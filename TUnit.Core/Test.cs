@@ -18,6 +18,7 @@ public record Test
         ArgumentValues = arguments?.Select(x => x.Value).ToArray();
         
         TestName = MethodInfo.Name;
+        DisplayName = MethodInfo.Name + GetArgumentValues();
         ClassName = classType.Name;
         FullyQualifiedClassName = classType.FullName!;
         Assembly = classType.Assembly;
@@ -30,6 +31,16 @@ public record Test
         FileName = SourceLocation.FileName;
         MinLineNumber = SourceLocation.MinLineNumber;
         MaxLineNumber = SourceLocation.MaxLineNumber;
+    }
+
+    private string GetArgumentValues()
+    {
+        if (ArgumentValues == null)
+        {
+            return string.Empty;
+        }
+        
+        return $"({string.Join(',', ArgumentValues.Select(StringifyArgument))})";
     }
 
     public Guid Id { get; } = Guid.NewGuid();
@@ -53,6 +64,7 @@ public record Test
     public SourceLocation SourceLocation { get; }
     
     public bool IsSkipped { get; }
+    public string DisplayName { get; }
 
     public static string GetParameterTypes(Type[]? types)
     {

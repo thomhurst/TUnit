@@ -10,7 +10,7 @@ public static class TestExtensions
     {
         var testCase = new TestCase(test.FullyQualifiedName, TestAdapterConstants.ExecutorUri, test.Source)
         {
-            DisplayName = test.TestName,
+            DisplayName = test.DisplayName,
             Id = test.Id,
             CodeFilePath = test.FileName,
             LineNumber = test.MinLineNumber,
