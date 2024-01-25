@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Reflection.Metadata;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Core.Attributes;
@@ -26,13 +27,19 @@ public class TestsLoader(IMessageLogger? messageLogger)
             
             foreach (var testWithDataAttribute in methodInfo.CustomAttributes.Where(x => x.AttributeType == typeof(TestWithDataAttribute)))
             {
-                var arguments = testWithDataAttribute.ConstructorArguments.Select(x => new ParameterArgument(x.ArgumentType, x.Value));
+                foreach (var customAttributeTypedArgument in testWithDataAttribute.ConstructorArguments)
+                {
+                    var arguments =
+                        (customAttributeTypedArgument.Value as IEnumerable<CustomAttributeTypedArgument>)
+                        ?.Select(x => new ParameterArgument(x.Value?.GetType()!, x.Value))
+                        .ToArray();
                     
-                yield return new Test(
-                    MethodInfo: methodInfo,
-                    SourceLocation: sourceLocation,
-                    arguments: arguments.ToArray()
-                );   
+                    yield return new Test(
+                            MethodInfo: methodInfo,
+                            SourceLocation: sourceLocation,
+                            arguments: arguments
+                        );
+                }
             }
             
             if(methodInfo.CustomAttributes.Any(x => x.AttributeType == typeof(TestAttribute)))
