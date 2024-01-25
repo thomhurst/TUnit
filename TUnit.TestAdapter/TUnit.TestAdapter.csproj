@@ -17,24 +17,8 @@
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" PrivateAssets="All" />
     </ItemGroup>
 
-    <PropertyGroup>
-        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddToOutput</TargetsForTfmSpecificContentInPackage>
-    </PropertyGroup>
-    
-    <Target Name="_AddToOutput">
-        <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.TestAdapter.targets" PackagePath="build" />
-        </ItemGroup>
-    </Target>
-
     <ItemGroup>
         <ProjectCapability Include="TestContainer" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="TUnit.TestAdapter.targets">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
     </ItemGroup>
     
 </Project>

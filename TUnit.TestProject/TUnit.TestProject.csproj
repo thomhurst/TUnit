@@ -11,9 +11,9 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
         <PackageReference Include="coverlet.collector" Version="6.0.0" />
-        <PackageReference Include="TUnit.TestAdapter" Version="0.0.1-alphad357835f-8b1a-4ffd-a8ba-b1ceadd6558f">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        <PackageReference Include="TUnit.TestAdapter" Version="0.0.1-alphab82d8665-88d4-4641-bbe6-83fb53b29420">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
 
