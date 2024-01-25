@@ -14,6 +14,7 @@ public static class TestExtensions
             Id = test.Id,
             CodeFilePath = test.FileName,
             LineNumber = test.MinLineNumber,
+            LocalExtensionData = test
         };
         
         testCase.SetPropertyValue(GetOrRegisterTestProperty("ManagedType"), test.FullyQualifiedClassName);

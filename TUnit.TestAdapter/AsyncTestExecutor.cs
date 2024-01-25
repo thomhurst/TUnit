@@ -18,14 +18,14 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
     private readonly ConcurrentDictionary<string, Task> _oneTimeTearDownRegistry = new();
 
-    public async Task RunInAsyncContext(IEnumerable<Test> tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
+    public async Task RunInAsyncContext(IEnumerable<TestWithTestCase> tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
         var allTestsOrderedByClass = tests
-            .GroupBy(x => x.FullyQualifiedClassName)
+            .GroupBy(x => x.Test.FullyQualifiedClassName)
             .SelectMany(x => x.ToList())
             .ToList();
         
-        var queue = new Queue<Test>(allTestsOrderedByClass);
+        var queue = new Queue<TestWithTestCase>(allTestsOrderedByClass);
         
         if (queue.Count is 0)
         {
@@ -57,13 +57,13 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
     }
 
     private void SetupRunOneTimeTearDownForClass(ProcessingTest processingTest,
-        IEnumerable<Test> allTestsOrderedByClass,
+        IEnumerable<TestWithTestCase> allTestsOrderedByClass,
         IEnumerable<ProcessingTest> executingTests)
     {
         var lastTestForClass = allTestsOrderedByClass.Last(x =>
-            x.FullyQualifiedClassName == processingTest.Test.FullyQualifiedClassName);
+            x.Test.FullyQualifiedClassName == processingTest.Test.FullyQualifiedClassName);
 
-        if (processingTest.Test.FullyQualifiedName != lastTestForClass.FullyQualifiedName)
+        if (processingTest.Test.FullyQualifiedName != lastTestForClass.Test.FullyQualifiedName)
         {
             return;
         }
@@ -82,7 +82,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         });
     }
 
-    private async IAsyncEnumerable<ProcessingTest> ProcessQueue(Queue<Test> queue, ITestExecutionRecorder? frameworkHandle)
+    private async IAsyncEnumerable<ProcessingTest> ProcessQueue(Queue<TestWithTestCase> queue, ITestExecutionRecorder? frameworkHandle)
     {
         while (queue.Count > 0)
         {
@@ -90,9 +90,9 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
             {
                 var test = queue.Dequeue();
                 
-                var @class = CreateTestClass(test);
+                var @class = CreateTestClass(test.Test);
                 
-                yield return new ProcessingTest(test, @class, ProcessTest(test, @class, frameworkHandle));
+                yield return new ProcessingTest(test.Test, @class, ProcessTest(test, @class, frameworkHandle));
             }
             else if (cancellationTokenSource.IsCancellationRequested)
             {
@@ -105,9 +105,9 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         }
     }
 
-    private async Task ProcessTest(Test test, object @class, ITestExecutionRecorder? frameworkHandle)
+    private async Task ProcessTest(TestWithTestCase testWithTestCase, object @class, ITestExecutionRecorder? frameworkHandle)
     {
-        await ExecuteTestMethod(test, @class, frameworkHandle);
+        await ExecuteTestMethod(testWithTestCase, @class, frameworkHandle);
     }
 
     private static object CreateTestClass(Test test)
@@ -115,10 +115,11 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         return Activator.CreateInstance(test.MethodInfo.DeclaringType!)!;
     }
 
-    private async ValueTask ExecuteTestMethod(Test test, object @class, ITestExecutionRecorder? frameworkHandle)
+    private async ValueTask ExecuteTestMethod(TestWithTestCase testWithTestCase, object @class, ITestExecutionRecorder? frameworkHandle)
     {
-        var testCase = test.ToTestCase();
-
+        var test = testWithTestCase.Test;
+        var testCase = testWithTestCase.TestCase;
+        
         if (test.IsSkipped)
         {
             frameworkHandle?.RecordEnd(testCase, TestOutcome.Skipped);
