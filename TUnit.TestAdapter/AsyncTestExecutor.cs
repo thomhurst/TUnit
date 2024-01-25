@@ -288,11 +288,11 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
     {
         try
         {
-            var result = methodInfo.Invoke(@class, bindingFlags, null, arguments, CultureInfo.InvariantCulture);
+            var result = await Task.Run<Task?>(() => methodInfo.Invoke(@class, bindingFlags, null, arguments, CultureInfo.InvariantCulture) as Task);
 
-            if (result is Task task)
+            if (result != null)
             {
-                await task;
+                await result;
             }
         }
         catch (TargetInvocationException e)
@@ -304,5 +304,10 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
             
             ExceptionDispatchInfo.Capture(e.InnerException).Throw();
         }
+    }
+
+    private bool IsTask(Type type)
+    {
+        return type.IsAssignableTo(typeof(Task));
     }
 }

@@ -11,14 +11,14 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
         <PackageReference Include="coverlet.collector" Version="6.0.0" />
-        <PackageReference Include="TUnit.TestAdapter" Version="0.0.1-alpha01">
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-          <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
+<!--        <PackageReference Include="TUnit.TestAdapter" Version="0.0.1-alpha01">-->
+<!--          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+<!--          <PrivateAssets>all</PrivateAssets>-->
+<!--        </PackageReference>-->
     </ItemGroup>
 
     <ItemGroup>
-<!--      <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />-->
+      <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 
