@@ -55,14 +55,14 @@ public class Tests
         Assert.That(value, Is.EqualTo("1"));
     }
 
-    [Test, Skip]
+    [Test, Skip("Reason1")]
     public void Skip1()
     {
         var value = "1";
         Assert.That(value, Is.EqualTo("1"));
     }
     
-    [Test, Skip]
+    [Test, Skip("Reason2")]
     public async Task Skip2()
     {
         await Task.Yield();

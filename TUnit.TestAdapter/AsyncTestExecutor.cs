@@ -131,7 +131,9 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
                 EndTime = skipTime,
                 Duration = TimeSpan.Zero,
                 ComputerName = Environment.MachineName,
+                ErrorMessage = $"Skipped due to: {test.SkipReason}",
             });
+            
             return;
         }
 

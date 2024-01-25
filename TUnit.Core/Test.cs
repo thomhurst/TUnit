@@ -24,15 +24,16 @@ public record Test
         Assembly = classType.Assembly;
         Source = classType.Assembly.Location;
         FullyQualifiedName = $"{classType.FullName}.{MethodInfo.Name}{GetParameterTypes(ParameterTypes)}";
-        IsSkipped = MethodInfo.CustomAttributes
+        SkipReason = MethodInfo.CustomAttributes
             .Concat(classType.CustomAttributes)
-            .Any(x => x.AttributeType == typeof(SkipAttribute));
+            .FirstOrDefault(x => x.AttributeType == typeof(SkipAttribute))
+            ?.ConstructorArguments.FirstOrDefault().Value as string;
 
         FileName = SourceLocation.FileName;
         MinLineNumber = SourceLocation.MinLineNumber;
         MaxLineNumber = SourceLocation.MaxLineNumber;
     }
-
+    
     private string GetArgumentValues()
     {
         if (ArgumentValues == null)
@@ -63,7 +64,8 @@ public record Test
     public object?[]? ArgumentValues { get; init; }
     public SourceLocation SourceLocation { get; }
     
-    public bool IsSkipped { get; }
+    public string? SkipReason { get; }
+    public bool IsSkipped => !string.IsNullOrEmpty(SkipReason);
     public string DisplayName { get; }
 
     public static string GetParameterTypes(Type[]? types)
