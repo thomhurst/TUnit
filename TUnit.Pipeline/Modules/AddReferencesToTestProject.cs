@@ -7,6 +7,7 @@ using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using File = ModularPipelines.FileSystem.File;
 
 namespace TUnit.Pipeline.Modules;
 [DependsOn<CreateLocalNuGetDirectoryModule>]
@@ -22,15 +23,28 @@ public class AddReferencesToTestProject : Module<CommandResult[]>
 
         await projects.Value!
             .ForEachAsync(
-                x => context.DotNet().Remove.Package(new DotNetRemovePackageOptions(x.Name), cancellationToken),
+                x => RemovePackage(context, cancellationToken, testProject, x),
                 cancellationToken: cancellationToken)
             .ProcessOneAtATime();
         
         return await projects.Value!
+            .Where(x => x.Name == "TUnit.TestAdapter")
             .SelectAsync(async x => await context.DotNet().Add.Package(new DotNetAddPackageOptions(testProject, x.Name)
             {
                 Version = x.Version,
                 Source = localNugetDirectory.Value!
             }, cancellationToken), cancellationToken: cancellationToken).ProcessOneAtATime();
+    }
+
+    private static async Task RemovePackage(IPipelineContext context, CancellationToken cancellationToken, File testProject, PackedProject x)
+    {
+        var existingPackages = await context.DotNet().List.Package(new DotNetListPackageOptions(testProject), cancellationToken);
+
+        if (!existingPackages.StandardOutput.Contains($" > {x.Name} "))
+        {
+            return;
+        }
+        
+        await context.DotNet().Remove.Package(new DotNetRemovePackageOptions(testProject, x.Name), cancellationToken);
     }
 }

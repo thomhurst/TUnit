@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
       <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />
     </ItemGroup>

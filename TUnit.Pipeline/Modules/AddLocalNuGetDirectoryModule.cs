@@ -14,6 +14,16 @@ public class AddLocalNuGetDirectoryModule : Module<CommandResult>
     {
         var directoryResult = await GetModule<CreateLocalNuGetDirectoryModule>();
 
+        var currentNuGetSources = await context.DotNet()
+            .Nuget
+            .List
+            .Source(token: cancellationToken);
+
+        if (currentNuGetSources.StandardOutput.Contains(directoryResult.Value!))
+        {
+            return currentNuGetSources;
+        }
+        
         return await context.DotNet().Nuget.Add
             .Source(new DotNetNugetAddSourceOptions(directoryResult.Value!), cancellationToken);
     }

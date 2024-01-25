@@ -4,7 +4,7 @@ namespace TUnit.Assertions;
 
 public static partial class Is
 {
-    public static IAssertCondition<string> EqualTo(string expected, StringComparison stringComparison = StringComparison.Ordinal)
+    public static AssertCondition<string> EqualTo(string expected, StringComparison stringComparison = StringComparison.Ordinal)
     {
         return new StringEqualsAssertCondition(expected, stringComparison);
     }
