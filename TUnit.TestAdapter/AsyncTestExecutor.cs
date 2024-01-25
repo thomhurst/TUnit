@@ -170,7 +170,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
     {
         await ExecuteSetUps(@class);
         
-        await InvokeMethod(@class, test.MethodInfo, BindingFlags.Default, test.Arguments);
+        await InvokeMethod(@class, test.MethodInfo, BindingFlags.Default, test.Arguments?.Select(x => x.Value).ToArray());
         
         await ExecuteTearDowns(@class);
     }
@@ -283,7 +283,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         return cpuUsageTotal * 100;
     }
 
-    public async Task InvokeMethod(object @class, MethodInfo methodInfo, BindingFlags bindingFlags, object?[]? arguments)
+    private async Task InvokeMethod(object @class, MethodInfo methodInfo, BindingFlags bindingFlags, object?[]? arguments)
     {
         try
         {
