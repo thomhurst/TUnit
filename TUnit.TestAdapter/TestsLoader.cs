@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Core.Attributes;
@@ -18,8 +17,6 @@ public class TestsLoader
 
     public IEnumerable<Test> GetTests(TypeInformation typeInformation)
     {
-        using var diaSession = new DiaSession(typeInformation.Assembly.Location);
-
         var methods = typeInformation.Types.SelectMany(x => x.GetMethods());
 
         foreach (var methodInfo in methods)
@@ -30,7 +27,7 @@ public class TestsLoader
             }
             
             var sourceLocation = _sourceLocationHelper
-                .GetSourceLocation(diaSession, methodInfo.DeclaringType!.Name, methodInfo.Name);
+                .GetSourceLocation(typeInformation.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
             
             foreach (var testWithDataAttribute in methodInfo.CustomAttributes.Where(x => x.AttributeType == typeof(TestWithDataAttribute)))
             {

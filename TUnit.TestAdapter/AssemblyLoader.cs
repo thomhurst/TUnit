@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.Loader;
 
 namespace TUnit.TestAdapter;
 
@@ -13,7 +14,7 @@ internal class AssemblyLoader
 
         try
         {
-            return Assembly.LoadFrom(assemblyPath);
+            return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
         }
         catch
         {

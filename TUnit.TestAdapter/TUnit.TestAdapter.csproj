@@ -17,10 +17,24 @@
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" PrivateAssets="All" />
     </ItemGroup>
 
-    <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
+    <PropertyGroup>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddToOutput</TargetsForTfmSpecificContentInPackage>
+    </PropertyGroup>
+    
+    <Target Name="_AddToOutput">
         <ItemGroup>
-            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
+            <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.TestAdapter.props" PackagePath="build" />
         </ItemGroup>
     </Target>
 
+    <ItemGroup>
+        <ProjectCapability Include="TestContainer" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="TUnit.TestAdapter.props">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+    
 </Project>

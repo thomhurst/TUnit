@@ -32,7 +32,7 @@ public class AddReferencesToTestProject : Module<CommandResult[]>
             .SelectAsync(async x => await context.DotNet().Add.Package(new DotNetAddPackageOptions(testProject, x.Name)
             {
                 Version = x.Version,
-                Source = localNugetDirectory.Value!
+                Source = localNugetDirectory.Value!,
             }, cancellationToken), cancellationToken: cancellationToken).ProcessOneAtATime();
     }
 

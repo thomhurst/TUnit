@@ -15,6 +15,7 @@ public class TestExecutor : ITestExecutor2
     
     public TestExecutor()
     {
+        Console.CancelKeyPress += (_, _) => _cancellationTokenSource.Cancel();
         _asyncTestExecutor = new AsyncTestExecutor(_cancellationTokenSource);
     }
 

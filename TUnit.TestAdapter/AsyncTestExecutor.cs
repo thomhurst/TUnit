@@ -36,6 +36,11 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         
         await foreach (var testCase in ProcessQueue(queue, frameworkHandle))
         {
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                break;
+            }
+            
             executingTests.Add(testCase);
 
             SetupRunOneTimeTearDownForClass(testCase, allTestsOrderedByClass, executingTests);
@@ -79,13 +84,17 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
     {
         while (queue.Count > 0)
         {
-            if (_canRunAnotherTest)
+            if (_canRunAnotherTest && !cancellationTokenSource.IsCancellationRequested)
             {
                 var test = queue.Dequeue();
                 
                 var @class = CreateTestClass(test);
                 
                 yield return new ProcessingTest(test, @class, ProcessTest(test, @class, frameworkHandle));
+            }
+            else if (cancellationTokenSource.IsCancellationRequested)
+            {
+                break;
             }
             else
             {
@@ -159,12 +168,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
     {
         await ExecuteSetUps(@class);
         
-        var methodExecutionObject = test.MethodInfo.Invoke(@class, test.Arguments);
-
-        if (methodExecutionObject is Task task)
-        {
-            await task;
-        }
+        await InvokeMethod(@class, test.MethodInfo, test.Arguments);
         
         await ExecuteTearDowns(@class);
     }
@@ -180,12 +184,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
 
         foreach (var setUpMethod in setUpMethods)
         {
-            var result = setUpMethod.Invoke(@class, null);
-
-            if (result is Task task)
-            {
-                await task;
-            }
+            await InvokeMethod(@class, setUpMethod, null);
         }
     }
     
@@ -202,12 +201,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         {
             try
             {
-                var result = tearDownMethod.Invoke(@class, null);
-
-                if (result is Task task)
-                {
-                    await task;
-                }
+                await InvokeMethod(@class, tearDownMethod, null);
             }
             catch (Exception e)
             {
@@ -290,5 +284,27 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
         
         return cpuUsageTotal * 100;
+    }
+
+    public async Task InvokeMethod(object @class, MethodInfo methodInfo, object?[]? arguments)
+    {
+        try
+        {
+            var result = methodInfo.Invoke(@class, arguments);
+
+            if (result is Task task)
+            {
+                await task;
+            }
+        }
+        catch (TargetInvocationException e)
+        {
+            if (e.InnerException is null)
+            {
+                throw;
+            }
+            
+            throw e.InnerException;
+        }
     }
 }

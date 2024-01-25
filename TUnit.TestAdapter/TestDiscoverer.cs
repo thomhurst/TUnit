@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using System.Diagnostics;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.TestAdapter.Constants;
@@ -17,6 +18,11 @@ public class TestDiscoverer : ITestDiscoverer
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
+        if (!Debugger.IsAttached)
+        {
+            Debugger.Launch();
+        }
+        
         var testCollector = new TestCollector(logger);
         
         foreach (var test in testCollector.TestsFromSources(sources))

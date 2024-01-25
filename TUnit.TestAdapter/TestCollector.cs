@@ -26,6 +26,7 @@ public class TestCollector
         var testsLoader = new TestsLoader(_messageLogger);
 
         var tests = sources
+            .Select(source => Path.IsPathRooted(source) ? source : Path.Combine(Directory.GetCurrentDirectory(), source))
             .Select(assemblyLoader.LoadByPath)
             .OfType<Assembly>()
             .Select(x => new TypeInformation(x))
