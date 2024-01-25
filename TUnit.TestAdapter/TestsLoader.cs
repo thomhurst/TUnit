@@ -31,7 +31,7 @@ public class TestsLoader(IMessageLogger? messageLogger)
                 yield return new Test(
                     MethodInfo: methodInfo,
                     SourceLocation: sourceLocation,
-                    Arguments: arguments.ToArray()
+                    arguments: arguments.ToArray()
                 );   
             }
             
@@ -40,7 +40,7 @@ public class TestsLoader(IMessageLogger? messageLogger)
                 yield return new Test(
                     MethodInfo: methodInfo,
                     SourceLocation: sourceLocation,
-                    Arguments: null
+                    arguments: null
                 );
             }
         }

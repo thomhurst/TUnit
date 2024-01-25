@@ -170,7 +170,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
     {
         await ExecuteSetUps(@class);
         
-        await InvokeMethod(@class, test.MethodInfo, BindingFlags.Default, test.Arguments?.Select(x => x.Value).ToArray());
+        await InvokeMethod(@class, test.MethodInfo, BindingFlags.Default, test.ArgumentValues?.ToArray());
         
         await ExecuteTearDowns(@class);
     }

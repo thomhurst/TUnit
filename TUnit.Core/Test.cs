@@ -7,20 +7,22 @@ public record Test
 {
     public Test(MethodInfo MethodInfo,
         SourceLocation SourceLocation,
-        ParameterArgument[]? Arguments)
+        ParameterArgument[]? arguments)
     {
         var classType = MethodInfo.DeclaringType!;
         
         this.MethodInfo = MethodInfo;
-        this.Arguments = Arguments;
         this.SourceLocation = SourceLocation;
+        
+        ParameterTypes = arguments?.Select(x => x.Type).ToArray();
+        ArgumentValues = arguments?.Select(x => x.Value).ToArray();
         
         TestName = MethodInfo.Name;
         ClassName = classType.Name;
         FullyQualifiedClassName = classType.FullName!;
         Assembly = classType.Assembly;
         Source = classType.Assembly.Location;
-        FullyQualifiedName = $"{classType.FullName}.{MethodInfo.Name}{GetParameterTypes(Arguments)}";
+        FullyQualifiedName = $"{classType.FullName}.{MethodInfo.Name}{GetParameterTypes(ParameterTypes)}";
         IsSkipped = MethodInfo.CustomAttributes
             .Concat(classType.CustomAttributes)
             .Any(x => x.AttributeType == typeof(SkipAttribute));
@@ -46,25 +48,20 @@ public record Test
     public string? FileName { get; set; }
     public int MinLineNumber { get; set; }
     public int MaxLineNumber { get; set; }
-    public ParameterArgument[]? Arguments { get; init; }
+    public Type[]? ParameterTypes { get; init; }
+    public object?[]? ArgumentValues { get; init; }
     public SourceLocation SourceLocation { get; }
     
     public bool IsSkipped { get; }
 
-    public void Deconstruct(out MethodInfo methodInfo, out object?[]? arguments)
+    public static string GetParameterTypes(Type[]? types)
     {
-        methodInfo = MethodInfo;
-        arguments = Arguments;
-    }
-    
-    public static string GetParameterTypes(ParameterArgument[]? arguments)
-    {
-        if (arguments is null)
+        if (types is null)
         {
             return string.Empty;
         }
 
-        var argsAsString = arguments.Select(arg => arg.Type.FullName!);
+        var argsAsString = types.Select(arg => arg.FullName!);
         
         return $"({string.Join(',', argsAsString)})";
     }

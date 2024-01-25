@@ -17,7 +17,7 @@ public static class TestExtensions
         };
         
         testCase.SetPropertyValue(GetOrRegisterTestProperty("ManagedType"), test.FullyQualifiedClassName);
-        testCase.SetPropertyValue(GetOrRegisterTestProperty("ManagedMethod"), test.MethodInfo.Name + Test.GetParameterTypes(test.Arguments));
+        testCase.SetPropertyValue(GetOrRegisterTestProperty("ManagedMethod"), test.MethodInfo.Name + Test.GetParameterTypes(test.ParameterTypes));
         
         return testCase;
     }
