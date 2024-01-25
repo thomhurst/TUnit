@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Reflection.Metadata;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Core.Attributes;

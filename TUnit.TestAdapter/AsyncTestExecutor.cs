@@ -7,7 +7,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using TUnit.Core;
 using TUnit.Core.Attributes;
-using TUnit.TestAdapter.Extensions;
 
 namespace TUnit.TestAdapter;
 

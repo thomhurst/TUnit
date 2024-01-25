@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
-using TUnit.TestAdapter.Extensions;
 
 namespace TUnit.TestAdapter;
 
@@ -15,7 +15,7 @@ public class TestCollector(IMessageLogger? messageLogger)
         return new TestCollection(sourcesAsList, TestsFromSources(sourcesAsList));
     }
 
-    public IEnumerable<TestWithTestCase> TestsFromTestCases(IEnumerable<TestCase> testCases)
+    public IEnumerable<TestWithTestCase> TestsFromTestCases(IEnumerable<TestCase> testCases, ITestExecutionRecorder? testExecutionRecorder)
     {
         var assemblyLoader = new AssemblyLoader();
         var testsLoader = new TestsLoader(messageLogger);
@@ -27,16 +27,38 @@ public class TestCollector(IMessageLogger? messageLogger)
 
             if (assembly is null)
             {
+                MarkNotFound(testCase, testExecutionRecorder);
                 continue;
             }
 
             var tests = testsLoader.GetTests(new TypeInformation(assembly));
 
-            var matchingTest = tests.First(x => x.FullyQualifiedName == testCase.FullyQualifiedName
+            var matchingTest = tests.FirstOrDefault(x => x.FullyQualifiedName == testCase.FullyQualifiedName
                                                 && x.DisplayName == testCase.DisplayName);
+
+            if (matchingTest is null)
+            {
+                MarkNotFound(testCase, testExecutionRecorder);
+                continue;
+            }
 
             yield return new TestWithTestCase(matchingTest, testCase);
         }
+    }
+
+    private void MarkNotFound(TestCase testCase, ITestExecutionRecorder? testExecutionRecorder)
+    {
+        var now = DateTimeOffset.Now;
+        
+        testExecutionRecorder?.RecordResult(new TestResult(testCase)
+        {
+            DisplayName = testCase.DisplayName,
+            Outcome = TestOutcome.NotFound,
+            Duration = TimeSpan.Zero,
+            StartTime = now,
+            EndTime = now,
+            ComputerName = Environment.MachineName
+        });
     }
 
     public IEnumerable<Test> TestsFromSources(IEnumerable<string> sources)

@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using TUnit.Core;
 using TUnit.TestAdapter.Constants;
 using TUnit.TestAdapter.Extensions;
 
@@ -17,7 +16,6 @@ public class TestExecutor : ITestExecutor2
     
     public TestExecutor()
     {
-        Console.CancelKeyPress += (_, _) => _cancellationTokenSource.Cancel();
         _asyncTestExecutor = new AsyncTestExecutor(_cancellationTokenSource);
     }
 
@@ -28,9 +26,13 @@ public class TestExecutor : ITestExecutor2
             return;
         }
 
-        var testsWithTestCases = new TestCollector(frameworkHandle).TestsFromTestCases(testCases);
+        var testsWithTestCases = new TestCollector(frameworkHandle)
+            .TestsFromTestCases(testCases, frameworkHandle);
             
-        _asyncTestExecutor.RunInAsyncContext(testsWithTestCases, runContext, frameworkHandle).GetAwaiter().GetResult();    }
+        _asyncTestExecutor.RunInAsyncContext(testsWithTestCases, runContext, frameworkHandle)
+            .GetAwaiter()
+            .GetResult();
+    }
 
     public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
