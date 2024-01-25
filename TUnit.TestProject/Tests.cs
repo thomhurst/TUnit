@@ -54,4 +54,19 @@ public class Tests
         await Task.Yield();
         Assert.That(value, Is.EqualTo("1"));
     }
+
+    [Test, Skip]
+    public void Skip1()
+    {
+        var value = "1";
+        Assert.That(value, Is.EqualTo("1"));
+    }
+    
+    [Test, Skip]
+    public async Task Skip2()
+    {
+        await Task.Yield();
+        var value = "1";
+        Assert.That(value, Is.EqualTo("1"));
+    }
 }

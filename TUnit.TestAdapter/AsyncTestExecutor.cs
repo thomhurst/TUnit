@@ -122,7 +122,17 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         
         if (test.IsSkipped)
         {
+            var skipTime = DateTimeOffset.Now;
             frameworkHandle?.RecordEnd(testCase, TestOutcome.Skipped);
+            frameworkHandle?.RecordResult(new TestResult(testCase)
+            {
+                Outcome = TestOutcome.Skipped,
+                DisplayName = test.TestName,
+                StartTime = skipTime,
+                EndTime = skipTime,
+                Duration = TimeSpan.Zero,
+                ComputerName = Environment.MachineName,
+            });
             return;
         }
 
