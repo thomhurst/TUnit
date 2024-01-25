@@ -7,10 +7,11 @@
         <LangVersion>default</LangVersion>
         <DevelopmentDependency>true</DevelopmentDependency>
         <OutputType>Library</OutputType>
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" PrivateAssets="All" />
       <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.8.0" PrivateAssets="All" />
     </ItemGroup>
 
