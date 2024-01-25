@@ -23,7 +23,7 @@
     
     <Target Name="_AddToOutput">
         <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.TestAdapter.props" PackagePath="build" />
+            <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.TestAdapter.targets" PackagePath="build" />
         </ItemGroup>
     </Target>
 
@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="TUnit.TestAdapter.props">
+      <None Update="TUnit.TestAdapter.targets">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
