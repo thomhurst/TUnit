@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
+      <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />
+    </ItemGroup>
+
+</Project>
