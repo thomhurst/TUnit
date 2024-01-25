@@ -32,9 +32,7 @@ public class SourceLocationHelper : IDisposable
 
                 return EmptySourceLocation;
             }
-
-            _logger?.SendMessage(TestMessageLevel.Informational, $"Navigation data found for {className}.{methodName}");
-
+            
             return new SourceLocation(navigationData.FileName, navigationData.MinLineNumber, navigationData.MaxLineNumber);
         }
         catch (Exception e)

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using TUnit.Core;
@@ -168,7 +170,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
     {
         await ExecuteSetUps(@class);
         
-        await InvokeMethod(@class, test.MethodInfo, test.Arguments);
+        await InvokeMethod(@class, test.MethodInfo, BindingFlags.Default, test.Arguments);
         
         await ExecuteTearDowns(@class);
     }
@@ -184,7 +186,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
 
         foreach (var setUpMethod in setUpMethods)
         {
-            await InvokeMethod(@class, setUpMethod, null);
+            await InvokeMethod(@class, setUpMethod, BindingFlags.Default, null);
         }
     }
     
@@ -201,7 +203,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         {
             try
             {
-                await InvokeMethod(@class, tearDownMethod, null);
+                await InvokeMethod(@class, tearDownMethod, BindingFlags.Default, null);
             }
             catch (Exception e)
             {
@@ -224,12 +226,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
 
         foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
         {
-            var result = oneTimeSetUpMethod.Invoke(null, BindingFlags.Static | BindingFlags.Public, null, null, null);
-
-            if (result is Task task)
-            {
-                await task;
-            }
+            await InvokeMethod(@class, oneTimeSetUpMethod, BindingFlags.Static | BindingFlags.Public, null);
         }
     }
     
@@ -286,11 +283,11 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         return cpuUsageTotal * 100;
     }
 
-    public async Task InvokeMethod(object @class, MethodInfo methodInfo, object?[]? arguments)
+    public async Task InvokeMethod(object @class, MethodInfo methodInfo, BindingFlags bindingFlags, object?[]? arguments)
     {
         try
         {
-            var result = methodInfo.Invoke(@class, arguments);
+            var result = methodInfo.Invoke(@class, bindingFlags, null, arguments, CultureInfo.InvariantCulture);
 
             if (result is Task task)
             {
@@ -304,7 +301,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
                 throw;
             }
             
-            throw e.InnerException;
+            ExceptionDispatchInfo.Capture(e.InnerException).Throw();
         }
     }
 }
