@@ -22,7 +22,7 @@ public class TestDiscoverer : ITestDiscoverer
         
         foreach (var test in testCollector.TestsFromSources(sources))
         {
-            logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.FullName);
+            logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.FullyQualifiedName);
             discoverySink.SendTestCase(test.ToTestCase());
         }
     }

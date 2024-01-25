@@ -7,7 +7,7 @@ public record Test
 {
     public Test(MethodInfo MethodInfo,
         SourceLocation SourceLocation,
-        object?[]? Arguments)
+        ParameterArgument[]? Arguments)
     {
         var classType = MethodInfo.DeclaringType!;
         
@@ -20,7 +20,7 @@ public record Test
         FullyQualifiedClassName = classType.FullName!;
         Assembly = classType.Assembly;
         Source = classType.Assembly.Location;
-        FullName = $"{classType.FullName}.{MethodInfo.Name}{GetArguments(Arguments)}";
+        FullyQualifiedName = $"{classType.FullName}.{MethodInfo.Name}{GetParameterTypes(Arguments)}";
         IsSkipped = MethodInfo.CustomAttributes
             .Concat(classType.CustomAttributes)
             .Any(x => x.AttributeType == typeof(SkipAttribute));
@@ -41,12 +41,12 @@ public record Test
     public Assembly Assembly { get; }
     
     public string Source { get; }
-    public string FullName { get; }
+    public string FullyQualifiedName { get; }
     public MethodInfo MethodInfo { get; init; }
     public string? FileName { get; set; }
     public int MinLineNumber { get; set; }
     public int MaxLineNumber { get; set; }
-    public object?[]? Arguments { get; init; }
+    public ParameterArgument[]? Arguments { get; init; }
     public SourceLocation SourceLocation { get; }
     
     public bool IsSkipped { get; }
@@ -57,16 +57,16 @@ public record Test
         arguments = Arguments;
     }
     
-    private static string GetArguments(object?[]? arguments)
+    public static string GetParameterTypes(ParameterArgument[]? arguments)
     {
         if (arguments is null)
         {
             return string.Empty;
         }
 
-        var argsAsString = arguments.Select(StringifyArgument);
+        var argsAsString = arguments.Select(arg => arg.Type.FullName!);
         
-        return $"({string.Join(", ", argsAsString)})";
+        return $"({string.Join(',', argsAsString)})";
     }
 
     private static string StringifyArgument(object? obj)

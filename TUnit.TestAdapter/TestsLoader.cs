@@ -5,15 +5,10 @@ using TUnit.Core.Attributes;
 
 namespace TUnit.TestAdapter;
 
-public class TestsLoader
+public class TestsLoader(IMessageLogger? messageLogger)
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute)];
-    private readonly SourceLocationHelper _sourceLocationHelper;
-
-    public TestsLoader(IMessageLogger? messageLogger)
-    {
-        _sourceLocationHelper = new SourceLocationHelper(messageLogger);
-    }
+    private readonly SourceLocationHelper _sourceLocationHelper = new(messageLogger);
 
     public IEnumerable<Test> GetTests(TypeInformation typeInformation)
     {
@@ -31,7 +26,7 @@ public class TestsLoader
             
             foreach (var testWithDataAttribute in methodInfo.CustomAttributes.Where(x => x.AttributeType == typeof(TestWithDataAttribute)))
             {
-                var arguments = testWithDataAttribute.ConstructorArguments.Select(x => x.Value);
+                var arguments = testWithDataAttribute.ConstructorArguments.Select(x => new ParameterArgument(x.ArgumentType, x.Value));
                     
                 yield return new Test(
                     MethodInfo: methodInfo,

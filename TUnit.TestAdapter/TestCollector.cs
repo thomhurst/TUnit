@@ -4,15 +4,8 @@ using TUnit.Core;
 
 namespace TUnit.TestAdapter;
 
-public class TestCollector
+public class TestCollector(IMessageLogger? messageLogger)
 {
-    private readonly IMessageLogger? _messageLogger;
-
-    public TestCollector(IMessageLogger? messageLogger)
-    {
-        _messageLogger = messageLogger;
-    }
-    
     public TestCollection CollectionFromSources(IEnumerable<string> sources)
     {
         var sourcesAsList = sources.ToList();
@@ -23,7 +16,7 @@ public class TestCollector
     public IEnumerable<Test> TestsFromSources(IEnumerable<string> sources)
     {
         var assemblyLoader = new AssemblyLoader();
-        var testsLoader = new TestsLoader(_messageLogger);
+        var testsLoader = new TestsLoader(messageLogger);
 
         var tests = sources
             .Select(source => Path.IsPathRooted(source) ? source : Path.Combine(Directory.GetCurrentDirectory(), source))

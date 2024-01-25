@@ -1,24 +1,16 @@
-﻿using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 
 namespace TUnit.TestAdapter;
 
-public class SourceLocationHelper : IDisposable
+public class SourceLocationHelper(IMessageLogger? logger) : IDisposable
 {
-    private readonly IMessageLogger? _logger;
     private static readonly SourceLocation EmptySourceLocation = new(null, 0, 0);
-    private readonly ReflectionMetadataProvider _metadataProvider;
     
+    private readonly ReflectionMetadataProvider _metadataProvider = new();
     private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new (StringComparer.OrdinalIgnoreCase);
 
-    public SourceLocationHelper(IMessageLogger? logger)
-    {
-        _logger = logger;
-        _metadataProvider = new ReflectionMetadataProvider();
-    }
-    
     public SourceLocation GetSourceLocation(string assemblyLocation, string className, string methodName)
     {
         try
@@ -27,8 +19,8 @@ public class SourceLocationHelper : IDisposable
 
             if (navigationData is null)
             {
-                _logger?.SendMessage(TestMessageLevel.Error, $"No navigation data found for {className}.{methodName}");
-                _logger?.SendMessage(TestMessageLevel.Error, $"Assembly: {assemblyLocation}");
+                logger?.SendMessage(TestMessageLevel.Error, $"No navigation data found for {className}.{methodName}");
+                logger?.SendMessage(TestMessageLevel.Error, $"Assembly: {assemblyLocation}");
 
                 return EmptySourceLocation;
             }
@@ -37,8 +29,8 @@ public class SourceLocationHelper : IDisposable
         }
         catch (Exception e)
         {
-            _logger?.SendMessage(TestMessageLevel.Error, $"Error retrieving source location for {className}.{methodName}");
-            _logger?.SendMessage(TestMessageLevel.Error, e.ToString());
+            logger?.SendMessage(TestMessageLevel.Error, $"Error retrieving source location for {className}.{methodName}");
+            logger?.SendMessage(TestMessageLevel.Error, e.ToString());
             
             return EmptySourceLocation;
         }
@@ -79,20 +71,6 @@ public class SourceLocationHelper : IDisposable
             }
         }
 
-        return null;
-    }
-    
-    private Type? DoWithBreaker(string assemblyLocation, Func<string, string, string, TypeInfo?> method, string declaringTypeName, string methodName)
-    {
-        try
-        {
-            return method.Invoke(assemblyLocation, declaringTypeName, methodName);
-        }
-        catch
-        {
-            // Ignored
-        }
-        
         return null;
     }
 

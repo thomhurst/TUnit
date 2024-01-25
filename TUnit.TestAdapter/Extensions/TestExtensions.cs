@@ -8,12 +8,23 @@ public static class TestExtensions
 {
     public static TestCase ToTestCase(this Test test)
     {
-        return new TestCase(test.FullName, TestAdapterConstants.ExecutorUri, test.Source)
+        var testCase = new TestCase(test.FullyQualifiedName, TestAdapterConstants.ExecutorUri, test.Source)
         {
             DisplayName = test.TestName,
             Id = test.Id,
             CodeFilePath = test.FileName,
-            LineNumber = test.MinLineNumber
+            LineNumber = test.MinLineNumber,
         };
+        
+        testCase.SetPropertyValue(GetOrRegisterTestProperty("ManagedType"), test.FullyQualifiedClassName);
+        testCase.SetPropertyValue(GetOrRegisterTestProperty("ManagedMethod"), test.MethodInfo.Name + Test.GetParameterTypes(test.Arguments));
+        
+        return testCase;
+    }
+
+    private static TestProperty GetOrRegisterTestProperty(string name)
+    {
+        return TestProperty.Find(name) 
+               ?? TestProperty.Register(name, name, typeof(string), typeof(TestCase));
     }
 }

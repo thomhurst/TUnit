@@ -63,7 +63,7 @@ public class AsyncTestExecutor(CancellationTokenSource cancellationTokenSource)
         var lastTestForClass = allTestsOrderedByClass.Last(x =>
             x.FullyQualifiedClassName == processingTest.Test.FullyQualifiedClassName);
 
-        if (processingTest.Test.FullName != lastTestForClass.FullName)
+        if (processingTest.Test.FullyQualifiedName != lastTestForClass.FullyQualifiedName)
         {
             return;
         }
