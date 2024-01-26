@@ -11,7 +11,9 @@ public class StringEqualsAssertCondition : AssertCondition<string>
     
     public override bool Matches(string actualValue)
     {
-        Message = $"Expected {ExpectedValue} but received {actualValue}";
+        Message = $"""
+                   Expected "{ExpectedValue}" but received "{actualValue}"
+                   """;
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }
 
