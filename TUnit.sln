@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions", "TUnit.A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Pipeline", "TUnit.Pipeline\TUnit.Pipeline.csproj", "{527337F5-0F78-4141-901C-72EA81222AB1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.UnitTests", "TUnit.Assertions.UnitTests\TUnit.Assertions.UnitTests.csproj", "{2D9CBBB5-2FF5-44F4-8358-D39CD0BD19EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{527337F5-0F78-4141-901C-72EA81222AB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{527337F5-0F78-4141-901C-72EA81222AB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{527337F5-0F78-4141-901C-72EA81222AB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D9CBBB5-2FF5-44F4-8358-D39CD0BD19EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D9CBBB5-2FF5-44F4-8358-D39CD0BD19EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D9CBBB5-2FF5-44F4-8358-D39CD0BD19EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D9CBBB5-2FF5-44F4-8358-D39CD0BD19EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
