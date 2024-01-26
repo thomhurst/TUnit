@@ -1,3 +1,3 @@
-﻿namespace TUnit.Pipeline.Modules;
+﻿namespace TUnit.Pipeline;
 
 public record PackedProject(string Name, string Version);

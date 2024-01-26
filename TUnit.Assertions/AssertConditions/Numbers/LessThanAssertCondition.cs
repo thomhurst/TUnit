@@ -1,17 +1,18 @@
 ﻿using System.Numerics;
 
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.AssertConditions.Numbers;
 
-public class LessThanAssertCondition<T> : AssertCondition<T> where T : INumber<T>
+public class LessThanAssertCondition<TActual, TExpected> : ExpectedValueAssertCondition<TActual, TExpected> 
+    where TExpected : INumber<TExpected>
+    where TActual : INumber<TActual>, TExpected
 {
-    public LessThanAssertCondition(T expected) : base(expected)
+    public LessThanAssertCondition(TExpected expected) : base(expected)
     {
     }
 
-    internal override Func<(T ExpectedValue, T ActualValue), string> MessageFactory { get; set; }
-        = tuple => $"{tuple.ActualValue} is not less than {tuple.ExpectedValue}";
+    public override string DefaultMessage => $"{ActualValue} is not less than {ExpectedValue}";
     
-    protected override bool Passes(T actualValue)
+    protected override bool Passes(TActual actualValue)
     {
         return actualValue < ExpectedValue;
     }

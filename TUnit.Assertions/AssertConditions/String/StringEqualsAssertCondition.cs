@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertConditions.String;
 
-public class StringEqualsAssertCondition : AssertCondition<string>
+public class StringEqualsAssertCondition : ExpectedValueAssertCondition<string, string>
 {
     private readonly StringComparison _stringComparison;
 
@@ -13,9 +13,8 @@ public class StringEqualsAssertCondition : AssertCondition<string>
     {
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }
-    
-    internal override Func<(string ExpectedValue, string ActualValue), string> MessageFactory { get; set; }
-        = tuple => $"""
-                    Expected "{tuple.ExpectedValue}" but received "{tuple.ActualValue}"
-                    """; 
+
+    public override string DefaultMessage => $"""
+                                              Expected "{ExpectedValue}" but received "{ActualValue}"
+                                              """;
 }

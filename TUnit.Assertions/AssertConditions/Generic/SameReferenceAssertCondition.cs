@@ -1,19 +1,16 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class SameReferenceAssertCondition<T> : AssertCondition<T>
+public class SameReferenceAssertCondition<TActual, TExpected> : ExpectedValueAssertCondition<TActual, TExpected>
 {
-    private readonly T _expected;
 
-    public SameReferenceAssertCondition(T expected) : base(expected)
+    public SameReferenceAssertCondition(TExpected expected) : base(expected)
     {
-        _expected = expected;
     }
 
-    internal override Func<(T ExpectedValue, T ActualValue), string> MessageFactory { get; set; }
-        = tuple => $"The two objects are different references.";
+    public override string DefaultMessage => "The two objects are different references.";
 
-    protected override bool Passes(T actualValue)
+    protected override bool Passes(TActual actualValue)
     {
-        return ReferenceEquals(actualValue, _expected);
+        return ReferenceEquals(actualValue, ExpectedValue);
     }
 }

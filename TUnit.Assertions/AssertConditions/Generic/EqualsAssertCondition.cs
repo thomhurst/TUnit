@@ -1,19 +1,16 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EqualsAssertCondition<T> : AssertCondition<T>
+public class EqualsAssertCondition<TActual, TExpected> : ExpectedValueAssertCondition<TActual, TExpected>
 {
-    private readonly T _expected;
 
-    public EqualsAssertCondition(T expected) : base(expected)
+    public EqualsAssertCondition(TExpected expected) : base(expected)
     {
-        _expected = expected;
     }
 
-    internal override Func<(T ExpectedValue, T ActualValue), string> MessageFactory { get; set; }
-    = tuple => $"Expected {tuple.ExpectedValue} but received {tuple.ActualValue}";
+    public override string DefaultMessage => $"Expected {ExpectedValue} but received {ActualValue}";
 
-    protected override bool Passes(T actualValue)
+    protected override bool Passes(TActual actualValue)
     {
-        return Equals(actualValue, _expected);
+        return Equals(actualValue, ExpectedValue);
     }
 }
