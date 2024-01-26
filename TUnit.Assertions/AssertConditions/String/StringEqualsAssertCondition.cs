@@ -9,13 +9,13 @@ public class StringEqualsAssertCondition : AssertCondition<string>
         _stringComparison = stringComparison;
     }
     
-    public override bool Matches(string actualValue)
+    protected override bool Passes(string actualValue)
     {
-        Message = $"""
-                   Expected "{ExpectedValue}" but received "{actualValue}"
-                   """;
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }
-
-    public override string Message { get; protected set; } = string.Empty;
+    
+    internal override Func<(string ExpectedValue, string ActualValue), string> MessageFactory { get; set; }
+        = tuple => $"""
+                    Expected "{tuple.ExpectedValue}" but received "{tuple.ActualValue}"
+                    """; 
 }

@@ -9,10 +9,11 @@ public class SameReferenceAssertCondition<T> : AssertCondition<T>
         _expected = expected;
     }
 
-    public override bool Matches(T actualValue)
+    internal override Func<(T ExpectedValue, T ActualValue), string> MessageFactory { get; set; }
+        = tuple => $"The two objects are different references.";
+
+    protected override bool Passes(T actualValue)
     {
         return ReferenceEquals(actualValue, _expected);
     }
-    
-    public override string Message { get; protected set; } = string.Empty;
 }

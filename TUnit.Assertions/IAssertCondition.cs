@@ -1,10 +1,8 @@
 ﻿namespace TUnit.Assertions;
 
-public interface IAssertCondition<T>
+public interface IAssertCondition<in T>
 {
-    internal T ExpectedValue { get; }
-    
-    public bool Matches(T actualValue);
+    public bool Assert(T actualValue);
     
     internal string Message { get; }
 }

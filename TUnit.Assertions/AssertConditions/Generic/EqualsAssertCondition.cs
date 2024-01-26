@@ -8,12 +8,12 @@ public class EqualsAssertCondition<T> : AssertCondition<T>
     {
         _expected = expected;
     }
-    
-    public override bool Matches(T actualValue)
+
+    internal override Func<(T ExpectedValue, T ActualValue), string> MessageFactory { get; set; }
+    = tuple => $"Expected {tuple.ExpectedValue} but received {tuple.ActualValue}";
+
+    protected override bool Passes(T actualValue)
     {
-        Message = $"Expected {_expected} but received {actualValue}";
         return Equals(actualValue, _expected);
     }
-    
-    public override string Message { get; protected set; } = string.Empty;
 }

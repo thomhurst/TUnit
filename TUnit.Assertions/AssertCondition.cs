@@ -7,14 +7,22 @@ public abstract class AssertCondition<T> : IAssertCondition<T>
         ExpectedValue = expected;
     }
     
-    internal Func<(T expectedValue, T actualValue), string>? MessageFactory { get; private set; }
+    internal abstract Func<(T ExpectedValue, T ActualValue), string> MessageFactory { get; set; }
 
-    public T ExpectedValue { get; }
-    public abstract bool Matches(T actualValue);
+    internal T ExpectedValue { get; }
+    private T ActualValue { get; set; } = default!;
+
+    public bool Assert(T actualValue)
+    {
+        ActualValue = actualValue;
+        return Passes(actualValue);
+    }
     
-    public abstract string Message { get; protected set; }
+    protected abstract bool Passes(T actualValue);
+
+    public string Message => MessageFactory.Invoke((ExpectedValue, ActualValue));
     
-    public IAssertCondition<T> WithMessage(Func<(T expectedValue, T actualValue), string> messageFactory)
+    public IAssertCondition<T> WithMessage(Func<(T ExpectedValue, T ActualValue), string> messageFactory)
     {
         MessageFactory = messageFactory;
         return this;
