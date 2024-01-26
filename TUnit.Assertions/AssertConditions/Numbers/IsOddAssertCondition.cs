@@ -2,13 +2,13 @@
 
 namespace TUnit.Assertions.AssertConditions.Numbers;
 
-public class IsEvenAssertCondition<TActual> : AssertCondition<TActual>
+public class IsOddAssertCondition<TActual> : AssertCondition<TActual>
     where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
 {
-    public override string DefaultMessage => $"{ActualValue} is not even";
+    public override string DefaultMessage => $"{ActualValue} is not odd";
     
     protected override bool Passes(TActual actualValue)
     {
-        return actualValue % 2 == 0;
+        return actualValue % 2 != 0;
     }
 }
