@@ -42,7 +42,11 @@ public class SingleTestExecutor
         
         try
         {
-            await ExecuteCore(testDetails, allClasses);
+            await Task.Run(async () =>
+            {
+                TestContext.Current = testDetails;
+                await ExecuteCore(testDetails, allClasses);
+            });
             
             var end = DateTimeOffset.Now;
             

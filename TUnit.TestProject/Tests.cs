@@ -1,4 +1,5 @@
 using TUnit.Assertions;
+using TUnit.Core;
 using TUnit.Core.Attributes;
 
 namespace TUnit.TestProject;
@@ -120,6 +121,18 @@ public class Tests
     {
         await Task.Yield();
         Assert.That(value, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void TestContext1()
+    {
+        Assert.That(TestContext.Current.TestName, Is.EqualTo(nameof(TestContext1)));
+    }
+    
+    [Test]
+    public void TestContext2()
+    {
+        Assert.That(TestContext.Current.TestName, Is.EqualTo(nameof(TestContext1)));
     }
     
     public static int One() => 1;

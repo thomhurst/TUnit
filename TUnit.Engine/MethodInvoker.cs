@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
+using TUnit.Core;
 
 namespace TUnit.Engine;
 
@@ -10,7 +11,7 @@ public class MethodInvoker
     {
         try
         {
-            var result = await Task.Run(() => methodInfo.Invoke(@class, bindingFlags, null, arguments, CultureInfo.InvariantCulture));
+            var result = methodInfo.Invoke(@class, bindingFlags, null, arguments, CultureInfo.InvariantCulture);
 
             if (result is ValueTask valueTask)
             { 
