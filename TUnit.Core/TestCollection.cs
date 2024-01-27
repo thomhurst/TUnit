@@ -8,6 +8,8 @@ namespace TUnit.Core;
 /// </summary>
 public sealed class TestCollection
 {
+    private readonly AssembliesAnd<TestDetails> _assembliesAndTestDetails;
+
     /// <summary>
     /// The test sources (assembly file names).
     /// </summary>
@@ -18,10 +20,11 @@ public sealed class TestCollection
     /// </summary>
     public IReadOnlyList<TestDetails> Tests { get; private set; }
 
-    public TestCollection(IEnumerable<string> sources, IEnumerable<TestDetails> tests)
+    public TestCollection(IEnumerable<string> sources, AssembliesAnd<TestDetails> assembliesAndTestDetails)
     {
+        _assembliesAndTestDetails = assembliesAndTestDetails;
         Sources = ImmutableArray.CreateRange(sources);
-        Tests = ImmutableArray.CreateRange(tests);
+        Tests = ImmutableArray.CreateRange(assembliesAndTestDetails.Values);
     }
 
     /// <summary>

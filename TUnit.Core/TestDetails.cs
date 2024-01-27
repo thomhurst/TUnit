@@ -6,12 +6,12 @@ namespace TUnit.Core;
 public record TestDetails
 {
     public TestDetails(MethodInfo MethodInfo,
+        Type ClassType,
         SourceLocation SourceLocation,
         ParameterArgument[]? arguments)
     {
-        var classType = MethodInfo.DeclaringType!;
-        
         this.MethodInfo = MethodInfo;
+        this.ClassType = ClassType;
         this.SourceLocation = SourceLocation;
         
         ParameterTypes = arguments?.Select(x => x.Type).ToArray();
@@ -19,14 +19,14 @@ public record TestDetails
         
         TestName = MethodInfo.Name;
         DisplayName = MethodInfo.Name + GetArgumentValues();
-        ClassName = classType.Name;
-        FullyQualifiedClassName = classType.FullName!;
-        Assembly = classType.Assembly;
-        Source = classType.Assembly.Location;
-        FullyQualifiedName = $"{classType.FullName}.{MethodInfo.Name}{GetParameterTypes(ParameterTypes)}";
+        ClassName = this.ClassType.Name;
+        FullyQualifiedClassName = this.ClassType.FullName!;
+        Assembly = this.ClassType.Assembly;
+        Source = this.ClassType.Assembly.Location;
+        FullyQualifiedName = $"{this.ClassType.FullName}.{MethodInfo.Name}{GetParameterTypes(ParameterTypes)}";
 
         var methodAndClassAttributes = MethodInfo.CustomAttributes
-            .Concat(classType.CustomAttributes)
+            .Concat(this.ClassType.CustomAttributes)
             .ToArray();
         
         SkipReason = methodAndClassAttributes
@@ -45,10 +45,10 @@ public record TestDetails
         MinLineNumber = SourceLocation.MinLineNumber;
         MaxLineNumber = SourceLocation.MaxLineNumber;
     }
+    
 
-
-    public int RetryCount { get; set; }
-    public int RepeatCount { get; set; }
+    public int RetryCount { get; }
+    public int RepeatCount { get; }
 
     private string GetArgumentValues()
     {
@@ -66,18 +66,19 @@ public record TestDetails
 
     public string ClassName { get; }
     
-    public string FullyQualifiedClassName { get; set; }
+    public string FullyQualifiedClassName { get; }
 
     public Assembly Assembly { get; }
     
     public string Source { get; }
     public string FullyQualifiedName { get; }
-    public MethodInfo MethodInfo { get; init; }
-    public string? FileName { get; set; }
-    public int MinLineNumber { get; set; }
-    public int MaxLineNumber { get; set; }
-    public Type[]? ParameterTypes { get; init; }
-    public object?[]? ArgumentValues { get; init; }
+    public MethodInfo MethodInfo { get; }
+    public Type ClassType { get; }
+    public string? FileName { get; }
+    public int MinLineNumber { get; }
+    public int MaxLineNumber { get; }
+    public Type[]? ParameterTypes { get; }
+    public object?[]? ArgumentValues { get; }
     public SourceLocation SourceLocation { get; }
     
     public string? SkipReason { get; }

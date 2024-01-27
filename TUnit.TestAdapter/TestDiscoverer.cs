@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TUnit.Engine.Extensions;
 using TUnit.TestAdapter.Constants;
 using TUnit.TestAdapter.Extensions;
 using TUnit.TestAdapter.Stubs;
@@ -21,8 +22,10 @@ public class TestDiscoverer : ITestDiscoverer
     {
         var testCollector = BuildServices(discoveryContext, logger)
             .GetRequiredService<TestCollector>();
+
+        var assembliesAndTests = testCollector.TestsFromSources(sources);
         
-        foreach (var test in testCollector.TestsFromSources(sources))
+        foreach (var test in assembliesAndTests.Values)
         {
             logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.FullyQualifiedName);
             discoverySink.SendTestCase(test.ToTestCase());

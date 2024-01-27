@@ -6,7 +6,7 @@ namespace TUnit.Engine;
 
 public class MethodInvoker
 {
-    public async Task InvokeMethod(object? @class, MethodInfo methodInfo, BindingFlags bindingFlags, object?[]? arguments)
+    public async Task<object?> InvokeMethod(object? @class, MethodInfo methodInfo, BindingFlags bindingFlags, object?[]? arguments)
     {
         try
         {
@@ -15,20 +15,38 @@ public class MethodInvoker
             if (result is ValueTask valueTask)
             { 
                 await valueTask;
+                
+                if (valueTask.GetType().IsGenericType)
+                {
+                    return valueTask.GetType()
+                        .GetProperty("Result", BindingFlags.Instance | BindingFlags.Public)
+                        ?.GetValue(valueTask);
+                }
+                
+                return null;
             }
-            else if (result is Task task)
+
+            if (result is Task task)
             {
                 await task;
+
+                if (task.GetType().IsGenericType)
+                {
+                    return task.GetType()
+                        .GetProperty("Result", BindingFlags.Instance | BindingFlags.Public)
+                        ?.GetValue(task);
+                }
+                
+                return null;
             }
+
+            return result;
         }
         catch (TargetInvocationException e)
         {
-            if (e.InnerException is null)
-            {
-                throw;
-            }
+            ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
             
-            ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+            return null;
         }
     }
 }

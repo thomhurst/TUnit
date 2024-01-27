@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TUnit.Core;
+using TUnit.Engine.Extensions;
 using TUnit.TestAdapter.Constants;
 using TUnit.TestAdapter.Extensions;
 using TUnit.TestAdapter.Stubs;
@@ -44,12 +46,15 @@ public class TestExecutor : ITestExecutor2
         
         var serviceProvider = BuildServices(runContext, frameworkHandle);
 
-        var tests = serviceProvider.GetRequiredService<TestCollector>()
-            .TestsFromSources(sources)
+        var assembliesAndTestsFromSources = serviceProvider.GetRequiredService<TestCollector>()
+            .TestsFromSources(sources);
+        
+        var tests = assembliesAndTestsFromSources
+            .Values
             .Select(x => new TestWithTestCase(x, x.ToTestCase()));
             
         serviceProvider.GetRequiredService<AsyncTestRunExecutor>()
-            .RunInAsyncContext(tests)
+            .RunInAsyncContext(new AssembliesAnd<TestWithTestCase>(assembliesAndTestsFromSources.Assemblies, tests))
             .GetAwaiter()
             .GetResult();
         

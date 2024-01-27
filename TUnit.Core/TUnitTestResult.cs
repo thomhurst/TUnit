@@ -10,11 +10,3 @@ public record TUnitTestResult
     public required Exception? Exception { get; init; }
     public required string ComputerName { get; init; }
 };
-
-public enum Status
-{
-    None,
-    Passed,
-    Failed,
-    Skipped
-}

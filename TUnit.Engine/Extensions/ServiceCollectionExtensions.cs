@@ -8,6 +8,8 @@ public static class ServiceCollectionExtensions
     {
         return services.AddSingleton<MethodInvoker>()
             .AddSingleton<TestClassCreator>()
+            .AddSingleton<TestDataSourceRetriever>()
+            .AddSingleton<ClassLoader>()
             .AddSingleton<SingleTestExecutor>();
     }
 }

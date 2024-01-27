@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <LangVersion>default</LangVersion>
+        <LangVersion>latest</LangVersion>
         <DevelopmentDependency>true</DevelopmentDependency>
         <OutputType>Library</OutputType>
         <IsPackable>true</IsPackable>

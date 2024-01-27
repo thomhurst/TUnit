@@ -18,7 +18,7 @@ public class SingleTestExecutor
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
 
-    public async Task<TUnitTestResult> ExecuteTest(TestDetails testDetails)
+    public async Task<TUnitTestResult> ExecuteTest(TestDetails testDetails, Type[] allClasses)
     {
         var start = DateTimeOffset.Now;
 
@@ -38,7 +38,7 @@ public class SingleTestExecutor
         
         try
         {
-            await ExecuteCore(testDetails);
+            await ExecuteCore(testDetails, allClasses);
             
             var end = DateTimeOffset.Now;
             
@@ -70,9 +70,9 @@ public class SingleTestExecutor
         }
     }
 
-    private async Task ExecuteCore(TestDetails testDetails)
+    private async Task ExecuteCore(TestDetails testDetails, Type[] allClasses)
     {
-        var @class = _testClassCreator.CreateTestClass(testDetails);
+        var @class = _testClassCreator.CreateTestClass(testDetails, allClasses);
 
         var isRetry = testDetails.RetryCount > 0;
         var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;

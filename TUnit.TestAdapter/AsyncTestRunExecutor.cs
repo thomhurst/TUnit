@@ -15,17 +15,19 @@ public class AsyncTestRunExecutor
         SingleTestExecutor singleTestExecutor, 
         MethodInvoker methodInvoker, 
         ITestExecutionRecorder testExecutionRecorder, 
+        ClassLoader classLoader,
         CancellationTokenSource cancellationTokenSource
         )
 {
     private bool _canRunAnotherTest = true;
 
     private readonly ConcurrentDictionary<string, Task> _oneTimeTearDownRegistry = new();
-    private readonly List<Task> _setResultsTasks = new();
+    private readonly List<Task> _setResultsTasks = [];
 
-    public async Task RunInAsyncContext(IEnumerable<TestWithTestCase> tests)
+    public async Task RunInAsyncContext(AssembliesAnd<TestWithTestCase> assembliesAndTests)
     {
-        var allTestsOrderedByClass = tests
+        var allTestsOrderedByClass = assembliesAndTests
+            .Values
             .GroupBy(x => x.Details.FullyQualifiedClassName)
             .SelectMany(x => x.ToList())
             .ToList();
@@ -40,8 +42,10 @@ public class AsyncTestRunExecutor
         MonitorSystemResources();
 
         var executingTests = new List<TestWithResult>();
+
+        var allClasses = classLoader.GetAllTypes(assembliesAndTests.Assemblies).ToArray();
         
-        await foreach (var testWithResult in ProcessQueue(queue))
+        await foreach (var testWithResult in ProcessQueue(queue, allClasses))
         {
             if (cancellationTokenSource.IsCancellationRequested)
             {
@@ -118,7 +122,7 @@ public class AsyncTestRunExecutor
         });
     }
 
-    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestWithTestCase> queue)
+    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestWithTestCase> queue, Type[] allClasses)
     {
         while (queue.Count > 0)
         {
@@ -126,7 +130,7 @@ public class AsyncTestRunExecutor
             {
                 var test = queue.Dequeue();
 
-                yield return new TestWithResult(test, singleTestExecutor.ExecuteTest(test.Details));
+                yield return new TestWithResult(test, singleTestExecutor.ExecuteTest(test.Details, allClasses));
             }
             else if (cancellationTokenSource.IsCancellationRequested)
             {
