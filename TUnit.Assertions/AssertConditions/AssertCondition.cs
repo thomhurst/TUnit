@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions;
 
-public abstract class AssertCondition<T> : IAssertCondition<T>
+public abstract class AssertCondition<T>
 {
     internal AssertCondition()
     {
@@ -10,7 +10,7 @@ public abstract class AssertCondition<T> : IAssertCondition<T>
 
     protected T ActualValue { get; private set; } = default!;
 
-    public bool Assert(T actualValue)
+    public virtual bool Assert(T actualValue)
     {
         ActualValue = actualValue;
         return Passes(actualValue);
@@ -22,7 +22,7 @@ public abstract class AssertCondition<T> : IAssertCondition<T>
 
     public string Message => MessageFactory?.Invoke(ActualValue) ?? DefaultMessage;
     
-    public IAssertCondition<T> WithMessage(Func<T, string> messageFactory)
+    public AssertCondition<T> WithMessage(Func<T, string> messageFactory)
     {
         MessageFactory = messageFactory;
         return this;

@@ -11,4 +11,12 @@ public static class Assert
             throw new AssertionException(assertCondition.Message);
         }
     }
+    
+    public static async Task ThatAsync<T>(T value, AsyncAssertCondition<T> assertCondition)
+    {
+        if (!await assertCondition.Assert(value))
+        {
+            throw new AssertionException(assertCondition.Message);
+        }
+    }
 }

@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions;
+﻿namespace TUnit.Assertions.AssertConditions;
 
 public abstract class ExpectedValueAssertCondition<TActual, TExpected> : AssertCondition<TActual>
 {
@@ -13,7 +13,7 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected> : AssertC
 
     private Func<(TExpected ExpectedValue, TActual ActualValue), string>? MessageFactory { get; set; }
     
-    public IAssertCondition<TActual> WithMessage(Func<(TExpected ExpectedValue, TActual ActualValue), string> messageFactory)
+    public AssertCondition<TActual> WithMessage(Func<(TExpected ExpectedValue, TActual ActualValue), string> messageFactory)
     {
         MessageFactory = messageFactory!;
         return this;
