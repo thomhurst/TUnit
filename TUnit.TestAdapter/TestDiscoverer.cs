@@ -1,8 +1,10 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.TestAdapter.Constants;
 using TUnit.TestAdapter.Extensions;
+using TUnit.TestAdapter.Stubs;
 
 namespace TUnit.TestAdapter;
 
@@ -17,12 +19,22 @@ public class TestDiscoverer : ITestDiscoverer
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
-        var testCollector = new TestCollector(logger);
+        var testCollector = BuildServices(discoveryContext, logger)
+            .GetRequiredService<TestCollector>();
         
         foreach (var test in testCollector.TestsFromSources(sources))
         {
             logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.FullyQualifiedName);
             discoverySink.SendTestCase(test.ToTestCase());
         }
+    }
+    
+    private IServiceProvider BuildServices(IDiscoveryContext discoveryContext, IMessageLogger messageLogger)
+    {
+        return new ServiceCollection()
+            .AddSingleton(discoveryContext)
+            .AddSingleton(messageLogger)
+            .AddTestAdapterServices()
+            .BuildServiceProvider();
     }
 }

@@ -5,22 +5,6 @@ namespace TUnit.TestAdapter
 {
     internal sealed class ReflectionMetadataProvider
     {
-        public Type? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName)
-        {
-            var type = TryGetSingleMethod(assemblyPath, reflectedTypeName, methodName)?.DeclaringType;
-            if (type == null)
-            {
-                return null;
-            }
-
-            if (type.IsConstructedGenericType)
-            {
-                type = type.GetGenericTypeDefinition();
-            }
-
-            return type;
-        }
-
         public Type? GetStateMachineType(string assemblyPath, string reflectedTypeName, string methodName)
         {
             var method = TryGetSingleMethod(assemblyPath, reflectedTypeName, methodName);
@@ -79,10 +63,6 @@ namespace TUnit.TestAdapter
             {
                 return null;
             }
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

@@ -1,7 +1,9 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using TUnit.TestAdapter.Constants;
 using TUnit.TestAdapter.Extensions;
+using TUnit.TestAdapter.Stubs;
 
 namespace TUnit.TestAdapter;
 
@@ -12,13 +14,7 @@ namespace TUnit.TestAdapter;
 public class TestExecutor : ITestExecutor2
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly AsyncTestRunExecutor _asyncTestRunExecutor;
     
-    public TestExecutor()
-    {
-        _asyncTestRunExecutor = new AsyncTestRunExecutor(_cancellationTokenSource);
-    }
-
     public void RunTests(IEnumerable<TestCase>? testCases, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
         if (testCases is null)
@@ -26,10 +22,14 @@ public class TestExecutor : ITestExecutor2
             return;
         }
 
-        var testsWithTestCases = new TestCollector(frameworkHandle)
-            .TestsFromTestCases(testCases, frameworkHandle);
+        var serviceProvider = BuildServices(runContext, frameworkHandle);
+        
+        var testsWithTestCases = 
+            serviceProvider.GetRequiredService<TestCollector>()
+                .TestsFromTestCases(testCases);
             
-        _asyncTestRunExecutor.RunInAsyncContext(testsWithTestCases, runContext, frameworkHandle)
+        serviceProvider.GetRequiredService<AsyncTestRunExecutor>()
+            .RunInAsyncContext(testsWithTestCases)
             .GetAwaiter()
             .GetResult();
     }
@@ -40,11 +40,18 @@ public class TestExecutor : ITestExecutor2
         {
             return;
         }
-
-        var tests = new TestCollector(frameworkHandle).TestsFromSources(sources)
-            .Select(x => new TestWithTestCase(x, x.ToTestCase()));
         
-        _asyncTestRunExecutor.RunInAsyncContext(tests, runContext, frameworkHandle).GetAwaiter().GetResult();
+        var serviceProvider = BuildServices(runContext, frameworkHandle);
+
+        var tests = serviceProvider.GetRequiredService<TestCollector>()
+            .TestsFromSources(sources)
+            .Select(x => new TestWithTestCase(x, x.ToTestCase()));
+            
+        serviceProvider.GetRequiredService<AsyncTestRunExecutor>()
+            .RunInAsyncContext(tests)
+            .GetAwaiter()
+            .GetResult();
+        
     }
 
     public void Cancel()
@@ -60,5 +67,16 @@ public class TestExecutor : ITestExecutor2
     public bool ShouldAttachToTestHost(IEnumerable<string>? sources, IRunContext runContext)
     {
         return runContext.IsBeingDebugged;
+    }
+
+    private IServiceProvider BuildServices(IRunContext? runContext, IFrameworkHandle? frameworkHandle)
+    {
+        return new ServiceCollection()
+            .AddSingleton(runContext ?? new NoOpRunContext())
+            .AddSingleton(frameworkHandle ?? new NoOpFrameworkHandle())
+            .AddSingleton<ITestExecutionRecorder>(x => x.GetRequiredService<IFrameworkHandle>())
+            .AddSingleton(_cancellationTokenSource)
+            .AddTestAdapterServices()
+            .BuildServiceProvider();
     }
 }

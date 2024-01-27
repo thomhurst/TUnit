@@ -6,7 +6,7 @@ using TUnit.Core;
 
 namespace TUnit.TestAdapter;
 
-public class TestCollector(IMessageLogger? messageLogger)
+public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoader, ITestExecutionRecorder testExecutionRecorder)
 {
     public TestCollection CollectionFromSources(IEnumerable<string> sources)
     {
@@ -15,11 +15,8 @@ public class TestCollector(IMessageLogger? messageLogger)
         return new TestCollection(sourcesAsList, TestsFromSources(sourcesAsList));
     }
 
-    public IEnumerable<TestWithTestCase> TestsFromTestCases(IEnumerable<TestCase> testCases, ITestExecutionRecorder? testExecutionRecorder)
+    public IEnumerable<TestWithTestCase> TestsFromTestCases(IEnumerable<TestCase> testCases)
     {
-        var assemblyLoader = new AssemblyLoader();
-        var testsLoader = new TestsLoader(messageLogger);
-        
         foreach (var testCase in testCases)
         {
             var source = testCase.Source;
@@ -46,11 +43,11 @@ public class TestCollector(IMessageLogger? messageLogger)
         }
     }
 
-    private void MarkNotFound(TestCase testCase, ITestExecutionRecorder? testExecutionRecorder)
+    private void MarkNotFound(TestCase testCase, ITestExecutionRecorder testExecutionRecorder)
     {
         var now = DateTimeOffset.Now;
         
-        testExecutionRecorder?.RecordResult(new TestResult(testCase)
+        testExecutionRecorder.RecordResult(new TestResult(testCase)
         {
             DisplayName = testCase.DisplayName,
             Outcome = TestOutcome.NotFound,
@@ -63,9 +60,6 @@ public class TestCollector(IMessageLogger? messageLogger)
 
     public IEnumerable<TestDetails> TestsFromSources(IEnumerable<string> sources)
     {
-        var assemblyLoader = new AssemblyLoader();
-        var testsLoader = new TestsLoader(messageLogger);
-
         var tests = sources
             .Select(source => Path.IsPathRooted(source) ? source : Path.Combine(Directory.GetCurrentDirectory(), source))
             .Select(assemblyLoader.LoadByPath)

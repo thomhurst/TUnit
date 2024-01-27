@@ -1,14 +1,12 @@
 ﻿using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Core.Attributes;
 
 namespace TUnit.TestAdapter;
 
-public class TestsLoader(IMessageLogger? messageLogger)
+public class TestsLoader(SourceLocationHelper sourceLocationHelper)
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute)];
-    private readonly SourceLocationHelper _sourceLocationHelper = new(messageLogger);
 
     public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation)
     {
@@ -21,7 +19,7 @@ public class TestsLoader(IMessageLogger? messageLogger)
                 continue;
             }
             
-            var sourceLocation = _sourceLocationHelper
+            var sourceLocation = sourceLocationHelper
                 .GetSourceLocation(typeInformation.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
             
             foreach (var testWithDataAttribute in methodInfo.CustomAttributes.Where(x => x.AttributeType == typeof(TestWithDataAttribute)))

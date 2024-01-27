@@ -3,7 +3,7 @@ using System.Runtime.Loader;
 
 namespace TUnit.TestAdapter;
 
-internal class AssemblyLoader
+public class AssemblyLoader
 {
     internal Assembly? LoadByPath(string assemblyPath)
     {

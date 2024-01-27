@@ -4,7 +4,7 @@ using TUnit.Core;
 
 namespace TUnit.TestAdapter;
 
-public class SourceLocationHelper(IMessageLogger? logger) : IDisposable
+public class SourceLocationHelper(IMessageLogger logger) : IDisposable
 {
     private static readonly SourceLocation EmptySourceLocation = new(null, 0, 0);
     
@@ -19,8 +19,8 @@ public class SourceLocationHelper(IMessageLogger? logger) : IDisposable
 
             if (navigationData is null)
             {
-                logger?.SendMessage(TestMessageLevel.Error, $"No navigation data found for {className}.{methodName}");
-                logger?.SendMessage(TestMessageLevel.Error, $"Assembly: {assemblyLocation}");
+                logger.SendMessage(TestMessageLevel.Error, $"No navigation data found for {className}.{methodName}");
+                logger.SendMessage(TestMessageLevel.Error, $"Assembly: {assemblyLocation}");
 
                 return EmptySourceLocation;
             }
@@ -29,8 +29,8 @@ public class SourceLocationHelper(IMessageLogger? logger) : IDisposable
         }
         catch (Exception e)
         {
-            logger?.SendMessage(TestMessageLevel.Error, $"Error retrieving source location for {className}.{methodName}");
-            logger?.SendMessage(TestMessageLevel.Error, e.ToString());
+            logger.SendMessage(TestMessageLevel.Error, $"Error retrieving source location for {className}.{methodName}");
+            logger.SendMessage(TestMessageLevel.Error, e.ToString());
             
             return EmptySourceLocation;
         }

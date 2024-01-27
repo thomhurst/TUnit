@@ -10,14 +10,20 @@ using TUnit.Engine;
 
 namespace TUnit.TestAdapter;
 
-public class AsyncTestRunExecutor(SingleTestExecutor singleTestExecutor, MethodInvoker methodInvoker, CancellationTokenSource cancellationTokenSource)
+public class AsyncTestRunExecutor
+    (
+        SingleTestExecutor singleTestExecutor, 
+        MethodInvoker methodInvoker, 
+        ITestExecutionRecorder testExecutionRecorder, 
+        CancellationTokenSource cancellationTokenSource
+        )
 {
     private bool _canRunAnotherTest = true;
 
     private readonly ConcurrentDictionary<string, Task> _oneTimeTearDownRegistry = new();
     private readonly List<Task> _setResultsTasks = new();
 
-    public async Task RunInAsyncContext(IEnumerable<TestWithTestCase> tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
+    public async Task RunInAsyncContext(IEnumerable<TestWithTestCase> tests)
     {
         var allTestsOrderedByClass = tests
             .GroupBy(x => x.Details.FullyQualifiedClassName)
@@ -53,7 +59,7 @@ public class AsyncTestRunExecutor(SingleTestExecutor singleTestExecutor, MethodI
                 var result = t.Result;
                 var testDetails = testWithResult.Test.Details;
                 
-                frameworkHandle?.RecordResult(new TestResult(testWithResult.Test.TestCase)
+                testExecutionRecorder?.RecordResult(new TestResult(testWithResult.Test.TestCase)
                 {
                     DisplayName = testDetails.DisplayName,
                     Outcome = GetOutcome(result.Status),
@@ -69,8 +75,8 @@ public class AsyncTestRunExecutor(SingleTestExecutor singleTestExecutor, MethodI
         
         executingTests.RemoveAll(x => x.Result.IsCompletedSuccessfully);
 
-        await WhenAllSafely(executingTests.Select(x => x.Result), frameworkHandle);
-        await WhenAllSafely(_oneTimeTearDownRegistry.Values, frameworkHandle);
+        await WhenAllSafely(executingTests.Select(x => x.Result), testExecutionRecorder);
+        await WhenAllSafely(_oneTimeTearDownRegistry.Values, testExecutionRecorder);
         await Task.WhenAll(_setResultsTasks);
     }
 
