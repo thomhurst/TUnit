@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestClassCreator>()
             .AddSingleton<TestDataSourceRetriever>()
             .AddSingleton<ClassLoader>()
+            .AddSingleton<Disposer>()
             .AddSingleton<SingleTestExecutor>();
     }
 }

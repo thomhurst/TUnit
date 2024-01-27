@@ -9,11 +9,15 @@ public class SingleTestExecutor
 {
     private readonly MethodInvoker _methodInvoker;
     private readonly TestClassCreator _testClassCreator;
+    private readonly Disposer _disposer;
 
-    public SingleTestExecutor(MethodInvoker methodInvoker, TestClassCreator testClassCreator)
+    public SingleTestExecutor(MethodInvoker methodInvoker, 
+        TestClassCreator testClassCreator,
+        Disposer disposer)
     {
         _methodInvoker = methodInvoker;
         _testClassCreator = testClassCreator;
+        _disposer = disposer;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
@@ -74,32 +78,39 @@ public class SingleTestExecutor
     {
         var @class = _testClassCreator.CreateTestClass(testDetails, allClasses);
 
-        var isRetry = testDetails.RetryCount > 0;
-        var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
-        
-        for (var i = 0; i < executionCount + 1; i++)
+        try
         {
-            try
+            var isRetry = testDetails.RetryCount > 0;
+            var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
+
+            for (var i = 0; i < executionCount + 1; i++)
             {
-                await ExecuteSetUps(@class);
-
-                await _methodInvoker.InvokeMethod(@class, testDetails.MethodInfo, BindingFlags.Default,
-                    testDetails.ArgumentValues?.ToArray());
-
-                await ExecuteTearDowns(@class);
-
-                if (isRetry)
+                try
                 {
-                    break;
+                    await ExecuteSetUps(@class);
+
+                    await _methodInvoker.InvokeMethod(@class, testDetails.MethodInfo, BindingFlags.Default,
+                        testDetails.ArgumentValues?.ToArray());
+
+                    await ExecuteTearDowns(@class);
+
+                    if (isRetry)
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    if (!isRetry || i == executionCount)
+                    {
+                        throw;
+                    }
                 }
             }
-            catch
-            {
-                if (!isRetry || i == executionCount)
-                {
-                    throw;
-                }
-            }
+        }
+        finally
+        {
+            await _disposer.DisposeAsync(@class);
         }
     }
 
