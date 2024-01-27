@@ -3,9 +3,9 @@ using TUnit.Core.Attributes;
 
 namespace TUnit.Core;
 
-public record Test
+public record TestDetails
 {
-    public Test(MethodInfo MethodInfo,
+    public TestDetails(MethodInfo MethodInfo,
         SourceLocation SourceLocation,
         ParameterArgument[]? arguments)
     {
@@ -67,6 +67,15 @@ public record Test
     public string? SkipReason { get; }
     public bool IsSkipped => !string.IsNullOrEmpty(SkipReason);
     public string DisplayName { get; }
+
+    private readonly TaskCompletionSource<TUnitTestResult> _completionSource = new();
+    public Task<TUnitTestResult> GetResultAsync() => _completionSource.Task;
+
+    public TUnitTestResult SetResult(TUnitTestResult unitTestResult)
+    {
+        _completionSource.SetResult(unitTestResult);
+        return unitTestResult;
+    }
 
     public static string GetParameterTypes(Type[]? types)
     {

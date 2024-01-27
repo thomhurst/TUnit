@@ -61,7 +61,7 @@ public class TestCollector(IMessageLogger? messageLogger)
         });
     }
 
-    public IEnumerable<Test> TestsFromSources(IEnumerable<string> sources)
+    public IEnumerable<TestDetails> TestsFromSources(IEnumerable<string> sources)
     {
         var assemblyLoader = new AssemblyLoader();
         var testsLoader = new TestsLoader(messageLogger);

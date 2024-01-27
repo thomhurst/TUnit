@@ -3,4 +3,5 @@ using TUnit.Core;
 
 namespace TUnit.TestAdapter;
 
-public record TestWithTestCase(Test Test, TestCase TestCase);
+public record TestWithTestCase(TestDetails Details, TestCase TestCase);
+public record TestWithResult(TestWithTestCase Test, Task<TUnitTestResult> Result);

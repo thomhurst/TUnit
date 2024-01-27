@@ -16,9 +16,9 @@ public sealed class TestCollection
     /// <summary>
     /// The tests that were discovered.
     /// </summary>
-    public IReadOnlyList<Test> Tests { get; private set; }
+    public IReadOnlyList<TestDetails> Tests { get; private set; }
 
-    public TestCollection(IEnumerable<string> sources, IEnumerable<Test> tests)
+    public TestCollection(IEnumerable<string> sources, IEnumerable<TestDetails> tests)
     {
         Sources = ImmutableArray.CreateRange(sources);
         Tests = ImmutableArray.CreateRange(tests);
@@ -28,7 +28,7 @@ public sealed class TestCollection
     /// Filters the tests in the test collection. This is used for partial test runs.
     /// </summary>
     /// <param name="filter">The filter to apply.</param>
-    public void Filter(Func<Test, bool> filter)
+    public void Filter(Func<TestDetails, bool> filter)
     {
         Tests = ImmutableArray.CreateRange(Tests.Where(filter));
     }

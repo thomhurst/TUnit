@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" PrivateAssets="All" />
+      <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>

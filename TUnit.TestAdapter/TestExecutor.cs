@@ -12,11 +12,11 @@ namespace TUnit.TestAdapter;
 public class TestExecutor : ITestExecutor2
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly AsyncTestExecutor _asyncTestExecutor;
+    private readonly AsyncTestRunExecutor _asyncTestRunExecutor;
     
     public TestExecutor()
     {
-        _asyncTestExecutor = new AsyncTestExecutor(_cancellationTokenSource);
+        _asyncTestRunExecutor = new AsyncTestRunExecutor(_cancellationTokenSource);
     }
 
     public void RunTests(IEnumerable<TestCase>? testCases, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
@@ -29,7 +29,7 @@ public class TestExecutor : ITestExecutor2
         var testsWithTestCases = new TestCollector(frameworkHandle)
             .TestsFromTestCases(testCases, frameworkHandle);
             
-        _asyncTestExecutor.RunInAsyncContext(testsWithTestCases, runContext, frameworkHandle)
+        _asyncTestRunExecutor.RunInAsyncContext(testsWithTestCases, runContext, frameworkHandle)
             .GetAwaiter()
             .GetResult();
     }
@@ -44,7 +44,7 @@ public class TestExecutor : ITestExecutor2
         var tests = new TestCollector(frameworkHandle).TestsFromSources(sources)
             .Select(x => new TestWithTestCase(x, x.ToTestCase()));
         
-        _asyncTestExecutor.RunInAsyncContext(tests, runContext, frameworkHandle).GetAwaiter().GetResult();
+        _asyncTestRunExecutor.RunInAsyncContext(tests, runContext, frameworkHandle).GetAwaiter().GetResult();
     }
 
     public void Cancel()

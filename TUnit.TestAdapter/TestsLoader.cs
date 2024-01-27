@@ -10,7 +10,7 @@ public class TestsLoader(IMessageLogger? messageLogger)
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute)];
     private readonly SourceLocationHelper _sourceLocationHelper = new(messageLogger);
 
-    public IEnumerable<Test> GetTests(TypeInformation typeInformation)
+    public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation)
     {
         var methods = typeInformation.Types.SelectMany(x => x.GetMethods());
 
@@ -33,7 +33,7 @@ public class TestsLoader(IMessageLogger? messageLogger)
                         ?.Select(x => new ParameterArgument(x.Value?.GetType()!, x.Value))
                         .ToArray();
                     
-                    yield return new Test(
+                    yield return new TestDetails(
                             MethodInfo: methodInfo,
                             SourceLocation: sourceLocation,
                             arguments: arguments
@@ -43,7 +43,7 @@ public class TestsLoader(IMessageLogger? messageLogger)
             
             if(methodInfo.CustomAttributes.Any(x => x.AttributeType == typeof(TestAttribute)))
             {
-                yield return new Test(
+                yield return new TestDetails(
                     MethodInfo: methodInfo,
                     SourceLocation: sourceLocation,
                     arguments: null
