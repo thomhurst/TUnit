@@ -72,11 +72,33 @@ public class SingleTestExecutor
     {
         var @class = CreateTestClass(testDetails);
 
-        await ExecuteSetUps(@class);
+        var isRetry = testDetails.RetryCount > 0;
+        var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
         
-        await _methodInvoker.InvokeMethod(@class, testDetails.MethodInfo, BindingFlags.Default, testDetails.ArgumentValues?.ToArray());
-        
-        await ExecuteTearDowns(@class);
+        for (var i = 0; i < executionCount + 1; i++)
+        {
+            try
+            {
+                await ExecuteSetUps(@class);
+
+                await _methodInvoker.InvokeMethod(@class, testDetails.MethodInfo, BindingFlags.Default,
+                    testDetails.ArgumentValues?.ToArray());
+
+                await ExecuteTearDowns(@class);
+
+                if (isRetry)
+                {
+                    break;
+                }
+            }
+            catch
+            {
+                if (!isRetry || i == executionCount)
+                {
+                    throw;
+                }
+            }
+        }
     }
 
     private async Task ExecuteSetUps(object @class)

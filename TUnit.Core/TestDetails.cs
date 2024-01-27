@@ -24,16 +24,32 @@ public record TestDetails
         Assembly = classType.Assembly;
         Source = classType.Assembly.Location;
         FullyQualifiedName = $"{classType.FullName}.{MethodInfo.Name}{GetParameterTypes(ParameterTypes)}";
-        SkipReason = MethodInfo.CustomAttributes
+
+        var methodAndClassAttributes = MethodInfo.CustomAttributes
             .Concat(classType.CustomAttributes)
+            .ToArray();
+        
+        SkipReason = methodAndClassAttributes
             .FirstOrDefault(x => x.AttributeType == typeof(SkipAttribute))
             ?.ConstructorArguments.FirstOrDefault().Value as string;
+        
+        RetryCount = methodAndClassAttributes
+            .FirstOrDefault(x => x.AttributeType == typeof(RetryAttribute))
+            ?.ConstructorArguments.FirstOrDefault().Value as int? ?? 0;
+        
+        RepeatCount = methodAndClassAttributes
+            .FirstOrDefault(x => x.AttributeType == typeof(RepeatAttribute))
+            ?.ConstructorArguments.FirstOrDefault().Value as int? ?? 0;
 
         FileName = SourceLocation.FileName;
         MinLineNumber = SourceLocation.MinLineNumber;
         MaxLineNumber = SourceLocation.MaxLineNumber;
     }
-    
+
+
+    public int RetryCount { get; set; }
+    public int RepeatCount { get; set; }
+
     private string GetArgumentValues()
     {
         if (ArgumentValues == null)

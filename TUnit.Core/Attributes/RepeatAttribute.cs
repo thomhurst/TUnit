@@ -1,0 +1,17 @@
+﻿namespace TUnit.Core.Attributes;
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+public class RepeatAttribute : TUnitAttribute
+{
+    public int Times { get; }
+
+    public RepeatAttribute(int times)
+    {
+        if (times < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(times), "Repeat times must be positive");
+        }
+        
+        Times = times;
+    }
+}
