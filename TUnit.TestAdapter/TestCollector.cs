@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 
 namespace TUnit.TestAdapter;
@@ -35,18 +34,17 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
 
             if (assembly is null)
             {
-                MarkNotFound(testCase, testExecutionRecorder);
+                MarkNotFound(testCase);
                 continue;
             }
 
             var tests = testsLoader.GetTests(new TypeInformation(assembly), allAssemblies);
 
-            var matchingTest = tests.FirstOrDefault(x => x.FullyQualifiedName == testCase.FullyQualifiedName
-                                                         && x.DisplayName == testCase.DisplayName);
+            var matchingTest = tests.FirstOrDefault(x => x.Id == testCase.Id);
 
             if (matchingTest is null)
             {
-                MarkNotFound(testCase, testExecutionRecorder);
+                MarkNotFound(testCase);
                 continue;
             }
 
@@ -54,7 +52,7 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
         }
     }
 
-    private void MarkNotFound(TestCase testCase, ITestExecutionRecorder testExecutionRecorder)
+    private void MarkNotFound(TestCase testCase)
     {
         var now = DateTimeOffset.Now;
         

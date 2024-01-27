@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using TUnit.Core.Attributes;
 
 namespace TUnit.Core;
@@ -44,8 +46,21 @@ public record TestDetails
         FileName = SourceLocation.FileName;
         MinLineNumber = SourceLocation.MinLineNumber;
         MaxLineNumber = SourceLocation.MaxLineNumber;
+
+        Id = GenerateGuid();
     }
-    
+
+    private Guid GenerateGuid()
+    {
+        var bytes = Encoding.UTF8.GetBytes(DisplayName + MinLineNumber + new string(FullyQualifiedName.Reverse().ToArray()));
+        
+        var hashedBytes = SHA1.HashData(bytes);
+        
+        Array.Resize(ref hashedBytes, 16);
+        
+        return new Guid(hashedBytes);
+    }
+
 
     public int RetryCount { get; }
     public int RepeatCount { get; }
@@ -60,7 +75,7 @@ public record TestDetails
         return $"({string.Join(',', ArgumentValues.Select(StringifyArgument))})";
     }
 
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; }
 
     public string TestName { get; }
 
