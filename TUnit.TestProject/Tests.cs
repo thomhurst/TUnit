@@ -135,6 +135,22 @@ public class Tests
         Assert.That(TestContext.Current.TestName, Is.EqualTo(nameof(TestContext1)));
     }
     
+    [Test]
+    public void Throws1()
+    {
+        Assert.That(() => new string(Array.Empty<char>()), Throws.Nothing);
+    }
+    
+    [Test]
+    public async Task Throws2()
+    {
+        await Assert.ThatAsync(async () =>
+        {
+            await Task.Yield();
+            new string(Array.Empty<char>());
+        }, Throws.Nothing);
+    }
+    
     public static int One() => 1;
     public static int Two() => 2;
 }

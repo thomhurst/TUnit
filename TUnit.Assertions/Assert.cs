@@ -19,4 +19,20 @@ public static class Assert
             throw new AssertionException(assertCondition.Message);
         }
     }
+    
+    public static void That(Action value, SynchronousDelegateAssertCondition assertCondition)
+    {
+        if (!assertCondition.Assert(value))
+        {
+            throw new AssertionException(assertCondition.Message);
+        }
+    }
+    
+    public static async Task ThatAsync(Func<Task> value, AsynchronousDelegateAssertCondition assertCondition)
+    {
+        if (!await assertCondition.Assert(value))
+        {
+            throw new AssertionException(assertCondition.Message);
+        }
+    }
 }
