@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.TestAdapter.Constants;
 using TUnit.TestAdapter.Extensions;
 using TUnit.TestAdapter.Stubs;
@@ -75,6 +76,7 @@ public class TestExecutor : ITestExecutor2
             .AddSingleton(runContext ?? new NoOpRunContext())
             .AddSingleton(frameworkHandle ?? new NoOpFrameworkHandle())
             .AddSingleton<ITestExecutionRecorder>(x => x.GetRequiredService<IFrameworkHandle>())
+            .AddSingleton<IMessageLogger>(x => x.GetRequiredService<IFrameworkHandle>())
             .AddSingleton(_cancellationTokenSource)
             .AddTestAdapterServices()
             .BuildServiceProvider();
