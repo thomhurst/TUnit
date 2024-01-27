@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestCollector>()
             .AddSingleton<SourceLocationHelper>()
             .AddSingleton<ReflectionMetadataProvider>()
+            .AddSingleton<TUnitTestFilterProvider>()
             .AddSingleton<AssemblyLoader>();
     }
 }

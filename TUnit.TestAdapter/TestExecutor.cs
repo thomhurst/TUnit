@@ -32,7 +32,7 @@ public class TestExecutor : ITestExecutor2
                 .TestsFromTestCases(testCases);
             
         serviceProvider.GetRequiredService<AsyncTestRunExecutor>()
-            .RunInAsyncContext(testsWithTestCases)
+            .RunInAsyncContext(Filter(testsWithTestCases, serviceProvider))
             .GetAwaiter()
             .GetResult();
     }
@@ -52,12 +52,23 @@ public class TestExecutor : ITestExecutor2
         var tests = assembliesAndTestsFromSources
             .Values
             .Select(x => new TestWithTestCase(x, x.ToTestCase()));
-            
+        
         serviceProvider.GetRequiredService<AsyncTestRunExecutor>()
-            .RunInAsyncContext(new AssembliesAnd<TestWithTestCase>(assembliesAndTestsFromSources.Assemblies, tests))
+            .RunInAsyncContext(Filter(new AssembliesAnd<TestWithTestCase>(assembliesAndTestsFromSources.Assemblies, tests), serviceProvider))
             .GetAwaiter()
             .GetResult();
         
+    }
+
+    private AssembliesAnd<TestWithTestCase> Filter(AssembliesAnd<TestWithTestCase> assembliesAnd, IServiceProvider serviceProvider)
+    {
+        var testFilterProvider = serviceProvider.GetRequiredService<TUnitTestFilterProvider>();
+        
+        var tests = assembliesAnd.Values;
+
+        var filteredTests = testFilterProvider.FilterTests(tests);
+
+        return assembliesAnd with { Values = filteredTests };
     }
 
     public void Cancel()
