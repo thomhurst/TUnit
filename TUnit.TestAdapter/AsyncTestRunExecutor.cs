@@ -63,7 +63,7 @@ public class AsyncTestRunExecutor
                 var result = t.Result;
                 var testDetails = testWithResult.Test.Details;
                 
-                testExecutionRecorder?.RecordResult(new TestResult(testWithResult.Test.TestCase)
+                testExecutionRecorder.RecordResult(new TestResult(testWithResult.Test.TestCase)
                 {
                     DisplayName = testDetails.DisplayName,
                     Outcome = GetOutcome(result.Status),

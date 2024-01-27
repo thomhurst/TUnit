@@ -69,4 +69,59 @@ public class Tests
         var value = "1";
         Assert.That(value, Is.EqualTo("1"));
     }
+    
+    [TestDataSource(nameof(One))]
+    public void TestDataSource1(int value)
+    {
+        Assert.That(value, Is.EqualTo(1));
+    }
+    
+    [TestDataSource(nameof(One))]
+    public async Task TestDataSource2(int value)
+    {
+        await Task.Yield();
+        Assert.That(value, Is.EqualTo(1));
+    }
+    
+    [TestDataSource(nameof(Two))]
+    public void TestDataSource3(int value)
+    {
+        Assert.That(value, Is.EqualTo(1));
+    }
+    
+    [TestDataSource(nameof(Two))]
+    public async Task TestDataSource4(int value)
+    {
+        await Task.Yield();
+        Assert.That(value, Is.EqualTo(1));
+    }
+    
+    [TestDataSource(nameof(TestDataSources), nameof(One))]
+    public void TestDataSource5(int value)
+    {
+        Assert.That(value, Is.EqualTo(1));
+    }
+    
+    [TestDataSource(nameof(TestDataSources), nameof(One))]
+    public async Task TestDataSource6(int value)
+    {
+        await Task.Yield();
+        Assert.That(value, Is.EqualTo(1));
+    }
+    
+    [TestDataSource(nameof(TestDataSources), nameof(Two))]
+    public void TestDataSource7(int value)
+    {
+        Assert.That(value, Is.EqualTo(1));
+    }
+    
+    [TestDataSource(nameof(TestDataSources), nameof(Two))]
+    public async Task TestDataSource8(int value)
+    {
+        await Task.Yield();
+        Assert.That(value, Is.EqualTo(1));
+    }
+    
+    public static int One() => 1;
+    public static int Two() => 2;
 }
