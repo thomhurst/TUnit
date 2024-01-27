@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions;
+﻿namespace TUnit.Assertions.AssertConditions;
 
 public abstract class AsyncAssertCondition<T>
 {

@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions;
+﻿namespace TUnit.Assertions.AssertConditions.Conditions;
 
 public class ThrowsNothingAsyncAssertCondition : AsynchronousDelegateAssertCondition
 {

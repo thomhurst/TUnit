@@ -1,3 +1,5 @@
+using Is = TUnit.Assertions.AssertConditions.Conditions.Is;
+
 namespace TUnit.Assertions.UnitTests;
 
 

@@ -1,22 +1,14 @@
-﻿namespace TUnit.Assertions;
+﻿namespace TUnit.Assertions.AssertConditions.Conditions;
 
-public class ThrowsNothingAssertCondition : SynchronousDelegateAssertCondition
+public class ThrowsNothingAssertCondition : DelegateAssertCondition
 {
     private Exception? _exception;
     
     public override string DefaultMessage => $"A {_exception?.GetType().Name} was thrown";
     
-    protected override bool Passes(Action actualValue)
+    protected override bool Passes(Exception? exception)
     {
-        try
-        {
-            actualValue();
-        }
-        catch (Exception e)
-        {
-            _exception = e;
-        }
-
-        return _exception == null;
+        _exception = exception;
+        return exception == null;
     }
 }
