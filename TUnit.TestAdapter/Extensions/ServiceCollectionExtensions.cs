@@ -9,7 +9,6 @@ public static class ServiceCollectionExtensions
     {
         return services.AddSingleton<TestsLoader>()
             .AddSingleton<AsyncTestRunExecutor>()
-            .AddSingleton<SingleTestExecutor>()
             .AddSingleton<TestCollector>()
             .AddSingleton<SourceLocationHelper>()
             .AddSingleton<ReflectionMetadataProvider>()

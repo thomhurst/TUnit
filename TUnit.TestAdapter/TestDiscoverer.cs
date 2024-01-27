@@ -35,6 +35,7 @@ public class TestDiscoverer : ITestDiscoverer
             .AddSingleton(discoveryContext)
             .AddSingleton(messageLogger)
             .AddTestAdapterServices()
+            .AddTestEngineServices()
             .BuildServiceProvider();
     }
 }

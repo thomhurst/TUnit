@@ -79,6 +79,7 @@ public class TestExecutor : ITestExecutor2
             .AddSingleton<IMessageLogger>(x => x.GetRequiredService<IFrameworkHandle>())
             .AddSingleton(_cancellationTokenSource)
             .AddTestAdapterServices()
+            .AddTestEngineServices()
             .BuildServiceProvider();
     }
 }
