@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using TUnit.Engine;
 
-namespace TUnit.TestAdapter.Extensions;
+namespace TUnit.Engine.Extensions;
 
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
     {
         return services.AddSingleton<MethodInvoker>()
+            .AddSingleton<TestClassCreator>()
             .AddSingleton<SingleTestExecutor>();
     }
 }

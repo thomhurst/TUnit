@@ -8,10 +8,12 @@ namespace TUnit.Engine;
 public class SingleTestExecutor
 {
     private readonly MethodInvoker _methodInvoker;
+    private readonly TestClassCreator _testClassCreator;
 
-    public SingleTestExecutor(MethodInvoker methodInvoker)
+    public SingleTestExecutor(MethodInvoker methodInvoker, TestClassCreator testClassCreator)
     {
         _methodInvoker = methodInvoker;
+        _testClassCreator = testClassCreator;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
@@ -70,7 +72,7 @@ public class SingleTestExecutor
 
     private async Task ExecuteCore(TestDetails testDetails)
     {
-        var @class = CreateTestClass(testDetails);
+        var @class = _testClassCreator.CreateTestClass(testDetails);
 
         var isRetry = testDetails.RetryCount > 0;
         var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
@@ -154,10 +156,5 @@ public class SingleTestExecutor
         {
             await _methodInvoker.InvokeMethod(@class, oneTimeSetUpMethod, BindingFlags.Static | BindingFlags.Public, null);
         }
-    }
-    
-    private static object CreateTestClass(TestDetails testDetails)
-    {
-        return Activator.CreateInstance(testDetails.MethodInfo.DeclaringType!)!;
     }
 }
