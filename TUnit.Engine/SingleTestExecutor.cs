@@ -107,7 +107,7 @@ public class SingleTestExecutor
 
                 await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
 
-                await ExecuteTearDowns(@class);
+                await ExecuteCleanUps(@class);
 
                 if (isRetry)
                 {
@@ -161,20 +161,20 @@ public class SingleTestExecutor
         }
     }
     
-    private async Task ExecuteTearDowns(object @class)
+    private async Task ExecuteCleanUps(object @class)
     {
-        var tearDownMethods = @class.GetType()
+        var cleanUpMethods = @class.GetType()
             .GetMethods()
             .Where(x => !x.IsStatic)
-            .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(TearDownAttribute)));
+            .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(CleanUpAttribute)));
 
         var exceptions = new List<Exception>();
         
-        foreach (var tearDownMethod in tearDownMethods)
+        foreach (var cleanUpMethod in cleanUpMethods)
         {
             try
             {
-                await _methodInvoker.InvokeMethod(@class, tearDownMethod, BindingFlags.Default, null);
+                await _methodInvoker.InvokeMethod(@class, cleanUpMethod, BindingFlags.Default, null);
             }
             catch (Exception e)
             {

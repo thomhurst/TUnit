@@ -21,7 +21,7 @@ public class AsyncTestRunExecutor
 {
     private bool _canRunAnotherTest = true;
 
-    private readonly ConcurrentDictionary<string, Task> _oneTimeTearDownRegistry = new();
+    private readonly ConcurrentDictionary<string, Task> _oneTimeCleanUpRegistry = new();
     private readonly List<Task> _setResultsTasks = [];
 
     public async Task RunInAsyncContext(AssembliesAnd<TestWithTestCase> assembliesAndTests)
@@ -54,7 +54,7 @@ public class AsyncTestRunExecutor
             
             executingTests.Add(testWithResult);
 
-            SetupRunOneTimeTearDownForClass(testWithResult.Test.Details, allTestsOrderedByClass, executingTests);
+            SetupRunOneTimeCleanUpForClass(testWithResult.Test.Details, allTestsOrderedByClass, executingTests);
             
             executingTests.RemoveAll(x => x.Result.IsCompletedSuccessfully);
             
@@ -80,7 +80,7 @@ public class AsyncTestRunExecutor
         executingTests.RemoveAll(x => x.Result.IsCompletedSuccessfully);
 
         await WhenAllSafely(executingTests.Select(x => x.Result), testExecutionRecorder);
-        await WhenAllSafely(_oneTimeTearDownRegistry.Values, testExecutionRecorder);
+        await WhenAllSafely(_oneTimeCleanUpRegistry.Values, testExecutionRecorder);
         await Task.WhenAll(_setResultsTasks);
     }
 
@@ -96,7 +96,7 @@ public class AsyncTestRunExecutor
         };
     }
 
-    private void SetupRunOneTimeTearDownForClass(TestDetails processingTestDetails,
+    private void SetupRunOneTimeCleanUpForClass(TestDetails processingTestDetails,
         IEnumerable<TestWithTestCase> allTestsOrderedByClass,
         IEnumerable<TestWithResult> executingTests)
     {
@@ -115,8 +115,8 @@ public class AsyncTestRunExecutor
 
         Task.WhenAll(executingTestsForThisClass).ContinueWith(x =>
         {
-            _ = _oneTimeTearDownRegistry.GetOrAdd(processingTestDetails.FullyQualifiedClassName,
-                ExecuteOneTimeTearDowns(processingTestDetails));
+            _ = _oneTimeCleanUpRegistry.GetOrAdd(processingTestDetails.FullyQualifiedClassName,
+                ExecuteOneTimeCleanUps(processingTestDetails));
             
             return Task.CompletedTask;
         });
@@ -178,16 +178,16 @@ public class AsyncTestRunExecutor
         return cpuUsageTotal * 100;
     }
     
-    private async Task ExecuteOneTimeTearDowns(TestDetails testDetails)
+    private async Task ExecuteOneTimeCleanUps(TestDetails testDetails)
     {
-        var oneTimeTearDownMethods = testDetails.MethodInfo.DeclaringType!
+        var oneTimeCleanUpMethods = testDetails.MethodInfo.DeclaringType!
             .GetMethods()
             .Where(x => x.IsStatic)
-            .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(OneTimeTearDownAttribute)));
+            .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(OneTimeCleanUpAttribute)));
 
-        foreach (var oneTimeTearDownMethod in oneTimeTearDownMethods)
+        foreach (var oneTimeCleanUpMethod in oneTimeCleanUpMethods)
         {
-            await methodInvoker.InvokeMethod(null, oneTimeTearDownMethod, BindingFlags.Static | BindingFlags.Public, null);
+            await methodInvoker.InvokeMethod(null, oneTimeCleanUpMethod, BindingFlags.Static | BindingFlags.Public, null);
         }
     }
 
