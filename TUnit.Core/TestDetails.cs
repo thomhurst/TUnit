@@ -109,7 +109,7 @@ public record TestDetails
 
     public TimeSpan Timeout { get; }
     
-    public int Count { get; internal set; }
+    public int CurrentExecutionCount { get; internal set; }
     
     public int MinLineNumber { get; }
     public int MaxLineNumber { get; }
