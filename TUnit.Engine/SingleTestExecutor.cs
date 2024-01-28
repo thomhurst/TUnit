@@ -84,48 +84,45 @@ public class SingleTestExecutor
 
     private async Task ExecuteCore(TestDetails testDetails, Type[] allClasses)
     {
-        var @class = _testClassCreator.CreateTestClass(testDetails, allClasses);
+        var isRetry = testDetails.RetryCount > 0;
+        var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
 
-        try
+        for (var i = 0; i < executionCount + 1; i++)
         {
-            var isRetry = testDetails.RetryCount > 0;
-            var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
-
-            for (var i = 0; i < executionCount + 1; i++)
+            var @class = _testClassCreator.CreateTestClass(testDetails, allClasses);
+            
+            try
             {
-                try
+                await ExecuteSetUps(@class);
+
+                var testLevelCancellationTokenSource =
+                    CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
+
+                if (testDetails.Timeout != default)
                 {
-                    await ExecuteSetUps(@class);
-                    
-                    var testLevelCancellationTokenSource =
-                        CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
-                    
-                    if(testDetails.Timeout != default)
-                    {
-                        testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
-                    }
-
-                    await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
-
-                    await ExecuteTearDowns(@class);
-
-                    if (isRetry)
-                    {
-                        break;
-                    }
+                    testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
                 }
-                catch
+
+                await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
+
+                await ExecuteTearDowns(@class);
+
+                if (isRetry)
                 {
-                    if (!isRetry || i == executionCount)
-                    {
-                        throw;
-                    }
+                    break;
                 }
             }
-        }
-        finally
-        {
-            await _disposer.DisposeAsync(@class);
+            catch
+            {
+                if (!isRetry || i == executionCount)
+                {
+                    throw;
+                }
+            }
+            finally
+            {
+                await _disposer.DisposeAsync(@class);
+            }
         }
     }
 
