@@ -43,11 +43,27 @@ public record TestDetails
             .FirstOrDefault(x => x.AttributeType == typeof(RepeatAttribute))
             ?.ConstructorArguments.FirstOrDefault().Value as int? ?? 0;
 
+        Timeout = GetTimeout(methodAndClassAttributes);
+        
         FileName = SourceLocation.FileName;
         MinLineNumber = SourceLocation.MinLineNumber;
         MaxLineNumber = SourceLocation.MaxLineNumber;
 
         Id = GenerateGuid();
+    }
+
+    private static TimeSpan GetTimeout(CustomAttributeData[] methodAndClassAttributes)
+    {
+        var timeoutMilliseconds = methodAndClassAttributes
+            .FirstOrDefault(x => x.AttributeType == typeof(TimeoutAttribute))
+            ?.ConstructorArguments.FirstOrDefault().Value as int?;
+
+        if (timeoutMilliseconds is 0 or null)
+        {
+            return default;
+        }
+        
+        return TimeSpan.FromMilliseconds(timeoutMilliseconds.Value);
     }
 
     private Guid GenerateGuid()
@@ -90,6 +106,9 @@ public record TestDetails
     public MethodInfo MethodInfo { get; }
     public Type ClassType { get; }
     public string? FileName { get; }
+
+    public TimeSpan Timeout { get; }
+    
     public int MinLineNumber { get; }
     public int MaxLineNumber { get; }
     public Type[]? ParameterTypes { get; }

@@ -10,14 +10,17 @@ public class SingleTestExecutor
     private readonly MethodInvoker _methodInvoker;
     private readonly TestClassCreator _testClassCreator;
     private readonly Disposer _disposer;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     public SingleTestExecutor(MethodInvoker methodInvoker, 
         TestClassCreator testClassCreator,
-        Disposer disposer)
+        Disposer disposer,
+        CancellationTokenSource cancellationTokenSource)
     {
         _methodInvoker = methodInvoker;
         _testClassCreator = testClassCreator;
         _disposer = disposer;
+        _cancellationTokenSource = cancellationTokenSource;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
@@ -92,9 +95,16 @@ public class SingleTestExecutor
                 try
                 {
                     await ExecuteSetUps(@class);
+                    
+                    var testLevelCancellationTokenSource =
+                        CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
+                    
+                    if(testDetails.Timeout != default)
+                    {
+                        testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
+                    }
 
-                    await _methodInvoker.InvokeMethod(@class, testDetails.MethodInfo, BindingFlags.Default,
-                        testDetails.ArgumentValues?.ToArray());
+                    await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
 
                     await ExecuteTearDowns(@class);
 
@@ -116,6 +126,24 @@ public class SingleTestExecutor
         {
             await _disposer.DisposeAsync(@class);
         }
+    }
+
+    private async Task ExecuteTestMethodWithTimeout(TestDetails testDetails, object @class,
+        CancellationTokenSource cancellationTokenSource)
+    {
+        var methodResult = _methodInvoker.InvokeMethod(@class, testDetails.MethodInfo, BindingFlags.Default,
+            testDetails.ArgumentValues?.ToArray());
+
+        if (testDetails.Timeout == default)
+        {
+            await methodResult;
+            return;
+        }
+        
+        var timeoutTask = Task.Delay(testDetails.Timeout, cancellationTokenSource.Token)
+            .ContinueWith(t => throw new OperationCanceledException());
+
+        await await Task.WhenAny(timeoutTask, methodResult);
     }
 
     private async Task ExecuteSetUps(object @class)

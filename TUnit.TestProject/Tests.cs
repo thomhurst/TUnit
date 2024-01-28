@@ -168,6 +168,12 @@ public class Tests
         }, Throws.Nothing);
     }
     
+    [Test, Timeout(500)]
+    public async Task Timeout1()
+    {
+        await Task.Delay(TimeSpan.FromSeconds(5));
+    }
+    
     public static int One() => 1;
     public static int Two() => 2;
 }
