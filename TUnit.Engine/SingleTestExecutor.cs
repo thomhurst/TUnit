@@ -2,6 +2,7 @@
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Attributes;
+using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
 
@@ -141,7 +142,7 @@ public class SingleTestExecutor
         }
         
         var timeoutTask = Task.Delay(testDetails.Timeout, cancellationTokenSource.Token)
-            .ContinueWith(t => throw new OperationCanceledException());
+            .ContinueWith(t => throw new TimeoutException(testDetails));
 
         await await Task.WhenAny(timeoutTask, methodResult);
     }
