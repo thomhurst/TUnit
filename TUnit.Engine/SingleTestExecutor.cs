@@ -89,6 +89,7 @@ public class SingleTestExecutor
 
         for (var i = 0; i < executionCount + 1; i++)
         {
+            TestContext.Current.Count++;
             var @class = _testClassCreator.CreateTestClass(testDetails, allClasses);
             
             try
