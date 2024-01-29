@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertConditions.Numbers;
 public class IsOddAssertCondition<TActual> : AssertCondition<TActual, TActual>
     where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
 {
-    public IsOddAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TActual>> previousAssertConditions, TActual? expected) : base(previousAssertConditions, expected)
+    public IsOddAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TActual>> nestedAssertConditions, TActual? expected) : base(nestedAssertConditions, expected)
     {
     }
 

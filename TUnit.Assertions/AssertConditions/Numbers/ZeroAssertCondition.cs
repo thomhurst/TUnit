@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertConditions.Numbers;
 public class ZeroAssertCondition<TActual> : AssertCondition<TActual, TActual> 
     where TActual : INumber<TActual>, IEqualityOperators<TActual, TActual, bool>
 {
-    public ZeroAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TActual>> previousAssertConditions, TActual? expected) : base(previousAssertConditions, expected)
+    public ZeroAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TActual>> nestedAssertConditions, TActual? expected) : base(nestedAssertConditions, expected)
     {
     }
 

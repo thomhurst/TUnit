@@ -5,15 +5,14 @@ public abstract class AssertCondition<TActual, TExpected>
     internal readonly IReadOnlyCollection<AssertCondition<TActual, TExpected>> NestedAssertConditions;
     internal TExpected? ExpectedValue { get; }
     
-    internal AssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> previousAssertConditions, TExpected? expected)
+    internal AssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> nestedAssertConditions, TExpected? expected)
     {
-        IReadOnlyCollection<AssertCondition<TActual, TExpected>> conditionsUntilNow = [..previousAssertConditions, this];
-        NestedAssertConditions = conditionsUntilNow;
+        NestedAssertConditions = [..nestedAssertConditions, this];
 
         ExpectedValue = expected;
         
-        And = new And<TActual, TExpected>(conditionsUntilNow);
-        Or = new Or<TActual, TExpected>(conditionsUntilNow);
+        And = new And<TActual, TExpected>(NestedAssertConditions);
+        Or = new Or<TActual, TExpected>(NestedAssertConditions);
     }
 
     private Func<TActual, string>? MessageFactory { get; set; }

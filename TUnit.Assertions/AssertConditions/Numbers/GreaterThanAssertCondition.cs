@@ -6,7 +6,7 @@ public class GreaterThanAssertCondition<TActual, TExpected> : AssertCondition<TA
     where TExpected : INumber<TExpected>
     where TActual : INumber<TActual>, TExpected
 {
-    public GreaterThanAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> previousAssertConditions, TExpected? expected) : base(previousAssertConditions, expected)
+    public GreaterThanAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> nestedAssertConditions, TExpected? expected) : base(nestedAssertConditions, expected)
     {
     }
 
