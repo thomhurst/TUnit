@@ -21,7 +21,7 @@ public class ClassLoader
         }
         catch
         {
-            return Array.Empty<Type>();
+            return [];
         }
     }
 }

@@ -1,23 +1,26 @@
 ﻿namespace TUnit.Assertions.AssertConditions;
 
-public abstract class AssertCondition<T>
+public abstract class AssertCondition<TActual, TExpected>
 {
-    internal readonly IReadOnlyCollection<AssertCondition<T>> PreviousAssertConditions;
+    internal readonly IReadOnlyCollection<AssertCondition<TActual, TExpected>> AllAssertConditions;
+    internal TExpected? ExpectedValue { get; }
     
-    internal AssertCondition(IReadOnlyCollection<AssertCondition<T>> previousAssertConditions)
+    internal AssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> previousAssertConditions, TExpected? expected)
     {
-        IReadOnlyCollection<AssertCondition<T>> conditionsUntilNow = [..previousAssertConditions, this];
-        PreviousAssertConditions = conditionsUntilNow;
+        IReadOnlyCollection<AssertCondition<TActual, TExpected>> conditionsUntilNow = [..previousAssertConditions, this];
+        AllAssertConditions = conditionsUntilNow;
+
+        ExpectedValue = expected;
         
-        And = new And<T>(conditionsUntilNow);
-        Or = new Or<T>(conditionsUntilNow);
+        And = new And<TActual, TExpected>(conditionsUntilNow);
+        Or = new Or<TActual, TExpected>(conditionsUntilNow);
     }
 
-    private Func<T, string>? MessageFactory { get; set; }
+    private Func<TActual, string>? MessageFactory { get; set; }
 
-    protected T ActualValue { get; private set; } = default!;
+    protected TActual ActualValue { get; private set; } = default!;
 
-    public bool Assert(T actualValue)
+    public bool Assert(TActual actualValue)
     {
         ActualValue = actualValue;
         return Passes(actualValue);
@@ -25,16 +28,16 @@ public abstract class AssertCondition<T>
 
     public abstract string DefaultMessage { get; }
 
-    protected abstract bool Passes(T actualValue);
+    protected abstract bool Passes(TActual actualValue);
 
     public string Message => MessageFactory?.Invoke(ActualValue) ?? DefaultMessage;
     
-    public AssertCondition<T> WithMessage(Func<T, string> messageFactory)
+    public AssertCondition<TActual, TExpected> WithMessage(Func<TActual, string> messageFactory)
     {
         MessageFactory = messageFactory;
         return this;
     }
 
-    public And<T> And { get; }
-    public Or<T> Or { get; }
+    public And<TActual, TExpected> And { get; }
+    public Or<TActual, TExpected> Or { get; }
 }

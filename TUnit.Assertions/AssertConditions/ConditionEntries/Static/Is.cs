@@ -4,22 +4,22 @@ namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 public partial class Is
 {
-    public static AssertCondition<T> EqualTo<T>(T expected)
+    public static AssertCondition<TExpected, TExpected> EqualTo<TExpected>(TExpected expected)
     {
-        return new EqualsAssertCondition<T, T>([], expected);
+        return new EqualsAssertCondition<TExpected, TExpected>([], expected);
     }
     
-    internal static AssertCondition<T> EqualTo<T>(IReadOnlyCollection<ExpectedValueAssertCondition<T, T>> previousConditions, T expected)
+    internal static AssertCondition<TActual, TExpected> EqualTo<TActual, TExpected>(IReadOnlyCollection<AssertCondition<TActual, TExpected>> previousConditions, TExpected expected)
     {
-        return new EqualsAssertCondition<T, T>(previousConditions, expected);
+        return new EqualsAssertCondition<TActual, TExpected>(previousConditions, expected);
     }
 
-    public static AssertCondition<T> SameReference<T>(T expected)
+    public static AssertCondition<T, T> SameReference<T>(T expected)
     {
         return new SameReferenceAssertCondition<T, T>([], expected);
     }
 
-    internal static AssertCondition<T> SameReference<T>(IReadOnlyCollection<ExpectedValueAssertCondition<T, T>> previousConditions, T expected)
+    internal static AssertCondition<T, T> SameReference<T>(IReadOnlyCollection<AssertCondition<T, T>> previousConditions, T expected)
     {
         return new SameReferenceAssertCondition<T, T>(previousConditions, expected);
     }

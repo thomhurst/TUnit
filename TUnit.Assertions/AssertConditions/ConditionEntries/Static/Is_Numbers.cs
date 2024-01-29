@@ -6,37 +6,37 @@ namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 public static partial class Is
 {
-    public static AssertCondition<long> Zero => new EqualsAssertCondition<long, long>([], 0);
-    internal static AssertCondition<long> ZeroInternal(IReadOnlyCollection<ExpectedValueAssertCondition<long, long>> previousConditions) 
+    public static AssertCondition<long, long> Zero => new EqualsAssertCondition<long, long>([], 0);
+    internal static AssertCondition<long, long> ZeroInternal(IReadOnlyCollection<AssertCondition<long, long>> previousConditions) 
         => new EqualsAssertCondition<long, long>(previousConditions, 0);
     
-    public static AssertCondition<T> GreaterThan<T>(T expected) where T : INumber<T>
+    public static AssertCondition<T, T> GreaterThan<T>(T expected) where T : INumber<T>
     {
-        return new GreaterThanAssertCondition<T, T>(expected);
+        return new GreaterThanAssertCondition<T, T>([], expected);
     }
     
-    public static AssertCondition<T> GreaterThanOrEqualTo<T>(T expected) where T : INumber<T>
+    public static AssertCondition<T, T> GreaterThanOrEqualTo<T>(T expected) where T : INumber<T>
     {
-        return new GreaterThanOrEqualToAssertCondition<T, T>(expected);
+        return new GreaterThanOrEqualToAssertCondition<T, T>([], expected);
     }
     
-    public static AssertCondition<T> LessThan<T>(T expected) where T : INumber<T>
+    public static AssertCondition<T, T> LessThan<T>(T expected) where T : INumber<T>
     {
-        return new GreaterThanAssertCondition<T, T>(expected);
+        return new GreaterThanAssertCondition<T, T>([], expected);
     }
     
-    public static AssertCondition<T> LessThanOrEqualTo<T>(T expected) where T : INumber<T>
+    public static AssertCondition<T, T> LessThanOrEqualTo<T>(T expected) where T : INumber<T>
     {
-        return new LessThanOrEqualToAssertCondition<T, T>(expected);
+        return new LessThanOrEqualToAssertCondition<T, T>([], expected);
     }
     
-    public static AssertCondition<T> Even<T>() where T : INumber<T>, IModulusOperators<T, int, int>
+    public static AssertCondition<T, T> Even<T>() where T : INumber<T>, IModulusOperators<T, int, int>
     {
-        return new IsEvenAssertCondition<T>();
+        return new IsEvenAssertCondition<T>([], default);
     }
     
-    public static AssertCondition<T> Odd<T>() where T : INumber<T>, IModulusOperators<T, int, int>
+    public static AssertCondition<T, T> Odd<T>() where T : INumber<T>, IModulusOperators<T, int, int>
     {
-        return new IsOddAssertCondition<T>();
+        return new IsOddAssertCondition<T>([], default);
     }
 }

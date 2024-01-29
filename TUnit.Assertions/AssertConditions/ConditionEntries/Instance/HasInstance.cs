@@ -2,16 +2,15 @@
 
 public class HasInstance<T>
 {
-    private readonly AsyncAssertCondition<T>? _asyncAssertCondition;
-    private readonly IReadOnlyCollection<AssertCondition<T>> _assertConditions;
+    private readonly IReadOnlyCollection<AssertCondition<T, T>> _assertConditions;
     
-    public HasInstance(IReadOnlyCollection<AssertCondition<T>> assertConditions)
+    public HasInstance(IReadOnlyCollection<AssertCondition<T, T>> assertConditions)
     {
         _assertConditions = assertConditions;
-        And = new And<T>(assertConditions);
-        Or = new Or<T>(assertConditions);
+        And = new And<T, T>(assertConditions);
+        Or = new Or<T, T>(assertConditions);
     }
 
-    public And<T> And { get; }
-    public Or<T> Or { get; }
+    public And<T, T> And { get; }
+    public Or<T, T> Or { get; }
 }

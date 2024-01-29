@@ -2,9 +2,9 @@
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class HasCountAssertCondition<TActual> : ExpectedValueAssertCondition<IEnumerable<TActual>, int>
+public class HasCountAssertCondition<TActual> : AssertCondition<IEnumerable<TActual>, int>
 {
-    public HasCountAssertCondition(AsyncAssertCondition<IEnumerable<TActual>>? IReadOnlyCollection<ExpectedValueAssertCondition<IEnumerable<TActual>, int>> previousConditions, int expected) : base(previousConditions, expected)
+    public HasCountAssertCondition(IReadOnlyCollection<AssertCondition<IEnumerable<TActual>, int>> previousConditions, int expected) : base(previousConditions, expected)
     {
     }
 

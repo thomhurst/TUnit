@@ -7,7 +7,7 @@ namespace TUnit.Assertions;
 
 public static class Assert
 {
-    public static void That<T>(T value, AssertCondition<T> assertCondition)
+    public static void That<T>(T value, AssertCondition<T, T> assertCondition)
     {
         if (!assertCondition.Assert(value))
         {
@@ -17,7 +17,9 @@ public static class Assert
     
     public static void That(Action value, DelegateAssertCondition assertCondition)
     {
-        if (!assertCondition.Assert(value))
+        var exception = value.InvokeAndGetException();
+        
+        if (!assertCondition.Assert(exception))
         {
             throw new AssertionException(assertCondition.Message);
         }
@@ -25,15 +27,19 @@ public static class Assert
     
     public static void That<T>(Func<T> value, DelegateAssertCondition<T> assertCondition)
     {
-        if (!assertCondition.Assert(value))
+        var delegateInvocationResult = value.InvokeAndGetException();
+        
+        if (!assertCondition.Assert(delegateInvocationResult))
         {
             throw new AssertionException(assertCondition.Message);
         }
     }
     
-    public static async Task That(Func<Task> value, AssertCondition assertCondition)
+    public static async Task That(Func<Task> value, DelegateAssertCondition assertCondition)
     {
-        if (!await assertCondition.Assert(value))
+        var exception = await value.InvokeAndGetExceptionAsync();
+        
+        if (!assertCondition.Assert(exception))
         {
             throw new AssertionException(assertCondition.Message);
         }
@@ -42,7 +48,8 @@ public static class Assert
     public static async Task That<T>(Func<Task<T>> value, DelegateAssertCondition<T> assertCondition)
     {
         var invocationResult = await value.InvokeAndGetExceptionAsync();
-        if (!assertCondition.Assert(invocationResult.Result, invocationResult.Exception))
+        
+        if (!assertCondition.Assert(invocationResult))
         {
             throw new AssertionException(assertCondition.Message);
         }

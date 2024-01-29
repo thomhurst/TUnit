@@ -139,7 +139,7 @@ public class Tests
     [Test]
     public void Throws1()
     {
-        Assert.That(() => new string(Array.Empty<char>()), Throws.Nothing);
+        Assert.That(() => new string([]), Throws.Nothing);
     }
     
     [Test]
@@ -148,8 +148,8 @@ public class Tests
         await Assert.That(async () =>
         {
             await Task.Yield();
-            new string(Array.Empty<char>());
-        }, Throws.NothingAsync);
+            new string([]);
+        }, Throws.Nothing);
     }
     
     [Test]
@@ -165,7 +165,7 @@ public class Tests
         {
             await Task.Yield();
             throw new ApplicationException();
-        }, Throws.NothingAsync);
+        }, Throws.Nothing);
     }
     
     [Test, Timeout(500)]

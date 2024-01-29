@@ -1,14 +1,14 @@
 ﻿namespace TUnit.Assertions.AssertConditions.String;
 
-public class StringEqualsAssertCondition : ExpectedValueAssertCondition<string, string>
+public class StringEqualsAssertCondition : AssertCondition<string, string>
 {
     private readonly StringComparison _stringComparison;
 
-    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : this(null, Array.Empty<ExpectedValueAssertCondition<string, string>>(), expected, stringComparison)
+    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : this([], expected, stringComparison)
     {
     }
     
-    public StringEqualsAssertCondition(IReadOnlyCollection<ExpectedValueAssertCondition<string, string>> previousConditions, string expected, StringComparison stringComparison) : base(previousConditions, expected)
+    public StringEqualsAssertCondition(IReadOnlyCollection<AssertCondition<string, string>> previousConditions, string expected, StringComparison stringComparison) : base(previousConditions, expected)
     {
         _stringComparison = stringComparison;
     }

@@ -1,9 +1,9 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class SameReferenceAssertCondition<TActual, TExpected> : ExpectedValueAssertCondition<TActual, TExpected>
+public class SameReferenceAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
 {
 
-    public SameReferenceAssertCondition(IReadOnlyCollection<ExpectedValueAssertCondition<TActual, TExpected>> previousConditions, TExpected expected) : base(previousConditions, expected)
+    public SameReferenceAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> previousConditions, TExpected expected) : base(previousConditions, expected)
     {
     }
 
