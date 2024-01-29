@@ -10,7 +10,15 @@ public abstract class BaseAssertCondition<TActual, TExpected>
     
     protected TActual ActualValue { get; set; } = default!;
     
+    public abstract string Message { get; }
+    
     public abstract string DefaultMessage { get; }
+    
+    public bool Assert(TActual actualValue)
+    {
+        ActualValue = actualValue;
+        return Passes(actualValue);
+    }
 
     protected internal abstract bool Passes(TActual actualValue);
 

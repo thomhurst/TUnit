@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Combiners;
-
-namespace TUnit.Assertions.AssertConditions;
+﻿namespace TUnit.Assertions.AssertConditions;
 
 public abstract class AssertCondition<TActual, TExpected> : BaseAssertCondition<TActual, TExpected>
 {
@@ -11,15 +9,9 @@ public abstract class AssertCondition<TActual, TExpected> : BaseAssertCondition<
         ExpectedValue = expected;
     }
     
-    public bool Assert(TActual actualValue)
-    {
-        ActualValue = actualValue;
-        return Passes(actualValue);
-    }
-    
     private Func<TActual, string>? MessageFactory { get; set; }
 
-    public string Message => MessageFactory?.Invoke(ActualValue) ?? DefaultMessage;
+    public override string Message => MessageFactory?.Invoke(ActualValue) ?? DefaultMessage;
     
     public AssertCondition<TActual, TExpected> WithMessage(Func<TActual, string> messageFactory)
     {

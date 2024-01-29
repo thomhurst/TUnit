@@ -11,11 +11,11 @@ public class AssertConditionOr<TActual, TExpected> : BaseAssertCondition<TActual
         _condition2 = condition2;
     }
 
-    public override string DefaultMessage => $"{_condition1.DefaultMessage} & {_condition2.DefaultMessage}";
+    public override string Message => $"{_condition1.DefaultMessage} & {_condition2.DefaultMessage}";
+    public override string DefaultMessage => string.Empty;
 
     protected internal override bool Passes(TActual actualValue)
     {
-        ActualValue = actualValue;
         return _condition1.Passes(actualValue) || _condition2.Passes(actualValue);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Combiners;
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;
@@ -7,11 +8,27 @@ namespace TUnit.Assertions;
 
 public static class Assert
 {
-    public static void That<T>(T value, AssertCondition<T, T> assertCondition)
+    public static void That<TActual, TExpected>(TActual value, AssertCondition<TActual, TExpected> assertCondition)
     {
         if (!assertCondition.Assert(value))
         {
             throw new AssertionException(assertCondition.Message);
+        }
+    }
+    
+    public static void That<TActual, TExpected>(TActual value, AssertConditionOr<TActual, TExpected> orCondition)
+    {
+        if (!orCondition.Assert(value))
+        {
+            throw new AssertionException(orCondition.Message);
+        }
+    }
+    
+    public static void That<TActual, TExpected>(TActual value, AssertConditionAnd<TActual, TExpected> andCondition)
+    {
+        if (!andCondition.Assert(value))
+        {
+            throw new AssertionException(andCondition.Message);
         }
     }
     

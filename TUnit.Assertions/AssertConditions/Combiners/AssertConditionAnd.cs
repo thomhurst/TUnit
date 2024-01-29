@@ -11,13 +11,14 @@ public class AssertConditionAnd<TActual, TExpected> : BaseAssertCondition<TActua
         _condition2 = condition2;
     }
 
-    public override string DefaultMessage =>
+    public override string Message =>
         !_condition1.Passes(ActualValue) ? _condition1.DefaultMessage :
         !_condition2.Passes(ActualValue) ? _condition2.DefaultMessage : string.Empty;
 
+    public override string DefaultMessage => string.Empty;
+    
     protected internal override bool Passes(TActual actualValue)
     {
-        ActualValue = actualValue;
         return _condition1.Passes(actualValue) && _condition2.Passes(actualValue);
     }
 }
