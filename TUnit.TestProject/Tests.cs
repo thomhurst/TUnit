@@ -182,6 +182,14 @@ public class Tests
         Assert.That(str, Is.EqualTo("My string").And.EqualTo("This"));
     }
     
+    [Test]
+    public void String_And_Condition2()
+    {
+        var str = "My string";
+
+        Assert.That(str, Is.EqualTo("This").And.EqualTo("My string"));
+    }
+    
     public static int One() => 1;
     public static int Two() => 2;
 }

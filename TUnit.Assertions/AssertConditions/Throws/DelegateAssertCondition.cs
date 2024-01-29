@@ -2,8 +2,11 @@
 
 public abstract class DelegateAssertCondition<T>
 {
-    internal DelegateAssertCondition()
+    internal readonly IReadOnlyCollection<DelegateAssertCondition<T>> NestedAssertConditions;
+
+    internal DelegateAssertCondition(IReadOnlyCollection<DelegateAssertCondition<T>> nestedAssertConditions)
     {
+        NestedAssertConditions = nestedAssertConditions;
     }
 
     private Func<T?, Exception?, string>? MessageFactory { get; set; }
@@ -34,8 +37,11 @@ public abstract class DelegateAssertCondition<T>
 
 public abstract class DelegateAssertCondition
 {
-    internal DelegateAssertCondition()
+    internal readonly IReadOnlyCollection<DelegateAssertCondition> NestedAssertConditions;
+
+    internal DelegateAssertCondition(IReadOnlyCollection<DelegateAssertCondition> nestedAssertConditions)
     {
+        NestedAssertConditions = nestedAssertConditions;
     }
 
     private Func<Exception?, string>? MessageFactory { get; set; }

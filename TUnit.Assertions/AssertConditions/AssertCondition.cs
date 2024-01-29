@@ -2,13 +2,13 @@
 
 public abstract class AssertCondition<TActual, TExpected>
 {
-    internal readonly IReadOnlyCollection<AssertCondition<TActual, TExpected>> AllAssertConditions;
+    internal readonly IReadOnlyCollection<AssertCondition<TActual, TExpected>> NestedAssertConditions;
     internal TExpected? ExpectedValue { get; }
     
     internal AssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> previousAssertConditions, TExpected? expected)
     {
         IReadOnlyCollection<AssertCondition<TActual, TExpected>> conditionsUntilNow = [..previousAssertConditions, this];
-        AllAssertConditions = conditionsUntilNow;
+        NestedAssertConditions = conditionsUntilNow;
 
         ExpectedValue = expected;
         
