@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -74,7 +76,36 @@ public class SampleSyntaxAnalyzer : DiagnosticAnalyzer
         }
 
         var propertyName = memberAccessExpressionSyntax.Name.Identifier.Value;
+
+        if (!Debugger.IsAttached)
+        {
+            // Debugger.Launch();
+        }
+
+        if (memberAccessExpressionSyntax.Parent is not MemberAccessExpressionSyntax parentMemberAccessExpressionSyntax)
+        {
+            return;
+        }
         
-        Console.WriteLine(propertyName);
+        var symbolInfo = context.SemanticModel.GetSymbolInfo(parentMemberAccessExpressionSyntax);
+
+        var fullyQualifiedSymbolInformation = symbolInfo.Symbol?.ToDisplayString(DisplayFormats.FullyQualifiedNonGeneric) 
+                                              ?? string.Empty;
+        
+        if (!fullyQualifiedSymbolInformation.Contains("global::TUnit.Assertions"))
+        {
+            return;
+        }
+        
+        if(fullyQualifiedSymbolInformation.Contains(".And.") 
+           && fullyQualifiedSymbolInformation.Contains(".Or."))
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning,
+                        true, Description),
+                    parentMemberAccessExpressionSyntax.GetLocation())
+            );
+        }
     }
 }

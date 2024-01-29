@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj" />
       <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>

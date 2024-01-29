@@ -19,24 +19,21 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="TUnit0001Description" xml:space="preserve">
-        <value>Type names should not contain the company name.</value><comment>An optional longer localizable description of the diagnostic.</comment>
+        <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>An optional longer localizable description of the diagnostic.</comment>
     </data>
     <data name="TUnit0001MessageFormat" xml:space="preserve">
-        <value>Type name '{0}' contains the company name</value><comment>The format-able message the diagnostic displays.</comment>
+        <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The format-able message the diagnostic displays.</comment>
     </data>
     <data name="TUnit0001Title" xml:space="preserve">
-        <value>Type name contains the company name</value><comment>The title of the diagnostic.</comment>
+        <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The title of the diagnostic.</comment>
     </data>
     <data name="TUnit0001CodeFixTitle" xml:space="preserve">
-        <value>Replace '{0}' with '{1}'</value><comment>The title of the code fix.</comment>
+        <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The title of the code fix.</comment>
     </data>
-    <data name="TUnit0002Description" xml:space="preserve">
+    <data name="TUnit0001Description" xml:space="preserve">
         <value>The speed must be lower than the Speed of Light.</value><comment>An optional longer localizable description of the diagnostic.</comment>
     </data>
-    <data name="TUnit0002MessageFormat" xml:space="preserve">
+    <data name="TUnit0001MessageFormat" xml:space="preserve">
         <value>The specified speed '{0}' must be lower than the Speed of Light</value><comment>The format-able message the diagnostic displays.</comment>
-    </data>
-    <data name="TUnit0002Title" xml:space="preserve">
-        <value>The impossible speed</value><comment>The title of the diagnostic.</comment>
     </data>
 </root>
