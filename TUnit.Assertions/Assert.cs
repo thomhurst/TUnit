@@ -18,7 +18,7 @@ public static class Assert
         }
     }
     
-    public static void That(Action value, DelegateAssertCondition assertCondition)
+    public static Exception? That(Action value, DelegateAssertCondition assertCondition)
     {
         var exception = value.InvokeAndGetException();
 
@@ -29,9 +29,11 @@ public static class Assert
                 throw new AssertionException(condition.Message);
             }
         }
+
+        return exception;
     }
     
-    public static void That<T>(Func<T> value, DelegateAssertCondition<T> assertCondition)
+    public static DelegateInvocationResult<T> That<T>(Func<T> value, DelegateAssertCondition<T> assertCondition)
     {
         var delegateInvocationResult = value.InvokeAndGetException();
 
@@ -42,9 +44,11 @@ public static class Assert
                 throw new AssertionException(condition.Message);
             }
         }
+
+        return delegateInvocationResult;
     }
     
-    public static async Task That(Func<Task> value, DelegateAssertCondition assertCondition)
+    public static async Task<Exception?> That(Func<Task> value, DelegateAssertCondition assertCondition)
     {
         var exception = await value.InvokeAndGetExceptionAsync();
 
@@ -55,9 +59,11 @@ public static class Assert
                 throw new AssertionException(condition.Message);
             }
         }
+
+        return exception;
     }
     
-    public static async Task That<T>(Func<Task<T>> value, DelegateAssertCondition<T> assertCondition)
+    public static async Task<DelegateInvocationResult<T>> That<T>(Func<Task<T>> value, DelegateAssertCondition<T> assertCondition)
     {
         var invocationResult = await value.InvokeAndGetExceptionAsync();
 
@@ -68,5 +74,7 @@ public static class Assert
                 throw new AssertionException(condition.Message);
             }
         }
+
+        return invocationResult;
     }
 }

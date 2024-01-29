@@ -4,11 +4,11 @@ public class StringEqualsAssertCondition : AssertCondition<string, string>
 {
     private readonly StringComparison _stringComparison;
 
-    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : this([], expected, stringComparison)
+    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : this([], null, expected, stringComparison)
     {
     }
     
-    public StringEqualsAssertCondition(IReadOnlyCollection<AssertCondition<string, string>> previousConditions, string expected, StringComparison stringComparison) : base(previousConditions, expected)
+    public StringEqualsAssertCondition(IReadOnlyCollection<AssertCondition<string, string>> nestedConditions, NestedConditionsOperator? @operator, string expected, StringComparison stringComparison) : base(nestedConditions, @operator, expected)
     {
         _stringComparison = stringComparison;
     }

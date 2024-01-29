@@ -3,12 +3,14 @@
 public abstract class AssertCondition<TActual, TExpected>
 {
     internal readonly IReadOnlyCollection<AssertCondition<TActual, TExpected>> NestedAssertConditions;
+    public NestedConditionsOperator? NestedConditionsOperator { get; }
     internal TExpected? ExpectedValue { get; }
     
-    internal AssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> nestedAssertConditions, TExpected? expected)
+    internal AssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> nestedAssertConditions, NestedConditionsOperator? nestedConditionsOperator, TExpected? expected)
     {
         NestedAssertConditions = [..nestedAssertConditions, this];
 
+        NestedConditionsOperator = nestedConditionsOperator;
         ExpectedValue = expected;
         
         And = new And<TActual, TExpected>(NestedAssertConditions);

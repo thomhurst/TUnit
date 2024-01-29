@@ -3,7 +3,7 @@
 public class SameReferenceAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
 {
 
-    public SameReferenceAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> previousConditions, TExpected expected) : base(previousConditions, expected)
+    public SameReferenceAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> nestedConditions, NestedConditionsOperator? @operator, TExpected expected) : base(nestedConditions, @operator, expected)
     {
     }
 

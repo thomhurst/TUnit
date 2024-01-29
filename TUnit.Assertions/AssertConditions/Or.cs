@@ -1,3 +1,5 @@
+using TUnit.Assertions.AssertConditions.ConditionEntries.Static;
+
 namespace TUnit.Assertions.AssertConditions;
 
 public class Or<TActual, TExpected>
@@ -7,5 +9,10 @@ public class Or<TActual, TExpected>
     public Or(IReadOnlyCollection<AssertCondition<TActual, TExpected>> assertConditions)
     {
         _assertConditions = assertConditions;
+    }
+    
+    public AssertCondition<TActual, TExpected> EqualTo(TExpected expected)
+    {
+        return Is.EqualTo(_assertConditions, NestedConditionsOperator.Or, expected);
     }
 }

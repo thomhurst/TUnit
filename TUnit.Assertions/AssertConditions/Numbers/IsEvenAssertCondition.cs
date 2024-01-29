@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertConditions.Numbers;
 public class IsEvenAssertCondition<TActual> : AssertCondition<TActual, TActual>
     where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
 {
-    public IsEvenAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TActual>> nestedAssertConditions, TActual? expected) : base(nestedAssertConditions, expected)
+    public IsEvenAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TActual>> nestedAssertConditions, NestedConditionsOperator? nestedConditionsOperator, TActual? expected) : base(nestedAssertConditions, nestedConditionsOperator, expected)
     {
     }
 

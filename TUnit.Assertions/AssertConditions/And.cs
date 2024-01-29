@@ -13,6 +13,6 @@ public class And<TActual, TExpected>
     
     public AssertCondition<TActual, TExpected> EqualTo(TExpected expected)
     {
-        return Is.EqualTo(_assertConditions, expected);
+        return Is.EqualTo(_assertConditions, NestedConditionsOperator.And, expected);
     }
 }

@@ -6,7 +6,7 @@ public class LessThanAssertCondition<TActual, TExpected> : AssertCondition<TActu
     where TExpected : INumber<TExpected>
     where TActual : INumber<TActual>, TExpected
 {
-    public LessThanAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> nestedAssertConditions, TExpected? expected) : base(nestedAssertConditions, expected)
+    public LessThanAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> nestedAssertConditions, NestedConditionsOperator? nestedConditionsOperator, TExpected? expected) : base(nestedAssertConditions, nestedConditionsOperator, expected)
     {
     }
 
