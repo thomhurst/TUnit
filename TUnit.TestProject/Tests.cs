@@ -1,4 +1,5 @@
 using TUnit.Assertions;
+using TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 using TUnit.Assertions.AssertConditions.Conditions;
 using TUnit.Core;
 using TUnit.Core.Attributes;
@@ -145,11 +146,11 @@ public class Tests
     [Test]
     public async Task Throws2()
     {
-        await Assert.ThatAsync(async () =>
+        await Assert.That(async () =>
         {
             await Task.Yield();
             new string(Array.Empty<char>());
-        }, Throws.Nothing);
+        }, Throws.NothingAsync);
     }
     
     [Test]
@@ -161,11 +162,11 @@ public class Tests
     [Test]
     public async Task Throws4()
     {
-        await Assert.ThatAsync(async () =>
+        await Assert.That(async () =>
         {
             await Task.Yield();
             throw new ApplicationException();
-        }, Throws.Nothing);
+        }, Throws.NothingAsync);
     }
     
     [Test, Timeout(500)]

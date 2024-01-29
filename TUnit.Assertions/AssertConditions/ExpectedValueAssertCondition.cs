@@ -7,6 +7,8 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected> : AssertC
     internal ExpectedValueAssertCondition(TExpected expected)
     {
         ExpectedValue = expected;
+        And = new And<TActual, TExpected>([this]);
+        Or = new Or<TActual, TExpected>([this]);
     }
 
     public new string Message => MessageFactory?.Invoke((ExpectedValue, ActualValue)) ?? DefaultMessage;
@@ -18,4 +20,7 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected> : AssertC
         MessageFactory = messageFactory!;
         return this;
     }
+    
+    public new And<TActual, TExpected> And { get; }
+    public new Or<TActual, TExpected> Or { get; }
 }

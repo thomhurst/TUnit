@@ -1,6 +1,6 @@
 ﻿using TUnit.Assertions.AssertConditions.String;
 
-namespace TUnit.Assertions.AssertConditions.Conditions;
+namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 public static partial class Is
 {

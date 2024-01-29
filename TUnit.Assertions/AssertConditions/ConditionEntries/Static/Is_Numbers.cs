@@ -2,7 +2,7 @@
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Numbers;
 
-namespace TUnit.Assertions.AssertConditions.Conditions;
+namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 public static partial class Is
 {

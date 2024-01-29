@@ -1,22 +1,11 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Conditions;
 
-public class ThrowsNothingAsyncAssertCondition : AsynchronousDelegateAssertCondition
+public class ThrowsNothingAsyncAssertCondition : AsyncAssertCondition
 {
-    private Exception? _exception;
+    public override string DefaultMessage => $"A {Exception?.GetType().Name} was thrown";
     
-    public override string DefaultMessage => $"A {_exception?.GetType().Name} was thrown";
-    
-    protected override async Task<bool> Passes(Func<Task> actualValue)
+    protected override bool Passes(Exception? exception)
     {
-        try
-        {
-            await actualValue();
-        }
-        catch (Exception e)
-        {
-            _exception = e;
-        }
-
-        return _exception == null;
+        return Exception == null;
     }
 }

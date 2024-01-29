@@ -1,8 +1,8 @@
 ﻿using TUnit.Assertions.AssertConditions.Generic;
 
-namespace TUnit.Assertions.AssertConditions.Conditions;
+namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
-public static partial class Is
+public partial class Is
 {
     public static AssertCondition<T> EqualTo<T>(T expected)
     {

@@ -11,11 +11,18 @@ public abstract class DelegateAssertCondition<T>
     protected Exception? Exception { get; private set; }
     protected T? ActualValue { get; private set; } = default!;
 
-    public virtual bool Assert(T? actualValue, Exception? exception)
+    public bool Assert(Func<T> action)
     {
-        Exception = exception;
-        ActualValue = actualValue;
-        return Passes(actualValue, exception);
+        try
+        {
+            ActualValue = action();
+        }
+        catch (Exception e)
+        {
+            Exception = e;
+        }
+
+        return Passes(ActualValue, Exception);
     }
 
     public abstract string DefaultMessage { get; }
@@ -41,10 +48,18 @@ public abstract class DelegateAssertCondition
 
     protected Exception? Exception { get; private set; }
 
-    public virtual bool Assert(Exception? exception)
+    public bool Assert(Action action)
     {
-        Exception = exception;
-        return Passes(exception);
+        try
+        {
+            action();
+        }
+        catch (Exception e)
+        {
+            Exception = e;
+        }
+
+        return Passes(Exception);
     }
 
     public abstract string DefaultMessage { get; }
