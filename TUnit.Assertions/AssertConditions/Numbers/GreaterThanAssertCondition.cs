@@ -6,13 +6,13 @@ public class GreaterThanAssertCondition<TActual, TExpected> : AssertCondition<TA
     where TExpected : INumber<TExpected>
     where TActual : INumber<TActual>, TExpected
 {
-    public GreaterThanAssertCondition(IReadOnlyCollection<AssertCondition<TActual, TExpected>> nestedAssertConditions, NestedConditionsOperator? nestedConditionsOperator, TExpected? expected) : base(nestedAssertConditions, nestedConditionsOperator, expected)
+    public GreaterThanAssertCondition(TExpected? expected) : base(expected)
     {
     }
 
     public override string DefaultMessage => $"{ActualValue} is not greater than {ExpectedValue}";
 
-    protected override bool Passes(TActual actualValue)
+    protected internal override bool Passes(TActual actualValue)
     {
         return actualValue > ExpectedValue!;
     }

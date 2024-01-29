@@ -1,18 +1,19 @@
+using TUnit.Assertions.AssertConditions.Combiners;
 using TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 namespace TUnit.Assertions.AssertConditions;
 
 public class And<TActual, TExpected>
 {
-    private readonly IReadOnlyCollection<AssertCondition<TActual, TExpected>> _assertConditions;
+    private readonly BaseAssertCondition<TActual, TExpected> _otherAssertCondition;
 
-    public And(IReadOnlyCollection<AssertCondition<TActual, TExpected>> assertConditions)
+    public And(BaseAssertCondition<TActual, TExpected> otherAssertCondition)
     {
-        _assertConditions = assertConditions;
+        _otherAssertCondition = otherAssertCondition;
     }
     
-    public AssertCondition<TActual, TExpected> EqualTo(TExpected expected)
+    public AssertConditionAnd<TActual, TExpected> EqualTo(TExpected expected)
     {
-        return Is.EqualTo(_assertConditions, NestedConditionsOperator.And, expected);
+        return new AssertConditionAnd<TActual, TExpected>(_otherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
     }
 }

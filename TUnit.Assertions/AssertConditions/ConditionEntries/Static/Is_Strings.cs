@@ -11,7 +11,7 @@ public static partial class Is
     
     internal static AssertCondition<string, string> EqualTo(IReadOnlyCollection<AssertCondition<string, string>> nestedConditions, NestedConditionsOperator? @operator, string expected)
     {
-        return new StringEqualsAssertCondition(nestedConditions, @operator, expected, StringComparison.Ordinal);
+        return new StringEqualsAssertCondition(expected, StringComparison.Ordinal);
     }
     
     public static AssertCondition<string, string> EqualTo(string expected, StringComparison stringComparison)
@@ -21,6 +21,6 @@ public static partial class Is
     
     internal static AssertCondition<string, string> EqualTo(IReadOnlyCollection<AssertCondition<string, string>> nestedConditions, NestedConditionsOperator? @operator, string expected, StringComparison stringComparison)
     {
-        return new StringEqualsAssertCondition(nestedConditions, @operator, expected, stringComparison);
+        return new StringEqualsAssertCondition(expected, stringComparison);
     }
 }

@@ -2,17 +2,10 @@
 
 public abstract class DelegateAssertCondition<T>
 {
-    internal readonly IReadOnlyCollection<DelegateAssertCondition<T>> NestedAssertConditions;
-
-    internal DelegateAssertCondition(IReadOnlyCollection<DelegateAssertCondition<T>> nestedAssertConditions)
-    {
-        NestedAssertConditions = [..nestedAssertConditions, this];
-    }
-
     private Func<T?, Exception?, string>? MessageFactory { get; set; }
 
-    protected Exception? Exception { get; private set; }
-    protected T? ActualValue { get; private set; } = default!;
+    protected Exception? Exception { get; set; }
+    protected T? ActualValue { get; set; } = default!;
 
     public bool Assert(DelegateInvocationResult<T> delegateInvocationResult)
     {
@@ -24,7 +17,7 @@ public abstract class DelegateAssertCondition<T>
 
     public abstract string DefaultMessage { get; }
 
-    protected abstract bool Passes(T? actualValue, Exception? exception);
+    protected internal abstract bool Passes(T? actualValue, Exception? exception);
 
     public string Message => MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage;
     
@@ -37,13 +30,6 @@ public abstract class DelegateAssertCondition<T>
 
 public abstract class DelegateAssertCondition
 {
-    internal readonly IReadOnlyCollection<DelegateAssertCondition> NestedAssertConditions;
-
-    internal DelegateAssertCondition(IReadOnlyCollection<DelegateAssertCondition> nestedAssertConditions)
-    {
-        NestedAssertConditions = [..nestedAssertConditions, this];
-    }
-
     private Func<Exception?, string>? MessageFactory { get; set; }
 
     protected Exception? Exception { get; private set; }
@@ -57,7 +43,7 @@ public abstract class DelegateAssertCondition
 
     public abstract string DefaultMessage { get; }
 
-    protected abstract bool Passes(Exception? exception);
+    protected internal abstract bool Passes(Exception? exception);
 
     public string Message => MessageFactory?.Invoke(Exception) ?? DefaultMessage;
     

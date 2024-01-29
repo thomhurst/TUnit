@@ -9,12 +9,9 @@ public static class Assert
 {
     public static void That<T>(T value, AssertCondition<T, T> assertCondition)
     {
-        foreach (var condition in assertCondition.NestedAssertConditions)
+        if (!assertCondition.Assert(value))
         {
-            if (!condition.Assert(value))
-            {
-                throw new AssertionException(condition.Message);
-            }
+            throw new AssertionException(assertCondition.Message);
         }
     }
     
@@ -22,12 +19,9 @@ public static class Assert
     {
         var exception = value.InvokeAndGetException();
 
-        foreach (var condition in assertCondition.NestedAssertConditions)
+        if (!assertCondition.Assert(exception))
         {
-            if (!condition.Assert(exception))
-            {
-                throw new AssertionException(condition.Message);
-            }
+            throw new AssertionException(assertCondition.Message);
         }
 
         return exception;
@@ -37,12 +31,9 @@ public static class Assert
     {
         var delegateInvocationResult = value.InvokeAndGetException();
 
-        foreach (var condition in assertCondition.NestedAssertConditions)
+        if (!assertCondition.Assert(delegateInvocationResult))
         {
-            if (!condition.Assert(delegateInvocationResult))
-            {
-                throw new AssertionException(condition.Message);
-            }
+            throw new AssertionException(assertCondition.Message);
         }
 
         return delegateInvocationResult;
@@ -52,12 +43,9 @@ public static class Assert
     {
         var exception = await value.InvokeAndGetExceptionAsync();
 
-        foreach (var condition in assertCondition.NestedAssertConditions)
+        if (!assertCondition.Assert(exception))
         {
-            if (!condition.Assert(exception))
-            {
-                throw new AssertionException(condition.Message);
-            }
+            throw new AssertionException(assertCondition.Message);
         }
 
         return exception;
@@ -65,16 +53,13 @@ public static class Assert
     
     public static async Task<DelegateInvocationResult<T>> That<T>(Func<Task<T>> value, DelegateAssertCondition<T> assertCondition)
     {
-        var invocationResult = await value.InvokeAndGetExceptionAsync();
+        var delegateInvocationResult = await value.InvokeAndGetExceptionAsync();
 
-        foreach (var condition in assertCondition.NestedAssertConditions)
+        if (!assertCondition.Assert(delegateInvocationResult))
         {
-            if (!condition.Assert(invocationResult))
-            {
-                throw new AssertionException(condition.Message);
-            }
+            throw new AssertionException(assertCondition.Message);
         }
 
-        return invocationResult;
+        return delegateInvocationResult;
     }
 }

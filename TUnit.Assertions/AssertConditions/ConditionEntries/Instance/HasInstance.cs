@@ -2,13 +2,10 @@
 
 public class HasInstance<T>
 {
-    private readonly IReadOnlyCollection<AssertCondition<T, T>> _assertConditions;
-    
-    public HasInstance(IReadOnlyCollection<AssertCondition<T, T>> assertConditions)
+    public HasInstance(AssertCondition<T, T> otherAssertConditions)
     {
-        _assertConditions = assertConditions;
-        And = new And<T, T>(assertConditions);
-        Or = new Or<T, T>(assertConditions);
+        And = new And<T, T>(otherAssertConditions);
+        Or = new Or<T, T>(otherAssertConditions);
     }
 
     public And<T, T> And { get; }

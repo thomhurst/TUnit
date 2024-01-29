@@ -1,18 +1,19 @@
+using TUnit.Assertions.AssertConditions.Combiners;
 using TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 namespace TUnit.Assertions.AssertConditions;
 
 public class Or<TActual, TExpected>
 {
-    private readonly IReadOnlyCollection<AssertCondition<TActual, TExpected>> _assertConditions;
+    private readonly BaseAssertCondition<TActual, TExpected> _otherAssertCondition;
 
-    public Or(IReadOnlyCollection<AssertCondition<TActual, TExpected>> assertConditions)
+    public Or(BaseAssertCondition<TActual, TExpected> otherAssertCondition)
     {
-        _assertConditions = assertConditions;
+        _otherAssertCondition = otherAssertCondition;
     }
     
-    public AssertCondition<TActual, TExpected> EqualTo(TExpected expected)
+    public AssertConditionOr<TActual, TExpected> EqualTo(TExpected expected)
     {
-        return Is.EqualTo(_assertConditions, NestedConditionsOperator.Or, expected);
+        return new AssertConditionOr<TActual, TExpected>(_otherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
     }
 }
