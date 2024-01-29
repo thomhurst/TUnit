@@ -177,17 +177,14 @@ public class Tests
     [Test]
     public void String_And_Condition()
     {
-        var str = "My string";
+        Assert.That("1", Is.EqualTo("1").And.EqualTo("1").Or.EqualTo("2"));
 
-        Assert.That(str, Is.EqualTo("My string").And.EqualTo("This"));
     }
     
     [Test]
     public void String_And_Condition2()
     {
-        var str = "My string";
-
-        Assert.That(str, Is.EqualTo("This").And.EqualTo("My string"));
+        Assert.That("1", Is.EqualTo("1").And.EqualTo("1").And.EqualTo("2"));
     }
     
     public static int One() => 1;

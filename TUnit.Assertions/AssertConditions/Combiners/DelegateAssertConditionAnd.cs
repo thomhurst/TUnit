@@ -19,6 +19,6 @@ public class DelegateAssertConditionAnd<TActual> : DelegateAssertCondition<TActu
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
-        return _condition1.Passes(actualValue, exception) && _condition2.Passes(actualValue, exception);
+        return _condition1.Assert((actualValue, exception)) && _condition2.Assert((actualValue, exception));
     }
 }

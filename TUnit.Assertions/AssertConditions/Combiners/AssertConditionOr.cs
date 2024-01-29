@@ -16,6 +16,6 @@ public class AssertConditionOr<TActual, TExpected> : BaseAssertCondition<TActual
 
     protected internal override bool Passes(TActual actualValue)
     {
-        return _condition1.Passes(actualValue) || _condition2.Passes(actualValue);
+        return _condition1.Assert(actualValue) || _condition2.Assert(actualValue);
     }
 }
