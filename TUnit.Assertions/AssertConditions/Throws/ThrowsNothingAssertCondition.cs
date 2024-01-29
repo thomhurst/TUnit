@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.AssertConditions.Conditions;
+﻿namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsNothingAssertCondition : DelegateAssertCondition
 {

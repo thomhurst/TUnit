@@ -1,6 +1,5 @@
 using TUnit.Assertions;
 using TUnit.Assertions.AssertConditions.ConditionEntries.Static;
-using TUnit.Assertions.AssertConditions.Conditions;
 using TUnit.Core;
 using TUnit.Core.Attributes;
 

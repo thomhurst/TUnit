@@ -1,10 +1,10 @@
 namespace TUnit.Assertions.AssertConditions;
 
-public class Or<TActual>
+public class Or<TExpected>
 {
-    private readonly IReadOnlyCollection<AssertCondition<TActual>> _assertConditions;
+    private readonly IReadOnlyCollection<AssertCondition<TExpected>> _assertConditions;
 
-    public Or(IReadOnlyCollection<AssertCondition<TActual>> assertConditions)
+    public Or(IReadOnlyCollection<AssertCondition<TExpected>> assertConditions)
     {
         _assertConditions = assertConditions;
     }

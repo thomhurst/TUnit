@@ -1,4 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Conditions;
+﻿using TUnit.Assertions.AssertConditions.Throws;
 
 namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 

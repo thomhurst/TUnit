@@ -1,6 +1,7 @@
 ﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Conditions;
+using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Exceptions;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions;
 
@@ -30,7 +31,7 @@ public static class Assert
         }
     }
     
-    public static async Task That(Func<Task> value, AsyncAssertCondition assertCondition)
+    public static async Task That(Func<Task> value, AssertCondition assertCondition)
     {
         if (!await assertCondition.Assert(value))
         {
@@ -38,9 +39,10 @@ public static class Assert
         }
     }
     
-    public static async Task That<T>(Func<Task<T>> value, AsyncAssertCondition<T> assertCondition)
+    public static async Task That<T>(Func<Task<T>> value, DelegateAssertCondition<T> assertCondition)
     {
-        if (!await assertCondition.Assert(value))
+        var invocationResult = await value.InvokeAndGetExceptionAsync();
+        if (!assertCondition.Assert(invocationResult.Result, invocationResult.Exception))
         {
             throw new AssertionException(assertCondition.Message);
         }

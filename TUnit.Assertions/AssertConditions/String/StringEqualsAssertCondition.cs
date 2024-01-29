@@ -4,7 +4,7 @@ public class StringEqualsAssertCondition : ExpectedValueAssertCondition<string, 
 {
     private readonly StringComparison _stringComparison;
 
-    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : this(Array.Empty<ExpectedValueAssertCondition<string, string>>(), expected, stringComparison)
+    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : this(null, Array.Empty<ExpectedValueAssertCondition<string, string>>(), expected, stringComparison)
     {
     }
     

@@ -6,7 +6,9 @@ namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 public static partial class Is
 {
-    public static AssertCondition<long> Zero => new EqualsAssertCondition<long, long>(0);
+    public static AssertCondition<long> Zero => new EqualsAssertCondition<long, long>([], 0);
+    internal static AssertCondition<long> ZeroInternal(IReadOnlyCollection<ExpectedValueAssertCondition<long, long>> previousConditions) 
+        => new EqualsAssertCondition<long, long>(previousConditions, 0);
     
     public static AssertCondition<T> GreaterThan<T>(T expected) where T : INumber<T>
     {

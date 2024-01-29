@@ -2,11 +2,8 @@
 
 public class HasInstance<T>
 {
+    private readonly AsyncAssertCondition<T>? _asyncAssertCondition;
     private readonly IReadOnlyCollection<AssertCondition<T>> _assertConditions;
-
-    public HasInstance(AssertCondition<T> assertConditions) : this([assertConditions])
-    {
-    }
     
     public HasInstance(IReadOnlyCollection<AssertCondition<T>> assertConditions)
     {

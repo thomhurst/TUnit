@@ -3,7 +3,7 @@
 public class SameReferenceAssertCondition<TActual, TExpected> : ExpectedValueAssertCondition<TActual, TExpected>
 {
 
-    public SameReferenceAssertCondition(TExpected expected) : base(expected)
+    public SameReferenceAssertCondition(IReadOnlyCollection<ExpectedValueAssertCondition<TActual, TExpected>> previousConditions, TExpected expected) : base(previousConditions, expected)
     {
     }
 

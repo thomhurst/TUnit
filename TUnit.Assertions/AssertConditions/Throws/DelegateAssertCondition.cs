@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.AssertConditions.Conditions;
+﻿namespace TUnit.Assertions.AssertConditions.Throws;
 
 public abstract class DelegateAssertCondition<T>
 {
@@ -11,17 +11,11 @@ public abstract class DelegateAssertCondition<T>
     protected Exception? Exception { get; private set; }
     protected T? ActualValue { get; private set; } = default!;
 
-    public bool Assert(Func<T> action)
+    public bool Assert(DelegateInvocationResult<T> delegateInvocationResult)
     {
-        try
-        {
-            ActualValue = action();
-        }
-        catch (Exception e)
-        {
-            Exception = e;
-        }
-
+        ActualValue = delegateInvocationResult.Result;
+        Exception = delegateInvocationResult.Exception;
+        
         return Passes(ActualValue, Exception);
     }
 
@@ -48,17 +42,10 @@ public abstract class DelegateAssertCondition
 
     protected Exception? Exception { get; private set; }
 
-    public bool Assert(Action action)
+    public bool Assert(Exception? exception)
     {
-        try
-        {
-            action();
-        }
-        catch (Exception e)
-        {
-            Exception = e;
-        }
-
+        Exception = exception;
+        
         return Passes(Exception);
     }
 

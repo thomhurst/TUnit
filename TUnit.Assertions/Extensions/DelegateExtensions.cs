@@ -28,7 +28,7 @@ internal static class DelegateExtensions
         }
     }
     
-    public static async Task<(T?, Exception?)> InvokeAndGetExceptionAsync<T>(this Func<Task<T>> action)
+    public static async Task<DelegateInvocationResult<T>> InvokeAndGetExceptionAsync<T>(this Func<Task<T>> action)
     {
         try
         {
@@ -40,7 +40,7 @@ internal static class DelegateExtensions
         }
     }
     
-    public static (T?, Exception?) InvokeAndGetException<T>(this Func<T> action)
+    public static DelegateInvocationResult<T> InvokeAndGetException<T>(this Func<T> action)
     {
         try
         {

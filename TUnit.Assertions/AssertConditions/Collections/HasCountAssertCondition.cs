@@ -4,7 +4,7 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class HasCountAssertCondition<TActual> : ExpectedValueAssertCondition<IEnumerable<TActual>, int>
 {
-    public HasCountAssertCondition(int expected) : base(expected)
+    public HasCountAssertCondition(AsyncAssertCondition<IEnumerable<TActual>>? IReadOnlyCollection<ExpectedValueAssertCondition<IEnumerable<TActual>, int>> previousConditions, int expected) : base(previousConditions, expected)
     {
     }
 
