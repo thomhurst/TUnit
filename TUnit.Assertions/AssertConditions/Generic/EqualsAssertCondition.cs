@@ -1,9 +1,11 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EqualsAssertCondition<TActual, TExpected> : ExpectedValueAssertCondition<TActual, TExpected>
+public class EqualsAssertCondition<TActual, TExpected>(
+    IReadOnlyCollection<ExpectedValueAssertCondition<TActual, TExpected>> previousConditions,
+    TExpected expected)
+    : ExpectedValueAssertCondition<TActual, TExpected>(previousConditions, expected)
 {
-
-    public EqualsAssertCondition(TExpected expected) : base(expected)
+    public EqualsAssertCondition(TExpected expected) : this(Array.Empty<ExpectedValueAssertCondition<TActual, TExpected>>(), expected)
     {
     }
 

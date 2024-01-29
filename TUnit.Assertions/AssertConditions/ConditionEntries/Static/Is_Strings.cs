@@ -9,8 +9,18 @@ public static partial class Is
         return new StringEqualsAssertCondition(expected, StringComparison.Ordinal);
     }
     
+    public static AssertCondition<string> EqualTo(IReadOnlyCollection<ExpectedValueAssertCondition<string, string>> previousConditions, string expected)
+    {
+        return new StringEqualsAssertCondition(previousConditions, expected, StringComparison.Ordinal);
+    }
+    
     public static AssertCondition<string> EqualTo(string expected, StringComparison stringComparison)
     {
         return new StringEqualsAssertCondition(expected, stringComparison);
+    }
+    
+    public static AssertCondition<string> EqualTo(IReadOnlyCollection<ExpectedValueAssertCondition<string, string>> previousConditions, string expected, StringComparison stringComparison)
+    {
+        return new StringEqualsAssertCondition(previousConditions, expected, stringComparison);
     }
 }

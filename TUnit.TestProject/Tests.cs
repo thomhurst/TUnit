@@ -174,6 +174,14 @@ public class Tests
     {
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
+
+    [Test]
+    public void String_And_Condition()
+    {
+        var str = "My string";
+
+        Assert.That(str, Is.EqualTo("My string").And.EqualTo("This"));
+    }
     
     public static int One() => 1;
     public static int Two() => 2;

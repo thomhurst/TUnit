@@ -2,10 +2,15 @@
 
 public abstract class AssertCondition<T>
 {
-    internal AssertCondition()
+    internal readonly IReadOnlyCollection<AssertCondition<T>> PreviousAssertConditions;
+    
+    internal AssertCondition(IReadOnlyCollection<AssertCondition<T>> previousAssertConditions)
     {
-        And = new And<T>([this]);
-        Or = new Or<T>([this]);
+        IReadOnlyCollection<AssertCondition<T>> conditionsUntilNow = [..previousAssertConditions, this];
+        PreviousAssertConditions = conditionsUntilNow;
+        
+        And = new And<T>(conditionsUntilNow);
+        Or = new Or<T>(conditionsUntilNow);
     }
 
     private Func<T, string>? MessageFactory { get; set; }
