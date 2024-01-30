@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Folder Include="AssertConditions\ConditionEntries\" />
       <Folder Include="Models\" />
     </ItemGroup>
 

@@ -1,13 +1,10 @@
-﻿using TUnit.Assertions.AssertConditions.Combiners;
-using TUnit.Assertions.AssertConditions.ConditionEntries.Static;
+﻿namespace TUnit.Assertions.AssertConditions.Connectors;
 
-namespace TUnit.Assertions.AssertConditions.ConditionEntries.Instance;
-
-public class AndIsInstance<TActual, TExpected>
+public class AndIs<TActual, TExpected>
 {
     private readonly BaseAssertCondition<TActual, TExpected> _otherAssertCondition;
 
-    public AndIsInstance(BaseAssertCondition<TActual, TExpected> otherAssertCondition)
+    public AndIs(BaseAssertCondition<TActual, TExpected> otherAssertCondition)
     {
         _otherAssertCondition = otherAssertCondition;
     }

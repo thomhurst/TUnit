@@ -1,8 +1,9 @@
 ﻿using System.Numerics;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Numbers;
 
-namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
+namespace TUnit.Assertions;
 
 public static partial class Is
 {

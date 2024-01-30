@@ -1,5 +1,5 @@
 ﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Combiners;
+using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;

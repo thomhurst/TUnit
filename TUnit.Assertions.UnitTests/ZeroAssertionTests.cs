@@ -1,4 +1,4 @@
-using Is = TUnit.Assertions.AssertConditions.ConditionEntries.Static.Is;
+using Is = TUnit.Assertions.Is;
 
 namespace TUnit.Assertions.UnitTests;
 

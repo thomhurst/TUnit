@@ -1,6 +1,7 @@
-﻿using TUnit.Assertions.AssertConditions.Generic;
+﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Generic;
 
-namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
+namespace TUnit.Assertions;
 
 public partial class Is
 {

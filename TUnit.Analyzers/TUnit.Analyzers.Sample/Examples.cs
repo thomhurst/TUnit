@@ -2,7 +2,6 @@
 // ReSharper disable UnusedMember.Global
 
 using TUnit.Assertions;
-using TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 namespace TUnit.Analyzers.Sample;
 

@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.AssertConditions.Combiners;
+﻿namespace TUnit.Assertions.AssertConditions.Connectors;
 
 public sealed class AssertConditionOr<TActual, TExpected> : BaseAssertCondition<TActual, TExpected>
 {

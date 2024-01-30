@@ -1,6 +1,6 @@
 ﻿using TUnit.Assertions.AssertConditions.Throws;
 
-namespace TUnit.Assertions.AssertConditions.ConditionEntries.Static;
+namespace TUnit.Assertions;
 
 public static class Throws
 {

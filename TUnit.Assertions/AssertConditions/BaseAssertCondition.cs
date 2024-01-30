@@ -1,3 +1,5 @@
+using TUnit.Assertions.AssertConditions.Operators;
+
 namespace TUnit.Assertions.AssertConditions;
 
 public abstract class BaseAssertCondition<TActual, TExpected>

@@ -1,6 +1,6 @@
 ﻿using TUnit.Assertions.AssertConditions.Throws;
 
-namespace TUnit.Assertions.AssertConditions.Combiners;
+namespace TUnit.Assertions.AssertConditions.Connectors;
 
 public sealed class DelegateAssertConditionAnd<TActual> : DelegateAssertCondition<TActual>
 {

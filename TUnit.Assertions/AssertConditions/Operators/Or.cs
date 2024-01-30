@@ -1,6 +1,6 @@
-using TUnit.Assertions.AssertConditions.ConditionEntries.Instance;
+using TUnit.Assertions.AssertConditions.Connectors;
 
-namespace TUnit.Assertions.AssertConditions;
+namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class Or<TActual, TExpected>
 {
@@ -11,5 +11,6 @@ public class Or<TActual, TExpected>
         _otherAssertCondition = otherAssertCondition;
     }
     
-    public OrIsInstance<TActual, TExpected> Is => new(_otherAssertCondition);
+    public OrIs<TActual, TExpected> Is => new(_otherAssertCondition);
+    public OrHas<TActual, TExpected> Has => new(_otherAssertCondition);
 }

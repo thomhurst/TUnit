@@ -1,6 +1,6 @@
-using TUnit.Assertions.AssertConditions.ConditionEntries.Instance;
+using TUnit.Assertions.AssertConditions.Connectors;
 
-namespace TUnit.Assertions.AssertConditions;
+namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class And<TActual, TExpected>
 {
@@ -11,5 +11,6 @@ public class And<TActual, TExpected>
         _otherAssertCondition = otherAssertCondition;
     }
     
-    public AndIsInstance<TActual, TExpected> Is => new(_otherAssertCondition);
+    public AndIs<TActual, TExpected> Is => new(_otherAssertCondition);
+    public AndHas<TActual, TExpected> Has => new(_otherAssertCondition);
 }
