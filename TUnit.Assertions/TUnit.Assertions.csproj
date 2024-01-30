@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="AssertConditions\Operators\" />
+      <Folder Include="Models\" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace TUnit.Core.Exceptions;
+﻿namespace TUnit.Core.Exceptions;
 
 public class TimeoutException : TUnitException
 {

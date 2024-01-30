@@ -9,17 +9,7 @@ public static partial class Is
         return new StringEqualsAssertCondition(expected, StringComparison.Ordinal);
     }
     
-    internal static AssertCondition<string, string> EqualTo(IReadOnlyCollection<AssertCondition<string, string>> nestedConditions, NestedConditionsOperator? @operator, string expected)
-    {
-        return new StringEqualsAssertCondition(expected, StringComparison.Ordinal);
-    }
-    
     public static AssertCondition<string, string> EqualTo(string expected, StringComparison stringComparison)
-    {
-        return new StringEqualsAssertCondition(expected, stringComparison);
-    }
-    
-    internal static AssertCondition<string, string> EqualTo(IReadOnlyCollection<AssertCondition<string, string>> nestedConditions, NestedConditionsOperator? @operator, string expected, StringComparison stringComparison)
     {
         return new StringEqualsAssertCondition(expected, stringComparison);
     }

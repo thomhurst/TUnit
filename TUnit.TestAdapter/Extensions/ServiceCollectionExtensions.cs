@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using TUnit.Engine;
 
 namespace TUnit.TestAdapter.Extensions;
 

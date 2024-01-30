@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
-using TUnit.Core;
 
 namespace TUnit.Engine;
 

@@ -18,9 +18,4 @@ public partial class Is
     {
         return new SameReferenceAssertCondition<T, T>(expected);
     }
-
-    internal static AssertCondition<T, T> SameReference<T>(IReadOnlyCollection<AssertCondition<T, T>> nestedConditions, NestedConditionsOperator? @operator, T expected)
-    {
-        return new SameReferenceAssertCondition<T, T>(expected);
-    }
 }
