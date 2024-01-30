@@ -186,6 +186,34 @@ public class Tests
         Assert.That("1", Is.EqualTo("1").And.Is.EqualTo("1").And.Is.EqualTo("2"));
     }
     
+    [Test]
+    public void Count1()
+    {
+        var list = new List<int> { 1, 2, 3 };
+        Assert.That(list, Has.Count.EqualTo(3));
+    }
+    
+    [Test]
+    public void Count2()
+    {
+        var list = new List<int> { 1, 2, 3 };
+        Assert.That(list, Has.Count.EqualTo(1));
+    }
+    
+    [Test]
+    public void Count3()
+    {
+        var list = new[] { 1, 2, 3 };
+        Assert.That(list, Has.Length.EqualTo(3));
+    }
+    
+    [Test]
+    public void Count4()
+    {
+        var list = new[] { 1, 2, 3 };
+        Assert.That(list, Has.Length.EqualTo(1));
+    }
+    
     public static int One() => 1;
     public static int Two() => 2;
 }
