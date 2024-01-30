@@ -1,6 +1,10 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class Count
+public class PropertyOrMethodAccessor<TActual>
 {
+    public PropertyOrMethodAccessor()
+    {
+    }
+    
     
 }

@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.AssertConditions.Combiners;
 
-public class DelegateAssertConditionAnd<TActual> : DelegateAssertCondition<TActual>
+public sealed class DelegateAssertConditionAnd<TActual> : DelegateAssertCondition<TActual>
 {
     private readonly DelegateAssertCondition<TActual> _condition1;
     private readonly DelegateAssertCondition<TActual> _condition2;

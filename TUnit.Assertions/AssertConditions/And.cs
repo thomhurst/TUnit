@@ -1,4 +1,5 @@
 using TUnit.Assertions.AssertConditions.Combiners;
+using TUnit.Assertions.AssertConditions.ConditionEntries.Instance;
 using TUnit.Assertions.AssertConditions.ConditionEntries.Static;
 
 namespace TUnit.Assertions.AssertConditions;
@@ -12,8 +13,5 @@ public class And<TActual, TExpected>
         _otherAssertCondition = otherAssertCondition;
     }
     
-    public AssertConditionAnd<TActual, TExpected> EqualTo(TExpected expected)
-    {
-        return new AssertConditionAnd<TActual, TExpected>(_otherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
-    }
+    public AndIsInstance<TActual, TExpected> Is => new(_otherAssertCondition);
 }

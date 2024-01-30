@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Combiners;
 
-public class AssertConditionOr<TActual, TExpected> : BaseAssertCondition<TActual, TExpected>
+public sealed class AssertConditionOr<TActual, TExpected> : BaseAssertCondition<TActual, TExpected>
 {
     private readonly BaseAssertCondition<TActual, TExpected> _condition1;
     private readonly BaseAssertCondition<TActual, TExpected> _condition2;
