@@ -19,7 +19,7 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="TUnit0001Description" xml:space="preserve">
-        <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>An optional longer localizable description of the diagnostic.</comment>
+        <value>Don't mix 'Or' &amp; 'And' operators in assertions.</value><comment>An optional longer localizable description of the diagnostic.</comment>
     </data>
     <data name="TUnit0001MessageFormat" xml:space="preserve">
         <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The format-able message the diagnostic displays.</comment>
@@ -29,11 +29,5 @@
     </data>
     <data name="TUnit0001CodeFixTitle" xml:space="preserve">
         <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The title of the code fix.</comment>
-    </data>
-    <data name="TUnit0001Description" xml:space="preserve">
-        <value>The speed must be lower than the Speed of Light.</value><comment>An optional longer localizable description of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0001MessageFormat" xml:space="preserve">
-        <value>The specified speed '{0}' must be lower than the Speed of Light</value><comment>The format-able message the diagnostic displays.</comment>
     </data>
 </root>

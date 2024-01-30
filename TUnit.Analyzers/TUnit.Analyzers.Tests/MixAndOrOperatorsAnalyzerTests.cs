@@ -2,11 +2,11 @@ using System.Threading.Tasks;
 using Xunit;
 using Verifier =
     Microsoft.CodeAnalysis.CSharp.Testing.XUnit.AnalyzerVerifier<
-        TUnit.Analyzers.SampleSyntaxAnalyzer>;
+        TUnit.Analyzers.MixAndOrOperatorsAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
-public class SampleSyntaxAnalyzerTests
+public class MixAndOrOperatorsAnalyzerTests
 {
     [Fact]
     public async Task ClassWithMyCompanyTitle_AlertDiagnostic()

@@ -14,7 +14,7 @@ namespace TUnit.Analyzers;
 /// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class SampleSyntaxAnalyzer : DiagnosticAnalyzer
+public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
 {
     public const string CompanyName = "MyCompany";
 
@@ -75,36 +75,30 @@ public class SampleSyntaxAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var propertyName = memberAccessExpressionSyntax.Name.Identifier.Value;
-
-        if (!Debugger.IsAttached)
-        {
-            // Debugger.Launch();
-        }
-
-        if (memberAccessExpressionSyntax.Parent is not MemberAccessExpressionSyntax parentMemberAccessExpressionSyntax)
+        if (memberAccessExpressionSyntax.Parent?.Parent is not InvocationExpressionSyntax invocationExpressionSyntax)
         {
             return;
         }
         
-        var symbolInfo = context.SemanticModel.GetSymbolInfo(parentMemberAccessExpressionSyntax);
+        var symbolInfo = context.SemanticModel.GetSymbolInfo(invocationExpressionSyntax);
 
         var fullyQualifiedSymbolInformation = symbolInfo.Symbol?.ToDisplayString(DisplayFormats.FullyQualifiedNonGeneric) 
                                               ?? string.Empty;
         
-        if (!fullyQualifiedSymbolInformation.Contains("global::TUnit.Assertions"))
+        if (!fullyQualifiedSymbolInformation.StartsWith("global::TUnit.Assertions"))
         {
             return;
         }
-        
-        if(fullyQualifiedSymbolInformation.Contains(".And.") 
-           && fullyQualifiedSymbolInformation.Contains(".Or."))
+
+        var fullInvocationStatement = invocationExpressionSyntax.ToFullString();
+        if(fullInvocationStatement.Contains(".And.") 
+           && fullInvocationStatement.Contains(".Or."))
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning,
                         true, Description),
-                    parentMemberAccessExpressionSyntax.GetLocation())
+                    invocationExpressionSyntax.GetLocation())
             );
         }
     }

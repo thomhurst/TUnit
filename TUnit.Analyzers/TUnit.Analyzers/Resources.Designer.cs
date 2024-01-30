@@ -69,7 +69,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The speed must be lower than the Speed of Light..
+        ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions..
         /// </summary>
         internal static string TUnit0001Description {
             get {
@@ -78,7 +78,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The specified speed &apos;{0}&apos; must be lower than the Speed of Light.
+        ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions.
         /// </summary>
         internal static string TUnit0001MessageFormat {
             get {
