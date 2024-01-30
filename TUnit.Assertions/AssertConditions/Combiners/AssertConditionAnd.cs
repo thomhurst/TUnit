@@ -12,8 +12,8 @@ public class AssertConditionAnd<TActual, TExpected> : BaseAssertCondition<TActua
     }
 
     public override string Message =>
-        !_condition1.Passes(ActualValue) ? _condition1.DefaultMessage :
-        !_condition2.Passes(ActualValue) ? _condition2.DefaultMessage : string.Empty;
+        !_condition1.Passes(ActualValue) ? _condition1.Message :
+        !_condition2.Passes(ActualValue) ? _condition2.Message : string.Empty;
 
     public override string DefaultMessage => string.Empty;
     
