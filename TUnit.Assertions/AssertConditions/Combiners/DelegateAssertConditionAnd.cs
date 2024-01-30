@@ -14,8 +14,8 @@ public class DelegateAssertConditionAnd<TActual> : DelegateAssertCondition<TActu
     }
 
     public override string DefaultMessage =>
-        !_condition1.Passes(ActualValue, Exception) ? _condition1.DefaultMessage :
-        !_condition2.Passes(ActualValue, Exception) ? _condition2.DefaultMessage : string.Empty;
+        !_condition1.Passes(ActualValue, Exception) ? _condition1.Message :
+        !_condition2.Passes(ActualValue, Exception) ? _condition2.Message : string.Empty;
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {

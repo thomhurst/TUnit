@@ -13,7 +13,7 @@ public class DelegateAssertConditionOr<TActual> : DelegateAssertCondition<TActua
         _condition2 = condition2;
     }
 
-    public override string DefaultMessage => $"{_condition1.DefaultMessage} & {_condition2.DefaultMessage}";
+    public override string DefaultMessage => $"{_condition1.Message} & {_condition2.Message}";
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
