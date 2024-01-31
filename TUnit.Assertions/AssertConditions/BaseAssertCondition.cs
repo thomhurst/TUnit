@@ -2,12 +2,12 @@ using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertConditions;
 
-public abstract class BaseAssertCondition<TActual, TExpected>
+public abstract class BaseAssertCondition<TActual>
 {
     internal BaseAssertCondition()
     {
-        And = new And<TActual, TExpected>(this);
-        Or = new Or<TActual, TExpected>(this);
+        And = new And<TActual>(this);
+        Or = new Or<TActual>(this);
     }
     
     protected TActual ActualValue { get; set; } = default!;
@@ -24,6 +24,6 @@ public abstract class BaseAssertCondition<TActual, TExpected>
 
     protected internal abstract bool Passes(TActual actualValue);
 
-    public And<TActual, TExpected> And { get; }
-    public Or<TActual, TExpected> Or { get; }
+    public And<TActual> And { get; }
+    public Or<TActual> Or { get; }
 }

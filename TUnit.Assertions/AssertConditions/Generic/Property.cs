@@ -4,7 +4,7 @@ namespace TUnit.Assertions.AssertConditions.Generic;
 
 public class Property<TActual> : Property<TActual, object>
 {
-    public Property(string name, ConnectorType connectorType, BaseAssertCondition<TActual,object> otherAssertConditions) 
+    public Property(string name, ConnectorType connectorType, BaseAssertCondition<TActual> otherAssertConditions) 
         : base(name, connectorType, otherAssertConditions)
     {
     }
@@ -17,27 +17,27 @@ public class Property<TActual> : Property<TActual, object>
 public class Property<TActual, TExpected>(string name)
 {
     private readonly ConnectorType? _connectorType;
-    private readonly BaseAssertCondition<TActual, TExpected>? _otherAssertConditions;
+    private readonly BaseAssertCondition<TActual>? _otherAssertConditions;
 
-    public Property(string name, ConnectorType connectorType, BaseAssertCondition<TActual,TExpected> otherAssertConditions) 
+    public Property(string name, ConnectorType connectorType, BaseAssertCondition<TActual> otherAssertConditions) 
         : this(name)
     {
         _connectorType = connectorType;
         _otherAssertConditions = otherAssertConditions;
     }
 
-    public BaseAssertCondition<TActual, TExpected> EqualTo(TExpected expected)
+    public BaseAssertCondition<TActual> EqualTo(TExpected expected)
     {
         var assertCondition = new PropertyEqualsAssertCondition<TActual, TExpected>(name, expected);
 
         if (_connectorType is ConnectorType.And)
         {
-            return new AssertConditionAnd<TActual, TExpected>(_otherAssertConditions!, assertCondition);
+            return new AssertConditionAnd<TActual>(_otherAssertConditions!, assertCondition);
         }
         
         if (_connectorType is ConnectorType.Or)
         {
-            return new AssertConditionOr<TActual, TExpected>(_otherAssertConditions!, assertCondition);
+            return new AssertConditionOr<TActual>(_otherAssertConditions!, assertCondition);
         }
 
         return assertCondition;

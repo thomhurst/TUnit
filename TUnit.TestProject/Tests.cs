@@ -190,7 +190,7 @@ public class Tests
     public void Count1()
     {
         var list = new List<int> { 1, 2, 3 };
-        Assert.That(list, Has.Count.EqualTo(3));
+        Assert.That(list, Has.Count.EqualTo(3).And.Is.EqualTo("1"));
     }
     
     [Test]

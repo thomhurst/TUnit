@@ -1,10 +1,10 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Connectors;
 
-public class OrHas<TActual, TExpected>
+public class OrHas<TActual>
 {
-    private readonly BaseAssertCondition<TActual, TExpected> _otherAssertConditions;
+    private readonly BaseAssertCondition<TActual> _otherAssertConditions;
 
-    public OrHas(BaseAssertCondition<TActual, TExpected> otherAssertConditions)
+    public OrHas(BaseAssertCondition<TActual> otherAssertConditions)
     {
         _otherAssertConditions = otherAssertConditions;
     }

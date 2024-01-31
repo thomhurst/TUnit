@@ -2,15 +2,15 @@ using TUnit.Assertions.AssertConditions.Connectors;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class And<TActual, TExpected>
+public class And<TActual>
 {
-    private readonly BaseAssertCondition<TActual, TExpected> _otherAssertCondition;
+    private readonly BaseAssertCondition<TActual> _otherAssertCondition;
 
-    public And(BaseAssertCondition<TActual, TExpected> otherAssertCondition)
+    public And(BaseAssertCondition<TActual> otherAssertCondition)
     {
         _otherAssertCondition = otherAssertCondition;
     }
     
-    public AndIs<TActual, TExpected> Is => new(_otherAssertCondition);
-    public AndHas<TActual, TExpected> Has => new(_otherAssertCondition);
+    public AndIs<TActual> Is => new(_otherAssertCondition);
+    public AndHas<TActual> Has => new(_otherAssertCondition);
 }

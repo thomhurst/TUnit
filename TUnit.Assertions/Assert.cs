@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;
@@ -8,7 +7,7 @@ namespace TUnit.Assertions;
 
 public static class Assert
 {
-    public static void That<TActual, TExpected>(TActual value, BaseAssertCondition<TActual, TExpected> assertCondition)
+    public static void That<TActual>(TActual value, BaseAssertCondition<TActual> assertCondition)
     {
         if (!assertCondition.Assert(value))
         {

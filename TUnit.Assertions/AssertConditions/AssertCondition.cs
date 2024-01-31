@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertConditions;
 
-public abstract class AssertCondition<TActual, TExpected> : BaseAssertCondition<TActual, TExpected>
+public abstract class AssertCondition<TActual, TExpected> : BaseAssertCondition<TActual>
 {
     internal TExpected? ExpectedValue { get; }
     

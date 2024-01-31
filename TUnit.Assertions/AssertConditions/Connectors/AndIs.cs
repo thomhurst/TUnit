@@ -1,16 +1,16 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Connectors;
 
-public class AndIs<TActual, TExpected>
+public class AndIs<TActual>
 {
-    private readonly BaseAssertCondition<TActual, TExpected> _otherAssertCondition;
+    private readonly BaseAssertCondition<TActual> _otherAssertCondition;
 
-    public AndIs(BaseAssertCondition<TActual, TExpected> otherAssertCondition)
+    public AndIs(BaseAssertCondition<TActual> otherAssertCondition)
     {
         _otherAssertCondition = otherAssertCondition;
     }
     
-    public AssertConditionAnd<TActual, TExpected> EqualTo(TExpected expected)
+    public AssertConditionAnd<TActual> EqualTo<TExpected>(TExpected expected)
     {
-        return new AssertConditionAnd<TActual, TExpected>(_otherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
+        return new AssertConditionAnd<TActual>(_otherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
     }
 }
