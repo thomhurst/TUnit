@@ -8,27 +8,11 @@ namespace TUnit.Assertions;
 
 public static class Assert
 {
-    public static void That<TActual, TExpected>(TActual value, AssertCondition<TActual, TExpected> assertCondition)
+    public static void That<TActual, TExpected>(TActual value, BaseAssertCondition<TActual, TExpected> assertCondition)
     {
         if (!assertCondition.Assert(value))
         {
             throw new AssertionException(assertCondition.Message);
-        }
-    }
-    
-    public static void That<TActual, TExpected>(TActual value, AssertConditionOr<TActual, TExpected> orCondition)
-    {
-        if (!orCondition.Assert(value))
-        {
-            throw new AssertionException(orCondition.Message);
-        }
-    }
-    
-    public static void That<TActual, TExpected>(TActual value, AssertConditionAnd<TActual, TExpected> andCondition)
-    {
-        if (!andCondition.Assert(value))
-        {
-            throw new AssertionException(andCondition.Message);
         }
     }
     
