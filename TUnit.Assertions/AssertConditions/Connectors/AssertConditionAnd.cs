@@ -17,7 +17,7 @@ public sealed class AssertConditionAnd<TActual> : BaseAssertCondition<TActual>
 
     public override string DefaultMessage => string.Empty;
     
-    protected internal override bool Passes(TActual actualValue)
+    protected internal override bool Passes(TActual? actualValue)
     {
         return _condition1.Assert(actualValue) && _condition2.Assert(actualValue);
     }

@@ -9,7 +9,7 @@ public class StringEqualsAssertCondition : AssertCondition<string, string>
         _stringComparison = stringComparison;
     }
     
-    protected internal override bool Passes(string actualValue)
+    protected internal override bool Passes(string? actualValue)
     {
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }

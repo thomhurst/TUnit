@@ -7,7 +7,7 @@ public class PropertyEqualsAssertCondition<TActual, TExpected>(string propertyNa
 {
     public override string DefaultMessage => $"Expected {ExpectedValue} but received {ActualValue}";
 
-    protected internal override bool Passes(TActual actualValue)
+    protected internal override bool Passes(TActual? actualValue)
     {
         var propertyValue = GetPropertyValue(actualValue);
         

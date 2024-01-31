@@ -10,13 +10,15 @@ public class HasCountAssertCondition<TActual> : AssertCondition<IEnumerable<TAct
 
     public override string DefaultMessage => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
     
-    protected internal override bool Passes(IEnumerable<TActual> actualValue)
+    protected internal override bool Passes(IEnumerable<TActual>? actualValue)
     {
         return GetCount(actualValue) == ExpectedValue;
     }
 
-    private int GetCount(IEnumerable<TActual> actualValue)
+    private int GetCount(IEnumerable<TActual>? actualValue)
     {
+        ArgumentNullException.ThrowIfNull(actualValue);
+
         if (actualValue is ICollection collection)
         {
             return collection.Count;

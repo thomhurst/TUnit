@@ -11,8 +11,10 @@ public class IsEvenAssertCondition<TActual> : AssertCondition<TActual, TActual>
 
     public override string DefaultMessage => $"{ActualValue} is not even";
 
-    protected internal override bool Passes(TActual actualValue)
+    protected internal override bool Passes(TActual? actualValue)
     {
+        ArgumentNullException.ThrowIfNull(actualValue);
+        
         return actualValue % 2 == 0;
     }
 }

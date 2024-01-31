@@ -7,7 +7,7 @@ public class PropertyOrMethodEqualsAssertCondition<TExpected>(string propertyNam
 {
     public override string DefaultMessage => $"Expected {ExpectedValue} but received {ActualValue}";
 
-    protected internal override bool Passes(object actualValue)
+    protected internal override bool Passes(object? actualValue)
     {
         var propertyValue = GetPropertyValue(actualValue);
 
@@ -16,8 +16,10 @@ public class PropertyOrMethodEqualsAssertCondition<TExpected>(string propertyNam
         return Equals(propertyValue, ExpectedValue);
     }
 
-    private object? GetPropertyValue(object actualValue)
+    private object? GetPropertyValue(object? actualValue)
     {
+        ArgumentNullException.ThrowIfNull(actualValue);
+
         if (actualValue.GetType().GetProperty(propertyName) is null
             && actualValue.GetType().GetProperty(propertyName) is null)
         {

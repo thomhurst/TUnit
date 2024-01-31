@@ -10,19 +10,19 @@ public abstract class BaseAssertCondition<TActual>
         Or = new Or<TActual>(this);
     }
     
-    protected TActual ActualValue { get; set; } = default!;
+    protected TActual? ActualValue { get; set; } = default!;
     
     public abstract string Message { get; }
     
     public abstract string DefaultMessage { get; }
     
-    public bool Assert(TActual actualValue)
+    public bool Assert(TActual? actualValue)
     {
         ActualValue = actualValue;
         return Passes(actualValue);
     }
 
-    protected internal abstract bool Passes(TActual actualValue);
+    protected internal abstract bool Passes(TActual? actualValue);
 
     public And<TActual> And { get; }
     public Or<TActual> Or { get; }

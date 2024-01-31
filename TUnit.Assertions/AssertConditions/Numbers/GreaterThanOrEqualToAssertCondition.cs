@@ -12,8 +12,10 @@ public class GreaterThanOrEqualToAssertCondition<TActual, TExpected> : AssertCon
 
     public override string DefaultMessage => $"{ActualValue} is not greater than or equal to {ExpectedValue}";
 
-    protected internal override bool Passes(TActual actualValue)
+    protected internal override bool Passes(TActual? actualValue)
     {
+        ArgumentNullException.ThrowIfNull(actualValue);
+
         return actualValue >= ExpectedValue!;
     }
 }

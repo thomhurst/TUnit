@@ -19,4 +19,8 @@ public partial class Is
     {
         return new SameReferenceAssertCondition<T, T>(expected);
     }
+
+    public static AssertCondition<object, object> Null => new NullAssertCondition();
+
+    public static Not Not => new();
 }

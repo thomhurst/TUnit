@@ -8,8 +8,13 @@ public class EnumerableEquivalentToAssertCondition<T> : AssertCondition<IEnumera
 
     public override string DefaultMessage => "The two Enumerables were not equivalent";
 
-    protected internal override bool Passes(IEnumerable<T> actualValue)
+    protected internal override bool Passes(IEnumerable<T>? actualValue)
     {
-        return actualValue.SequenceEqual(ExpectedValue!);
+        if (actualValue is null && ExpectedValue is null)
+        {
+            return true;
+        }
+        
+        return actualValue?.SequenceEqual(ExpectedValue!) ?? false;
     }
 }

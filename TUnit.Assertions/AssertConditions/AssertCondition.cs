@@ -9,11 +9,11 @@ public abstract class AssertCondition<TActual, TExpected> : BaseAssertCondition<
         ExpectedValue = expected;
     }
     
-    private Func<TActual, string>? MessageFactory { get; set; }
+    private Func<TActual?, string>? MessageFactory { get; set; }
 
     public override string Message => MessageFactory?.Invoke(ActualValue) ?? DefaultMessage;
     
-    public AssertCondition<TActual, TExpected> WithMessage(Func<TActual, string> messageFactory)
+    public AssertCondition<TActual, TExpected> WithMessage(Func<TActual?, string> messageFactory)
     {
         MessageFactory = messageFactory;
         return this;
