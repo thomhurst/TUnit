@@ -1,6 +1,13 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class Property
+public class Property : Property<object>
+{
+    public Property(string name) : base(name)
+    {
+    }
+}
+
+public class Property<TExpected>
 {
     private readonly string _name;
 
@@ -9,7 +16,7 @@ public class Property
         _name = name;
     }
     
-    public AssertCondition<object, TExpected> EqualTo<TExpected>(TExpected expected)
+    public AssertCondition<object, TExpected> EqualTo(TExpected expected)
     {
         return new PropertyEqualsAssertCondition<TExpected>(_name, expected);
     }
