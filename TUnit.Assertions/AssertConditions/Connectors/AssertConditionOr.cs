@@ -11,8 +11,8 @@ public sealed class AssertConditionOr<TActual> : BaseAssertCondition<TActual>
         _condition2 = condition2;
     }
 
-    public override string Message => $"{_condition1.Message} & {_condition2.Message}";
-    public override string DefaultMessage => string.Empty;
+    protected internal override string Message => $"{_condition1.Message} & {_condition2.Message}";
+    protected override string DefaultMessage => string.Empty;
 
     protected internal override bool Passes(TActual? actualValue)
     {

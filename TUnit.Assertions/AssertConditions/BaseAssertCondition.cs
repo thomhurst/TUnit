@@ -12,11 +12,11 @@ public abstract class BaseAssertCondition<TActual>
     
     protected TActual? ActualValue { get; set; } = default!;
     
-    public abstract string Message { get; }
+    protected internal abstract string Message { get; }
     
-    public abstract string DefaultMessage { get; }
+    protected abstract string DefaultMessage { get; }
     
-    public bool Assert(TActual? actualValue)
+    internal bool Assert(TActual? actualValue)
     {
         ActualValue = actualValue;
         return Passes(actualValue);

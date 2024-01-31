@@ -10,7 +10,7 @@ public class GreaterThanAssertCondition<TActual, TExpected> : AssertCondition<TA
     {
     }
 
-    public override string DefaultMessage => $"{ActualValue} is not greater than {ExpectedValue}";
+    protected override string DefaultMessage => $"{ActualValue} is not greater than {ExpectedValue}";
 
     protected internal override bool Passes(TActual? actualValue)
     {

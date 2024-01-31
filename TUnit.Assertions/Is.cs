@@ -21,6 +21,7 @@ public partial class Is
     }
 
     public static AssertCondition<object, object> Null => new NullAssertCondition();
+    public static AssertCondition<object, TExpected> TypeOf<TExpected>() => new TypeOfAssertCondition<object, TExpected>();
 
     public static Not Not => new();
 }

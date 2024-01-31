@@ -8,7 +8,7 @@ public class HasCountAssertCondition<TActual> : AssertCondition<IEnumerable<TAct
     {
     }
 
-    public override string DefaultMessage => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
+    protected override string DefaultMessage => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
     
     protected internal override bool Passes(IEnumerable<TActual>? actualValue)
     {

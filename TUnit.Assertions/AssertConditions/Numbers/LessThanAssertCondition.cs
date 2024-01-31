@@ -10,7 +10,7 @@ public class LessThanAssertCondition<TActual, TExpected> : AssertCondition<TActu
     {
     }
 
-    public override string DefaultMessage => $"{ActualValue} is not less than {ExpectedValue}";
+    protected override string DefaultMessage => $"{ActualValue} is not less than {ExpectedValue}";
 
     protected internal override bool Passes(TActual? actualValue)
     {

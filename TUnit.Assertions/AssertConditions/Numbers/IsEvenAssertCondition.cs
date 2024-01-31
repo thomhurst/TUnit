@@ -9,7 +9,7 @@ public class IsEvenAssertCondition<TActual> : AssertCondition<TActual, TActual>
     {
     }
 
-    public override string DefaultMessage => $"{ActualValue} is not even";
+    protected override string DefaultMessage => $"{ActualValue} is not even";
 
     protected internal override bool Passes(TActual? actualValue)
     {

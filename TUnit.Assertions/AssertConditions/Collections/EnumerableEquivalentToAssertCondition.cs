@@ -6,7 +6,7 @@ public class EnumerableEquivalentToAssertCondition<T> : AssertCondition<IEnumera
     {
     }
 
-    public override string DefaultMessage => "The two Enumerables were not equivalent";
+    protected override string DefaultMessage => "The two Enumerables were not equivalent";
 
     protected internal override bool Passes(IEnumerable<T>? actualValue)
     {

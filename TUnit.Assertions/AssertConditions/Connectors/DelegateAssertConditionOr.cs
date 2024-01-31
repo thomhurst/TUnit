@@ -13,7 +13,7 @@ public sealed class DelegateAssertConditionOr<TActual> : DelegateAssertCondition
         _condition2 = condition2;
     }
 
-    public override string DefaultMessage => $"{_condition1.Message} & {_condition2.Message}";
+    protected override string DefaultMessage => $"{_condition1.Message} & {_condition2.Message}";
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {

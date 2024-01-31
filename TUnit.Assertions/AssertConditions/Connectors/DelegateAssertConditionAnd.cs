@@ -13,7 +13,7 @@ public sealed class DelegateAssertConditionAnd<TActual> : DelegateAssertConditio
         _condition2 = condition2;
     }
 
-    public override string DefaultMessage =>
+    protected override string DefaultMessage =>
         !_condition1.Passes(ActualValue, Exception) ? _condition1.Message :
         !_condition2.Passes(ActualValue, Exception) ? _condition2.Message : string.Empty;
 

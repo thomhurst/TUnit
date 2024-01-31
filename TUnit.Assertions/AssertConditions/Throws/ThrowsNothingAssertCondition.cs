@@ -4,7 +4,7 @@ public class ThrowsNothingAssertCondition : DelegateAssertCondition
 {
     private Exception? _exception;
 
-    public override string DefaultMessage => $"A {_exception?.GetType().Name} was thrown";
+    protected override string DefaultMessage => $"A {_exception?.GetType().Name} was thrown";
 
     protected internal override bool Passes(Exception? exception)
     {

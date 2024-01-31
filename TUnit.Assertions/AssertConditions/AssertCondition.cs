@@ -11,7 +11,7 @@ public abstract class AssertCondition<TActual, TExpected> : BaseAssertCondition<
     
     private Func<TActual?, string>? MessageFactory { get; set; }
 
-    public override string Message => MessageFactory?.Invoke(ActualValue) ?? DefaultMessage;
+    protected internal override string Message => MessageFactory?.Invoke(ActualValue) ?? DefaultMessage;
     
     public AssertCondition<TActual, TExpected> WithMessage(Func<TActual?, string> messageFactory)
     {

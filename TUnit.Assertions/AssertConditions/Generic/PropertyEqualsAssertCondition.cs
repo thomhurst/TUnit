@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertConditions.Generic;
 public class PropertyEqualsAssertCondition<TActual, TExpected>(string propertyName, TExpected expected)
     : AssertCondition<TActual, TExpected>(expected)
 {
-    public override string DefaultMessage => $"Expected {ExpectedValue} but received {ActualValue}";
+    protected override string DefaultMessage => $"Expected {ExpectedValue} but received {ActualValue}";
 
     protected internal override bool Passes(TActual? actualValue)
     {

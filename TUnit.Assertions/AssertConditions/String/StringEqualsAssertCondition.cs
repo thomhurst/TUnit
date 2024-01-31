@@ -14,7 +14,7 @@ public class StringEqualsAssertCondition : AssertCondition<string, string>
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }
 
-    public override string DefaultMessage => $"""
+    protected override string DefaultMessage => $"""
                                               Expected "{ExpectedValue}" but received "{ActualValue}"
                                               """;
 }

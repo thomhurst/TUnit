@@ -15,7 +15,7 @@ public abstract class DelegateAssertCondition<T>
         return Passes(ActualValue, Exception);
     }
 
-    public abstract string DefaultMessage { get; }
+    protected abstract string DefaultMessage { get; }
 
     protected internal abstract bool Passes(T? actualValue, Exception? exception);
 
@@ -41,7 +41,7 @@ public abstract class DelegateAssertCondition
         return Passes(Exception);
     }
 
-    public abstract string DefaultMessage { get; }
+    protected abstract string DefaultMessage { get; }
 
     protected internal abstract bool Passes(Exception? exception);
 

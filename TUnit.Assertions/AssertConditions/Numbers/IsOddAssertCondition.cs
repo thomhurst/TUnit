@@ -9,7 +9,7 @@ public class IsOddAssertCondition<TActual> : AssertCondition<TActual, TActual>
     {
     }
 
-    public override string DefaultMessage => $"{ActualValue} is not odd";
+    protected override string DefaultMessage => $"{ActualValue} is not odd";
 
     protected internal override bool Passes(TActual? actualValue)
     {

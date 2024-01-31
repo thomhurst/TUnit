@@ -9,7 +9,7 @@ public class ZeroAssertCondition<TActual> : AssertCondition<TActual, TActual>
     {
     }
 
-    public override string DefaultMessage => $"{ActualValue} is not equal to 0";
+    protected override string DefaultMessage => $"{ActualValue} is not equal to 0";
 
     protected internal override bool Passes(TActual? actualValue)
     {
