@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Analyzers;
 
@@ -13,8 +14,6 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
 {
-    public const string CompanyName = "MyCompany";
-
     // Preferred format of DiagnosticId is Your Prefix + Number, e.g. CA1234.
     public const string DiagnosticId = "TUnit0001";
 
@@ -31,7 +30,6 @@ public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
         new LocalizableResourceString(nameof(Resources.TUnit0001Description), Resources.ResourceManager,
             typeof(Resources));
 
-    // The category of the diagnostic (Design, Naming etc.).
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId, Title, MessageFormat, Category,
@@ -52,15 +50,9 @@ public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
         // Subscribe to the Syntax Node with the appropriate 'SyntaxKind' (ClassDeclaration) action.
         // To figure out which Syntax Nodes you should choose, consider installing the Roslyn syntax tree viewer plugin Rossynt: https://plugins.jetbrains.com/plugin/16902-rossynt/
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.SimpleMemberAccessExpression);
-
-        // Check other 'context.Register...' methods that might be helpful for your purposes.
     }
-
-    /// <summary>
-    /// Executed for each Syntax Node with 'SyntaxKind' is 'ClassDeclaration'.
-    /// </summary>
-    /// <param name="context">Operation context.</param>
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    
+    private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
     {
         // The Roslyn architecture is based on inheritance.
         // To get the required metadata, we should match the 'Node' object to the particular type: 'ClassDeclarationSyntax'.
@@ -72,7 +64,7 @@ public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (memberAccessExpressionSyntax.Parent?.Parent is not InvocationExpressionSyntax invocationExpressionSyntax)
+        if (memberAccessExpressionSyntax.GetAncestorSyntaxOfType<InvocationExpressionSyntax>() is not { } invocationExpressionSyntax)
         {
             return;
         }
