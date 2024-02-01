@@ -1,5 +1,3 @@
-using Is = TUnit.Assertions.Is;
-
 namespace TUnit.Assertions.UnitTests;
 
 
