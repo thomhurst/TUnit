@@ -2,15 +2,15 @@
 
 public class AndIs<TActual>
 {
-    private readonly BaseAssertCondition<TActual> _otherAssertCondition;
+    internal BaseAssertCondition<TActual> OtherAssertCondition { get; }
 
     public AndIs(BaseAssertCondition<TActual> otherAssertCondition)
     {
-        _otherAssertCondition = otherAssertCondition;
+        OtherAssertCondition = otherAssertCondition;
     }
     
     public AssertConditionAnd<TActual> EqualTo<TExpected>(TExpected expected)
     {
-        return new AssertConditionAnd<TActual>(_otherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
+        return new AssertConditionAnd<TActual>(OtherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
     }
 }

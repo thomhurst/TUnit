@@ -2,15 +2,15 @@
 
 public class OrIs<TActual>
 {
-    private readonly BaseAssertCondition<TActual> _otherAssertCondition;
+    internal BaseAssertCondition<TActual> OtherAssertCondition { get; }
 
     public OrIs(BaseAssertCondition<TActual> otherAssertCondition)
     {
-        _otherAssertCondition = otherAssertCondition;
+        OtherAssertCondition = otherAssertCondition;
     }
     
     public AssertConditionOr<TActual> EqualTo<TExpected>(TExpected expected)
     {
-        return new AssertConditionOr<TActual>(_otherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
+        return new AssertConditionOr<TActual>(OtherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
     }
 }

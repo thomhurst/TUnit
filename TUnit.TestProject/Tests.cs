@@ -213,7 +213,7 @@ public class Tests
     {
         var list = new[] { 1, 2, 3 };
         Assert.That(list, Has.Length.EqualTo(1));
-        Assert.That(list, Is.TypeOf<string>().And.Has.Length.EqualTo(1));
+        Assert.That(list).);
     }
     
     public static int One() => 1;

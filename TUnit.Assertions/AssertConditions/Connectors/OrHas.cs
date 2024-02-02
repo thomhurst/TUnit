@@ -2,10 +2,10 @@
 
 public class OrHas<TActual>
 {
-    private readonly BaseAssertCondition<TActual> _otherAssertConditions;
+    internal BaseAssertCondition<TActual> OtherAssertCondition { get; }
 
-    public OrHas(BaseAssertCondition<TActual> otherAssertConditions)
+    public OrHas(BaseAssertCondition<TActual> otherAssertCondition)
     {
-        _otherAssertConditions = otherAssertConditions;
+        OtherAssertCondition = otherAssertCondition;
     }
 }
