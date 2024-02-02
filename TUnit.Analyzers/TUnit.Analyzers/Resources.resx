@@ -30,4 +30,16 @@
     <data name="TUnit0001CodeFixTitle" xml:space="preserve">
         <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The title of the code fix.</comment>
     </data>
+    <data name="TUnit0002Description" xml:space="preserve">
+        <value>Assert statements must be awaited.</value><comment>An optional longer localizable description of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0002MessageFormat" xml:space="preserve">
+        <value>Assert statements must be awaited</value><comment>The format-able message the diagnostic displays.</comment>
+    </data>
+    <data name="TUnit0002Title" xml:space="preserve">
+        <value>Assert statements must be awaited</value><comment>The title of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0002CodeFixTitle" xml:space="preserve">
+        <value>Assert statements must be awaited</value><comment>The title of the code fix.</comment>
+    </data>
 </root>

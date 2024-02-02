@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.Attributes;
+﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class RepeatAttribute : TUnitAttribute

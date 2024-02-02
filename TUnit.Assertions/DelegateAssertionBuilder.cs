@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions;
+﻿namespace TUnit.Assertions;
 
 public class DelegateAssertionBuilder<T> : AssertionBuilder<T>
 {

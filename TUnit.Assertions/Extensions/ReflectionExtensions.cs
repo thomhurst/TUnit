@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.Extensions;
+﻿namespace TUnit.Assertions;
 
 public static class ReflectionExtensions
 {

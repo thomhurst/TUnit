@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using TUnit.Core.Attributes;
 
 namespace TUnit.Core;
 

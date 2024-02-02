@@ -94,5 +94,41 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0001Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assert statements must be awaited.
+        /// </summary>
+        internal static string TUnit0002CodeFixTitle {
+            get {
+                return ResourceManager.GetString("TUnit0002CodeFixTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assert statements must be awaited..
+        /// </summary>
+        internal static string TUnit0002Description {
+            get {
+                return ResourceManager.GetString("TUnit0002Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assert statements must be awaited.
+        /// </summary>
+        internal static string TUnit0002MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0002MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assert statements must be awaited.
+        /// </summary>
+        internal static string TUnit0002Title {
+            get {
+                return ResourceManager.GetString("TUnit0002Title", resourceCulture);
+            }
+        }
     }
 }

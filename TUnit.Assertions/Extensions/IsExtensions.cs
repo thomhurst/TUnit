@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Numerics;
+﻿using System.Numerics;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Numbers;
 using TUnit.Assertions.AssertConditions.String;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions;
 
 public static class IsExtensions
 {

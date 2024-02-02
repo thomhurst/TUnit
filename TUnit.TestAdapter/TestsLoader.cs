@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using TUnit.Core;
-using TUnit.Core.Attributes;
 using TUnit.Engine;
 
 namespace TUnit.TestAdapter;

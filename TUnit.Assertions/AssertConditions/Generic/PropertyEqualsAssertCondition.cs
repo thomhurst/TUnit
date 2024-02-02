@@ -1,5 +1,3 @@
-using TUnit.Assertions.Extensions;
-
 namespace TUnit.Assertions.AssertConditions.Generic;
 
 public class PropertyEqualsAssertCondition<TActual, TExpected>(AssertionBuilder<TActual> assertionBuilder, string propertyName, TExpected expected)

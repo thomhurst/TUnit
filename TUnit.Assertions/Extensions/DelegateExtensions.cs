@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.Extensions;
+﻿namespace TUnit.Assertions;
 
 internal static class DelegateExtensions
 {

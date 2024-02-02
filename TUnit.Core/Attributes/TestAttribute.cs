@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.Attributes;
+﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class TestAttribute : TUnitAttribute;

@@ -1,10 +1,9 @@
 ﻿using System.Numerics;
-using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Numbers;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions;
 
 public static class AndIsExtensions
 {

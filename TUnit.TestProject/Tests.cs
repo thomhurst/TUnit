@@ -1,7 +1,5 @@
 using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.Core;
-using TUnit.Core.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -213,7 +211,7 @@ public class Tests
     public void Count4()
     {
         var list = new[] { 1, 2, 3 };
-        Assert.That(list).Is.EquivalentTo(new []{1});
+        Assert.That(list).Has.Count.EqualTo(3);
     }
     
     public static int One() => 1;

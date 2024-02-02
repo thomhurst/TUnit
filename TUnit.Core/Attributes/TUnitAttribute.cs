@@ -1,3 +1,3 @@
-﻿namespace TUnit.Core.Attributes;
+﻿namespace TUnit.Core;
 
 public class TUnitAttribute : Attribute;
