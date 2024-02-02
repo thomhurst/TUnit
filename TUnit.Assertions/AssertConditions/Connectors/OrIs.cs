@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.Connectors;
+﻿using TUnit.Assertions.AssertConditions.Generic;
+
+namespace TUnit.Assertions.AssertConditions.Connectors;
 
 public class OrIs<TActual>
 {
@@ -11,6 +13,6 @@ public class OrIs<TActual>
     
     public AssertConditionOr<TActual> EqualTo<TExpected>(TExpected expected)
     {
-        return new AssertConditionOr<TActual>(OtherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
+        return new AssertConditionOr<TActual>(OtherAssertCondition, new EqualsAssertCondition<TActual, TExpected>(OtherAssertCondition.AssertionBuilder,  expected));
     }
 }

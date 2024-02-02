@@ -3,25 +3,32 @@ using TUnit.Assertions.AssertConditions.Generic;
 
 namespace TUnit.Assertions;
 
-public partial class Is
+public partial class Is<TActual>
 {
-    public static AssertCondition<TExpected, TExpected> EqualTo<TExpected>(TExpected expected)
+    internal readonly AssertionBuilder<TActual> AssertionBuilder;
+
+    public Is(AssertionBuilder<TActual> assertionBuilder)
     {
-        return new EqualsAssertCondition<TExpected, TExpected>(expected);
+        AssertionBuilder = assertionBuilder;
     }
     
-    internal static AssertCondition<TActual, TExpected> EqualTo<TActual, TExpected>(TExpected expected)
+    public AssertCondition<TActual, TActual> EqualTo(TActual expected)
     {
-        return new EqualsAssertCondition<TActual, TExpected>(expected);
+        return new EqualsAssertCondition<TActual, TActual>(AssertionBuilder, expected);
+    }
+    
+    internal AssertCondition<TActual, TExpected> EqualTo<TExpected>(TExpected expected)
+    {
+        return new EqualsAssertCondition<TActual, TExpected>(AssertionBuilder, expected);
     }
 
-    public static AssertCondition<T, T> SameReference<T>(T expected)
+    public AssertCondition<TActual, TActual> SameReference(TActual expected)
     {
-        return new SameReferenceAssertCondition<T, T>(expected);
+        return new SameReferenceAssertCondition<TActual, TActual>(AssertionBuilder, expected);
     }
 
-    public static AssertCondition<object, object> Null => new NullAssertCondition();
-    public static AssertCondition<object, TExpected> TypeOf<TExpected>() => new TypeOfAssertCondition<object, TExpected>();
+    public AssertCondition<TActual, TActual> Null => new NullAssertCondition<TActual>(AssertionBuilder);
+    public AssertCondition<TActual, TExpected> TypeOf<TExpected>() => new TypeOfAssertCondition<TActual, TExpected>(AssertionBuilder);
 
-    public static Not Not => new();
+    public Not<TActual> Not => new(AssertionBuilder);
 }

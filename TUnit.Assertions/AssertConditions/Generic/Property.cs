@@ -9,18 +9,18 @@ public class Property<TActual> : Property<TActual, object>
     {
     }
 
-    public Property(string name) : base(name)
+    public Property(AssertionBuilder<TActual> assertionBuilder, string name) : base(assertionBuilder, name)
     {
     }
 }
 
-public class Property<TActual, TExpected>(string name)
+public class Property<TActual, TExpected>(AssertionBuilder<TActual> assertionBuilder, string name)
 {
     private readonly ConnectorType? _connectorType;
     private readonly BaseAssertCondition<TActual>? _otherAssertConditions;
 
     public Property(string name, ConnectorType connectorType, BaseAssertCondition<TActual> otherAssertConditions) 
-        : this(name)
+        : this(otherAssertConditions.AssertionBuilder, name)
     {
         _connectorType = connectorType;
         _otherAssertConditions = otherAssertConditions;
@@ -28,7 +28,7 @@ public class Property<TActual, TExpected>(string name)
 
     public BaseAssertCondition<TActual> EqualTo(TExpected expected)
     {
-        var assertCondition = new PropertyEqualsAssertCondition<TActual, TExpected>(name, expected);
+        var assertCondition = new PropertyEqualsAssertCondition<TActual, TExpected>(assertionBuilder, name, expected);
 
         if (_connectorType is ConnectorType.And)
         {

@@ -3,8 +3,15 @@ using TUnit.Assertions.AssertConditions.Generic;
 
 namespace TUnit.Assertions;
 
-public class Not
+public class Not<TActual>
 {
-    public AssertCondition<object, object> Null => new NotNullAssertCondition();
-    public AssertCondition<object, TExpected> TypeOf<TExpected>() => new NotTypeOfAssertCondition<object, TExpected>();
+    internal readonly AssertionBuilder<TActual> AssertionBuilder;
+
+    public Not(AssertionBuilder<TActual> assertionBuilder)
+    {
+        AssertionBuilder = assertionBuilder;
+    }
+    
+    public AssertCondition<TActual, TActual> Null => new NotNullAssertCondition<TActual>(AssertionBuilder);
+    public AssertCondition<TActual, TExpected> TypeOf<TExpected>() => new NotTypeOfAssertCondition<TActual, TExpected>(AssertionBuilder);
 }

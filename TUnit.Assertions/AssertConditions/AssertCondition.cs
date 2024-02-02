@@ -4,7 +4,7 @@ public abstract class AssertCondition<TActual, TExpected> : BaseAssertCondition<
 {
     internal TExpected? ExpectedValue { get; }
     
-    internal AssertCondition(TExpected? expected)
+    internal AssertCondition(AssertionBuilder<TActual> assertionBuilder, TExpected? expected) : base(assertionBuilder)
     {
         ExpectedValue = expected;
     }

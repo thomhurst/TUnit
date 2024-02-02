@@ -1,65 +1,29 @@
-﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.Assertions.Exceptions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions;
+﻿namespace TUnit.Assertions;
 
 public static class Assert
 {
-    public static void That<TActual>(TActual value, BaseAssertCondition<TActual> assertCondition)
+    public static AssertionBuilder<TActual> That<TActual>(TActual value)
     {
-        if (!assertCondition.Assert(value))
-        {
-            throw new AssertionException(assertCondition.Message);
-        }
+        return new ValueAssertionBuilder<TActual>(value);
     }
     
-    public static Exception? That(Action value, DelegateAssertCondition assertCondition)
+    public static AssertionBuilder<object> That(Action value)
     {
-        var exception = value.InvokeAndGetException();
-
-        if (!assertCondition.Assert(exception))
-        {
-            throw new AssertionException(assertCondition.Message);
-        }
-
-        return exception;
+        return new DelegateAssertionBuilder(value);
     }
     
-    public static DelegateInvocationResult<T> That<T>(Func<T> value, DelegateAssertCondition<T> assertCondition)
+    public static AssertionBuilder<T> That<T>(Func<T> value)
     {
-        var delegateInvocationResult = value.InvokeAndGetException();
-
-        if (!assertCondition.Assert(delegateInvocationResult))
-        {
-            throw new AssertionException(assertCondition.Message);
-        }
-
-        return delegateInvocationResult;
+        return new DelegateAssertionBuilder<T>(value);
     }
     
-    public static async Task<Exception?> That(Func<Task> value, DelegateAssertCondition assertCondition)
+    public static AssertionBuilder<object> That(Func<Task> value)
     {
-        var exception = await value.InvokeAndGetExceptionAsync();
-
-        if (!assertCondition.Assert(exception))
-        {
-            throw new AssertionException(assertCondition.Message);
-        }
-
-        return exception;
+        return new AsyncDelegateAssertionBuilder(value);
     }
     
-    public static async Task<DelegateInvocationResult<T>> That<T>(Func<Task<T>> value, DelegateAssertCondition<T> assertCondition)
+    public static AssertionBuilder<T> That<T>(Func<Task<T>> value)
     {
-        var delegateInvocationResult = await value.InvokeAndGetExceptionAsync();
-
-        if (!assertCondition.Assert(delegateInvocationResult))
-        {
-            throw new AssertionException(assertCondition.Message);
-        }
-
-        return delegateInvocationResult;
+        return new AsyncDelegateAssertionBuilder<T>(value!);
     }
 }

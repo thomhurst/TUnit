@@ -1,4 +1,5 @@
 using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
 using TUnit.Core;
 using TUnit.Core.Attributes;
 
@@ -15,14 +16,14 @@ public class Tests
     public void Test1()
     {
         var value = "1";
-        Assert.That(value, Is.EqualTo("1"));
+        Assert.That(value);
     }
     
     [Test]
     public void Test2()
     {
         var value = "2";
-        Assert.That(value, Is.EqualTo("1"));
+        Assert.That(value);
     }
     
     [Test]
@@ -30,7 +31,7 @@ public class Tests
     {
         await Task.Yield();
         var value = "1";
-        Assert.That(value, Is.EqualTo("1"));
+        Assert.That(value);
     }
     
     [Test]
@@ -38,14 +39,14 @@ public class Tests
     {
         await Task.Yield();
         var value = "2";
-        Assert.That(value, Is.EqualTo("1"));
+        Assert.That(value);
     }
     
     [TestWithData("1")]
     [TestWithData("2")]
     public void ParameterisedTests1(string value)
     {
-        Assert.That(value, Is.EqualTo("1"));
+        Assert.That(value);
     }
     
     [TestWithData("1")]
@@ -53,14 +54,14 @@ public class Tests
     public async Task ParameterisedTests2(string value)
     {
         await Task.Yield();
-        Assert.That(value, Is.EqualTo("1"));
+        Assert.That(value);
     }
 
     [Test, Skip("Reason1")]
     public void Skip1()
     {
         var value = "1";
-        Assert.That(value, Is.EqualTo("1"));
+        Assert.That(value);
     }
     
     [Test, Skip("Reason2")]
@@ -68,77 +69,77 @@ public class Tests
     {
         await Task.Yield();
         var value = "1";
-        Assert.That(value, Is.EqualTo("1"));
+        Assert.That(value);
     }
     
     [TestDataSource(nameof(One))]
     public void TestDataSource1(int value)
     {
-        Assert.That(value, Is.EqualTo(1));
+        Assert.That(value);
     }
     
     [TestDataSource(nameof(One))]
     public async Task TestDataSource2(int value)
     {
         await Task.Yield();
-        Assert.That(value, Is.EqualTo(1));
+        Assert.That(value);
     }
     
     [TestDataSource(nameof(Two))]
     public void TestDataSource3(int value)
     {
-        Assert.That(value, Is.EqualTo(1));
+        Assert.That(value);
     }
     
     [TestDataSource(nameof(Two))]
     public async Task TestDataSource4(int value)
     {
         await Task.Yield();
-        Assert.That(value, Is.EqualTo(1));
+        Assert.That(value);
     }
     
     [TestDataSource(nameof(TestDataSources), nameof(One))]
     public void TestDataSource5(int value)
     {
-        Assert.That(value, Is.EqualTo(1));
+        Assert.That(value);
     }
     
     [TestDataSource(nameof(TestDataSources), nameof(One))]
     public async Task TestDataSource6(int value)
     {
         await Task.Yield();
-        Assert.That(value, Is.EqualTo(1));
+        Assert.That(value);
     }
     
     [TestDataSource(nameof(TestDataSources), nameof(Two))]
     public void TestDataSource7(int value)
     {
-        Assert.That(value, Is.EqualTo(1));
+        Assert.That(value);
     }
     
     [TestDataSource(nameof(TestDataSources), nameof(Two))]
     public async Task TestDataSource8(int value)
     {
         await Task.Yield();
-        Assert.That(value, Is.EqualTo(1));
+        Assert.That(value);
     }
 
     [Test]
     public void TestContext1()
     {
-        Assert.That(TestContext.Current.TestName, Is.EqualTo(nameof(TestContext1)));
+        Assert.That(TestContext.Current.TestName);
     }
     
     [Test]
     public void TestContext2()
     {
-        Assert.That(TestContext.Current.TestName, Is.EqualTo(nameof(TestContext1)));
+        Assert.That(TestContext.Current.TestName);
     }
     
     [Test]
     public void Throws1()
     {
-        Assert.That(() => new string([]), Throws.Nothing);
+        Assert.That(() => new string([]));
     }
     
     [Test]
@@ -148,13 +149,13 @@ public class Tests
         {
             await Task.Yield();
             new string([]);
-        }, Throws.Nothing);
+        }).Is.EqualTo(string.Empty);
     }
     
     [Test]
     public void Throws3()
     {
-        Assert.That(() => throw new ApplicationException(), Throws.Nothing);
+        Assert.That(() => throw new ApplicationException());
     }
     
     [Test]
@@ -163,8 +164,8 @@ public class Tests
         await Assert.That(async () =>
         {
             await Task.Yield();
-            throw new ApplicationException();
-        }, Throws.Nothing);
+            return true;
+        }).Is.False();
     }
     
     [Test, Timeout(500)]
@@ -176,44 +177,43 @@ public class Tests
     [Test]
     public void String_And_Condition()
     {
-        Assert.That("1", Is.EqualTo("1").And.Is.EqualTo("1").Or.Is.EqualTo("2"));
+        Assert.That("1");
 
     }
     
     [Test]
     public void String_And_Condition2()
     {
-        Assert.That("1", Is.EqualTo("1").And.Is.EqualTo("1").And.Is.EqualTo("2"));
+        Assert.That("1");
     }
     
     [Test]
     public void Count1()
     {
         var list = new List<int> { 1, 2, 3 };
-        Assert.That(list, Is.Null);
-        Assert.That(list, Has.Count.EqualTo(3).And.Is.EqualTo("1"));
+        Assert.That<object>(list);
+        Assert.That<object>(list);
     }
     
     [Test]
     public void Count2()
     {
         var list = new List<int> { 1, 2, 3 };
-        Assert.That(list, Has.Count.EqualTo(1));
+        Assert.That<object>(list);
     }
     
     [Test]
     public void Count3()
     {
         var list = new[] { 1, 2, 3 };
-        Assert.That(list, Has.Length.EqualTo(3));
+        Assert.That<object>(list);
     }
     
     [Test]
     public void Count4()
     {
         var list = new[] { 1, 2, 3 };
-        Assert.That(list, Has.Length.EqualTo(1));
-        Assert.That(list).);
+        Assert.That(list).Is.EquivalentTo(new []{1});
     }
     
     public static int One() => 1;

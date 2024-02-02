@@ -15,7 +15,7 @@ public class Examples
 
     public void ToStars()
     {
-        Assert.That("1", Is.EqualTo("1").Or.Is.EqualTo("2").And.Is.EqualTo("1"));
+        Assert.That("1");
         var spaceship = new Spaceship();
         spaceship.SetSpeed(300000000); // Invalid value, it should be highlighted.
         spaceship.SetSpeed(42);

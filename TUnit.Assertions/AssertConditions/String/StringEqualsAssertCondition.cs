@@ -4,12 +4,12 @@ public class StringEqualsAssertCondition : AssertCondition<string, string>
 {
     private readonly StringComparison _stringComparison;
     
-    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : base(expected)
+    public StringEqualsAssertCondition(AssertionBuilder<string> assertionBuilder, string expected, StringComparison stringComparison) : base(assertionBuilder, expected)
     {
         _stringComparison = stringComparison;
     }
     
-    protected internal override bool Passes(string? actualValue)
+    protected internal override bool Passes(string? actualValue, Exception? exception)
     {
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }

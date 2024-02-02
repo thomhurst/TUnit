@@ -2,12 +2,19 @@
 
 namespace TUnit.Assertions;
 
-public static class Has
+public class Has<T>
 {
-    public static Property<object, int> Count => new("Count");
-    public static Property<object, int> Length => new("Length");
-    public static Property<object> Value => new("Value");
+    internal AssertionBuilder<T> AssertionBuilder { get; }
+
+    public Has(AssertionBuilder<T> assertionBuilder)
+    {
+        AssertionBuilder = assertionBuilder;
+    }
     
-    public static Property<object> Property(string name) => new(name);
-    public static Property<object, T> Property<T>(string name) => new(name);
+    public Property<T, int> Count => new(AssertionBuilder, "Count");
+    public Property<T, int> Length => new(AssertionBuilder, "Length");
+    public Property<T> Value => new(AssertionBuilder, "Value");
+    
+    public Property<T> Property(string name) => new(AssertionBuilder, name);
+    public Property<T, TPropertyType> Property<TPropertyType>(string name) => new(AssertionBuilder, name);
 }

@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.Connectors;
+﻿using TUnit.Assertions.AssertConditions.Generic;
+
+namespace TUnit.Assertions.AssertConditions.Connectors;
 
 public class AndIs<TActual>
 {
@@ -11,6 +13,6 @@ public class AndIs<TActual>
     
     public AssertConditionAnd<TActual> EqualTo<TExpected>(TExpected expected)
     {
-        return new AssertConditionAnd<TActual>(OtherAssertCondition, Is.EqualTo<TActual, TExpected>(expected));
+        return new AssertConditionAnd<TActual>(OtherAssertCondition, new EqualsAssertCondition<TActual, TExpected>(OtherAssertCondition.AssertionBuilder,  expected));
     }
 }

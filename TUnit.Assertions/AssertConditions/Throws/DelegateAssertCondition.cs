@@ -7,10 +7,10 @@ public abstract class DelegateAssertCondition<T>
     protected Exception? Exception { get; set; }
     protected T? ActualValue { get; set; } = default!;
 
-    public bool Assert(DelegateInvocationResult<T> delegateInvocationResult)
+    public bool Assert(AssertionData<T> assertionData)
     {
-        ActualValue = delegateInvocationResult.Result;
-        Exception = delegateInvocationResult.Exception;
+        ActualValue = assertionData.Result;
+        Exception = assertionData.Exception;
         
         return Passes(ActualValue, Exception);
     }

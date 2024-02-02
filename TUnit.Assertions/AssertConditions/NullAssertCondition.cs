@@ -1,15 +1,13 @@
-using TUnit.Assertions.AssertConditions;
+namespace TUnit.Assertions.AssertConditions;
 
-namespace TUnit.Assertions;
-
-public class NullAssertCondition : AssertCondition<object,object>
+public class NullAssertCondition<TActual> : AssertCondition<TActual, TActual>
 {
-    public NullAssertCondition() : base(null)
+    public NullAssertCondition(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder, default)
     {
     }
 
     protected override string DefaultMessage => $"{ActualValue} is not null";
-    protected internal override bool Passes(object? actualValue)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
         return actualValue is null;
     }

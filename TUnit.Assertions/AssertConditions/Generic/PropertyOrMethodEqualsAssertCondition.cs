@@ -2,12 +2,12 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class PropertyOrMethodEqualsAssertCondition<TExpected>(string propertyName, TExpected expected)
-    : AssertCondition<object, TExpected>(expected)
+public class PropertyOrMethodEqualsAssertCondition<TActual, TExpected>(AssertionBuilder<TActual> assertionBuilder, string propertyName, TExpected expected)
+    : AssertCondition<TActual, TExpected>(assertionBuilder,  expected)
 {
     protected override string DefaultMessage => $"Expected {ExpectedValue} but received {ActualValue}";
 
-    protected internal override bool Passes(object? actualValue)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
         var propertyValue = GetPropertyValue(actualValue);
 
