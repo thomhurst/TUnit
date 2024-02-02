@@ -1,14 +1,15 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsNothingAssertCondition : DelegateAssertCondition
+public class ThrowsNothingAssertCondition : AssertCondition<object, object>
 {
-    private Exception? _exception;
-
-    protected override string DefaultMessage => $"A {_exception?.GetType().Name} was thrown";
-
-    protected internal override bool Passes(Exception? exception)
+    public ThrowsNothingAssertCondition(AssertionBuilder<object> assertionBuilder, object? expected) : base(assertionBuilder, expected)
     {
-        _exception = exception;
-        return exception == null;
+    }
+    
+    protected override string DefaultMessage => $"A {Exception?.GetType().Name} was thrown";
+
+    protected internal override bool Passes(object? actualValue, Exception? exception)
+    {
+        return exception is null;
     }
 }
