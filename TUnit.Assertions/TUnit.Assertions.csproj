@@ -11,5 +11,5 @@
       <Folder Include="AssertConditions\ConditionEntries\" />
       <Folder Include="Models\" />
     </ItemGroup>
-
+    
 </Project>
