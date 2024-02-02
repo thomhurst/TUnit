@@ -1,14 +1,15 @@
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableEquivalentToAssertCondition<T> : AssertCondition<IEnumerable<T>, IEnumerable<T>>
+public class EnumerableEquivalentToAssertCondition<T, TInner> : AssertCondition<T, IEnumerable<TInner>>
+    where T : IEnumerable<TInner>
 {
-    public EnumerableEquivalentToAssertCondition(AssertionBuilder<IEnumerable<T>> assertionBuilder, IEnumerable<T> expected) : base(assertionBuilder, expected)
+    public EnumerableEquivalentToAssertCondition(AssertionBuilder<T> assertionBuilder, IEnumerable<TInner> expected) : base(assertionBuilder, expected)
     {
     }
 
     protected override string DefaultMessage => "The two Enumerables were not equivalent";
 
-    protected internal override bool Passes(IEnumerable<T>? actualValue, Exception? exception)
+    protected internal override bool Passes(T? actualValue, Exception? exception)
     {
         if (actualValue is null && ExpectedValue is null)
         {

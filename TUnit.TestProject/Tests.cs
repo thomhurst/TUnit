@@ -203,7 +203,10 @@ public class Tests
     [Test]
     public void Count3()
     {
-        var list = new[] { 1, 2, 3 };
+        var list = new[] { 1, 2, 3 }.ToArray();
+
+        Assert.That(list).Is.EquivalentTo(new List<int> { 1, 2, 3 });
+        
         Assert.That<object>(list);
     }
     

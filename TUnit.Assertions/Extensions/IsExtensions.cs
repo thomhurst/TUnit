@@ -65,10 +65,10 @@ public static class IsExtensions
 
     #region Enumerables
 
-    public static EnumerableEquivalentToAssertCondition<TInner> EquivalentTo<T, TInner>(this Is<IEnumerable<TInner>> @is, T expected)
+    public static AssertCondition<T, IEnumerable<TInner>> EquivalentTo<T, TInner>(this Is<T> @is, IEnumerable<TInner> expected)
     where T : IEnumerable<TInner>
     {
-        return new EnumerableEquivalentToAssertCondition<TInner>(@is.AssertionBuilder, expected);
+        return new EnumerableEquivalentToAssertCondition<T, TInner>(@is.AssertionBuilder, expected);
     }
 
     #endregion
