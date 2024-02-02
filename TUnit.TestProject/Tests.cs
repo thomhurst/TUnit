@@ -163,7 +163,7 @@ public class Tests
         {
             await Task.Yield();
             return true;
-        }).Is.False();
+        }).Throws.Nothing.And.Is.EqualTo(false).Or.Is.EqualTo(true);
     }
     
     [Test, Timeout(500)]

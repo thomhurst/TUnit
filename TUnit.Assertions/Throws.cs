@@ -2,7 +2,13 @@
 
 namespace TUnit.Assertions;
 
-public static class Throws
+public class Throws<TActual>
 {
-    public static ThrowsNothingAssertCondition Nothing => new();
+    internal AssertionBuilder<TActual> AssertionBuilder { get; }
+
+    public Throws(AssertionBuilder<TActual> assertionBuilder)
+    {
+        AssertionBuilder = assertionBuilder;
+    }
+    public ThrowsNothingAssertCondition<TActual> Nothing => new(AssertionBuilder);
 }
