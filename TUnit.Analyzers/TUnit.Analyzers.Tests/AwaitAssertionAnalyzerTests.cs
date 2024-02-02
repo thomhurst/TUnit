@@ -1,24 +1,27 @@
 using System.Threading.Tasks;
-using Xunit;
+using NUnit.Framework;
 using Verifier =
-    Microsoft.CodeAnalysis.CSharp.Testing.XUnit.AnalyzerVerifier<
-        TUnit.Analyzers.AwaitAssertionAnalyzer>;
+    ModularPipelines.Analyzers.Test.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.AwaitAssertionAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
 public class AwaitAssertionAnalyzerTests
 {
-    [Fact]
+    [Test]
     public async Task ClassWithMyCompanyTitle_AlertDiagnostic()
     {
         const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Assertions;
+                            using TUnit.Core;
+                            
                             public class MyClass
                             {
 
                                 public async Task MyTest()
                                 {
                                     var one = 1;
-                                    {|#0:Assert.That(one).Is.EqualTo(1)|};
+                                    {|#0:Assert.That(one).Is.EqualTo(1);|}
                                 }
 
                             }
