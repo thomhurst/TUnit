@@ -6,6 +6,9 @@ public class DelegateAssertionBuilder<T> : AssertionBuilder<T>
 {
     private readonly Func<T?> _function;
     
+    public Does<T> Does => new(this, ConnectorType.None, null);
+    public Is<T> Is => new(this, ConnectorType.None, null);
+    public Has<T> Has => new(this, ConnectorType.None, null);
     public Throws<T> Throws => new(this, ConnectorType.None, null);
 
     internal DelegateAssertionBuilder(Func<T?> function)

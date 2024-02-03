@@ -2,7 +2,7 @@
 
 public static class Assert
 {
-    public static AssertionBuilder<TActual> That<TActual>(TActual value)
+    public static ValueAssertionBuilder<TActual> That<TActual>(TActual value)
     {
         return new ValueAssertionBuilder<TActual>(value);
     }
