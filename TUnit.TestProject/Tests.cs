@@ -147,7 +147,7 @@ public class Tests
         {
             await Task.Yield();
             new string([]);
-        }).Is.EqualTo(string.Empty);
+        }).Is.Not.EqualTo(string.Empty);
     }
 
     [Test]
@@ -180,6 +180,7 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Fail")]
     public async Task String_And_Condition2()
     {
         await Assert.That("1").Is.EqualTo("2").And.Has.Length().EqualTo(2);
@@ -193,10 +194,11 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Fail")]
     public async Task Count2()
     {
         var list = new List<int> { 1, 2, 3 };
-        await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3 }).And.Has.Count().EqualTo(5);
+        await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 }).And.Has.Count().EqualTo(5);
     }
 
     public static int One() => 1;

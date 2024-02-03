@@ -27,5 +27,5 @@ public class Is<TActual> : Connector<TActual>
 
     public BaseAssertCondition<TActual> TypeOf<TExpected>() => Wrap(new TypeOfAssertCondition<TActual, TExpected>(AssertionBuilder));
 
-    public IsNot<TActual> IsNot => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
+    public IsNot<TActual> Not => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
 }
