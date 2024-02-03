@@ -67,27 +67,49 @@ public class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger mess
     private bool TestMatchesFilter(TestDetails test, Filter filter)
     {
         messageLogger.SendMessage(TestMessageLevel.Informational, test.ToString());
-        
-        if (filter.RunnableTestNames.Contains(test.SimpleMethodName))
-        {
-            return true;
-        }
 
-        if (filter.RunnableCategories.Intersect(test.Categories).Any())
-        {
-            return true;
-        }
-
-        if (filter.RunnableClasses.Contains(test.ClassType.Name))
+        if (filter.IsEmpty)
         {
             return true;
         }
         
-        if (filter.RunnableFullyQualifiedClasses.Contains(test.ClassType.FullName!))
+        if (filter.BannedCategories.Intersect(test.Categories).Any())
         {
-            return true;
+            return false;
         }
 
-        return false;
+        return AllowedTestName(test, filter)
+            && AllowedCategory(test, filter)
+            && AllowedClass(test, filter);
+    }
+
+    private static bool AllowedTestName(TestDetails test, Filter filter)
+    {
+        return !filter.RunnableTestNames.Any() ||
+               filter.RunnableTestNames.Contains(test.SimpleMethodName, StringComparer.InvariantCultureIgnoreCase);
+    }
+    
+    private static bool AllowedCategory(TestDetails test, Filter filter)
+    {
+        return !filter.RunnableCategories.Any() ||
+               filter.RunnableCategories.Intersect(test.Categories, StringComparer.InvariantCultureIgnoreCase).Any();
+    }
+    
+    private static bool AllowedClass(TestDetails test, Filter filter)
+    {
+        return AllowedSimpleClass(test, filter)
+            && AllowedFullyQualifiedClass(test, filter);
+    }
+    
+    private static bool AllowedSimpleClass(TestDetails test, Filter filter)
+    {
+        return !filter.RunnableClasses.Any() ||
+               filter.RunnableClasses.Contains(test.ClassType.Name, StringComparer.InvariantCultureIgnoreCase);
+    }
+    
+    private static bool AllowedFullyQualifiedClass(TestDetails test, Filter filter)
+    {
+        return !filter.RunnableFullyQualifiedClasses.Any() ||
+               filter.RunnableFullyQualifiedClasses.Contains(test.ClassType.FullName, StringComparer.InvariantCultureIgnoreCase);
     }
 }

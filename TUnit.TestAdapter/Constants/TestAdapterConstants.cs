@@ -11,9 +11,10 @@ internal static class TestAdapterConstants
     
     public static class Filters
     {
-        public static readonly IReadOnlyList<string> KnownFilters = [TestName, TestClasses, Categories];
+        public static readonly IReadOnlyList<string> KnownFilters = [TestName, TestClass, Category, NotCategory];
         public const string TestName = "TestName";
-        public const string TestClasses = "TestClass";
-        public const string Categories = "Category";
+        public const string TestClass = "TestClass";
+        public const string Category = "Category";
+        public const string NotCategory = "NotCategory";
     }
 }
