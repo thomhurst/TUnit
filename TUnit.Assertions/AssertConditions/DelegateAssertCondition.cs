@@ -4,9 +4,13 @@ public class DelegateAssertCondition<TActual, TExpected> : AssertCondition<TActu
 {
     private readonly Func<TActual?, TExpected?, Exception?, bool> _condition;
 
-    public DelegateAssertCondition(AssertionBuilder<TActual> assertionBuilder, TExpected? expected, Func<TActual?, TExpected?, Exception?, bool> condition) : base(assertionBuilder, expected)
+    public DelegateAssertCondition(AssertionBuilder<TActual> assertionBuilder, 
+        TExpected? expected, 
+        Func<TActual?, TExpected?, Exception?, bool> condition,
+        Func<TActual?, TExpected?, Exception?, string> messageFactory) : base(assertionBuilder, expected)
     {
         _condition = condition;
+        WithMessage(messageFactory);
     }
 
     protected override string DefaultMessage { get; }
