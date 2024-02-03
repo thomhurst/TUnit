@@ -53,12 +53,46 @@ public static class IsExtensions
     
     public static AssertCondition<T, T> Even<T>(this Is<T> @is) where T : INumber<T>, IModulusOperators<T, int, int>
     {
-        return new IsEvenAssertCondition<T>(@is.AssertionBuilder);
+        return new DelegateAssertCondition<T, T>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value % 2 == 0;
+            },
+            (value, _, _) => $"{value} was not even");
     }
     
     public static AssertCondition<T, T> Odd<T>(this Is<T> @is) where T : INumber<T>, IModulusOperators<T, int, int>
     {
-        return new IsOddAssertCondition<T>(@is.AssertionBuilder);
+        return new DelegateAssertCondition<T, T>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value % 2 != 0;
+            },
+            (value, _, _) => $"{value} was not odd");
+    }
+    
+    public static AssertCondition<T, T> Negative<T>(this Is<T> @is) where T : INumber<T>
+    {
+        return new DelegateAssertCondition<T, T>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value < T.Zero;
+            },
+            (value, _, _) => $"{value} was not negative");
+    }
+    
+    public static AssertCondition<T, T> Positive<T>(this Is<T> @is) where T : INumber<T>
+    {
+        return new DelegateAssertCondition<T, T>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value > T.Zero;
+            },
+            (value, _, _) => $"{value} was not positive");
     }
     
     #endregion

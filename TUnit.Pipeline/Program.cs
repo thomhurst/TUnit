@@ -2,7 +2,7 @@
 using ModularPipelines.Host;
 
 await PipelineHostBuilder.Create()
-    .ConfigureServices((context, collection) =>
+    .ConfigureServices((_, collection) =>
     {
         collection.AddModulesFromAssembly(typeof(Program).Assembly);
     })

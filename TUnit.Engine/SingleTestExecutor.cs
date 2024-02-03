@@ -140,7 +140,7 @@ public class SingleTestExecutor
         }
         
         var timeoutTask = Task.Delay(testDetails.Timeout, cancellationTokenSource.Token)
-            .ContinueWith(t => throw new TimeoutException(testDetails));
+            .ContinueWith(_ => throw new TimeoutException(testDetails));
 
         await await Task.WhenAny(timeoutTask, methodResult);
     }

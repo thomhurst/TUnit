@@ -14,63 +14,63 @@ public class EnumerableCount<T, TInner> where T : IEnumerable<TInner>
     
     public AssertCondition<T, int> EqualTo(int expected)
     {
-        return new DelegateAssertCondition<T, int>(AssertionBuilder, expected, (enumerable, count, arg3) =>
+        return new DelegateAssertCondition<T, int>(AssertionBuilder, expected, (enumerable, count, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) == count;
             },
-            (enumerable, count, arg3) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {count}");
+            (enumerable, count, _) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {count}");
     }
     
     public AssertCondition<T, int> Empty =>
-        new DelegateAssertCondition<T, int>(AssertionBuilder, 0, (enumerable, count, arg3) =>
+        new DelegateAssertCondition<T, int>(AssertionBuilder, 0, (enumerable, count, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) == count;
             },
-            (enumerable, count, arg3) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {count}");
+            (enumerable, count, _) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {count}");
 
     public AssertCondition<T, int> GreaterThan(int expected)
     {
         return new DelegateAssertCondition<T, int>(
             AssertionBuilder, 
             expected, 
-            (enumerable, count, arg3) =>
+            (enumerable, count, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) > count;
             },
-            (enumerable, count, arg3) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than {count}");
+            (enumerable, count, _) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than {count}");
     }
     
     public AssertCondition<T, int> GreaterThanOrEqualTo(int expected)
     {
-        return new DelegateAssertCondition<T, int>(AssertionBuilder, expected, (enumerable, count, arg3) =>
+        return new DelegateAssertCondition<T, int>(AssertionBuilder, expected, (enumerable, count, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) >= count;
             },
-            (enumerable, count, arg3) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than or equal to {count}");
+            (enumerable, count, _) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than or equal to {count}");
     }
     
     public AssertCondition<T, int> LessThan(int expected)
     {
-        return new DelegateAssertCondition<T, int>(AssertionBuilder, expected, (enumerable, count, arg3) =>
+        return new DelegateAssertCondition<T, int>(AssertionBuilder, expected, (enumerable, count, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) < count;
             },
-            (enumerable, count, arg3) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than {count}");
+            (enumerable, count, _) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than {count}");
     }
     
     public AssertCondition<T, int> LessThanOrEqualTo(int expected)
     {
-        return new DelegateAssertCondition<T, int>(AssertionBuilder, expected, (enumerable, count, arg3) =>
+        return new DelegateAssertCondition<T, int>(AssertionBuilder, expected, (enumerable, count, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) <= count;
             },
-            (enumerable, count, arg3) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than or equal to {count}");
+            (enumerable, count, _) => $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than or equal to {count}");
     }
     
     private int GetCount(T? actualValue)
