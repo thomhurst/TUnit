@@ -13,7 +13,8 @@ public class DelegateAssertCondition<TActual, TExpected> : AssertCondition<TActu
         WithMessage(messageFactory);
     }
 
-    protected override string DefaultMessage { get; }
+    protected override string DefaultMessage => string.Empty;
+
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
         return _condition(actualValue, ExpectedValue, exception);

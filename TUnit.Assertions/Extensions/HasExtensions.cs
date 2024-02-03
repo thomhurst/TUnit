@@ -1,5 +1,3 @@
-using TUnit.Assertions.AssertConditions.String;
-
 namespace TUnit.Assertions;
 
 public static class HasExtensions
