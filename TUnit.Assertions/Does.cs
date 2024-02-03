@@ -4,7 +4,7 @@ namespace TUnit.Assertions;
 
 public class Does<T>
 {
-    internal AssertionBuilder<T> AssertionBuilder { get; }
+    protected AssertionBuilder<T> AssertionBuilder { get; }
 
     public Does(AssertionBuilder<T> assertionBuilder)
     {

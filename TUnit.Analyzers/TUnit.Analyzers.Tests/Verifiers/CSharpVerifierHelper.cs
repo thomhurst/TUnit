@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace ModularPipelines.Analyzers.Test.Verifiers;
+namespace TUnit.Analyzers.Tests.Verifiers;
 
 internal static class CSharpVerifierHelper
 {

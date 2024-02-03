@@ -6,12 +6,10 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
-using TUnit.Analyzers;
-using TUnit.Analyzers.Tests;
 using TUnit.Assertions;
 using TUnit.Core;
 
-namespace ModularPipelines.Analyzers.Test.Verifiers;
+namespace TUnit.Analyzers.Tests.Verifiers;
 
 public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()

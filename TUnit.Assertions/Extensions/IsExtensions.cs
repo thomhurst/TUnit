@@ -13,7 +13,7 @@ public static class IsExtensions
 
     public static AssertCondition<string, string> EqualTo(this Is<string> @is, string expected)
     {
-        return new StringEqualsAssertCondition(@is.AssertionBuilder, expected, StringComparison.Ordinal);
+        return EqualTo(@is, expected, StringComparison.Ordinal);
     }
     
     public static AssertCondition<string, string> EqualTo(this Is<string> @is, string expected, StringComparison stringComparison)
@@ -66,9 +66,15 @@ public static class IsExtensions
     #region Enumerables
 
     public static AssertCondition<T, IEnumerable<TInner>> EquivalentTo<T, TInner>(this Is<T> @is, IEnumerable<TInner> expected)
-    where T : IEnumerable<TInner>
+        where T : IEnumerable<TInner>
     {
         return new EnumerableEquivalentToAssertCondition<T, TInner>(@is.AssertionBuilder, expected);
+    }
+    
+    public static AssertCondition<T, int> Empty<T, TInner>(this Is<T> @is)
+        where T : IEnumerable<TInner>
+    {
+        return new EnumerableCountEqualToAssertCondition<T, TInner>(@is.AssertionBuilder, 0);
     }
 
     #endregion

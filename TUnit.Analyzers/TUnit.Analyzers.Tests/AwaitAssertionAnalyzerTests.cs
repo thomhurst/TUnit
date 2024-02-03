@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Verifier =
-    ModularPipelines.Analyzers.Test.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.AwaitAssertionAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.AwaitAssertionAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 

@@ -16,11 +16,6 @@ public partial class Is<TActual>
     {
         return new EqualsAssertCondition<TActual, TActual>(AssertionBuilder, expected);
     }
-    
-    internal AssertCondition<TActual, TExpected> EqualTo<TExpected>(TExpected expected)
-    {
-        return new EqualsAssertCondition<TActual, TExpected>(AssertionBuilder, expected);
-    }
 
     public AssertCondition<TActual, TActual> SameReference(TActual expected)
     {

@@ -2,20 +2,21 @@
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class HasCountAssertCondition<TActual> : AssertCondition<IEnumerable<TActual>, int>
+public class EnumerableCountEqualToAssertCondition<T, TInner> : AssertCondition<T, int>
+    where T : IEnumerable<TInner>
 {
-    public HasCountAssertCondition(AssertionBuilder<IEnumerable<TActual>> assertionBuilder, int expected) : base(assertionBuilder, expected)
+    public EnumerableCountEqualToAssertCondition(AssertionBuilder<T> assertionBuilder, int expected) : base(assertionBuilder, expected)
     {
     }
 
     protected override string DefaultMessage => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
     
-    protected internal override bool Passes(IEnumerable<TActual>? actualValue, Exception? exception)
+    protected internal override bool Passes(T? actualValue, Exception? exception)
     {
         return GetCount(actualValue) == ExpectedValue;
     }
 
-    private int GetCount(IEnumerable<TActual>? actualValue)
+    private int GetCount(T? actualValue)
     {
         ArgumentNullException.ThrowIfNull(actualValue);
 
@@ -24,7 +25,7 @@ public class HasCountAssertCondition<TActual> : AssertCondition<IEnumerable<TAct
             return collection.Count;
         }
 
-        if (actualValue is TActual[] array)
+        if (actualValue is TInner[] array)
         {
             return array.Length;
         }
