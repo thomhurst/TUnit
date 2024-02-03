@@ -1,40 +1,19 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TUnit.Core;
+using TUnit.TestAdapter.Constants;
 
 namespace TUnit.TestAdapter;
 
-public class TUnitTestFilterProvider(IRunContext runContext)
+public class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger messageLogger)
 {
-    private static readonly Dictionary<string,TestProperty> _supportedPropertiesCache;
-    private static readonly List<string> SupportedProperties = [];
-
-    static TUnitTestFilterProvider()
-    {
-        // Initialize the property cache
-        _supportedPropertiesCache = new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName,
-            ["Name"] = TestCaseProperties.DisplayName,
-            ["TestCategory"] = TUnitProperties.TestCategory,
-        };
-
-        SupportedProperties.AddRange(_supportedPropertiesCache.Keys);
-    }
-
-    public ITestCaseFilterExpression? GetFilter()
-    {
-        return runContext.GetTestCaseFilter(SupportedProperties, name =>
-            _supportedPropertiesCache.TryGetValue(name, out var property)
-                ? property
-                : TestProperty.Find(name)
-        );
-    }
-
     public IEnumerable<TestWithTestCase> FilterTests(IEnumerable<TestWithTestCase> tests)
     {
-        var filter = GetFilter();
+        var filterExpression = runContext.GetTestCaseFilter(null, _ => null);
 
-        if (filter is null)
+        messageLogger.SendMessage(TestMessageLevel.Informational, $"TestCaseFilterValue is: {filterExpression?.TestCaseFilterValue}");
+        
+        if (filterExpression is null)
         {
             foreach (var testWithTestCase in tests)
             {
@@ -46,12 +25,69 @@ public class TUnitTestFilterProvider(IRunContext runContext)
         
         foreach (var testWithTestCase in tests)
         {
-            var (testDetails, testCase) = testWithTestCase;
+            var (testDetails, _) = testWithTestCase;
 
-            if (filter.MatchTestCase(testCase, TestProperty.Find))
+            if (string.IsNullOrWhiteSpace(filterExpression.TestCaseFilterValue))
+            {
+                yield return testWithTestCase;
+                continue;
+            }
+            
+            var filter = ParseFilter(filterExpression.TestCaseFilterValue);
+
+            if (TestMatchesFilter(testDetails, filter))
             {
                 yield return testWithTestCase;
             }
         }
+    }
+
+    private Filter ParseFilter(string testCaseFilterValue)
+    {
+        var filter = new Filter();
+        
+        foreach (var filterSegment in testCaseFilterValue.Split(';'))
+        {
+            var filterSplit = filterSegment.Split('=');
+            var filterName = filterSplit.FirstOrDefault();
+            var filterValue = filterSplit.ElementAtOrDefault(1);
+
+            if (string.IsNullOrWhiteSpace(filterName) || 
+                !TestAdapterConstants.Filters.KnownFilters.Contains(filterName, StringComparer.InvariantCultureIgnoreCase))
+            {
+                continue;
+            }
+
+            filter.AddFilter(filterName, filterValue);
+        }
+
+        return filter;
+    }
+
+    private bool TestMatchesFilter(TestDetails test, Filter filter)
+    {
+        messageLogger.SendMessage(TestMessageLevel.Informational, test.ToString());
+        
+        if (filter.RunnableTestNames.Contains(test.SimpleMethodName))
+        {
+            return true;
+        }
+
+        if (filter.RunnableCategories.Intersect(test.Categories).Any())
+        {
+            return true;
+        }
+
+        if (filter.RunnableClasses.Contains(test.ClassType.Name))
+        {
+            return true;
+        }
+        
+        if (filter.RunnableFullyQualifiedClasses.Contains(test.ClassType.FullName!))
+        {
+            return true;
+        }
+
+        return false;
     }
 }

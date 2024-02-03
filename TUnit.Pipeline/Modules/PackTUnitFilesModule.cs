@@ -18,7 +18,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         var guid = Guid.NewGuid();
         var version = $"0.0.1-alpha{guid}";
 
-        var packedProjects = await projects.Value!.SelectAsync(async project =>
+        await projects.Value!.SelectAsync(async project =>
             {
                 return await context.DotNet()
                     .Pack(

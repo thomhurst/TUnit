@@ -9,4 +9,11 @@ internal static class TestAdapterConstants
     public const string Name = "TUnit.Name";
     public const string TestCategory = "TUnit.TestCategory";
     
+    public static class Filters
+    {
+        public static readonly IReadOnlyList<string> KnownFilters = [TestName, TestClasses, Categories];
+        public const string TestName = "TestName";
+        public const string TestClasses = "TestClass";
+        public const string Categories = "Category";
+    }
 }

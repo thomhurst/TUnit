@@ -215,7 +215,7 @@ public class Tests
     {
         var list = new[] { 1, 2, 3 };
         
-        Assert.That(list).Has.Count().EqualTo(3);
+        Assert.That(list).Has.Count().EqualTo(99);
     }
     
     public static int One() => 1;

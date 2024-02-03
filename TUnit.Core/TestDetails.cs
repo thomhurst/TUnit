@@ -19,6 +19,7 @@ public record TestDetails
         ArgumentValues = arguments?.Select(x => x.Value).ToArray();
         
         TestName = MethodInfo.Name;
+        SimpleMethodName = MethodInfo.Name;
         DisplayName = MethodInfo.Name + GetArgumentValues();
         ClassName = this.ClassType.Name;
         FullyQualifiedClassName = this.ClassType.FullName!;
@@ -42,6 +43,8 @@ public record TestDetails
             .FirstOrDefault(x => x.AttributeType == typeof(RepeatAttribute))
             ?.ConstructorArguments.FirstOrDefault().Value as int? ?? 0;
 
+        AddCategories(methodAndClassAttributes);
+        
         Timeout = GetTimeout(methodAndClassAttributes);
         
         FileName = SourceLocation.FileName;
@@ -50,6 +53,22 @@ public record TestDetails
 
         Id = GenerateGuid();
     }
+
+    private void AddCategories(CustomAttributeData[] methodAndClassAttributes)
+    {
+        var categoryAttributes = methodAndClassAttributes
+            .Where(x => x.AttributeType == typeof(TestCategoryAttribute));
+
+        var categories = categoryAttributes
+            .Select(x => x.ConstructorArguments.FirstOrDefault().Value)
+            .OfType<string>();
+        
+        Categories.AddRange(categories);
+    }
+
+    public List<string> Categories { get; } = new();
+
+    public string SimpleMethodName { get; set; }
 
     private static TimeSpan GetTimeout(CustomAttributeData[] methodAndClassAttributes)
     {
