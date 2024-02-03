@@ -28,7 +28,7 @@ public static class IsExtensions
     public static AssertCondition<TActual, TActual> Zero<TActual>(this Is<TActual> @is)
         where TActual : INumber<TActual>
     {
-        return new EqualsAssertCondition<TActual, TActual>(@is.AssertionBuilder, TActual.Zero);
+        return new EqualsAssertCondition<TActual>(@is.AssertionBuilder, TActual.Zero);
     }
     
     public static AssertCondition<T, T> GreaterThan<T>(this Is<T> @is, T expected) where T : INumber<T>
@@ -59,7 +59,7 @@ public static class IsExtensions
 
                 return value % 2 == 0;
             },
-            (value, _, _) => $"{value} was not even");
+            (value, _) => $"{value} was not even");
     }
     
     public static AssertCondition<T, T> Odd<T>(this Is<T> @is) where T : INumber<T>, IModulusOperators<T, int, int>
@@ -70,7 +70,7 @@ public static class IsExtensions
 
                 return value % 2 != 0;
             },
-            (value, _, _) => $"{value} was not odd");
+            (value, _) => $"{value} was not odd");
     }
     
     public static AssertCondition<T, T> Negative<T>(this Is<T> @is) where T : INumber<T>
@@ -81,7 +81,7 @@ public static class IsExtensions
 
                 return value < T.Zero;
             },
-            (value, _, _) => $"{value} was not negative");
+            (value, _) => $"{value} was not negative");
     }
     
     public static AssertCondition<T, T> Positive<T>(this Is<T> @is) where T : INumber<T>
@@ -92,7 +92,7 @@ public static class IsExtensions
 
                 return value > T.Zero;
             },
-            (value, _, _) => $"{value} was not positive");
+            (value, _) => $"{value} was not positive");
     }
     
     #endregion
@@ -117,12 +117,12 @@ public static class IsExtensions
 
     public static AssertCondition<bool, bool> True(this Is<bool> @is)
     {
-        return new EqualsAssertCondition<bool, bool>(@is.AssertionBuilder, true);
+        return new EqualsAssertCondition<bool>(@is.AssertionBuilder, true);
     }
     
     public static AssertCondition<bool, bool> False(this Is<bool> @is)
     {
-        return new EqualsAssertCondition<bool, bool>(@is.AssertionBuilder, false);
+        return new EqualsAssertCondition<bool>(@is.AssertionBuilder, false);
     }
 
     #endregion

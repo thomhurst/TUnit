@@ -30,9 +30,17 @@ public abstract class BaseAssertCondition<TActual>
 
     protected TActual? ActualValue { get; private set; }
     protected Exception? Exception { get; private set; }
+
+
+    protected internal virtual string Message => MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage;
+
+    private Func<TActual?, Exception?, string>? MessageFactory { get; set; }
     
-    
-    protected internal abstract string Message { get; }
+    public BaseAssertCondition<TActual> WithMessage(Func<TActual?, Exception?, string> messageFactory)
+    {
+        MessageFactory = messageFactory;
+        return this;
+    }
     
     protected abstract string DefaultMessage { get; }
 
@@ -48,11 +56,20 @@ public abstract class BaseAssertCondition<TActual>
     {
         ActualValue = actualValue;
         Exception = exception;
-        return Passes(actualValue, exception);
+        return IsInverted ? !Passes(actualValue, exception) : Passes(actualValue, exception);
     }
 
     protected internal abstract bool Passes(TActual? actualValue, Exception? exception);
 
     public And<TActual> And { get; }
     public Or<TActual> Or { get; }
+
+    internal BaseAssertCondition<TActual> Invert(Func<TActual?, Exception?, string> messageFactory)
+    {
+        WithMessage(messageFactory);
+        IsInverted = true;
+        return this;
+    }
+    
+    protected bool IsInverted { get; set; }
 }

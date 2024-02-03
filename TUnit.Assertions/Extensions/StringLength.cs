@@ -14,33 +14,33 @@ public class StringLength : Connector<string>
 
     public BaseAssertCondition<string> EqualTo(int expected)
     {
-        return Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, expected, (@string, length, _) =>
+        return Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, expected, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
-                return @string.Length == length;
+                return @string.Length == expected;
             },
-            (@string, length, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {length}")
+            (@string, _) =>
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}")
         );
     }
 
     public BaseAssertCondition<string> IsEmpty =>
-        Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, 0, (@string, length, _) =>
+        Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, 0, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
-                return @string.Length == length;
+                return @string.Length == 0;
             },
-            (@string, length, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {length}")
+            (@string, _) =>
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}")
         );
 
     public BaseAssertCondition<string> IsNotEmpty =>
-        Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, default, (@string, length, _) =>
+        Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, default, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
                 return @string.Length > 0;
             },
-            (@string, length, _) =>
+            (@string, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to empty"
         ));
 
@@ -50,49 +50,49 @@ public class StringLength : Connector<string>
         return Wrap(new DelegateAssertCondition<string, int>(
             AssertionBuilder,
             expected,
-            (@string, length, _) =>
+            (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
-                return @string.Length > length;
+                return @string.Length > expected;
             },
-            (@string, length, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than {length}")
+            (@string, _) =>
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than {expected}")
         );
     }
 
     public BaseAssertCondition<string> GreaterThanOrEqualTo(int expected)
     {
-        return Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, expected, (@string, length, _) =>
+        return Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, expected, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
-                return @string.Length >= length;
+                return @string.Length >= expected;
             },
-            (@string, length, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than or equal to {length}")
+            (@string, _) =>
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than or equal to {expected}")
         );
     }
 
     public BaseAssertCondition<string> LessThan(int expected)
     {
-        return Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, expected, (@string, length, _) =>
+        return Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, expected, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
-                return @string.Length < length;
+                return @string.Length < expected;
             },
-            (@string, length, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than {length}")
+            (@string, _) =>
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than {expected}")
         );
     }
 
     public BaseAssertCondition<string> LessThanOrEqualTo(int expected)
     {
-        return Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, expected, (@string, length, _) =>
+        return Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, expected, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
-                return @string.Length <= length;
+                return @string.Length <= expected;
             },
-            (@string, length, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than or equal to {length}")
+            (@string, _) =>
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than or equal to {expected}")
         );
     }
 }

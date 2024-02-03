@@ -5,7 +5,7 @@ public class InvertedAssertCondition<TActual, TExpected> : AssertCondition<TActu
     private readonly AssertCondition<TActual, TExpected> _conditionToInvert;
 
     public InvertedAssertCondition(AssertCondition<TActual, TExpected> conditionToInvert,
-        Func<TActual?, TExpected?, Exception?, string> messageFactory) : base(conditionToInvert.AssertionBuilder, conditionToInvert.ExpectedValue)
+        Func<TActual?, Exception?, string> messageFactory) : base(conditionToInvert.AssertionBuilder, conditionToInvert.ExpectedValue)
     {
         _conditionToInvert = conditionToInvert;
         WithMessage(messageFactory);

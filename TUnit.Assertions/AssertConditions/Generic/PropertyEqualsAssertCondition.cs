@@ -9,7 +9,7 @@ public class PropertyEqualsAssertCondition<TActual, TExpected>(AssertionBuilder<
     {
         var propertyValue = GetPropertyValue(actualValue);
         
-        WithMessage((_, _, _) => $"Expected {ExpectedValue} but received {propertyValue}");
+        WithMessage((_, _) => $"Expected {ExpectedValue} but received {propertyValue}");
         
         return Equals(propertyValue, ExpectedValue);
     }

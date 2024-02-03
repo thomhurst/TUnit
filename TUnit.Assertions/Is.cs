@@ -15,7 +15,7 @@ public class Is<TActual> : Connector<TActual>
 
     public BaseAssertCondition<TActual> EqualTo(TActual expected)
     {
-        return Wrap(new EqualsAssertCondition<TActual, TActual>(AssertionBuilder, expected));
+        return Wrap(new EqualsAssertCondition<TActual>(AssertionBuilder, expected));
     }
 
     public BaseAssertCondition<TActual> SameReference(TActual expected)

@@ -5,11 +5,6 @@ namespace TUnit.TestProject;
 
 public class Tests
 {
-    // [SetUp]
-    // public void Setup()
-    // {
-    // }
-
     [Test]
     public async Task Test1()
     {
@@ -18,6 +13,7 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Fail")]
     public async Task Test2()
     {
         var value = "2";
@@ -33,6 +29,7 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Fail")]
     public async Task Test4()
     {
         await Task.Yield();
@@ -42,6 +39,7 @@ public class Tests
 
     [TestWithData("1")]
     [TestWithData("2")]
+    [TestCategory("Fail")]
     public async Task ParameterisedTests1(string value)
     {
         await Assert.That(value).Is.EqualTo("1");
@@ -49,6 +47,7 @@ public class Tests
 
     [TestWithData("1")]
     [TestWithData("2")]
+    [TestCategory("Fail")]
     public async Task ParameterisedTests2(string value)
     {
         await Task.Yield();
@@ -56,6 +55,7 @@ public class Tests
     }
 
     [Test, Skip("Reason1")]
+    [TestCategory("Skip")]
     public async Task Skip1()
     {
         var value = "1";
@@ -63,6 +63,7 @@ public class Tests
     }
 
     [Test, Skip("Reason2")]
+    [TestCategory("Skip")]
     public async Task Skip2()
     {
         await Task.Yield();
@@ -84,12 +85,14 @@ public class Tests
     }
 
     [TestDataSource(nameof(Two))]
+    [TestCategory("Fail")]
     public async Task TestDataSource3(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
     [TestDataSource(nameof(Two))]
+    [TestCategory("Fail")]
     public async Task TestDataSource4(int value)
     {
         await Task.Yield();
@@ -110,12 +113,14 @@ public class Tests
     }
 
     [TestDataSource(nameof(TestDataSources), nameof(Two))]
+    [TestCategory("Fail")]
     public async Task TestDataSource7(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
     [TestDataSource(nameof(TestDataSources), nameof(Two))]
+    [TestCategory("Fail")]
     public async Task TestDataSource8(int value)
     {
         await Task.Yield();
@@ -129,18 +134,21 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Fail")]
     public async Task TestContext2()
     {
         await Assert.That(TestContext.Current.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]
+    [TestCategory("Fail")]
     public async Task Throws1()
     {
-        await Assert.That(() => new string([])).Is.EqualTo(string.Empty);
+        await Assert.That(() => new string([])).Throws.Exception;
     }
 
     [Test]
+    [TestCategory("Fail")]
     public async Task Throws2()
     {
         await Assert.That(async () =>

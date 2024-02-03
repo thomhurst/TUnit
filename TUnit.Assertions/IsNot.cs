@@ -3,7 +3,7 @@ using TUnit.Assertions.AssertConditions.Generic;
 
 namespace TUnit.Assertions;
 
-public class IsNot<TActual> : Connector<TActual>
+public class IsNot<TActual> : NotConnector<TActual>
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
     
@@ -11,8 +11,13 @@ public class IsNot<TActual> : Connector<TActual>
     {
         AssertionBuilder = assertionBuilder;
     }
+    
+    public BaseAssertCondition<TActual> EqualTo(TActual expected) => Invert(new EqualsAssertCondition<TActual>(AssertionBuilder, expected),
+        (actual, exception) => $"Expected {actual} to equal {expected}");
 
-    public BaseAssertCondition<TActual> Null => Wrap(new NotNullAssertCondition<TActual>(AssertionBuilder));
+    public BaseAssertCondition<TActual> Null => Invert(new NullAssertCondition<TActual>(AssertionBuilder),
+        (actual, exception) => $"Expected {actual} to be null");
 
-    public BaseAssertCondition<TActual> TypeOf<TExpected>() => Wrap(new NotTypeOfAssertCondition<TActual, TExpected>(AssertionBuilder));
+    public BaseAssertCondition<TActual> TypeOf<TExpected>() => Invert(new TypeOfAssertCondition<TActual, TExpected>(AssertionBuilder),
+        (actual, exception) => $"Expected {actual} to not be of type {typeof(TExpected)}");
 }

@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EqualsAssertCondition<TActual, TExpected>(AssertionBuilder<TActual> assertionBuilder, TExpected expected)
-    : AssertCondition<TActual, TExpected>(assertionBuilder, expected)
+public class EqualsAssertCondition<TActual>(AssertionBuilder<TActual> assertionBuilder, TActual expected)
+    : AssertCondition<TActual, TActual>(assertionBuilder, expected)
 {
     protected override string DefaultMessage => $"Expected {ExpectedValue} but received {ActualValue}";
 

@@ -7,7 +7,7 @@ public class DelegateAssertCondition<TActual, TExpected> : AssertCondition<TActu
     public DelegateAssertCondition(AssertionBuilder<TActual> assertionBuilder, 
         TExpected? expected, 
         Func<TActual?, TExpected?, Exception?, bool> condition,
-        Func<TActual?, TExpected?, Exception?, string> messageFactory) : base(assertionBuilder, expected)
+        Func<TActual?, Exception?, string> messageFactory) : base(assertionBuilder, expected)
     {
         _condition = condition;
         WithMessage(messageFactory);

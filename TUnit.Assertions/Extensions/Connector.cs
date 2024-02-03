@@ -14,7 +14,7 @@ public abstract class Connector<T>
         OtherAssertCondition = otherAssertCondition;
     }
 
-    public BaseAssertCondition<T> Wrap(BaseAssertCondition<T> assertCondition)
+    protected BaseAssertCondition<T> Wrap(BaseAssertCondition<T> assertCondition)
     {
         return ConnectorType switch
         {
