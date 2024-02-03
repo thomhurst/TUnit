@@ -5,7 +5,7 @@ namespace TUnit.Assertions;
 
 public class Not<TActual>
 {
-    internal readonly AssertionBuilder<TActual> AssertionBuilder;
+    protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
 
     public Not(AssertionBuilder<TActual> assertionBuilder)
     {

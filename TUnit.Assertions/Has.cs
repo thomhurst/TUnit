@@ -4,7 +4,7 @@ namespace TUnit.Assertions;
 
 public class Has<T>
 {
-    protected AssertionBuilder<T> AssertionBuilder { get; }
+    protected internal AssertionBuilder<T> AssertionBuilder { get; }
 
     public Has(AssertionBuilder<T> assertionBuilder)
     {

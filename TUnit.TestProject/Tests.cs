@@ -214,7 +214,8 @@ public class Tests
     public void Count4()
     {
         var list = new[] { 1, 2, 3 };
-        Assert.That(list).Has.Count.EqualTo(3);
+        
+        Assert.That(list).Has.Count().EqualTo(3);
     }
     
     public static int One() => 1;

@@ -6,7 +6,7 @@ namespace TUnit.Assertions.AssertConditions;
 
 public abstract class BaseAssertCondition<TActual>
 {
-    internal readonly AssertionBuilder<TActual> AssertionBuilder;
+    protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
 
     internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
     {

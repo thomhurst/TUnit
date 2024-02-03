@@ -1,14 +1,16 @@
+using System.Collections;
+
 namespace TUnit.Assertions;
 
 public static class HasExtensions
 {
-    public static EnumerableCount<T, TInner> Count<T, TInner>(this Is<T> @is) where T : IEnumerable<TInner>
+    public static EnumerableCount<T> Count<T>(this Has<T> has) where T : IEnumerable
     {
-        return new EnumerableCount<T, TInner>(@is.AssertionBuilder);
+        return new EnumerableCount<T>(has.AssertionBuilder);
     }
     
-    public static StringLength Length(this Is<string> @is)
+    public static StringLength Length(this Has<string> has)
     {
-        return new StringLength(@is.AssertionBuilder);
+        return new StringLength(has.AssertionBuilder);
     }
 }

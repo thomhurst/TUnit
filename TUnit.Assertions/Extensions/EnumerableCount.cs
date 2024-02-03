@@ -3,9 +3,9 @@ using TUnit.Assertions.AssertConditions;
 
 namespace TUnit.Assertions;
 
-public class EnumerableCount<T, TInner> where T : IEnumerable<TInner> 
+public class EnumerableCount<T> where T : IEnumerable 
 {
-    protected AssertionBuilder<T> AssertionBuilder { get; }
+    protected internal AssertionBuilder<T> AssertionBuilder { get; }
 
     public EnumerableCount(AssertionBuilder<T> assertionBuilder)
     {
@@ -81,12 +81,12 @@ public class EnumerableCount<T, TInner> where T : IEnumerable<TInner>
         {
             return collection.Count;
         }
-
-        if (actualValue is TInner[] array)
+        
+        if (actualValue is IList list)
         {
-            return array.Length;
+            return list.Count;
         }
         
-        return actualValue.Count();
+        return actualValue.Cast<object>().Count();
     }
 }
