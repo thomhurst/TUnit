@@ -14,9 +14,25 @@ public sealed class AssertConditionAnd<TActual> : BaseAssertCondition<TActual>
         _condition2 = condition2;
     }
 
-    protected internal override string Message =>
-        !_condition1.Passes(ActualValue, Exception) ? _condition1.Message :
-        !_condition2.Passes(ActualValue, Exception) ? _condition2.Message : string.Empty;
+    protected internal override string Message
+    {
+        get
+        {
+            var messages = new List<string>(2);
+            
+            if (!_condition1.Assert(ActualValue, Exception))
+            {
+                messages.Add(_condition1.Message);
+            }
+            
+            if (!_condition2.Assert(ActualValue, Exception))
+            {
+                messages.Add(_condition2.Message);
+            }
+
+            return string.Join($"{Environment.NewLine}   ", messages);
+        }
+    }
 
     protected override string DefaultMessage => string.Empty;
     

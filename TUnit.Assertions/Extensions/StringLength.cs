@@ -20,7 +20,7 @@ public class StringLength : Connector<string>
                 return @string.Length == length;
             },
             (@string, length, _) =>
-                $"{@string} was {@string?.Length} characters long but expected to be equal to {length}")
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {length}")
         );
     }
 
@@ -31,7 +31,7 @@ public class StringLength : Connector<string>
                 return @string.Length == length;
             },
             (@string, length, _) =>
-                $"{@string} was {@string?.Length} characters long but expected to be equal to {length}")
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {length}")
         );
 
     public BaseAssertCondition<string> IsNotEmpty =>
@@ -41,7 +41,7 @@ public class StringLength : Connector<string>
                 return @string.Length > 0;
             },
             (@string, length, _) =>
-                $"{@string} was {@string?.Length} characters long but expected to empty"
+                $"\"{@string}\" was {@string?.Length} characters long but expected to empty"
         ));
 
 
@@ -56,7 +56,7 @@ public class StringLength : Connector<string>
                 return @string.Length > length;
             },
             (@string, length, _) =>
-                $"{@string} was {@string?.Length} characters long but expected to be greater than {length}")
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than {length}")
         );
     }
 
@@ -68,7 +68,7 @@ public class StringLength : Connector<string>
                 return @string.Length >= length;
             },
             (@string, length, _) =>
-                $"{@string} was {@string?.Length} characters long but expected to be greater than or equal to {length}")
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than or equal to {length}")
         );
     }
 
@@ -80,7 +80,7 @@ public class StringLength : Connector<string>
                 return @string.Length < length;
             },
             (@string, length, _) =>
-                $"{@string} was {@string?.Length} characters long but expected to be less than {length}")
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than {length}")
         );
     }
 
@@ -92,7 +92,7 @@ public class StringLength : Connector<string>
                 return @string.Length <= length;
             },
             (@string, length, _) =>
-                $"{@string} was {@string?.Length} characters long but expected to be less than or equal to {length}")
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than or equal to {length}")
         );
     }
 }

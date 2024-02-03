@@ -182,7 +182,7 @@ public class Tests
     [Test]
     public async Task String_And_Condition2()
     {
-        await Assert.That("1").Is.EqualTo("2").And.Has.Length().EqualTo(1);
+        await Assert.That("1").Is.EqualTo("2").And.Has.Length().EqualTo(2);
     }
 
     [Test]
