@@ -1,8 +1,12 @@
-﻿namespace TUnit.Assertions;
+﻿using TUnit.Assertions.AssertConditions;
+
+namespace TUnit.Assertions;
 
 public class AsyncDelegateAssertionBuilder<T> : AssertionBuilder<T>
 {
     private readonly Func<Task<T?>> _function;
+    
+    public Throws<T> Throws => new(this, ConnectorType.None, null);
 
     internal AsyncDelegateAssertionBuilder(Func<Task<T?>> function)
     {
@@ -17,19 +21,21 @@ public class AsyncDelegateAssertionBuilder<T> : AssertionBuilder<T>
     }
 }
 
-public class AsyncDelegateAssertionBuilder : AssertionBuilder<object>
+public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?>
 {
     private readonly Func<Task> _function;
+    
+    public Throws<object?> Throws => new(this, ConnectorType.None, null);
 
     internal AsyncDelegateAssertionBuilder(Func<Task> function)
     {
         _function = function;
     }
 
-    protected internal override async Task<AssertionData<object>> GetAssertionData()
+    protected internal override async Task<AssertionData<object?>> GetAssertionData()
     {
         var exception = await _function.InvokeAndGetExceptionAsync();
         
-        return new AssertionData<object>(null, exception);
+        return new AssertionData<object?>(null, exception);
     }
 }
