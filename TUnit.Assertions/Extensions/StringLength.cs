@@ -35,8 +35,11 @@ public class StringLength : Connector<string>
         );
 
     public BaseAssertCondition<string> IsNotEmpty =>
-        Wrap(new InvertedAssertCondition<string, int>(
-            IsEmpty,
+        Wrap(new DelegateAssertCondition<string, int>(AssertionBuilder, default, (@string, length, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(@string);
+                return @string.Length > 0;
+            },
             (@string, length, _) =>
                 $"{@string} was {@string?.Length} characters long but expected to empty"
         ));
