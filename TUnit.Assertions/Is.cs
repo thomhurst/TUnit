@@ -3,27 +3,29 @@ using TUnit.Assertions.AssertConditions.Generic;
 
 namespace TUnit.Assertions;
 
-public partial class Is<TActual>
+public class Is<TActual> : Connector<TActual>
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
 
-    public Is(AssertionBuilder<TActual> assertionBuilder)
+    public Is(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType,
+        BaseAssertCondition<TActual>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder;
     }
-    
-    public AssertCondition<TActual, TActual> EqualTo(TActual expected)
+
+    public BaseAssertCondition<TActual> EqualTo(TActual expected)
     {
-        return new EqualsAssertCondition<TActual, TActual>(AssertionBuilder, expected);
+        return Wrap(new EqualsAssertCondition<TActual, TActual>(AssertionBuilder, expected));
     }
 
-    public AssertCondition<TActual, TActual> SameReference(TActual expected)
+    public BaseAssertCondition<TActual> SameReference(TActual expected)
     {
-        return new SameReferenceAssertCondition<TActual, TActual>(AssertionBuilder, expected);
+        return Wrap(new SameReferenceAssertCondition<TActual, TActual>(AssertionBuilder, expected));
     }
 
-    public AssertCondition<TActual, TActual> Null => new NullAssertCondition<TActual>(AssertionBuilder);
-    public AssertCondition<TActual, TExpected> TypeOf<TExpected>() => new TypeOfAssertCondition<TActual, TExpected>(AssertionBuilder);
+    public BaseAssertCondition<TActual> Null => Wrap(new NullAssertCondition<TActual>(AssertionBuilder));
 
-    public Not<TActual> Not => new(AssertionBuilder);
+    public BaseAssertCondition<TActual> TypeOf<TExpected>() => Wrap(new TypeOfAssertCondition<TActual, TExpected>(AssertionBuilder));
+
+    public IsNot<TActual> IsNot => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
 }

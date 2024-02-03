@@ -7,6 +7,9 @@ public sealed class AssertConditionOr<TActual> : BaseAssertCondition<TActual>
 
     public AssertConditionOr(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2) : base(condition1.AssertionBuilder)
     {
+        ArgumentNullException.ThrowIfNull(condition1);
+        ArgumentNullException.ThrowIfNull(condition2);
+
         _condition1 = condition1;
         _condition2 = condition2;
     }

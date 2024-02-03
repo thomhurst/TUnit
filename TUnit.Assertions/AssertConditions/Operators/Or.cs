@@ -1,5 +1,3 @@
-using TUnit.Assertions.AssertConditions.Connectors;
-
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class Or<TActual>
@@ -11,6 +9,6 @@ public class Or<TActual>
         _otherAssertCondition = otherAssertCondition;
     }
     
-    public OrIs<TActual> Is => new(_otherAssertCondition);
-    public OrHas<TActual> Has => new(_otherAssertCondition);
+    public Is<TActual> Is => new(_otherAssertCondition.AssertionBuilder, ConnectorType.Or, _otherAssertCondition);
+    public Has<TActual> Has => new(_otherAssertCondition.AssertionBuilder, ConnectorType.Or, _otherAssertCondition);
 }

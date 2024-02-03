@@ -11,6 +11,6 @@ public class And<TActual>
         _otherAssertCondition = otherAssertCondition;
     }
     
-    public AndIs<TActual> Is => new(_otherAssertCondition);
-    public AndHas<TActual> Has => new(_otherAssertCondition);
+    public Is<TActual> Is => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
+    public Has<TActual> Has => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
 }

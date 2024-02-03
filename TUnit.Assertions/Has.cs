@@ -1,16 +1,18 @@
-﻿using TUnit.Assertions.AssertConditions.Generic;
+﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Generic;
 
 namespace TUnit.Assertions;
 
-public class Has<T>
+public class Has<T> : Connector<T>
 {
     protected internal AssertionBuilder<T> AssertionBuilder { get; }
 
-    public Has(AssertionBuilder<T> assertionBuilder)
+    public Has(AssertionBuilder<T> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<T>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder;
     }
     
     public Property<T> Property(string name) => new(AssertionBuilder, name);
+
     public Property<T, TPropertyType> Property<TPropertyType>(string name) => new(AssertionBuilder, name);
 }

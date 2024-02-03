@@ -24,7 +24,7 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
         ImmutableArray.Create(AwaitAssertionAnalyzer.DiagnosticId);
 
     // If you don't need the 'fix all' behaviour, return null.
-    public override FixAllProvider? GetFixAllProvider() => null;
+    public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
     public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
