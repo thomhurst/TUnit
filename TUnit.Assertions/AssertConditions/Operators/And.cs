@@ -1,5 +1,3 @@
-using TUnit.Assertions.AssertConditions.Connectors;
-
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class And<TActual>
@@ -13,4 +11,6 @@ public class And<TActual>
     
     public Is<TActual> Is => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
     public Has<TActual> Has => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
+    public Does<TActual> Does => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
+    public Throws<TActual> Throws => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
 }

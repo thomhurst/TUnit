@@ -11,4 +11,6 @@ public class Or<TActual>
     
     public Is<TActual> Is => new(_otherAssertCondition.AssertionBuilder, ConnectorType.Or, _otherAssertCondition);
     public Has<TActual> Has => new(_otherAssertCondition.AssertionBuilder, ConnectorType.Or, _otherAssertCondition);
+    public Does<TActual> Does => new(_otherAssertCondition.AssertionBuilder, ConnectorType.Or, _otherAssertCondition);
+    public Throws<TActual> Throws => new(_otherAssertCondition.AssertionBuilder, ConnectorType.Or, _otherAssertCondition);
 }
