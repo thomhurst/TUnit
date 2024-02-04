@@ -19,10 +19,11 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         var git = await context.Git().Versioning.GetGitVersioningInformation();
                     
         var version = git.SemVer;
-
+        var packageVersion = version;
+        
         if (git.BranchName == "main")
         {
-            version += "alpha01";
+            packageVersion += "alpha01";
         }
 
         await projects.Value!.SelectAsync(async project =>
@@ -34,7 +35,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                             Properties = new[]
                                 { 
                                     new KeyValue("Version", version!), 
-                                    new KeyValue("PackageVersion", version!) 
+                                    new KeyValue("PackageVersion", packageVersion!) 
                                 }
                         }, cancellationToken);
             }, cancellationToken: cancellationToken)
