@@ -4,6 +4,10 @@ using ModularPipelines.Extensions;
 using ModularPipelines.Host;
 
 await PipelineHostBuilder.Create()
+    .ConfigureAppConfiguration((context, builder) =>
+    {
+        builder.AddEnvironmentVariables();
+    })
     .ConfigureServices((_, collection) =>
     {
         _.Configuration.GetSection("NuGet").Bind(new NuGetOptions());
