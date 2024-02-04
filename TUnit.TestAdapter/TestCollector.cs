@@ -60,16 +60,16 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
                 && testDetails.MinLineNumber == testCase.LineNumber;
         }
         
-        var testProperty = TestProperty.Find(nameof(TestDetails));
+        var testProperty = TestProperty.Find(nameof(TestDetails.UniqueId));
         
-        var embeddedTestDetails = testProperty is null ? null : testCase.GetPropertyValue(testProperty, null as TestDetails);
+        var uniqueId = testProperty is null ? null : testCase.GetPropertyValue(testProperty, null as string);
         
-        if (embeddedTestDetails == null)
+        if (uniqueId == null)
         {
             return false;
         }
         
-        return embeddedTestDetails.UniqueId == testDetails.UniqueId;
+        return uniqueId == testDetails.UniqueId;
     }
 
     private void MarkNotFound(TestCase testCase)

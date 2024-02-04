@@ -16,7 +16,7 @@ public static class TestExtensions
             LocalExtensionData = testDetails
         };
         
-        testCase.SetPropertyValue(GetOrRegisterTestProperty<TestDetails>(nameof(TestDetails)), testDetails);
+        testCase.SetPropertyValue(GetOrRegisterTestProperty<string>(nameof(TestDetails.UniqueId)), testDetails.UniqueId);
         
         testCase.SetPropertyValue(GetOrRegisterTestProperty<string>("ManagedType"), testDetails.FullyQualifiedClassName);
         testCase.SetPropertyValue(GetOrRegisterTestProperty<string>("ManagedMethod"), testDetails.MethodInfo.Name + TestDetails.GetParameterTypes(testDetails.ParameterTypes));
