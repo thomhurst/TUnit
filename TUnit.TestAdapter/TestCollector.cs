@@ -40,7 +40,7 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
 
             var tests = testsLoader.GetTests(new TypeInformation(assembly), allAssemblies);
 
-            var matchingTest = tests.FirstOrDefault(x => x.Id == testCase.Id);
+            var matchingTest = tests.FirstOrDefault(x => MatchTest(x, testCase));
 
             if (matchingTest is null)
             {
@@ -50,6 +50,26 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
 
             yield return new TestWithTestCase(matchingTest, testCase);
         }
+    }
+
+    private static bool MatchTest(TestDetails testDetails, TestCase testCase)
+    {
+        if (testDetails.IsSingleTest)
+        {
+            return testDetails.FullyQualifiedName == testCase.FullyQualifiedName
+                && testDetails.MinLineNumber == testCase.LineNumber;
+        }
+        
+        var testProperty = TestProperty.Find(nameof(TestDetails));
+        
+        var embeddedTestDetails = testProperty is null ? null : testCase.GetPropertyValue(testProperty, null as TestDetails);
+        
+        if (embeddedTestDetails == null)
+        {
+            return false;
+        }
+        
+        return embeddedTestDetails.UniqueId == testDetails.UniqueId;
     }
 
     private void MarkNotFound(TestCase testCase)

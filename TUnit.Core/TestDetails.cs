@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace TUnit.Core;
 
@@ -30,6 +28,9 @@ public record TestDetails
         var methodAndClassAttributes = MethodInfo.CustomAttributes
             .Concat(this.ClassType.CustomAttributes)
             .ToArray();
+
+        IsSingleTest = !methodAndClassAttributes.Any(x => x.AttributeType == typeof(TestWithDataAttribute)
+                                                          || x.AttributeType == typeof(TestDataSourceAttribute));
         
         SkipReason = methodAndClassAttributes
             .FirstOrDefault(x => x.AttributeType == typeof(SkipAttribute))
@@ -51,8 +52,10 @@ public record TestDetails
         MinLineNumber = SourceLocation.MinLineNumber;
         MaxLineNumber = SourceLocation.MaxLineNumber;
 
-        Id = GenerateGuid();
+        UniqueId = FullyQualifiedClassName + DisplayName + GetParameterTypes(ParameterTypes);
     }
+
+    public bool IsSingleTest { get; }
 
     private void AddCategories(CustomAttributeData[] methodAndClassAttributes)
     {
@@ -84,17 +87,6 @@ public record TestDetails
         return TimeSpan.FromMilliseconds(timeoutMilliseconds.Value);
     }
 
-    private Guid GenerateGuid()
-    {
-        var bytes = Encoding.UTF8.GetBytes(DisplayName + MinLineNumber + new string(FullyQualifiedName.Reverse().ToArray()));
-        
-        var hashedBytes = SHA1.HashData(bytes);
-        
-        Array.Resize(ref hashedBytes, 16);
-        
-        return new Guid(hashedBytes);
-    }
-
 
     public int RetryCount { get; }
     public int RepeatCount { get; }
@@ -108,9 +100,9 @@ public record TestDetails
         
         return $"({string.Join(',', ArgumentValues.Select(StringifyArgument))})";
     }
-
-    public Guid Id { get; }
-
+    
+    public string UniqueId { get; }
+    
     public string TestName { get; }
 
     public string ClassName { get; }
