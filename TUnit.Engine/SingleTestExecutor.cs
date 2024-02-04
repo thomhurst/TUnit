@@ -42,6 +42,8 @@ internal class SingleTestExecutor
                 Status = Status.Skipped
             });
         }
+        
+        var isRetry = testDetails.RetryCount > 0;
 
         object? @class = null;
         TestContext? testContext = null;
@@ -54,7 +56,21 @@ internal class SingleTestExecutor
                 testContext = new TestContext(testDetails, @class);
                 TestContext.Current = testContext;
 
-                await ExecuteWithRepeatsOrRetries(testContext, testDetails, @class);
+                try
+                {
+                    if (isRetry)
+                    {
+                        await ExecuteWithRetries(testContext, testDetails, @class);
+                    }
+                    else
+                    {
+                        await ExecuteWithRepeats(testContext, testDetails, @class);
+                    }
+                }
+                finally
+                {
+                    await _disposer.DisposeAsync(@class);
+                }
             });
 
             var end = DateTimeOffset.Now;
@@ -98,42 +114,35 @@ internal class SingleTestExecutor
         }
     }
 
-    private async Task ExecuteWithRepeatsOrRetries(TestContext testContext, TestDetails testDetails, object? @class)
+    private async Task ExecuteWithRetries(TestContext testContext, TestDetails testDetails, object? @class)
     {
-        var isRetry = testDetails.RetryCount > 0;
-        var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
-
-        var tasks = new List<Task>();
-
-        try
+        for (var i = 0; i < testDetails.RetryCount + 1; i++)
         {
-            for (var i = 0; i < executionCount + 1; i++)
+            try
             {
-                var task = ExecuteCore(testContext, testDetails, @class);
-                tasks.Add(task);
-                
-                if (isRetry)
+                await ExecuteCore(testContext, testDetails, @class);
+                break;
+            }
+            catch
+            {
+                if (i == testDetails.RetryCount)
                 {
-                    try
-                    {
-                        await task;
-                        break;
-                    }
-                    catch
-                    {
-                        if (i == executionCount)
-                        {
-                            throw;
-                        }
-                    }
+                    throw;
                 }
             }
-            await Task.WhenAll(tasks);
         }
-        finally
+    }
+
+    private async Task ExecuteWithRepeats(TestContext testContext, TestDetails testDetails, object? @class)
+    {
+        var tasks = new List<Task>();
+
+        for (var i = 0; i < testDetails.RepeatCount + 1; i++)
         {
-            await _disposer.DisposeAsync(@class);
+            tasks.Add(ExecuteCore(testContext, testDetails, @class));
         }
+
+        await Task.WhenAll(tasks);
     }
 
     private async Task ExecuteCore(TestContext testContext, TestDetails testDetails, object? @class)
