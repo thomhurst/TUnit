@@ -45,7 +45,7 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
         }
     }
     
-    internal async Task<bool> AssertAsync(bool shouldThrow)
+    internal override async Task<bool> AssertAsync()
     {
         var assertionData = await AssertionBuilder.GetAssertionData();
 

@@ -69,7 +69,7 @@ public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (memberAccessExpressionSyntax.ToString() != "Assert.That")
+        if (memberAccessExpressionSyntax.ToString() is not "Assert.That" and not "Assert.Multiple")
         {
             return;
         }
@@ -81,8 +81,16 @@ public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (methodSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGeneric) !=
-            "global::TUnit.Assertions.Assert.That")
+        if (methodSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGeneric) 
+            is not "global::TUnit.Assertions.Assert.That"
+            and not "global::TUnit.Assertions.Assert.Multiple")
+        {
+            return;
+        }
+
+        if (memberAccessExpressionSyntax.ToString() is "Assert.That"
+            && memberAccessExpressionSyntax.GetAllAncestorSyntaxesOfType<InvocationExpressionSyntax>()
+                .Any(x => x.ToString().StartsWith("Assert.Multiple")))
         {
             return;
         }

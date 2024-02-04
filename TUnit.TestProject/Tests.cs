@@ -227,6 +227,18 @@ public class Tests
         var list = new List<int> { 1, 2, 3 };
         await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 }).And.Has.Count().EqualTo(5);
     }
+    
+    [Test]
+    public async Task AssertMultiple()
+    {
+        var list = new List<int> { 1, 2, 3 };
+        
+        await Assert.Multiple(() =>
+        {
+            Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
+            Assert.That(list).Has.Count().EqualTo(5);
+        });
+    }
 
     public static int One() => 1;
     public static int Two() => 2;
