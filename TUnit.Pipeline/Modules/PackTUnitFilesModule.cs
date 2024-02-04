@@ -23,7 +23,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         
         if (git.BranchName == "main")
         {
-            packageVersion += "alpha01";
+            packageVersion += "-alpha01";
         }
 
         await projects.Value!.SelectAsync(async project =>
