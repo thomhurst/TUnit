@@ -33,13 +33,13 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         {
                             Properties = new[]
                                 { 
-                                    new KeyValue("Version", version), 
-                                    new KeyValue("PackageVersion", version) 
+                                    new KeyValue("Version", version!), 
+                                    new KeyValue("PackageVersion", version!) 
                                 }
                         }, cancellationToken);
             }, cancellationToken: cancellationToken)
             .ProcessOneAtATime();
 
-        return projects.Value!.Select(x => new PackedProject(x.NameWithoutExtension, version)).ToList();
+        return projects.Value!.Select(x => new PackedProject(x.NameWithoutExtension, version!)).ToList();
     }
 }
