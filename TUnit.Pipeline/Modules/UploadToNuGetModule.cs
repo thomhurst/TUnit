@@ -10,7 +10,7 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
-[SkipIfBranch("main")]
+[RunOnlyOnBranch("main")]
 [DependsOn<PackTUnitFilesModule>]
 public class UploadToNuGetModule : Module<CommandResult[]>
 {
