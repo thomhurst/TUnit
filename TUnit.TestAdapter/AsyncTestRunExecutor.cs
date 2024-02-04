@@ -102,7 +102,7 @@ public class AsyncTestRunExecutor
         var lastTestForClass = allTestsOrderedByClass.Last(x =>
             x.Details.FullyQualifiedClassName == processingTestDetails.FullyQualifiedClassName);
 
-        if (processingTestDetails.FullyQualifiedName != lastTestForClass.Details.FullyQualifiedName)
+        if (processingTestDetails.UniqueId != lastTestForClass.Details.UniqueId)
         {
             return;
         }

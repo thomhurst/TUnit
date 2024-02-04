@@ -56,7 +56,7 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
     {
         if (testDetails.IsSingleTest)
         {
-            return testDetails.FullyQualifiedName == testCase.FullyQualifiedName
+            return testDetails.UniqueId == testCase.FullyQualifiedName
                 && testDetails.MinLineNumber == testCase.LineNumber;
         }
         
@@ -64,7 +64,7 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
         
         if (uniqueId == null)
         {
-            return testDetails.FullyQualifiedName == testCase.FullyQualifiedName
+            return testDetails.UniqueId == testCase.FullyQualifiedName
                    && testDetails.MinLineNumber == testCase.LineNumber
                    && testDetails.DisplayName == testCase.DisplayName;
         }

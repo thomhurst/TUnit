@@ -25,7 +25,6 @@ public record TestDetails
         FullyQualifiedClassName = ClassType.FullName!;
         Assembly = ClassType.Assembly;
         Source = ClassType.Assembly.Location;
-        FullyQualifiedName = $"{ClassType.FullName}.{methodInfo.Name}{GetParameterTypes(ParameterTypes)}";
 
         var methodAndClassAttributes = methodInfo.CustomAttributes
             .Concat(ClassType.CustomAttributes)
@@ -119,7 +118,6 @@ public record TestDetails
     public Assembly Assembly { get; }
     
     public string Source { get; }
-    public string FullyQualifiedName { get; }
     public MethodInfo MethodInfo { get; }
     public Type ClassType { get; }
     public string? FileName { get; }
