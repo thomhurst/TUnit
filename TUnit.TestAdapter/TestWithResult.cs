@@ -2,4 +2,4 @@
 
 namespace TUnit.TestAdapter;
 
-public record TestWithResult(TestWithTestCase Test, Task<TUnitTestResult> Result);
+internal record TestWithResult(TestWithTestCase Test, Task<TUnitTestResult> Result);

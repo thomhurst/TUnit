@@ -7,6 +7,13 @@ public class Tests
 {
     [Test]
     [TestCategory("Pass")]
+    public void ConsoleOutput()
+    {
+        Console.WriteLine("Blah!");
+    }
+    
+    [Test]
+    [TestCategory("Pass")]
     public async Task Test1()
     {
         var value = "1";
@@ -137,14 +144,14 @@ public class Tests
     [TestCategory("Pass")]
     public async Task TestContext1()
     {
-        await Assert.That(TestContext.Current.TestName).Is.EqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]
     [TestCategory("Fail")]
     public async Task TestContext2()
     {
-        await Assert.That(TestContext.Current.TestName).Is.EqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]

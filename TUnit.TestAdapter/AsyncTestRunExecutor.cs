@@ -9,7 +9,7 @@ using TUnit.Engine;
 
 namespace TUnit.TestAdapter;
 
-public class AsyncTestRunExecutor
+internal class AsyncTestRunExecutor
     (
         SingleTestExecutor singleTestExecutor, 
         MethodInvoker methodInvoker, 

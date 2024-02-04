@@ -5,15 +5,8 @@ using TUnit.Core;
 
 namespace TUnit.TestAdapter;
 
-public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoader, ITestExecutionRecorder testExecutionRecorder)
+internal class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoader, ITestExecutionRecorder testExecutionRecorder)
 {
-    public TestCollection CollectionFromSources(IEnumerable<string> sources)
-    {
-        var sourcesAsList = sources.ToList();
-        
-        return new TestCollection(sourcesAsList, TestsFromSources(sourcesAsList));
-    }
-
     public AssembliesAnd<TestWithTestCase> TestsFromTestCases(IEnumerable<TestCase> testCases)
     {
         var testCasesArray = testCases.ToArray();

@@ -5,7 +5,7 @@ using TUnit.TestAdapter.Constants;
 
 namespace TUnit.TestAdapter;
 
-public class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger messageLogger)
+internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger messageLogger)
 {
     public IEnumerable<TestWithTestCase> FilterTests(IEnumerable<TestWithTestCase> tests)
     {
@@ -86,7 +86,7 @@ public class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger mess
     private static bool AllowedTestName(TestDetails test, Filter filter)
     {
         return !filter.RunnableTestNames.Any() ||
-               filter.RunnableTestNames.Contains(test.SimpleMethodName, StringComparer.InvariantCultureIgnoreCase);
+               filter.RunnableTestNames.Contains(test.TestName, StringComparer.InvariantCultureIgnoreCase);
     }
     
     private static bool AllowedCategory(TestDetails test, Filter filter)

@@ -4,7 +4,7 @@ using TUnit.Engine;
 
 namespace TUnit.TestAdapter;
 
-public class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoader classLoader, TestDataSourceRetriever testDataSourceRetriever)
+internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoader classLoader, TestDataSourceRetriever testDataSourceRetriever)
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute), typeof(TestDataSourceAttribute)];
 

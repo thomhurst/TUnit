@@ -2,7 +2,7 @@
 
 public class TimeoutException : TUnitException
 {
-    public TimeoutException(TestDetails testDetails) : base(GetMessage(testDetails))
+    internal TimeoutException(TestDetails testDetails) : base(GetMessage(testDetails))
     {
         
     }

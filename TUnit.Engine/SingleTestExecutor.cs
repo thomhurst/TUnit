@@ -5,7 +5,7 @@ using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
 
-public class SingleTestExecutor
+internal class SingleTestExecutor
 {
     private readonly MethodInvoker _methodInvoker;
     private readonly TestClassCreator _testClassCreator;
@@ -47,7 +47,6 @@ public class SingleTestExecutor
         {
             await Task.Run(async () =>
             {
-                TestContext.Current = testDetails;
                 await ExecuteCore(testDetails, allClasses);
             });
             
@@ -88,41 +87,47 @@ public class SingleTestExecutor
 
         for (var i = 0; i < executionCount + 1; i++)
         {
-            TestContext.Current.CurrentExecutionCount++;
-            
-            var @class = _testClassCreator.CreateTestClass(testDetails, allClasses);
-            
-            try
+            testDetails.CurrentExecutionCount++;
+
+            var createdClasses = _testClassCreator.CreateTestClass(testDetails, allClasses);
+
+            foreach (var @class in createdClasses)
             {
-                await ExecuteSetUps(@class, testDetails.ClassType);
+                var context = new TestContext(testDetails, @class);
+                TestContext.Current = context;
 
-                var testLevelCancellationTokenSource =
-                    CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
-
-                if (testDetails.Timeout != default)
+                try
                 {
-                    testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
+                    await ExecuteSetUps(@class, testDetails.ClassType);
+
+                    var testLevelCancellationTokenSource =
+                        CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
+
+                    if (testDetails.Timeout != default)
+                    {
+                        testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
+                    }
+
+                    await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
+
+                    await ExecuteCleanUps(@class);
+
+                    if (isRetry)
+                    {
+                        break;
+                    }
                 }
-
-                await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
-
-                await ExecuteCleanUps(@class);
-
-                if (isRetry)
+                catch
                 {
-                    break;
+                    if (!isRetry || i == executionCount)
+                    {
+                        throw;
+                    }
                 }
-            }
-            catch
-            {
-                if (!isRetry || i == executionCount)
+                finally
                 {
-                    throw;
+                    await _disposer.DisposeAsync(@class);
                 }
-            }
-            finally
-            {
-                await _disposer.DisposeAsync(@class);
             }
         }
     }

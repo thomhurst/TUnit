@@ -1,14 +1,26 @@
-﻿using System.Collections.Concurrent;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public class TestContext
 {
-    private static readonly AsyncLocal<TestDetails> _asyncLocal = new();
-    private static readonly ConcurrentDictionary<Guid, TestContext> _contexts = new();
-    public static TestDetails Current
+    private readonly TestDetails _testDetails;
+    private readonly object? _classInstance;
+
+    private static readonly AsyncLocal<TestContext> AsyncLocal = new();
+
+    public TestInformation TestInformation { get; }
+    
+    internal TestContext(TestDetails testDetails, object? classInstance)
     {
-        get => _asyncLocal.Value!;
-        set => _asyncLocal.Value = value;
+        _testDetails = testDetails;
+        _classInstance = classInstance;
+        TestInformation = new(_testDetails, _classInstance);
     }
+
+    public static TestContext Current
+    {
+        get => AsyncLocal.Value!;
+        set => AsyncLocal.Value = value;
+    }
+    
+    public bool HasFailed { get; init; }
 }

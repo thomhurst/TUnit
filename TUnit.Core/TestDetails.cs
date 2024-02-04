@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-public record TestDetails
+internal record TestDetails
 {
     public TestDetails(MethodInfo methodInfo,
         Type classType,
@@ -19,7 +19,6 @@ public record TestDetails
         ArgumentValues = arguments?.Select(x => x.Value).ToArray();
         
         TestName = methodInfo.Name;
-        SimpleMethodName = methodInfo.Name;
         DisplayName = methodInfo.Name + GetArgumentValues() + GetCountInBrackets();
         ClassName = ClassType.Name;
         FullyQualifiedClassName = ClassType.FullName!;
@@ -76,9 +75,7 @@ public record TestDetails
     }
 
     public List<string> Categories { get; } = new();
-
-    public string SimpleMethodName { get; set; }
-
+    
     private static TimeSpan GetTimeout(CustomAttributeData[] methodAndClassAttributes)
     {
         var timeoutMilliseconds = methodAndClassAttributes

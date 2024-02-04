@@ -4,7 +4,7 @@ using TUnit.TestAdapter.Constants;
 
 namespace TUnit.TestAdapter.Extensions;
 
-public static class TestExtensions
+internal static class TestExtensions
 {
     public static TestCase ToTestCase(this TestDetails testDetails)
     {

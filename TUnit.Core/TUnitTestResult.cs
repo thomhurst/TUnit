@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-public record TUnitTestResult
+internal record TUnitTestResult
 {
     public required TestDetails TestDetails { get; init; }
     public required Status Status { get; init; }

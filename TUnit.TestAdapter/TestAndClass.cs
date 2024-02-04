@@ -2,4 +2,4 @@
 
 namespace TUnit.TestAdapter;
 
-public record TestAndClass(TestDetails TestDetails, object Class);
+internal record TestAndClass(TestDetails TestDetails, object Class);

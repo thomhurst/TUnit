@@ -3,21 +3,24 @@ using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
 
-public class TestClassCreator(TestDataSourceRetriever testDataSourceRetriever)
+internal class TestClassCreator(TestDataSourceRetriever testDataSourceRetriever)
 {
-    public object? CreateTestClass(TestDetails testDetails, Type[] allClasses)
+    public IEnumerable<object?> CreateTestClass(TestDetails testDetails, Type[] allClasses)
     {
         if (testDetails.MethodInfo.IsStatic)
         {
-            return null;
+            yield break;
         }
         
         if (testDetails.ClassType.HasAttribute<TestDataSourceAttribute>(out var testDataSourceAttributes))
         {
-            return CreateWithTestDataSources(testDetails, testDataSourceAttributes, allClasses);
+            foreach (var withTestDataSource in CreateWithTestDataSources(testDetails, testDataSourceAttributes, allClasses))
+            {
+                yield return withTestDataSource;
+            }
         }
         
-        return CreateBasicClass(testDetails);
+        yield return CreateBasicClass(testDetails);
     }
 
     private IEnumerable<object> CreateWithTestDataSources(TestDetails testDetails,
