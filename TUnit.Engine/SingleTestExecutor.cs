@@ -94,7 +94,7 @@ public class SingleTestExecutor
             
             try
             {
-                await ExecuteSetUps(@class);
+                await ExecuteSetUps(@class, testDetails.ClassType);
 
                 var testLevelCancellationTokenSource =
                     CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
@@ -145,11 +145,11 @@ public class SingleTestExecutor
         await await Task.WhenAny(timeoutTask, methodResult);
     }
 
-    private async Task ExecuteSetUps(object @class)
+    private async Task ExecuteSetUps(object? @class, Type testDetailsClassType)
     {
-        await _oneTimeSetUpRegistry.GetOrAdd(@class.GetType().FullName!, _ => ExecuteOneTimeSetUps(@class));
+        await _oneTimeSetUpRegistry.GetOrAdd(testDetailsClassType.FullName!, _ => ExecuteOneTimeSetUps(@class, testDetailsClassType));
 
-        var setUpMethods = @class.GetType()
+        var setUpMethods = testDetailsClassType
             .GetMethods()
             .Where(x => !x.IsStatic)
             .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(SetUpAttribute)));
@@ -187,9 +187,9 @@ public class SingleTestExecutor
         }
     }
 
-    private async Task ExecuteOneTimeSetUps(object @class)
+    private async Task ExecuteOneTimeSetUps(object? @class, Type testDetailsClassType)
     {
-        var oneTimeSetUpMethods = @class.GetType()
+        var oneTimeSetUpMethods = testDetailsClassType
             .GetMethods()
             .Where(x => x.IsStatic)
             .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(OneTimeSetUpAttribute)));

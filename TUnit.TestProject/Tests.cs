@@ -44,7 +44,7 @@ public class Tests
     [TestCategory("Fail")]
     public async Task ParameterisedTests1(string value)
     {
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).Is.EqualTo("1").And.Has.Length().EqualTo(1);
     }
 
     [TestWithData("1")]

@@ -5,8 +5,13 @@ namespace TUnit.Engine;
 
 public class TestClassCreator(TestDataSourceRetriever testDataSourceRetriever)
 {
-    public object CreateTestClass(TestDetails testDetails, Type[] allClasses)
+    public object? CreateTestClass(TestDetails testDetails, Type[] allClasses)
     {
+        if (testDetails.MethodInfo.IsStatic)
+        {
+            return null;
+        }
+        
         if (testDetails.ClassType.HasAttribute<TestDataSourceAttribute>(out var testDataSourceAttributes))
         {
             return CreateWithTestDataSources(testDetails, testDataSourceAttributes, allClasses);
