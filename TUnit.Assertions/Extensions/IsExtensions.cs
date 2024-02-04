@@ -149,6 +149,69 @@ public static class IsExtensions
     }
     
     #endregion
+    
+    #region TimeSpans
+    
+    public static BaseAssertCondition<TimeSpan, TAnd, TOr> Zero<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is)
+        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
+        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
+    {
+        return @is.Wrap(new EqualsAssertCondition<TimeSpan, TAnd, TOr>(@is.AssertionBuilder, TimeSpan.Zero));
+    }
+    
+    public static BaseAssertCondition<TimeSpan, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is, TimeSpan expected)
+        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
+        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value > expected;
+            },
+            (value, _) => $"{value} was not greater than {expected}"));
+    }
+    
+    public static BaseAssertCondition<TimeSpan, TAnd, TOr> GreaterThanOrEqualTo<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is, TimeSpan expected) 
+        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
+        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value >= expected;
+            },
+            (value, _) => $"{value} was not greater than or equal to {expected}"));
+    }
+    
+    public static BaseAssertCondition<TimeSpan, TAnd, TOr> LessThan<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is, TimeSpan expected) 
+        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
+        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value < expected;
+            },
+            (value, _) => $"{value} was not less than {expected}"));
+    }
+    
+    public static BaseAssertCondition<TimeSpan, TAnd, TOr> LessThanOrEqualTo<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is, TimeSpan expected) 
+        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
+        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value <= expected;
+            },
+            (value, _) => $"{value} was not less than or equal to {expected}"));
+    }
+    
+    #endregion
 
     #region Enumerables
 
