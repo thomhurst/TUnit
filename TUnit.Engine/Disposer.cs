@@ -2,7 +2,7 @@
 
 public class Disposer
 {
-    public ValueTask DisposeAsync(object obj)
+    public ValueTask DisposeAsync(object? obj)
     {
         if (obj is IAsyncDisposable asyncDisposable)
         {

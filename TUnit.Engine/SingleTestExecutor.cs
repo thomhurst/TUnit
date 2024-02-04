@@ -127,7 +127,7 @@ public class SingleTestExecutor
         }
     }
 
-    private async Task ExecuteTestMethodWithTimeout(TestDetails testDetails, object @class,
+    private async Task ExecuteTestMethodWithTimeout(TestDetails testDetails, object? @class,
         CancellationTokenSource cancellationTokenSource)
     {
         var methodResult = _methodInvoker.InvokeMethod(@class, testDetails.MethodInfo, BindingFlags.Default,
@@ -160,8 +160,13 @@ public class SingleTestExecutor
         }
     }
     
-    private async Task ExecuteCleanUps(object @class)
+    private async Task ExecuteCleanUps(object? @class)
     {
+        if (@class is null)
+        {
+            return;
+        }
+        
         var cleanUpMethods = @class.GetType()
             .GetMethods()
             .Where(x => !x.IsStatic)
