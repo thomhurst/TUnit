@@ -54,22 +54,7 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
 
     private static bool MatchTest(TestDetails testDetails, TestCase testCase)
     {
-        if (testDetails.IsSingleTest)
-        {
-            return testDetails.UniqueId == testCase.FullyQualifiedName
-                && testDetails.MinLineNumber == testCase.LineNumber;
-        }
-        
-        var uniqueId = testCase.GetPropertyValue(TUnitTestProperties.UniqueId, null as string);
-        
-        if (uniqueId == null)
-        {
-            return testDetails.UniqueId == testCase.FullyQualifiedName
-                   && testDetails.MinLineNumber == testCase.LineNumber
-                   && testDetails.DisplayName == testCase.DisplayName;
-        }
-        
-        return uniqueId == testDetails.UniqueId;
+        return testDetails.UniqueId == testCase.FullyQualifiedName;
     }
 
     private void MarkNotFound(TestCase testCase)
