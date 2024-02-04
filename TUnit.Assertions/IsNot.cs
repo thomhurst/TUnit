@@ -23,4 +23,14 @@ public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Invert(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder),
         (actual, _) => $"Expected {actual} to not be of type {typeof(TExpected)}");
+    
+    public BaseAssertCondition<TActual, TAnd, TOr> AssignableTo<TExpected>() => Wrap(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder,
+        default,
+        (value, expected, _) => !value!.GetType().IsAssignableTo(typeof(TExpected)),
+        (actual, _) => $"{actual?.GetType()} is assignable to {typeof(TExpected).Name}"));
+
+    public BaseAssertCondition<TActual, TAnd, TOr> AssignableFrom<TExpected>() => Wrap(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder,
+        default,
+        (value, expected, _) => !value!.GetType().IsAssignableFrom(typeof(TExpected)),
+        (actual, _) => $"{actual?.GetType()} is assignable from {typeof(TExpected).Name}"));
 }
