@@ -137,7 +137,7 @@ internal record TestDetails
     private readonly TaskCompletionSource<TUnitTestResult> _completionSource = new();
     public Task<TUnitTestResult> GetResultAsync() => _completionSource.Task;
 
-    public TUnitTestResult SetResult(TUnitTestResult unitTestResult)
+    public TUnitTestResultWithDetails SetResult(TUnitTestResultWithDetails unitTestResult)
     {
         _completionSource.SetResult(unitTestResult);
         return unitTestResult;

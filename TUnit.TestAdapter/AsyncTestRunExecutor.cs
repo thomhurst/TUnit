@@ -70,6 +70,7 @@ internal class AsyncTestRunExecutor
                     Duration = result.Duration,
                     StartTime = result.Start,
                     EndTime = result.End,
+                    Messages = { new TestResultMessage("Output", result.Output) },
                     ErrorMessage = result.Exception?.Message,
                     ErrorStackTrace = result.Exception?.StackTrace,
                 });

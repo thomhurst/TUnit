@@ -5,58 +5,54 @@ namespace TUnit.Engine;
 
 internal class TestClassCreator(TestDataSourceRetriever testDataSourceRetriever)
 {
-    public IEnumerable<object?> CreateTestClass(TestDetails testDetails, Type[] allClasses)
+    public object? CreateTestClass(TestDetails testDetails, Type[] allClasses)
     {
         if (testDetails.MethodInfo.IsStatic)
         {
-            yield break;
+            return null;
         }
         
         if (testDetails.ClassType.HasAttribute<TestDataSourceAttribute>(out var testDataSourceAttributes))
         {
-            foreach (var withTestDataSource in CreateWithTestDataSources(testDetails, testDataSourceAttributes, allClasses))
-            {
-                yield return withTestDataSource;
-            }
+            return CreateWithTestDataSources(testDetails, testDataSourceAttributes, allClasses);
         }
         
-        yield return CreateBasicClass(testDetails);
+        return CreateBasicClass(testDetails);
     }
 
-    private IEnumerable<object> CreateWithTestDataSources(TestDetails testDetails,
+    private object CreateWithTestDataSources(TestDetails testDetails,
         IEnumerable<TestDataSourceAttribute> testDataSourceAttributes, 
         Type[] allClasses)
     {
-        foreach (var testDataSourceAttribute in testDataSourceAttributes)
+        var testDataSourceAttribute = testDataSourceAttributes.First();
+        
+        var className = testDataSourceAttribute.ClassNameProvidingDataSource;
+
+        ParameterArgument[]? testData;
+        if (string.IsNullOrEmpty(className))
         {
-            var className = testDataSourceAttribute.ClassNameProvidingDataSource;
-
-            ParameterArgument[]? testData;
-            if (string.IsNullOrEmpty(className))
-            {
-                var @class = testDetails.MethodInfo.DeclaringType!;
+            var @class = testDetails.MethodInfo.DeclaringType!;
                 
-                testData = testDataSourceRetriever.GetTestDataSourceArguments(
-                    @class,
-                    testDataSourceAttribute.MethodNameProvidingDataSource
-                );
-            }
-            else
-            {
-                var @class = allClasses.FirstOrDefault(x => x.FullName == className)
-                             ?? allClasses.First(x => x.Name == className);
+            testData = testDataSourceRetriever.GetTestDataSourceArguments(
+                @class,
+                testDataSourceAttribute.MethodNameProvidingDataSource
+            );
+        }
+        else
+        {
+            var @class = allClasses.FirstOrDefault(x => x.FullName == className)
+                         ?? allClasses.First(x => x.Name == className);
 
-                testData = testDataSourceRetriever.GetTestDataSourceArguments(
-                    @class,
-                    testDataSourceAttribute.MethodNameProvidingDataSource
-                );
-            }
+            testData = testDataSourceRetriever.GetTestDataSourceArguments(
+                @class,
+                testDataSourceAttribute.MethodNameProvidingDataSource
+            );
+        }
 
-            yield return Activator.CreateInstance(
+        return Activator.CreateInstance(
                 testDetails.ClassType,
                 testData?.Select(x => x.Value).ToArray()
             )!;
-        }
     }
 
     private static object CreateBasicClass(TestDetails testDetails)

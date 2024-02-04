@@ -25,13 +25,13 @@ internal class SingleTestExecutor
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
 
-    public async Task<TUnitTestResult> ExecuteTest(TestDetails testDetails, Type[] allClasses)
+    public async Task<TUnitTestResultWithDetails> ExecuteTest(TestDetails testDetails, Type[] allClasses)
     {
         var start = DateTimeOffset.Now;
 
         if (testDetails.IsSkipped)
         {
-            return testDetails.SetResult(new TUnitTestResult
+            return testDetails.SetResult(new TUnitTestResultWithDetails
             {
                 TestDetails = testDetails,
                 Duration = TimeSpan.Zero,
@@ -42,17 +42,24 @@ internal class SingleTestExecutor
                 Status = Status.Skipped
             });
         }
-        
+
+        object? @class = null;
+        TestContext? testContext = null;
         try
         {
             await Task.Run(async () =>
             {
-                await ExecuteCore(testDetails, allClasses);
+                @class = _testClassCreator.CreateTestClass(testDetails, allClasses);
+
+                testContext = new TestContext(testDetails, @class);
+                TestContext.Current = testContext;
+
+                await ExecuteCore(testDetails, @class);
             });
-            
+
             var end = DateTimeOffset.Now;
-            
-            return testDetails.SetResult(new TUnitTestResult
+
+            return testDetails.SetResult(new TUnitTestResultWithDetails
             {
                 TestDetails = testDetails,
                 Duration = end - start,
@@ -60,14 +67,15 @@ internal class SingleTestExecutor
                 End = end,
                 ComputerName = Environment.MachineName,
                 Exception = null,
-                Status = Status.Passed
+                Status = Status.Passed,
+                Output = testContext?.GetOutput()
             });
         }
         catch (Exception e)
         {
             var end = DateTimeOffset.Now;
-            
-            return testDetails.SetResult(new TUnitTestResult
+
+            var unitTestResult = new TUnitTestResultWithDetails
             {
                 TestDetails = testDetails,
                 Duration = end - start,
@@ -75,59 +83,59 @@ internal class SingleTestExecutor
                 End = end,
                 ComputerName = Environment.MachineName,
                 Exception = e,
-                Status = Status.Failed
-            });
+                Status = Status.Failed,
+                Output = testContext?.GetOutput()
+            };
+            
+            if (testContext != null)
+            {
+                testContext.Result = unitTestResult;
+            }
+            
+            await ExecuteCleanUps(@class);
+            
+            return testDetails.SetResult(unitTestResult);
         }
     }
 
-    private async Task ExecuteCore(TestDetails testDetails, Type[] allClasses)
+    private async Task ExecuteCore(TestDetails testDetails, object? @class)
     {
         var isRetry = testDetails.RetryCount > 0;
         var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
-
+        
         for (var i = 0; i < executionCount + 1; i++)
         {
             testDetails.CurrentExecutionCount++;
-
-            var createdClasses = _testClassCreator.CreateTestClass(testDetails, allClasses);
-
-            foreach (var @class in createdClasses)
+            
+            try
             {
-                var context = new TestContext(testDetails, @class);
-                TestContext.Current = context;
+                await ExecuteSetUps(@class, testDetails.ClassType);
 
-                try
+                var testLevelCancellationTokenSource =
+                    CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
+
+                if (testDetails.Timeout != default)
                 {
-                    await ExecuteSetUps(@class, testDetails.ClassType);
-
-                    var testLevelCancellationTokenSource =
-                        CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
-
-                    if (testDetails.Timeout != default)
-                    {
-                        testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
-                    }
-
-                    await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
-
-                    await ExecuteCleanUps(@class);
-
-                    if (isRetry)
-                    {
-                        break;
-                    }
+                    testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
                 }
-                catch
+
+                await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
+
+                if (isRetry)
                 {
-                    if (!isRetry || i == executionCount)
-                    {
-                        throw;
-                    }
+                    break;
                 }
-                finally
+            }
+            catch
+            {
+                if (!isRetry || i == executionCount)
                 {
-                    await _disposer.DisposeAsync(@class);
+                    throw;
                 }
+            }
+            finally
+            {
+                await _disposer.DisposeAsync(@class);
             }
         }
     }
