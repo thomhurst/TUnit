@@ -71,6 +71,6 @@ public static class DoesExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.EndsWith(expected, stringComparison);
             },
-            (actual, _) => $"\"{actual}\" does not start with \"{expected}\""));
+            (actual, _) => $"\"{actual}\" does not end with \"{expected}\""));
     }
 }
