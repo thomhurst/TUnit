@@ -7,9 +7,11 @@ public class Tests
 {
     [Test]
     [TestCategory("Pass")]
-    public void ConsoleOutput()
+    public async Task ConsoleOutput()
     {
         Console.WriteLine("Blah!");
+
+        await Assert.That(TestContext.Current.GetOutput()).Is.EqualTo("Blah!");
     }
     
     [Test]

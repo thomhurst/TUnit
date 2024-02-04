@@ -13,7 +13,6 @@ internal static class TestExtensions
             DisplayName = testDetails.DisplayName,
             CodeFilePath = testDetails.FileName,
             LineNumber = testDetails.MinLineNumber,
-            LocalExtensionData = testDetails
         };
         
         testCase.SetPropertyValue(TUnitTestProperties.UniqueId, testDetails.UniqueId);

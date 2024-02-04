@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestDataSourceRetriever>()
             .AddSingleton<ClassLoader>()
             .AddSingleton<Disposer>()
-            .AddSingleton<SingleTestExecutor>();
+            .AddSingleton<SingleTestExecutor>()
+            .AddSingleton(new ConsoleInterceptor());
     }
 }

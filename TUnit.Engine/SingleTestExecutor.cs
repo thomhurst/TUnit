@@ -54,7 +54,7 @@ internal class SingleTestExecutor
                 testContext = new TestContext(testDetails, @class);
                 TestContext.Current = testContext;
 
-                await ExecuteCore(testDetails, @class);
+                await ExecuteWithRepeatsOrRetries(testContext, testDetails, @class);
             });
 
             var end = DateTimeOffset.Now;
@@ -98,45 +98,68 @@ internal class SingleTestExecutor
         }
     }
 
-    private async Task ExecuteCore(TestDetails testDetails, object? @class)
+    private async Task ExecuteWithRepeatsOrRetries(TestContext testContext, TestDetails testDetails, object? @class)
     {
         var isRetry = testDetails.RetryCount > 0;
         var executionCount = isRetry ? testDetails.RetryCount : testDetails.RepeatCount;
-        
-        for (var i = 0; i < executionCount + 1; i++)
+
+        var tasks = new List<Task>();
+
+        try
         {
-            testDetails.CurrentExecutionCount++;
-            
-            try
+            for (var i = 0; i < executionCount + 1; i++)
             {
-                await ExecuteSetUps(@class, testDetails.ClassType);
-
-                var testLevelCancellationTokenSource =
-                    CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
-
-                if (testDetails.Timeout != default)
-                {
-                    testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
-                }
-
-                await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
-
+                var task = ExecuteCore(testContext, testDetails, @class);
+                tasks.Add(task);
+                
                 if (isRetry)
                 {
-                    break;
+                    try
+                    {
+                        await task;
+                        break;
+                    }
+                    catch
+                    {
+                        if (i == executionCount)
+                        {
+                            throw;
+                        }
+                    }
                 }
             }
-            catch
-            {
-                if (!isRetry || i == executionCount)
-                {
-                    throw;
-                }
-            }
-            finally
-            {
-                await _disposer.DisposeAsync(@class);
-            }
+            await Task.WhenAll(tasks);
+        }
+        finally
+        {
+            await _disposer.DisposeAsync(@class);
+        }
+    }
+
+    private async Task ExecuteCore(TestContext testContext, TestDetails testDetails, object? @class)
+    {
+        testDetails.CurrentExecutionCount++;
+        
+        await ExecuteSetUps(@class, testDetails.ClassType);
+
+        var testLevelCancellationTokenSource =
+            CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
+
+        if (testDetails.Timeout != default)
+        {
+            testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
+        }
+
+        testContext.CancellationToken = testLevelCancellationTokenSource.Token;
+
+        try
+        {
+            await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
+        }
+        catch
+        {
+            testLevelCancellationTokenSource.Cancel();
+            throw;
         }
     }
 
