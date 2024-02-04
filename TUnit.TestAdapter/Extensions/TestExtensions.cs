@@ -16,17 +16,11 @@ public static class TestExtensions
             LocalExtensionData = testDetails
         };
         
-        testCase.SetPropertyValue(GetOrRegisterTestProperty<string>(nameof(TestDetails.UniqueId)), testDetails.UniqueId);
+        testCase.SetPropertyValue(TUnitTestProperties.UniqueId, testDetails.UniqueId);
         
-        testCase.SetPropertyValue(GetOrRegisterTestProperty<string>("ManagedType"), testDetails.FullyQualifiedClassName);
-        testCase.SetPropertyValue(GetOrRegisterTestProperty<string>("ManagedMethod"), testDetails.MethodInfo.Name + TestDetails.GetParameterTypes(testDetails.ParameterTypes));
+        testCase.SetPropertyValue(TUnitTestProperties.ManagedType, testDetails.FullyQualifiedClassName);
+        testCase.SetPropertyValue(TUnitTestProperties.ManagedMethod, testDetails.MethodInfo.Name + TestDetails.GetParameterTypes(testDetails.ParameterTypes));
         
         return testCase;
-    }
-
-    private static TestProperty GetOrRegisterTestProperty<T>(string name)
-    {
-        return TestProperty.Find(name) 
-               ?? TestProperty.Register(name, name, typeof(T), typeof(TestCase));
     }
 }

@@ -60,9 +60,7 @@ public class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoade
                 && testDetails.MinLineNumber == testCase.LineNumber;
         }
         
-        var testProperty = TestProperty.Find(nameof(TestDetails.UniqueId));
-        
-        var uniqueId = testProperty is null ? null : testCase.GetPropertyValue(testProperty, null as string);
+        var uniqueId = testCase.GetPropertyValue(TUnitTestProperties.UniqueId, null as string);
         
         if (uniqueId == null)
         {
