@@ -20,7 +20,7 @@ public record TestDetails
         
         TestName = methodInfo.Name;
         SimpleMethodName = methodInfo.Name;
-        DisplayName = methodInfo.Name + GetCount() + GetArgumentValues();
+        DisplayName = methodInfo.Name + GetArgumentValues() + GetCountInBrackets();
         ClassName = ClassType.Name;
         FullyQualifiedClassName = ClassType.FullName!;
         Assembly = ClassType.Assembly;
@@ -57,9 +57,9 @@ public record TestDetails
         UniqueId = FullyQualifiedClassName + DisplayName + Count + GetParameterTypes(ParameterTypes);
     }
 
-    private string GetCount()
+    private string GetCountInBrackets()
     {
-        return Count == 1 ? string.Empty : Count.ToString();
+        return Count == 1 ? string.Empty : $" [{Count}]";
     }
 
     public bool IsSingleTest { get; }

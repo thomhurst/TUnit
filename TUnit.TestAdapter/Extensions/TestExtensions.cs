@@ -8,7 +8,7 @@ public static class TestExtensions
 {
     public static TestCase ToTestCase(this TestDetails testDetails)
     {
-        var testCase = new TestCase(testDetails.FullyQualifiedName, TestAdapterConstants.ExecutorUri, testDetails.Source)
+        var testCase = new TestCase(testDetails.UniqueId, TestAdapterConstants.ExecutorUri, testDetails.Source)
         {
             DisplayName = testDetails.DisplayName,
             CodeFilePath = testDetails.FileName,
