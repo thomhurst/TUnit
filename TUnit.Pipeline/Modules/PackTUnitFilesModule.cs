@@ -9,7 +9,6 @@ using ModularPipelines.Git.Extensions;
 
 namespace TUnit.Pipeline.Modules;
 [DependsOn<GetPackageProjectsModule>]
-[DependsOn<CleanProjectsModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
     protected override async Task<List<PackedProject>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
