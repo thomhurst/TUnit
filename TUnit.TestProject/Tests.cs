@@ -6,6 +6,7 @@ namespace TUnit.TestProject;
 public class Tests
 {
     [Test]
+    [TestCategory("Pass")]
     public async Task Test1()
     {
         var value = "1";
@@ -21,6 +22,7 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Pass")]
     public async Task Test3()
     {
         await Task.Yield();
@@ -72,12 +74,14 @@ public class Tests
     }
 
     [TestDataSource(nameof(One))]
+    [TestCategory("Pass")]
     public async Task TestDataSource1(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
     [TestDataSource(nameof(One))]
+    [TestCategory("Pass")]
     public async Task TestDataSource2(int value)
     {
         await Task.Yield();
@@ -100,12 +104,14 @@ public class Tests
     }
 
     [TestDataSource(nameof(TestDataSources), nameof(One))]
+    [TestCategory("Pass")]
     public async Task TestDataSource5(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
     [TestDataSource(nameof(TestDataSources), nameof(One))]
+    [TestCategory("Pass")]
     public async Task TestDataSource6(int value)
     {
         await Task.Yield();
@@ -128,6 +134,7 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Pass")]
     public async Task TestContext1()
     {
         await Assert.That(TestContext.Current.TestName).Is.EqualTo(nameof(TestContext1));
@@ -158,12 +165,14 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Pass")]
     public async Task Throws3()
     {
         await Assert.That(() => throw new ApplicationException()).Throws.Exception;
     }
 
     [Test]
+    [TestCategory("Pass")]
     public async Task Throws4()
     {
         await Assert.That(async () =>
@@ -181,6 +190,7 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Pass")]
     public async Task String_And_Condition()
     {
         await Assert.That("1").Is.EqualTo("1").And.Has.Length().EqualTo(1);
@@ -194,6 +204,7 @@ public class Tests
     }
 
     [Test]
+    [TestCategory("Pass")]
     public async Task Count1()
     {
         var list = new List<int> { 1, 2, 3 };
