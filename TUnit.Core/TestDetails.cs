@@ -4,29 +4,31 @@ namespace TUnit.Core;
 
 public record TestDetails
 {
-    public TestDetails(MethodInfo MethodInfo,
-        Type ClassType,
-        SourceLocation SourceLocation,
-        ParameterArgument[]? arguments)
+    public TestDetails(MethodInfo methodInfo,
+        Type classType,
+        SourceLocation sourceLocation,
+        ParameterArgument[]? arguments, 
+        int count)
     {
-        this.MethodInfo = MethodInfo;
-        this.ClassType = ClassType;
-        this.SourceLocation = SourceLocation;
-        
+        MethodInfo = methodInfo;
+        ClassType = classType;
+        SourceLocation = sourceLocation;
+        Count = count;
+
         ParameterTypes = arguments?.Select(x => x.Type).ToArray();
         ArgumentValues = arguments?.Select(x => x.Value).ToArray();
         
-        TestName = MethodInfo.Name;
-        SimpleMethodName = MethodInfo.Name;
-        DisplayName = MethodInfo.Name + GetArgumentValues();
-        ClassName = this.ClassType.Name;
-        FullyQualifiedClassName = this.ClassType.FullName!;
-        Assembly = this.ClassType.Assembly;
-        Source = this.ClassType.Assembly.Location;
-        FullyQualifiedName = $"{this.ClassType.FullName}.{MethodInfo.Name}{GetParameterTypes(ParameterTypes)}";
+        TestName = methodInfo.Name;
+        SimpleMethodName = methodInfo.Name;
+        DisplayName = methodInfo.Name + GetCount() + GetArgumentValues();
+        ClassName = ClassType.Name;
+        FullyQualifiedClassName = ClassType.FullName!;
+        Assembly = ClassType.Assembly;
+        Source = ClassType.Assembly.Location;
+        FullyQualifiedName = $"{ClassType.FullName}.{methodInfo.Name}{GetParameterTypes(ParameterTypes)}";
 
-        var methodAndClassAttributes = MethodInfo.CustomAttributes
-            .Concat(this.ClassType.CustomAttributes)
+        var methodAndClassAttributes = methodInfo.CustomAttributes
+            .Concat(ClassType.CustomAttributes)
             .ToArray();
 
         IsSingleTest = !methodAndClassAttributes.Any(x => x.AttributeType == typeof(TestWithDataAttribute)
@@ -48,11 +50,16 @@ public record TestDetails
         
         Timeout = GetTimeout(methodAndClassAttributes);
         
-        FileName = SourceLocation.FileName;
-        MinLineNumber = SourceLocation.MinLineNumber;
-        MaxLineNumber = SourceLocation.MaxLineNumber;
+        FileName = sourceLocation.FileName;
+        MinLineNumber = sourceLocation.MinLineNumber;
+        MaxLineNumber = sourceLocation.MaxLineNumber;
 
         UniqueId = FullyQualifiedClassName + DisplayName + GetParameterTypes(ParameterTypes);
+    }
+
+    private string GetCount()
+    {
+        return Count == 1 ? string.Empty : Count.ToString();
     }
 
     public bool IsSingleTest { get; }
@@ -126,7 +133,8 @@ public record TestDetails
     public Type[]? ParameterTypes { get; }
     public object?[]? ArgumentValues { get; }
     public SourceLocation SourceLocation { get; }
-    
+    public int Count { get; }
+
     public string? SkipReason { get; }
     public bool IsSkipped => !string.IsNullOrEmpty(SkipReason);
     public string DisplayName { get; }

@@ -27,8 +27,11 @@ public class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoader 
                 .Where(t => t.IsAssignableTo(methodInfo.DeclaringType!) && !t.IsAbstract)
                 .ToArray();
             
+            var count = 0;
+            
             foreach (var testWithDataAttribute in methodInfo.CustomAttributes.Where(x => x.AttributeType == typeof(TestWithDataAttribute)))
             {
+                count++;
                 foreach (var customAttributeTypedArgument in testWithDataAttribute.ConstructorArguments)
                 {
                     var arguments =
@@ -39,10 +42,11 @@ public class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoader 
                     foreach (var classType in nonAbstractClassesContainingTest)
                     {
                         yield return new TestDetails(
-                            MethodInfo: methodInfo,
-                            ClassType: classType,
-                            SourceLocation: sourceLocation,
-                            arguments: arguments
+                            methodInfo: methodInfo,
+                            classType: classType,
+                            sourceLocation: sourceLocation,
+                            arguments: arguments,
+                            count: count
                         );   
                     }
                 }
@@ -53,23 +57,26 @@ public class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoader 
                 foreach (var classType in nonAbstractClassesContainingTest)
                 {
                     yield return new TestDetails(
-                        MethodInfo: methodInfo,
-                        ClassType: classType,
-                        SourceLocation: sourceLocation,
-                        arguments: null
+                        methodInfo: methodInfo,
+                        classType: classType,
+                        sourceLocation: sourceLocation,
+                        arguments: null,
+                        count: 1
                     );
                 }
             }
             
             foreach (var testDataSourceAttribute in methodInfo.CustomAttributes.Where(x => x.AttributeType == typeof(TestDataSourceAttribute)))
             {
+                count++;
                 foreach (var classType in nonAbstractClassesContainingTest)
                 {
                     yield return new TestDetails(
-                        MethodInfo: methodInfo,
-                        ClassType: classType,
-                        SourceLocation: sourceLocation,
-                        arguments: testDataSourceRetriever.GetTestDataSourceArguments(methodInfo, testDataSourceAttribute, allClasses)
+                        methodInfo: methodInfo,
+                        classType: classType,
+                        sourceLocation: sourceLocation,
+                        arguments: testDataSourceRetriever.GetTestDataSourceArguments(methodInfo, testDataSourceAttribute, allClasses),
+                        count: count
                     );
                 }
             }
