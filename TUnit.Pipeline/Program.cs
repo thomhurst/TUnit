@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ModularPipelines.Extensions;
 using ModularPipelines.Host;
@@ -8,9 +9,9 @@ await PipelineHostBuilder.Create()
     {
         builder.AddEnvironmentVariables();
     })
-    .ConfigureServices((_, collection) =>
+    .ConfigureServices((context, collection) =>
     {
-        _.Configuration.GetSection("NuGet").Bind(new NuGetOptions());
+        collection.Configure<NuGetOptions>(context.Configuration.GetSection("NuGet"));
         collection.AddModulesFromAssembly(typeof(Program).Assembly);
     })
     .SetLogLevel(LogLevel.Debug)
