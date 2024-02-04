@@ -1,22 +1,25 @@
 ﻿using System.Collections;
+using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableCountEqualToAssertCondition<T, TInner> : AssertCondition<T, int>
-    where T : IEnumerable<TInner>
+public class EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, int, TAnd, TOr>
+    where TActual : IEnumerable<TInner>
+    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    public EnumerableCountEqualToAssertCondition(AssertionBuilder<T> assertionBuilder, int expected) : base(assertionBuilder, expected)
+    public EnumerableCountEqualToAssertCondition(AssertionBuilder<TActual> assertionBuilder, int expected) : base(assertionBuilder, expected)
     {
     }
 
     protected override string DefaultMessage => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
     
-    protected internal override bool Passes(T? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
         return GetCount(actualValue) == ExpectedValue;
     }
 
-    private int GetCount(T? actualValue)
+    private int GetCount(TActual? actualValue)
     {
         ArgumentNullException.ThrowIfNull(actualValue);
 

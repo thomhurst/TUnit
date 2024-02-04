@@ -4,7 +4,9 @@ using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertConditions;
 
-public abstract class BaseAssertCondition<TActual>
+public abstract class BaseAssertCondition<TActual, TAnd, TOr>
+    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
 
@@ -12,8 +14,8 @@ public abstract class BaseAssertCondition<TActual>
     {
         AssertionBuilder = assertionBuilder;
         
-        And = new And<TActual>(this);
-        Or = new Or<TActual>(this);
+        And = TAnd.Create(this);
+        Or = TOr.Create(this);
     }
     
     public TaskAwaiter GetAwaiter()
@@ -36,7 +38,7 @@ public abstract class BaseAssertCondition<TActual>
 
     private Func<TActual?, Exception?, string>? MessageFactory { get; set; }
     
-    public BaseAssertCondition<TActual> WithMessage(Func<TActual?, Exception?, string> messageFactory)
+    public BaseAssertCondition<TActual, TAnd, TOr> WithMessage(Func<TActual?, Exception?, string> messageFactory)
     {
         MessageFactory = messageFactory;
         return this;
@@ -61,10 +63,10 @@ public abstract class BaseAssertCondition<TActual>
 
     protected internal abstract bool Passes(TActual? actualValue, Exception? exception);
 
-    public And<TActual> And { get; }
-    public Or<TActual> Or { get; }
+    public TAnd And { get; }
+    public TOr Or { get; }
 
-    internal BaseAssertCondition<TActual> Invert(Func<TActual?, Exception?, string> messageFactory)
+    internal BaseAssertCondition<TActual, TAnd, TOr> Invert(Func<TActual?, Exception?, string> messageFactory)
     {
         WithMessage(messageFactory);
         IsInverted = true;

@@ -12,9 +12,9 @@ public static class Assert
         return new DelegateAssertionBuilder(value);
     }
     
-    public static DelegateAssertionBuilder<T> That<T>(Func<T> value)
+    public static DelegateAssertionBuilder<TActual> That<TActual>(Func<TActual> value)
     {
-        return new DelegateAssertionBuilder<T>(value);
+        return new DelegateAssertionBuilder<TActual>(value);
     }
     
     public static AsyncDelegateAssertionBuilder That(Func<Task> value)
@@ -22,8 +22,8 @@ public static class Assert
         return new AsyncDelegateAssertionBuilder(value);
     }
     
-    public static AsyncDelegateAssertionBuilder<T> That<T>(Func<Task<T>> value)
+    public static AsyncDelegateAssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value)
     {
-        return new AsyncDelegateAssertionBuilder<T>(value!);
+        return new AsyncDelegateAssertionBuilder<TActual>(value!);
     }
 }

@@ -1,16 +1,13 @@
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class And<TActual>
+public abstract class And<TActual, TAnd, TOr>
+    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    private readonly BaseAssertCondition<TActual> _otherAssertCondition;
+    protected readonly BaseAssertCondition<TActual, TAnd, TOr> OtherAssertCondition;
 
-    public And(BaseAssertCondition<TActual> otherAssertCondition)
+    public And(BaseAssertCondition<TActual, TAnd, TOr> otherAssertCondition)
     {
-        _otherAssertCondition = otherAssertCondition;
+        OtherAssertCondition = otherAssertCondition;
     }
-    
-    public Is<TActual> Is => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
-    public Has<TActual> Has => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
-    public Does<TActual> Does => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
-    public Throws<TActual> Throws => new(_otherAssertCondition.AssertionBuilder, ConnectorType.And, _otherAssertCondition);
 }

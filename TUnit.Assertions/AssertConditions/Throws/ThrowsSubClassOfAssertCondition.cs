@@ -1,6 +1,10 @@
+using TUnit.Assertions.AssertConditions.Operators;
+
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsSubClassOfAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
+public class ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCondition<TActual, TExpected, TAnd, TOr>
+    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
     public ThrowsSubClassOfAssertCondition(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder, default)
     {

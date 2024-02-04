@@ -1,31 +1,34 @@
 ﻿using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
+using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions;
 
-public class Is<TActual> : Connector<TActual>
+public class Is<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
+    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
 
     public Is(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType,
-        BaseAssertCondition<TActual>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+        BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder;
     }
 
-    public BaseAssertCondition<TActual> EqualTo(TActual expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected)
     {
-        return Wrap(new EqualsAssertCondition<TActual>(AssertionBuilder, expected));
+        return Wrap(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder, expected));
     }
 
-    public BaseAssertCondition<TActual> SameReference(TActual expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> SameReference(TActual expected)
     {
-        return Wrap(new SameReferenceAssertCondition<TActual, TActual>(AssertionBuilder, expected));
+        return Wrap(new SameReferenceAssertCondition<TActual, TActual, TAnd, TOr>(AssertionBuilder, expected));
     }
 
-    public BaseAssertCondition<TActual> Null => Wrap(new NullAssertCondition<TActual>(AssertionBuilder));
+    public BaseAssertCondition<TActual, TAnd, TOr> Null => Wrap(new NullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder));
 
-    public BaseAssertCondition<TActual> TypeOf<TExpected>() => Wrap(new TypeOfAssertCondition<TActual, TExpected>(AssertionBuilder));
+    public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Wrap(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder));
 
-    public IsNot<TActual> Not => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
+    public IsNot<TActual, TAnd, TOr> Not => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
 }

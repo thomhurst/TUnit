@@ -1,8 +1,6 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿namespace TUnit.Assertions;
 
-namespace TUnit.Assertions;
-
-public abstract class AssertionBuilder<T>
+public abstract class AssertionBuilder<TActual>
 {
-    protected internal abstract Task<AssertionData<T>> GetAssertionData();
+    protected internal abstract Task<AssertionData<TActual>> GetAssertionData();
 }

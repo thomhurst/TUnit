@@ -1,6 +1,10 @@
-﻿namespace TUnit.Assertions.AssertConditions.String;
+﻿using TUnit.Assertions.AssertConditions.Operators;
 
-public class StringContainsAssertCondition : AssertCondition<string, string>
+namespace TUnit.Assertions.AssertConditions.String;
+
+public class StringContainsAssertCondition<TAnd, TOr> : AssertCondition<string, string, TAnd, TOr>
+    where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+    where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
 {
     private readonly StringComparison _stringComparison;
     

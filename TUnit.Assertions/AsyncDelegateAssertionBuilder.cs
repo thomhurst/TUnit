@@ -1,22 +1,23 @@
 ﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions;
 
-public class AsyncDelegateAssertionBuilder<T> : AssertionBuilder<T>
+public class AsyncDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
 {
-    private readonly Func<Task<T?>> _function;
+    private readonly Func<Task<TActual?>> _function;
     
-    public Does<T> Does => new(this, ConnectorType.None, null);
-    public Is<T> Is => new(this, ConnectorType.None, null);
-    public Has<T> Has => new(this, ConnectorType.None, null);
-    public Throws<T> Throws => new(this, ConnectorType.None, null);
+    public Does<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Does => new(this, ConnectorType.None, null);
+    public Is<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Is => new(this, ConnectorType.None, null);
+    public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
+    public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
-    internal AsyncDelegateAssertionBuilder(Func<Task<T?>> function)
+    internal AsyncDelegateAssertionBuilder(Func<Task<TActual?>> function)
     {
         _function = function;
     }
 
-    protected internal override async Task<AssertionData<T>> GetAssertionData()
+    protected internal override async Task<AssertionData<TActual>> GetAssertionData()
     {
         var assertionData = await _function.InvokeAndGetExceptionAsync();
         
@@ -28,7 +29,7 @@ public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?>
 {
     private readonly Func<Task> _function;
     
-    public Throws<object?> Throws => new(this, ConnectorType.None, null);
+    public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
 
     internal AsyncDelegateAssertionBuilder(Func<Task> function)
     {

@@ -1,6 +1,10 @@
-﻿namespace TUnit.Assertions.AssertConditions;
+﻿using TUnit.Assertions.AssertConditions.Operators;
 
-public class DelegateAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
+namespace TUnit.Assertions.AssertConditions;
+
+public class DelegateAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCondition<TActual, TExpected, TAnd, TOr>
+    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
     private readonly Func<TActual?, TExpected?, Exception?, bool> _condition;
 

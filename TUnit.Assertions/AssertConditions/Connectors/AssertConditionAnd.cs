@@ -1,11 +1,15 @@
-﻿namespace TUnit.Assertions.AssertConditions.Connectors;
+﻿using TUnit.Assertions.AssertConditions.Operators;
 
-public sealed class AssertConditionAnd<TActual> : BaseAssertCondition<TActual>
+namespace TUnit.Assertions.AssertConditions.Connectors;
+
+public sealed class AssertConditionAnd<TActual, TAnd, TOr> : BaseAssertCondition<TActual, TAnd, TOr>
+    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    private readonly BaseAssertCondition<TActual> _condition1;
-    private readonly BaseAssertCondition<TActual> _condition2;
+    private readonly BaseAssertCondition<TActual, TAnd, TOr> _condition1;
+    private readonly BaseAssertCondition<TActual, TAnd, TOr> _condition2;
 
-    public AssertConditionAnd(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2) : base(condition1.AssertionBuilder)
+    public AssertConditionAnd(BaseAssertCondition<TActual, TAnd, TOr> condition1, BaseAssertCondition<TActual, TAnd, TOr> condition2) : base(condition1.AssertionBuilder)
     {
         ArgumentNullException.ThrowIfNull(condition1);
         ArgumentNullException.ThrowIfNull(condition2);

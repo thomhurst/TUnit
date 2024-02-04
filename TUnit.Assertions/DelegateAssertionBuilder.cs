@@ -1,22 +1,23 @@
 ﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions;
 
-public class DelegateAssertionBuilder<T> : AssertionBuilder<T>
+public class DelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
 {
-    private readonly Func<T?> _function;
+    private readonly Func<TActual?> _function;
     
-    public Does<T> Does => new(this, ConnectorType.None, null);
-    public Is<T> Is => new(this, ConnectorType.None, null);
-    public Has<T> Has => new(this, ConnectorType.None, null);
-    public Throws<T> Throws => new(this, ConnectorType.None, null);
+    public Does<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Does => new(this, ConnectorType.None, null);
+    public Is<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Is => new(this, ConnectorType.None, null);
+    public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
+    public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
-    internal DelegateAssertionBuilder(Func<T?> function)
+    internal DelegateAssertionBuilder(Func<TActual?> function)
     {
         _function = function;
     }
 
-    protected internal override Task<AssertionData<T>> GetAssertionData()
+    protected internal override Task<AssertionData<TActual>> GetAssertionData()
     {
         var assertionData = _function.InvokeAndGetException();
         
@@ -28,7 +29,7 @@ public class DelegateAssertionBuilder : AssertionBuilder<object?>
 {
     private readonly Action _action;
     
-    public Throws<object?> Throws => new(this, ConnectorType.None, null);
+    public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
 
     internal DelegateAssertionBuilder(Action action)
     {
