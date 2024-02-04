@@ -6,6 +6,7 @@ public class TestContext
 {
     public CancellationToken CancellationToken { get; internal set; } = CancellationToken.None;
     internal readonly StringWriter OutputWriter = new();
+    private readonly List<object> _assertions = new(); 
     
     private readonly TestDetails _testDetails;
     private readonly object? _classInstance;
@@ -32,5 +33,20 @@ public class TestContext
     public string GetOutput()
     {
         return OutputWriter.ToString().Trim();
+    }
+
+    public void StoreObject(object obj)
+    {
+        _assertions.Add(obj);
+    }
+    
+    public void ClearObjects<T>()
+    {
+        _assertions.RemoveAll(x => x is T);
+    }
+    
+    public IReadOnlyList<T> GetObjects<T>()
+    {
+        return _assertions.OfType<T>().ToArray();
     }
 }
