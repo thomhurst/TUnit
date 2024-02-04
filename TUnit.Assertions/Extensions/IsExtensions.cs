@@ -230,6 +230,20 @@ public static class IsExtensions
     {
         return @is.Wrap(new EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr>(@is.AssertionBuilder, 0));
     }
+    
+    public static BaseAssertCondition<string, TAnd, TOr> Empty<TInner, TAnd, TOr>(this Is<string, TAnd, TOr> @is)
+        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
+            @is.AssertionBuilder, 0,
+            (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                return value == string.Empty;
+            },
+            (s, _) => $"'{s}' was not empty"));
+    }
 
     #endregion
 

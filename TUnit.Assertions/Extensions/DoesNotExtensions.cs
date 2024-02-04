@@ -13,7 +13,7 @@ public static class DoesNotExtensions
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
         return doesNot.Invert(new EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr>(doesNot.AssertionBuilder, expected),
-            (actual, _) => $"{expected} was found in the collection");
+            (_, _) => $"{expected} was found in the collection");
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> Contain<TAnd, TOr>(this DoesNot<string, TAnd, TOr> doesNot, string expected)
@@ -28,7 +28,7 @@ public static class DoesNotExtensions
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
         return doesNot.Invert(new StringContainsAssertCondition<TAnd, TOr>(doesNot.AssertionBuilder, expected, stringComparison),
-            (s, exception) => $"{expected} was found in {s}");
+            (s, _) => $"{expected} was found in {s}");
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> StartWith<TAnd, TOr>(this DoesNot<string, TAnd, TOr> doesNot, string expected)
