@@ -11,7 +11,7 @@ public abstract class NotConnector<TActual, TAnd, TOr> : Connector<TActual, TAnd
     {
     }
 
-    protected BaseAssertCondition<TActual, TAnd, TOr> Invert(BaseAssertCondition<TActual, TAnd, TOr> assertCondition, Func<TActual?, Exception?, string> messageFactory)
+    protected internal BaseAssertCondition<TActual, TAnd, TOr> Invert(BaseAssertCondition<TActual, TAnd, TOr> assertCondition, Func<TActual?, Exception?, string> messageFactory)
     {
         return Wrap(assertCondition.Invert(messageFactory));
     }
