@@ -26,7 +26,7 @@ public class Is<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         return Wrap(new SameReferenceAssertCondition<TActual, TActual, TAnd, TOr>(AssertionBuilder, expected));
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Null => Wrap(new NullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder));
+    public BaseAssertCondition<TActual, TAnd, TOr> Null() => Wrap(new NullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder));
 
     public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Wrap(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder));
 

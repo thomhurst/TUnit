@@ -18,7 +18,7 @@ public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected) => Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder, expected),
         (actual, _) => $"Expected {actual} to equal {expected}");
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Null => Invert(new NullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder),
+    public BaseAssertCondition<TActual, TAnd, TOr> Null() => Invert(new NullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder),
         (actual, _) => $"Expected {actual} to be null");
 
     public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Invert(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder),
