@@ -236,7 +236,7 @@ public static class IsNotExtensions
             (inners, exception) => $"{inners} was empty");
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Empty<TInner, TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
+    public static BaseAssertCondition<string, TAnd, TOr> Empty<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {

@@ -231,7 +231,7 @@ public static class IsExtensions
         return @is.Wrap(new EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr>(@is.AssertionBuilder, 0));
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Empty<TInner, TAnd, TOr>(this Is<string, TAnd, TOr> @is)
+    public static BaseAssertCondition<string, TAnd, TOr> Empty<TAnd, TOr>(this Is<string, TAnd, TOr> @is)
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
