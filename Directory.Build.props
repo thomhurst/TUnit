@@ -17,4 +17,8 @@
             <_Parameter1>TUnit.TestAdapter</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
+
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
 </Project>

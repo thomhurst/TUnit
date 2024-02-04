@@ -8,11 +8,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj"
-                        OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
       <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
       <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
       <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
+        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj" />
     </ItemGroup>
 
 </Project>
