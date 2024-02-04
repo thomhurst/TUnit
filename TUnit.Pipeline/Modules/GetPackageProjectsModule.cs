@@ -10,6 +10,13 @@ public class GetPackageProjectsModule : Module<List<File>>
 {
     protected override Task<List<File>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        return context.Git().RootDirectory.GetFiles(x => x.Extension == ".csproj").Where(x => !x.Name.Contains("Pipeline")).Where(x => !x.Name.Contains("TestProject")).ToList().AsTask<List<File>?>();
+        return context.Git().RootDirectory
+            .GetFiles(x => x.Extension == ".csproj")
+            .Where(x => !x.Name.Contains("Pipeline"))
+            .Where(x => !x.Name.Contains("Sample"))
+            .Where(x => !x.Name.Contains("TestProject"))
+            .Where(x => !x.Name.Contains("Tests"))
+            .ToList()
+            .AsTask<List<File>?>();
     }
 }

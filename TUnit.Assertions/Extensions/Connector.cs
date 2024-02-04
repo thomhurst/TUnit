@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.ComponentModel;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Operators;
 
@@ -8,7 +9,10 @@ public abstract class Connector<TActual, TAnd, TOr>
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
+    [EditorBrowsable(EditorBrowsableState.Advanced)]
     public ConnectorType ConnectorType { get; }
+    
+    [EditorBrowsable(EditorBrowsableState.Advanced)]
     public BaseAssertCondition<TActual, TAnd, TOr>? OtherAssertCondition { get; }
 
     public Connector(ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition)
