@@ -8,8 +8,6 @@
         <DevelopmentDependency>true</DevelopmentDependency>
         <OutputType>Library</OutputType>
         <IsPackable>true</IsPackable>
-
-        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddTestAdapterToOutput</TargetsForTfmSpecificContentInPackage>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,12 +21,11 @@
 
     <ItemGroup>
         <ProjectCapability Include="TestContainer" />
+        <Files Include="$(MSBuildThisFileDirectory)/../lib/netstandard2.0/**/TUnit.TestAdapter.dll" />
     </ItemGroup>
 
-    <Target Name="_AddTestAdapterToOutput">
-        <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.Analyzers.dll" PackagePath="analyzers/dotnet/cs" />
-        </ItemGroup>
+    <Target Name="_AddTestAdapterToOutput" AfterTargets="Build">
+        <Copy SourceFiles="@(Files)" DestinationFolder="$(TargetDir)" />
     </Target>
     
 </Project>
