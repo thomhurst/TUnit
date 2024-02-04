@@ -1,10 +1,22 @@
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Exceptions;
+using TUnit.Core;
 
 namespace TUnit.Assertions.AssertConditions;
 
-public abstract class BaseAssertCondition<TActual, TAnd, TOr>
+public abstract class BaseAssertCondition
+{
+    public BaseAssertCondition()
+    {
+        TestContext.Current.StoreObject(this);
+    }
+    
+    protected internal virtual string? Message { get; }
+    internal abstract Task<bool> AssertAsync();
+}
+
+public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
@@ -20,21 +32,31 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr>
     
     public TaskAwaiter GetAwaiter()
     {
-        return AssertAsync().GetAwaiter();
+        return AssertAndThrowAsync().GetAwaiter();
     }
 
-    private async Task AssertAsync()
+    internal async Task AssertAndThrowAsync()
     {
         var assertionData = await AssertionBuilder.GetAssertionData();
         
-        AssertAndThrow(assertionData.Result, assertionData.Exception);
+        if (!Assert(assertionData.Result, assertionData.Exception))
+        {
+            throw new AssertionException(Message);
+        }
+    }
+    
+    internal override async Task<bool> AssertAsync()
+    {
+        var assertionData = await AssertionBuilder.GetAssertionData();
+
+        return Assert(assertionData.Result, assertionData.Exception);
     }
 
     protected TActual? ActualValue { get; private set; }
     protected Exception? Exception { get; private set; }
 
 
-    protected internal virtual string Message => MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage;
+    protected internal override string Message => MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage;
 
     private Func<TActual?, Exception?, string>? MessageFactory { get; set; }
     
@@ -45,14 +67,6 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr>
     }
     
     protected abstract string DefaultMessage { get; }
-
-    private void AssertAndThrow(TActual? actual, Exception? exception)
-    {
-        if (!Assert(actual, exception))
-        {
-            throw new AssertionException(Message);
-        }
-    }
     
     internal bool Assert(TActual? actualValue, Exception? exception)
     {

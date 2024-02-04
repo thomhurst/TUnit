@@ -7,7 +7,7 @@ namespace TUnit.Analyzers.Tests;
 public class AwaitAssertionAnalyzerTests
 {
     [Test]
-    public async Task ClassWithMyCompanyTitle_AlertDiagnostic()
+    public async Task Assert_That_Is_Flagged_When_Not_Awaited()
     {
         const string text = """
                             using System.Threading.Tasks;
@@ -29,5 +29,35 @@ public class AwaitAssertionAnalyzerTests
         var expected = Verifier.Diagnostic().WithLocation(0);
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Assert_That_Is_Not_Flagged_When_Not_Awaited_But_Inside_Assert_Multiple()
+    {
+        const string text = """
+                            using System;
+                            using System.Collections.Generic;
+                            using System.Threading.Tasks;
+                            using TUnit.Assertions;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                            
+                                public async Task MyTest()
+                                {
+                                    var list = new List<int> { 1, 2, 3 };
+                            
+                                    await Assert.Multiple(() =>
+                                    {
+                                        Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                        Assert.That(list).Has.Count().EqualTo(5);
+                                    });
+                                }
+                                
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
     }
 }

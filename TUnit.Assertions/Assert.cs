@@ -26,4 +26,9 @@ public static class Assert
     {
         return new AsyncDelegateAssertionBuilder<TActual>(value!);
     }
+
+    public static AssertMultipleHandler Multiple(Action action)
+    {
+        return new AssertMultipleHandler(action);
+    }
 }
