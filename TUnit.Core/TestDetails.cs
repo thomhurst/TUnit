@@ -54,7 +54,7 @@ public record TestDetails
         MinLineNumber = sourceLocation.MinLineNumber;
         MaxLineNumber = sourceLocation.MaxLineNumber;
 
-        UniqueId = FullyQualifiedClassName + DisplayName + GetParameterTypes(ParameterTypes);
+        UniqueId = FullyQualifiedClassName + DisplayName + Count + GetParameterTypes(ParameterTypes);
     }
 
     private string GetCount()
