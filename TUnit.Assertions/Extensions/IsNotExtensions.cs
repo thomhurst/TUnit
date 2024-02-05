@@ -11,16 +11,16 @@ public static class IsNotExtensions
 {
     #region Strings
 
-    public static BaseAssertCondition<string, TAnd, TOr> EqualTo<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot, string expected)
-        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    public static BaseAssertCondition<string?, TAnd, TOr> EqualTo<TAnd, TOr>(this IsNot<string?, TAnd, TOr> isNot, string expected)
+        where TAnd : And<string?, TAnd, TOr>, IAnd<TAnd, string?, TAnd, TOr>
+        where TOr : Or<string?, TAnd, TOr>, IOr<TOr, string?, TAnd, TOr>
     {
         return EqualTo(isNot, expected, StringComparison.Ordinal);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> EqualTo<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot, string expected, StringComparison stringComparison)
-        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    public static BaseAssertCondition<string?, TAnd, TOr> EqualTo<TAnd, TOr>(this IsNot<string?, TAnd, TOr> isNot, string expected, StringComparison stringComparison)
+        where TAnd : And<string?, TAnd, TOr>, IAnd<TAnd, string?, TAnd, TOr>
+        where TOr : Or<string?, TAnd, TOr>, IOr<TOr, string?, TAnd, TOr>
     {
         return isNot.Invert(new StringEqualsAssertCondition<TAnd, TOr>(isNot.AssertionBuilder, expected, stringComparison),
             (s, _) => $"{s} was equal to {expected}");
@@ -30,20 +30,20 @@ public static class IsNotExtensions
     
     #region Numbers
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Zero<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot)
-        where TActual : INumber<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Zero<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot)
+        where TActual : INumber<TActual?>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder, TActual.Zero),
+        return isNot.Invert(new EqualsAssertCondition<TActual?, TAnd, TOr>(isNot.AssertionBuilder, TActual.Zero),
             (value, exception) => $"{value} was Zero");
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> GreaterThan<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected) where TActual : INumber<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> GreaterThan<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot, TActual? expected) where TActual : INumber<TActual?>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual?, TActual?, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(value);
 
@@ -52,12 +52,12 @@ public static class IsNotExtensions
             (value, _) => $"{value} was greater than {expected}"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected) 
-        where TActual : INumber<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> GreaterThanOrEqualTo<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot, TActual? expected) 
+        where TActual : INumber<TActual?>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual?, TActual?, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(value);
 
@@ -66,12 +66,12 @@ public static class IsNotExtensions
             (value, _) => $"{value} was greater than or equal to {expected}"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> LessThan<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected) 
-        where TActual : INumber<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> LessThan<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot, TActual? expected) 
+        where TActual : INumber<TActual?>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual?, TActual?, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(value);
 
@@ -80,12 +80,12 @@ public static class IsNotExtensions
             (value, _) => $"{value} was less than {expected}"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected) 
-        where TActual : INumber<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> LessThanOrEqualTo<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot, TActual? expected) 
+        where TActual : INumber<TActual?>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual?, TActual?, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(value);
 
@@ -94,12 +94,12 @@ public static class IsNotExtensions
             (value, _) => $"{value} was less than or equal to {expected}"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Even<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
-        where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Even<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot) 
+        where TActual : INumber<TActual?>, IModulusOperators<TActual?, int, int>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual?, TActual?, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(value);
 
@@ -108,12 +108,12 @@ public static class IsNotExtensions
             (value, _) => $"{value} was even"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Odd<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
-        where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Odd<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot) 
+        where TActual : INumber<TActual?>, IModulusOperators<TActual?, int, int>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual?, TActual?, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(value);
 
@@ -122,12 +122,12 @@ public static class IsNotExtensions
             (value, _) => $"{value} was odd"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Negative<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
-        where TActual : INumber<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Negative<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot) 
+        where TActual : INumber<TActual?>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual?, TActual?, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(value);
 
@@ -136,12 +136,12 @@ public static class IsNotExtensions
             (value, _) => $"{value} was negative"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Positive<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
-        where TActual : INumber<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Positive<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot) 
+        where TActual : INumber<TActual?>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual?, TActual?, TAnd, TOr>(isNot.AssertionBuilder, default, (value, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(value);
 
@@ -218,27 +218,27 @@ public static class IsNotExtensions
 
     #region Enumerables
 
-    public static BaseAssertCondition<TActual, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, IEnumerable<TInner?> expected)
-        where TActual : IEnumerable<TInner?>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot, IEnumerable<TInner?> expected)
+        where TActual : IEnumerable<TInner?>?
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Invert(new EnumerableEquivalentToAssertCondition<TActual, TInner?, TAnd, TOr>(isNot.AssertionBuilder, expected),
+        return isNot.Invert(new EnumerableEquivalentToAssertCondition<TActual?, TInner?, TAnd, TOr>(isNot.AssertionBuilder, expected),
             (inners, exception) => $"{inners} was empty");
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot)
-        where TActual : IEnumerable<TInner>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot)
+        where TActual : IEnumerable<TInner>?
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Invert(new EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr>(isNot.AssertionBuilder, 0),
+        return isNot.Invert(new EnumerableCountEqualToAssertCondition<TActual?, TInner, TAnd, TOr>(isNot.AssertionBuilder, 0),
             (inners, exception) => $"{inners} was empty");
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Empty<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
-        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    public static BaseAssertCondition<string?, TAnd, TOr> Empty<TAnd, TOr>(this IsNot<string?, TAnd, TOr> isNot)
+        where TAnd : And<string?, TAnd, TOr>, IAnd<TAnd, string?, TAnd, TOr>
+        where TOr : Or<string?, TAnd, TOr>, IOr<TOr, string?, TAnd, TOr>
     {
         return isNot.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
             isNot.AssertionBuilder, 0,
