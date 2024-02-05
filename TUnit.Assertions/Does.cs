@@ -14,5 +14,5 @@ public class Does<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         AssertionBuilder = assertionBuilder;
     }
 
-  
+    public DoesNot<TActual, TAnd, TOr> Not => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
 }
