@@ -26,4 +26,15 @@ public class Throws<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> SubClassOf<TExpected>() =>
         Wrap(new ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder));
+    
+    public BaseAssertCondition<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory) =>
+        Wrap(new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(AssertionBuilder,
+            default,
+            (actual, exception, arg3) =>
+            {
+                return action(exception);
+            },
+            (actual, exception) => messageFactory(exception)
+        ));
+
 }
