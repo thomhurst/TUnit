@@ -1,10 +1,17 @@
 ﻿using System.Reflection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Engine;
+using TUnit.Engine.Extensions;
+using TUnit.TestAdapter.Extensions;
 
 namespace TUnit.TestAdapter;
 
-internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoader classLoader, TestDataSourceRetriever testDataSourceRetriever)
+internal class TestsLoader(SourceLocationHelper sourceLocationHelper, 
+    ClassLoader classLoader, 
+    TestDataSourceRetriever testDataSourceRetriever,
+    CombinativeSolver combinativeSolver,
+    IMessageLogger messageLogger)
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute), typeof(TestDataSourceAttribute)];
 
@@ -83,7 +90,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
         }
     }
 
-    private static IEnumerable<TestDetails> CollectStandardTests(MethodInfo methodInfo, Type[] nonAbstractClassesContainingTest,
+    private IEnumerable<TestDetails> CollectStandardTests(MethodInfo methodInfo, Type[] nonAbstractClassesContainingTest,
         int runCount, SourceLocation sourceLocation)
     {
         if (!methodInfo.GetCustomAttributes<TestAttribute>().Any())
@@ -91,19 +98,55 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
             yield break;
         }
 
+        var count = 1;
+        
+        var hasCombinativeAttribute = methodInfo.GetCustomAttribute<CombinativeAttribute>() != null;
+
         foreach (var classType in nonAbstractClassesContainingTest)
         {
             for (var i = 1; i <= runCount; i++)
             {
-                yield return new TestDetails(
-                    methodInfo: methodInfo,
-                    classType: classType,
-                    sourceLocation: sourceLocation,
-                    arguments: null,
-                    count: i
-                );
+                if (hasCombinativeAttribute)
+                {
+                    foreach (var combinativeValue in GetCombinativeValues(methodInfo))
+                    {
+                        yield return new TestDetails(
+                            methodInfo: methodInfo,
+                            classType: classType,
+                            sourceLocation: sourceLocation,
+                            arguments: combinativeValue.ToArray(),
+                            count: count++
+                        );
+                    }
+                }
+                else
+                {
+                    yield return new TestDetails(
+                        methodInfo: methodInfo,
+                        classType: classType,
+                        sourceLocation: sourceLocation,
+                        arguments: null,
+                        count: count++
+                    );
+                }
             }
         }
+    }
+
+    private IEnumerable<IEnumerable<object?>> GetCombinativeValues(MethodInfo methodInfo)
+    {
+        var parameters = methodInfo.GetParameters();
+
+        var parametersWithValues = parameters
+            .Select(GetCombinativeValues)
+            .ToList();
+
+        return combinativeSolver.GetCombinativeArgumentsList(parametersWithValues);
+    }
+
+    private static object?[] GetCombinativeValues(ParameterInfo parameterInfo)
+    {
+        return parameterInfo.GetCustomAttribute<CombinativeValuesAttribute>()?.Objects ?? [null];
     }
 
     private static IEnumerable<TestDetails> CollectTestWithDataAttributeTests(MethodInfo methodInfo,
@@ -121,7 +164,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
         foreach (var testWithDataAttribute in testWithDataAttributes)
         {
             count++;
-            var arguments = testWithDataAttribute.Values.Select(x => new ParameterArgument(x?.GetType() ?? typeof(object), x)).ToArray();
+            var arguments = testWithDataAttribute.Values;
                     
             foreach (var classType in nonAbstractClassesContainingTest)
             {

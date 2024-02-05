@@ -28,7 +28,7 @@ internal class TestClassCreator(TestDataSourceRetriever testDataSourceRetriever)
         
         var className = testDataSourceAttribute.ClassNameProvidingDataSource;
 
-        ParameterArgument[]? testData;
+        object?[]? testData;
         if (string.IsNullOrEmpty(className))
         {
             var @class = testDetails.MethodInfo.DeclaringType!;
@@ -51,7 +51,7 @@ internal class TestClassCreator(TestDataSourceRetriever testDataSourceRetriever)
 
         return Activator.CreateInstance(
                 testDetails.ClassType,
-                testData?.Select(x => x.Value).ToArray()
+                testData
             )!;
     }
 

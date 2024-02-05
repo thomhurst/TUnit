@@ -7,7 +7,7 @@ internal record TestDetails
     public TestDetails(MethodInfo methodInfo,
         Type classType,
         SourceLocation sourceLocation,
-        ParameterArgument[]? arguments, 
+        object?[]? arguments, 
         int count)
     {
         MethodInfo = methodInfo;
@@ -15,8 +15,8 @@ internal record TestDetails
         SourceLocation = sourceLocation;
         Count = count;
 
-        ParameterTypes = arguments?.Select(x => x.Type).ToArray();
-        ArgumentValues = arguments?.Select(x => x.Value).ToArray();
+        ParameterTypes = arguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
+        ArgumentValues = arguments;
         
         TestName = methodInfo.Name;
         DisplayName = methodInfo.Name + GetArgumentValues() + GetCountInBrackets();
