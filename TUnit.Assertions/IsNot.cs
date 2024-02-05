@@ -18,8 +18,11 @@ public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected) => Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder, expected),
         (actual, _) => $"Expected {actual} to equal {expected}");
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Null() => Invert(new NullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder),
-        (actual, _) => $"Expected {actual} to be null");
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+#pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
+    public BaseAssertCondition<TActual, TAnd, TOr> Null() => Wrap(new NotNullAssertCondition<TActual?, TAnd, TOr>(AssertionBuilder)!);
+#pragma warning restore CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
 
     public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Invert(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder),
         (actual, _) => $"Expected {actual} to not be of type {typeof(TExpected)}");
