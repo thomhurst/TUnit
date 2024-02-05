@@ -258,7 +258,7 @@ public static class IsExtensions
         return @is.Wrap(new EnumerableEquivalentToAssertCondition<TActual?, TInner, TAnd, TOr>(@is.AssertionBuilder, expected));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is)
+    public static BaseAssertCondition<TActual, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is)
         where TActual : IEnumerable<TInner>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
