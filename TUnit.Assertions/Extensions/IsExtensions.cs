@@ -318,6 +318,57 @@ public static class IsExtensions
             },
             (dateTime, _) => $"{dateTime} is not between {dateTime - tolerance} and {dateTime + tolerance}"));
     }
+    
+    public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected, TimeSpan tolerance)
+        where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
+        where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset,TAnd,TOr>(
+            @is.AssertionBuilder, 
+            expected,
+            (actual, expected, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(actual);
+                ArgumentNullException.ThrowIfNull(expected);
+                
+                return actual <= expected + tolerance && actual >= expected - tolerance;
+            },
+            (dateTime, _) => $"{dateTime} is not between {dateTime - tolerance} and {dateTime + tolerance}"));
+    }
+    
+    public static BaseAssertCondition<DateOnly, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected, int daysTolerance)
+        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
+        where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateOnly,DateOnly,TAnd,TOr>(
+            @is.AssertionBuilder, 
+            expected,
+            (actual, expected, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(actual);
+                ArgumentNullException.ThrowIfNull(expected);
+                
+                return actual <= expected.AddDays(daysTolerance) && actual >= expected.AddDays(-daysTolerance);
+            },
+            (dateTime, _) => $"{dateTime} is not between {dateTime.AddDays(-daysTolerance)} and {dateTime.AddDays(daysTolerance)}"));
+    }
+    
+    public static BaseAssertCondition<TimeOnly, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected, TimeSpan tolerance)
+        where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
+        where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly,TimeOnly,TAnd,TOr>(
+            @is.AssertionBuilder, 
+            expected,
+            (actual, expected, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(actual);
+                ArgumentNullException.ThrowIfNull(expected);
+                
+                return actual <= expected.Add(tolerance) && actual >= expected.Add(-tolerance);
+            },
+            (dateTime, _) => $"{dateTime} is not between {dateTime.Add(-tolerance)} and {dateTime.Add(tolerance)}"));
+    }
 
     #endregion
 }
