@@ -21,7 +21,7 @@ public class DelegateAssertionBuilder<TActual> : AssertionBuilder<TActual?>
     {
         var assertionData = _function.InvokeAndGetException();
         
-        return Task.FromResult(assertionData)!;
+        return Task.FromResult(assertionData);
     }
 }
 

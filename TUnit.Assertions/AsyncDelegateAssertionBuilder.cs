@@ -21,7 +21,7 @@ public class AsyncDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual?>
     {
         var assertionData = await _function.InvokeAndGetExceptionAsync();
         
-        return assertionData!;
+        return assertionData;
     }
 }
 
