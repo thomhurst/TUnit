@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions;
+﻿using TUnit.Assertions.Exceptions;
+
+namespace TUnit.Assertions;
 
 public static class Assert
 {
@@ -30,5 +32,10 @@ public static class Assert
     public static AssertMultipleHandler Multiple(Action action)
     {
         return new AssertMultipleHandler(action);
+    }
+
+    public static void Fail(string reason)
+    {
+        throw new AssertionException(reason);
     }
 }
