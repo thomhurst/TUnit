@@ -27,7 +27,20 @@ public abstract class Connector<TActual, TAnd, TOr>
         {
             ConnectorType.None => assertCondition,
             ConnectorType.And => new AssertConditionAnd<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition),
-            ConnectorType.Or => new AssertConditionAnd<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition),
+            ConnectorType.Or => new AssertConditionOr<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition),
+            _ => throw new ArgumentOutOfRangeException(nameof(ConnectorType), ConnectorType, "Unknown connector type")
+        };
+    }
+    
+    public AssertCondition<TActual, TExpected, TAnd, TOr> Wrap<TExpected>(AssertCondition<TActual, TExpected, TAnd, TOr> assertCondition)
+    {
+        var castOtherAssertCondition = (AssertCondition<TActual, TExpected, TAnd, TOr>)OtherAssertCondition!;
+        
+        return ConnectorType switch
+        {
+            ConnectorType.None => assertCondition,
+            ConnectorType.And => new AssertConditionAnd<TActual, TExpected, TAnd, TOr>(castOtherAssertCondition, assertCondition),
+            ConnectorType.Or => new AssertConditionOr<TActual, TExpected, TAnd, TOr>(castOtherAssertCondition, assertCondition),
             _ => throw new ArgumentOutOfRangeException(nameof(ConnectorType), ConnectorType, "Unknown connector type")
         };
     }
