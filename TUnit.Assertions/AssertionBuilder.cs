@@ -2,5 +2,5 @@
 
 public abstract class AssertionBuilder<TActual>
 {
-    protected internal abstract Task<AssertionData<TActual?>> GetAssertionData();
+    protected internal abstract Task<AssertionData<TActual>> GetAssertionData();
 }

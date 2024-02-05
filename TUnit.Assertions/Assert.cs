@@ -25,9 +25,9 @@ public static class Assert
         return new AsyncDelegateAssertionBuilder(value);
     }
     
-    public static AsyncDelegateAssertionBuilder<TActual?> That<TActual>(Func<Task<TActual?>> value)
+    public static AsyncDelegateAssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value)
     {
-        return new AsyncDelegateAssertionBuilder<TActual?>(value);
+        return new AsyncDelegateAssertionBuilder<TActual>(value);
     }
 
     public static AssertMultipleHandler Multiple(Action action)
