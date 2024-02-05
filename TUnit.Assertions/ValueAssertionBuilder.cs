@@ -12,7 +12,7 @@ public class ValueAssertionBuilder<TActual> : AssertionBuilder<TActual>
     public Is<TActual, ValueAnd<TActual>, ValueOr<TActual>> Is => new(this, ConnectorType.None, null);
     public Has<TActual, ValueAnd<TActual>, ValueOr<TActual>> Has => new(this, ConnectorType.None, null);
 
-    internal ValueAssertionBuilder(TActual? value)
+    internal ValueAssertionBuilder(TActual value)
     {
         _value = value;
     }
