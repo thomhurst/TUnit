@@ -13,6 +13,6 @@ public class DelegateAnd<TActual>
 
     public static DelegateAnd<TActual> Create(BaseAssertCondition<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> otherAssertCondition)
     {
-        return new DelegateAnd<TActual>(otherAssertCondition)!;
+        return new DelegateAnd<TActual>(otherAssertCondition);
     }
 }

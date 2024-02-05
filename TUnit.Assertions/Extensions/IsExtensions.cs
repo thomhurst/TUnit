@@ -29,6 +29,24 @@ public static class IsExtensions
     
     #region Numbers
     
+    public static BaseAssertCondition<TActual, TAnd, TOr> EqualToWithTolerance<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual expected, TActual tolerance)
+        where TActual : INumber<TActual>
+        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TActual,TActual,TAnd,TOr>(
+            @is.AssertionBuilder, 
+            expected,
+            (actual, expected, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(actual);
+                ArgumentNullException.ThrowIfNull(expected);
+                
+                return actual <= expected + tolerance && actual >= expected - tolerance;
+            },
+            (number, _) => $"{number} is not between {number! - tolerance} and {number! + tolerance}"));
+    }
+    
     public static BaseAssertCondition<TActual, TAnd, TOr> Zero<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is)
         where TActual : INumber<TActual>
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
@@ -152,6 +170,23 @@ public static class IsExtensions
     
     #region TimeSpans
     
+    public static BaseAssertCondition<TimeSpan, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is, TimeSpan expected, TimeSpan tolerance)
+        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
+        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan,TimeSpan,TAnd,TOr>(
+            @is.AssertionBuilder, 
+            expected,
+            (actual, expected, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(actual);
+                ArgumentNullException.ThrowIfNull(expected);
+                
+                return actual <= expected + tolerance && actual >= expected - tolerance;
+            },
+            (timeSpan, _) => $"{timeSpan} is not between {timeSpan - tolerance} and {timeSpan + tolerance}"));
+    }
+    
     public static BaseAssertCondition<TimeSpan, TAnd, TOr> Zero<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is)
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
@@ -261,6 +296,27 @@ public static class IsExtensions
         where TOr : Or<bool, TAnd, TOr>, IOr<TOr, bool, TAnd, TOr>
     {
         return @is.Wrap(new EqualsAssertCondition<bool, TAnd, TOr>(@is.AssertionBuilder, false));
+    }
+
+    #endregion
+
+    #region DateTimes
+
+    public static BaseAssertCondition<DateTime, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected, TimeSpan tolerance)
+        where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
+        where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTime,DateTime,TAnd,TOr>(
+            @is.AssertionBuilder, 
+            expected,
+            (actual, expected, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(actual);
+                ArgumentNullException.ThrowIfNull(expected);
+                
+                return actual <= expected + tolerance && actual >= expected - tolerance;
+            },
+            (dateTime, _) => $"{dateTime} is not between {dateTime - tolerance} and {dateTime + tolerance}"));
     }
 
     #endregion

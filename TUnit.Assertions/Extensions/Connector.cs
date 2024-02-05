@@ -32,7 +32,8 @@ public abstract class Connector<TActual, TAnd, TOr>
         };
     }
     
-    public AssertCondition<TActual, TExpected, TAnd, TOr> Wrap<TExpected>(AssertCondition<TActual, TExpected, TAnd, TOr> assertCondition)
+    public AssertCondition<TActual, TExpected, TAnd, TOr> Wrap<TExpected, TAssertCondition>(TAssertCondition assertCondition) 
+        where TAssertCondition : AssertCondition<TActual, TExpected, TAnd, TOr>
     {
         var castOtherAssertCondition = (AssertCondition<TActual, TExpected, TAnd, TOr>)OtherAssertCondition!;
         
