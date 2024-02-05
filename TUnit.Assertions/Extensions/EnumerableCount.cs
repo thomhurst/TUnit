@@ -5,7 +5,7 @@ using TUnit.Assertions.AssertConditions.Operators;
 namespace TUnit.Assertions;
 
 public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual?, TAnd, TOr> 
-    where TActual : IEnumerable
+    where TActual : IEnumerable?
     where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
     where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
 {

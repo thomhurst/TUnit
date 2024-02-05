@@ -29,7 +29,7 @@ public static class IsExtensions
     
     #region Numbers
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> EqualToWithTolerance<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is, TActual? expected, TActual? tolerance)
+    public static BaseAssertCondition<TActual?, TAnd, TOr> EqualToWithTolerance<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual? expected, TActual? tolerance)
         where TActual : INumber<TActual?>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -47,7 +47,7 @@ public static class IsExtensions
             (number, _) => $"{number} is not between {number! - tolerance} and {number! + tolerance}"));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Zero<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is)
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Zero<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is)
         where TActual : INumber<TActual?>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -55,7 +55,7 @@ public static class IsExtensions
         return @is.Wrap(new EqualsAssertCondition<TActual?, TAnd, TOr>(@is.AssertionBuilder, TActual.Zero));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> GreaterThan<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is, TActual? expected) where TActual : INumber<TActual?>
+    public static BaseAssertCondition<TActual?, TAnd, TOr> GreaterThan<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual? expected) where TActual : INumber<TActual?>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
@@ -68,7 +68,7 @@ public static class IsExtensions
             (value, _) => $"{value} was not greater than {expected}"));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> GreaterThanOrEqualTo<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is, TActual? expected) 
+    public static BaseAssertCondition<TActual?, TAnd, TOr> GreaterThanOrEqualTo<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual? expected) 
         where TActual : INumber<TActual?>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -82,7 +82,7 @@ public static class IsExtensions
             (value, _) => $"{value} was not greater than or equal to {expected}"));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> LessThan<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is, TActual? expected) 
+    public static BaseAssertCondition<TActual?, TAnd, TOr> LessThan<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual? expected) 
         where TActual : INumber<TActual?>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -96,7 +96,7 @@ public static class IsExtensions
             (value, _) => $"{value} was not less than {expected}"));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> LessThanOrEqualTo<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is, TActual? expected) 
+    public static BaseAssertCondition<TActual?, TAnd, TOr> LessThanOrEqualTo<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual? expected) 
         where TActual : INumber<TActual?>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -110,7 +110,7 @@ public static class IsExtensions
             (value, _) => $"{value} was not less than or equal to {expected}"));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Even<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is) 
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Even<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is) 
         where TActual : INumber<TActual?>, IModulusOperators<TActual?, int, int>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -124,7 +124,7 @@ public static class IsExtensions
             (value, _) => $"{value} was not even"));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Odd<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is) 
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Odd<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is) 
         where TActual : INumber<TActual?>, IModulusOperators<TActual?, int, int>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -138,7 +138,7 @@ public static class IsExtensions
             (value, _) => $"{value} was not odd"));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Negative<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is) 
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Negative<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is) 
         where TActual : INumber<TActual?>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -152,7 +152,7 @@ public static class IsExtensions
             (value, _) => $"{value} was not negative"));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Positive<TActual, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is) 
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Positive<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is) 
         where TActual : INumber<TActual?>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -250,7 +250,7 @@ public static class IsExtensions
 
     #region Enumerables
 
-    public static BaseAssertCondition<TActual?, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is, IEnumerable<TInner> expected)
+    public static BaseAssertCondition<TActual?, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, IEnumerable<TInner> expected)
         where TActual : IEnumerable<TInner>?
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
@@ -258,7 +258,7 @@ public static class IsExtensions
         return @is.Wrap(new EnumerableEquivalentToAssertCondition<TActual?, TInner, TAnd, TOr>(@is.AssertionBuilder, expected));
     }
     
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is)
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is)
         where TActual : IEnumerable<TInner>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>

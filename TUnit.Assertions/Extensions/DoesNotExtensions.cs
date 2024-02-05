@@ -7,7 +7,7 @@ namespace TUnit.Assertions;
 
 public static class DoesNotExtensions
 {
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Contain<TActual, TInner, TAnd, TOr>(this DoesNot<TActual?, TAnd, TOr> doesNot, TInner expected)
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Contain<TActual, TInner, TAnd, TOr>(this DoesNot<TActual, TAnd, TOr> doesNot, TInner expected)
         where TActual : IEnumerable<TInner>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
