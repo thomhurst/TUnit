@@ -6,24 +6,13 @@ namespace TUnit.Engine;
 public class TestDataSourceRetriever(MethodInvoker methodInvoker)
 {
     public ParameterArgument[]? GetTestDataSourceArguments(MethodInfo methodInfo,
-        CustomAttributeData testDataSourceAttribute, Type[] allClasses)
+        TestDataSourceAttribute testDataSourceAttribute, Type[] allClasses)
     {
-        if (testDataSourceAttribute.ConstructorArguments.Count == 1)
-        {
-            // 1 argument means only method name supplied - Implies method is in same class
-            var methodName = (string) testDataSourceAttribute.ConstructorArguments[0].Value!;
-            var @class = methodInfo.DeclaringType!;
+        // Class name and method name
+        var className = testDataSourceAttribute.ClassNameProvidingDataSource ?? methodInfo.DeclaringType!.FullName!;
+        var methodName = testDataSourceAttribute.MethodNameProvidingDataSource;
             
-            return GetTestDataSourceArguments(@class, methodName);
-        }
-        else
-        {
-            // Class name and method name
-            var className = (string) testDataSourceAttribute.ConstructorArguments[0].Value!;
-            var methodName = (string) testDataSourceAttribute.ConstructorArguments[1].Value!;
-            
-            return GetTestDataSourceArguments(className, methodName, allClasses);
-        }
+        return GetTestDataSourceArguments(className, methodName, allClasses);
     }
     
     public ParameterArgument[]? GetTestDataSourceArguments(

@@ -23,6 +23,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
                 .GetSourceLocation(typeInformation.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
 
             var allClasses = classLoader.GetAllTypes(allAssemblies).ToArray();
+            
             var nonAbstractClassesContainingTest = allClasses
                 .Where(t => t.IsAssignableTo(methodInfo.DeclaringType!) && !t.IsAbstract)
                 .ToArray();
@@ -33,67 +34,106 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
 
             var runCount = repeatCount + 1;
             
-            var count = 0;
-            
-            foreach (var testWithDataAttribute in methodInfo.CustomAttributes.Where(x => x.AttributeType == typeof(TestWithDataAttribute)))
+            foreach (var test in CollectTestWithDataAttributeTests(methodInfo, nonAbstractClassesContainingTest, runCount, sourceLocation))
             {
-                count++;
-                foreach (var customAttributeTypedArgument in testWithDataAttribute.ConstructorArguments)
+                yield return test;
+            }
+
+            foreach (var test in CollectStandardTests(methodInfo, nonAbstractClassesContainingTest, runCount, sourceLocation))
+            {
+                yield return test;
+            }
+
+            foreach (var test in CollectTestDataSourceTests(methodInfo, nonAbstractClassesContainingTest, runCount, sourceLocation, allClasses))
+            {
+                yield return test;
+            }
+        }
+    }
+
+    private IEnumerable<TestDetails> CollectTestDataSourceTests(MethodInfo methodInfo,
+        Type[] nonAbstractClassesContainingTest, int runCount, SourceLocation sourceLocation, Type[] allClasses)
+    {
+        var testDataSourceAttributes = methodInfo.GetCustomAttributes<TestDataSourceAttribute>().ToList();
+        
+        if (!testDataSourceAttributes.Any())
+        {
+            yield break;
+        }
+        
+        var count = 0;
+        
+        foreach (var testDataSourceAttribute in testDataSourceAttributes)
+        {
+            count++;
+            foreach (var classType in nonAbstractClassesContainingTest)
+            {
+                for (var i = 1; i <= runCount; i++)
                 {
-                    var arguments =
-                        (customAttributeTypedArgument.Value as IEnumerable<CustomAttributeTypedArgument>)
-                        ?.Select(x => new ParameterArgument(x.Value?.GetType()!, x.Value))
-                        .ToArray();
+                    yield return new TestDetails(
+                        methodInfo: methodInfo,
+                        classType: classType,
+                        sourceLocation: sourceLocation,
+                        arguments: testDataSourceRetriever.GetTestDataSourceArguments(methodInfo,
+                            testDataSourceAttribute, allClasses),
+                        count: count * i
+                    );
+                }
+            }
+        }
+    }
+
+    private static IEnumerable<TestDetails> CollectStandardTests(MethodInfo methodInfo, Type[] nonAbstractClassesContainingTest,
+        int runCount, SourceLocation sourceLocation)
+    {
+        if (!methodInfo.GetCustomAttributes<TestAttribute>().Any())
+        {
+            yield break;
+        }
+
+        foreach (var classType in nonAbstractClassesContainingTest)
+        {
+            for (var i = 1; i <= runCount; i++)
+            {
+                yield return new TestDetails(
+                    methodInfo: methodInfo,
+                    classType: classType,
+                    sourceLocation: sourceLocation,
+                    arguments: null,
+                    count: i
+                );
+            }
+        }
+    }
+
+    private static IEnumerable<TestDetails> CollectTestWithDataAttributeTests(MethodInfo methodInfo,
+        Type[] nonAbstractClassesContainingTest, int runCount, SourceLocation sourceLocation)
+    {
+        var testWithDataAttributes = methodInfo.GetCustomAttributes<TestWithDataAttribute>().ToList();
+        
+        if (!testWithDataAttributes.Any())
+        {
+            yield break;
+        }
+        
+        var count = 0;
+        
+        foreach (var testWithDataAttribute in testWithDataAttributes)
+        {
+            count++;
+            var arguments = testWithDataAttribute.Values.Select(x => new ParameterArgument(x?.GetType() ?? typeof(object), x)).ToArray();
                     
-                    foreach (var classType in nonAbstractClassesContainingTest)
-                    {
-                        for (var i = 1; i <= runCount; i++)
-                        {
-                            yield return new TestDetails(
-                                methodInfo: methodInfo,
-                                classType: classType,
-                                sourceLocation: sourceLocation,
-                                arguments: arguments,
-                                count: count * i
-                            );
-                        }
-                    }
-                }
-            }
-            
-            if(methodInfo.CustomAttributes.Any(x => x.AttributeType == typeof(TestAttribute)))
+            foreach (var classType in nonAbstractClassesContainingTest)
             {
-                foreach (var classType in nonAbstractClassesContainingTest)
+                for (var i = 1; i <= runCount; i++)
                 {
-                    for (var i = 1; i <= runCount; i++)
-                    {
-                        yield return new TestDetails(
-                            methodInfo: methodInfo,
-                            classType: classType,
-                            sourceLocation: sourceLocation,
-                            arguments: null,
-                            count: i
-                        );
-                    }
-                }
-            }
-            
-            foreach (var testDataSourceAttribute in methodInfo.CustomAttributes.Where(x => x.AttributeType == typeof(TestDataSourceAttribute)))
-            {
-                count++;
-                foreach (var classType in nonAbstractClassesContainingTest)
-                {
-                    for (var i = 1; i <= runCount; i++)
-                    {
-                        yield return new TestDetails(
-                            methodInfo: methodInfo,
-                            classType: classType,
-                            sourceLocation: sourceLocation,
-                            arguments: testDataSourceRetriever.GetTestDataSourceArguments(methodInfo,
-                                testDataSourceAttribute, allClasses),
-                            count: count * i
-                        );
-                    }
+                    yield return new TestDetails(
+                        methodInfo: methodInfo,
+                        classType: classType,
+                        sourceLocation: sourceLocation,
+                        arguments: arguments,
+                        count: count * i
+                    );
                 }
             }
         }
