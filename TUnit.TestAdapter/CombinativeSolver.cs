@@ -2,11 +2,11 @@
 
 public class CombinativeSolver
 {
+    private static readonly IEnumerable<IEnumerable<object?>> Seed = new[] { Enumerable.Empty<object?>() };
+    
     public IEnumerable<IEnumerable<object?>> GetCombinativeArgumentsList(IEnumerable<IReadOnlyList<object?>> elements)
     {
-        IEnumerable<IEnumerable<object?>> Seed() { yield return Enumerable.Empty<object?>(); }
-
-        return elements.Aggregate(Seed(), (accumulator, enumerable)
+        return elements.Aggregate(Seed, (accumulator, enumerable)
             => accumulator.SelectMany(x => enumerable.Select(x.Append)));
     }
 }
