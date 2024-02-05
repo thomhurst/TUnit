@@ -6,7 +6,7 @@ using ModularPipelines.Host;
 using TUnit.Pipeline;
 
 await PipelineHostBuilder.Create()
-    .ConfigureAppConfiguration((context, builder) =>
+    .ConfigureAppConfiguration((_, builder) =>
     {
         builder.AddEnvironmentVariables();
     })

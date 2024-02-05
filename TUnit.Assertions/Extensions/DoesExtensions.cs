@@ -8,11 +8,11 @@ namespace TUnit.Assertions;
 public static class DoesExtensions
 {
     public static BaseAssertCondition<TActual?, TAnd, TOr> Contain<TActual, TInner, TAnd, TOr>(this Does<TActual?, TAnd, TOr> does, TInner expected)
-        where TActual : IEnumerable<TInner>?
+        where TActual : IEnumerable<TInner>
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return does.Wrap(new EnumerableContainsAssertCondition<TActual?, TInner, TAnd, TOr>(does.AssertionBuilder, expected));
+        return does.Wrap(new EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr>(does.AssertionBuilder, expected));
     }
     
     public static BaseAssertCondition<string?, TAnd, TOr> Contain<TAnd, TOr>(this Does<string?, TAnd, TOr> does, string expected)

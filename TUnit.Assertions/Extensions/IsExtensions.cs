@@ -37,7 +37,7 @@ public static class IsExtensions
         return @is.Wrap(new DelegateAssertCondition<TActual?,TActual?,TAnd,TOr>(
             @is.AssertionBuilder, 
             expected,
-            (actual, expected, _) =>
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
@@ -177,7 +177,7 @@ public static class IsExtensions
         return @is.Wrap(new DelegateAssertCondition<TimeSpan,TimeSpan,TAnd,TOr>(
             @is.AssertionBuilder, 
             expected,
-            (actual, expected, _) =>
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
@@ -250,20 +250,20 @@ public static class IsExtensions
 
     #region Enumerables
 
-    public static BaseAssertCondition<TActual?, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is, IEnumerable<TInner?> expected)
-        where TActual : IEnumerable<TInner?>?
-        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
-        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
-    {
-        return @is.Wrap(new EnumerableEquivalentToAssertCondition<TActual?, TInner?, TAnd, TOr>(@is.AssertionBuilder, expected));
-    }
-    
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is)
+    public static BaseAssertCondition<TActual?, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is, IEnumerable<TInner> expected)
         where TActual : IEnumerable<TInner>?
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return @is.Wrap(new EnumerableCountEqualToAssertCondition<TActual?, TInner, TAnd, TOr>(@is.AssertionBuilder, 0));
+        return @is.Wrap(new EnumerableEquivalentToAssertCondition<TActual?, TInner, TAnd, TOr>(@is.AssertionBuilder, expected));
+    }
+    
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this Is<TActual?, TAnd, TOr> @is)
+        where TActual : IEnumerable<TInner>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
+    {
+        return @is.Wrap(new EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr>(@is.AssertionBuilder, 0));
     }
     
     public static BaseAssertCondition<string?, TAnd, TOr> Empty<TAnd, TOr>(this Is<string?, TAnd, TOr> @is)
@@ -329,7 +329,7 @@ public static class IsExtensions
         return @is.Wrap(new DelegateAssertCondition<DateTime,DateTime,TAnd,TOr>(
             @is.AssertionBuilder, 
             expected,
-            (actual, expected, _) =>
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
@@ -346,7 +346,7 @@ public static class IsExtensions
         return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset,TAnd,TOr>(
             @is.AssertionBuilder, 
             expected,
-            (actual, expected, _) =>
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
@@ -363,7 +363,7 @@ public static class IsExtensions
         return @is.Wrap(new DelegateAssertCondition<DateOnly,DateOnly,TAnd,TOr>(
             @is.AssertionBuilder, 
             expected,
-            (actual, expected, _) =>
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
@@ -380,7 +380,7 @@ public static class IsExtensions
         return @is.Wrap(new DelegateAssertCondition<TimeOnly,TimeOnly,TAnd,TOr>(
             @is.AssertionBuilder, 
             expected,
-            (actual, expected, _) =>
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);

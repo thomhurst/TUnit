@@ -36,7 +36,7 @@ public static class IsNotExtensions
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
         return isNot.Invert(new EqualsAssertCondition<TActual?, TAnd, TOr>(isNot.AssertionBuilder, TActual.Zero),
-            (value, exception) => $"{value} was Zero");
+            (value, _) => $"{value} was Zero");
     }
     
     public static BaseAssertCondition<TActual?, TAnd, TOr> GreaterThan<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot, TActual? expected) where TActual : INumber<TActual?>
@@ -159,7 +159,7 @@ public static class IsNotExtensions
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
         return isNot.Invert(new EqualsAssertCondition<TimeSpan, TAnd, TOr>(isNot.AssertionBuilder, TimeSpan.Zero),
-            (value, exception) => $"{value} was Zero");
+            (value, _) => $"{value} was Zero");
     }
     
     public static BaseAssertCondition<TimeSpan, TAnd, TOr> GreaterThan<TAnd, TOr>(this IsNot<TimeSpan, TAnd, TOr> isNot, TimeSpan expected)
@@ -218,22 +218,22 @@ public static class IsNotExtensions
 
     #region Enumerables
 
-    public static BaseAssertCondition<TActual?, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot, IEnumerable<TInner?> expected)
-        where TActual : IEnumerable<TInner?>?
-        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
-        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
-    {
-        return isNot.Invert(new EnumerableEquivalentToAssertCondition<TActual?, TInner?, TAnd, TOr>(isNot.AssertionBuilder, expected),
-            (inners, exception) => $"{inners} was empty");
-    }
-    
-    public static BaseAssertCondition<TActual?, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot)
+    public static BaseAssertCondition<TActual?, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot, IEnumerable<TInner> expected)
         where TActual : IEnumerable<TInner>?
         where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
         where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Invert(new EnumerableCountEqualToAssertCondition<TActual?, TInner, TAnd, TOr>(isNot.AssertionBuilder, 0),
-            (inners, exception) => $"{inners} was empty");
+        return isNot.Invert(new EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr>(isNot.AssertionBuilder, expected),
+            (inners, _) => $"{inners} was empty");
+    }
+    
+    public static BaseAssertCondition<TActual?, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot)
+        where TActual : IEnumerable<TInner>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
+    {
+        return isNot.Invert(new EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr>(isNot.AssertionBuilder, 0),
+            (inners, _) => $"{inners} was empty");
     }
     
     public static BaseAssertCondition<string?, TAnd, TOr> Empty<TAnd, TOr>(this IsNot<string?, TAnd, TOr> isNot)
