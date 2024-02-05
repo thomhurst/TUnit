@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
@@ -54,9 +55,26 @@ internal class SingleTestExecutor
                 testContext = new TestContext(testDetails, @class);
                 TestContext.Current = testContext;
 
+                var customTestAttributes = testDetails.MethodInfo.GetCustomAttributes()
+                    .Concat(testDetails.ClassType.GetCustomAttributes())
+                    .OfType<ITestAttribute>();
+                
+                foreach (var customTestAttribute in customTestAttributes)
+                {
+                    await customTestAttribute.ApplyToTest(testContext);
+                }
+                
                 try
-                { 
-                    await ExecuteWithRetries(testContext, testDetails, @class);
+                {
+                    if (testContext.FailReason != null)
+                    {
+                        throw new Exception(testContext.FailReason);
+                    }
+
+                    if(testContext.SkipReason != null)
+                    {
+                        await ExecuteWithRetries(testContext, testDetails, @class);
+                    }
                 }
                 finally
                 {
@@ -74,8 +92,8 @@ internal class SingleTestExecutor
                 End = end,
                 ComputerName = Environment.MachineName,
                 Exception = null,
-                Status = Status.Passed,
-                Output = testContext?.GetOutput()
+                Status = testContext!.SkipReason != null ? Status.Skipped : Status.Passed,
+                Output = testContext?.GetOutput() ?? testContext!.FailReason ?? testContext.SkipReason
             });
         }
         catch (Exception e)

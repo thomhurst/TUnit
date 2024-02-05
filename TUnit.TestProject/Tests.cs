@@ -81,6 +81,15 @@ public class Tests
         var value = "1";
         await Assert.That(value).Is.EqualTo("1");
     }
+    
+    [Test, CustomSkip()]
+    [TestCategory("Skip")]
+    public async Task CustomSkip1()
+    {
+        await Task.Yield();
+        var value = "1";
+        await Assert.That(value).Is.EqualTo("1");
+    }
 
     [TestDataSource(nameof(One))]
     [TestCategory("Pass")]

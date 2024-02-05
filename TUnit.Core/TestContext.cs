@@ -27,6 +27,18 @@ public class TestContext
         get => AsyncLocal.Value!;
         set => AsyncLocal.Value = value;
     }
+
+    public string? SkipReason { get; private set; }
+    public void SkipTest(string reason)
+    {
+        SkipReason = reason;
+    }
+    
+    public string? FailReason { get; private set; }
+    public void FailTest(string reason)
+    {
+        FailReason = reason;
+    }
     
     public TUnitTestResult? Result { get; internal set; }
 
