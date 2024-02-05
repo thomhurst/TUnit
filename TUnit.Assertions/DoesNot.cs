@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions;

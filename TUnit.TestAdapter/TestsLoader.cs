@@ -1,17 +1,13 @@
 ﻿using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Engine;
-using TUnit.Engine.Extensions;
-using TUnit.TestAdapter.Extensions;
 
 namespace TUnit.TestAdapter;
 
 internal class TestsLoader(SourceLocationHelper sourceLocationHelper, 
     ClassLoader classLoader, 
     TestDataSourceRetriever testDataSourceRetriever,
-    CombinativeSolver combinativeSolver,
-    IMessageLogger messageLogger)
+    CombinativeSolver combinativeSolver)
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute), typeof(TestDataSourceAttribute)];
 

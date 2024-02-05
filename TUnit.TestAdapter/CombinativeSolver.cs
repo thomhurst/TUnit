@@ -1,8 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using TUnit.Core;
-using TUnit.Engine.Extensions;
-
-namespace TUnit.TestAdapter;
+﻿namespace TUnit.TestAdapter;
 
 public class CombinativeSolver
 {

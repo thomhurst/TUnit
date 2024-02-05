@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public class TestContext
 {
