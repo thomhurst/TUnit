@@ -2,13 +2,13 @@
 
 namespace TUnit.Assertions.AssertConditions.String;
 
-public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, string?, TAnd, TOr>
-    where TAnd : And<string?, TAnd, TOr>, IAnd<TAnd, string?, TAnd, TOr>
-    where TOr : Or<string?, TAnd, TOr>, IOr<TOr, string?, TAnd, TOr>
+public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, string, TAnd, TOr>
+    where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+    where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
 {
     private readonly StringComparison _stringComparison;
     
-    public StringEqualsAssertCondition(AssertionBuilder<string?> assertionBuilder, string expected, StringComparison stringComparison) : base(assertionBuilder, expected)
+    public StringEqualsAssertCondition(AssertionBuilder<string> assertionBuilder, string expected, StringComparison stringComparison) : base(assertionBuilder, expected)
     {
         _stringComparison = stringComparison;
     }

@@ -5,10 +5,10 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, int, TAnd, TOr>
     where TActual : IEnumerable<TInner>
-    where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
-    where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
+    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    public EnumerableCountEqualToAssertCondition(AssertionBuilder<TActual?> assertionBuilder, int expected) : base(assertionBuilder, expected)
+    public EnumerableCountEqualToAssertCondition(AssertionBuilder<TActual> assertionBuilder, int expected) : base(assertionBuilder, expected)
     {
     }
 
