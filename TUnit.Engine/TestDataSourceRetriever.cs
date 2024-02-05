@@ -5,7 +5,7 @@ namespace TUnit.Engine;
 
 public class TestDataSourceRetriever(MethodInvoker methodInvoker)
 {
-    public ParameterArgument[]? GetTestDataSourceArguments(MethodInfo methodInfo,
+    public object?[]? GetTestDataSourceArguments(MethodInfo methodInfo,
         TestDataSourceAttribute testDataSourceAttribute, Type[] allClasses)
     {
         // Class name and method name
@@ -15,7 +15,7 @@ public class TestDataSourceRetriever(MethodInvoker methodInvoker)
         return GetTestDataSourceArguments(className, methodName, allClasses);
     }
     
-    public ParameterArgument[]? GetTestDataSourceArguments(
+    public object?[]? GetTestDataSourceArguments(
         string className,
         string methodName,
         Type[] allClasses
@@ -27,7 +27,7 @@ public class TestDataSourceRetriever(MethodInvoker methodInvoker)
         return GetTestDataSourceArguments(@class, methodName);
     }
     
-    public ParameterArgument[]? GetTestDataSourceArguments(
+    public object?[]? GetTestDataSourceArguments(
         Type @class,
         string methodName
     )
@@ -41,6 +41,6 @@ public class TestDataSourceRetriever(MethodInvoker methodInvoker)
             return null;
         }
             
-        return [new ParameterArgument(result.GetType(), result)];
+        return [result];
     }
 }

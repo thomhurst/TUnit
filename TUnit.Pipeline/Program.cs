@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ModularPipelines.Extensions;
 using ModularPipelines.Host;
+using TUnit.Pipeline;
 
 await PipelineHostBuilder.Create()
     .ConfigureAppConfiguration((context, builder) =>

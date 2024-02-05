@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<ReflectionMetadataProvider>()
             .AddSingleton<TUnitTestFilterProvider>()
             .AddSingleton<AssemblyLoader>()
-            .AddSingleton<TestGrouper>();
+            .AddSingleton<TestGrouper>()
+            .AddSingleton<CombinativeSolver>();
     }
 }
