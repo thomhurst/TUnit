@@ -43,8 +43,6 @@ internal class SingleTestExecutor
             });
         }
         
-        var isRetry = testDetails.RetryCount > 0;
-
         object? @class = null;
         TestContext? testContext = null;
         try
@@ -57,15 +55,8 @@ internal class SingleTestExecutor
                 TestContext.Current = testContext;
 
                 try
-                {
-                    if (isRetry)
-                    {
-                        await ExecuteWithRetries(testContext, testDetails, @class);
-                    }
-                    else
-                    {
-                        await ExecuteWithRepeats(testContext, testDetails, @class);
-                    }
+                { 
+                    await ExecuteWithRetries(testContext, testDetails, @class);
                 }
                 finally
                 {
@@ -131,18 +122,6 @@ internal class SingleTestExecutor
                 }
             }
         }
-    }
-
-    private async Task ExecuteWithRepeats(TestContext testContext, TestDetails testDetails, object? @class)
-    {
-        var tasks = new List<Task>();
-
-        for (var i = 0; i < testDetails.RepeatCount + 1; i++)
-        {
-            tasks.Add(ExecuteCore(testContext, testDetails, @class));
-        }
-
-        await Task.WhenAll(tasks);
     }
 
     private async Task ExecuteCore(TestContext testContext, TestDetails testDetails, object? @class)

@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Engine;
+using TUnit.TestAdapter.Extensions;
 
 namespace TUnit.TestAdapter;
 
@@ -15,7 +16,8 @@ internal class AsyncTestRunExecutor
         MethodInvoker methodInvoker, 
         ITestExecutionRecorder testExecutionRecorder, 
         ClassLoader classLoader,
-        CancellationTokenSource cancellationTokenSource
+        CancellationTokenSource cancellationTokenSource,
+        TestGrouper testGrouper
         )
 {
     private bool _canRunAnotherTest = true;
@@ -25,26 +27,27 @@ internal class AsyncTestRunExecutor
 
     public async Task RunInAsyncContext(AssembliesAnd<TestWithTestCase> assembliesAndTests)
     {
-        var allTestsOrderedByClass = assembliesAndTests
-            .Values
-            .GroupBy(x => x.Details.FullyQualifiedClassName)
-            .SelectMany(x => x.ToList())
-            .ToList();
-        
-        var queue = new Queue<TestWithTestCase>(allTestsOrderedByClass);
-        
-        if (queue.Count is 0)
-        {
-            return;
-        }
-        
-        MonitorSystemResources();
-
-        var executingTests = new List<TestWithResult>();
+        var tests = testGrouper.OrganiseTests(assembliesAndTests);
 
         var allClasses = classLoader.GetAllTypes(assembliesAndTests.Assemblies).ToArray();
+
+        MonitorSystemResources();
+
+        await ProcessTests(tests.Parallel, true, allClasses, tests.LastTestOfClasses);
+
+        await Task.WhenAll(tests.KeyedNotInParallel
+            .Select(keyedTestsGroup =>
+                ProcessTests(keyedTestsGroup.ToQueue(), false, allClasses, tests.LastTestOfClasses))
+        );
         
-        await foreach (var testWithResult in ProcessQueue(queue, allClasses))
+        await ProcessTests(tests.NotInParallel, false, allClasses, tests.LastTestOfClasses);
+    }
+
+    private async Task ProcessTests(Queue<TestWithTestCase> queue, bool runInParallel, Type[] allClasses, IReadOnlyCollection<TestWithTestCase> lastTestsOfClasses)
+    {
+        var executingTests = new List<TestWithResult>();
+        
+        await foreach (var testWithResult in ProcessQueue(queue, runInParallel, allClasses))
         {
             if (cancellationTokenSource.IsCancellationRequested)
             {
@@ -53,7 +56,7 @@ internal class AsyncTestRunExecutor
             
             executingTests.Add(testWithResult);
 
-            SetupRunOneTimeCleanUpForClass(testWithResult.Test.Details, allTestsOrderedByClass, executingTests);
+            SetupRunOneTimeCleanUpForClass(testWithResult.Test.Details, lastTestsOfClasses, executingTests);
             
             executingTests.RemoveAll(x => x.Result.IsCompletedSuccessfully);
             
@@ -122,7 +125,8 @@ internal class AsyncTestRunExecutor
         });
     }
 
-    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestWithTestCase> queue, Type[] allClasses)
+    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestWithTestCase> queue, bool runInParallel,
+        Type[] allClasses)
     {
         while (queue.Count > 0)
         {
@@ -130,7 +134,14 @@ internal class AsyncTestRunExecutor
             {
                 var test = queue.Dequeue();
 
-                yield return new TestWithResult(test, singleTestExecutor.ExecuteTest(test.Details, allClasses));
+                var executionTask = singleTestExecutor.ExecuteTest(test.Details, allClasses);
+
+                if (!runInParallel)
+                {
+                    await executionTask;
+                }
+                
+                yield return new TestWithResult(test, executionTask);
             }
             else if (cancellationTokenSource.IsCancellationRequested)
             {

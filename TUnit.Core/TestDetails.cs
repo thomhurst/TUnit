@@ -44,6 +44,17 @@ internal record TestDetails
             .FirstOrDefault(x => x.AttributeType == typeof(RepeatAttribute))
             ?.ConstructorArguments.FirstOrDefault().Value as int? ?? 0;
 
+        if (RepeatCount > 0)
+        {
+            CurrentExecutionCount = count;
+        }
+        
+        Order = methodAndClassAttributes
+            .FirstOrDefault(x => x.AttributeType == typeof(RetryAttribute))
+            ?.ConstructorArguments.FirstOrDefault().Value as int? ?? int.MaxValue;
+        
+        NotInParallelConstraintKey = GetNotInParallelConstraintKey(methodAndClassAttributes);
+        
         AddCategories(methodAndClassAttributes);
         
         Timeout = GetTimeout(methodAndClassAttributes);
@@ -54,6 +65,26 @@ internal record TestDetails
 
         UniqueId = FullyQualifiedClassName + DisplayName + Count + GetParameterTypes(ParameterTypes);
     }
+
+    private static string? GetNotInParallelConstraintKey(CustomAttributeData[] methodAndClassAttributes)
+    {
+        var notInParallelAttribute = methodAndClassAttributes
+            .FirstOrDefault(x => x.AttributeType == typeof(NotInParallelAttribute));
+
+        if (notInParallelAttribute is null)
+        {
+            return null;
+        }
+
+        return notInParallelAttribute.ConstructorArguments
+                   .FirstOrDefault()
+                   .Value as string
+               ?? string.Empty;
+    }
+
+    public string? NotInParallelConstraintKey { get; }
+
+    public int Order { get; }
 
     private string GetCountInBrackets()
     {
@@ -120,7 +151,7 @@ internal record TestDetails
     public string? FileName { get; }
 
     public TimeSpan Timeout { get; }
-    
+
     public int CurrentExecutionCount { get; internal set; }
     
     public int MinLineNumber { get; }

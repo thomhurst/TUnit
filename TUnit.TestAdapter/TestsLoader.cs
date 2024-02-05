@@ -26,6 +26,12 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
             var nonAbstractClassesContainingTest = allClasses
                 .Where(t => t.IsAssignableTo(methodInfo.DeclaringType!) && !t.IsAbstract)
                 .ToArray();
+
+            var repeatCount = methodInfo.CustomAttributes
+                .FirstOrDefault(x => x.AttributeType == typeof(RepeatAttribute))
+                ?.ConstructorArguments.First().Value as int? ?? 0;
+
+            var runCount = repeatCount + 1;
             
             var count = 0;
             
@@ -41,13 +47,16 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
                     
                     foreach (var classType in nonAbstractClassesContainingTest)
                     {
-                        yield return new TestDetails(
-                            methodInfo: methodInfo,
-                            classType: classType,
-                            sourceLocation: sourceLocation,
-                            arguments: arguments,
-                            count: count
-                        );   
+                        for (var i = 1; i <= runCount; i++)
+                        {
+                            yield return new TestDetails(
+                                methodInfo: methodInfo,
+                                classType: classType,
+                                sourceLocation: sourceLocation,
+                                arguments: arguments,
+                                count: count * i
+                            );
+                        }
                     }
                 }
             }
@@ -56,13 +65,16 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
             {
                 foreach (var classType in nonAbstractClassesContainingTest)
                 {
-                    yield return new TestDetails(
-                        methodInfo: methodInfo,
-                        classType: classType,
-                        sourceLocation: sourceLocation,
-                        arguments: null,
-                        count: 1
-                    );
+                    for (var i = 1; i <= runCount; i++)
+                    {
+                        yield return new TestDetails(
+                            methodInfo: methodInfo,
+                            classType: classType,
+                            sourceLocation: sourceLocation,
+                            arguments: null,
+                            count: i
+                        );
+                    }
                 }
             }
             
@@ -71,13 +83,17 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper, ClassLoade
                 count++;
                 foreach (var classType in nonAbstractClassesContainingTest)
                 {
-                    yield return new TestDetails(
-                        methodInfo: methodInfo,
-                        classType: classType,
-                        sourceLocation: sourceLocation,
-                        arguments: testDataSourceRetriever.GetTestDataSourceArguments(methodInfo, testDataSourceAttribute, allClasses),
-                        count: count
-                    );
+                    for (var i = 1; i <= runCount; i++)
+                    {
+                        yield return new TestDetails(
+                            methodInfo: methodInfo,
+                            classType: classType,
+                            sourceLocation: sourceLocation,
+                            arguments: testDataSourceRetriever.GetTestDataSourceArguments(methodInfo,
+                                testDataSourceAttribute, allClasses),
+                            count: count * i
+                        );
+                    }
                 }
             }
         }

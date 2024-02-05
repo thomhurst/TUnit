@@ -66,8 +66,6 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
 
     private bool TestMatchesFilter(TestDetails test, Filter filter)
     {
-        messageLogger.SendMessage(TestMessageLevel.Informational, test.ToString());
-
         if (filter.IsEmpty)
         {
             return true;
