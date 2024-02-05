@@ -6,7 +6,7 @@ namespace TUnit.Assertions;
 
 public class ValueAssertionBuilder<TActual> : AssertionBuilder<TActual>
 {
-    private readonly TActual? _value;
+    private readonly TActual _value;
     
     public Does<TActual, ValueAnd<TActual>, ValueOr<TActual>> Does => new(this, ConnectorType.None, null);
     public Is<TActual, ValueAnd<TActual>, ValueOr<TActual>> Is => new(this, ConnectorType.None, null);
