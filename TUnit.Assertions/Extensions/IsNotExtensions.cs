@@ -243,7 +243,27 @@ public static class IsNotExtensions
         return isNot.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
             isNot.AssertionBuilder, 0,
             (value, _, _) => value != string.Empty,
-            (s, _) => $"'{s}' not empty"));
+            (s, _) => $"'{s}' is empty"));
+    }
+    
+    public static BaseAssertCondition<string?, TAnd, TOr> NullOrEmpty<TAnd, TOr>(this IsNot<string?, TAnd, TOr> isNot)
+        where TAnd : And<string?, TAnd, TOr>, IAnd<TAnd, string?, TAnd, TOr>
+        where TOr : Or<string?, TAnd, TOr>, IOr<TOr, string?, TAnd, TOr>
+    {
+        return isNot.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
+            isNot.AssertionBuilder, 0,
+            (value, _, _) => !string.IsNullOrEmpty(value),
+            (s, _) => $"'{s}' is null or empty"));
+    }
+    
+    public static BaseAssertCondition<string?, TAnd, TOr> NullOrWhitespace<TAnd, TOr>(this IsNot<string?, TAnd, TOr> isNot)
+        where TAnd : And<string?, TAnd, TOr>, IAnd<TAnd, string?, TAnd, TOr>
+        where TOr : Or<string?, TAnd, TOr>, IOr<TOr, string?, TAnd, TOr>
+    {
+        return isNot.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
+            isNot.AssertionBuilder, 0,
+            (value, _, _) => !string.IsNullOrWhiteSpace(value),
+            (s, _) => $"'{s}' is null or whitespace"));
     }
 
     #endregion
