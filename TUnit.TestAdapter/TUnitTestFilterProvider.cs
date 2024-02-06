@@ -69,7 +69,7 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
             var filterValue = filterSplit.ElementAtOrDefault(1);
 
             if (string.IsNullOrWhiteSpace(filterName) || 
-                !TestAdapterConstants.Filters.KnownFilters.Contains(filterName, StringComparer.InvariantCultureIgnoreCase))
+                !SupportedProperties.Keys.Contains(filterName, StringComparer.InvariantCultureIgnoreCase))
             {
                 continue;
             }
@@ -88,7 +88,8 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
         }
 
         if (filter.BannedCategories.Intersect(
-                test.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>())
+                test.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>()),
+                StringComparer.InvariantCultureIgnoreCase
             ).Any())
         {
             return false;
