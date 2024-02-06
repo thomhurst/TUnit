@@ -249,6 +249,218 @@ public static class IsExtensions
     
     #endregion
 
+    #region DateTimes
+    
+    public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected)
+        where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
+        where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value > expected;
+            },
+            (value, _) => $"{value} was not greater than {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> GreaterThanOrEqualTo<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected) 
+        where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
+        where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value >= expected;
+            },
+            (value, _) => $"{value} was not greater than or equal to {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> LessThan<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected) 
+        where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
+        where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value < expected;
+            },
+            (value, _) => $"{value} was not less than {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> LessThanOrEqualTo<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected) 
+        where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
+        where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value <= expected;
+            },
+            (value, _) => $"{value} was not less than or equal to {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateTime, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected)
+        where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
+        where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value > expected;
+            },
+            (value, _) => $"{value} was not greater than {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateTime, TAnd, TOr> GreaterThanOrEqualTo<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected) 
+        where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
+        where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value >= expected;
+            },
+            (value, _) => $"{value} was not greater than or equal to {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateTime, TAnd, TOr> LessThan<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected) 
+        where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
+        where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value < expected;
+            },
+            (value, _) => $"{value} was not less than {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateTime, TAnd, TOr> LessThanOrEqualTo<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected) 
+        where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
+        where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value <= expected;
+            },
+            (value, _) => $"{value} was not less than or equal to {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateOnly, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected)
+        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
+        where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value > expected;
+            },
+            (value, _) => $"{value} was not greater than {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateOnly, TAnd, TOr> GreaterThanOrEqualTo<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected) 
+        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
+        where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value >= expected;
+            },
+            (value, _) => $"{value} was not greater than or equal to {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateOnly, TAnd, TOr> LessThan<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected) 
+        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
+        where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value < expected;
+            },
+            (value, _) => $"{value} was not less than {expected}"));
+    }
+    
+    public static BaseAssertCondition<DateOnly, TAnd, TOr> LessThanOrEqualTo<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected) 
+        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
+        where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value <= expected;
+            },
+            (value, _) => $"{value} was not less than or equal to {expected}"));
+    }
+    
+    public static BaseAssertCondition<TimeOnly, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected)
+        where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
+        where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value > expected;
+            },
+            (value, _) => $"{value} was not greater than {expected}"));
+    }
+    
+    public static BaseAssertCondition<TimeOnly, TAnd, TOr> GreaterThanOrEqualTo<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected) 
+        where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
+        where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value >= expected;
+            },
+            (value, _) => $"{value} was not greater than or equal to {expected}"));
+    }
+    
+    public static BaseAssertCondition<TimeOnly, TAnd, TOr> LessThan<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected) 
+        where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
+        where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value < expected;
+            },
+            (value, _) => $"{value} was not less than {expected}"));
+    }
+    
+    public static BaseAssertCondition<TimeOnly, TAnd, TOr> LessThanOrEqualTo<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected) 
+        where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
+        where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value <= expected;
+            },
+            (value, _) => $"{value} was not less than or equal to {expected}"));
+    }
+    
+    #endregion
+    
     #region Enumerables
 
     public static BaseAssertCondition<TActual, TAnd, TOr> EquivalentTo<TActual, TInner, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, IEnumerable<TInner> expected)
