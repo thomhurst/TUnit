@@ -50,6 +50,11 @@ public class TestContext
         _assertions.Add(obj);
     }
     
+    public void RemoveObject(object obj)
+    {
+        _assertions.Remove(obj);
+    }
+    
     public void ClearObjects<T>()
     {
         _assertions.RemoveAll(x => x is T);

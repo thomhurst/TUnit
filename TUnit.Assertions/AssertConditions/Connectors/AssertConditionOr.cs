@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Core;
 
 namespace TUnit.Assertions.AssertConditions.Connectors;
 
@@ -16,6 +17,12 @@ public sealed class AssertConditionOr<TActual, TExpected, TAnd, TOr> : AssertCon
 
         _condition1 = condition1;
         _condition2 = condition2;
+        
+        // We store assert conditions in the test context for use with Assert.Multiple
+        // However, we won't be asserting them individually if we've combined them with and/or statements
+        // As this handler will be registered and will control invoking them
+        TestContext.Current.RemoveObject(condition1);
+        TestContext.Current.RemoveObject(condition2);
     }
 
     protected override string DefaultMessage => string.Empty;
