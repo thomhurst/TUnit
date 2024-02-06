@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using TUnit.Core;
 using TUnit.Engine;
 
 namespace TUnit.TestAdapter;
 
-internal class TestCollector(CacheableAssemblyLoader assemblyLoader, TestsLoader testsLoader, ITestExecutionRecorder testExecutionRecorder)
+internal class TestCollector(CacheableAssemblyLoader assemblyLoader, TestsLoader testsLoader)
 {
     public IEnumerable<TestDetails> TestsFromSources(IEnumerable<string> sources)
     {

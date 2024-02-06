@@ -14,8 +14,7 @@ internal class AsyncTestRunExecutor
     (
         SingleTestExecutor singleTestExecutor, 
         MethodInvoker methodInvoker, 
-        ITestExecutionRecorder testExecutionRecorder, 
-        ClassLoader classLoader,
+        ITestExecutionRecorder testExecutionRecorder,
         CacheableAssemblyLoader assemblyLoader,
         CancellationTokenSource cancellationTokenSource,
         TestGrouper testGrouper
