@@ -7,28 +7,28 @@ namespace TUnit.TestAdapter;
 
 internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger messageLogger)
 {
-    private static readonly Dictionary<string, TestProperty> _supportedProperties =
-        new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, TestProperty> SupportedProperties 
+        = new(StringComparer.OrdinalIgnoreCase);
 
     static TUnitTestFilterProvider()
     {
-        _supportedProperties[nameof(TUnitTestProperties.TestName)] =
+        SupportedProperties[nameof(TUnitTestProperties.TestName)] =
             TUnitTestProperties.TestName;
         
-        _supportedProperties[nameof(TUnitTestProperties.TestClass)] =
+        SupportedProperties[nameof(TUnitTestProperties.TestClass)] =
             TUnitTestProperties.TestClass;
         
-        _supportedProperties[nameof(TUnitTestProperties.Category)] =
+        SupportedProperties[nameof(TUnitTestProperties.Category)] =
             TUnitTestProperties.Category;
         
-        _supportedProperties[nameof(TUnitTestProperties.NotCategory)] =
+        SupportedProperties[nameof(TUnitTestProperties.NotCategory)] =
             TUnitTestProperties.NotCategory;
     }
     
     public IEnumerable<TestCase> FilterTests(IEnumerable<TestCase> tests)
     {
-        var filterExpression = runContext.GetTestCaseFilter(_supportedProperties.Keys, 
-            propertyName => _supportedProperties.GetValueOrDefault(propertyName));
+        var filterExpression = runContext.GetTestCaseFilter(SupportedProperties.Keys, 
+            propertyName => SupportedProperties.GetValueOrDefault(propertyName));
 
         messageLogger.SendMessage(TestMessageLevel.Informational, $"TestCaseFilterValue is: {filterExpression?.TestCaseFilterValue}");
         
@@ -47,7 +47,7 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
         foreach (var test in tests)
         {
             if (filterExpression.MatchTestCase(test, propertyName =>
-                    !_supportedProperties.TryGetValue(propertyName, out var testProperty)
+                    !SupportedProperties.TryGetValue(propertyName, out var testProperty)
                         ? false
                         : test.GetPropertyValue(testProperty))
                 && TestMatchesFilter(test, filter)
