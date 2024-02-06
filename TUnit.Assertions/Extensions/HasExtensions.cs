@@ -1,6 +1,8 @@
 using System.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
 
+#nullable disable
+
 namespace TUnit.Assertions;
 
 public static class HasExtensions
@@ -14,7 +16,7 @@ public static class HasExtensions
     }
     
     public static EnumerableCount<TActual, TAnd, TOr> Count<TActual, TAnd, TOr>(this Has<TActual, TAnd, TOr> has) 
-        where TActual : IEnumerable?
+        where TActual : IEnumerable
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {

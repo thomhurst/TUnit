@@ -6,6 +6,8 @@ using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
 
+#nullable disable
+
 namespace TUnit.Assertions;
 
 public static class IsExtensions

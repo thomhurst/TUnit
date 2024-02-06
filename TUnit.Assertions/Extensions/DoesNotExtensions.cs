@@ -3,6 +3,8 @@ using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
 
+#nullable disable
+
 namespace TUnit.Assertions;
 
 public static class DoesNotExtensions

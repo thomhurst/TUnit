@@ -263,7 +263,7 @@ public class Tests
     {
         string? item = null;
 
-        await Assert.That(item).Is.Not.Null().And.Is.EqualTo("");
+        await Assert.That(item).Is.Not.Null().And.Is.Not.Empty();
     }
     
     [Test]
@@ -271,7 +271,7 @@ public class Tests
     {
         var item = "";
 
-        await Assert.That(item).Is.Not.Null().And.Is.EqualTo("");
+        await Assert.That(item).Is.Not.Null().And.Is.Not.Empty();
     }
 
     public static int One() => 1;
