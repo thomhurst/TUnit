@@ -11,7 +11,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute), typeof(TestDataSourceAttribute)];
 
-    public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation, AssemblyWithSource[] allAssemblies)
+    public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation, Assembly[] allAssemblies)
     {
         var methods = typeInformation.Types.SelectMany(x => x.GetMethods());
 
@@ -23,7 +23,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
             }
             
             var sourceLocation = sourceLocationHelper
-                .GetSourceLocation(typeInformation.Assembly.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
+                .GetSourceLocation(typeInformation.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
 
             var allClasses = classLoader.GetAllTypes(allAssemblies).ToArray();
             
@@ -47,7 +47,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
                 yield return test;
             }
 
-            foreach (var test in CollectTestDataSourceTests(methodInfo, nonAbstractClassesContainingTest, runCount, sourceLocation, allClasses))
+            foreach (var test in CollectTestDataSourceTests(methodInfo, nonAbstractClassesContainingTest, runCount, sourceLocation))
             {
                 yield return test;
             }
@@ -55,7 +55,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
     }
 
     private IEnumerable<TestDetails> CollectTestDataSourceTests(MethodInfo methodInfo,
-        Type[] nonAbstractClassesContainingTest, int runCount, SourceLocation sourceLocation, Type[] allClasses)
+        Type[] nonAbstractClassesContainingTest, int runCount, SourceLocation sourceLocation)
     {
         var testDataSourceAttributes = methodInfo.GetCustomAttributes<TestDataSourceAttribute>().ToList();
         
@@ -66,21 +66,23 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
         
         var count = 0;
         
-        foreach (var testDataSourceAttribute in testDataSourceAttributes)
+        foreach (var methodArguments in testDataSourceRetriever.GetTestDataSourceArguments(methodInfo))
         {
-            count++;
             foreach (var classType in nonAbstractClassesContainingTest)
             {
-                for (var i = 1; i <= runCount; i++)
+                foreach (var classArguments in testDataSourceRetriever.GetTestDataSourceArguments(classType))
                 {
-                    yield return new TestDetails(
-                        methodInfo: methodInfo,
-                        classType: classType,
-                        sourceLocation: sourceLocation,
-                        arguments: testDataSourceRetriever.GetTestDataSourceArguments(methodInfo,
-                            testDataSourceAttribute, allClasses),
-                        count: count * i
-                    );
+                    for (var i = 1; i <= runCount; i++)
+                    {
+                        yield return new TestDetails(
+                            methodInfo: methodInfo,
+                            classType: classType,
+                            sourceLocation: sourceLocation,
+                            methodArguments: methodArguments,
+                            classArguments: classArguments,
+                            count: count++
+                        );
+                    }
                 }
             }
         }
@@ -100,30 +102,35 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
 
         foreach (var classType in nonAbstractClassesContainingTest)
         {
-            for (var i = 1; i <= runCount; i++)
+            foreach (var classArguments in testDataSourceRetriever.GetTestDataSourceArguments(classType))
             {
-                if (hasCombinativeAttribute)
+                for (var i = 1; i <= runCount; i++)
                 {
-                    foreach (var combinativeValue in GetCombinativeValues(methodInfo))
+                    if (hasCombinativeAttribute)
+                    {
+                        foreach (var combinativeValue in GetCombinativeValues(methodInfo))
+                        {
+                            yield return new TestDetails(
+                                methodInfo: methodInfo,
+                                classType: classType,
+                                sourceLocation: sourceLocation,
+                                methodArguments: combinativeValue.ToArray(),
+                                classArguments: classArguments,
+                                count: count++
+                            );
+                        }
+                    }
+                    else
                     {
                         yield return new TestDetails(
                             methodInfo: methodInfo,
                             classType: classType,
                             sourceLocation: sourceLocation,
-                            arguments: combinativeValue.ToArray(),
+                            methodArguments: null,
+                            classArguments: classArguments,
                             count: count++
                         );
                     }
-                }
-                else
-                {
-                    yield return new TestDetails(
-                        methodInfo: methodInfo,
-                        classType: classType,
-                        sourceLocation: sourceLocation,
-                        arguments: null,
-                        count: count++
-                    );
                 }
             }
         }
@@ -145,7 +152,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
         return parameterInfo.GetCustomAttribute<CombinativeValuesAttribute>()?.Objects ?? [null];
     }
 
-    private static IEnumerable<TestDetails> CollectTestWithDataAttributeTests(MethodInfo methodInfo,
+    private IEnumerable<TestDetails> CollectTestWithDataAttributeTests(MethodInfo methodInfo,
         Type[] nonAbstractClassesContainingTest, int runCount, SourceLocation sourceLocation)
     {
         var testWithDataAttributes = methodInfo.GetCustomAttributes<TestWithDataAttribute>().ToList();
@@ -159,20 +166,23 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
         
         foreach (var testWithDataAttribute in testWithDataAttributes)
         {
-            count++;
             var arguments = testWithDataAttribute.Values;
                     
             foreach (var classType in nonAbstractClassesContainingTest)
             {
-                for (var i = 1; i <= runCount; i++)
+                foreach (var classArguments in testDataSourceRetriever.GetTestDataSourceArguments(classType))
                 {
-                    yield return new TestDetails(
-                        methodInfo: methodInfo,
-                        classType: classType,
-                        sourceLocation: sourceLocation,
-                        arguments: arguments,
-                        count: count * i
-                    );
+                    for (var i = 1; i <= runCount; i++)
+                    {
+                        yield return new TestDetails(
+                            methodInfo: methodInfo,
+                            classType: classType,
+                            sourceLocation: sourceLocation,
+                            methodArguments: arguments,
+                            classArguments: classArguments,
+                            count: count++
+                        );
+                    }
                 }
             }
         }

@@ -1,9 +1,10 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace TUnit.TestAdapter
 {
-    internal sealed class ReflectionMetadataProvider
+    internal sealed class ReflectionMetadataProvider(IMessageLogger messageLogger)
     {
         public Type? GetStateMachineType(string assemblyPath, string reflectedTypeName, string methodName)
         {
@@ -48,7 +49,7 @@ namespace TUnit.TestAdapter
             return candidate;
         }
 
-        private static MethodInfo? TryGetSingleMethod(string assemblyPath, string reflectedTypeName, string methodName)
+        private MethodInfo? TryGetSingleMethod(string assemblyPath, string reflectedTypeName, string methodName)
         {
             try
             {
@@ -59,8 +60,10 @@ namespace TUnit.TestAdapter
                 var methods = type?.GetMethods().Where(m => m.Name == methodName).Take(2).ToList();
                 return methods?.Count == 1 ? methods[0] : null;
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException e)
             {
+                messageLogger.SendMessage(TestMessageLevel.Error, $"Error getting single method from {reflectedTypeName} {methodName}");
+                messageLogger.SendMessage(TestMessageLevel.Error, e.ToString());
                 return null;
             }
         }

@@ -3,7 +3,7 @@
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class TestDataSourceAttribute : TUnitAttribute
 {
-    public string? ClassNameProvidingDataSource { get; }
+    public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }
     
 
@@ -12,9 +12,9 @@ public class TestDataSourceAttribute : TUnitAttribute
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
     
-    public TestDataSourceAttribute(string classNameProvidingDataSource, string methodNameProvidingDataSource)
+    public TestDataSourceAttribute(Type classProvidingDataSource, string methodNameProvidingDataSource)
     {
-        ClassNameProvidingDataSource = classNameProvidingDataSource;
+        ClassProvidingDataSource = classProvidingDataSource;
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
 }

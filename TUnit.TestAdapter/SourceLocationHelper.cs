@@ -8,7 +8,7 @@ public class SourceLocationHelper(IMessageLogger logger) : IDisposable
 {
     private static SourceLocation GetEmptySourceLocation(string source) => new(source, null, 0, 0);
     
-    private readonly ReflectionMetadataProvider _metadataProvider = new();
+    private readonly ReflectionMetadataProvider _metadataProvider = new(logger);
     private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new (StringComparer.OrdinalIgnoreCase);
 
     public SourceLocation GetSourceLocation(string assemblyLocation, string className, string methodName)

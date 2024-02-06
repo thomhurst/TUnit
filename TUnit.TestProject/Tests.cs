@@ -1,4 +1,3 @@
-using System.Xml.XPath;
 using TUnit.Assertions;
 using TUnit.Core;
 
@@ -122,14 +121,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(nameof(TestDataSources), nameof(One))]
+    [TestDataSource(typeof(TestDataSources), nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource5(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(nameof(TestDataSources), nameof(One))]
+    [TestDataSource(typeof(TestDataSources), nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource6(int value)
     {
@@ -137,14 +136,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(nameof(TestDataSources), nameof(Two))]
+    [TestDataSource(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource7(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(nameof(TestDataSources), nameof(Two))]
+    [TestDataSource(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource8(int value)
     {
@@ -299,6 +298,7 @@ public class Tests
     [Test]
     public async Task Throws6()
     {
+        await Task.CompletedTask;
         Console.WriteLine(_retryCount);
         throw new Exception();
     }
@@ -308,6 +308,12 @@ public class Tests
     {
         Console.WriteLine(_retryCount);
         throw new Exception();
+    }
+    
+    [Test]
+    public async Task OneSecond()
+    {
+        await Task.Delay(TimeSpan.FromSeconds(1));
     }
 
     public static int One() => 1;

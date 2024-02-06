@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using TUnit.Core;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.TestAdapter.Extensions;
 using TUnit.TestAdapter.Models;
 
@@ -7,31 +7,31 @@ namespace TUnit.TestAdapter;
 
 internal class TestGrouper(IMessageLogger messageLogger)
 {
-    public GroupedTests OrganiseTests(AssembliesAnd<TestWithTestCase> assembliesAndTests)
+    public GroupedTests OrganiseTests(IEnumerable<TestCase> testCases)
     {
-        var allTestsOrderedByClass = assembliesAndTests
-            .Values
-            .GroupBy(x => x.Details.FullyQualifiedClassName)
+        var allTestsOrderedByClass = testCases
+            .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, ""))
             .SelectMany(x => x)
-            .OrderBy(x => x.Details.Order);
+            .OrderBy(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue));
 
-        var notInParallel = new Queue<TestWithTestCase>();
-        var keyedNotInParallel = new List<TestWithTestCase>();
-        var parallel = new Queue<TestWithTestCase>();
+        var notInParallel = new Queue<TestCase>();
+        var keyedNotInParallel = new List<TestCase>();
+        var parallel = new Queue<TestCase>();
 
-        foreach (var testWithTestCase in allTestsOrderedByClass)
+        foreach (var test in allTestsOrderedByClass)
         {
-            if (testWithTestCase.Details.NotInParallelConstraintKey == null)
+            var notInParallelConstraintKey = test.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, null as string);
+            if (notInParallelConstraintKey == null)
             {
-                parallel.Enqueue(testWithTestCase);
+                parallel.Enqueue(test);
             }
-            else if (testWithTestCase.Details.NotInParallelConstraintKey == string.Empty)
+            else if (notInParallelConstraintKey == string.Empty)
             {
-                notInParallel.Enqueue(testWithTestCase);
+                notInParallel.Enqueue(test);
             }
             else
             {
-                keyedNotInParallel.Add(testWithTestCase);
+                keyedNotInParallel.Add(test);
             }
         }
 
@@ -40,7 +40,7 @@ internal class TestGrouper(IMessageLogger messageLogger)
             Parallel = parallel,
             
             KeyedNotInParallel = keyedNotInParallel
-                .GroupBy(x => x.Details.NotInParallelConstraintKey!)
+                .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, ""))
                 .ToQueue(),
             
             NotInParallel = notInParallel,
@@ -48,7 +48,7 @@ internal class TestGrouper(IMessageLogger messageLogger)
             LastTestOfClasses = parallel
                 .Concat(keyedNotInParallel)
                 .Concat(notInParallel)
-                .GroupBy(x => x.Details.ClassType.FullName!)
+                .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, ""))
                 .Select(x => x.Last())
                 .ToList()
         };

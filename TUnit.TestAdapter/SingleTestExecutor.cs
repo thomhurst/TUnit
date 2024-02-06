@@ -1,62 +1,72 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.Engine;
+using TUnit.TestAdapter.Extensions;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
-namespace TUnit.Engine;
+namespace TUnit.TestAdapter;
 
 internal class SingleTestExecutor
 {
     private readonly MethodInvoker _methodInvoker;
     private readonly TestClassCreator _testClassCreator;
+    private readonly TestMethodRetriever _testMethodRetriever;
     private readonly Disposer _disposer;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
     public SingleTestExecutor(MethodInvoker methodInvoker, 
         TestClassCreator testClassCreator,
+        TestMethodRetriever testMethodRetriever,
         Disposer disposer,
         CancellationTokenSource cancellationTokenSource)
     {
         _methodInvoker = methodInvoker;
         _testClassCreator = testClassCreator;
+        _testMethodRetriever = testMethodRetriever;
         _disposer = disposer;
         _cancellationTokenSource = cancellationTokenSource;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
 
-    public async Task<TUnitTestResultWithDetails> ExecuteTest(TestDetails testDetails, Type[] allClasses)
+    public async Task<TUnitTestResult> ExecuteTest(TestCase testCase)
     {
         var start = DateTimeOffset.Now;
 
-        if (testDetails.IsSkipped)
+        if (testCase.GetPropertyValue(TUnitTestProperties.IsSkipped, false))
         {
-            return testDetails.SetResult(new TUnitTestResultWithDetails
+            return new TUnitTestResult
             {
-                TestDetails = testDetails,
                 Duration = TimeSpan.Zero,
                 Start = start,
                 End = start,
                 ComputerName = Environment.MachineName,
                 Exception = null,
                 Status = Status.Skipped
-            });
+            };
         }
         
-        object? @class = null;
+        object? classInstance = null;
         TestContext? testContext = null;
+        TestInformation? testInformation = null;
         try
         {
             await Task.Run(async () =>
             {
-                @class = _testClassCreator.CreateTestClass(testDetails, allClasses);
+                classInstance = _testClassCreator.CreateClass(testCase, out var classType);
 
-                testContext = new TestContext(testDetails, @class);
+                var methodInfo = _testMethodRetriever.GetTestMethod(classType, testCase);
+
+                testInformation = testCase.ToTestInformation(classType, classInstance, methodInfo);
+                
+                testContext = new TestContext(testInformation);
                 TestContext.Current = testContext;
 
-                var customTestAttributes = testDetails.MethodInfo.GetCustomAttributes()
-                    .Concat(testDetails.ClassType.GetCustomAttributes())
+                var customTestAttributes = methodInfo.GetCustomAttributes()
+                    .Concat(classType.GetCustomAttributes())
                     .OfType<ITestAttribute>();
                 
                 foreach (var customTestAttribute in customTestAttributes)
@@ -73,20 +83,19 @@ internal class SingleTestExecutor
 
                     if(testContext.SkipReason != null)
                     {
-                        await ExecuteWithRetries(testContext, testDetails, @class);
+                        await ExecuteWithRetries(testContext, testInformation, classInstance);
                     }
                 }
                 finally
                 {
-                    await _disposer.DisposeAsync(@class);
+                    await _disposer.DisposeAsync(classInstance);
                 }
             });
 
             var end = DateTimeOffset.Now;
 
-            return testDetails.SetResult(new TUnitTestResultWithDetails
+            return new TUnitTestResult
             {
-                TestDetails = testDetails,
                 Duration = end - start,
                 Start = start,
                 End = end,
@@ -94,15 +103,14 @@ internal class SingleTestExecutor
                 Exception = null,
                 Status = testContext!.SkipReason != null ? Status.Skipped : Status.Passed,
                 Output = testContext?.GetOutput() ?? testContext!.FailReason ?? testContext.SkipReason
-            });
+            };
         }
         catch (Exception e)
         {
             var end = DateTimeOffset.Now;
 
-            var unitTestResult = new TUnitTestResultWithDetails
+            var unitTestResult = new TUnitTestResult
             {
-                TestDetails = testDetails,
                 Duration = end - start,
                 Start = start,
                 End = end,
@@ -117,25 +125,27 @@ internal class SingleTestExecutor
                 testContext.Result = unitTestResult;
             }
             
-            await ExecuteCleanUps(@class);
+            await ExecuteCleanUps(classInstance);
             
-            return testDetails.SetResult(unitTestResult);
+            return unitTestResult;
         }
     }
 
-    private async Task ExecuteWithRetries(TestContext testContext, TestDetails testDetails, object? @class)
+    private async Task ExecuteWithRetries(TestContext testContext, TestInformation testInformation, object? @class)
     {
+        var retryCount = testInformation.RetryCount;
+        
         // +1 for the original non-retry
-        for (var i = 0; i < testDetails.RetryCount + 1; i++)
+        for (var i = 0; i < retryCount + 1; i++)
         {
             try
             {
-                await ExecuteCore(testContext, testDetails, @class);
+                await ExecuteCore(testContext, testInformation, @class);
                 break;
             }
             catch
             {
-                if (i == testDetails.RetryCount)
+                if (i == retryCount)
                 {
                     throw;
                 }
@@ -143,25 +153,25 @@ internal class SingleTestExecutor
         }
     }
 
-    private async Task ExecuteCore(TestContext testContext, TestDetails testDetails, object? @class)
+    private async Task ExecuteCore(TestContext testContext, TestInformation testInformation, object? @class)
     {
-        testDetails.CurrentExecutionCount++;
+        testInformation.CurrentExecutionCount++;
         
-        await ExecuteSetUps(@class, testDetails.ClassType);
+        await ExecuteSetUps(@class, testInformation.ClassType);
 
         var testLevelCancellationTokenSource =
             CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
 
-        if (testDetails.Timeout != default)
+        if (testInformation.Timeout != default)
         {
-            testLevelCancellationTokenSource.CancelAfter(testDetails.Timeout);
+            testLevelCancellationTokenSource.CancelAfter(testInformation.Timeout);
         }
 
         testContext.CancellationToken = testLevelCancellationTokenSource.Token;
 
         try
         {
-            await ExecuteTestMethodWithTimeout(testDetails, @class, testLevelCancellationTokenSource);
+            await ExecuteTestMethodWithTimeout(testInformation, @class, testLevelCancellationTokenSource);
         }
         catch
         {
@@ -171,20 +181,20 @@ internal class SingleTestExecutor
         }
     }
 
-    private async Task ExecuteTestMethodWithTimeout(TestDetails testDetails, object? @class,
+    private async Task ExecuteTestMethodWithTimeout(TestInformation testInformation, object? @class,
         CancellationTokenSource cancellationTokenSource)
     {
-        var methodResult = _methodInvoker.InvokeMethod(@class, testDetails.MethodInfo, BindingFlags.Default,
-            testDetails.ArgumentValues?.ToArray());
+        var methodResult = _methodInvoker.InvokeMethod(@class, testInformation.MethodInfo, BindingFlags.Default,
+            testInformation.TestMethodArguments);
 
-        if (testDetails.Timeout == default)
+        if (testInformation.Timeout == default)
         {
             await methodResult;
             return;
         }
         
-        var timeoutTask = Task.Delay(testDetails.Timeout, cancellationTokenSource.Token)
-            .ContinueWith(_ => throw new TimeoutException(testDetails));
+        var timeoutTask = Task.Delay(testInformation.Timeout, cancellationTokenSource.Token)
+            .ContinueWith(_ => throw new TimeoutException(testInformation));
 
         await await Task.WhenAny(timeoutTask, methodResult);
     }

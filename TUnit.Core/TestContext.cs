@@ -3,21 +3,18 @@
 public class TestContext
 {
     public CancellationToken CancellationToken { get; internal set; } = CancellationToken.None;
-    internal readonly StringWriter OutputWriter = new();
-    private readonly List<object> _assertions = new(); 
     
-    private readonly TestDetails _testDetails;
-    private readonly object? _classInstance;
-
+    internal readonly StringWriter OutputWriter = new();
+    
+    private readonly List<object> _assertions = []; 
+    
     private static readonly AsyncLocal<TestContext> AsyncLocal = new();
 
     public TestInformation TestInformation { get; }
     
-    internal TestContext(TestDetails testDetails, object? classInstance)
+    internal TestContext(TestInformation testInformation)
     {
-        _testDetails = testDetails;
-        _classInstance = classInstance;
-        TestInformation = new(_testDetails, _classInstance);
+        TestInformation = testInformation;
     }
 
     public static TestContext Current

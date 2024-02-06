@@ -12,8 +12,10 @@ public static class ServiceCollectionExtensions
             .AddSingleton<SourceLocationHelper>()
             .AddSingleton<ReflectionMetadataProvider>()
             .AddSingleton<TUnitTestFilterProvider>()
-            .AddSingleton<AssemblyLoader>()
+            .AddSingleton<TestClassCreator>()
+            .AddSingleton<TestMethodRetriever>()
             .AddSingleton<TestGrouper>()
-            .AddSingleton<CombinativeSolver>();
+            .AddSingleton<CombinativeSolver>()
+            .AddSingleton<SingleTestExecutor>();
     }
 }
