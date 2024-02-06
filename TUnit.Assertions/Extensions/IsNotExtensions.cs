@@ -13,10 +13,10 @@ public static class IsNotExtensions
 #pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
     public static BaseAssertCondition<TActual, TAnd, TOr> Null<TActual, TAnd, TOr>(this IsNot<TActual?, TAnd, TOr> isNot)
 #pragma warning restore CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+        where TAnd : And<TActual?, TAnd, TOr>, IAnd<TAnd, TActual?, TAnd, TOr>
+        where TOr : Or<TActual?, TAnd, TOr>, IOr<TOr, TActual?, TAnd, TOr>
     {
-        return isNot.Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder!)!)!;
+        return isNot.Wrap(new NotNullAssertCondition<TActual?, TAnd, TOr>(isNot.AssertionBuilder!)!)!;
     }
     
     #region Strings
