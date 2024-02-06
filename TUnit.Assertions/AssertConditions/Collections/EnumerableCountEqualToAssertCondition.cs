@@ -3,8 +3,8 @@ using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, int, TAnd, TOr>
-    where TActual : IEnumerable<TInner>
+public class EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, int, TAnd, TOr>
+    where TActual : IEnumerable
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
@@ -27,12 +27,7 @@ public class EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr> :
         {
             return collection.Count;
         }
-
-        if (actualValue is TInner[] array)
-        {
-            return array.Length;
-        }
         
-        return actualValue.Count();
+        return actualValue.Cast<object>().Count();
     }
 }

@@ -228,6 +228,14 @@ public class Tests
         var list = new List<int> { 1, 2, 3 };
         await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3 }).And.Has.Count().EqualTo(3);
     }
+    
+    [Test]
+    [TestCategory("Pass")]
+    public async Task Enumerable_NotEmpty()
+    {
+        var list = new List<int> { 1, 2, 3 };
+        await Assert.That(list).Is.Not.Empty();
+    }
 
     [Test]
     [TestCategory("Fail")]

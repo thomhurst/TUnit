@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections;
+using System.Numerics;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Generic;
@@ -258,12 +259,12 @@ public static class IsExtensions
         return @is.Wrap(new EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr>(@is.AssertionBuilder, expected));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is)
-        where TActual : IEnumerable<TInner>
+    public static BaseAssertCondition<TActual, TAnd, TOr> Empty<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is)
+        where TActual : IEnumerable
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr>(@is.AssertionBuilder, 0));
+        return @is.Wrap(new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(@is.AssertionBuilder, 0));
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> Empty<TAnd, TOr>(this Is<string, TAnd, TOr> @is)

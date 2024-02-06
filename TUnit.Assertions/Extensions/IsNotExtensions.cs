@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections;
+using System.Numerics;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Generic;
@@ -227,12 +228,12 @@ public static class IsNotExtensions
             (inners, _) => $"{inners} was empty");
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Empty<TActual, TInner, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot)
-        where TActual : IEnumerable<TInner>
+    public static BaseAssertCondition<TActual, TAnd, TOr> Empty<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot)
+        where TActual : IEnumerable
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Invert(new EnumerableCountEqualToAssertCondition<TActual, TInner, TAnd, TOr>(isNot.AssertionBuilder, 0),
+        return isNot.Invert(new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder, 0),
             (inners, _) => $"{inners} was empty");
     }
     
