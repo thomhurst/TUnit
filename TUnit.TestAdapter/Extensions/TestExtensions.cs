@@ -19,7 +19,7 @@ internal static class TestExtensions
             Categories = testCase.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>()).ToList(),
             TestClassArguments = testCase.GetPropertyValue(TUnitTestProperties.ClassArguments, null as object?[]),
             TestMethodArguments = testCase.GetPropertyValue(TUnitTestProperties.MethodArguments, null as object?[]),
-            Timeout = TimeSpan.FromMilliseconds(testCase.GetPropertyValue(TUnitTestProperties.Timeout, -1)),
+            Timeout = TimeSpan.FromMilliseconds(testCase.GetPropertyValue(TUnitTestProperties.Timeout, -1d)),
             RepeatCount = testCase.GetPropertyValue(TUnitTestProperties.RepeatCount, 0),
             RetryCount = testCase.GetPropertyValue(TUnitTestProperties.RetryCount, 0),
         };

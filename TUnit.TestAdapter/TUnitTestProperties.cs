@@ -23,7 +23,7 @@ public static class TUnitTestProperties
     public static TestProperty RepeatCount => GetOrRegisterTestProperty<int>(nameof(RepeatCount));
     public static TestProperty RetryCount => GetOrRegisterTestProperty<int>(nameof(RetryCount));
 
-    public static TestProperty Timeout => GetOrRegisterTestProperty<int>(nameof(Timeout));
+    public static TestProperty Timeout => GetOrRegisterTestProperty<double>(nameof(Timeout));
     
     public static TestProperty NotInParallelConstraintKey =>
         GetOrRegisterTestProperty<string?>(nameof(NotInParallelConstraintKey));
