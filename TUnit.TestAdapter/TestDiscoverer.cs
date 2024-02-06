@@ -23,9 +23,9 @@ public class TestDiscoverer : ITestDiscoverer
         var testCollector = BuildServices(discoveryContext, logger)
             .GetRequiredService<TestCollector>();
 
-        var assembliesAndTests = testCollector.TestsFromSources(sources);
+        var tests = testCollector.TestsFromSources(sources);
         
-        foreach (var test in assembliesAndTests.Values)
+        foreach (var test in tests)
         {
             logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.DisplayName);
             discoverySink.SendTestCase(test.ToTestCase());

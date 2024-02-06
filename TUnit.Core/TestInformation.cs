@@ -1,25 +1,26 @@
-﻿namespace TUnit.Core;
+﻿using System.Reflection;
+
+namespace TUnit.Core;
 
 public record TestInformation
 {
-    private readonly TestDetails _testDetails;
-
-    internal TestInformation(TestDetails testDetails, object? classInstance)
+    internal TestInformation()
     {
-        _testDetails = testDetails;
-        ClassInstance = classInstance;
     }
-
-    public string TestName => _testDetails.TestName;
     
-    public object?[]? TestArguments => _testDetails.ArgumentValues;
+    public required string TestName { get; init; }
     
-    public List<string> Categories => _testDetails.Categories;
+    public required object?[]? TestMethodArguments { get; init; }
+    public required object?[]? TestClassArguments { get; init; }
     
-    public Type ClassType => _testDetails.ClassType;
-    public object? ClassInstance { get; }
+    public required List<string> Categories { get; init; }
     
-    public int RepeatCount => _testDetails.RepeatCount;
-    public int RetryCount => _testDetails.RetryCount;
-    public int CurrentExecutionCount => _testDetails.CurrentExecutionCount;
+    public required MethodInfo MethodInfo { get; init; }
+    public required Type ClassType { get; init; }
+    public required object? ClassInstance { get; init; }
+    
+    public required int RepeatCount { get; init; }
+    public required int RetryCount { get; init; }
+    public int CurrentExecutionCount { get; internal set; }
+    public required TimeSpan Timeout { get; set; }
 }

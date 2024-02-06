@@ -264,7 +264,7 @@ public class ConsoleInterceptor : TextWriter
         return InnerWriter.WriteAsync(buffer, index, count);
     }
 
-    public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new CancellationToken())
+    public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
     {
         return InnerWriter.WriteAsync(buffer, cancellationToken);
     }
@@ -274,7 +274,7 @@ public class ConsoleInterceptor : TextWriter
         return InnerWriter.WriteAsync(value);
     }
 
-    public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new CancellationToken())
+    public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new())
     {
         return InnerWriter.WriteAsync(value, cancellationToken);
     }
@@ -299,7 +299,7 @@ public class ConsoleInterceptor : TextWriter
         return InnerWriter.WriteLineAsync(buffer, index, count);
     }
 
-    public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new CancellationToken())
+    public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
     {
         return InnerWriter.WriteLineAsync(buffer, cancellationToken);
     }
@@ -309,7 +309,7 @@ public class ConsoleInterceptor : TextWriter
         return InnerWriter.WriteLineAsync(value);
     }
 
-    public override Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new CancellationToken())
+    public override Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
     {
         return InnerWriter.WriteLineAsync(value, cancellationToken);
     }

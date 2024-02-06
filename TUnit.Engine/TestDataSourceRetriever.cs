@@ -5,26 +5,44 @@ namespace TUnit.Engine;
 
 public class TestDataSourceRetriever(MethodInvoker methodInvoker)
 {
-    public object?[]? GetTestDataSourceArguments(MethodInfo methodInfo,
-        TestDataSourceAttribute testDataSourceAttribute, Type[] allClasses)
+    public IEnumerable<object?[]?> GetTestDataSourceArguments(MethodInfo methodInfo)
     {
-        // Class name and method name
-        var className = testDataSourceAttribute.ClassNameProvidingDataSource ?? methodInfo.DeclaringType!.FullName!;
-        var methodName = testDataSourceAttribute.MethodNameProvidingDataSource;
-            
-        return GetTestDataSourceArguments(className, methodName, allClasses);
+        var testDataSourceAttributes = methodInfo.GetCustomAttributes<TestDataSourceAttribute>().ToList();
+
+        if (!testDataSourceAttributes.Any())
+        {
+            yield return null;
+            yield break;
+        }
+        
+        foreach (var testDataSourceAttribute in testDataSourceAttributes)
+        {
+            yield return GetTestDataSourceArguments(methodInfo.DeclaringType!, testDataSourceAttribute);
+        }
     }
     
-    public object?[]? GetTestDataSourceArguments(
-        string className,
-        string methodName,
-        Type[] allClasses
-    )
+    public IEnumerable<object?[]?> GetTestDataSourceArguments(Type type)
     {
-        var @class = allClasses.FirstOrDefault(x => x.FullName == className)
-                     ?? allClasses.First(x => x.Name == className);
+        var testDataSourceAttributes = type.GetCustomAttributes<TestDataSourceAttribute>().ToList();
 
-        return GetTestDataSourceArguments(@class, methodName);
+        if (!testDataSourceAttributes.Any())
+        {
+            yield return null;
+            yield break;
+        }
+        
+        foreach (var testDataSourceAttribute in testDataSourceAttributes)
+        {
+            yield return GetTestDataSourceArguments(type, testDataSourceAttribute);
+        }
+    }
+ 
+    public object?[]? GetTestDataSourceArguments(Type fallbackType, TestDataSourceAttribute testDataSourceAttribute)
+    {
+        var classType = testDataSourceAttribute.ClassProvidingDataSource ?? fallbackType;
+        var methodName = testDataSourceAttribute.MethodNameProvidingDataSource;
+            
+        return GetTestDataSourceArguments(classType, methodName);
     }
     
     public object?[]? GetTestDataSourceArguments(

@@ -1,6 +1,4 @@
-﻿using TUnit.TestAdapter.Constants;
-
-namespace TUnit.TestAdapter;
+﻿namespace TUnit.TestAdapter;
 
 public record Filter
 {
@@ -18,7 +16,7 @@ public record Filter
         {
             return;
         }
-        
+
         foreach (var value in rawValue.Split(','))
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -27,26 +25,30 @@ public record Filter
             }
 
             IsEmpty = false;
-            
-            switch (filterName)
-            {
-                case TestAdapterConstants.Filters.TestName:
-                    RunnableTestNames.Add(value);
-                    continue;
-                case TestAdapterConstants.Filters.TestClass:
-                    if (value.Contains('.'))
-                    {
-                        RunnableFullyQualifiedClasses.Add(value);
-                    }
-                    else
-                    {
-                        RunnableClasses.Add(value);
-                    }
 
-                    continue;
-                case TestAdapterConstants.Filters.Category:
-                    RunnableCategories.Add(value);
-                    continue;
+            if (string.Equals(filterName, TUnitTestProperties.TestName.Id,
+                    StringComparison.InvariantCultureIgnoreCase))
+            {
+                RunnableTestNames.Add(value);
+            }
+
+            if (string.Equals(filterName, TUnitTestProperties.TestClass.Id,
+                    StringComparison.InvariantCultureIgnoreCase))
+            {
+                var collection = value.Contains('.') ? RunnableFullyQualifiedClasses : RunnableClasses;
+                collection.Add(value);
+            }
+
+            if (string.Equals(filterName, TUnitTestProperties.Category.Id,
+                    StringComparison.InvariantCultureIgnoreCase))
+            {
+                RunnableCategories.Add(value);
+            }
+            
+            if (string.Equals(filterName, TUnitTestProperties.NotCategory.Id,
+                    StringComparison.InvariantCultureIgnoreCase))
+            {
+                BannedCategories.Add(value);
             }
         }
     }

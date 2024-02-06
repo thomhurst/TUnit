@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-internal record TypeInformation(AssemblyWithSource Assembly)
+internal record TypeInformation(Assembly Assembly)
 {
-    public Type[] Types { get; } = Assembly.Assembly.GetTypes();
+    public Type[] Types { get; } = Assembly.GetTypes();
 }

@@ -7,7 +7,8 @@ internal record TestDetails
     public TestDetails(MethodInfo methodInfo,
         Type classType,
         SourceLocation sourceLocation,
-        object?[]? arguments, 
+        object?[]? methodArguments, 
+        object?[]? classArguments, 
         int count)
     {
         MethodInfo = methodInfo;
@@ -15,8 +16,9 @@ internal record TestDetails
         SourceLocation = sourceLocation;
         Count = count;
 
-        ParameterTypes = arguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
-        ArgumentValues = arguments;
+        ParameterTypes = methodArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
+        MethodArgumentValues = methodArguments;
+        ClassArgumentValues = classArguments;
         
         TestName = methodInfo.Name;
         DisplayName = methodInfo.Name + GetArgumentValues() + GetCountInBrackets();
@@ -127,12 +129,12 @@ internal record TestDetails
 
     private string GetArgumentValues()
     {
-        if (ArgumentValues == null)
+        if (MethodArgumentValues == null)
         {
             return string.Empty;
         }
         
-        return $"({string.Join(',', ArgumentValues.Select(StringifyArgument))})";
+        return $"({string.Join(',', MethodArgumentValues.Select(StringifyArgument))})";
     }
     
     public string UniqueId { get; }
@@ -157,22 +159,14 @@ internal record TestDetails
     public int MinLineNumber { get; }
     public int MaxLineNumber { get; }
     public Type[]? ParameterTypes { get; }
-    public object?[]? ArgumentValues { get; }
+    public object?[]? MethodArgumentValues { get; }
+    public object?[]? ClassArgumentValues { get; }
     public SourceLocation SourceLocation { get; }
     public int Count { get; }
 
     public string? SkipReason { get; }
     public bool IsSkipped => !string.IsNullOrEmpty(SkipReason);
     public string DisplayName { get; }
-
-    private readonly TaskCompletionSource<TUnitTestResult> _completionSource = new();
-    public Task<TUnitTestResult> GetResultAsync() => _completionSource.Task;
-
-    public TUnitTestResultWithDetails SetResult(TUnitTestResultWithDetails unitTestResult)
-    {
-        _completionSource.SetResult(unitTestResult);
-        return unitTestResult;
-    }
 
     public static string GetParameterTypes(Type[]? types)
     {

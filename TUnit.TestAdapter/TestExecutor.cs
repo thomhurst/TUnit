@@ -2,7 +2,6 @@
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.TestAdapter.Constants;
 using TUnit.TestAdapter.Extensions;
@@ -26,13 +25,9 @@ public class TestExecutor : ITestExecutor2
         }
 
         var serviceProvider = BuildServices(runContext, frameworkHandle);
-        
-        var testsWithTestCases = 
-            serviceProvider.GetRequiredService<TestCollector>()
-                .TestsFromTestCases(testCases);
             
         serviceProvider.GetRequiredService<AsyncTestRunExecutor>()
-            .RunInAsyncContext(Filter(testsWithTestCases, serviceProvider))
+            .RunInAsyncContext(Filter(testCases, serviceProvider))
             .GetAwaiter()
             .GetResult();
     }
@@ -41,34 +36,27 @@ public class TestExecutor : ITestExecutor2
     {
         if (sources is null)
         {
+            frameworkHandle?.SendMessage(TestMessageLevel.Warning, "No sources found");
             return;
         }
         
         var serviceProvider = BuildServices(runContext, frameworkHandle);
 
-        var assembliesAndTestsFromSources = serviceProvider.GetRequiredService<TestCollector>()
-            .TestsFromSources(sources);
-        
-        var tests = assembliesAndTestsFromSources
-            .Values
-            .Select(x => new TestWithTestCase(x, x.ToTestCase()));
+        var tests = serviceProvider.GetRequiredService<TestCollector>()
+            .TestsFromSources(sources)
+            .Select(x => x.ToTestCase());
         
         serviceProvider.GetRequiredService<AsyncTestRunExecutor>()
-            .RunInAsyncContext(Filter(new AssembliesAnd<TestWithTestCase>(assembliesAndTestsFromSources.Assemblies, tests), serviceProvider))
+            .RunInAsyncContext(Filter(tests, serviceProvider))
             .GetAwaiter()
             .GetResult();
-        
     }
 
-    private AssembliesAnd<TestWithTestCase> Filter(AssembliesAnd<TestWithTestCase> assembliesAnd, IServiceProvider serviceProvider)
+    private IEnumerable<TestCase> Filter(IEnumerable<TestCase> tests, IServiceProvider serviceProvider)
     {
         var testFilterProvider = serviceProvider.GetRequiredService<TUnitTestFilterProvider>();
         
-        var tests = assembliesAnd.Values;
-
-        var filteredTests = testFilterProvider.FilterTests(tests);
-
-        return assembliesAnd with { Values = filteredTests };
+        return testFilterProvider.FilterTests(tests);
     }
 
     public void Cancel()

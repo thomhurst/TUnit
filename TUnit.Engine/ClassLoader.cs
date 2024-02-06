@@ -1,13 +1,12 @@
 ﻿using System.Reflection;
-using TUnit.Core;
 
 namespace TUnit.Engine;
 
 internal class ClassLoader
 {
-    public IEnumerable<Type> GetAllTypes(AssemblyWithSource[] assemblies)
+    public IEnumerable<Type> GetAllTypes(Assembly[] assemblies)
     {
-        return assemblies.SelectMany(x => LoadTypes(x.Assembly));
+        return assemblies.SelectMany(LoadTypes);
     }
 
     private static IEnumerable<Type> LoadTypes(Assembly assembly)

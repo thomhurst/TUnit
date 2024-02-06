@@ -2,13 +2,13 @@
 
 public class TimeoutException : TUnitException
 {
-    internal TimeoutException(TestDetails testDetails) : base(GetMessage(testDetails))
+    internal TimeoutException(TestInformation testInformation) : base(GetMessage(testInformation))
     {
         
     }
 
-    private static string GetMessage(TestDetails testDetails)
+    private static string GetMessage(TestInformation testInformation)
     {
-        return $"The test timed out after {testDetails.Timeout.Milliseconds} milliseconds";
+        return $"The test timed out after {testInformation.Timeout.Milliseconds} milliseconds";
     }
 }

@@ -1,19 +1,37 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using TUnit.Core;
-using TUnit.TestAdapter.Constants;
 
 namespace TUnit.TestAdapter;
 
 internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger messageLogger)
 {
-    public IEnumerable<TestWithTestCase> FilterTests(IEnumerable<TestWithTestCase> tests)
+    private static readonly Dictionary<string, TestProperty> SupportedProperties 
+        = new(StringComparer.OrdinalIgnoreCase);
+
+    static TUnitTestFilterProvider()
     {
-        var filterExpression = runContext.GetTestCaseFilter(null, _ => null);
+        SupportedProperties[nameof(TUnitTestProperties.TestName)] =
+            TUnitTestProperties.TestName;
+        
+        SupportedProperties[nameof(TUnitTestProperties.TestClass)] =
+            TUnitTestProperties.TestClass;
+        
+        SupportedProperties[nameof(TUnitTestProperties.Category)] =
+            TUnitTestProperties.Category;
+        
+        SupportedProperties[nameof(TUnitTestProperties.NotCategory)] =
+            TUnitTestProperties.NotCategory;
+    }
+    
+    public IEnumerable<TestCase> FilterTests(IEnumerable<TestCase> tests)
+    {
+        var filterExpression = runContext.GetTestCaseFilter(SupportedProperties.Keys, 
+            propertyName => SupportedProperties.GetValueOrDefault(propertyName));
 
         messageLogger.SendMessage(TestMessageLevel.Informational, $"TestCaseFilterValue is: {filterExpression?.TestCaseFilterValue}");
         
-        if (filterExpression is null)
+        if (string.IsNullOrWhiteSpace(filterExpression?.TestCaseFilterValue))
         {
             foreach (var testWithTestCase in tests)
             {
@@ -23,21 +41,18 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
             yield break;
         }
         
-        foreach (var testWithTestCase in tests)
+        var filter = ParseFilter(filterExpression.TestCaseFilterValue);
+        
+        foreach (var test in tests)
         {
-            var (testDetails, _) = testWithTestCase;
-
-            if (string.IsNullOrWhiteSpace(filterExpression.TestCaseFilterValue))
+            if (
+                // filterExpression.MatchTestCase(test, propertyName =>
+                //     SupportedProperties.TryGetValue(propertyName, out var testProperty)
+                //         && test.GetPropertyValue(testProperty) != null)
+                TestMatchesFilter(test, filter)
+               )
             {
-                yield return testWithTestCase;
-                continue;
-            }
-            
-            var filter = ParseFilter(filterExpression.TestCaseFilterValue);
-
-            if (TestMatchesFilter(testDetails, filter))
-            {
-                yield return testWithTestCase;
+                yield return test;
             }
         }
     }
@@ -53,7 +68,7 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
             var filterValue = filterSplit.ElementAtOrDefault(1);
 
             if (string.IsNullOrWhiteSpace(filterName) || 
-                !TestAdapterConstants.Filters.KnownFilters.Contains(filterName, StringComparer.InvariantCultureIgnoreCase))
+                !SupportedProperties.Keys.Contains(filterName, StringComparer.InvariantCultureIgnoreCase))
             {
                 continue;
             }
@@ -64,50 +79,54 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
         return filter;
     }
 
-    private bool TestMatchesFilter(TestDetails test, Filter filter)
+    private bool TestMatchesFilter(TestCase test, Filter filter)
     {
         if (filter.IsEmpty)
         {
             return true;
         }
-        
-        if (filter.BannedCategories.Intersect(test.Categories).Any())
+
+        if (filter.BannedCategories.Intersect(
+                test.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>()),
+                StringComparer.InvariantCultureIgnoreCase
+            ).Any())
         {
             return false;
         }
 
         return AllowedTestName(test, filter)
-            && AllowedCategory(test, filter)
-            && AllowedClass(test, filter);
+               && AllowedCategory(test, filter)
+               && AllowedClass(test, filter);
     }
 
-    private static bool AllowedTestName(TestDetails test, Filter filter)
+    private static bool AllowedTestName(TestCase test, Filter filter)
     {
         return !filter.RunnableTestNames.Any() ||
-               filter.RunnableTestNames.Contains(test.TestName, StringComparer.InvariantCultureIgnoreCase);
+               filter.RunnableTestNames.Contains(test.GetPropertyValue(TUnitTestProperties.TestName, "#"), StringComparer.InvariantCultureIgnoreCase);
     }
     
-    private static bool AllowedCategory(TestDetails test, Filter filter)
+    private static bool AllowedCategory(TestCase test, Filter filter)
     {
         return !filter.RunnableCategories.Any() ||
-               filter.RunnableCategories.Intersect(test.Categories, StringComparer.InvariantCultureIgnoreCase).Any();
+               filter.RunnableCategories.Intersect(test.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>()), StringComparer.InvariantCultureIgnoreCase).Any();
     }
     
-    private static bool AllowedClass(TestDetails test, Filter filter)
+    private static bool AllowedClass(TestCase test, Filter filter)
     {
         return AllowedSimpleClass(test, filter)
             && AllowedFullyQualifiedClass(test, filter);
     }
     
-    private static bool AllowedSimpleClass(TestDetails test, Filter filter)
+    private static bool AllowedSimpleClass(TestCase test, Filter filter)
     {
         return !filter.RunnableClasses.Any() ||
-               filter.RunnableClasses.Contains(test.ClassType.Name, StringComparer.InvariantCultureIgnoreCase);
+               filter.RunnableClasses.Contains(test.GetPropertyValue(TUnitTestProperties.TestClass, "#"), StringComparer.InvariantCultureIgnoreCase);
     }
     
-    private static bool AllowedFullyQualifiedClass(TestDetails test, Filter filter)
+    private static bool AllowedFullyQualifiedClass(TestCase test, Filter filter)
     {
+        var className = test.GetPropertyValue(TUnitTestProperties.TestClass, "#");
         return !filter.RunnableFullyQualifiedClasses.Any() ||
-               filter.RunnableFullyQualifiedClasses.Contains(test.ClassType.FullName, StringComparer.InvariantCultureIgnoreCase);
+               filter.RunnableFullyQualifiedClasses.Any(x => string.Equals(x, className, StringComparison.InvariantCultureIgnoreCase));
     }
 }
