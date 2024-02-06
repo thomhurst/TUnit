@@ -46,6 +46,12 @@ public class AssertConditionOr<TActual, TAnd, TOr> : BaseAssertCondition<TActual
 
         _condition1 = condition1;
         _condition2 = condition2;
+        
+        // We store assert conditions in the test context for use with Assert.Multiple
+        // However, we won't be asserting them individually if we've combined them with and/or statements
+        // As this handler will be registered and will control invoking them
+        TestContext.Current.RemoveObject(condition1);
+        TestContext.Current.RemoveObject(condition2);
     }
 
     protected internal override string Message => $"{_condition1.Message} & {_condition2.Message}";

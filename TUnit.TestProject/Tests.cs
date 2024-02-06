@@ -274,6 +274,19 @@ public class Tests
         await Assert.That(item).Is.Not.Null().And.Is.Not.Empty();
     }
 
+    [Test]
+    public async Task Assert_Multiple_With_Or_Conditions()
+    {
+        var one = "";
+        var two = "Foo bar!";
+        
+        await Assert.Multiple(() =>
+        {
+            Assert.That(one).Is.Null().Or.Is.Empty();
+            Assert.That(two).Is.EqualTo("Foo bar").Or.Is.Null();
+        });
+    }
+
     public static int One() => 1;
     public static int Two() => 2;
 }
