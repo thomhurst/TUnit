@@ -1,6 +1,4 @@
-﻿using TUnit.TestAdapter.Constants;
-
-namespace TUnit.TestAdapter;
+﻿namespace TUnit.TestAdapter;
 
 public record Filter
 {

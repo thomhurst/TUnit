@@ -17,14 +17,14 @@ internal static class TestExtensions
             ClassType = classType,
             ClassInstance = classInstance,
             Categories = testCase.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>()).ToList(),
-            TestClassArguments = testCase.GetPropertyValue(TUnitTestProperties.ClassArguments, null as object?[]),
-            TestMethodArguments = testCase.GetPropertyValue(TUnitTestProperties.MethodArguments, null as object?[]),
+            TestClassArguments = testCase.GetPropertyValue(TUnitTestProperties.ClassArguments, null as string).DeserializeArgumentsSafely(),
+            TestMethodArguments = testCase.GetPropertyValue(TUnitTestProperties.MethodArguments, null as string).DeserializeArgumentsSafely(),
             Timeout = TimeSpan.FromMilliseconds(testCase.GetPropertyValue(TUnitTestProperties.Timeout, -1d)),
             RepeatCount = testCase.GetPropertyValue(TUnitTestProperties.RepeatCount, 0),
             RetryCount = testCase.GetPropertyValue(TUnitTestProperties.RetryCount, 0),
         };
     }
-    
+
     public static TestCase ToTestCase(this TestDetails testDetails)
     {
         var testCase = new TestCase(testDetails.UniqueId, TestAdapterConstants.ExecutorUri, testDetails.Source)
@@ -54,8 +54,8 @@ internal static class TestExtensions
         testCase.SetPropertyValue(TUnitTestProperties.ManagedMethod, testDetails.MethodInfo.Name + TestDetails.GetParameterTypes(testDetails.ParameterTypes));
         
         testCase.SetPropertyValue(TUnitTestProperties.MethodParameterTypeNames, testDetails.ParameterTypes?.Select(x => x.FullName).ToArray());
-        testCase.SetPropertyValue(TUnitTestProperties.MethodArguments, JsonSerializer.Serialize(testDetails.MethodArgumentValues));
-        testCase.SetPropertyValue(TUnitTestProperties.ClassArguments, JsonSerializer.Serialize(testDetails.ClassArgumentValues));
+        testCase.SetPropertyValue(TUnitTestProperties.MethodArguments, testDetails.MethodArgumentValues.SerializeArgumentsSafely());
+        testCase.SetPropertyValue(TUnitTestProperties.ClassArguments, testDetails.ClassArgumentValues.SerializeArgumentsSafely());
         
         return testCase;
     }

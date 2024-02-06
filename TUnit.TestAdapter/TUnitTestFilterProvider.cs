@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using TUnit.TestAdapter.Constants;
 
 namespace TUnit.TestAdapter;
 
@@ -46,11 +45,11 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
         
         foreach (var test in tests)
         {
-            if (filterExpression.MatchTestCase(test, propertyName =>
-                    !SupportedProperties.TryGetValue(propertyName, out var testProperty)
-                        ? false
-                        : test.GetPropertyValue(testProperty))
-                && TestMatchesFilter(test, filter)
+            if (
+                // filterExpression.MatchTestCase(test, propertyName =>
+                //     SupportedProperties.TryGetValue(propertyName, out var testProperty)
+                //         && test.GetPropertyValue(testProperty) != null)
+                TestMatchesFilter(test, filter)
                )
             {
                 yield return test;
