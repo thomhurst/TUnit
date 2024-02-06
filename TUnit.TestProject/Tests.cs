@@ -1,3 +1,4 @@
+using System.Xml.XPath;
 using TUnit.Assertions;
 using TUnit.Core;
 
@@ -255,6 +256,22 @@ public class Tests
             Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
             Assert.That(list).Has.Count().EqualTo(5);
         });
+    }
+    
+    [Test]
+    public async Task NotNull()
+    {
+        string? item = null;
+
+        await Assert.That(item).Is.Not.Null().And.Is.EqualTo("");
+    }
+    
+    [Test]
+    public async Task NotNull2()
+    {
+        var item = "";
+
+        await Assert.That(item).Is.Not.Null().And.Is.EqualTo("");
     }
 
     public static int One() => 1;
