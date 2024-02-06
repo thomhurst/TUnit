@@ -23,7 +23,7 @@ internal record TestDetails
         ClassName = ClassType.Name;
         FullyQualifiedClassName = ClassType.FullName!;
         Assembly = ClassType.Assembly;
-        Source = ClassType.Assembly.Location;
+        Source = sourceLocation.RawSource;
 
         var methodAndClassAttributes = methodInfo.CustomAttributes
             .Concat(ClassType.CustomAttributes)

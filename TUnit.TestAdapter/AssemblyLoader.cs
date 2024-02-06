@@ -1,20 +1,24 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
+using TUnit.Core;
+using TUnit.TestAdapter.Models;
 
 namespace TUnit.TestAdapter;
 
 public class AssemblyLoader
 {
-    internal Assembly? LoadByPath(string assemblyPath)
+    internal AssemblyWithSource? LoadByPath(string source)
     {
-        if (!File.Exists(assemblyPath))
+        var rootedSource = Path.IsPathRooted(source) ? source : Path.Combine(Directory.GetCurrentDirectory(), source);
+        
+        if (!File.Exists(rootedSource))
         {
             return null;
         }
 
         try
         {
-            return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+            return new AssemblyWithSource(source, rootedSource, AssemblyLoadContext.Default.LoadFromAssemblyPath(rootedSource));
         }
         catch
         {

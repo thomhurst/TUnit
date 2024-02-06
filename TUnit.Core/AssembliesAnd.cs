@@ -2,4 +2,4 @@
 
 namespace TUnit.Core;
 
-public record AssembliesAnd<T>(Assembly[] Assemblies, IEnumerable<T> Values);
+internal record AssembliesAnd<T>(AssemblyWithSource[] Assemblies, IEnumerable<T> Values);

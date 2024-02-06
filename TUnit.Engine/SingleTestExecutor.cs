@@ -125,6 +125,7 @@ internal class SingleTestExecutor
 
     private async Task ExecuteWithRetries(TestContext testContext, TestDetails testDetails, object? @class)
     {
+        // +1 for the original non-retry
         for (var i = 0; i < testDetails.RetryCount + 1; i++)
         {
             try
@@ -165,6 +166,7 @@ internal class SingleTestExecutor
         catch
         {
             testLevelCancellationTokenSource.Cancel();
+            testLevelCancellationTokenSource.Dispose();
             throw;
         }
     }

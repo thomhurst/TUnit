@@ -1,3 +1,3 @@
 ﻿namespace TUnit.Core;
 
-public record SourceLocation(string? FileName, int MinLineNumber, int MaxLineNumber);
+public record SourceLocation(string RawSource, string? FileName, int MinLineNumber, int MaxLineNumber);

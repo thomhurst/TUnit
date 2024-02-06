@@ -45,8 +45,7 @@ public class MethodInvoker
         catch (TargetInvocationException e)
         {
             ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
-            
-            return null;
+            throw;
         }
     }
 }

@@ -11,7 +11,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute), typeof(TestDataSourceAttribute)];
 
-    public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation, Assembly[] allAssemblies)
+    public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation, AssemblyWithSource[] allAssemblies)
     {
         var methods = typeInformation.Types.SelectMany(x => x.GetMethods());
 
@@ -23,7 +23,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
             }
             
             var sourceLocation = sourceLocationHelper
-                .GetSourceLocation(typeInformation.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
+                .GetSourceLocation(typeInformation.Assembly.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
 
             var allClasses = classLoader.GetAllTypes(allAssemblies).ToArray();
             

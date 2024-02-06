@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using TUnit.Core;
+using TUnit.TestAdapter.Models;
 
 namespace TUnit.TestAdapter;
 
@@ -12,13 +13,13 @@ internal class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoa
         var testCasesArray = testCases.ToArray();
         var allAssemblies = testCasesArray
             .Select(x => assemblyLoader.LoadByPath(x.Source))
-            .OfType<Assembly>()
+            .OfType<AssemblyWithSource>()
             .ToArray();
         
         return new AssembliesAnd<TestWithTestCase>(allAssemblies, TestWithTestCaseCore(testCasesArray, allAssemblies));
     }
 
-    private IEnumerable<TestWithTestCase> TestWithTestCaseCore(TestCase[] testCasesArray, Assembly[] allAssemblies)
+    private IEnumerable<TestWithTestCase> TestWithTestCaseCore(TestCase[] testCasesArray, AssemblyWithSource[] allAssemblies)
     {
         foreach (var testCase in testCasesArray)
         {
@@ -68,9 +69,8 @@ internal class TestCollector(AssemblyLoader assemblyLoader, TestsLoader testsLoa
     public AssembliesAnd<TestDetails> TestsFromSources(IEnumerable<string> sources)
     {
         var allAssemblies = sources
-            .Select(source => Path.IsPathRooted(source) ? source : Path.Combine(Directory.GetCurrentDirectory(), source))
             .Select(assemblyLoader.LoadByPath)
-            .OfType<Assembly>()
+            .OfType<AssemblyWithSource>()
             .ToArray();
         
         var tests = allAssemblies

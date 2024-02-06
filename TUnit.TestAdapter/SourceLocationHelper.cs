@@ -6,7 +6,7 @@ namespace TUnit.TestAdapter;
 
 public class SourceLocationHelper(IMessageLogger logger) : IDisposable
 {
-    private static readonly SourceLocation EmptySourceLocation = new(null, 0, 0);
+    private static SourceLocation GetEmptySourceLocation(string source) => new(source, null, 0, 0);
     
     private readonly ReflectionMetadataProvider _metadataProvider = new();
     private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new (StringComparer.OrdinalIgnoreCase);
@@ -22,17 +22,17 @@ public class SourceLocationHelper(IMessageLogger logger) : IDisposable
                 logger.SendMessage(TestMessageLevel.Error, $"No navigation data found for {className}.{methodName}");
                 logger.SendMessage(TestMessageLevel.Error, $"Assembly: {assemblyLocation}");
 
-                return EmptySourceLocation;
+                return GetEmptySourceLocation(assemblyLocation);
             }
             
-            return new SourceLocation(navigationData.FileName, navigationData.MinLineNumber, navigationData.MaxLineNumber);
+            return navigationData with { RawSource = assemblyLocation };
         }
         catch (Exception e)
         {
             logger.SendMessage(TestMessageLevel.Error, $"Error retrieving source location for {className}.{methodName}");
             logger.SendMessage(TestMessageLevel.Error, e.ToString());
             
-            return EmptySourceLocation;
+            return GetEmptySourceLocation(assemblyLocation);
         }
     }
     
@@ -86,7 +86,7 @@ public class SourceLocationHelper(IMessageLogger logger) : IDisposable
 
         return string.IsNullOrEmpty(data?.FileName) 
             ? null 
-            : new SourceLocation(data.FileName, data.MinLineNumber, data.MaxLineNumber);
+            : new SourceLocation(assemblyPath, data.FileName, data.MinLineNumber, data.MaxLineNumber);
     }
 
     public void Dispose()
