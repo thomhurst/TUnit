@@ -23,13 +23,13 @@ public class ExceptionMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr
 
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison)
     {
-        return Wrap(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder, expected, (_, _, exception) =>
+        return Wrap(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder, expected, (actual, _, _) =>
             {
-                ArgumentNullException.ThrowIfNull(exception);
-                return string.Equals(exception.Message, expected, stringComparison);
+                ArgumentNullException.ThrowIfNull(actual);
+                return string.Equals(actual.Message, expected, stringComparison);
             },
-            (_, exception) =>
-                $"Exception had a message of '{exception?.Message}' instead of '{expected}'")
+            (_, actual) =>
+                $"Exception had a message of '{actual?.Message}' instead of '{expected}'")
         );
     }
 }
