@@ -31,7 +31,7 @@ internal class TestClassCreator(CacheableAssemblyLoader assemblyLoader)
     {
         try
         {
-            return Activator.CreateInstance(classType, BindingFlags.Default, null, arguments)!;
+            return Activator.CreateInstance(classType, arguments)!;
         }
         catch (Exception e)
         {
