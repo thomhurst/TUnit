@@ -17,9 +17,7 @@ public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
     
     public BaseAssertCondition<TActual, TAnd, TOr> Null()
     {
-#pragma warning disable CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
-        return Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder!));
-#pragma warning restore CS8631 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match constraint type.
+        return Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder));
     }
     
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected) => Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder, expected),
