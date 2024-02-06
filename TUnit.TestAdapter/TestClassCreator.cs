@@ -35,7 +35,10 @@ internal class TestClassCreator(CacheableAssemblyLoader assemblyLoader)
         }
         catch (Exception e)
         {
-            throw new Exception("Cannot create an instance of the test class. Is there a public parameterless constructor?", e);
+            throw new Exception($"""
+                                Cannot create an instance of the test class.
+                                Is there a public parameterless constructor?
+                                """, e);
         }
     }
 }

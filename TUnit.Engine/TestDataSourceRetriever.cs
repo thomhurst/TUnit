@@ -11,7 +11,7 @@ public class TestDataSourceRetriever(MethodInvoker methodInvoker)
 
         if (!testDataSourceAttributes.Any())
         {
-            yield return [null];
+            yield return null;
             yield break;
         }
         
@@ -27,7 +27,7 @@ public class TestDataSourceRetriever(MethodInvoker methodInvoker)
 
         if (!testDataSourceAttributes.Any())
         {
-            yield return [null];
+            yield return null;
             yield break;
         }
         
