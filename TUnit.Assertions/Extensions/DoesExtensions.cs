@@ -73,4 +73,19 @@ public static class DoesExtensions
             },
             (actual, _) => $"\"{actual}\" does not end with \"{expected}\""));
     }
+    
+    public static BaseAssertCondition<string, TAnd, TOr> Match<TAnd, TOr>(this Does<string, TAnd, TOr> does, string expected, StringComparison stringComparison)
+        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    {
+        return does.Wrap(new DelegateAssertCondition<string, string, TAnd, TOr>(
+            does.AssertionBuilder, 
+            expected,
+            (actual, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(actual);
+                return actual.EndsWith(expected, stringComparison);
+            },
+            (actual, _) => $"\"{actual}\" does not end with \"{expected}\""));
+    }
 }
