@@ -162,8 +162,6 @@ internal class SingleTestExecutor
 
     private async Task ExecuteCore(TestContext testContext, TestInformation testInformation, object? @class)
     {
-        _messageLogger.SendMessage(TestMessageLevel.Informational, $"{testInformation.TestName} starting at {DateTime.Now}...");
-
         testInformation.CurrentExecutionCount++;
         
         await ExecuteSetUps(@class, testInformation.ClassType);
@@ -187,10 +185,6 @@ internal class SingleTestExecutor
             testLevelCancellationTokenSource.Cancel();
             testLevelCancellationTokenSource.Dispose();
             throw;
-        }
-        finally
-        {
-            _messageLogger.SendMessage(TestMessageLevel.Informational, $"{testInformation.TestName} finished at {DateTime.Now}.");
         }
     }
 
