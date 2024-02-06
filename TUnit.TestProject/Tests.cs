@@ -287,6 +287,29 @@ public class Tests
         });
     }
 
+    private int _retryCount = 0;
+
+    [Test]
+    public async Task Throws5()
+    {
+        Console.WriteLine(_retryCount);
+        throw new Exception();
+    }
+    
+    [Test]
+    public async Task Throws6()
+    {
+        Console.WriteLine(_retryCount);
+        throw new Exception();
+    }
+    
+    [Test]
+    public void Throws7()
+    {
+        Console.WriteLine(_retryCount);
+        throw new Exception();
+    }
+
     public static int One() => 1;
     public static int Two() => 2;
 }

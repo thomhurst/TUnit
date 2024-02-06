@@ -32,7 +32,7 @@ public record Filter
             {
                 case TestAdapterConstants.Filters.TestName:
                     RunnableTestNames.Add(value);
-                    return;
+                    continue;
                 case TestAdapterConstants.Filters.TestClass:
                     if (value.Contains('.'))
                     {
@@ -43,10 +43,10 @@ public record Filter
                         RunnableClasses.Add(value);
                     }
 
-                    return;
+                    continue;
                 case TestAdapterConstants.Filters.Category:
                     RunnableCategories.Add(value);
-                    return;
+                    continue;
             }
         }
     }
