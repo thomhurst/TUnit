@@ -1,11 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.TestAdapter.Extensions;
 using TUnit.TestAdapter.Models;
 
 namespace TUnit.TestAdapter;
 
-internal class TestGrouper(IMessageLogger messageLogger)
+internal class TestGrouper
 {
     public GroupedTests OrganiseTests(IEnumerable<TestCase> testCases)
     {
@@ -35,7 +34,7 @@ internal class TestGrouper(IMessageLogger messageLogger)
             }
         }
 
-        var groupedTests = new GroupedTests
+        return new GroupedTests
         {
             Parallel = parallel,
             
@@ -52,9 +51,5 @@ internal class TestGrouper(IMessageLogger messageLogger)
                 .Select(x => x.Last())
                 .ToList()
         };
-        
-        messageLogger.SendMessage(TestMessageLevel.Informational, groupedTests.ToString());
-
-        return groupedTests;
     }
 }

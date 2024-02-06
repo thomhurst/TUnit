@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine;
@@ -15,18 +16,21 @@ internal class SingleTestExecutor
     private readonly TestClassCreator _testClassCreator;
     private readonly TestMethodRetriever _testMethodRetriever;
     private readonly Disposer _disposer;
+    private readonly IMessageLogger _messageLogger;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
     public SingleTestExecutor(MethodInvoker methodInvoker, 
         TestClassCreator testClassCreator,
         TestMethodRetriever testMethodRetriever,
         Disposer disposer,
+        IMessageLogger messageLogger,
         CancellationTokenSource cancellationTokenSource)
     {
         _methodInvoker = methodInvoker;
         _testClassCreator = testClassCreator;
         _testMethodRetriever = testMethodRetriever;
         _disposer = disposer;
+        _messageLogger = messageLogger;
         _cancellationTokenSource = cancellationTokenSource;
     }
     
@@ -35,9 +39,11 @@ internal class SingleTestExecutor
     public async Task<TUnitTestResult> ExecuteTest(TestCase testCase)
     {
         var start = DateTimeOffset.Now;
-
+        
         if (testCase.GetPropertyValue(TUnitTestProperties.IsSkipped, false))
         {
+            _messageLogger.SendMessage(TestMessageLevel.Informational, $"Skipping {testCase.DisplayName}...");
+
             return new TUnitTestResult
             {
                 Duration = TimeSpan.Zero,
@@ -51,7 +57,6 @@ internal class SingleTestExecutor
         
         object? classInstance = null;
         TestContext? testContext = null;
-        TestInformation? testInformation = null;
         try
         {
             await Task.Run(async () =>
@@ -60,7 +65,7 @@ internal class SingleTestExecutor
 
                 var methodInfo = _testMethodRetriever.GetTestMethod(classType, testCase);
 
-                testInformation = testCase.ToTestInformation(classType, classInstance, methodInfo);
+                var testInformation = testCase.ToTestInformation(classType, classInstance, methodInfo);
                 
                 testContext = new TestContext(testInformation);
                 TestContext.Current = testContext;
@@ -81,7 +86,7 @@ internal class SingleTestExecutor
                         throw new Exception(testContext.FailReason);
                     }
 
-                    if(testContext.SkipReason != null)
+                    if(testContext.SkipReason == null)
                     {
                         await ExecuteWithRetries(testContext, testInformation, classInstance);
                     }
@@ -149,12 +154,16 @@ internal class SingleTestExecutor
                 {
                     throw;
                 }
+                
+                _messageLogger.SendMessage(TestMessageLevel.Warning, $"{testInformation.TestName} failed, retrying...");
             }
         }
     }
 
     private async Task ExecuteCore(TestContext testContext, TestInformation testInformation, object? @class)
     {
+        _messageLogger.SendMessage(TestMessageLevel.Informational, $"{testInformation.TestName} starting at {DateTime.Now}...");
+
         testInformation.CurrentExecutionCount++;
         
         await ExecuteSetUps(@class, testInformation.ClassType);
@@ -179,11 +188,16 @@ internal class SingleTestExecutor
             testLevelCancellationTokenSource.Dispose();
             throw;
         }
+        finally
+        {
+            _messageLogger.SendMessage(TestMessageLevel.Informational, $"{testInformation.TestName} finished at {DateTime.Now}.");
+        }
     }
 
     private async Task ExecuteTestMethodWithTimeout(TestInformation testInformation, object? @class,
         CancellationTokenSource cancellationTokenSource)
     {
+        
         var methodResult = _methodInvoker.InvokeMethod(@class, testInformation.MethodInfo, BindingFlags.Default,
             testInformation.TestMethodArguments);
 
