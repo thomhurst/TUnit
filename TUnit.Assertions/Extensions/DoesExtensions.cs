@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.Text.RegularExpressions;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
@@ -74,18 +75,25 @@ public static class DoesExtensions
             (actual, _) => $"\"{actual}\" does not end with \"{expected}\""));
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Match<TAnd, TOr>(this Does<string, TAnd, TOr> does, string expected, StringComparison stringComparison)
+    public static BaseAssertCondition<string, TAnd, TOr> Match<TAnd, TOr>(this Does<string, TAnd, TOr> does, string regex)
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return does.Wrap(new DelegateAssertCondition<string, string, TAnd, TOr>(
+        return Match(does, new Regex(regex));
+    }
+    
+    public static BaseAssertCondition<string, TAnd, TOr> Match<TAnd, TOr>(this Does<string, TAnd, TOr> does, Regex regex)
+        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    {
+        return does.Wrap(new DelegateAssertCondition<string, Regex, TAnd, TOr>(
             does.AssertionBuilder, 
-            expected,
+            regex,
             (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
-                return actual.EndsWith(expected, stringComparison);
+                return regex.IsMatch(actual);
             },
-            (actual, _) => $"\"{actual}\" does not end with \"{expected}\""));
+            (actual, _) => $"The regex \"{regex}\" does not match with \"{actual}\""));
     }
 }
