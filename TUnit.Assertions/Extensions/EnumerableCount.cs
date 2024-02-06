@@ -25,7 +25,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 return GetCount(enumerable) == expected;
             },
             (enumerable, _) =>
-                $"{enumerable} has a expected of {GetCount(enumerable)} but expected to be equal to {expected}")
+                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {expected}")
         );
     }
 
@@ -36,7 +36,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 return GetCount(enumerable) == expected;
             },
             (enumerable, _) =>
-                $"{enumerable} has a expected of {GetCount(enumerable)} but expected to be equal to {0}")
+                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {0}")
         );
 
     public BaseAssertCondition<TActual, TAnd, TOr> GreaterThan(int expected)
@@ -50,7 +50,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 return GetCount(enumerable) > expected;
             },
             (enumerable, _) =>
-                $"{enumerable} has a expected of {GetCount(enumerable)} but expected to be greater than {expected}")
+                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than {expected}")
         );
     }
 
@@ -62,7 +62,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 return GetCount(enumerable) >= expected;
             },
             (enumerable, _) =>
-                $"{enumerable} has a expected of {GetCount(enumerable)} but expected to be greater than or equal to {expected}")
+                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than or equal to {expected}")
         );
     }
 
@@ -74,7 +74,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 return GetCount(enumerable) < expected;
             },
             (enumerable, _) =>
-                $"{enumerable} has a expected of {GetCount(enumerable)} but expected to be less than {expected}")
+                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than {expected}")
         );
     }
 
@@ -86,7 +86,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 return GetCount(enumerable) <= expected;
             },
             (enumerable, _) =>
-                $"{enumerable} has a expected of {GetCount(enumerable)} but expected to be less than or equal to {expected}")
+                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than or equal to {expected}")
         );
     }
 
