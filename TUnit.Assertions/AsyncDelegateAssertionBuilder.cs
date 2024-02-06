@@ -7,10 +7,10 @@ public class AsyncDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
 {
     private readonly Func<Task<TActual>> _function;
     
-    public Does<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Does => new(this!, ConnectorType.None, null);
-    public Is<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Is => new(this!, ConnectorType.None, null);
-    public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this!, ConnectorType.None, null);
-    public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this!, ConnectorType.None, null);
+    public Does<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Does => new(this, ConnectorType.None, null);
+    public Is<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Is => new(this, ConnectorType.None, null);
+    public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
+    public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
     internal AsyncDelegateAssertionBuilder(Func<Task<TActual>> function)
     {
