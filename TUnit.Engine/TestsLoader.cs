@@ -3,7 +3,7 @@ using TUnit.Core;
 
 namespace TUnit.Engine;
 
-internal class TestsLoader(SourceLocationHelper sourceLocationHelper, 
+internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever, 
     ClassLoader classLoader, 
     TestDataSourceRetriever testDataSourceRetriever,
     CombinativeSolver combinativeSolver)
@@ -21,7 +21,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
                 continue;
             }
             
-            var sourceLocation = sourceLocationHelper
+            var sourceLocation = sourceLocationRetriever
                 .GetSourceLocation(typeInformation.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
 
             var allClasses = classLoader.GetAllTypes(allAssemblies).ToArray();

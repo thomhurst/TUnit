@@ -4,7 +4,7 @@ using TUnit.Core;
 
 namespace TUnit.Engine;
 
-internal class SourceLocationHelper(IMessageLogger logger) : IDisposable
+internal class SourceLocationRetriever(IMessageLogger logger) : IDisposable
 {
     private static SourceLocation GetEmptySourceLocation(string source) => new(source, null, 0, 0);
     
