@@ -22,11 +22,14 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
     
-    protected string GetCallerExpressionPrefix()
+    protected string GetCallerExpressionSuffix()
     {
-        return string.IsNullOrEmpty(AssertionBuilder.CallerExpression) 
+        return string.IsNullOrEmpty(AssertionBuilder.CallerExpression)
             ? string.Empty
-            : $"{AssertionBuilder.CallerExpression}: ";
+            : $"""
+
+                  for: {AssertionBuilder.CallerExpression}
+               """;
     }
 
     internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
@@ -64,7 +67,7 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
 
 
     protected internal override string Message => 
-        $"{GetCallerExpressionPrefix()}{MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}";
+        $"{MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}{GetCallerExpressionSuffix()}";
 
     private Func<TActual?, Exception?, string>? MessageFactory { get; set; }
     
