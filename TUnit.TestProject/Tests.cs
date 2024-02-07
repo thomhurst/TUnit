@@ -50,6 +50,9 @@ public class Tests
 
     [TestWithData("1")]
     [TestWithData("2")]
+    [TestWithData("3")]
+    [TestWithData("4")]
+    [TestWithData("5")]
     [TestCategory("Fail")]
     public async Task ParameterisedTests1(string value)
     {
@@ -58,6 +61,9 @@ public class Tests
 
     [TestWithData("1")]
     [TestWithData("2")]
+    [TestWithData("3")]
+    [TestWithData("4")]
+    [TestWithData("5")]
     [TestCategory("Fail")]
     public async Task ParameterisedTests2(string value)
     {

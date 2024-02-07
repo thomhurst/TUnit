@@ -67,7 +67,7 @@ internal record TestDetails
         MinLineNumber = sourceLocation.MinLineNumber;
         MaxLineNumber = sourceLocation.MaxLineNumber;
 
-        UniqueId = FullyQualifiedClassName + DisplayName + Count + GetParameterTypes(MethodParameterTypes);
+        UniqueId = $"{FullyQualifiedClassName}.{DisplayName}";
     }
 
     private static string? GetNotInParallelConstraintKey(CustomAttributeData[] methodAndClassAttributes)

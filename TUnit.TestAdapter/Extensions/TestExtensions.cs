@@ -1,8 +1,12 @@
 ﻿using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Newtonsoft.Json;
 using TUnit.Core;
 using TUnit.TestAdapter.Constants;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace TUnit.TestAdapter.Extensions;
 
@@ -47,7 +51,7 @@ internal static class TestExtensions
         var testMethodName = testDetails.MethodInfo.Name;
         
         testCase.SetPropertyValue(TUnitTestProperties.TestName, testMethodName);
-        testCase.SetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, testDetails.ClassType.FullName);
+        testCase.SetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, testDetails.ClassType.AssemblyQualifiedName);
 
         testCase.SetPropertyValue(TUnitTestProperties.IsSkipped, testDetails.IsSkipped);
         testCase.SetPropertyValue(TUnitTestProperties.IsStatic, testDetails.MethodInfo.IsStatic);

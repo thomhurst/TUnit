@@ -99,10 +99,10 @@ internal class AsyncTestRunExecutor
         IEnumerable<TestWithResult> executingTests)
     {
         var processingTestFullyQualifiedClassName =
-            processingTestDetails.GetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, "");
+            processingTestDetails.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, "");
         
         var lastTestForClass = allTestsOrderedByClass.Last(x =>
-            x.GetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, "") == processingTestFullyQualifiedClassName);
+            x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, "") == processingTestFullyQualifiedClassName);
 
         if (processingTestDetails.GetPropertyValue(TUnitTestProperties.UniqueId, "") != lastTestForClass.GetPropertyValue(TUnitTestProperties.UniqueId, ""))
         {
@@ -110,7 +110,7 @@ internal class AsyncTestRunExecutor
         }
 
         var executingTestsForThisClass = executingTests
-            .Where(x => x.Test.GetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, "") == processingTestFullyQualifiedClassName)
+            .Where(x => x.Test.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, "") == processingTestFullyQualifiedClassName)
             .Select(x => x.Result)
             .ToArray();
 
@@ -191,7 +191,7 @@ internal class AsyncTestRunExecutor
         var assembly = assemblyLoader.GetOrLoadAssembly(testDetails.Source);
         
         var classType =
-            assembly?.GetType(testDetails.GetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, ""));
+            assembly?.GetType(testDetails.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""));
 
         if (classType is null)
         {

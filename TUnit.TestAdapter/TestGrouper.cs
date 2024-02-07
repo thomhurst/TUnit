@@ -9,7 +9,7 @@ internal class TestGrouper
     public GroupedTests OrganiseTests(IEnumerable<TestCase> testCases)
     {
         var allTestsOrderedByClass = testCases
-            .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, ""))
+            .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
             .SelectMany(x => x)
             .OrderBy(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue));
 
@@ -47,7 +47,7 @@ internal class TestGrouper
             LastTestOfClasses = parallel
                 .Concat(keyedNotInParallel)
                 .Concat(notInParallel)
-                .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, ""))
+                .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
                 .Select(x => x.Last())
                 .ToList()
         };

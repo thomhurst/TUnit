@@ -15,8 +15,8 @@ public static class TUnitTestProperties
     public static TestProperty ManagedType => GetOrRegisterTestProperty<string>("TestCase.ManagedType", "ManagedType");
     public static TestProperty ManagedMethod => GetOrRegisterTestProperty<string>("TestCase.ManagedMethod", "ManagedMethod");
 
-    public static TestProperty FullyQualifiedClassName =>
-        GetOrRegisterTestProperty<string>(nameof(FullyQualifiedClassName), nameof(FullyQualifiedClassName));
+    public static TestProperty AssemblyQualifiedClassName =>
+        GetOrRegisterTestProperty<string>(nameof(AssemblyQualifiedClassName), nameof(AssemblyQualifiedClassName));
 
     public static TestProperty IsSkipped => GetOrRegisterTestProperty<bool>(nameof(IsSkipped), nameof(IsSkipped));
     public static TestProperty IsStatic => GetOrRegisterTestProperty<bool>(nameof(IsStatic), nameof(IsStatic));
