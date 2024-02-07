@@ -33,12 +33,18 @@ public static class SerializationExtensions
         return argumentsArray?.Select((x, i) => FromJsonElement(x, typeNames[i])).ToArray();
     }
 
-    private static object? FromJsonElement(object obj, string typeName)
+    private static object? FromJsonElement(object? obj, string typeName)
     {
+        if (obj is null)
+        {
+            return null;
+        }
+        
         if (obj is JsonElement jsonElement)
         {
             switch (jsonElement.ValueKind)
             {
+                
                 case JsonValueKind.String:
                     return jsonElement.GetString();
                 case JsonValueKind.Number:
@@ -49,6 +55,10 @@ public static class SerializationExtensions
                     return false;
                 case JsonValueKind.Null:
                     return null;
+                case JsonValueKind.Undefined:
+                    return null;
+                case JsonValueKind.Object:
+                    return jsonElement.Deserialize(Type.GetType(typeName)!);
                 default:
                     return obj;
             }
