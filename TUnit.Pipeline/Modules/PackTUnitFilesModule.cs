@@ -35,7 +35,8 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                                 { 
                                     new KeyValue("Version", version!), 
                                     new KeyValue("PackageVersion", packageVersion!) 
-                                }
+                                },
+                            IncludeSource = true
                         }, cancellationToken);
             }, cancellationToken: cancellationToken)
             .ProcessOneAtATime();
