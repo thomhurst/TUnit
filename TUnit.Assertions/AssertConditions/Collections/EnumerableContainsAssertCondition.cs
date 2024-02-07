@@ -11,7 +11,7 @@ public class EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr> : Ass
     {
     }
 
-    protected override string DefaultMessage => $"{ExpectedValue} was not found in the collection";
+    protected override string DefaultMessage => $"{GetCallerExpressionPrefix()}{ExpectedValue} was not found in the collection";
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {

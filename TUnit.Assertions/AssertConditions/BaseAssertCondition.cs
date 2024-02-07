@@ -21,6 +21,13 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
+    
+    protected string GetCallerExpressionPrefix()
+    {
+        return string.IsNullOrEmpty(AssertionBuilder.CallerExpression) 
+            ? string.Empty
+            : $"{AssertionBuilder.CallerExpression}: ";
+    }
 
     internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
     {

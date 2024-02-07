@@ -22,6 +22,6 @@ public class StringContainsAssertCondition<TAnd, TOr> : AssertCondition<string, 
     }
 
     protected override string DefaultMessage => $"""
-                                              Expected "{ExpectedValue}" but received "{ActualValue}"
+                                              {GetCallerExpressionPrefix()}Expected "{ActualValue}" to contain "{ExpectedValue}"
                                               """;
 }
