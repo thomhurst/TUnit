@@ -65,8 +65,6 @@ internal static class TestExtensions
         var managedMethod = $"{testMethodName}{testParameterTypes}";
         
         var hierarchy = new StringBuilder()
-            .Append(testCase.CodeFilePath)
-            .Append('.')
             .Append(testDetails.FullyQualifiedClassName)
             .ToString()
             .Split('.')
