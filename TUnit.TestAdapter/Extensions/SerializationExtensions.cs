@@ -64,7 +64,6 @@ public static class SerializationExtensions
                     {
                         return jsonElement.EnumerateArray().ToArray();
                     }
-
                     return jsonElement.EnumerateArray().ToList();
                 default:
                     return obj;
