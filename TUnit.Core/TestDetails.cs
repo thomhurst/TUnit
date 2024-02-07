@@ -16,7 +16,9 @@ internal record TestDetails
         SourceLocation = sourceLocation;
         Count = count;
 
-        ParameterTypes = methodArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
+        MethodParameterTypes = methodArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
+        MethodParameterTypes = classArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
+
         MethodArgumentValues = methodArguments;
         ClassArgumentValues = classArguments;
         
@@ -65,7 +67,7 @@ internal record TestDetails
         MinLineNumber = sourceLocation.MinLineNumber;
         MaxLineNumber = sourceLocation.MaxLineNumber;
 
-        UniqueId = FullyQualifiedClassName + DisplayName + Count + GetParameterTypes(ParameterTypes);
+        UniqueId = FullyQualifiedClassName + DisplayName + Count + GetParameterTypes(MethodParameterTypes);
     }
 
     private static string? GetNotInParallelConstraintKey(CustomAttributeData[] methodAndClassAttributes)
@@ -158,7 +160,8 @@ internal record TestDetails
     
     public int MinLineNumber { get; }
     public int MaxLineNumber { get; }
-    public Type[]? ParameterTypes { get; }
+    public Type[]? MethodParameterTypes { get; }
+    public Type[]? ClassParameterTypes { get; }
     public object?[]? MethodArgumentValues { get; }
     public object?[]? ClassArgumentValues { get; }
     public SourceLocation SourceLocation { get; }

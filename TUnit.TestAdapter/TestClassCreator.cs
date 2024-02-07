@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using TUnit.Engine;
 using TUnit.TestAdapter.Extensions;
 
@@ -20,9 +19,12 @@ internal class TestClassCreator(CacheableAssemblyLoader assemblyLoader)
             return null;
         }
 
+        var classArgumentTypes = testCase
+            .GetPropertyValue(TUnitTestProperties.ClassParameterTypeNames, null as string[]);
+        
         var classArguments = testCase
             .GetPropertyValue(TUnitTestProperties.ClassArguments, null as string)
-            .DeserializeArgumentsSafely();
+            .DeserializeArgumentsSafely(classArgumentTypes!);
 
         return CreateClass(classType, classArguments);
     }

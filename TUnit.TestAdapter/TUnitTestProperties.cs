@@ -31,6 +31,7 @@ public static class TUnitTestProperties
     public static TestProperty MethodParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(MethodParameterTypeNames));
     public static TestProperty MethodArguments => GetOrRegisterTestProperty<string?>(nameof(MethodArguments));
     public static TestProperty ClassArguments => GetOrRegisterTestProperty<string?>(nameof(ClassArguments));
+    public static TestProperty ClassParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(ClassParameterTypeNames));
 
     public static TestProperty TestClass => GetOrRegisterTestProperty<string>(nameof(TestClass));
     public static TestProperty TestName => GetOrRegisterTestProperty<string>(nameof(TestName));
