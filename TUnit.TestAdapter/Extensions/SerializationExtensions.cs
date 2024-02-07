@@ -59,6 +59,13 @@ public static class SerializationExtensions
                     return null;
                 case JsonValueKind.Object:
                     return jsonElement.Deserialize(Type.GetType(typeName)!);
+                case JsonValueKind.Array:
+                    if (typeName.EndsWith("[]") == true)
+                    {
+                        return jsonElement.EnumerateArray().ToArray();
+                    }
+
+                    return jsonElement.EnumerateArray().ToList();
                 default:
                     return obj;
             }
