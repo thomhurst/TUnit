@@ -68,7 +68,7 @@ internal static class TestExtensions
         {
             // First option is 'Container' which is empty for C# projects
             string.Empty,
-            testDetails.Assembly.GetName().Name ?? string.Empty,
+            testDetails.ClassType.Namespace ?? string.Empty,
             testDetails.ClassType.Name,
             testDetails.TestNameWithParameterTypes
         };
