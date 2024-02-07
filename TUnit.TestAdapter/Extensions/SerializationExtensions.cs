@@ -21,7 +21,7 @@ public static class SerializationExtensions
         return JsonSerializer.Serialize(arguments, Options);
     }
     
-    public static object?[]? DeserializeArgumentsSafely(this string? argumentsJson, string[] typeNames)
+    public static object?[]? DeserializeArgumentsSafely(this string? argumentsJson, string[]? typeNames)
     {
         if (argumentsJson == null)
         {
@@ -30,10 +30,10 @@ public static class SerializationExtensions
 
         var argumentsArray = JsonSerializer.Deserialize<object?[]>(argumentsJson, Options);
 
-        return argumentsArray?.Select((x, i) => FromJsonElement(x, typeNames[i])).ToArray();
+        return argumentsArray?.Select((x, i) => FromJsonElement(x, typeNames?.ElementAtOrDefault(i))).ToArray();
     }
 
-    private static object? FromJsonElement(object? obj, string typeName)
+    private static object? FromJsonElement(object? obj, string? typeName)
     {
         if (obj is null)
         {
@@ -44,7 +44,6 @@ public static class SerializationExtensions
         {
             switch (jsonElement.ValueKind)
             {
-                
                 case JsonValueKind.String:
                     return jsonElement.GetString();
                 case JsonValueKind.Number:
@@ -58,9 +57,9 @@ public static class SerializationExtensions
                 case JsonValueKind.Undefined:
                     return null;
                 case JsonValueKind.Object:
-                    return jsonElement.Deserialize(Type.GetType(typeName)!);
+                    return jsonElement.Deserialize(Type.GetType(typeName!, false) ?? typeof(object));
                 case JsonValueKind.Array:
-                    if (typeName.EndsWith("[]"))
+                    if (typeName?.EndsWith("[]") == true)
                     {
                         return jsonElement.EnumerateArray().ToArray();
                     }
