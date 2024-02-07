@@ -8,7 +8,7 @@ public static class SerializationExtensions
 {
     private static readonly JsonSerializerOptions Options = new()
     {
-        Converters = { new JsonStringEnumConverter(), new ObjectArrayConverter() },
+        Converters = { new ObjectArrayConverter() },
         ReferenceHandler = ReferenceHandler.Preserve,
     };
     
