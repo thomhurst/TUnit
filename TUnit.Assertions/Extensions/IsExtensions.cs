@@ -551,7 +551,7 @@ public static class IsExtensions
                 
                 return actual <= expected + tolerance && actual >= expected - tolerance;
             },
-            (dateTime, _) => $"{dateTime} is not between {dateTime - tolerance} and {dateTime + tolerance}"));
+            (dateTime, _) => $"{dateTime.ToLongStringWithMilliseconds()} is not between {(dateTime - tolerance).ToLongStringWithMilliseconds()} and {(dateTime + tolerance).ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected, TimeSpan tolerance)
@@ -568,7 +568,7 @@ public static class IsExtensions
                 
                 return actual <= expected + tolerance && actual >= expected - tolerance;
             },
-            (dateTime, _) => $"{dateTime} is not between {dateTime - tolerance} and {dateTime + tolerance}"));
+            (dateTime, _) => $"{dateTime.ToLongStringWithMilliseconds()} is not between {(dateTime - tolerance).ToLongStringWithMilliseconds()} and {(dateTime + tolerance).ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateOnly, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected, int daysTolerance)
@@ -585,7 +585,7 @@ public static class IsExtensions
                 
                 return actual <= expected.AddDays(daysTolerance) && actual >= expected.AddDays(-daysTolerance);
             },
-            (dateTime, _) => $"{dateTime} is not between {dateTime.AddDays(-daysTolerance)} and {dateTime.AddDays(daysTolerance)}"));
+            (date, _) => $"{date} is not between {date.AddDays(-daysTolerance)} and {date.AddDays(daysTolerance)}"));
     }
     
     public static BaseAssertCondition<TimeOnly, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected, TimeSpan tolerance)
@@ -602,7 +602,7 @@ public static class IsExtensions
                 
                 return actual <= expected.Add(tolerance) && actual >= expected.Add(-tolerance);
             },
-            (dateTime, _) => $"{dateTime} is not between {dateTime.Add(-tolerance)} and {dateTime.Add(tolerance)}"));
+            (time, _) => $"{time.ToLongStringWithMilliseconds()} is not between {time.Add(-tolerance).ToLongStringWithMilliseconds()} and {time.Add(tolerance).ToLongStringWithMilliseconds()}"));
     }
 
     #endregion
