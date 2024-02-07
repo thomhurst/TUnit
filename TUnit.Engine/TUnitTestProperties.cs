@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
-public static class TUnitTestProperties
+internal static class TUnitTestProperties
 {
     public static TestProperty GetOrRegisterTestProperty<T>(string id, string label)
     {

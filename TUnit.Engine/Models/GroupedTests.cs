@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace TUnit.TestAdapter.Models;
+namespace TUnit.Engine.Models;
 
 internal record GroupedTests
 {

@@ -1,6 +1,6 @@
-﻿namespace TUnit.TestAdapter;
+﻿namespace TUnit.Engine;
 
-public record Filter
+internal record Filter
 {
     public bool IsEmpty { get; private set; } = true;
     

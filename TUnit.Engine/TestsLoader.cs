@@ -1,8 +1,7 @@
 ﻿using System.Reflection;
 using TUnit.Core;
-using TUnit.Engine;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal class TestsLoader(SourceLocationHelper sourceLocationHelper, 
     ClassLoader classLoader, 

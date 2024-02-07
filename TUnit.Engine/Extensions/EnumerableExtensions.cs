@@ -1,6 +1,6 @@
-﻿namespace TUnit.TestAdapter.Extensions;
+﻿namespace TUnit.Engine.Extensions;
 
-public static class EnumerableExtensions
+internal static class EnumerableExtensions
 {
     public static Queue<T> ToQueue<T>(this IEnumerable<T> enumerable)
     {

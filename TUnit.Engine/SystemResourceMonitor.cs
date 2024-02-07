@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using Hardware.Info;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal class SystemResourceMonitor : IDisposable
 {
@@ -12,7 +12,9 @@ internal class SystemResourceMonitor : IDisposable
 
     private static double _fallbackCpuPercentage;
 
+#pragma warning disable CA2255
     [ModuleInitializer]
+#pragma warning restore CA2255
     public static void Initialize()
     {
         Task.Run(Refresh);

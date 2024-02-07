@@ -11,6 +11,18 @@ public static class ServiceCollectionExtensions
             .AddSingleton<ClassLoader>()
             .AddSingleton<Disposer>()
             .AddSingleton<CacheableAssemblyLoader>()
-            .AddSingleton(new ConsoleInterceptor());
+            .AddSingleton(new ConsoleInterceptor())
+            .AddSingleton<TestsLoader>()
+            .AddSingleton<AsyncTestRunExecutor>()
+            .AddSingleton<TestCollector>()
+            .AddSingleton<SourceLocationHelper>()
+            .AddSingleton<ReflectionMetadataProvider>()
+            .AddSingleton<TUnitTestFilterProvider>()
+            .AddSingleton<TestClassCreator>()
+            .AddSingleton<TestMethodRetriever>()
+            .AddSingleton<TestGrouper>()
+            .AddSingleton<CombinativeSolver>()
+            .AddSingleton<SingleTestExecutor>()
+            .AddSingleton<SystemResourceMonitor>();
     }
 }

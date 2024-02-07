@@ -1,4 +1,4 @@
-﻿namespace TUnit.TestAdapter.Constants;
+﻿namespace TUnit.Engine.Constants;
 
 internal static class TestAdapterConstants
 {

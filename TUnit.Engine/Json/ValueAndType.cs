@@ -1,6 +1,6 @@
-namespace TUnit.TestAdapter.Json;
+namespace TUnit.Engine.Json;
 
-public record ValueAndType
+internal record ValueAndType
 {
     public required string? QualifiedTypeName { get; init; }
     public required object? Value { get; init; }

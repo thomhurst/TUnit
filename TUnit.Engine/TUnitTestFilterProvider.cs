@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger messageLogger)
 {

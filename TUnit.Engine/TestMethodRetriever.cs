@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal class TestMethodRetriever
 {

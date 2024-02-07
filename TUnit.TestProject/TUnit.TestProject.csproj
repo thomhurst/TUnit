@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
         <PackageReference Include="coverlet.collector" Version="6.0.0" />
         <PackageReference Include="System.Text.Json" Version="8.0.1" />
 <!--        <PackageReference Include="TUnit.TestAdapter" Version="0.0.1-alpha01">-->

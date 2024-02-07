@@ -4,7 +4,7 @@ using System.Runtime.ExceptionServices;
 
 namespace TUnit.Engine;
 
-public class MethodInvoker
+internal class MethodInvoker
 {
     public async Task<object?> InvokeMethod(object? @class, MethodInfo methodInfo, BindingFlags bindingFlags, object?[]? arguments)
     {

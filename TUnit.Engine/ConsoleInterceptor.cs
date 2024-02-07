@@ -4,7 +4,7 @@ using TUnit.Core;
 
 namespace TUnit.Engine;
 
-public class ConsoleInterceptor : TextWriter
+internal class ConsoleInterceptor : TextWriter
 {
     public StringWriter InnerWriter => TestContext.Current.OutputWriter;
     

@@ -1,14 +1,10 @@
 ﻿using System.Reflection;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Newtonsoft.Json;
 using TUnit.Core;
-using TUnit.TestAdapter.Constants;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+using TUnit.Engine.Constants;
 
-namespace TUnit.TestAdapter.Extensions;
+namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
