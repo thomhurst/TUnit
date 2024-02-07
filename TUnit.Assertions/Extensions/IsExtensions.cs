@@ -185,9 +185,9 @@ public static class IsExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
                 
-                return actual <= expected + tolerance && actual >= expected - tolerance;
+                return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
             },
-            (timeSpan, _) => $"{timeSpan} is not between {timeSpan - tolerance} and {timeSpan + tolerance}"));
+            (timeSpan, _) => $"{timeSpan} is not between {timeSpan.Subtract(tolerance)} and {timeSpan.Add(tolerance)}"));
     }
     
     public static BaseAssertCondition<TimeSpan, TAnd, TOr> Zero<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is)
