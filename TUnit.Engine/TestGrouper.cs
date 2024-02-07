@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using TUnit.TestAdapter.Extensions;
-using TUnit.TestAdapter.Models;
+using TUnit.Engine.Extensions;
+using TUnit.Engine.Models;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal class TestGrouper
 {

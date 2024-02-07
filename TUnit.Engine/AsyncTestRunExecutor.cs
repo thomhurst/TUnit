@@ -4,10 +4,10 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
-using TUnit.Engine;
-using TUnit.TestAdapter.Extensions;
+using TUnit.Engine.Extensions;
+using TUnit.Engine.Models;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal class AsyncTestRunExecutor
     (

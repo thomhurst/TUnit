@@ -9,4 +9,4 @@ public record TUnitTestResult
     public required Exception? Exception { get; init; }
     public required string ComputerName { get; init; }
     public string? Output { get; internal set; }
-};
+}

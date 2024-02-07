@@ -11,9 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Hardware.Info" Version="100.0.1.1" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" PrivateAssets="All" />
-      <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.8.0" PrivateAssets="All" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>

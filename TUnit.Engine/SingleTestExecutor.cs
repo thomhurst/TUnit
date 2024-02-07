@@ -4,11 +4,10 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
-using TUnit.Engine;
-using TUnit.TestAdapter.Extensions;
+using TUnit.Engine.Extensions;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal class SingleTestExecutor
 {

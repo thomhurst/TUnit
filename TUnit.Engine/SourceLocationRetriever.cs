@@ -2,9 +2,9 @@
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
-public class SourceLocationHelper(IMessageLogger logger) : IDisposable
+internal class SourceLocationRetriever(IMessageLogger logger) : IDisposable
 {
     private static SourceLocation GetEmptySourceLocation(string source) => new(source, null, 0, 0);
     

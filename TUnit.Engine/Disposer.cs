@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Engine;
 
-public class Disposer
+internal class Disposer
 {
     public ValueTask DisposeAsync(object? obj)
     {

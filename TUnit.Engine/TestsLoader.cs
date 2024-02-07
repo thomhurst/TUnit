@@ -1,15 +1,14 @@
 ﻿using System.Reflection;
 using TUnit.Core;
-using TUnit.Engine;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
-internal class TestsLoader(SourceLocationHelper sourceLocationHelper, 
+internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever, 
     ClassLoader classLoader, 
     TestDataSourceRetriever testDataSourceRetriever,
     CombinativeSolver combinativeSolver)
 {
-    private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(TestWithDataAttribute), typeof(TestDataSourceAttribute)];
+    private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(DataDrivenTestAttribute), typeof(TestDataSourceAttribute)];
 
     public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation, Assembly[] allAssemblies)
     {
@@ -22,7 +21,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
                 continue;
             }
             
-            var sourceLocation = sourceLocationHelper
+            var sourceLocation = sourceLocationRetriever
                 .GetSourceLocation(typeInformation.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
 
             var allClasses = classLoader.GetAllTypes(allAssemblies).ToArray();
@@ -37,7 +36,7 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
 
             var runCount = repeatCount + 1;
             
-            foreach (var test in CollectTestWithDataAttributeTests(methodInfo, nonAbstractClassesContainingTest, runCount, sourceLocation))
+            foreach (var test in CollectDataDrivenTests(methodInfo, nonAbstractClassesContainingTest, runCount, sourceLocation))
             {
                 yield return test;
             }
@@ -152,21 +151,21 @@ internal class TestsLoader(SourceLocationHelper sourceLocationHelper,
         return parameterInfo.GetCustomAttribute<CombinativeValuesAttribute>()?.Objects ?? [null];
     }
 
-    private IEnumerable<TestDetails> CollectTestWithDataAttributeTests(MethodInfo methodInfo,
+    private IEnumerable<TestDetails> CollectDataDrivenTests(MethodInfo methodInfo,
         Type[] nonAbstractClassesContainingTest, int runCount, SourceLocation sourceLocation)
     {
-        var testWithDataAttributes = methodInfo.GetCustomAttributes<TestWithDataAttribute>().ToList();
+        var dataDrivenTestAttributes = methodInfo.GetCustomAttributes<DataDrivenTestAttribute>().ToList();
         
-        if (!testWithDataAttributes.Any())
+        if (!dataDrivenTestAttributes.Any())
         {
             yield break;
         }
         
         var count = 0;
         
-        foreach (var testWithDataAttribute in testWithDataAttributes)
+        foreach (var dataDrivenTestAttribute in dataDrivenTestAttributes)
         {
-            var arguments = testWithDataAttribute.Values;
+            var arguments = dataDrivenTestAttribute.Values;
                     
             foreach (var classType in nonAbstractClassesContainingTest)
             {

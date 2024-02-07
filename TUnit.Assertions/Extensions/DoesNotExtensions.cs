@@ -1,9 +1,9 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿#nullable disable
+
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
-
-#nullable disable
 
 namespace TUnit.Assertions;
 

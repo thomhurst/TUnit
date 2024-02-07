@@ -1,7 +1,7 @@
+#nullable disable
+
 using System.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
-
-#nullable disable
 
 namespace TUnit.Assertions;
 

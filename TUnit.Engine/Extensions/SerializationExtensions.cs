@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using TUnit.TestAdapter.Json;
+using TUnit.Engine.Json;
 
-namespace TUnit.TestAdapter.Extensions;
+namespace TUnit.Engine.Extensions;
 
-public static class SerializationExtensions
+internal static class SerializationExtensions
 {
     private static readonly JsonSerializerOptions Options = new()
     {

@@ -1,12 +1,12 @@
-﻿using System.Collections;
+﻿#nullable disable
+
+using System.Collections;
 using System.Numerics;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
-
-#nullable disable
 
 namespace TUnit.Assertions;
 

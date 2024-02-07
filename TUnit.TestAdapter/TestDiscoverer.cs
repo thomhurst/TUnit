@@ -2,9 +2,9 @@
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TUnit.Engine;
+using TUnit.Engine.Constants;
 using TUnit.Engine.Extensions;
-using TUnit.TestAdapter.Constants;
-using TUnit.TestAdapter.Extensions;
 using TUnit.TestAdapter.Stubs;
 
 namespace TUnit.TestAdapter;
@@ -27,7 +27,7 @@ public class TestDiscoverer : ITestDiscoverer
         
         foreach (var test in tests)
         {
-            logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.DisplayName);
+            logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.TestNameWithArguments);
             discoverySink.SendTestCase(test.ToTestCase());
         }
     }
@@ -38,7 +38,6 @@ public class TestDiscoverer : ITestDiscoverer
             .AddSingleton(discoveryContext)
             .AddSingleton(messageLogger)
             .AddSingleton<ITestExecutionRecorder, NoOpExecutionRecorder>()
-            .AddTestAdapterServices()
             .AddTestEngineServices()
             .BuildServiceProvider();
     }

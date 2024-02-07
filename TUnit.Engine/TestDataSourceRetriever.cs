@@ -3,7 +3,7 @@ using TUnit.Core;
 
 namespace TUnit.Engine;
 
-public class TestDataSourceRetriever(MethodInvoker methodInvoker)
+internal class TestDataSourceRetriever(MethodInvoker methodInvoker)
 {
     public IEnumerable<object?[]?> GetTestDataSourceArguments(MethodInfo methodInfo)
     {

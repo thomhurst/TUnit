@@ -1,10 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using TUnit.Engine;
-using TUnit.TestAdapter.Extensions;
+using TUnit.Engine.Extensions;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
-internal class TestClassCreator(CacheableAssemblyLoader assemblyLoader)
+internal class TestClassCreator
 {
     public object? CreateClass(TestCase testCase, out Type classType)
     {

@@ -13,7 +13,6 @@ public class DisplayFormats
         SymbolDisplayExtensionMethodStyle.Default,
         SymbolDisplayParameterOptions.IncludeType,
         SymbolDisplayPropertyStyle.NameOnly,
-        SymbolDisplayLocalOptions.IncludeType,
-        SymbolDisplayKindOptions.None
+        SymbolDisplayLocalOptions.IncludeType
     );
 }

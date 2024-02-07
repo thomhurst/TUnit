@@ -1,14 +1,10 @@
 ﻿using System.Reflection;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Newtonsoft.Json;
 using TUnit.Core;
-using TUnit.TestAdapter.Constants;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+using TUnit.Engine.Constants;
 
-namespace TUnit.TestAdapter.Extensions;
+namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
@@ -41,11 +37,11 @@ internal static class TestExtensions
     {
         var testCase = new TestCase(testDetails.UniqueId, TestAdapterConstants.ExecutorUri, testDetails.Source)
         {
-            DisplayName = testDetails.DisplayName,
+            DisplayName = testDetails.TestNameWithArguments,
             CodeFilePath = testDetails.FileName,
             LineNumber = testDetails.MinLineNumber,
         };
-        
+
         testCase.SetPropertyValue(TUnitTestProperties.UniqueId, testDetails.UniqueId);
 
         var testMethodName = testDetails.MethodInfo.Name;
@@ -53,37 +49,55 @@ internal static class TestExtensions
         testCase.SetPropertyValue(TUnitTestProperties.TestName, testMethodName);
         testCase.SetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, testDetails.ClassType.AssemblyQualifiedName);
 
-        testCase.SetPropertyValue(TUnitTestProperties.IsSkipped, testDetails.IsSkipped);
-        testCase.SetPropertyValue(TUnitTestProperties.IsStatic, testDetails.MethodInfo.IsStatic);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.IsSkipped, testDetails.IsSkipped);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.IsStatic, testDetails.MethodInfo.IsStatic);
         
-        testCase.SetPropertyValue(TUnitTestProperties.Category, testDetails.Categories.ToArray());
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Category, testDetails.Categories.ToArray());
         
-        testCase.SetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, testDetails.NotInParallelConstraintKey);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.NotInParallelConstraintKey, testDetails.NotInParallelConstraintKey);
         
-        testCase.SetPropertyValue(TUnitTestProperties.Timeout, testDetails.Timeout.TotalMilliseconds);
-        testCase.SetPropertyValue(TUnitTestProperties.RepeatCount, testDetails.RepeatCount);
-        testCase.SetPropertyValue(TUnitTestProperties.RetryCount, testDetails.RetryCount);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Timeout, testDetails.Timeout.TotalMilliseconds);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RepeatCount, testDetails.RepeatCount);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RetryCount, testDetails.RetryCount);
 
         var testParameterTypes = TestDetails.GetParameterTypes(testDetails.MethodParameterTypes);
         
         var managedMethod = $"{testMethodName}{testParameterTypes}";
-        
-        var hierarchy = new StringBuilder()
-            .Append(testDetails.FullyQualifiedClassName)
-            .ToString()
-            .Split('.')
-            .Append(managedMethod)
-            .ToArray();
+
+        var hierarchy = new[]
+        {
+            // First option is 'Container' which is empty for C# projects
+            string.Empty,
+            testDetails.ClassType.Namespace ?? string.Empty,
+            testDetails.ClassType.Name,
+            testDetails.TestNameWithParameterTypes
+        };
         
         testCase.SetPropertyValue(TUnitTestProperties.Hierarchy, hierarchy);
         testCase.SetPropertyValue(TUnitTestProperties.ManagedType, testDetails.FullyQualifiedClassName);
         testCase.SetPropertyValue(TUnitTestProperties.ManagedMethod, managedMethod);
         
-        testCase.SetPropertyValue(TUnitTestProperties.MethodParameterTypeNames, testDetails.MethodParameterTypes?.Select(x => x.FullName).ToArray());
-        testCase.SetPropertyValue(TUnitTestProperties.ClassParameterTypeNames, testDetails.ClassParameterTypes?.Select(x => x.FullName).ToArray());
-        testCase.SetPropertyValue(TUnitTestProperties.MethodArguments, testDetails.MethodArgumentValues.SerializeArgumentsSafely());
-        testCase.SetPropertyValue(TUnitTestProperties.ClassArguments, testDetails.ClassArgumentValues.SerializeArgumentsSafely());
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.MethodParameterTypeNames, testDetails.MethodParameterTypes?.Select(x => x.FullName).ToArray());
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassParameterTypeNames, testDetails.ClassParameterTypes?.Select(x => x.FullName).ToArray());
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.MethodArguments, testDetails.MethodArgumentValues.SerializeArgumentsSafely());
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassArguments, testDetails.ClassArgumentValues.SerializeArgumentsSafely());
+
+        if (testDetails.TestName.Contains("ParameterisedTests1"))
+        {
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "TestCase2.json");
+            File.AppendAllText(path, JsonConvert.SerializeObject(testCase) + ',');
+        }
         
         return testCase;
+    }
+
+    private static void SetPropertyValueIfNotDefault<T>(this TestCase testCase, TestProperty property, T value)
+    {
+        if (EqualityComparer<T>.Default.Equals(value,  default))
+        {
+            return;
+        }
+        
+        testCase.SetPropertyValue(property, value);
     }
 }
