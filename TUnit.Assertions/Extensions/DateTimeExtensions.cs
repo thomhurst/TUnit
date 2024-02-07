@@ -2,7 +2,7 @@
 
 public static class DateTimeExtensions
 {
-    private static readonly string? DateFormat = "yyyy/MM/dd hh:mm:ss.fff tt";
+    private static readonly string? DateFormat = "yyyy/MM/dd";
     private static readonly string? LongTimeFormatWithMilliseconds = "hh:mm:ss.fff tt";
     private static readonly string? LongDateTimeFormatWithMilliseconds = $"{DateFormat} {LongTimeFormatWithMilliseconds}";
 
