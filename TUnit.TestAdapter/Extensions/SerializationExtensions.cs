@@ -60,7 +60,7 @@ public static class SerializationExtensions
                 case JsonValueKind.Object:
                     return jsonElement.Deserialize(Type.GetType(typeName)!);
                 case JsonValueKind.Array:
-                    if (typeName.EndsWith("[]") == true)
+                    if (typeName.EndsWith("[]"))
                     {
                         return jsonElement.EnumerateArray().ToArray();
                     }
