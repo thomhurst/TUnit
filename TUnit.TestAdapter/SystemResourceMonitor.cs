@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Hardware.Info;
 
 namespace TUnit.TestAdapter;
@@ -9,6 +10,8 @@ internal class SystemResourceMonitor : IDisposable
     private readonly PeriodicTimer _periodicTimer = new(TimeSpan.FromSeconds(5));
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
+    private double _fallbackCpuPercentage;
+
     [ModuleInitializer]
     public static void Initialize()
     {
@@ -17,6 +20,17 @@ internal class SystemResourceMonitor : IDisposable
 
     public SystemResourceMonitor()
     {
+        // According to Hardware.Info, there might be a 21 second delay on getting CPU stats
+        // So let's just run this 50 times (as it contains a 500ms delay in it) which means it'll stop
+        // after around 25 seconds
+        Task.Run(async () =>
+        {
+            for (var i = 0; i < 50; i++)
+            {
+                _fallbackCpuPercentage = await GetCpuUsagePercentageForProcess();
+            }
+        });
+        
         Task.Factory.StartNew(async () =>
         {
             while (await _periodicTimer.WaitForNextTickAsync())
@@ -35,10 +49,31 @@ internal class SystemResourceMonitor : IDisposable
     {
         if (!HardwareInfo.CpuList.Any())
         {
-            return false;
+            return _fallbackCpuPercentage > 90;
         }
 
         return HardwareInfo.CpuList.All(x => x.PercentProcessorTime > 90);
+    }
+    
+    private static async Task<double> GetCpuUsagePercentageForProcess()
+    {
+        var startTime = DateTime.UtcNow;
+        
+        var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+        
+        await Task.Delay(500);
+    
+        var endTime = DateTime.UtcNow;
+        
+        var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+        
+        var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
+        
+        var totalMsPassed = (endTime - startTime).TotalMilliseconds;
+        
+        var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
+        
+        return cpuUsageTotal * 100;
     }
     
     private bool IsMemoryStrained()
