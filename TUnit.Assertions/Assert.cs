@@ -1,33 +1,34 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions;
 
 public static class Assert
 {
-    public static ValueAssertionBuilder<TActual> That<TActual>(TActual value)
+    public static ValueAssertionBuilder<TActual> That<TActual>(TActual value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
     {
-        return new ValueAssertionBuilder<TActual>(value);
+        return new ValueAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static DelegateAssertionBuilder That(Action value)
+    public static DelegateAssertionBuilder That(Action value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
     {
-        return new DelegateAssertionBuilder(value);
+        return new DelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static DelegateAssertionBuilder<TActual> That<TActual>(Func<TActual> value)
+    public static DelegateAssertionBuilder<TActual> That<TActual>(Func<TActual> value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
     {
-        return new DelegateAssertionBuilder<TActual>(value);
+        return new DelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static AsyncDelegateAssertionBuilder That(Func<Task> value)
+    public static AsyncDelegateAssertionBuilder That(Func<Task> value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
     {
-        return new AsyncDelegateAssertionBuilder(value);
+        return new AsyncDelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static AsyncDelegateAssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value)
+    public static AsyncDelegateAssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
     {
-        return new AsyncDelegateAssertionBuilder<TActual>(value);
+        return new AsyncDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
 
     public static AssertMultipleHandler Multiple(Action action)
@@ -41,12 +42,12 @@ public static class Assert
         throw new AssertionException(reason);
     }
     
-    public static async Task<TException> ThrowsAsync<TException>(Func<Task> @delegate) where TException : Exception
+    public static async Task<TException> ThrowsAsync<TException>(Func<Task> @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
     {
         try
         {
             await @delegate();
-            Fail("No exception was thrown");
+            Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
         catch (Exception e)
         {
@@ -55,18 +56,18 @@ public static class Assert
                 return exception;
             }
             
-            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name}");
+            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
 
         return null!;
     }
     
-    public static TException ThrowsAsync<TException>(Action @delegate) where TException : Exception
+    public static TException ThrowsAsync<TException>(Action @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
     {
         try
         {
             @delegate();
-            Fail("No exception was thrown");
+            Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
         catch (Exception e)
         {
@@ -75,7 +76,7 @@ public static class Assert
                 return exception;
             }
             
-            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name}");
+            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
 
         return null!;

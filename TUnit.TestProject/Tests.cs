@@ -184,7 +184,7 @@ public class Tests
     {
         await Assert.That(async () =>
         {
-            await Task.Yield();;
+            await Task.Yield();
         }).Throws.Exception();
     }
 

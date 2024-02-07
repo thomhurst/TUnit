@@ -21,6 +21,16 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
+    
+    protected string GetCallerExpressionSuffix()
+    {
+        return string.IsNullOrEmpty(AssertionBuilder.CallerExpression)
+            ? string.Empty
+            : $"""
+
+                  for: {AssertionBuilder.CallerExpression}
+               """;
+    }
 
     internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
     {
@@ -56,7 +66,8 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     protected Exception? Exception { get; private set; }
 
 
-    protected internal override string Message => MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage;
+    protected internal override string Message => 
+        $"{MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}{GetCallerExpressionSuffix()}";
 
     private Func<TActual?, Exception?, string>? MessageFactory { get; set; }
     
