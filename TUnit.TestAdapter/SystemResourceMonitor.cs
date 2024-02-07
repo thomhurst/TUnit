@@ -10,16 +10,13 @@ internal class SystemResourceMonitor : IDisposable
     private readonly PeriodicTimer _periodicTimer = new(TimeSpan.FromSeconds(5));
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    private double _fallbackCpuPercentage;
+    private static double _fallbackCpuPercentage;
 
     [ModuleInitializer]
     public static void Initialize()
     {
         Task.Run(Refresh);
-    }
-
-    public SystemResourceMonitor()
-    {
+        
         // According to Hardware.Info, there might be a 21 second delay on getting CPU stats
         // So let's just run this 50 times (as it contains a 500ms delay in it) which means it'll stop
         // after around 25 seconds
@@ -30,7 +27,10 @@ internal class SystemResourceMonitor : IDisposable
                 _fallbackCpuPercentage = await GetCpuUsagePercentageForProcess();
             }
         });
-        
+    }
+
+    public SystemResourceMonitor()
+    {
         Task.Factory.StartNew(async () =>
         {
             while (await _periodicTimer.WaitForNextTickAsync())

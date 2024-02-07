@@ -18,7 +18,7 @@ internal class SingleTestExecutor
     private readonly Disposer _disposer;
     private readonly IMessageLogger _messageLogger;
     private readonly CancellationTokenSource _cancellationTokenSource;
-
+    
     public SingleTestExecutor(MethodInvoker methodInvoker, 
         TestClassCreator testClassCreator,
         TestMethodRetriever testMethodRetriever,
@@ -247,10 +247,23 @@ internal class SingleTestExecutor
                 exceptions.Add(e);
             }
         }
-        
-        if (exceptions.Any())
+
+        if (exceptions.Count == 1)
         {
-            throw new AggregateException(exceptions);
+            _messageLogger.SendMessage(TestMessageLevel.Error, $"""
+                                                               Error running CleanUp:
+                                                                  {exceptions.First().Message}
+                                                                  {exceptions.First().StackTrace}
+                                                               """);
+        }
+        else if (exceptions.Count > 1)
+        {
+            var aggregateException = new AggregateException(exceptions);
+            _messageLogger.SendMessage(TestMessageLevel.Error, $"""
+                                                                Error running CleanUp:
+                                                                   {aggregateException.Message}
+                                                                   {aggregateException.StackTrace}
+                                                                """);
         }
     }
 

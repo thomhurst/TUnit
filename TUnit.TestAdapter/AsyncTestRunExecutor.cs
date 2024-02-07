@@ -22,6 +22,8 @@ internal class AsyncTestRunExecutor
 {
     private readonly ConcurrentDictionary<string, Task> _oneTimeCleanUpRegistry = new();
     private readonly List<Task> _setResultsTasks = [];
+    
+    private int _currentlyExecutingTests;
 
     public async Task RunInAsyncContext(IEnumerable<TestCase> testCases)
     {
@@ -128,9 +130,11 @@ internal class AsyncTestRunExecutor
                 break;
             }
             
-            if (!systemResourceMonitor.IsSystemStrained())
+            if (_currentlyExecutingTests < 1 || !systemResourceMonitor.IsSystemStrained())
             {
                 var test = queue.Dequeue();
+
+                Interlocked.Increment(ref _currentlyExecutingTests);
 
                 var executionTask = singleTestExecutor.ExecuteTest(test);
 
@@ -138,6 +142,8 @@ internal class AsyncTestRunExecutor
                 {
                     await executionTask;
                 }
+                
+                Interlocked.Decrement(ref _currentlyExecutingTests);
                 
                 yield return new TestWithResult(test, executionTask);
             }
