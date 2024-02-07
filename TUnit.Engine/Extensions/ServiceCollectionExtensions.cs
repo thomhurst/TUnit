@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestsLoader>()
             .AddSingleton<AsyncTestRunExecutor>()
             .AddSingleton<TestCollector>()
-            .AddSingleton<SourceLocationHelper>()
+            .AddSingleton<SourceLocationRetriever>()
             .AddSingleton<ReflectionMetadataProvider>()
             .AddSingleton<TUnitTestFilterProvider>()
             .AddSingleton<TestClassCreator>()
