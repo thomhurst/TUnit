@@ -4,37 +4,38 @@ namespace TUnit.TestAdapter;
 
 public static class TUnitTestProperties
 {
-    public static TestProperty GetOrRegisterTestProperty<T>(string name)
+    public static TestProperty GetOrRegisterTestProperty<T>(string id, string label)
     {
-        return TestProperty.Find(name)
-               ?? TestProperty.Register(name, name, typeof(T), typeof(TestCase));
+        return TestProperty.Find(id)
+               ?? TestProperty.Register(id, label, typeof(T), typeof(TestCase));
     }
 
-    public static TestProperty UniqueId => GetOrRegisterTestProperty<string>(nameof(UniqueId));
-    public static TestProperty ManagedType => GetOrRegisterTestProperty<string>("ManagedType");
-    public static TestProperty ManagedMethod => GetOrRegisterTestProperty<string>("ManagedMethod");
+    public static TestProperty UniqueId => GetOrRegisterTestProperty<string>(nameof(UniqueId), nameof(UniqueId));
+    public static TestProperty Hierarchy => GetOrRegisterTestProperty<string[]>("TestCase.Hierarchy", "Hierarchy");
+    public static TestProperty ManagedType => GetOrRegisterTestProperty<string>("TestCase.ManagedType", "ManagedType");
+    public static TestProperty ManagedMethod => GetOrRegisterTestProperty<string>("TestCase.ManagedMethod", "ManagedMethod");
 
     public static TestProperty FullyQualifiedClassName =>
-        GetOrRegisterTestProperty<string>(nameof(FullyQualifiedClassName));
+        GetOrRegisterTestProperty<string>(nameof(FullyQualifiedClassName), nameof(FullyQualifiedClassName));
 
-    public static TestProperty IsSkipped => GetOrRegisterTestProperty<bool>(nameof(IsSkipped));
-    public static TestProperty IsStatic => GetOrRegisterTestProperty<bool>(nameof(IsStatic));
-    public static TestProperty Order => GetOrRegisterTestProperty<int>(nameof(Order));
-    public static TestProperty RepeatCount => GetOrRegisterTestProperty<int>(nameof(RepeatCount));
-    public static TestProperty RetryCount => GetOrRegisterTestProperty<int>(nameof(RetryCount));
+    public static TestProperty IsSkipped => GetOrRegisterTestProperty<bool>(nameof(IsSkipped), nameof(IsSkipped));
+    public static TestProperty IsStatic => GetOrRegisterTestProperty<bool>(nameof(IsStatic), nameof(IsStatic));
+    public static TestProperty Order => GetOrRegisterTestProperty<int>(nameof(Order), nameof(Order));
+    public static TestProperty RepeatCount => GetOrRegisterTestProperty<int>(nameof(RepeatCount), nameof(RepeatCount));
+    public static TestProperty RetryCount => GetOrRegisterTestProperty<int>(nameof(RetryCount), nameof(RetryCount));
 
-    public static TestProperty Timeout => GetOrRegisterTestProperty<double>(nameof(Timeout));
+    public static TestProperty Timeout => GetOrRegisterTestProperty<double>(nameof(Timeout), nameof(Timeout));
     
     public static TestProperty NotInParallelConstraintKey =>
-        GetOrRegisterTestProperty<string?>(nameof(NotInParallelConstraintKey));
+        GetOrRegisterTestProperty<string?>(nameof(NotInParallelConstraintKey), nameof(NotInParallelConstraintKey));
 
-    public static TestProperty MethodParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(MethodParameterTypeNames));
-    public static TestProperty MethodArguments => GetOrRegisterTestProperty<string?>(nameof(MethodArguments));
-    public static TestProperty ClassArguments => GetOrRegisterTestProperty<string?>(nameof(ClassArguments));
-    public static TestProperty ClassParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(ClassParameterTypeNames));
+    public static TestProperty MethodParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(MethodParameterTypeNames), nameof(MethodParameterTypeNames));
+    public static TestProperty MethodArguments => GetOrRegisterTestProperty<string?>(nameof(MethodArguments), nameof(MethodArguments));
+    public static TestProperty ClassArguments => GetOrRegisterTestProperty<string?>(nameof(ClassArguments), nameof(ClassArguments));
+    public static TestProperty ClassParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(ClassParameterTypeNames), nameof(ClassParameterTypeNames));
 
-    public static TestProperty TestClass => GetOrRegisterTestProperty<string>(nameof(TestClass));
-    public static TestProperty TestName => GetOrRegisterTestProperty<string>(nameof(TestName));
-    public static TestProperty Category => GetOrRegisterTestProperty<string[]>(nameof(Category));
-    public static TestProperty NotCategory => GetOrRegisterTestProperty<string>(nameof(NotCategory));
+    public static TestProperty TestClass => GetOrRegisterTestProperty<string>(nameof(TestClass), nameof(TestClass));
+    public static TestProperty TestName => GetOrRegisterTestProperty<string>(nameof(TestName), nameof(TestName));
+    public static TestProperty Category => GetOrRegisterTestProperty<string[]>(nameof(Category), nameof(Category));
+    public static TestProperty NotCategory => GetOrRegisterTestProperty<string>(nameof(NotCategory), nameof(NotCategory));
 }

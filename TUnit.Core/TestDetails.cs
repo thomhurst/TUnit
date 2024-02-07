@@ -129,7 +129,7 @@ internal record TestDetails
     public int RetryCount { get; }
     public int RepeatCount { get; }
 
-    private string GetArgumentValues()
+    public string GetArgumentValues()
     {
         if (MethodArgumentValues == null)
         {

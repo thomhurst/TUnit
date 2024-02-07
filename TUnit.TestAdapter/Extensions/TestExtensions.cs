@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using TUnit.Core;
 using TUnit.TestAdapter.Constants;
@@ -22,8 +23,8 @@ internal static class TestExtensions
             ClassType = classType,
             ClassInstance = classInstance,
             Categories = testCase.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>()).ToList(),
-            TestClassArguments = testCase.GetPropertyValue(TUnitTestProperties.ClassArguments, null as string).DeserializeArgumentsSafely(classParameterTypes!),
-            TestMethodArguments = testCase.GetPropertyValue(TUnitTestProperties.MethodArguments, null as string).DeserializeArgumentsSafely(methodParameterTypes!),
+            TestClassArguments = testCase.GetPropertyValue(TUnitTestProperties.ClassArguments, null as string).DeserializeArgumentsSafely(),
+            TestMethodArguments = testCase.GetPropertyValue(TUnitTestProperties.MethodArguments, null as string).DeserializeArgumentsSafely(),
             TestClassArgumentTypes = classParameterTypes,
             TestMethodArgumentTypes = methodParameterTypes,
             Timeout = TimeSpan.FromMilliseconds(testCase.GetPropertyValue(TUnitTestProperties.Timeout, -1d)),
@@ -42,8 +43,10 @@ internal static class TestExtensions
         };
         
         testCase.SetPropertyValue(TUnitTestProperties.UniqueId, testDetails.UniqueId);
+
+        var testMethodName = testDetails.MethodInfo.Name;
         
-        testCase.SetPropertyValue(TUnitTestProperties.TestName, testDetails.MethodInfo.Name);
+        testCase.SetPropertyValue(TUnitTestProperties.TestName, testMethodName);
         testCase.SetPropertyValue(TUnitTestProperties.FullyQualifiedClassName, testDetails.ClassType.FullName);
 
         testCase.SetPropertyValue(TUnitTestProperties.IsSkipped, testDetails.IsSkipped);
@@ -56,9 +59,23 @@ internal static class TestExtensions
         testCase.SetPropertyValue(TUnitTestProperties.Timeout, testDetails.Timeout.TotalMilliseconds);
         testCase.SetPropertyValue(TUnitTestProperties.RepeatCount, testDetails.RepeatCount);
         testCase.SetPropertyValue(TUnitTestProperties.RetryCount, testDetails.RetryCount);
+
+        var testParameterTypes = TestDetails.GetParameterTypes(testDetails.MethodParameterTypes);
         
+        var managedMethod = $"{testMethodName}{testParameterTypes}";
+        
+        var hierarchy = new StringBuilder()
+            .Append(testCase.CodeFilePath)
+            .Append('.')
+            .Append(testDetails.FullyQualifiedClassName)
+            .ToString()
+            .Split('.')
+            .Append(managedMethod)
+            .ToArray();
+        
+        testCase.SetPropertyValue(TUnitTestProperties.Hierarchy, hierarchy);
         testCase.SetPropertyValue(TUnitTestProperties.ManagedType, testDetails.FullyQualifiedClassName);
-        testCase.SetPropertyValue(TUnitTestProperties.ManagedMethod, testDetails.MethodInfo.Name + TestDetails.GetParameterTypes(testDetails.MethodParameterTypes));
+        testCase.SetPropertyValue(TUnitTestProperties.ManagedMethod, managedMethod);
         
         testCase.SetPropertyValue(TUnitTestProperties.MethodParameterTypeNames, testDetails.MethodParameterTypes?.Select(x => x.FullName).ToArray());
         testCase.SetPropertyValue(TUnitTestProperties.ClassParameterTypeNames, testDetails.ClassParameterTypes?.Select(x => x.FullName).ToArray());

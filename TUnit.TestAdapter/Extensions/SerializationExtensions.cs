@@ -22,9 +22,9 @@ public static class SerializationExtensions
         return JsonSerializer.Serialize(arguments, Options);
     }
     
-    public static object?[]? DeserializeArgumentsSafely(this string? argumentsJson, string[]? typeNames)
+    public static object?[]? DeserializeArgumentsSafely(this string? argumentsJson)
     {
-        if (argumentsJson == null)
+        if (string.IsNullOrWhiteSpace(argumentsJson))
         {
             return null;
         }

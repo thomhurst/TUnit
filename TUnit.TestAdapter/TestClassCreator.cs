@@ -18,13 +18,10 @@ internal class TestClassCreator(CacheableAssemblyLoader assemblyLoader)
         {
             return null;
         }
-
-        var classArgumentTypes = testCase
-            .GetPropertyValue(TUnitTestProperties.ClassParameterTypeNames, null as string[]);
         
         var classArguments = testCase
             .GetPropertyValue(TUnitTestProperties.ClassArguments, null as string)
-            .DeserializeArgumentsSafely(classArgumentTypes!);
+            .DeserializeArgumentsSafely();
 
         return CreateClass(classType, classArguments);
     }
