@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -17,11 +16,10 @@ internal class AsyncTestRunExecutor
         ITestExecutionRecorder testExecutionRecorder,
         CacheableAssemblyLoader assemblyLoader,
         CancellationTokenSource cancellationTokenSource,
-        TestGrouper testGrouper
+        TestGrouper testGrouper,
+        SystemResourceMonitor systemResourceMonitor
         )
 {
-    private bool _canRunAnotherTest = true;
-
     private readonly ConcurrentDictionary<string, Task> _oneTimeCleanUpRegistry = new();
     private readonly List<Task> _setResultsTasks = [];
 
@@ -29,8 +27,6 @@ internal class AsyncTestRunExecutor
     {
         var tests = testGrouper.OrganiseTests(testCases);
         
-        MonitorSystemResources();
-
         await ProcessTests(tests.Parallel, true, tests.LastTestOfClasses);
 
         await Task.WhenAll(tests.KeyedNotInParallel
@@ -127,7 +123,12 @@ internal class AsyncTestRunExecutor
     {
         while (queue.Count > 0)
         {
-            if (_canRunAnotherTest && !cancellationTokenSource.IsCancellationRequested)
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                break;
+            }
+            
+            if (!systemResourceMonitor.IsSystemStrained())
             {
                 var test = queue.Dequeue();
 
@@ -140,50 +141,11 @@ internal class AsyncTestRunExecutor
                 
                 yield return new TestWithResult(test, executionTask);
             }
-            else if (cancellationTokenSource.IsCancellationRequested)
-            {
-                break;
-            }
             else
             {
-                await Task.Delay(100);
+                await Task.Delay(500);
             }
         }
-    }
-
-    private void MonitorSystemResources()
-    {
-        Task.Factory.StartNew(async _ =>
-        {
-            while (!cancellationTokenSource.IsCancellationRequested)
-            {
-                await Task.Delay(500);
-                
-                var cpuUsage = await GetCpuUsageForProcess();
-
-                _canRunAnotherTest = cpuUsage < 80;
-            }
-        }, null, TaskCreationOptions.LongRunning);
-    }
-    
-    private async Task<double> GetCpuUsageForProcess()
-    {
-        var startTime = DateTime.UtcNow;
-        
-        var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-        await Task.Delay(500);
-    
-        var endTime = DateTime.UtcNow;
-        
-        var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-        
-        var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-        
-        var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-        
-        var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
-        
-        return cpuUsageTotal * 100;
     }
     
     private async Task ExecuteOneTimeCleanUps(TestCase testDetails)

@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TUnit.Engine;
 using TUnit.Engine.Extensions;
 using TUnit.TestAdapter.Constants;
 using TUnit.TestAdapter.Extensions;
