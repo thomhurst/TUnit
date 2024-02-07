@@ -11,7 +11,7 @@ public class EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr> :
     {
     }
 
-    protected override string DefaultMessage => $"{GetCallerExpressionPrefix()}The two Enumerables were not equivalent";
+    protected override string DefaultMessage => "The two Enumerables were not equivalent";
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {

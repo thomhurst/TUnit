@@ -7,13 +7,13 @@ public class PropertyOrMethodEqualsAssertCondition<TActual, TExpected, TAnd, TOr
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    protected override string DefaultMessage => $"{GetCallerExpressionPrefix()}Expected {ExpectedValue} but received {ActualValue}";
+    protected override string DefaultMessage => $"Expected {ExpectedValue} but received {ActualValue}";
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
         var propertyValue = GetPropertyValue(actualValue);
 
-        WithMessage((_, _) => $"{GetCallerExpressionPrefix()}Expected {ExpectedValue} but received {propertyValue}");
+        WithMessage((_, _) => $"Expected {ExpectedValue} but received {propertyValue}");
         
         return Equals(propertyValue, ExpectedValue);
     }

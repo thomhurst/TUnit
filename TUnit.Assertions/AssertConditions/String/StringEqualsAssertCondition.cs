@@ -19,6 +19,6 @@ public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, st
     }
 
     protected override string DefaultMessage => $"""
-                                              {GetCallerExpressionPrefix()}Expected "{ExpectedValue}" but received "{ActualValue}"
+                                              Expected "{ExpectedValue}" but received "{ActualValue}"
                                               """;
 }

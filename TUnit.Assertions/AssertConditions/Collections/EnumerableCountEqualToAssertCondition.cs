@@ -12,7 +12,7 @@ public class EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr> : AssertC
     {
     }
 
-    protected override string DefaultMessage => $"{GetCallerExpressionPrefix()}Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
+    protected override string DefaultMessage => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
     
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {

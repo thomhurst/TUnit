@@ -63,7 +63,8 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     protected Exception? Exception { get; private set; }
 
 
-    protected internal override string Message => MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage;
+    protected internal override string Message => 
+        $"{GetCallerExpressionPrefix()}{MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}";
 
     private Func<TActual?, Exception?, string>? MessageFactory { get; set; }
     
