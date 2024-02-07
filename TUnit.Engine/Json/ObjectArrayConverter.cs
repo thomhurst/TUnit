@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace TUnit.Engine.Json;
@@ -7,51 +8,54 @@ internal sealed class ObjectArrayConverter : JsonConverter<object?[]?>
 {
     public override object?[]? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType is JsonTokenType.Null)
-        {
-            return null;
-        }
-        
-        var valuesAndTypesArrayContainer = JsonSerializer.Deserialize<ValuesAndTypesArrayContainer>(ref reader, options);
-
-        if (valuesAndTypesArrayContainer is null)
+        if (reader.TokenType is not JsonTokenType.StartArray)
         {
             return null;
         }
         
         var values = new List<object?>();
-        
-        foreach (var valueAndType in valuesAndTypesArrayContainer.ValueAndTypes)
+
+        while (reader.Read())
         {
-            if (valueAndType.QualifiedTypeName is null)
+            switch (reader.TokenType)
             {
-                values.Add(null);
-                continue;
-            } 
-            
-            if (valueAndType.Value is JsonElement jsonElement)
-            {
-                values.Add(jsonElement.Deserialize(Type.GetType(valueAndType.QualifiedTypeName)!));
+                case JsonTokenType.String:
+                    var type = reader.GetString()!;
+                    reader.Read();
+                    var obj = JsonSerializer.Deserialize(ref reader, Type.GetType(type)!);
+                    values.Add(obj);
+                    break;
+                
+                case JsonTokenType.Null:
+                    values.Add(null);
+                    reader.Read();
+                    break;
             }
         }
-
+        
         return values.ToArray();
     }
 
     public override void Write(Utf8JsonWriter writer, object?[]? values, JsonSerializerOptions options)
     {
+        if (!Debugger.IsAttached)
+        {
+            //Debugger.Launch();
+        }
+        
         if (values is null)
         {
             return;
         }
+
+        var serializableValues = new List<object?>();
         
-        JsonSerializer.Serialize(writer, new ValuesAndTypesArrayContainer
+        foreach (var value in values)
         {
-            ValueAndTypes = values.Select(x => new ValueAndType
-            {
-                QualifiedTypeName = x?.GetType().AssemblyQualifiedName,
-                Value = x
-            }).ToArray()
-        }, options);
+            serializableValues.Add(value?.GetType().AssemblyQualifiedName);
+            serializableValues.Add(value);
+        }
+        
+        JsonSerializer.Serialize(writer, serializableValues.ToArray());
     }
 }
