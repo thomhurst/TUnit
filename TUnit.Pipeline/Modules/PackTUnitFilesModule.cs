@@ -36,7 +36,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                                     new KeyValue("Version", version!), 
                                     new KeyValue("PackageVersion", packageVersion!) 
                                 },
-                            IncludeSource = !project.Name.Contains("Analyzers")
+                            IncludeSource = !project.Name.Contains("Analyzers"),
                         }, cancellationToken);
             }, cancellationToken: cancellationToken)
             .ProcessOneAtATime();
