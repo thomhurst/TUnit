@@ -3,7 +3,7 @@ using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
 
-internal class TestClassCreator()
+internal class TestClassCreator
 {
     public object? CreateClass(TestCase testCase, out Type classType)
     {

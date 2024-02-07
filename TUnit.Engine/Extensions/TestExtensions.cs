@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Text;
-using System.Text.Json.Serialization;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Newtonsoft.Json;
 using TUnit.Core;
@@ -39,7 +37,7 @@ internal static class TestExtensions
     {
         var testCase = new TestCase(testDetails.UniqueId, TestAdapterConstants.ExecutorUri, testDetails.Source)
         {
-            DisplayName = testDetails.DisplayName,
+            DisplayName = testDetails.TestNameWithArguments,
             CodeFilePath = testDetails.FileName,
             LineNumber = testDetails.MinLineNumber,
         };
@@ -65,13 +63,15 @@ internal static class TestExtensions
         var testParameterTypes = TestDetails.GetParameterTypes(testDetails.MethodParameterTypes);
         
         var managedMethod = $"{testMethodName}{testParameterTypes}";
-        
-        var hierarchy = new StringBuilder()
-            .Append(testDetails.FullyQualifiedClassName)
-            .ToString()
-            .Split('.')
-            .Append(managedMethod)
-            .ToArray();
+
+        var hierarchy = new[]
+        {
+            // First option is 'Container' which is empty for C# projects
+            string.Empty,
+            testDetails.Assembly.GetName().Name ?? string.Empty,
+            testDetails.ClassType.Name,
+            testDetails.TestNameWithParameterTypes
+        };
         
         testCase.SetPropertyValue(TUnitTestProperties.Hierarchy, hierarchy);
         testCase.SetPropertyValue(TUnitTestProperties.ManagedType, testDetails.FullyQualifiedClassName);
@@ -85,7 +85,7 @@ internal static class TestExtensions
         if (testDetails.TestName.Contains("ParameterisedTests1"))
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "TestCase2.json");
-            File.AppendAllText(path, JsonConvert.SerializeObject(testCase));
+            File.AppendAllText(path, JsonConvert.SerializeObject(testCase) + ',');
         }
         
         return testCase;

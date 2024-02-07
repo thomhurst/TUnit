@@ -23,7 +23,8 @@ internal record TestDetails
         ClassArgumentValues = classArguments;
         
         TestName = methodInfo.Name;
-        DisplayName = methodInfo.Name + GetArgumentValues() + GetCountInBrackets();
+        TestNameWithArguments = methodInfo.Name + GetArgumentValues() + GetCountInBrackets();
+        TestNameWithParameterTypes = methodInfo.Name + GetParameterTypes(MethodParameterTypes);
         ClassName = ClassType.Name;
         FullyQualifiedClassName = ClassType.FullName!;
         Assembly = ClassType.Assembly;
@@ -67,7 +68,7 @@ internal record TestDetails
         MinLineNumber = sourceLocation.MinLineNumber;
         MaxLineNumber = sourceLocation.MaxLineNumber;
 
-        UniqueId = $"{FullyQualifiedClassName}.{DisplayName}";
+        UniqueId = $"{FullyQualifiedClassName}.{TestNameWithArguments}";
     }
 
     private static string? GetNotInParallelConstraintKey(CustomAttributeData[] methodAndClassAttributes)
@@ -169,7 +170,8 @@ internal record TestDetails
 
     public string? SkipReason { get; }
     public bool IsSkipped => !string.IsNullOrEmpty(SkipReason);
-    public string DisplayName { get; }
+    public string TestNameWithArguments { get; }
+    public string TestNameWithParameterTypes { get; }
 
     public static string GetParameterTypes(Type[]? types)
     {

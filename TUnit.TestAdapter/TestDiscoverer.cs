@@ -27,7 +27,7 @@ public class TestDiscoverer : ITestDiscoverer
         
         foreach (var test in tests)
         {
-            logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.DisplayName);
+            logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.TestNameWithArguments);
             discoverySink.SendTestCase(test.ToTestCase());
         }
     }

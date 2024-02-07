@@ -88,7 +88,7 @@ public class Tests
         await Assert.That(value).Is.EqualTo("1");
     }
     
-    [Test, CustomSkip()]
+    [Test, CustomSkip]
     [TestCategory("Skip")]
     public async Task CustomSkip1()
     {
