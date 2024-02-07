@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using TUnit.TestAdapter.Json;
 
 namespace TUnit.TestAdapter.Extensions;
 
@@ -7,8 +8,8 @@ public static class SerializationExtensions
 {
     private static readonly JsonSerializerOptions Options = new()
     {
-        Converters = { new JsonStringEnumConverter() },
-        ReferenceHandler = ReferenceHandler.Preserve
+        Converters = { new JsonStringEnumConverter(), new ObjectArrayConverter() },
+        ReferenceHandler = ReferenceHandler.Preserve,
     };
     
     public static string? SerializeArgumentsSafely(this object?[]? arguments)
@@ -28,9 +29,7 @@ public static class SerializationExtensions
             return null;
         }
 
-        var argumentsArray = JsonSerializer.Deserialize<object?[]>(argumentsJson, Options);
-
-        return argumentsArray?.Select((x, i) => FromJsonElement(x, typeNames?.ElementAtOrDefault(i))).ToArray();
+        return JsonSerializer.Deserialize<object?[]?>(argumentsJson, Options);
     }
 
     private static object? FromJsonElement(object? obj, string? typeName)
