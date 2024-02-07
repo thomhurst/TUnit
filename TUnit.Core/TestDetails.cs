@@ -92,7 +92,7 @@ internal record TestDetails
 
     private string GetCountInBrackets()
     {
-        return Count == 1 ? string.Empty : $" [{Count}]";
+        return RepeatCount > 0 ? $" [{Count}]" : string.Empty;
     }
 
     public bool IsSingleTest { get; }
