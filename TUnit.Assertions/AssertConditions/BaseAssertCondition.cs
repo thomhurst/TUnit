@@ -57,9 +57,16 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     
     internal override async Task<bool> AssertAsync()
     {
-        var assertionData = await AssertionBuilder.GetAssertionData();
+        try
+        {
+            var assertionData = await AssertionBuilder.GetAssertionData();
 
-        return Assert(assertionData.Result, assertionData.Exception);
+            return Assert(assertionData.Result, assertionData.Exception);
+        }
+        catch (Exception e)
+        {
+            throw new AssertionException(e.Message + GetCallerExpressionSuffix(), e);
+        }
     }
 
     protected TActual? ActualValue { get; private set; }
