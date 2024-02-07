@@ -34,7 +34,7 @@ internal record TestDetails
             .Concat(ClassType.CustomAttributes)
             .ToArray();
 
-        IsSingleTest = !methodAndClassAttributes.Any(x => x.AttributeType == typeof(TestWithDataAttribute)
+        IsSingleTest = !methodAndClassAttributes.Any(x => x.AttributeType == typeof(DataDrivenTestAttribute)
                                                           || x.AttributeType == typeof(TestDataSourceAttribute));
         
         SkipReason = methodAndClassAttributes

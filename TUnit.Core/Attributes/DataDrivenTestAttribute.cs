@@ -1,11 +1,11 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public class TestWithDataAttribute : TUnitAttribute
+public class DataDrivenTestAttribute : TUnitAttribute
 {
     public object?[] Values { get; }
 
-    public TestWithDataAttribute(params object?[]? values)
+    public DataDrivenTestAttribute(params object?[]? values)
     {
         Values = values ?? [null];
     }
