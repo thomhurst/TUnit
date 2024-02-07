@@ -549,9 +549,9 @@ public static class IsExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
                 
-                return actual <= expected + tolerance && actual >= expected - tolerance;
+                return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
             },
-            (dateTime, _) => $"{dateTime.ToLongStringWithMilliseconds()} is not between {(dateTime - tolerance).ToLongStringWithMilliseconds()} and {(dateTime + tolerance).ToLongStringWithMilliseconds()}"));
+            (dateTime, _) => $"{dateTime.ToLongStringWithMilliseconds()} is not between {dateTime.Subtract(tolerance).ToLongStringWithMilliseconds()} and {dateTime.Add(tolerance).ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected, TimeSpan tolerance)
@@ -566,9 +566,9 @@ public static class IsExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
                 
-                return actual <= expected + tolerance && actual >= expected - tolerance;
+                return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
             },
-            (dateTime, _) => $"{dateTime.ToLongStringWithMilliseconds()} is not between {(dateTime - tolerance).ToLongStringWithMilliseconds()} and {(dateTime + tolerance).ToLongStringWithMilliseconds()}"));
+            (dateTime, _) => $"{dateTime.ToLongStringWithMilliseconds()} is not between {dateTime.Subtract(tolerance).ToLongStringWithMilliseconds()} and {dateTime.Add(tolerance).ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateOnly, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected, int daysTolerance)
