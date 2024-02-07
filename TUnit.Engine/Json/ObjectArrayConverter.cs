@@ -56,6 +56,6 @@ internal sealed class ObjectArrayConverter : JsonConverter<object?[]?>
             serializableValues.Add(value);
         }
         
-        JsonSerializer.Serialize(writer, serializableValues.ToArray());
+        JsonSerializer.Serialize(writer, serializableValues);
     }
 }
