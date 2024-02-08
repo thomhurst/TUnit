@@ -43,6 +43,11 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
         }
         
         var filter = ParseFilter(filterExpression.TestCaseFilterValue);
+
+        if (filter is null)
+        {
+            yield break;
+        }
         
         foreach (var test in tests)
         {
@@ -58,7 +63,7 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
         }
     }
 
-    private Filter ParseFilter(string testCaseFilterValue)
+    private Filter? ParseFilter(string testCaseFilterValue)
     {
         var filter = new Filter();
         
@@ -71,13 +76,13 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
             if (string.IsNullOrWhiteSpace(filterName) || 
                 !SupportedProperties.Keys.Contains(filterName, StringComparer.InvariantCultureIgnoreCase))
             {
-                messageLogger.SendMessage(TestMessageLevel.Warning,
+                messageLogger.SendMessage(TestMessageLevel.Error,
                     $"""
                     '{filterName}' is not a known filter.
                     Supported filters are: {string.Join(", ", SupportedProperties.Keys)}
                     """);
                 
-                continue;
+                return null;
             }
 
             filter.AddFilter(filterName, filterValue);
