@@ -53,7 +53,7 @@ public static class Assert
             await @delegate();
             Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
-        catch (Exception e)
+        catch (Exception e) when(e is not AssertionException)
         {
             if (e is TException exception)
             {
@@ -77,7 +77,7 @@ public static class Assert
             @delegate();
             Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
-        catch (Exception e)
+        catch (Exception e) when(e is not AssertionException)
         {
             if (e is TException exception)
             {
