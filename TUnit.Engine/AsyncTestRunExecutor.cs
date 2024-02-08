@@ -20,10 +20,9 @@ internal class AsyncTestRunExecutor
         SystemResourceMonitor systemResourceMonitor
         )
 {
-    private readonly ConcurrentDictionary<string, Task> _oneTimeCleanUpRegistry = new();
-    private readonly List<Task> _setResultsTasks = [];
-    
     private int _currentlyExecutingTests;
+
+    private readonly ConcurrentDictionary<string, Task> _oneTimeCleanUpRegistry = [];
 
     public async Task RunInAsyncContext(IEnumerable<TestCase> testCases)
     {
@@ -41,7 +40,8 @@ internal class AsyncTestRunExecutor
 
     private async Task ProcessTests(Queue<TestCase> queue, bool runInParallel, IReadOnlyCollection<TestCase> lastTestsOfClasses)
     {
-        var executingTests = new List<TestWithResult>();
+        List<Task> setResultsTasks = [];
+        List<TestWithResult> executingTests = [];
         
         await foreach (var testWithResult in ProcessQueue(queue, runInParallel))
         {
@@ -53,7 +53,7 @@ internal class AsyncTestRunExecutor
             
             executingTests.RemoveAll(x => x.Result.IsCompletedSuccessfully);
             
-            _setResultsTasks.Add(testWithResult.Result.ContinueWith(t =>
+            setResultsTasks.Add(testWithResult.Result.ContinueWith(t =>
             {
                 var result = t.Result;
                 var testDetails = testWithResult.Test;
@@ -77,7 +77,7 @@ internal class AsyncTestRunExecutor
 
         await WhenAllSafely(executingTests.Select(x => x.Result), testExecutionRecorder);
         await WhenAllSafely(_oneTimeCleanUpRegistry.Values, testExecutionRecorder);
-        await Task.WhenAll(_setResultsTasks);
+        await Task.WhenAll(setResultsTasks);
     }
 
     private TestOutcome GetOutcome(Status resultStatus)
@@ -112,13 +112,10 @@ internal class AsyncTestRunExecutor
             .Select(x => x.Result)
             .ToArray();
 
-        Task.WhenAll(executingTestsForThisClass).ContinueWith(x =>
-        {
-            _ = _oneTimeCleanUpRegistry.GetOrAdd(processingTestFullyQualifiedClassName,
-                ExecuteOneTimeCleanUps(processingTestDetails));
-            
-            return Task.CompletedTask;
-        });
+        Task.WhenAll(executingTestsForThisClass).ContinueWith(_ =>
+            _oneTimeCleanUpRegistry.GetOrAdd(processingTestFullyQualifiedClassName,
+                ExecuteOneTimeCleanUps(processingTestDetails))
+        );
     }
 
     private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestCase> queue, bool runInParallel)
