@@ -17,11 +17,6 @@ public class OneTimeCleanUpTracker
             .ToDictionary(x => x.Key, x => x.ToList());
     }
 
-    public List<TestCase> GetRemainingTests() 
-        => _innerDictionary.Values.SelectMany(x => x).ToList();
-
-    public bool IsEmpty() => _innerDictionary.Count == 0;
-
     private readonly object _removeLock = new();
     
     public void Remove(TestCase testCase, Task executingTask)
@@ -40,7 +35,10 @@ public class OneTimeCleanUpTracker
             if (list.Count == 0)
             {
                 _innerDictionary.Remove(className);
-                _onLastTestForClassProcessed(testCase, executingTask);
+                
+                executingTask.ContinueWith(_ =>
+                    _onLastTestForClassProcessed(testCase, executingTask)
+                );
             }
         }
     }
