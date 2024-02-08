@@ -15,6 +15,8 @@ internal static class TestExtensions
         
         var methodParameterTypes =
             testCase.GetPropertyValue(TUnitTestProperties.MethodParameterTypeNames, null as string[]);
+
+        var timeoutMilliseconds = testCase.GetPropertyValue(TUnitTestProperties.Timeout, null as double?);
         
         return new TestInformation
         {
@@ -25,11 +27,12 @@ internal static class TestExtensions
             Categories = testCase.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>()).ToList(),
             TestClassArguments = testCase.GetPropertyValue(TUnitTestProperties.ClassArguments, null as string).DeserializeArgumentsSafely(),
             TestMethodArguments = testCase.GetPropertyValue(TUnitTestProperties.MethodArguments, null as string).DeserializeArgumentsSafely(),
-            TestClassArgumentTypes = classParameterTypes,
-            TestMethodArgumentTypes = methodParameterTypes,
-            Timeout = TimeSpan.FromMilliseconds(testCase.GetPropertyValue(TUnitTestProperties.Timeout, -1d)),
+            TestClassParameterTypes = classParameterTypes,
+            TestMethodParameterTypes = methodParameterTypes,
+            Timeout = timeoutMilliseconds is null ? null : TimeSpan.FromMilliseconds(timeoutMilliseconds.Value),
             RepeatCount = testCase.GetPropertyValue(TUnitTestProperties.RepeatCount, 0),
             RetryCount = testCase.GetPropertyValue(TUnitTestProperties.RetryCount, 0),
+            NotInParallelConstraintKeys = testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, null as string[]),
         };
     }
 
@@ -54,9 +57,9 @@ internal static class TestExtensions
         
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Category, testDetails.Categories.ToArray());
         
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.NotInParallelConstraintKey, testDetails.NotInParallelConstraintKey);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.NotInParallelConstraintKey, testDetails.NotInParallelConstraintKeys);
         
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Timeout, testDetails.Timeout.TotalMilliseconds);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Timeout, testDetails.Timeout?.TotalMilliseconds);
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RepeatCount, testDetails.RepeatCount);
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RetryCount, testDetails.RetryCount);
 

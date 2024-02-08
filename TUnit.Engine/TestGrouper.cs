@@ -11,7 +11,8 @@ internal class TestGrouper
         var allTestsOrderedByClass = testCases
             .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
             .SelectMany(x => x)
-            .OrderBy(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue));
+            .OrderBy(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue))
+            .ToList();
 
         var notInParallel = new Queue<TestCase>();
         var keyedNotInParallel = new List<TestCase>();
@@ -36,11 +37,11 @@ internal class TestGrouper
 
         return new GroupedTests
         {
+            AllTests = allTestsOrderedByClass,
+            
             Parallel = parallel,
             
-            KeyedNotInParallel = keyedNotInParallel
-                .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, ""))
-                .ToQueue(),
+            KeyedNotInParallel = keyedNotInParallel,
             
             NotInParallel = notInParallel,
             
@@ -49,7 +50,7 @@ internal class TestGrouper
                 .Concat(notInParallel)
                 .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
                 .Select(x => x.Last())
-                .ToList()
+                .ToList(),
         };
     }
 }

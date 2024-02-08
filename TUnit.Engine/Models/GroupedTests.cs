@@ -4,8 +4,9 @@ namespace TUnit.Engine.Models;
 
 internal record GroupedTests
 {
+    public required IReadOnlyList<TestCase> AllTests { get; init; }
     public required Queue<TestCase> NotInParallel { get; init; }
-    public required Queue<IGrouping<string, TestCase>> KeyedNotInParallel { get; init; }
+    public required List<TestCase> KeyedNotInParallel { get; init; }
 
     public required Queue<TestCase> Parallel { get; init; }
 

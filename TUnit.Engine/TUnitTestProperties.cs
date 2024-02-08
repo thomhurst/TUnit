@@ -24,17 +24,17 @@ internal static class TUnitTestProperties
     public static TestProperty RepeatCount => GetOrRegisterTestProperty<int>(nameof(RepeatCount), nameof(RepeatCount));
     public static TestProperty RetryCount => GetOrRegisterTestProperty<int>(nameof(RetryCount), nameof(RetryCount));
 
-    public static TestProperty Timeout => GetOrRegisterTestProperty<double>(nameof(Timeout), nameof(Timeout));
+    public static TestProperty Timeout => GetOrRegisterTestProperty<double?>(nameof(Timeout), nameof(Timeout));
     
     public static TestProperty NotInParallelConstraintKey =>
-        GetOrRegisterTestProperty<string?>(nameof(NotInParallelConstraintKey), nameof(NotInParallelConstraintKey));
+        GetOrRegisterTestProperty<string[]?>(nameof(NotInParallelConstraintKey), nameof(NotInParallelConstraintKey));
 
     public static TestProperty MethodParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(MethodParameterTypeNames), nameof(MethodParameterTypeNames));
     public static TestProperty MethodArguments => GetOrRegisterTestProperty<string?>(nameof(MethodArguments), nameof(MethodArguments));
     public static TestProperty ClassArguments => GetOrRegisterTestProperty<string?>(nameof(ClassArguments), nameof(ClassArguments));
     public static TestProperty ClassParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(ClassParameterTypeNames), nameof(ClassParameterTypeNames));
 
-    public static TestProperty TestClass => GetOrRegisterTestProperty<string>(nameof(TestClass), nameof(TestClass));
+    public static TestProperty TestClass => ManagedType;
     public static TestProperty TestName => GetOrRegisterTestProperty<string>(nameof(TestName), nameof(TestName));
     public static TestProperty Category => GetOrRegisterTestProperty<string[]>(nameof(Category), nameof(Category));
     public static TestProperty NotCategory => GetOrRegisterTestProperty<string>(nameof(NotCategory), nameof(NotCategory));

@@ -21,58 +21,110 @@ internal class AsyncTestRunExecutor
         )
 {
     private int _currentlyExecutingTests;
-    
+    private OneTimeCleanUpTracker _oneTimeCleanupTracker = null!;
+
     public async Task RunInAsyncContext(IEnumerable<TestCase> testCases)
     {
         var tests = testGrouper.OrganiseTests(testCases);
+
+        var oneTimeCleanUps = new ConcurrentQueue<Task>();
+
+        _oneTimeCleanupTracker = new OneTimeCleanUpTracker(tests.AllTests, (testCase, executingTask) =>
+        {
+            oneTimeCleanUps.Enqueue(executingTask.ContinueWith(t =>
+                ExecuteOneTimeCleanUps(testCase)
+            ));
+        });
         
         await ProcessTests(tests.Parallel, true, tests.LastTestOfClasses);
 
-        await Task.WhenAll(tests.KeyedNotInParallel
-            .Select(keyedTestsGroup =>
-                ProcessTests(keyedTestsGroup.ToQueue(), false, tests.LastTestOfClasses))
-        );
+        await ProcessKeyedNotInParallelTests(tests);
         
         await ProcessTests(tests.NotInParallel, false, tests.LastTestOfClasses);
+
+        await Task.WhenAll(oneTimeCleanUps);
+    }
+    
+    private async Task ProcessKeyedNotInParallelTests(GroupedTests tests)
+    {
+        var currentlyExecutingByKeysLock = new object();
+        var currentlyExecutingByKeys = new List<(string[] Keys, Task)>();
+
+        var testsToProcess = tests.KeyedNotInParallel;
+
+        while (testsToProcess.Count > 0)
+        {
+            // Reversing allows us to remove from the collection
+            for (var i = testsToProcess.Count - 1; i >= 0; i--)
+            {
+                var testToProcess = testsToProcess[i];
+
+                var notInParallelKeys =
+                    testToProcess.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, Array.Empty<string>());
+
+                if (currentlyExecutingByKeys.Any(x => x.Keys.Intersect(notInParallelKeys).Any()))
+                {
+                    // There are currently executing tasks with that same 
+                    continue;
+                }
+            
+                // Remove from collection as we're now processing it
+                testsToProcess.RemoveAt(i);
+
+                var testWithResult = await ProcessTest(testToProcess, true);
+
+                var tuple = (notInParallelKeys, Result: testWithResult.ResultTask);
+
+                lock (currentlyExecutingByKeysLock)
+                {
+                    currentlyExecutingByKeys.Add(tuple);
+                }
+
+                _ = testWithResult.ResultTask.ContinueWith(t =>
+                {
+                    lock (currentlyExecutingByKeysLock)
+                    {
+                        return currentlyExecutingByKeys.Remove(tuple);
+                    }
+                });
+            
+                _oneTimeCleanupTracker.Remove(testWithResult.Test, ProcessResult(testWithResult));
+            }
+        }
+
+        await Task.WhenAll(currentlyExecutingByKeys.Select(x => x.Item2));
     }
 
     private async Task ProcessTests(Queue<TestCase> queue, bool runInParallel, IReadOnlyCollection<TestCase> lastTestsOfClasses)
     {
-        List<Task> setResultsTasks = [];
-        List<TestWithResult> executingTests = [];
-        ConcurrentDictionary<string, Task> oneTimeCleanUpRegistry = [];
-        
         await foreach (var testWithResult in ProcessQueue(queue, runInParallel))
         {
-            cancellationTokenSource.Token.ThrowIfCancellationRequested();
-            
-            executingTests.Add(testWithResult);
-
-            SetupRunOneTimeCleanUpForClass(testWithResult.Test, lastTestsOfClasses, executingTests, oneTimeCleanUpRegistry);
-            
-            setResultsTasks.Add(testWithResult.Result.ContinueWith(t =>
-            {
-                var result = t.Result;
-                var testDetails = testWithResult.Test;
-                
-                testExecutionRecorder.RecordResult(new TestResult(testWithResult.Test)
-                {
-                    DisplayName = testDetails.DisplayName,
-                    Outcome = GetOutcome(result.Status),
-                    ComputerName = result.ComputerName,
-                    Duration = result.Duration,
-                    StartTime = result.Start,
-                    EndTime = result.End,
-                    Messages = { new TestResultMessage("Output", result.Output) },
-                    ErrorMessage = result.Exception?.Message,
-                    ErrorStackTrace = result.Exception?.StackTrace,
-                });
-            }));
+            _oneTimeCleanupTracker.Remove(testWithResult.Test, ProcessResult(testWithResult));
         }
+    }
+
+    private Task ProcessResult(TestWithResult testWithResult)
+    {
+        cancellationTokenSource.Token.ThrowIfCancellationRequested();
         
-        await WhenAllSafely(executingTests.Select(x => x.Result), testExecutionRecorder);
-        await WhenAllSafely(oneTimeCleanUpRegistry.Values, testExecutionRecorder);
-        await Task.WhenAll(setResultsTasks);
+        return testWithResult.ResultTask.ContinueWith(t =>
+        {
+            var result = t.Result;
+            var testDetails = testWithResult.Test;
+                
+            testExecutionRecorder.RecordResult(new TestResult(testWithResult.Test)
+            {
+                DisplayName = testDetails.DisplayName,
+                Outcome = GetOutcome(result.Status),
+                ComputerName = result.ComputerName,
+                Duration = result.Duration,
+                StartTime = result.Start,
+                EndTime = result.End,
+                Messages = { new TestResultMessage("Output", result.Output) },
+                ErrorMessage = result.Exception?.Message,
+                ErrorStackTrace = result.Exception?.StackTrace,
+            });
+        });
     }
 
     private TestOutcome GetOutcome(Status resultStatus)
@@ -104,7 +156,7 @@ internal class AsyncTestRunExecutor
 
         var executingTestsForThisClass = executingTests
             .Where(x => x.Test.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, "") == processingTestFullyQualifiedClassName)
-            .Select(x => x.Result)
+            .Select(x => x.ResultTask)
             .ToArray();
 
         Task.WhenAll(executingTestsForThisClass).ContinueWith(_ =>
@@ -126,18 +178,7 @@ internal class AsyncTestRunExecutor
             {
                 var test = queue.Dequeue();
 
-                Interlocked.Increment(ref _currentlyExecutingTests);
-
-                var executionTask = singleTestExecutor.ExecuteTest(test);
-
-                if (!runInParallel)
-                {
-                    await executionTask;
-                }
-                
-                Interlocked.Decrement(ref _currentlyExecutingTests);
-                
-                yield return new TestWithResult(test, executionTask);
+                yield return await ProcessTest(test, runInParallel);
             }
             else
             {
@@ -145,7 +186,23 @@ internal class AsyncTestRunExecutor
             }
         }
     }
-    
+
+    private async Task<TestWithResult> ProcessTest(TestCase test, bool runInParallel)
+    {
+        Interlocked.Increment(ref _currentlyExecutingTests);
+
+        var executionTask = singleTestExecutor.ExecuteTest(test);
+
+        if (!runInParallel)
+        {
+            await executionTask;
+        }
+                
+        Interlocked.Decrement(ref _currentlyExecutingTests);
+        
+        return new TestWithResult(test, executionTask);
+    }
+
     private async Task ExecuteOneTimeCleanUps(TestCase testDetails)
     {
         var assembly = assemblyLoader.GetOrLoadAssembly(testDetails.Source);

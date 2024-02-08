@@ -30,24 +30,26 @@ internal record TestDetails
         Assembly = ClassType.Assembly;
         Source = sourceLocation.RawSource;
 
-        var methodAndClassAttributes = methodInfo.CustomAttributes
-            .Concat(ClassType.CustomAttributes)
+        var methodAndClassAttributes = methodInfo.GetCustomAttributes()
+            .Concat(ClassType.GetCustomAttributes())
             .ToArray();
 
-        IsSingleTest = !methodAndClassAttributes.Any(x => x.AttributeType == typeof(DataDrivenTestAttribute)
-                                                          || x.AttributeType == typeof(TestDataSourceAttribute));
+        IsSingleTest = !methodAndClassAttributes.Any(x => x is DataDrivenTestAttribute or TestDataSourceAttribute);
         
         SkipReason = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeType == typeof(SkipAttribute))
-            ?.ConstructorArguments.FirstOrDefault().Value as string;
+            .OfType<SkipAttribute>()
+            .FirstOrDefault()
+            ?.Reason;
         
         RetryCount = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeType == typeof(RetryAttribute))
-            ?.ConstructorArguments.FirstOrDefault().Value as int? ?? 0;
+            .OfType<RetryAttribute>()
+            .FirstOrDefault()
+            ?.Times ?? 0;
         
         RepeatCount = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeType == typeof(RepeatAttribute))
-            ?.ConstructorArguments.FirstOrDefault().Value as int? ?? 0;
+            .OfType<RepeatAttribute>()
+            .FirstOrDefault()
+            ?.Times ?? 0;;
 
         if (RepeatCount > 0)
         {
@@ -55,10 +57,11 @@ internal record TestDetails
         }
         
         Order = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeType == typeof(RetryAttribute))
-            ?.ConstructorArguments.FirstOrDefault().Value as int? ?? int.MaxValue;
+            .OfType<OrderAttribute>()
+            .FirstOrDefault()
+            ?.Order ?? int.MaxValue;
         
-        NotInParallelConstraintKey = GetNotInParallelConstraintKey(methodAndClassAttributes);
+        NotInParallelConstraintKeys = GetNotInParallelConstraintKeys(methodAndClassAttributes);
         
         AddCategories(methodAndClassAttributes);
         
@@ -71,23 +74,16 @@ internal record TestDetails
         UniqueId = $"{FullyQualifiedClassName}.{TestNameWithArguments}";
     }
 
-    private static string? GetNotInParallelConstraintKey(CustomAttributeData[] methodAndClassAttributes)
+    private static string[]? GetNotInParallelConstraintKeys(IEnumerable<Attribute> methodAndClassAttributes)
     {
         var notInParallelAttribute = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeType == typeof(NotInParallelAttribute));
+            .OfType<NotInParallelAttribute>()
+            .FirstOrDefault();
 
-        if (notInParallelAttribute is null)
-        {
-            return null;
-        }
-
-        return notInParallelAttribute.ConstructorArguments
-                   .FirstOrDefault()
-                   .Value as string
-               ?? string.Empty;
+        return notInParallelAttribute?.ConstraintKeys;
     }
 
-    public string? NotInParallelConstraintKey { get; }
+    public string[]? NotInParallelConstraintKeys { get; }
 
     public int Order { get; }
 
@@ -98,32 +94,25 @@ internal record TestDetails
 
     public bool IsSingleTest { get; }
 
-    private void AddCategories(CustomAttributeData[] methodAndClassAttributes)
+    private void AddCategories(Attribute[] methodAndClassAttributes)
     {
         var categoryAttributes = methodAndClassAttributes
-            .Where(x => x.AttributeType == typeof(TestCategoryAttribute));
+            .OfType<TestCategoryAttribute>();
 
         var categories = categoryAttributes
-            .Select(x => x.ConstructorArguments.FirstOrDefault().Value)
-            .OfType<string>();
+            .Select(x => x.Category);
         
         Categories.AddRange(categories);
     }
 
     public List<string> Categories { get; } = new();
     
-    private static TimeSpan GetTimeout(CustomAttributeData[] methodAndClassAttributes)
+    private static TimeSpan? GetTimeout(IEnumerable<Attribute> methodAndClassAttributes)
     {
-        var timeoutMilliseconds = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeType == typeof(TimeoutAttribute))
-            ?.ConstructorArguments.FirstOrDefault().Value as int?;
-
-        if (timeoutMilliseconds is 0 or null)
-        {
-            return default;
-        }
-        
-        return TimeSpan.FromMilliseconds(timeoutMilliseconds.Value);
+        return methodAndClassAttributes
+            .OfType<TimeoutAttribute>()
+            .FirstOrDefault()
+            ?.Timeout;
     }
 
 
@@ -155,7 +144,7 @@ internal record TestDetails
     public Type ClassType { get; }
     public string? FileName { get; }
 
-    public TimeSpan Timeout { get; }
+    public TimeSpan? Timeout { get; }
 
     public int CurrentExecutionCount { get; internal set; }
     

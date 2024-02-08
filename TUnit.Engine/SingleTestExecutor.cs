@@ -168,9 +168,9 @@ internal class SingleTestExecutor
         var testLevelCancellationTokenSource =
             CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
 
-        if (testInformation.Timeout != default)
+        if (testInformation.Timeout != null && testInformation.Timeout.Value != default)
         {
-            testLevelCancellationTokenSource.CancelAfter(testInformation.Timeout);
+            testLevelCancellationTokenSource.CancelAfter(testInformation.Timeout.Value);
         }
 
         testContext.CancellationToken = testLevelCancellationTokenSource.Token;
@@ -194,13 +194,13 @@ internal class SingleTestExecutor
         var methodResult = _methodInvoker.InvokeMethod(@class, testInformation.MethodInfo, BindingFlags.Default,
             testInformation.TestMethodArguments);
 
-        if (testInformation.Timeout == default)
+        if (testInformation.Timeout == null || testInformation.Timeout.Value == default)
         {
             await methodResult;
             return;
         }
         
-        var timeoutTask = Task.Delay(testInformation.Timeout, cancellationTokenSource.Token)
+        var timeoutTask = Task.Delay(testInformation.Timeout.Value, cancellationTokenSource.Token)
             .ContinueWith(_ => throw new TimeoutException(testInformation));
 
         await await Task.WhenAny(timeoutTask, methodResult);
