@@ -32,7 +32,7 @@ internal record Filter
                 RunnableTestNames.Add(value);
             }
 
-            if (string.Equals(filterName, TUnitTestProperties.TestClass.Id,
+            if (string.Equals(filterName, nameof(TUnitTestProperties.TestClass),
                     StringComparison.InvariantCultureIgnoreCase))
             {
                 var collection = value.Contains('.') ? RunnableFullyQualifiedClasses : RunnableClasses;
