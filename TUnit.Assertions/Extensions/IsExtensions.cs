@@ -263,7 +263,7 @@ public static class IsExtensions
 
                 return value >= lowerBound && value <= upperBound;
             },
-            (value, _) => $"{value} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTime, TAnd, TOr> Between<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime lowerBound, DateTime upperBound)
@@ -276,7 +276,7 @@ public static class IsExtensions
 
                 return value >= lowerBound && value <= upperBound;
             },
-            (value, _) => $"{value} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected)
@@ -289,7 +289,7 @@ public static class IsExtensions
 
                 return value > expected;
             },
-            (value, _) => $"{value} was not greater than {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> GreaterThanOrEqualTo<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected) 
@@ -302,7 +302,7 @@ public static class IsExtensions
 
                 return value >= expected;
             },
-            (value, _) => $"{value} was not greater than or equal to {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> LessThan<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected) 
@@ -315,7 +315,7 @@ public static class IsExtensions
 
                 return value < expected;
             },
-            (value, _) => $"{value} was not less than {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> LessThanOrEqualTo<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected) 
@@ -328,7 +328,7 @@ public static class IsExtensions
 
                 return value <= expected;
             },
-            (value, _) => $"{value} was not less than or equal to {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTime, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected)
@@ -341,7 +341,7 @@ public static class IsExtensions
 
                 return value > expected;
             },
-            (value, _) => $"{value} was not greater than {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTime, TAnd, TOr> GreaterThanOrEqualTo<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected) 
@@ -354,7 +354,7 @@ public static class IsExtensions
 
                 return value >= expected;
             },
-            (value, _) => $"{value} was not greater than or equal to {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTime, TAnd, TOr> LessThan<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected) 
@@ -367,7 +367,7 @@ public static class IsExtensions
 
                 return value < expected;
             },
-            (value, _) => $"{value} was not less than {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateTime, TAnd, TOr> LessThanOrEqualTo<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected) 
@@ -380,7 +380,7 @@ public static class IsExtensions
 
                 return value <= expected;
             },
-            (value, _) => $"{value} was not less than or equal to {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<DateOnly, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected)
@@ -445,7 +445,7 @@ public static class IsExtensions
 
                 return value > expected;
             },
-            (value, _) => $"{value} was not greater than {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<TimeOnly, TAnd, TOr> GreaterThanOrEqualTo<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected) 
@@ -458,7 +458,7 @@ public static class IsExtensions
 
                 return value >= expected;
             },
-            (value, _) => $"{value} was not greater than or equal to {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<TimeOnly, TAnd, TOr> LessThan<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected) 
@@ -471,7 +471,7 @@ public static class IsExtensions
 
                 return value < expected;
             },
-            (value, _) => $"{value} was not less than {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}"));
     }
     
     public static BaseAssertCondition<TimeOnly, TAnd, TOr> LessThanOrEqualTo<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected) 
@@ -484,7 +484,7 @@ public static class IsExtensions
 
                 return value <= expected;
             },
-            (value, _) => $"{value} was not less than or equal to {expected}"));
+            (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}"));
     }
     
     #endregion
