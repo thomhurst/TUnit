@@ -21,9 +21,7 @@ internal class AsyncTestRunExecutor
         )
 {
     private int _currentlyExecutingTests;
-
-    private readonly ConcurrentDictionary<string, Task> _oneTimeCleanUpRegistry = [];
-
+    
     public async Task RunInAsyncContext(IEnumerable<TestCase> testCases)
     {
         var tests = testGrouper.OrganiseTests(testCases);
@@ -42,6 +40,7 @@ internal class AsyncTestRunExecutor
     {
         List<Task> setResultsTasks = [];
         List<TestWithResult> executingTests = [];
+        ConcurrentDictionary<string, Task> oneTimeCleanUpRegistry = [];
         
         await foreach (var testWithResult in ProcessQueue(queue, runInParallel))
         {
@@ -49,9 +48,7 @@ internal class AsyncTestRunExecutor
             
             executingTests.Add(testWithResult);
 
-            SetupRunOneTimeCleanUpForClass(testWithResult.Test, lastTestsOfClasses, executingTests);
-            
-            executingTests.RemoveAll(x => x.Result.IsCompletedSuccessfully);
+            SetupRunOneTimeCleanUpForClass(testWithResult.Test, lastTestsOfClasses, executingTests, oneTimeCleanUpRegistry);
             
             setResultsTasks.Add(testWithResult.Result.ContinueWith(t =>
             {
@@ -73,10 +70,8 @@ internal class AsyncTestRunExecutor
             }));
         }
         
-        executingTests.RemoveAll(x => x.Result.IsCompletedSuccessfully);
-
         await WhenAllSafely(executingTests.Select(x => x.Result), testExecutionRecorder);
-        await WhenAllSafely(_oneTimeCleanUpRegistry.Values, testExecutionRecorder);
+        await WhenAllSafely(oneTimeCleanUpRegistry.Values, testExecutionRecorder);
         await Task.WhenAll(setResultsTasks);
     }
 
@@ -94,7 +89,7 @@ internal class AsyncTestRunExecutor
 
     private void SetupRunOneTimeCleanUpForClass(TestCase processingTestDetails,
         IEnumerable<TestCase> allTestsOrderedByClass,
-        IEnumerable<TestWithResult> executingTests)
+        IEnumerable<TestWithResult> executingTests, ConcurrentDictionary<string, Task> oneTimeCleanUpRegistry)
     {
         var processingTestFullyQualifiedClassName =
             processingTestDetails.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, "");
@@ -113,7 +108,7 @@ internal class AsyncTestRunExecutor
             .ToArray();
 
         Task.WhenAll(executingTestsForThisClass).ContinueWith(_ =>
-            _oneTimeCleanUpRegistry.GetOrAdd(processingTestFullyQualifiedClassName,
+            oneTimeCleanUpRegistry.GetOrAdd(processingTestFullyQualifiedClassName,
                 ExecuteOneTimeCleanUps(processingTestDetails))
         );
     }
