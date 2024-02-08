@@ -253,6 +253,32 @@ public static class IsExtensions
 
     #region DateTimes
     
+    public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> Between<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset lowerBound, DateTimeOffset upperBound)
+        where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
+        where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value >= lowerBound && value <= upperBound;
+            },
+            (value, _) => $"{value} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}"));
+    }
+    
+    public static BaseAssertCondition<DateTime, TAnd, TOr> Between<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime lowerBound, DateTime upperBound)
+        where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
+        where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+
+                return value >= lowerBound && value <= upperBound;
+            },
+            (value, _) => $"{value} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}"));
+    }
+    
     public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected)
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
@@ -536,73 +562,78 @@ public static class IsExtensions
     #endregion
 
     #region DateTimes
+    
+    public static BaseAssertCondition<TimeSpan, TAnd, TOr> Between<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is, TimeSpan lowerBound, TimeSpan upperBound)
+        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
+        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                ArgumentNullException.ThrowIfNull(lowerBound);
+                ArgumentNullException.ThrowIfNull(upperBound);
+
+                return value >= lowerBound && value <= upperBound;
+            },
+            (value, _) => $"{value} was not between {lowerBound} and {upperBound}"));
+    }
+    
+    public static BaseAssertCondition<DateOnly, TAnd, TOr> Between<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly lowerBound, DateOnly upperBound)
+        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
+        where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                ArgumentNullException.ThrowIfNull(lowerBound);
+                ArgumentNullException.ThrowIfNull(upperBound);
+
+                return value >= lowerBound && value <= upperBound;
+            },
+            (value, _) => $"{value} was not between {lowerBound} and {upperBound}"));
+    }
+    
+    public static BaseAssertCondition<TimeOnly, TAnd, TOr> Between<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly lowerBound, TimeOnly upperBound)
+        where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
+        where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
+    {
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder, default, (value, _, _) =>
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                ArgumentNullException.ThrowIfNull(lowerBound);
+                ArgumentNullException.ThrowIfNull(upperBound);
+
+                return value >= lowerBound && value <= upperBound;
+            },
+            (value, _) => $"{value} was not between {lowerBound} and {upperBound}"));
+    }
 
     public static BaseAssertCondition<DateTime, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateTime, TAnd, TOr> @is, DateTime expected, TimeSpan tolerance)
         where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
         where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTime,DateTime,TAnd,TOr>(
-            @is.AssertionBuilder, 
-            expected,
-            (actual, _, _) =>
-            {
-                ArgumentNullException.ThrowIfNull(actual);
-                ArgumentNullException.ThrowIfNull(expected);
-                
-                return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
-            },
-            (dateTime, _) => $"{dateTime.ToLongStringWithMilliseconds()} is not between {dateTime.Subtract(tolerance).ToLongStringWithMilliseconds()} and {dateTime.Add(tolerance).ToLongStringWithMilliseconds()}"));
+        return Between(@is, expected - tolerance, expected + tolerance);
     }
     
     public static BaseAssertCondition<DateTimeOffset, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateTimeOffset, TAnd, TOr> @is, DateTimeOffset expected, TimeSpan tolerance)
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset,TAnd,TOr>(
-            @is.AssertionBuilder, 
-            expected,
-            (actual, _, _) =>
-            {
-                ArgumentNullException.ThrowIfNull(actual);
-                ArgumentNullException.ThrowIfNull(expected);
-                
-                return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
-            },
-            (dateTime, _) => $"{dateTime.ToLongStringWithMilliseconds()} is not between {dateTime.Subtract(tolerance).ToLongStringWithMilliseconds()} and {dateTime.Add(tolerance).ToLongStringWithMilliseconds()}"));
+        return Between(@is, expected - tolerance, expected + tolerance);
     }
     
     public static BaseAssertCondition<DateOnly, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<DateOnly, TAnd, TOr> @is, DateOnly expected, int daysTolerance)
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateOnly,DateOnly,TAnd,TOr>(
-            @is.AssertionBuilder, 
-            expected,
-            (actual, _, _) =>
-            {
-                ArgumentNullException.ThrowIfNull(actual);
-                ArgumentNullException.ThrowIfNull(expected);
-                
-                return actual <= expected.AddDays(daysTolerance) && actual >= expected.AddDays(-daysTolerance);
-            },
-            (date, _) => $"{date} is not between {date.AddDays(-daysTolerance)} and {date.AddDays(daysTolerance)}"));
+        return Between(@is, expected.AddDays(-daysTolerance), expected.AddDays(daysTolerance));
     }
     
     public static BaseAssertCondition<TimeOnly, TAnd, TOr> EqualToWithTolerance<TAnd, TOr>(this Is<TimeOnly, TAnd, TOr> @is, TimeOnly expected, TimeSpan tolerance)
         where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
         where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeOnly,TimeOnly,TAnd,TOr>(
-            @is.AssertionBuilder, 
-            expected,
-            (actual, _, _) =>
-            {
-                ArgumentNullException.ThrowIfNull(actual);
-                ArgumentNullException.ThrowIfNull(expected);
-                
-                return actual <= expected.Add(tolerance) && actual >= expected.Add(-tolerance);
-            },
-            (time, _) => $"{time.ToLongStringWithMilliseconds()} is not between {time.Add(-tolerance).ToLongStringWithMilliseconds()} and {time.Add(tolerance).ToLongStringWithMilliseconds()}"));
+        return Between(@is, expected.Add(-tolerance), expected.Add(tolerance));
     }
 
     #endregion
