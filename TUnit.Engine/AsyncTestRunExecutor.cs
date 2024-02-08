@@ -164,7 +164,7 @@ internal class AsyncTestRunExecutor
         var oneTimeCleanUpMethods = classType
             .GetMethods()
             .Where(x => x.IsStatic)
-            .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(OneTimeCleanUpAttribute)));
+            .Where(x => x.GetCustomAttributes<OneTimeCleanUpAttribute>().Any());
 
         foreach (var oneTimeCleanUpMethod in oneTimeCleanUpMethods)
         {

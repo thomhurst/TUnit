@@ -237,7 +237,7 @@ internal class SingleTestExecutor
         var setUpMethods = testDetailsClassType
             .GetMethods()
             .Where(x => !x.IsStatic)
-            .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(SetUpAttribute)));
+            .Where(x => x.GetCustomAttributes<SetUpAttribute>().Any());
 
         foreach (var setUpMethod in setUpMethods)
         {
@@ -255,7 +255,7 @@ internal class SingleTestExecutor
         var cleanUpMethods = @class.GetType()
             .GetMethods()
             .Where(x => !x.IsStatic)
-            .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(CleanUpAttribute)));
+            .Where(x => x.GetCustomAttributes<CleanUpAttribute>().Any());
 
         var exceptions = new List<Exception>();
         
@@ -295,7 +295,7 @@ internal class SingleTestExecutor
         var oneTimeSetUpMethods = testDetailsClassType
             .GetMethods()
             .Where(x => x.IsStatic)
-            .Where(x => x.CustomAttributes.Any(attributeData => attributeData.AttributeType == typeof(OneTimeSetUpAttribute)));
+            .Where(x => x.GetCustomAttributes<OneTimeSetUpAttribute>().Any());
 
         foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
         {

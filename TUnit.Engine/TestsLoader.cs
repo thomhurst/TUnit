@@ -30,9 +30,10 @@ internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever,
                 .Where(t => t.IsAssignableTo(methodInfo.DeclaringType!) && !t.IsAbstract)
                 .ToArray();
 
-            var repeatCount = methodInfo.CustomAttributes
-                .FirstOrDefault(x => x.AttributeType == typeof(RepeatAttribute))
-                ?.ConstructorArguments.First().Value as int? ?? 0;
+            var repeatCount = methodInfo.GetCustomAttributes<RepeatAttribute>()
+                .Concat(methodInfo.DeclaringType!.GetCustomAttributes<RepeatAttribute>())
+                .FirstOrDefault()
+                ?.Times ?? 0;
 
             var runCount = repeatCount + 1;
             
