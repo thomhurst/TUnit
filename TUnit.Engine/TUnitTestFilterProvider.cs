@@ -71,6 +71,12 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
             if (string.IsNullOrWhiteSpace(filterName) || 
                 !SupportedProperties.Keys.Contains(filterName, StringComparer.InvariantCultureIgnoreCase))
             {
+                messageLogger.SendMessage(TestMessageLevel.Warning,
+                    $"""
+                    '{filterName}' is not a known filter.
+                    Supported filters are: {string.Join(", ", SupportedProperties.Keys)}
+                    """);
+                
                 continue;
             }
 
