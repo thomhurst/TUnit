@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -16,6 +17,7 @@ internal class SingleTestExecutor
     private readonly TestMethodRetriever _testMethodRetriever;
     private readonly Disposer _disposer;
     private readonly IMessageLogger _messageLogger;
+    private readonly ITestExecutionRecorder _testExecutionRecorder;
     private readonly CancellationTokenSource _cancellationTokenSource;
     
     public SingleTestExecutor(MethodInvoker methodInvoker, 
@@ -23,6 +25,7 @@ internal class SingleTestExecutor
         TestMethodRetriever testMethodRetriever,
         Disposer disposer,
         IMessageLogger messageLogger,
+        ITestExecutionRecorder testExecutionRecorder,
         CancellationTokenSource cancellationTokenSource)
     {
         _methodInvoker = methodInvoker;
@@ -30,12 +33,33 @@ internal class SingleTestExecutor
         _testMethodRetriever = testMethodRetriever;
         _disposer = disposer;
         _messageLogger = messageLogger;
+        _testExecutionRecorder = testExecutionRecorder;
         _cancellationTokenSource = cancellationTokenSource;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
 
     public async Task<TUnitTestResult> ExecuteTest(TestCase testCase)
+    {
+        var result = await ExecuteInternal(testCase);
+        
+        _testExecutionRecorder.RecordResult(new TestResult(testCase)
+        {
+            DisplayName = testCase.DisplayName,
+            Outcome = GetOutcome(result.Status),
+            ComputerName = result.ComputerName,
+            Duration = result.Duration,
+            StartTime = result.Start,
+            EndTime = result.End,
+            Messages = { new TestResultMessage("Output", result.Output) },
+            ErrorMessage = result.Exception?.Message,
+            ErrorStackTrace = result.Exception?.StackTrace,
+        });
+
+        return result;
+    }
+
+    private async Task<TUnitTestResult> ExecuteInternal(TestCase testCase)
     {
         var start = DateTimeOffset.Now;
         
@@ -168,9 +192,9 @@ internal class SingleTestExecutor
         var testLevelCancellationTokenSource =
             CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
 
-        if (testInformation.Timeout != default)
+        if (testInformation.Timeout != null && testInformation.Timeout.Value != default)
         {
-            testLevelCancellationTokenSource.CancelAfter(testInformation.Timeout);
+            testLevelCancellationTokenSource.CancelAfter(testInformation.Timeout.Value);
         }
 
         testContext.CancellationToken = testLevelCancellationTokenSource.Token;
@@ -194,13 +218,13 @@ internal class SingleTestExecutor
         var methodResult = _methodInvoker.InvokeMethod(@class, testInformation.MethodInfo, BindingFlags.Default,
             testInformation.TestMethodArguments);
 
-        if (testInformation.Timeout == default)
+        if (testInformation.Timeout == null || testInformation.Timeout.Value == default)
         {
             await methodResult;
             return;
         }
         
-        var timeoutTask = Task.Delay(testInformation.Timeout, cancellationTokenSource.Token)
+        var timeoutTask = Task.Delay(testInformation.Timeout.Value, cancellationTokenSource.Token)
             .ContinueWith(_ => throw new TimeoutException(testInformation));
 
         await await Task.WhenAny(timeoutTask, methodResult);
@@ -277,5 +301,17 @@ internal class SingleTestExecutor
         {
             await _methodInvoker.InvokeMethod(@class, oneTimeSetUpMethod, BindingFlags.Static | BindingFlags.Public, null);
         }
+    }
+    
+    private TestOutcome GetOutcome(Status resultStatus)
+    {
+        return resultStatus switch
+        {
+            Status.None => TestOutcome.None,
+            Status.Passed => TestOutcome.Passed,
+            Status.Failed => TestOutcome.Failed,
+            Status.Skipped => TestOutcome.Skipped,
+            _ => throw new ArgumentOutOfRangeException(nameof(resultStatus), resultStatus, null)
+        };
     }
 }

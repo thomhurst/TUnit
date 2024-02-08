@@ -11,7 +11,8 @@ internal class TestGrouper
         var allTestsOrderedByClass = testCases
             .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
             .SelectMany(x => x)
-            .OrderBy(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue));
+            .OrderBy(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue))
+            .ToList();
 
         var notInParallel = new Queue<TestCase>();
         var keyedNotInParallel = new List<TestCase>();
@@ -19,12 +20,13 @@ internal class TestGrouper
 
         foreach (var test in allTestsOrderedByClass)
         {
-            var notInParallelConstraintKey = test.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, null as string);
+            var notInParallelConstraintKey = test.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]);
+            
             if (notInParallelConstraintKey == null)
             {
                 parallel.Enqueue(test);
             }
-            else if (notInParallelConstraintKey == string.Empty)
+            else if (notInParallelConstraintKey.Length == 0)
             {
                 notInParallel.Enqueue(test);
             }
@@ -36,11 +38,11 @@ internal class TestGrouper
 
         return new GroupedTests
         {
+            AllTests = allTestsOrderedByClass,
+            
             Parallel = parallel,
             
-            KeyedNotInParallel = keyedNotInParallel
-                .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, ""))
-                .ToQueue(),
+            KeyedNotInParallel = keyedNotInParallel,
             
             NotInParallel = notInParallel,
             
@@ -49,7 +51,7 @@ internal class TestGrouper
                 .Concat(notInParallel)
                 .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
                 .Select(x => x.Last())
-                .ToList()
+                .ToList(),
         };
     }
 }

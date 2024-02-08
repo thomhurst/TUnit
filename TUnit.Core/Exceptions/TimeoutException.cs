@@ -9,6 +9,6 @@ public class TimeoutException : TUnitException
 
     private static string GetMessage(TestInformation testInformation)
     {
-        return $"The test timed out after {testInformation.Timeout.Milliseconds} milliseconds";
+        return $"The test timed out after {testInformation.Timeout!.Value.TotalMilliseconds} milliseconds";
     }
 }
