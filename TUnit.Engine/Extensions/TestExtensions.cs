@@ -38,8 +38,11 @@ internal static class TestExtensions
 
     public static TestCase ToTestCase(this TestDetails testDetails)
     {
-        var testCase = new TestCase(testDetails.UniqueId, TestAdapterConstants.ExecutorUri, testDetails.Source)
+        var fullyQualified = $"{testDetails.ClassType.FullName}.{testDetails.TestName}";
+        
+        var testCase = new TestCase(fullyQualified, TestAdapterConstants.ExecutorUri, testDetails.Source)
         {
+            Id = Guid.NewGuid(),
             DisplayName = testDetails.TestNameWithArguments,
             CodeFilePath = testDetails.FileName,
             LineNumber = testDetails.MinLineNumber,
