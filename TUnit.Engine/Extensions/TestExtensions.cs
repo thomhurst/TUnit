@@ -32,7 +32,7 @@ internal static class TestExtensions
             Timeout = timeoutMilliseconds is null ? null : TimeSpan.FromMilliseconds(timeoutMilliseconds.Value),
             RepeatCount = testCase.GetPropertyValue(TUnitTestProperties.RepeatCount, 0),
             RetryCount = testCase.GetPropertyValue(TUnitTestProperties.RetryCount, 0),
-            NotInParallelConstraintKeys = testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, null as string[]),
+            NotInParallelConstraintKeys = testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]),
         };
     }
 
@@ -57,7 +57,7 @@ internal static class TestExtensions
         
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Category, testDetails.Categories.ToArray());
         
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.NotInParallelConstraintKey, testDetails.NotInParallelConstraintKeys);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.NotInParallelConstraintKeys, testDetails.NotInParallelConstraintKeys);
         
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Timeout, testDetails.Timeout?.TotalMilliseconds);
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RepeatCount, testDetails.RepeatCount);

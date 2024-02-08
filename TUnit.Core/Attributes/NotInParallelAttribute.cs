@@ -3,7 +3,7 @@
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class NotInParallelAttribute : Attribute
 {
-    public string[]? ConstraintKeys { get; }
+    public string[] ConstraintKeys { get; } = Array.Empty<string>();
 
     public NotInParallelAttribute()
     {

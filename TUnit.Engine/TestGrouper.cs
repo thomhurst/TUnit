@@ -20,12 +20,13 @@ internal class TestGrouper
 
         foreach (var test in allTestsOrderedByClass)
         {
-            var notInParallelConstraintKey = test.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, null as string);
+            var notInParallelConstraintKey = test.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]);
+            
             if (notInParallelConstraintKey == null)
             {
                 parallel.Enqueue(test);
             }
-            else if (notInParallelConstraintKey == string.Empty)
+            else if (notInParallelConstraintKey.Length == 0)
             {
                 notInParallel.Enqueue(test);
             }

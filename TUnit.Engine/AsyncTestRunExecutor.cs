@@ -47,7 +47,7 @@ internal class AsyncTestRunExecutor
         var currentlyExecutingByKeysLock = new object();
         var currentlyExecutingByKeys = new List<(string[] Keys, Task)>();
 
-        var results = new List<Task>();
+        var executing = new List<Task>();
         
         while (testsToProcess.Count > 0)
         {
@@ -57,7 +57,7 @@ internal class AsyncTestRunExecutor
                 var testToProcess = testsToProcess[i];
 
                 var notInParallelKeys =
-                    testToProcess.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKey, Array.Empty<string>());
+                    testToProcess.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, Array.Empty<string>());
 
                 lock (currentlyExecutingByKeysLock)
                 {
@@ -88,61 +88,27 @@ internal class AsyncTestRunExecutor
                     }
                 });
                 
-                results.Add(testWithResult.ResultTask.ContinueWith(t =>
-                {
-                    ProcessResult(testToProcess, t.Result);
-                }));
+                executing.Add(testWithResult.ResultTask);
             
                 _oneTimeCleanupTracker.Remove(testWithResult.Test, testWithResult.ResultTask);
             }
         }
 
-        await Task.WhenAll(results);
+        await WhenAllSafely(executing, testExecutionRecorder);
     }
 
     private async Task ProcessTests(Queue<TestCase> queue, bool runInParallel)
     {
-        var results = new List<Task>();
+        var executing = new List<Task>();
         
         await foreach (var testWithResult in ProcessQueue(queue, runInParallel))
         {
-            results.Add(testWithResult.ResultTask.ContinueWith(task => 
-                ProcessResult(testWithResult.Test, task.Result)));
+            executing.Add(testWithResult.ResultTask);
             
             _oneTimeCleanupTracker.Remove(testWithResult.Test, testWithResult.ResultTask);
         }
 
-        await Task.WhenAll(results);
-    }
-
-    private Task ProcessResult(TestCase testDetails, TUnitTestResult result)
-    {
-        testExecutionRecorder.RecordResult(new TestResult(testDetails)
-        {
-            DisplayName = testDetails.DisplayName,
-            Outcome = GetOutcome(result.Status),
-            ComputerName = result.ComputerName,
-            Duration = result.Duration,
-            StartTime = result.Start,
-            EndTime = result.End,
-            Messages = { new TestResultMessage("Output", result.Output) },
-            ErrorMessage = result.Exception?.Message,
-            ErrorStackTrace = result.Exception?.StackTrace,
-        });
-
-        return Task.CompletedTask;
-    }
-
-    private TestOutcome GetOutcome(Status resultStatus)
-    {
-        return resultStatus switch
-        {
-            Status.None => TestOutcome.None,
-            Status.Passed => TestOutcome.Passed,
-            Status.Failed => TestOutcome.Failed,
-            Status.Skipped => TestOutcome.Skipped,
-            _ => throw new ArgumentOutOfRangeException(nameof(resultStatus), resultStatus, null)
-        };
+        await WhenAllSafely(executing, testExecutionRecorder);
     }
 
     private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestCase> queue, bool runInParallel)

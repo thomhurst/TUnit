@@ -26,8 +26,8 @@ internal static class TUnitTestProperties
 
     public static TestProperty Timeout => GetOrRegisterTestProperty<double?>(nameof(Timeout), nameof(Timeout));
     
-    public static TestProperty NotInParallelConstraintKey =>
-        GetOrRegisterTestProperty<string[]?>(nameof(NotInParallelConstraintKey), nameof(NotInParallelConstraintKey));
+    public static TestProperty NotInParallelConstraintKeys =>
+        GetOrRegisterTestProperty<string[]?>(nameof(NotInParallelConstraintKeys), nameof(NotInParallelConstraintKeys));
 
     public static TestProperty MethodParameterTypeNames => GetOrRegisterTestProperty<string[]?>(nameof(MethodParameterTypeNames), nameof(MethodParameterTypeNames));
     public static TestProperty MethodArguments => GetOrRegisterTestProperty<string?>(nameof(MethodArguments), nameof(MethodArguments));
