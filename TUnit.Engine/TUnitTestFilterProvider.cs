@@ -132,7 +132,7 @@ internal class TUnitTestFilterProvider(IRunContext runContext, IMessageLogger me
     private static bool AllowedSimpleClass(TestCase test, Filter filter)
     {
         return !filter.RunnableClasses.Any() ||
-               filter.RunnableClasses.Contains(test.GetPropertyValue(TUnitTestProperties.TestClass, "#"), StringComparer.InvariantCultureIgnoreCase);
+               filter.RunnableClasses.Contains(test.GetPropertyValue(TUnitTestProperties.TestClass, "#").Split('.').Last(), StringComparer.InvariantCultureIgnoreCase);
     }
     
     private static bool AllowedFullyQualifiedClass(TestCase test, Filter filter)
