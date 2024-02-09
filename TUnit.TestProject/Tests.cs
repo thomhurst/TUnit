@@ -322,6 +322,19 @@ public class Tests
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
 
+    [DataSourceDrivenTest(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]
+    public async Task TestDataSourceEnumerable(int value)
+    {
+        await Assert.That(value).Is.EqualTo(1);
+    }
+    
+    [DataSourceDrivenTest(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
+    [TestCategory("Fail")]
+    public async Task TestDataSourceFailingEnumerable(int value)
+    {
+        await Assert.That(value).Is.EqualTo(1);
+    }
+    
     public static int One() => 1;
     public static int Two() => 2;
 }
