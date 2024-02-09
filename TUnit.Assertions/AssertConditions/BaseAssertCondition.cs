@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Exceptions;
-using TUnit.Core;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -9,7 +8,7 @@ public abstract class BaseAssertCondition
 {
     public BaseAssertCondition()
     {
-        TestContext.Current.StoreObject(this);
+        AssertionsTracker.Current.Add(this);
     }
     
     protected internal virtual string? Message { get; }

@@ -10,9 +10,5 @@
     <ItemGroup>
       <Folder Include="Models\" />
     </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
-    </ItemGroup>
     
 </Project>

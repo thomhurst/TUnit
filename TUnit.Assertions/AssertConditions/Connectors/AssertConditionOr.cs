@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Core;
 
 namespace TUnit.Assertions.AssertConditions.Connectors;
 
@@ -21,8 +20,8 @@ public sealed class AssertConditionOr<TActual, TExpected, TAnd, TOr> : AssertCon
         // We store assert conditions in the test context for use with Assert.Multiple
         // However, we won't be asserting them individually if we've combined them with and/or statements
         // As this handler will be registered and will control invoking them
-        TestContext.Current.RemoveObject(condition1);
-        TestContext.Current.RemoveObject(condition2);
+        AssertionsTracker.Current.Remove(condition1);
+        AssertionsTracker.Current.Remove(condition2);
     }
 
     protected override string DefaultMessage => string.Empty;
@@ -50,8 +49,8 @@ public class AssertConditionOr<TActual, TAnd, TOr> : BaseAssertCondition<TActual
         // We store assert conditions in the test context for use with Assert.Multiple
         // However, we won't be asserting them individually if we've combined them with and/or statements
         // As this handler will be registered and will control invoking them
-        TestContext.Current.RemoveObject(condition1);
-        TestContext.Current.RemoveObject(condition2);
+        AssertionsTracker.Current.Remove(condition1);
+        AssertionsTracker.Current.Remove(condition2);
     }
 
     protected internal override string Message => $"{_condition1.Message} & {_condition2.Message}";

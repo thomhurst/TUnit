@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Exceptions;
-using TUnit.Core;
 
 namespace TUnit.Assertions;
 
@@ -18,11 +17,11 @@ public class AssertMultipleHandler
 
     public async Task AssertAsync()
     {
-        TestContext.Current.ClearObjects<BaseAssertCondition>();
+        AssertionsTracker.Current.Clear();;
         
         _action();
         
-        var assertions = TestContext.Current.GetObjects<BaseAssertCondition>();
+        var assertions = AssertionsTracker.Current;
 
         var failed = new List<BaseAssertCondition>();
         foreach (var baseAssertCondition in assertions)
