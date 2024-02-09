@@ -74,7 +74,6 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
 
     protected internal override string Message =>
         $"""
-         
          {MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}{GetCallerExpressionSuffix()}
          
          """;

@@ -34,7 +34,7 @@ public class AssertMultipleHandler
         
         if (failed.Any())
         {
-            throw new AssertionException(string.Join($"{Environment.NewLine}   ", failed.Select(x => x.Message)));
+            throw new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Select(x => x.Message?.Trim())));
         }
     }
 }
