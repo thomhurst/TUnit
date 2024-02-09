@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace TUnit.Engine.Models;
 

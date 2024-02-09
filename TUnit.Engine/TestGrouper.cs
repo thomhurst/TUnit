@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine;

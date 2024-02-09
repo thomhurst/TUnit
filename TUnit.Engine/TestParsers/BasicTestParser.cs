@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using TUnit.Core;
 
 namespace TUnit.Engine.TestParsers;
