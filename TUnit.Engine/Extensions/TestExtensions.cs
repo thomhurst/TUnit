@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Newtonsoft.Json;
 using TUnit.Core;
 using TUnit.Engine.Constants;
 
@@ -87,12 +86,6 @@ internal static class TestExtensions
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassParameterTypeNames, testDetails.ClassParameterTypes?.Select(x => x.FullName).ToArray());
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.MethodArguments, testDetails.MethodArgumentValues.SerializeArgumentsSafely());
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassArguments, testDetails.ClassArgumentValues.SerializeArgumentsSafely());
-
-        if (testDetails.TestName.Contains("ParameterisedTests1"))
-        {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "TestCase2.json");
-            File.AppendAllText(path, JsonConvert.SerializeObject(testCase) + ',');
-        }
         
         return testCase;
     }
