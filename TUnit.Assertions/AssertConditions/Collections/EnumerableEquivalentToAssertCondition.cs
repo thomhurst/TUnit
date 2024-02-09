@@ -11,7 +11,11 @@ public class EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr> :
     {
     }
 
-    protected override string DefaultMessage => "The two Enumerables were not equivalent";
+    protected override string DefaultMessage => $"""
+                                                The two Enumerables were not equivalent
+                                                   Actual: {(ActualValue != null ? string.Join(',', ActualValue) : null)}
+                                                   Expected: {(ExpectedValue != null ? string.Join(',', ExpectedValue) : null)}
+                                                """;
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
