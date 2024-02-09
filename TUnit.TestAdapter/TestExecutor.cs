@@ -23,7 +23,7 @@ public class TestExecutor : ITestExecutor2
         {
             return;
         }
-
+        
         var serviceProvider = BuildServices(runContext, frameworkHandle);
             
         serviceProvider.GetRequiredService<AsyncTestRunExecutor>()

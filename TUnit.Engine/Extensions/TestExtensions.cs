@@ -37,7 +37,7 @@ internal static class TestExtensions
 
     public static TestCase ToTestCase(this TestDetails testDetails)
     {
-        var testCase = new TestCase(testDetails.UniqueId, TestAdapterConstants.ExecutorUri, testDetails.Source)
+        var testCase = new TestCase(GetFullyQualifiedName(testDetails), TestAdapterConstants.ExecutorUri, testDetails.Source)
         {
             Id = Guid.NewGuid(),
             DisplayName = testDetails.TestNameWithArguments,
@@ -86,6 +86,11 @@ internal static class TestExtensions
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassArguments, testDetails.ClassArgumentValues.SerializeArgumentsSafely());
         
         return testCase;
+    }
+
+    private static string GetFullyQualifiedName(TestDetails testDetails)
+    {
+        return testDetails.UniqueId;
     }
 
     private static void SetPropertyValueIfNotDefault<T>(this TestCase testCase, TestProperty property, T value)
