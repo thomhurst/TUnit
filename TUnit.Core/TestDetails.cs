@@ -23,7 +23,7 @@ internal record TestDetails
         ClassArgumentValues = classArguments;
         
         TestName = methodInfo.Name;
-        TestNameWithArguments = methodInfo.Name + GetArgumentValues() + GetCountInBrackets();
+        TestNameWithArguments = methodInfo.Name + GetArgumentValues(MethodArgumentValues) + GetCountInBrackets();
         TestNameWithParameterTypes = methodInfo.Name + GetParameterTypes(MethodParameterTypes);
         ClassName = ClassType.Name;
         FullyQualifiedClassName = ClassType.FullName!;
@@ -34,7 +34,7 @@ internal record TestDetails
             .Concat(ClassType.GetCustomAttributes())
             .ToArray();
 
-        IsSingleTest = !methodAndClassAttributes.Any(x => x is DataDrivenTestAttribute or DataSourceDrivenTestAttribute);
+        IsSingleTest = Count > 1 || MethodParameterTypes?.Any() == true;
         
         SkipReason = methodAndClassAttributes
             .OfType<SkipAttribute>()
@@ -71,7 +71,7 @@ internal record TestDetails
         MinLineNumber = sourceLocation.MinLineNumber;
         MaxLineNumber = sourceLocation.MaxLineNumber;
 
-        UniqueId = $"{FullyQualifiedClassName}.{TestNameWithArguments}";
+        UniqueId = $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
     }
 
     private static string[]? GetNotInParallelConstraintKeys(IEnumerable<Attribute> methodAndClassAttributes)
@@ -119,14 +119,14 @@ internal record TestDetails
     public int RetryCount { get; }
     public int RepeatCount { get; }
 
-    public string GetArgumentValues()
+    public static string GetArgumentValues(object?[]? argumentValues)
     {
-        if (MethodArgumentValues == null)
+        if (argumentValues == null)
         {
             return string.Empty;
         }
         
-        return $"({string.Join(',', MethodArgumentValues.Select(StringifyArgument))})";
+        return $"({string.Join(',', argumentValues.Select(StringifyArgument))})";
     }
     
     public string UniqueId { get; }
