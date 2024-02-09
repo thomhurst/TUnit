@@ -97,14 +97,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo("1");
     }
 
-    [TestDataSource(nameof(One))]
+    [DataSourceDrivenTest(nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource1(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(nameof(One))]
+    [DataSourceDrivenTest(nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource2(int value)
     {
@@ -112,14 +112,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(nameof(Two))]
+    [DataSourceDrivenTest(nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource3(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(nameof(Two))]
+    [DataSourceDrivenTest(nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource4(int value)
     {
@@ -127,14 +127,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(typeof(TestDataSources), nameof(One))]
+    [DataSourceDrivenTest(typeof(TestDataSources), nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource5(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(typeof(TestDataSources), nameof(One))]
+    [DataSourceDrivenTest(typeof(TestDataSources), nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource6(int value)
     {
@@ -142,14 +142,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(typeof(TestDataSources), nameof(Two))]
+    [DataSourceDrivenTest(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource7(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [TestDataSource(typeof(TestDataSources), nameof(Two))]
+    [DataSourceDrivenTest(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource8(int value)
     {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using TUnit.Engine.TestParsers;
 
 namespace TUnit.Engine.Extensions;
 
@@ -7,12 +8,15 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
     {
         return services.AddSingleton<MethodInvoker>()
-            .AddSingleton<TestDataSourceRetriever>()
+            .AddSingleton<DataSourceRetriever>()
             .AddSingleton<ClassLoader>()
             .AddSingleton<Disposer>()
             .AddSingleton<CacheableAssemblyLoader>()
             .AddSingleton(new ConsoleInterceptor())
             .AddSingleton<TestsLoader>()
+            .AddSingleton<ITestParser, BasicTestParser>()
+            .AddSingleton<ITestParser, DataDrivenTestParser>()
+            .AddSingleton<ITestParser, DataSourceDrivenTestParser>()
             .AddSingleton<AsyncTestRunExecutor>()
             .AddSingleton<TestCollector>()
             .AddSingleton<SourceLocationRetriever>()

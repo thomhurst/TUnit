@@ -1,0 +1,54 @@
+﻿using System.Reflection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using TUnit.Core;
+
+namespace TUnit.Engine.TestParsers;
+
+internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetriever) : ITestParser
+{
+    public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
+        Type[] nonAbstractClassesContainingTest, 
+        int runCount,
+        SourceLocation sourceLocation)
+    {
+        var testDataSourceAttributes = methodInfo.GetCustomAttributes<DataSourceDrivenTestAttribute>().ToList();
+        
+        if (!testDataSourceAttributes.Any())
+        {
+            yield break;
+        }
+        
+        var count = 0;
+        
+        foreach (var methodArguments in dataSourceRetriever.GetTestDataSourceArguments(methodInfo))
+        {
+            foreach (var classType in nonAbstractClassesContainingTest)
+            {
+                foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(classType))
+                {
+                    for (var i = 1; i <= runCount; i++)
+                    {
+                        yield return new TestDetails(
+                            methodInfo: methodInfo,
+                            classType: classType,
+                            sourceLocation: sourceLocation,
+                            methodArguments: GetDataSourceArguments(methodArguments),
+                            classArguments: GetDataSourceArguments(classArguments),
+                            count: count++
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    public static object?[]? GetDataSourceArguments(object? methodArguments)
+    {
+        if (methodArguments is null)
+        {
+            return null;
+        }
+        
+        return [methodArguments];
+    }
+}
