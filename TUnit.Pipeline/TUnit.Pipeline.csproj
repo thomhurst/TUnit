@@ -10,7 +10,7 @@
 
     <ItemGroup>
       <PackageReference Include="ModularPipelines.DotNet" Version="2.26.8" />
-      <PackageReference Include="ModularPipelines.Git" Version="2.26.8" />
+      <PackageReference Include="ModularPipelines.Git" Version="2.27.3" />
     </ItemGroup>
 
 </Project>
