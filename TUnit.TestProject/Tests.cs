@@ -334,6 +334,21 @@ public class Tests
     {
         await Assert.That(value).Is.EqualTo(1);
     }
+
+    [DataDrivenTest]
+    public void No_Arg()
+    {
+    }
+    
+    [DataDrivenTest()]
+    public void No_Arg2()
+    {
+    }
+    
+    [DataDrivenTest("")]
+    public void WrongType(int i)
+    {
+    }
     
     public static int One() => 1;
     public static int Two() => 2;
