@@ -15,31 +15,9 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
 {
-    // Preferred format of DiagnosticId is Your Prefix + Number, e.g. CA1234.
-    public const string DiagnosticId = "TUnit0002";
-
-    // Feel free to use raw strings if you don't need localization.
-    private static readonly LocalizableString Title = new LocalizableResourceString(DiagnosticId + "Title",
-        Resources.ResourceManager, typeof(Resources));
-
-    // The message that will be displayed to the user.
-    private static readonly LocalizableString MessageFormat =
-        new LocalizableResourceString(DiagnosticId + "MessageFormat", Resources.ResourceManager,
-            typeof(Resources));
-
-    private static readonly LocalizableString Description =
-        new LocalizableResourceString(DiagnosticId + "Description", Resources.ResourceManager,
-            typeof(Resources));
-
-    // The category of the diagnostic (Design, Naming etc.).
-    private const string Category = "Usage";
-
-    private static readonly DiagnosticDescriptor Rule = new(DiagnosticId, Title, MessageFormat, Category,
-        DiagnosticSeverity.Error, isEnabledByDefault: true, description: Description);
-
     // Keep in mind: you have to list your rules here.
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rule);
+        ImmutableArray.Create(Rules.AwaitAssertion);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -81,7 +59,7 @@ public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (methodSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGeneric) 
+        if (methodSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
             is not "global::TUnit.Assertions.Assert.That"
             and not "global::TUnit.Assertions.Assert.Multiple")
         {
@@ -108,10 +86,7 @@ public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
         }
         
         context.ReportDiagnostic(
-            Diagnostic.Create(
-                new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Error,
-                    true, Description),
-                expressionStatementParent.GetLocation())
+            Diagnostic.Create(Rules.AwaitAssertion, expressionStatementParent.GetLocation())
         );
     }
 }

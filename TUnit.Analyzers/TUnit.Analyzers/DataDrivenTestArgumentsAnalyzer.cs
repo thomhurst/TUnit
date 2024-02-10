@@ -15,43 +15,9 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 {
-    public const string MismatchedArgumentsDiagnosticId = "TUnit0003";
-    
-    private static readonly LocalizableString MismatchedArgumentsTitle = new LocalizableResourceString(MismatchedArgumentsDiagnosticId + "Title",
-        Resources.ResourceManager, typeof(Resources));
-    
-    private static readonly LocalizableString MismatchedArgumentsMessageFormat =
-        new LocalizableResourceString(MismatchedArgumentsDiagnosticId + "MessageFormat", Resources.ResourceManager,
-            typeof(Resources));
-
-    private static readonly LocalizableString MismatchedArgumentsDescription =
-        new LocalizableResourceString(MismatchedArgumentsDiagnosticId + "Description", Resources.ResourceManager,
-            typeof(Resources));
-    
-    public const string MissingArgumentsDiagnosticId = "TUnit0004";
-    
-    private static readonly LocalizableString MissingArgumentsTitle = new LocalizableResourceString(MismatchedArgumentsDiagnosticId + "Title",
-        Resources.ResourceManager, typeof(Resources));
-    
-    private static readonly LocalizableString MissingArgumentsMessageFormat =
-        new LocalizableResourceString(MissingArgumentsDiagnosticId + "MessageFormat", Resources.ResourceManager,
-            typeof(Resources));
-
-    private static readonly LocalizableString MissingArgumentsDescription =
-        new LocalizableResourceString(MissingArgumentsDiagnosticId + "Description", Resources.ResourceManager,
-            typeof(Resources));
-
-    private const string Category = "Usage";
-
-    private static readonly DiagnosticDescriptor MismatchedArgumentsRule = new(MismatchedArgumentsDiagnosticId, MismatchedArgumentsTitle, MismatchedArgumentsMessageFormat, Category,
-        DiagnosticSeverity.Error, isEnabledByDefault: true, description: MismatchedArgumentsDescription);
-    
-    private static readonly DiagnosticDescriptor MissingArgumentsRule = new(MissingArgumentsDiagnosticId, MissingArgumentsTitle, MissingArgumentsMessageFormat, Category,
-        DiagnosticSeverity.Error, isEnabledByDefault: true, description: MissingArgumentsDescription);
-
     // Keep in mind: you have to list your rules here.
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(MismatchedArgumentsRule, MissingArgumentsRule);
+        ImmutableArray.Create(Rules.InvalidDataAssertion, Rules.NoDataProvidedAssertion);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -89,7 +55,7 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
         
-        foreach (var dataDrivenTestAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGeneric)
+        foreach (var dataDrivenTestAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                                 == "global::TUnit.Core.DataDrivenTestAttribute"))
         {
             CheckAttributeAgainstMethod(context, methodSymbol, dataDrivenTestAttribute);
@@ -102,9 +68,7 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         if (!dataDrivenTestAttribute.ConstructorArguments.Any())
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(
-                    new DiagnosticDescriptor(MissingArgumentsDiagnosticId, MissingArgumentsTitle, MissingArgumentsMessageFormat, Category, DiagnosticSeverity.Error,
-                        true, MissingArgumentsDescription),
+                Diagnostic.Create(Rules.NoDataProvidedAssertion,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;
@@ -116,9 +80,7 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         if (methodParameterTypes.Count != attributeTypesPassedIn.Count)
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(
-                    new DiagnosticDescriptor(MismatchedArgumentsDiagnosticId, MismatchedArgumentsTitle, MismatchedArgumentsMessageFormat, Category, DiagnosticSeverity.Error,
-                        true, MismatchedArgumentsDescription),
+                Diagnostic.Create(Rules.InvalidDataAssertion,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                     string.Join(", ", attributeTypesPassedIn.Select(x => x?.ToDisplayString())),
                     string.Join(", ", methodParameterTypes.Select(x => x?.ToDisplayString())))
@@ -134,9 +96,7 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
             if (!context.Compilation.HasImplicitConversion(attributeArgumentType, methodParameterType))
             {
                 context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        new DiagnosticDescriptor(MismatchedArgumentsDiagnosticId, MismatchedArgumentsTitle, MismatchedArgumentsMessageFormat, Category, DiagnosticSeverity.Error,
-                            true, MismatchedArgumentsDescription),
+                    Diagnostic.Create(Rules.InvalidDataAssertion,
                         dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                         attributeArgumentType?.ToDisplayString(),
                         methodParameterType?.ToDisplayString())

@@ -14,30 +14,8 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
 {
-    // Preferred format of DiagnosticId is Your Prefix + Number, e.g. CA1234.
-    public const string DiagnosticId = "TUnit0001";
-
-    // Feel free to use raw strings if you don't need localization.
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.TUnit0001Title),
-        Resources.ResourceManager, typeof(Resources));
-
-    // The message that will be displayed to the user.
-    private static readonly LocalizableString MessageFormat =
-        new LocalizableResourceString(nameof(Resources.TUnit0001MessageFormat), Resources.ResourceManager,
-            typeof(Resources));
-
-    private static readonly LocalizableString Description =
-        new LocalizableResourceString(nameof(Resources.TUnit0001Description), Resources.ResourceManager,
-            typeof(Resources));
-
-    private const string Category = "Usage";
-
-    private static readonly DiagnosticDescriptor Rule = new(DiagnosticId, Title, MessageFormat, Category,
-        DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
-
-    // Keep in mind: you have to list your rules here.
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rule);
+        ImmutableArray.Create(Rules.MixAndOrConditionsAssertion);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -71,7 +49,7 @@ public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
         
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocationExpressionSyntax);
 
-        var fullyQualifiedSymbolInformation = symbolInfo.Symbol?.ToDisplayString(DisplayFormats.FullyQualifiedNonGeneric) 
+        var fullyQualifiedSymbolInformation = symbolInfo.Symbol?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
                                               ?? string.Empty;
         
         if (!fullyQualifiedSymbolInformation.StartsWith("global::TUnit.Assertions"))
@@ -83,10 +61,7 @@ public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
         if(fullInvocationStatement.Contains(".And.") 
            && fullInvocationStatement.Contains(".Or."))
         {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning,
-                        true, Description),
+            context.ReportDiagnostic(Diagnostic.Create(Rules.MixAndOrConditionsAssertion,
                     invocationExpressionSyntax.GetLocation())
             );
         }

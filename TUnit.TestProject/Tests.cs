@@ -141,6 +141,14 @@ public class Tests
         await Task.Yield();
         await Assert.That(value).Is.EqualTo(1);
     }
+    
+    [DataSourceDrivenTest(typeof(TestDataSources), "Two")]
+    [TestCategory("Pass")]
+    public async Task TestDataSource_Wrong(string value)
+    {
+        await Assert.That(value).Is.EqualTo(1);
+    }
+
 
     [DataSourceDrivenTest(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]

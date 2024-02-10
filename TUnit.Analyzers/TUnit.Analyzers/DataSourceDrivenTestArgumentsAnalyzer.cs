@@ -17,43 +17,8 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 {
-    public const string MismatchedArgumentsDiagnosticId = "TUnit0005";
-    
-    private static readonly LocalizableString MismatchedArgumentsTitle = new LocalizableResourceString(MismatchedArgumentsDiagnosticId + "Title",
-        Resources.ResourceManager, typeof(Resources));
-    
-    private static readonly LocalizableString MismatchedArgumentsMessageFormat =
-        new LocalizableResourceString(MismatchedArgumentsDiagnosticId + "MessageFormat", Resources.ResourceManager,
-            typeof(Resources));
-
-    private static readonly LocalizableString MismatchedArgumentsDescription =
-        new LocalizableResourceString(MismatchedArgumentsDiagnosticId + "Description", Resources.ResourceManager,
-            typeof(Resources));
-    
-    private const string Category = "Usage";
-
-    private static readonly DiagnosticDescriptor MismatchedArgumentsRule = new(MismatchedArgumentsDiagnosticId, MismatchedArgumentsTitle, MismatchedArgumentsMessageFormat, Category,
-        DiagnosticSeverity.Error, isEnabledByDefault: true, description: MismatchedArgumentsDescription);
-
-    public const string NotFoundDataSourceDiagnosticId = "TUnit0006";
-    
-    private static readonly LocalizableString NotFoundDataSourceTitle = new LocalizableResourceString(MismatchedArgumentsDiagnosticId + "Title",
-        Resources.ResourceManager, typeof(Resources));
-    
-    private static readonly LocalizableString NotFoundDataSourceMessageFormat =
-        new LocalizableResourceString(NotFoundDataSourceDiagnosticId + "MessageFormat", Resources.ResourceManager,
-            typeof(Resources));
-
-    private static readonly LocalizableString NotFoundDataSourceDescription =
-        new LocalizableResourceString(NotFoundDataSourceDiagnosticId + "Description", Resources.ResourceManager,
-            typeof(Resources));
-    
-    private static readonly DiagnosticDescriptor NotFoundDataSourceRule = new(NotFoundDataSourceDiagnosticId, NotFoundDataSourceTitle, NotFoundDataSourceMessageFormat, Category,
-        DiagnosticSeverity.Error, isEnabledByDefault: true, description: NotFoundDataSourceDescription);
-    
-    // Keep in mind: you have to list your rules here.
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(MismatchedArgumentsRule, NotFoundDataSourceRule);
+        ImmutableArray.Create(Rules.InvalidDataSourceAssertion, Rules.NoDataSourceMethodFoundAssertion);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -91,7 +56,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
         
-        foreach (var dataDrivenTestAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGeneric)
+        foreach (var dataDrivenTestAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                                 == "global::TUnit.Core.DataSourceDrivenTestAttribute"))
         {
             CheckAttributeAgainstMethod(context, methodSymbol, dataDrivenTestAttribute);
@@ -105,14 +70,15 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         var methodContainingTestData = FindMethodContainingTestData(context, dataDrivenTestAttribute, methodSymbol.ContainingType);
 
         if (methodContainingTestData is null 
+            || methodContainingTestData.ReturnsVoid
+            || !methodContainingTestData.IsStatic
+            || methodContainingTestData.DeclaredAccessibility != Accessibility.Public
             || methodContainingTestData.Parameters.Any()
-            || methodContainingTestData.ReturnsVoid)
+            )
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
-                    new DiagnosticDescriptor(NotFoundDataSourceDiagnosticId, NotFoundDataSourceTitle,
-                        NotFoundDataSourceMessageFormat, Category, DiagnosticSeverity.Error,
-                        true, NotFoundDataSourceDescription),
+                    Rules.NoDataSourceMethodFoundAssertion,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;
@@ -121,30 +87,27 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         var argumentType = methodContainingTestData.ReturnType;
 
         var enumerableOfMethodType = CreateEnumerableOfType(context, methodParameterType!);
-        
-        if (!SymbolEqualityComparer.Default.Equals(argumentType, methodParameterType)
-            && !SymbolEqualityComparer.Default.Equals(argumentType, enumerableOfMethodType))
+
+        if (SymbolEqualityComparer.Default.Equals(argumentType, methodParameterType)
+            || SymbolEqualityComparer.Default.Equals(argumentType, enumerableOfMethodType))
         {
-            context.ReportDiagnostic(
+            return;
+        }
+        
+        context.ReportDiagnostic(
                 Diagnostic.Create(
-                    new DiagnosticDescriptor(MismatchedArgumentsDiagnosticId, MismatchedArgumentsTitle, MismatchedArgumentsMessageFormat, Category, DiagnosticSeverity.Error,
-                        true, MismatchedArgumentsDescription),
+                    Rules.InvalidDataSourceAssertion,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                     argumentType,
                     methodParameterType)
             );
-        }
     }
 
     private static ITypeSymbol CreateEnumerableOfType(SyntaxNodeAnalysisContext context, ITypeSymbol typeSymbol)
     {
-        var fullyQualifiedFormat = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-        var type = Type.GetType(fullyQualifiedFormat);
-
-        var enumerableType = typeof(IEnumerable<>).MakeGenericType(type);
-
-        return context.Compilation.GetTypeByMetadataName(enumerableType.FullName!)!;
+        return context.SemanticModel.Compilation
+            .GetTypeByMetadataName(typeof(IEnumerable<>).FullName!)!
+            .Construct(typeSymbol);
     }
 
     private IMethodSymbol? FindMethodContainingTestData(SyntaxNodeAnalysisContext context, AttributeData dataDrivenTestAttribute,
