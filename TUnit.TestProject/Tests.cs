@@ -141,6 +141,14 @@ public class Tests
         await Task.Yield();
         await Assert.That(value).Is.EqualTo(1);
     }
+    
+    [DataSourceDrivenTest(typeof(TestDataSources), "Two")]
+    [TestCategory("Pass")]
+    public async Task TestDataSource_Wrong(string value)
+    {
+        await Assert.That(value).Is.EqualTo(1);
+    }
+
 
     [DataSourceDrivenTest(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
@@ -333,6 +341,21 @@ public class Tests
     public async Task TestDataSourceFailingEnumerable(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
+    }
+
+    [DataDrivenTest]
+    public void No_Arg()
+    {
+    }
+    
+    [DataDrivenTest()]
+    public void No_Arg2()
+    {
+    }
+    
+    [DataDrivenTest("")]
+    public void WrongType(int i)
+    {
     }
     
     public static int One() => 1;

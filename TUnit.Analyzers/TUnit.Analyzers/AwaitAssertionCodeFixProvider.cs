@@ -21,7 +21,7 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
 {
     // Specify the diagnostic IDs of analyzers that are expected to be linked.
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(AwaitAssertionAnalyzer.DiagnosticId);
+        ImmutableArray.Create(Rules.AwaitAssertion.Id);
 
     // If you don't need the 'fix all' behaviour, return null.
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;

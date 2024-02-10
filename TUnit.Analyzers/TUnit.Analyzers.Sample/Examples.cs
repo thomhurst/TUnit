@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using TUnit.Assertions;
+using TUnit.Core;
 
 namespace TUnit.Analyzers.Sample;
 
@@ -11,6 +12,27 @@ namespace TUnit.Analyzers.Sample;
 public class Examples
 {
     public class CommonClass // Try to apply quick fix using the IDE.
+    {
+    }
+    
+    [DataDrivenTest]
+    public void No_Arg()
+    {
+    }
+    
+    [DataDrivenTest()]
+    public void No_Arg2()
+    {
+    }
+    
+    [DataDrivenTest("")]
+    public void WrongType(int i)
+    {
+    }
+    
+        
+    [DataDrivenTest("")]
+    public void WrongType()
     {
     }
 
