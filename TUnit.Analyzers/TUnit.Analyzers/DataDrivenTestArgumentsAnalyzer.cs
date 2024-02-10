@@ -51,7 +51,7 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 
     // Keep in mind: you have to list your rules here.
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(MismatchedArgumentsRule);
+        ImmutableArray.Create(MismatchedArgumentsRule, MissingArgumentsRule);
 
     public override void Initialize(AnalysisContext context)
     {
