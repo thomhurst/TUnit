@@ -4,18 +4,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Analyzers;
 
-/// <summary>
-/// A sample analyzer that reports the company name being used in class declarations.
-/// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
-/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 {
-    // Keep in mind: you have to list your rules here.
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.InvalidDataAssertion, Rules.NoDataProvidedAssertion);
 
@@ -92,6 +86,11 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         {
             var methodParameterType = methodParameterTypes[i];
             var attributeArgumentType = attributeTypesPassedIn[i];
+
+            if (IsEnumAndInteger(methodParameterType, attributeArgumentType))
+            {
+                continue;
+            }
             
             if (!context.Compilation.HasImplicitConversion(attributeArgumentType, methodParameterType))
             {
@@ -103,5 +102,20 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
                 );
             }
         }
+    }
+
+    private bool IsEnumAndInteger(ITypeSymbol type1, ITypeSymbol? type2)
+    {
+        if (type1.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "int")
+        {
+            return type2?.TypeKind == TypeKind.Enum;
+        }
+        
+        if (type2?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "int")
+        {
+            return type1.TypeKind == TypeKind.Enum;
+        }
+
+        return false;
     }
 }
