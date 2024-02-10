@@ -29,6 +29,12 @@ public class Examples
     public void WrongType(int i)
     {
     }
+    
+        
+    [DataDrivenTest("")]
+    public void WrongType()
+    {
+    }
 
     public async Task ToStars()
     {

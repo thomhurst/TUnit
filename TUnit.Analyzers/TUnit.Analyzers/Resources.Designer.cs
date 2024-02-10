@@ -184,5 +184,59 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0004Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data provided for test..
+        /// </summary>
+        internal static string TUnit0005Description {
+            get {
+                return ResourceManager.GetString("TUnit0005Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data provided for test.
+        /// </summary>
+        internal static string TUnit0005MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0005MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data provided for test.
+        /// </summary>
+        internal static string TUnit0005Title {
+            get {
+                return ResourceManager.GetString("TUnit0005Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data source method found..
+        /// </summary>
+        internal static string TUnit0006Description {
+            get {
+                return ResourceManager.GetString("TUnit0006Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data source method found.
+        /// </summary>
+        internal static string TUnit0006MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0006MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data source method found.
+        /// </summary>
+        internal static string TUnit0006Title {
+            get {
+                return ResourceManager.GetString("TUnit0006Title", resourceCulture);
+            }
+        }
     }
 }
