@@ -157,5 +157,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0003Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data provided for test..
+        /// </summary>
+        internal static string TUnit0004Description {
+            get {
+                return ResourceManager.GetString("TUnit0004Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data provided for test.
+        /// </summary>
+        internal static string TUnit0004MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0004MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data provided for test.
+        /// </summary>
+        internal static string TUnit0004Title {
+            get {
+                return ResourceManager.GetString("TUnit0004Title", resourceCulture);
+            }
+        }
     }
 }

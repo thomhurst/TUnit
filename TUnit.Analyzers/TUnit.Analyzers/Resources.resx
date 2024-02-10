@@ -51,4 +51,13 @@
     <data name="TUnit0003Title" xml:space="preserve">
         <value>Invalid Data for Tests</value><comment>The title of the diagnostic.</comment>
     </data>
+    <data name="TUnit0004Description" xml:space="preserve">
+        <value>No data provided for test.</value><comment>An optional longer localizable description of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0004MessageFormat" xml:space="preserve">
+        <value>No data provided for test</value><comment>The format-able message the diagnostic displays.</comment>
+    </data>
+    <data name="TUnit0004Title" xml:space="preserve">
+        <value>No data provided for test</value><comment>The title of the diagnostic.</comment>
+    </data>
 </root>
