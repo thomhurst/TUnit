@@ -16,7 +16,7 @@ public abstract class ExceptionMessageDiagnosticAnalyzer : DiagnosticAnalyzer
         }
         catch (Exception e)
         {
-            throw new Exception(e.ToString());
+            throw new Exception(e.StackTrace);
         }
     }
 
