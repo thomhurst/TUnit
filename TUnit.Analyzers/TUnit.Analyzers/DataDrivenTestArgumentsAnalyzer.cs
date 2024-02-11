@@ -70,7 +70,7 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 
         var methodParameterTypes = methodSymbol.Parameters.Select(x => x.Type).ToList();
         var attributeTypesPassedIn = dataDrivenTestAttribute.ConstructorArguments.First().Values.Select(x => x.Type).ToList();
-
+        
         if (methodParameterTypes.Count != attributeTypesPassedIn.Count)
         {
             context.ReportDiagnostic(
@@ -88,6 +88,11 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
             var attributeArgumentType = attributeTypesPassedIn[i];
 
             if (IsEnumAndInteger(methodParameterType, attributeArgumentType))
+            {
+                continue;
+            }
+
+            if (attributeArgumentType is null)
             {
                 continue;
             }
