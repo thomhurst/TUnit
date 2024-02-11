@@ -8,24 +8,14 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
+public class DataDrivenTestArgumentsAnalyzer : ExceptionMessageDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.InvalidDataAssertion, Rules.NoDataProvidedAssertion);
 
-    public override void Initialize(AnalysisContext context)
-    {
-        // You must call this method to avoid analyzing generated code.
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-
-        // You must call this method to enable the Concurrent Execution.
-        context.EnableConcurrentExecution();
-
-        // Subscribe to the Syntax Node with the appropriate 'SyntaxKind' (ClassDeclaration) action.
-        // To figure out which Syntax Nodes you should choose, consider installing the Roslyn syntax tree viewer plugin Rossynt: https://plugins.jetbrains.com/plugin/16902-rossynt/
+    public override void InitializeInternal(AnalysisContext context)
+    { 
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
-
-        // Check other 'context.Register...' methods that might be helpful for your purposes.
     }
 
     /// <summary>
@@ -86,13 +76,8 @@ public class DataDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         {
             var methodParameterType = methodParameterTypes[i];
             var attributeArgumentType = attributeTypesPassedIn[i];
-
+            
             if (IsEnumAndInteger(methodParameterType, attributeArgumentType))
-            {
-                continue;
-            }
-
-            if (attributeArgumentType is null)
             {
                 continue;
             }
