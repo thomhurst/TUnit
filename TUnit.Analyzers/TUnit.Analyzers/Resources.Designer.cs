@@ -238,5 +238,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0006Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter is not defined as nullable..
+        /// </summary>
+        internal static string TUnit0007Description {
+            get {
+                return ResourceManager.GetString("TUnit0007Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter &apos;{0}&apos; is not defined as nullable.
+        /// </summary>
+        internal static string TUnit0007MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0007MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter is not defined as nullable.
+        /// </summary>
+        internal static string TUnit0007Title {
+            get {
+                return ResourceManager.GetString("TUnit0007Title", resourceCulture);
+            }
+        }
     }
 }

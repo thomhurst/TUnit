@@ -11,21 +11,15 @@ namespace TUnit.Analyzers;
 public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.InvalidDataAssertion, Rules.NoDataProvidedAssertion);
+        ImmutableArray.Create(Rules.InvalidDataAssertion, Rules.NoDataProvidedAssertion, Rules.BadNullabilityAssertion);
 
     public override void InitializeInternal(AnalysisContext context)
     { 
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
     }
-
-    /// <summary>
-    /// Executed for each Syntax Node with 'SyntaxKind' is 'ClassDeclaration'.
-    /// </summary>
-    /// <param name="context">Operation context.</param>
+    
     private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
-    {
-        // The Roslyn architecture is based on inheritance.
-        // To get the required metadata, we should match the 'Node' object to the particular type: 'ClassDeclarationSyntax'.
+    { 
         if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
         {
             return;
@@ -59,14 +53,17 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var methodParameterTypes = methodSymbol.Parameters.Select(x => x.Type).ToList();
-        var attributeTypesPassedIn = dataDrivenTestAttribute.ConstructorArguments.First().Values.Select(x => x.Type).ToList();
+        var objectArrayArgument = dataDrivenTestAttribute.ConstructorArguments.First();
+        var attributeTypesPassedIn = 
+            objectArrayArgument.IsNull ? [null] : 
+            objectArrayArgument.Values.Select(x => x.IsNull ? null : x.Type).ToList();
         
         if (methodParameterTypes.Count != attributeTypesPassedIn.Count)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.InvalidDataAssertion,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
-                    string.Join(", ", attributeTypesPassedIn.Select(x => x?.ToDisplayString())),
+                    string.Join(", ", attributeTypesPassedIn?.Select(x => x?.ToDisplayString()) ?? ImmutableArray<string>.Empty),
                     string.Join(", ", methodParameterTypes.Select(x => x?.ToDisplayString())))
             );
             return;
@@ -77,19 +74,31 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             var methodParameterType = methodParameterTypes[i];
             var attributeArgumentType = attributeTypesPassedIn[i];
             
+            if (attributeArgumentType is null &&
+                methodParameterType.NullableAnnotation == NullableAnnotation.NotAnnotated)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rules.BadNullabilityAssertion,
+                        methodSymbol.Parameters[i].Locations.FirstOrDefault(),
+                        methodSymbol.Parameters[i].Name)
+                );
+            }
+            
             if (IsEnumAndInteger(methodParameterType, attributeArgumentType))
             {
                 continue;
             }
             
-            if (!context.Compilation.HasImplicitConversion(attributeArgumentType, methodParameterType))
+            if (attributeArgumentType is not null &&
+                !context.Compilation.HasImplicitConversion(attributeArgumentType, methodParameterType))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.InvalidDataAssertion,
                         dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
-                        attributeArgumentType?.ToDisplayString(),
-                        methodParameterType?.ToDisplayString())
+                        attributeArgumentType.ToDisplayString(),
+                        methodParameterType.ToDisplayString())
                 );
+                return;
             }
         }
     }

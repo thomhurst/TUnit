@@ -23,6 +23,9 @@ internal static class Rules
 
     public static readonly DiagnosticDescriptor NoDataSourceMethodFoundAssertion =
         MakeResult("TUnit0006", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor BadNullabilityAssertion =
+        MakeResult("TUnit0007", UsageCategory, DiagnosticSeverity.Warning);
 
     private static DiagnosticDescriptor MakeResult(string diagnosticId, string category, DiagnosticSeverity severity)
     {

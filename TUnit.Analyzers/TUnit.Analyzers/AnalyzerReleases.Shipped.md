@@ -10,3 +10,4 @@ TUnit0003  | Usage   | Error    | Invalid Test Data.
 TUnit0004  | Usage   | Error    | Missing Test Data.
 TUnit0005  | Usage   | Error    | Invalid Test Data.
 TUnit0006  | Usage   | Error    | No data source method found.
+TUnit0007  | Usage   | Error    | The parameter is not defined as nullable.

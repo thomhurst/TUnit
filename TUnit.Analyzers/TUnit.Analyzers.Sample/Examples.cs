@@ -35,6 +35,11 @@ public class Examples
     public void WrongType()
     {
     }
+    
+    [DataDrivenTest("")]
+    public void WrongType(string value)
+    {
+    }
 
     public async Task ToStars()
     {
