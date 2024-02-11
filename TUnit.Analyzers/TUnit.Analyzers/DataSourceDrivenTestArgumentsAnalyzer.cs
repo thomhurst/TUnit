@@ -105,7 +105,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
     private static ITypeSymbol CreateEnumerableOfType(SyntaxNodeAnalysisContext context, ITypeSymbol typeSymbol)
     {
         return context.SemanticModel.Compilation
-            .GetTypeByMetadataName(typeof(IEnumerable<>).FullName!)!
+            .GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)
             .Construct(typeSymbol);
     }
 

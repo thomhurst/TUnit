@@ -51,7 +51,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             );
             return;
         }
-
+        
         var methodParameterTypes = methodSymbol.Parameters.Select(x => x.Type).ToList();
         var objectArrayArgument = dataDrivenTestAttribute.ConstructorArguments.First();
         var attributeTypesPassedIn = 
@@ -63,7 +63,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.InvalidDataAssertion,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
-                    string.Join(", ", attributeTypesPassedIn?.Select(x => x?.ToDisplayString()) ?? ImmutableArray<string>.Empty),
+                    string.Join(", ", attributeTypesPassedIn.Select(x => x?.ToDisplayString()) ?? ImmutableArray<string>.Empty),
                     string.Join(", ", methodParameterTypes.Select(x => x?.ToDisplayString())))
             );
             return;
