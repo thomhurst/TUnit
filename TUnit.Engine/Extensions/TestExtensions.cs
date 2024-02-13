@@ -43,7 +43,7 @@ internal static class TestExtensions
         
         var testCase = new TestCase(fullyQualifiedName, TestAdapterConstants.ExecutorUri, testDetails.Source)
         {
-            Id = GetId(testDetails),
+            Id = GetId(fullyQualifiedName),
             DisplayName = testDetails.TestNameWithArguments,
             CodeFilePath = testDetails.FileName,
             LineNumber = testDetails.MinLineNumber,
@@ -92,10 +92,10 @@ internal static class TestExtensions
         return testCase;
     }
 
-    private static Guid GetId(TestDetails testDetails)
+    private static Guid GetId(string fullyQualifiedName)
     {
         var idProvider = new TestIdProvider();
-        idProvider.AppendString(testDetails.UniqueId);
+        idProvider.AppendString(fullyQualifiedName);
         return idProvider.GetId();
     }
 
