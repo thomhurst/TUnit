@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
+using Microsoft.TestPlatform.AdapterUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using TUnit.Core;
 using TUnit.Engine.Constants;
@@ -37,9 +39,16 @@ internal static class TestExtensions
 
     public static TestCase ToTestCase(this TestDetails testDetails)
     {
-        var testCase = new TestCase(GetFullyQualifiedName(testDetails), TestAdapterConstants.ExecutorUri, testDetails.Source)
+        if (!Debugger.IsAttached)
         {
-            Id = Guid.NewGuid(),
+            //Debugger.Launch();
+        }
+        
+        var fullyQualifiedName = GetFullyQualifiedName(testDetails);
+        
+        var testCase = new TestCase(fullyQualifiedName, TestAdapterConstants.ExecutorUri, testDetails.Source)
+        {
+            Id = GetId(testDetails),
             DisplayName = testDetails.TestNameWithArguments,
             CodeFilePath = testDetails.FileName,
             LineNumber = testDetails.MinLineNumber,
@@ -88,8 +97,20 @@ internal static class TestExtensions
         return testCase;
     }
 
+    private static Guid GetId(TestDetails testDetails)
+    {
+        var idProvider = new TestIdProvider();
+        idProvider.AppendString(testDetails.UniqueId);
+        return idProvider.GetId();
+    }
+
     private static string GetFullyQualifiedName(TestDetails testDetails)
     {
+        if(testDetails.IsSingleTest)
+        {
+            return $"{testDetails.ClassType.FullName}.{testDetails.TestName}";
+        }
+
         return testDetails.UniqueId;
     }
 

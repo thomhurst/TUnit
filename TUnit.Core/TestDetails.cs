@@ -17,7 +17,7 @@ internal record TestDetails
         Count = count;
 
         MethodParameterTypes = methodArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
-        MethodParameterTypes = classArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
+        ClassParameterTypes = classArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
 
         MethodArgumentValues = methodArguments;
         ClassArgumentValues = classArguments;
@@ -34,7 +34,7 @@ internal record TestDetails
             .Concat(ClassType.GetCustomAttributes())
             .ToArray();
 
-        IsSingleTest = Count > 1 || MethodParameterTypes?.Any() == true;
+        IsSingleTest = GetIsSingleTest();
         
         SkipReason = methodAndClassAttributes
             .OfType<SkipAttribute>()
@@ -72,6 +72,19 @@ internal record TestDetails
         MaxLineNumber = sourceLocation.MaxLineNumber;
 
         UniqueId = $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
+    }
+
+    private bool GetIsSingleTest()
+    {
+        if (RetryCount > 0)
+            return false;
+        if (Count > 1)
+            return false;
+        if (MethodParameterTypes?.Any() == true)
+            return false;
+        if (ClassParameterTypes?.Any() == true)
+            return false;
+        return true;
     }
 
     private static string[]? GetNotInParallelConstraintKeys(IEnumerable<Attribute> methodAndClassAttributes)

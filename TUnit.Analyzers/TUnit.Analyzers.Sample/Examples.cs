@@ -15,26 +15,26 @@ public class Examples
     {
     }
     
-    [DataDrivenTest]
-    public void No_Arg()
-    {
-    }
+    // [DataDrivenTest]
+    // public void No_Arg()
+    // {
+    // }
     
-    [DataDrivenTest()]
-    public void No_Arg2()
-    {
-    }
+    // [DataDrivenTest()]
+    // public void No_Arg2()
+    // {
+    // }
     
-    [DataDrivenTest("")]
-    public void WrongType(int i)
-    {
-    }
+    // [DataDrivenTest("")]
+    // public void WrongType(int i)
+    // {
+    // }
     
         
-    [DataDrivenTest("")]
-    public void WrongType()
-    {
-    }
+    // [DataDrivenTest("")]
+    // public void WrongType()
+    // {
+    // }
     
     [DataDrivenTest("")]
     public void WrongType(string value)
