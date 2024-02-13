@@ -7,27 +7,30 @@ internal static class Rules
     private const string UsageCategory = "Usage";
 
     public static readonly DiagnosticDescriptor MixAndOrConditionsAssertion =
-        MakeResult("TUnit0001", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0001", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor AwaitAssertion =
-        MakeResult("TUnit0002", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0002", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor InvalidDataAssertion =
-        MakeResult("TUnit0003", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0003", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor NoDataProvidedAssertion =
-        MakeResult("TUnit0004", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0004", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor InvalidDataSourceAssertion =
-        MakeResult("TUnit0005", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0005", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor NoDataSourceMethodFoundAssertion =
-        MakeResult("TUnit0006", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0006", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor BadNullabilityAssertion =
-        MakeResult("TUnit0007", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor("TUnit0007", UsageCategory, DiagnosticSeverity.Warning);
 
-    private static DiagnosticDescriptor MakeResult(string diagnosticId, string category, DiagnosticSeverity severity)
+    public static readonly DiagnosticDescriptor StringEqualsUseComparer =
+        CreateDescriptor("TUnit0008", UsageCategory, DiagnosticSeverity.Warning);
+
+    private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(
             id: diagnosticId,

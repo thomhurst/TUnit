@@ -265,5 +265,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0007Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use a string comparer..
+        /// </summary>
+        internal static string TUnit0008Description {
+            get {
+                return ResourceManager.GetString("TUnit0008Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use a string comparer.
+        /// </summary>
+        internal static string TUnit0008MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0008MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use a string comparer.
+        /// </summary>
+        internal static string TUnit0008Title {
+            get {
+                return ResourceManager.GetString("TUnit0008Title", resourceCulture);
+            }
+        }
     }
 }
