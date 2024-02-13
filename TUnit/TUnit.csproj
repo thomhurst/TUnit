@@ -16,13 +16,10 @@
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj"
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
-                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj" />
-        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
     </ItemGroup>
 
 </Project>
