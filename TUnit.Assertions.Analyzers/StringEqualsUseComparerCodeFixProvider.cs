@@ -61,9 +61,13 @@ public class StringEqualsUseComparerCodeFixProvider : CodeFixProvider
         IdentifierNameSyntax identifierNameSyntax, CancellationToken cancellationToken)
     {
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
-        
-        var argumentList = identifierNameSyntax.Parent!.ChildNodes().OfType<ArgumentListSyntax>().First();
 
+        var parent = identifierNameSyntax.Parent!.Parent!;
+        var descendants = parent.DescendantNodes().ToList();
+        var identifierIndex = descendants.IndexOf(identifierNameSyntax);
+        var argumentList = descendants.Skip(identifierIndex)
+            .OfType<ArgumentListSyntax>().First();
+        
         editor.ReplaceNode(argumentList,
             argumentList.WithArguments(
                 argumentList.Arguments.Add(

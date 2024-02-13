@@ -19,7 +19,7 @@ public class Tests
     public async Task Test1()
     {
         var value = "1";
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).Is.EqualTo("1", StringComparison.Ordinal);
     }
 
     [Test]
@@ -76,7 +76,7 @@ public class Tests
     public async Task Skip1()
     {
         var value = "1";
-        await Assert.That(value).Is.EqualTo("1");
+        Assert.That(value).Is.EqualTo("1");
     }
 
     [Test, Skip("Reason2")]
