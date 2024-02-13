@@ -39,11 +39,6 @@ internal static class TestExtensions
 
     public static TestCase ToTestCase(this TestDetails testDetails)
     {
-        if (!Debugger.IsAttached)
-        {
-            //Debugger.Launch();
-        }
-        
         var fullyQualifiedName = GetFullyQualifiedName(testDetails);
         
         var testCase = new TestCase(fullyQualifiedName, TestAdapterConstants.ExecutorUri, testDetails.Source)

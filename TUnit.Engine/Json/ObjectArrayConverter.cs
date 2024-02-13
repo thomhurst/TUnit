@@ -38,11 +38,6 @@ internal sealed class ObjectArrayConverter : JsonConverter<object?[]?>
 
     public override void Write(Utf8JsonWriter writer, object?[]? values, JsonSerializerOptions options)
     {
-        if (!Debugger.IsAttached)
-        {
-            //Debugger.Launch();
-        }
-        
         if (values is null)
         {
             return;
