@@ -329,6 +329,13 @@ public class Tests
     {
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
+    
+    [Test]
+    public async Task Long_String_Not_Equals()
+    {
+        await Assert.That("ABCDEFGHJIJKLMNOPQRSTUVWXYZ")
+            .Is.EqualTo("ABCDEFGHJIJKLMNOOPQRSTUVWXYZ", StringComparison.Ordinal);
+    }
 
     // [DataSourceDrivenTest(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]
     // public async Task TestDataSourceEnumerable(int value)

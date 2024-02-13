@@ -23,6 +23,12 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     
     protected string GetCallerExpressionSuffix()
     {
+        if (AssertionBuilder.CallerExpression?.TrimStart('"').TrimEnd('"')
+            == ActualValue?.ToString())
+        {
+            return string.Empty;
+        }
+        
         return string.IsNullOrEmpty(AssertionBuilder.CallerExpression)
             ? string.Empty
             : $"""
