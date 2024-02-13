@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace TUnit.Analyzers.Shared;
+namespace TUnit.Analyzers;
 
 public class DisplayFormats
 {

@@ -3,8 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Shared;
-using TUnit.Analyzers.Shared.Extensions;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 

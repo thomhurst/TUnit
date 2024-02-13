@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace TUnit.Analyzers.Shared;
+namespace TUnit.Analyzers;
 
 public abstract class ConcurrentDiagnosticAnalyzer : DiagnosticAnalyzer
 {

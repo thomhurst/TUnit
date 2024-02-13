@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
-namespace TUnit.Analyzers.Shared.Extensions;
+namespace TUnit.Assertions.Analyzers.Extensions;
 
 public static class SyntaxExtensions
 {
