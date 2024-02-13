@@ -333,8 +333,15 @@ public class Tests
     [Test]
     public async Task Long_String_Not_Equals()
     {
-        await Assert.That("ABCDEFGHJIJKLMNOPQRSTUVWXYZ")
-            .Is.EqualTo("ABCDEFGHJIJKLMNOOPQRSTUVWXYZ", StringComparison.Ordinal);
+        await Assert.That("ABCDEFGHIJKLMNOOPQRSTUVWXYZ")
+            .Is.EqualTo("ABCDEFGHIJKLMNOPQRSTUVWXYZ", StringComparison.Ordinal);
+    }
+    
+    [Test]
+    public async Task Short_String_Not_Equals()
+    {
+        await Assert.That("ABCCDE")
+            .Is.EqualTo("ABCDE", StringComparison.Ordinal);
     }
 
     // [DataSourceDrivenTest(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]

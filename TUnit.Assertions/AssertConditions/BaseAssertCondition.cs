@@ -13,6 +13,11 @@ public abstract class BaseAssertCondition
     
     protected internal virtual string? Message { get; }
     internal abstract Task<bool> AssertAsync();
+
+    protected internal virtual string GetExtraMessage()
+    {
+        return string.Empty;
+    }
 }
 
 public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition
@@ -21,7 +26,7 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
     
-    protected string GetCallerExpressionSuffix()
+    protected string GetCallerExpression()
     {
         if (AssertionBuilder.CallerExpression?.TrimStart('"').TrimEnd('"')
             == ActualValue?.ToString())
@@ -70,7 +75,7 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
         }
         catch (Exception e)
         {
-            throw new AssertionException(e.Message + GetCallerExpressionSuffix(), e);
+            throw new AssertionException(e.Message + GetCallerExpression(), e);
         }
     }
 
@@ -80,7 +85,7 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
 
     protected internal override string Message =>
         $"""
-         {MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}{GetCallerExpressionSuffix()}
+         {MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}{GetCallerExpression()}{GetExtraMessage()}
          
          """;
 
