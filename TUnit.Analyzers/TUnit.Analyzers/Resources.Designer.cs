@@ -60,16 +60,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions.
-        /// </summary>
-        internal static string TUnit0001CodeFixTitle {
-            get {
-                return ResourceManager.GetString("TUnit0001CodeFixTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions..
+        ///   Looks up a localized string similar to The arguments for this test don&apos;t match the method argument types..
         /// </summary>
         internal static string TUnit0001Description {
             get {
@@ -78,7 +69,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions.
+        ///   Looks up a localized string similar to Attribute argument types &apos;{0}&apos; don&apos;t match method parameter types &apos;{1}&apos;.
         /// </summary>
         internal static string TUnit0001MessageFormat {
             get {
@@ -87,7 +78,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions.
+        ///   Looks up a localized string similar to Invalid Data for Tests.
         /// </summary>
         internal static string TUnit0001Title {
             get {
@@ -96,16 +87,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assert statements must be awaited.
-        /// </summary>
-        internal static string TUnit0002CodeFixTitle {
-            get {
-                return ResourceManager.GetString("TUnit0002CodeFixTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Assert statements must be awaited..
+        ///   Looks up a localized string similar to No data provided for test..
         /// </summary>
         internal static string TUnit0002Description {
             get {
@@ -114,7 +96,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assert statements must be awaited.
+        ///   Looks up a localized string similar to No data provided for test.
         /// </summary>
         internal static string TUnit0002MessageFormat {
             get {
@@ -123,7 +105,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assert statements must be awaited.
+        ///   Looks up a localized string similar to No data provided for test.
         /// </summary>
         internal static string TUnit0002Title {
             get {
@@ -132,7 +114,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The arguments for this test don&apos;t match the method argument types..
+        ///   Looks up a localized string similar to No data provided for test..
         /// </summary>
         internal static string TUnit0003Description {
             get {
@@ -141,7 +123,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Attribute argument types &apos;{0}&apos; don&apos;t match method parameter types &apos;{1}&apos;.
+        ///   Looks up a localized string similar to No data provided for test.
         /// </summary>
         internal static string TUnit0003MessageFormat {
             get {
@@ -150,7 +132,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid Data for Tests.
+        ///   Looks up a localized string similar to No data provided for test.
         /// </summary>
         internal static string TUnit0003Title {
             get {
@@ -159,7 +141,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data provided for test..
+        ///   Looks up a localized string similar to No data source method found..
         /// </summary>
         internal static string TUnit0004Description {
             get {
@@ -168,7 +150,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data provided for test.
+        ///   Looks up a localized string similar to No data source method found.
         /// </summary>
         internal static string TUnit0004MessageFormat {
             get {
@@ -177,7 +159,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data provided for test.
+        ///   Looks up a localized string similar to No data source method found.
         /// </summary>
         internal static string TUnit0004Title {
             get {
@@ -186,7 +168,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data provided for test..
+        ///   Looks up a localized string similar to The parameter is not defined as nullable..
         /// </summary>
         internal static string TUnit0005Description {
             get {
@@ -195,7 +177,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data provided for test.
+        ///   Looks up a localized string similar to The parameter &apos;{0}&apos; is not defined as nullable.
         /// </summary>
         internal static string TUnit0005MessageFormat {
             get {
@@ -204,92 +186,11 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data provided for test.
+        ///   Looks up a localized string similar to The parameter is not defined as nullable.
         /// </summary>
         internal static string TUnit0005Title {
             get {
                 return ResourceManager.GetString("TUnit0005Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No data source method found..
-        /// </summary>
-        internal static string TUnit0006Description {
-            get {
-                return ResourceManager.GetString("TUnit0006Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No data source method found.
-        /// </summary>
-        internal static string TUnit0006MessageFormat {
-            get {
-                return ResourceManager.GetString("TUnit0006MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No data source method found.
-        /// </summary>
-        internal static string TUnit0006Title {
-            get {
-                return ResourceManager.GetString("TUnit0006Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The parameter is not defined as nullable..
-        /// </summary>
-        internal static string TUnit0007Description {
-            get {
-                return ResourceManager.GetString("TUnit0007Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The parameter &apos;{0}&apos; is not defined as nullable.
-        /// </summary>
-        internal static string TUnit0007MessageFormat {
-            get {
-                return ResourceManager.GetString("TUnit0007MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The parameter is not defined as nullable.
-        /// </summary>
-        internal static string TUnit0007Title {
-            get {
-                return ResourceManager.GetString("TUnit0007Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Use a string comparer..
-        /// </summary>
-        internal static string TUnit0008Description {
-            get {
-                return ResourceManager.GetString("TUnit0008Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Use a string comparer.
-        /// </summary>
-        internal static string TUnit0008MessageFormat {
-            get {
-                return ResourceManager.GetString("TUnit0008MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Use a string comparer.
-        /// </summary>
-        internal static string TUnit0008Title {
-            get {
-                return ResourceManager.GetString("TUnit0008Title", resourceCulture);
             }
         }
     }

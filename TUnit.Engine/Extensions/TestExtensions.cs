@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.TestPlatform.AdapterUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using TUnit.Core;

@@ -10,25 +10,22 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 
-namespace TUnit.Analyzers;
+namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
 /// A sample code fix provider that renames classes with the company name in their definition.
 /// All code fixes must  be linked to specific analyzers.
 /// </summary>
-[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(AwaitAssertionCodeFixProvider)), Shared]
-public class AwaitAssertionCodeFixProvider : CodeFixProvider
+[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(StringEqualsUseComparerCodeFixProvider)), Shared]
+public class StringEqualsUseComparerCodeFixProvider : CodeFixProvider
 {
-    // Specify the diagnostic IDs of analyzers that are expected to be linked.
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.AwaitAssertion.Id);
+        ImmutableArray.Create(Rules.StringEqualsUseComparer.Id);
 
-    // If you don't need the 'fix all' behaviour, return null.
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
     public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
-        // We link only one diagnostic and assume there is only one diagnostic in the context.
         var diagnostic = context.Diagnostics.Single();
 
         // 'SourceSpan' of 'Location' is the highlighted area. We're going to use this area to find the 'SyntaxNode' to rename.
@@ -41,15 +38,15 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
         var diagnosticNode = root?.FindNode(diagnosticSpan);
 
         // To get the required metadata, we should match the Node to the specific type: 'ClassDeclarationSyntax'.
-        if (diagnosticNode is not ExpressionStatementSyntax expressionStatementSyntax)
+        if (diagnosticNode is not IdentifierNameSyntax identifierNameSyntax)
             return;
 
         // Register a code action that will invoke the fix.
         context.RegisterCodeFix(
             CodeAction.Create(
-                title: Resources.TUnit0002CodeFixTitle,
-                createChangedDocument: c => AwaitAssertionAsync(context.Document, expressionStatementSyntax, c),
-                equivalenceKey: nameof(Resources.TUnit0002CodeFixTitle)),
+                title: Resources.TUnitAnalyzers0003Title,
+                createChangedDocument: c => AddComparer(context.Document, identifierNameSyntax, c),
+                equivalenceKey: nameof(Resources.TUnitAnalyzers0003Title)),
             diagnostic);
     }
 
@@ -60,14 +57,26 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
     /// <param name="expressionStatementSyntax">Highlighted class declaration Syntax Node.</param>
     /// <param name="cancellationToken">Any fix is cancellable by the user, so we should support the cancellation token.</param>
     /// <returns>Clone of the solution with updates: renamed class.</returns>
-    private async Task<Document> AwaitAssertionAsync(Document document,
-        ExpressionStatementSyntax expressionStatementSyntax, CancellationToken cancellationToken)
+    private async Task<Document> AddComparer(Document document,
+        IdentifierNameSyntax identifierNameSyntax, CancellationToken cancellationToken)
     {
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
-        
-        var awaitExpressionSyntax = SyntaxFactory.AwaitExpression(expressionStatementSyntax.Expression);
 
-        editor.ReplaceNode(expressionStatementSyntax.Expression, awaitExpressionSyntax);
+        var parent = identifierNameSyntax.Parent!.Parent!;
+        var descendants = parent.DescendantNodes().ToList();
+        var identifierIndex = descendants.IndexOf(identifierNameSyntax);
+        var argumentList = descendants.Skip(identifierIndex)
+            .OfType<ArgumentListSyntax>().First();
+        
+        editor.ReplaceNode(argumentList,
+            argumentList.WithArguments(
+                argumentList.Arguments.Add(
+                    SyntaxFactory.Argument(
+                        SyntaxFactory.ParseExpression("StringComparison.Ordinal")
+                    )
+                )
+            )
+        );
         
         return editor.GetChangedDocument();
     }

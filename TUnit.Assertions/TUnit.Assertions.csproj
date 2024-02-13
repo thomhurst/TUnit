@@ -7,8 +7,13 @@
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="Models\" />
+    <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
+        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
     </ItemGroup>
     
 </Project>

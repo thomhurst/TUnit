@@ -1,14 +1,14 @@
+using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
 
-namespace TUnit.Analyzers.Tests.Verifiers;
+namespace TUnit.Analyzers.Tests.Shared.Verifiers;
 
-public static partial class CSharpAnalyzerVerifier<TAnalyzer>
-    where TAnalyzer : DiagnosticAnalyzer, new()
+public static partial class CSharpCodeRefactoringVerifier<TCodeRefactoring>
+    where TCodeRefactoring : CodeRefactoringProvider, new()
 {
-    public class Test : CSharpAnalyzerTest<TAnalyzer, NUnitVerifier>
+    public class Test : CSharpCodeRefactoringTest<TCodeRefactoring, NUnitVerifier>
     {
         public Test()
         {

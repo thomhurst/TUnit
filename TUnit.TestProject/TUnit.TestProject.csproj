@@ -13,15 +13,13 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
         <PackageReference Include="coverlet.collector" Version="6.0.0" />
         <PackageReference Include="System.Text.Json" Version="8.0.1" />
-<!--        <PackageReference Include="TUnit.TestAdapter" Version="0.0.1-alpha01">-->
-<!--          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
-<!--          <PrivateAssets>all</PrivateAssets>-->
-<!--        </PackageReference>-->
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj"
-                        OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
       <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>

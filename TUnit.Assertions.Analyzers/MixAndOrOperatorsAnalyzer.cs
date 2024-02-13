@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Extensions;
+using TUnit.Assertions.Analyzers.Extensions;
 
-namespace TUnit.Analyzers;
+namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
 /// A sample analyzer that reports the company name being used in class declarations.
@@ -19,14 +19,10 @@ public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        // You must call this method to avoid analyzing generated code.
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
-        // You must call this method to enable the Concurrent Execution.
         context.EnableConcurrentExecution();
 
-        // Subscribe to the Syntax Node with the appropriate 'SyntaxKind' (ClassDeclaration) action.
-        // To figure out which Syntax Nodes you should choose, consider installing the Roslyn syntax tree viewer plugin Rossynt: https://plugins.jetbrains.com/plugin/16902-rossynt/
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.SimpleMemberAccessExpression);
     }
     
