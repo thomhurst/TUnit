@@ -1,25 +1,19 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace TUnit.Analyzers;
+namespace TUnit.Assertions.Analyzers;
 
 internal static class Rules
 {
     private const string UsageCategory = "Usage";
-    
-    public static readonly DiagnosticDescriptor InvalidDataAssertion =
-        CreateDescriptor("TUnit0001", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor NoDataProvidedAssertion =
-        CreateDescriptor("TUnit0002", UsageCategory, DiagnosticSeverity.Error);
+    public static readonly DiagnosticDescriptor MixAndOrConditionsAssertion =
+        CreateDescriptor("TUnitAnalyzers0001", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor InvalidDataSourceAssertion =
-        CreateDescriptor("TUnit0003", UsageCategory, DiagnosticSeverity.Error);
+    public static readonly DiagnosticDescriptor AwaitAssertion =
+        CreateDescriptor("TUnitAnalyzers0002", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor NoDataSourceMethodFoundAssertion =
-        CreateDescriptor("TUnit0004", UsageCategory, DiagnosticSeverity.Error);
-    
-    public static readonly DiagnosticDescriptor BadNullabilityAssertion =
-        CreateDescriptor("TUnit0005", UsageCategory, DiagnosticSeverity.Warning);
+    public static readonly DiagnosticDescriptor StringEqualsUseComparer =
+        CreateDescriptor("TUnitAnalyzers0003", UsageCategory, DiagnosticSeverity.Warning);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

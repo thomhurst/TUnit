@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace TUnit.Analyzers.Tests.Verifiers;
+namespace TUnit.Analyzers.Tests.Shared.Verifiers;
 
 internal static class CSharpVerifierHelper
 {

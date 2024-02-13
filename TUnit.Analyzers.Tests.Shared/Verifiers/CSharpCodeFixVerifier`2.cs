@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
@@ -9,7 +7,7 @@ using Microsoft.CodeAnalysis.Testing.Verifiers;
 using TUnit.Assertions;
 using TUnit.Core;
 
-namespace TUnit.Analyzers.Tests.Verifiers;
+namespace TUnit.Analyzers.Tests.Shared.Verifiers;
 
 public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()

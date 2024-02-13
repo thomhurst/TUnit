@@ -1,14 +1,12 @@
-using System;
-using System.Threading.Tasks;
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.StringEqualsUseComparerAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Shared.Verifiers.CSharpAnalyzerVerifier<TUnit.Assertions.Analyzers.AwaitAssertionAnalyzer>;
 
-namespace TUnit.Analyzers.Tests;
+namespace TUnit.Assertions.Analyzers.Tests;
 
-public class StringEqualsUseComparerAnalyzerTests
+public class AwaitAssertionAnalyzerTests
 {
     [Test]
-    public async Task EqualTo_String_Is_Flagged_When_Not_Passing_Comparer()
+    public async Task Assert_That_Is_Flagged_When_Not_Awaited()
     {
         const string text = """
                             using System.Threading.Tasks;
@@ -20,8 +18,8 @@ public class StringEqualsUseComparerAnalyzerTests
 
                                 public async Task MyTest()
                                 {
-                                    var one = "1";
-                                    Assert.That(one).Is.{|#0:EqualTo|}("1");
+                                    var one = 1;
+                                    {|#0:Assert.That(one).Is.EqualTo(1);|}
                                 }
 
                             }
@@ -33,10 +31,11 @@ public class StringEqualsUseComparerAnalyzerTests
     }
     
     [Test]
-    public async Task EqualTo_String_Is_Not_Flagged_When_Passing_Comparer()
+    public async Task Assert_That_Is_Not_Flagged_When_Not_Awaited_But_Inside_Assert_Multiple()
     {
         const string text = """
                             using System;
+                            using System.Collections.Generic;
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Core;
@@ -46,10 +45,15 @@ public class StringEqualsUseComparerAnalyzerTests
                             
                                 public async Task MyTest()
                                 {
-                                    var one = "1";
-                                    Assert.That(one).Is.EqualTo("1", StringComparison.Ordinal);
+                                    var list = new List<int> { 1, 2, 3 };
+                            
+                                    await Assert.Multiple(() =>
+                                    {
+                                        Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                        Assert.That(list).Has.Count().EqualTo(5);
+                                    });
                                 }
-
+                                
                             }
                             """;
         

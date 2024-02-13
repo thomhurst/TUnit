@@ -1,7 +1,6 @@
 ﻿// ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global
 
-using System;
 using System.Threading.Tasks;
 using TUnit.Assertions;
 using TUnit.Core;

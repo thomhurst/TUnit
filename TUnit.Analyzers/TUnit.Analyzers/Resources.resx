@@ -19,81 +19,48 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="TUnit0001Description" xml:space="preserve">
-        <value>Don't mix 'Or' &amp; 'And' operators in assertions.</value><comment>An optional longer localizable description of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0001MessageFormat" xml:space="preserve">
-        <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The format-able message the diagnostic displays.</comment>
-    </data>
-    <data name="TUnit0001Title" xml:space="preserve">
-        <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The title of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0001CodeFixTitle" xml:space="preserve">
-        <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The title of the code fix.</comment>
-    </data>
-    <data name="TUnit0002Description" xml:space="preserve">
-        <value>Assert statements must be awaited.</value><comment>An optional longer localizable description of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0002MessageFormat" xml:space="preserve">
-        <value>Assert statements must be awaited</value><comment>The format-able message the diagnostic displays.</comment>
-    </data>
-    <data name="TUnit0002Title" xml:space="preserve">
-        <value>Assert statements must be awaited</value><comment>The title of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0002CodeFixTitle" xml:space="preserve">
-        <value>Assert statements must be awaited</value><comment>The title of the code fix.</comment>
-    </data>
-    <data name="TUnit0003Description" xml:space="preserve">
         <value>The arguments for this test don't match the method argument types.</value><comment>An optional longer localizable description of the diagnostic.</comment>
     </data>
-    <data name="TUnit0003MessageFormat" xml:space="preserve">
+    <data name="TUnit0001MessageFormat" xml:space="preserve">
         <value>Attribute argument types '{0}' don't match method parameter types '{1}'</value><comment>The format-able message the diagnostic displays.</comment>
     </data>
-    <data name="TUnit0003Title" xml:space="preserve">
+    <data name="TUnit0001Title" xml:space="preserve">
         <value>Invalid Data for Tests</value><comment>The title of the diagnostic.</comment>
     </data>
+    <data name="TUnit0002Description" xml:space="preserve">
+        <value>No data provided for test.</value><comment>An optional longer localizable description of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0002MessageFormat" xml:space="preserve">
+        <value>No data provided for test</value><comment>The format-able message the diagnostic displays.</comment>
+    </data>
+    <data name="TUnit0002Title" xml:space="preserve">
+        <value>No data provided for test</value><comment>The title of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0003Description" xml:space="preserve">
+        <value>No data provided for test.</value><comment>An optional longer localizable description of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0003MessageFormat" xml:space="preserve">
+        <value>No data provided for test</value><comment>The format-able message the diagnostic displays.</comment>
+    </data>
+    <data name="TUnit0003Title" xml:space="preserve">
+        <value>No data provided for test</value><comment>The title of the diagnostic.</comment>
+    </data>
     <data name="TUnit0004Description" xml:space="preserve">
-        <value>No data provided for test.</value><comment>An optional longer localizable description of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0004MessageFormat" xml:space="preserve">
-        <value>No data provided for test</value><comment>The format-able message the diagnostic displays.</comment>
-    </data>
-    <data name="TUnit0004Title" xml:space="preserve">
-        <value>No data provided for test</value><comment>The title of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0005Description" xml:space="preserve">
-        <value>No data provided for test.</value><comment>An optional longer localizable description of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0005MessageFormat" xml:space="preserve">
-        <value>No data provided for test</value><comment>The format-able message the diagnostic displays.</comment>
-    </data>
-    <data name="TUnit0005Title" xml:space="preserve">
-        <value>No data provided for test</value><comment>The title of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0006Description" xml:space="preserve">
         <value>No data source method found.</value><comment>An optional longer localizable description of the diagnostic.</comment>
     </data>
-    <data name="TUnit0006MessageFormat" xml:space="preserve">
+    <data name="TUnit0004MessageFormat" xml:space="preserve">
         <value>No data source method found</value><comment>The format-able message the diagnostic displays.</comment>
     </data>
-    <data name="TUnit0006Title" xml:space="preserve">
+    <data name="TUnit0004Title" xml:space="preserve">
         <value>No data source method found</value><comment>The title of the diagnostic.</comment>
     </data>
-    <data name="TUnit0007Description" xml:space="preserve">
+    <data name="TUnit0005Description" xml:space="preserve">
         <value>The parameter is not defined as nullable.</value><comment>An optional longer localizable description of the diagnostic.</comment>
     </data>
-    <data name="TUnit0007MessageFormat" xml:space="preserve">
+    <data name="TUnit0005MessageFormat" xml:space="preserve">
         <value>The parameter '{0}' is not defined as nullable</value><comment>The format-able message the diagnostic displays.</comment>
     </data>
-    <data name="TUnit0007Title" xml:space="preserve">
+    <data name="TUnit0005Title" xml:space="preserve">
         <value>The parameter is not defined as nullable</value><comment>The title of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0008Description" xml:space="preserve">
-        <value>Use a string comparer.</value><comment>An optional longer localizable description of the diagnostic.</comment>
-    </data>
-    <data name="TUnit0008MessageFormat" xml:space="preserve">
-        <value>Use a string comparer</value><comment>The format-able message the diagnostic displays.</comment>
-    </data>
-    <data name="TUnit0008Title" xml:space="preserve">
-        <value>Use a string comparer</value><comment>The title of the diagnostic.</comment>
     </data>
 </root>
