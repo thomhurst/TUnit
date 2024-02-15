@@ -384,7 +384,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A data source test must only have 1 matching parameter..
+        ///   Looks up a localized string similar to A data source method must only have 1 matching parameter..
         /// </summary>
         internal static string TUnit0013Description {
             get {
@@ -393,7 +393,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A data source test must only have 1 matching parameter.
+        ///   Looks up a localized string similar to A data source method must only have 1 matching parameter.
         /// </summary>
         internal static string TUnit0013MessageFormat {
             get {
@@ -402,7 +402,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A data source test must only have 1 matching parameter.
+        ///   Looks up a localized string similar to A data source method must only have 1 matching parameter.
         /// </summary>
         internal static string TUnit0013Title {
             get {
