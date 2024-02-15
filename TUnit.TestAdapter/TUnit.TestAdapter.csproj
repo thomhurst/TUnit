@@ -7,19 +7,13 @@
         <LangVersion>latest</LangVersion>
         <DevelopmentDependency>true</DevelopmentDependency>
         <OutputType>Library</OutputType>
-        <IsPackable>true</IsPackable>
     </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" PrivateAssets="All"/>
-    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectCapability Include="TestContainer" />
         <Files Include="$(MSBuildThisFileDirectory)/../lib/netstandard2.0/**/TUnit.TestAdapter.dll" />
     </ItemGroup>
 

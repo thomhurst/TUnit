@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.Testing;
 
-namespace TUnit.Analyzers.Tests.Shared;
+namespace TUnit.Assertions.Analyzers.Tests;
 
 internal static class Net
 {

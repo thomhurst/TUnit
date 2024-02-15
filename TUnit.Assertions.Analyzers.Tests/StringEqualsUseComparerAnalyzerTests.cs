@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Shared.Verifiers.CSharpAnalyzerVerifier<TUnit.Assertions.Analyzers.StringEqualsUseComparerAnalyzer>;
+using Verifier = TUnit.Assertions.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Assertions.Analyzers.StringEqualsUseComparerAnalyzer>;
 
 namespace TUnit.Assertions.Analyzers.Tests;
 

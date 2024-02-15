@@ -1,17 +1,15 @@
-﻿using Microsoft.VisualStudio.TestPlatform.Common;
-using Microsoft.VisualStudio.TestPlatform.Common.Filtering;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace TUnit.TestAdapter.Stubs;
 
 public class NoOpRunContext : IRunContext
 {
-    public IRunSettings? RunSettings { get; } = new RunSettings();
-    
+    public IRunSettings? RunSettings => null;
+
     public ITestCaseFilterExpression? GetTestCaseFilter(IEnumerable<string>? supportedProperties, Func<string, TestProperty?> propertyProvider)
     {
-        return new TestCaseFilterExpression(new FilterExpressionWrapper(string.Empty));
+        return null;
     }
 
     public bool KeepAlive => false;

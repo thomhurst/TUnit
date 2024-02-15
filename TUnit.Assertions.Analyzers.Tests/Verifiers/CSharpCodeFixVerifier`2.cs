@@ -4,24 +4,23 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
-using TUnit.Assertions;
 using TUnit.Core;
 
-namespace TUnit.Analyzers.Tests.Shared.Verifiers;
+namespace TUnit.Assertions.Analyzers.Tests.Verifiers;
 
 public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
     where TCodeFix : CodeFixProvider, new()
 {
-    /// <inheritdoc cref="CodeFixVerifier{TAnalyzer, TCodeFix, TTest, TVerifier}.Diagnostic()"/>
+    /// <inheritdoc cref="Microsoft.CodeAnalysis.Diagnostic"/>
     public static DiagnosticResult Diagnostic()
         => CSharpCodeFixVerifier<TAnalyzer, TCodeFix, NUnitVerifier>.Diagnostic();
 
-    /// <inheritdoc cref="CodeFixVerifier{TAnalyzer, TCodeFix, TTest, TVerifier}.Diagnostic(string)"/>
+    /// <inheritdoc cref="Microsoft.CodeAnalysis.Diagnostic"/>
     public static DiagnosticResult Diagnostic(string diagnosticId)
         => CSharpCodeFixVerifier<TAnalyzer, TCodeFix, NUnitVerifier>.Diagnostic(diagnosticId);
 
-    /// <inheritdoc cref="CodeFixVerifier{TAnalyzer, TCodeFix, TTest, TVerifier}.Diagnostic(DiagnosticDescriptor)"/>
+    /// <inheritdoc cref="Microsoft.CodeAnalysis.Diagnostic"/>
     public static DiagnosticResult Diagnostic(DiagnosticDescriptor descriptor)
         => CSharpCodeFixVerifier<TAnalyzer, TCodeFix, NUnitVerifier>.Diagnostic(descriptor);
 

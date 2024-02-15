@@ -1,14 +1,16 @@
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
 
-namespace TUnit.Analyzers.Tests.Shared.Verifiers;
+namespace TUnit.Analyzers.Tests.Verifiers;
 
-public static partial class CSharpAnalyzerVerifier<TAnalyzer>
+public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
+    where TCodeFix : CodeFixProvider, new()
 {
-    public class Test : CSharpAnalyzerTest<TAnalyzer, NUnitVerifier>
+    public class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, NUnitVerifier>
     {
         public Test()
         {

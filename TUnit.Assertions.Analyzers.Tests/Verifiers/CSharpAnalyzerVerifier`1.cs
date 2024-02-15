@@ -3,23 +3,22 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
-using TUnit.Assertions;
 using TUnit.Core;
 
-namespace TUnit.Analyzers.Tests.Shared.Verifiers;
+namespace TUnit.Assertions.Analyzers.Tests.Verifiers;
 
 public static partial class CSharpAnalyzerVerifier<TAnalyzer>
     where TAnalyzer : DiagnosticAnalyzer, new()
 {
-    /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.Diagnostic()"/>
+    /// <inheritdoc cref="Microsoft.CodeAnalysis.Diagnostic"/>
     public static DiagnosticResult Diagnostic()
         => CSharpAnalyzerVerifier<TAnalyzer, NUnitVerifier>.Diagnostic();
 
-    /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.Diagnostic(string)"/>
+    /// <inheritdoc cref="Microsoft.CodeAnalysis.Diagnostic"/>
     public static DiagnosticResult Diagnostic(string diagnosticId)
         => CSharpAnalyzerVerifier<TAnalyzer, NUnitVerifier>.Diagnostic(diagnosticId);
 
-    /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.Diagnostic(DiagnosticDescriptor)"/>
+    /// <inheritdoc cref="Microsoft.CodeAnalysis.Diagnostic"/>
     public static DiagnosticResult Diagnostic(DiagnosticDescriptor descriptor)
         => CSharpAnalyzerVerifier<TAnalyzer, NUnitVerifier>.Diagnostic(descriptor);
 
