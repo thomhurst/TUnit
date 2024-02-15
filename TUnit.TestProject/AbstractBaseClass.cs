@@ -3,7 +3,7 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-public abstract class BaseClass
+public abstract class AbstractBaseClass
 {
     [Test]
     public async Task AssertClassName()
@@ -16,7 +16,7 @@ public abstract class BaseClass
     protected abstract string GetName();
 }
 
-public class ConcreteClass1 : BaseClass
+public class ConcreteClass1 : AbstractBaseClass
 {
     protected override string GetName()
     {
@@ -24,7 +24,7 @@ public class ConcreteClass1 : BaseClass
     }
 }
 
-public class ConcreteClass2 : BaseClass
+public class ConcreteClass2 : AbstractBaseClass
 {
     protected override string GetName()
     {
