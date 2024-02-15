@@ -30,7 +30,7 @@ public abstract class TestModule : Module<DotNetTestResult>
             Logger = new[] { $"trx;LogFileName={trxFile}" },
         });
 
-        var parsedResults = new NUnitTrxParser().ParseTrxContents(await trxFile.ReadAsync());
+        var parsedResults = await context.Trx().ParseTrxFile(trxFile);
 
         assertions.ForEach(x => x.Invoke(parsedResults));
 
