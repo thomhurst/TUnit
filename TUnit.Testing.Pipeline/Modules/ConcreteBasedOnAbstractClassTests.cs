@@ -15,6 +15,7 @@ public class ConcreteBasedOnAbstractClassTests : TestModule
             new List<Action<DotNetTestResult>>
             {
                 result => result.Successful.Should().BeFalse(),
+                result => result.UnitTestResults.Should().HaveCount(2),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Passed).Should().HaveCount(1),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Failed).Should().HaveCount(1),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.NotExecuted).Should().HaveCount(0),

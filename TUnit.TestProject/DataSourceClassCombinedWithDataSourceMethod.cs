@@ -5,7 +5,7 @@ namespace TUnit.TestProject;
 [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.One))]
 [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.Two))]
 [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.Three))]
-public class DataSourceClassCombinedWithDataSourceMethod
+public class DataSourceClassCombinedWithDataSourceMethod(int i)
 {
     [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.One))]
     [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.Two))]

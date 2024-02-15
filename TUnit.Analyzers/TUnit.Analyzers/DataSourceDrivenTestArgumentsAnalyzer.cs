@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -35,19 +36,14 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 
         context.EnableConcurrentExecution();
 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeMethod, SyntaxKind.MethodDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeClass, SyntaxKind.ClassDeclaration);
 
         // Check other 'context.Register...' methods that might be helpful for your purposes.
     }
-
-    /// <summary>
-    /// Executed for each Syntax Node with 'SyntaxKind' is 'ClassDeclaration'.
-    /// </summary>
-    /// <param name="context">Operation context.</param>
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    
+    private void AnalyzeMethod(SyntaxNodeAnalysisContext context)
     {
-        // The Roslyn architecture is based on inheritance.
-        // To get the required metadata, we should match the 'Node' object to the particular type: 'ClassDeclarationSyntax'.
         if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
         {
             return;
@@ -62,16 +58,40 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                == "global::TUnit.Core.DataSourceDrivenTestAttribute"))
+                                                                        == "global::TUnit.Core.DataSourceDrivenTestAttribute"))
         {
-            CheckAttributeAgainstMethod(context, methodSymbol, dataSourceDrivenAttribute);
+            CheckAttributeAgainstMethod(context, methodSymbol.Parameters, dataSourceDrivenAttribute, methodSymbol.ContainingType);
+        }
+    }
+    
+    private void AnalyzeClass(SyntaxNodeAnalysisContext context)
+    {
+        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
+        {
+            return;
+        }
+
+        if (context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)
+            is not { } namedTypeSymbol)
+        {
+            return;
+        }
+
+        var attributes = namedTypeSymbol.GetAttributes();
+        
+        foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                                                                        == "global::TUnit.Core.DataSourceDrivenTestAttribute"))
+        {
+            CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol);
         }
     }
 
-    private void CheckAttributeAgainstMethod(SyntaxNodeAnalysisContext context, IMethodSymbol testMethod,
-        AttributeData dataSourceDrivenAttribute)
+    private void CheckAttributeAgainstMethod(SyntaxNodeAnalysisContext context, 
+        ImmutableArray<IParameterSymbol> parameters,
+        AttributeData dataSourceDrivenAttribute,
+        INamedTypeSymbol fallbackClassToSearchForDataSourceIn)
     {
-        if (testMethod.Parameters.Length == 0)
+        if (parameters.Length == 0)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
@@ -81,7 +101,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
             return;
         }
         
-        if (testMethod.Parameters.Length > 1)
+        if (parameters.Length > 1)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
@@ -91,9 +111,9 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
             return;
         }
         
-        var methodParameterType = testMethod.Parameters.Select(x => x.Type).FirstOrDefault();
+        var methodParameterType = parameters.Select(x => x.Type).FirstOrDefault();
         
-        var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, testMethod.ContainingType);
+        var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, fallbackClassToSearchForDataSourceIn);
         
         if (methodContainingTestData is null)
         {
