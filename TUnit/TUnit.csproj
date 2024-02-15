@@ -5,7 +5,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
-        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,10 +20,6 @@
 
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj" />
-    </ItemGroup>
-    
-    <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" PrivateAssets="All"/>
     </ItemGroup>
 
 </Project>
