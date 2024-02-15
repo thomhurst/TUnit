@@ -1,24 +1,40 @@
-﻿using ModularPipelines.Context;
+﻿using System.Linq.Expressions;
+using ModularPipelines.Context;
+using ModularPipelines.DotNet;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.DotNet.Parsers.NUnitTrx;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using File = ModularPipelines.FileSystem.File;
 
-namespace TUnit.Testing.Pipeline;
+namespace TUnit.Testing.Pipeline.Modules;
 
 
-public abstract class TestModule : Module<CommandResult>
+public abstract class TestModule : Module<DotNetTestResult>
 {
-    protected async Task<CommandResult> RunTestsWithFilter(IPipelineContext context, string filter)
+    public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
+
+    protected async Task<DotNetTestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<DotNetTestResult>> assertions)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
 
-        return await context.DotNet().Test(new DotNetTestOptions(project)
+        var trxFile = File.GetNewTemporaryFilePath();
+        
+        var results = await context.DotNet().Test(new DotNetTestOptions(project)
         {
             NoBuild = true,
-            Filter = filter
+            Filter = filter,
+            ThrowOnNonZeroExitCode = false,
+            Logger = new[] { $"trx;LogFileName={trxFile}" },
         });
+
+        var parsedResults = new NUnitTrxParser().ParseTrxContents(await trxFile.ReadAsync());
+
+        assertions.ForEach(x => x.Invoke(parsedResults));
+
+        return parsedResults;
     }
 }
