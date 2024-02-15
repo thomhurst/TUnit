@@ -24,12 +24,7 @@ public class TestDiscoverer : ITestDiscoverer
         var testCollector = BuildServices(discoveryContext, logger)
             .GetRequiredService<TestCollector>();
 
-        var tests = testCollector.TestsFromSources(sources).ToList();
-        
-        if (!Debugger.IsAttached)
-        {
-            //Debugger.Launch();
-        }
+        var tests = testCollector.TestsFromSources(sources);
         
         foreach (var test in tests)
         {
