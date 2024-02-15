@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -23,7 +24,12 @@ public class TestDiscoverer : ITestDiscoverer
         var testCollector = BuildServices(discoveryContext, logger)
             .GetRequiredService<TestCollector>();
 
-        var tests = testCollector.TestsFromSources(sources);
+        var tests = testCollector.TestsFromSources(sources).ToList();
+        
+        if (!Debugger.IsAttached)
+        {
+            //Debugger.Launch();
+        }
         
         foreach (var test in tests)
         {

@@ -6,7 +6,7 @@ namespace TUnit.Engine.TestParsers;
 internal class DataDrivenTestParser(DataSourceRetriever dataSourceRetriever) : ITestParser
 {
     public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
-        Type[] nonAbstractClassesContainingTest, 
+        Type type, 
         int runCount,
         SourceLocation sourceLocation)
     {
@@ -23,21 +23,18 @@ internal class DataDrivenTestParser(DataSourceRetriever dataSourceRetriever) : I
         {
             var arguments = dataDrivenTestAttribute.Values;
                     
-            foreach (var classType in nonAbstractClassesContainingTest)
+            foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
             {
-                foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(classType))
+                for (var i = 1; i <= runCount; i++)
                 {
-                    for (var i = 1; i <= runCount; i++)
-                    {
-                        yield return new TestDetails(
-                            methodInfo: methodInfo,
-                            classType: classType,
-                            sourceLocation: sourceLocation,
-                            methodArguments: arguments,
-                            classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
-                            count: count++
-                        );
-                    }
+                    yield return new TestDetails(
+                        methodInfo: methodInfo,
+                        classType: type,
+                        sourceLocation: sourceLocation,
+                        methodArguments: arguments,
+                        classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
+                        count: count++
+                    );
                 }
             }
         }

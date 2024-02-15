@@ -6,7 +6,7 @@ namespace TUnit.Engine.TestParsers;
 internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, CombinativeSolver combinativeSolver) : ITestParser
 {
     public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
-        Type[] nonAbstractClassesContainingTest, 
+        Type type, 
         int runCount,
         SourceLocation sourceLocation)
     {
@@ -19,37 +19,34 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
         
         var hasCombinativeAttribute = methodInfo.GetCustomAttribute<CombinativeAttribute>() != null;
 
-        foreach (var classType in nonAbstractClassesContainingTest)
+        foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
         {
-            foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(classType))
+            for (var i = 1; i <= runCount; i++)
             {
-                for (var i = 1; i <= runCount; i++)
+                if (hasCombinativeAttribute)
                 {
-                    if (hasCombinativeAttribute)
-                    {
-                        foreach (var combinativeValue in GetCombinativeValues(methodInfo))
-                        {
-                            yield return new TestDetails(
-                                methodInfo: methodInfo,
-                                classType: classType,
-                                sourceLocation: sourceLocation,
-                                methodArguments: combinativeValue.ToArray(),
-                                classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
-                                count: count++
-                            );
-                        }
-                    }
-                    else
+                    foreach (var combinativeValue in GetCombinativeValues(methodInfo))
                     {
                         yield return new TestDetails(
                             methodInfo: methodInfo,
-                            classType: classType,
+                            classType: type,
                             sourceLocation: sourceLocation,
-                            methodArguments: null,
+                            methodArguments: combinativeValue.ToArray(),
                             classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
                             count: count++
                         );
                     }
+                }
+                else
+                {
+                    yield return new TestDetails(
+                        methodInfo: methodInfo,
+                        classType: type,
+                        sourceLocation: sourceLocation,
+                        methodArguments: null,
+                        classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
+                        count: count++
+                    );
                 }
             }
         }

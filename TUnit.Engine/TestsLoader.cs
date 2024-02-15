@@ -1,5 +1,7 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using TUnit.Core;
+using TUnit.Engine.Models;
 using TUnit.Engine.TestParsers;
 
 namespace TUnit.Engine;
@@ -12,34 +14,23 @@ internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever,
 
     public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation, Assembly[] allAssemblies)
     {
-        var methods = typeInformation.Types.SelectMany(x => x.GetMethods());
+        var nonAbstractClasses = typeInformation.Types.Where(x => !x.IsAbstract);
 
-        foreach (var methodInfo in methods)
+        foreach (var testMethod in GetTestMethods(nonAbstractClasses))
         {
-            if (!HasTestAttributes(methodInfo))
-            {
-                continue;
-            }
-            
             var sourceLocation = sourceLocationRetriever
-                .GetSourceLocation(typeInformation.Assembly.Location, methodInfo.DeclaringType!.FullName!, methodInfo.Name);
+                .GetSourceLocation(typeInformation.Assembly.Location, testMethod.MethodInfo.DeclaringType!.FullName!, testMethod.MethodInfo.Name);
 
-            var allClasses = classLoader.GetAllTypes(allAssemblies).ToArray();
-            
-            var nonAbstractClassesContainingTest = allClasses
-                .Where(t => t.IsAssignableTo(methodInfo.DeclaringType!) && !t.IsAbstract)
-                .ToArray();
-
-            var repeatCount = methodInfo.GetCustomAttributes<RepeatAttribute>()
-                .Concat(methodInfo.DeclaringType!.GetCustomAttributes<RepeatAttribute>())
+            var repeatCount = testMethod.MethodInfo.GetCustomAttributes<RepeatAttribute>()
+                .Concat(testMethod.TestClass.GetCustomAttributes<RepeatAttribute>())
                 .FirstOrDefault()
                 ?.Times ?? 0;
 
             var runCount = repeatCount + 1;
-
+            
             var testDetailsEnumerable = testParsers.SelectMany(testParser =>
-                testParser.GetTestCases(methodInfo,
-                    nonAbstractClassesContainingTest,
+                testParser.GetTestCases(testMethod.MethodInfo,
+                    testMethod.TestClass,
                     runCount,
                     sourceLocation)
             );
@@ -47,6 +38,28 @@ internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever,
             foreach (var testDetails in testDetailsEnumerable)
             {
                 yield return testDetails;
+            }
+        }
+    }
+
+    private static IEnumerable<TestMethod> GetTestMethods(IEnumerable<Type> nonAbstractClasses)
+    {
+        foreach (var nonAbstractClass in nonAbstractClasses)
+        {
+            var methods = nonAbstractClass.GetMethods();
+
+            foreach (var methodInfo in methods)
+            {
+                if (!HasTestAttributes(methodInfo))
+                {
+                    continue;
+                }
+
+                yield return new TestMethod
+                {
+                    MethodInfo = methodInfo,
+                    TestClass = nonAbstractClass
+                };
             }
         }
     }
