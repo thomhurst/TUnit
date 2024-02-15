@@ -66,8 +66,6 @@ internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever,
     private static bool HasTestAttributes(MethodInfo methodInfo)
     {
         return methodInfo.CustomAttributes
-            .Select(x => x.AttributeType)
-            .Intersect(TestAttributes)
-            .Any();
+            .Any(x => TestAttributes.Contains(x.AttributeType));
     }
 }
