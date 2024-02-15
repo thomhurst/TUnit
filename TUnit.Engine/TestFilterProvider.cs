@@ -49,8 +49,8 @@ internal class TestFilterProvider(IRunContext runContext, IMessageLogger message
                 {
                     return test.GetPropertyValue(testProperty);
                 }
-                
-                return null;
+
+                return test.Traits.FirstOrDefault(x => x.Name == propertyName)?.Value;
             });
             
             if (isMatch)
