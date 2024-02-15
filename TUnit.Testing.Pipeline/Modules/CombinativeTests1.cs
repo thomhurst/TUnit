@@ -10,7 +10,7 @@ public class CombinativeTests1 : TestModule
     protected override async Task<DotNetTestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "TestClass=CombinativeTests&TestName=CombinativeTest_One",
+            "TestClass~CombinativeTests&TestName=CombinativeTest_One",
             new List<Action<DotNetTestResult>>
             {
                 result => result.Successful.Should().BeTrue(),
