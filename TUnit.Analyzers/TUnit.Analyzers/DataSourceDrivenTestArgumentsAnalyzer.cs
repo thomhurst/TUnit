@@ -16,7 +16,7 @@ namespace TUnit.Analyzers;
 public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.InvalidDataSourceAssertion, Rules.NoDataSourceMethodFoundAssertion);
+        ImmutableArray.Create(Rules.NoTestDataSourceProvided, Rules.NoDataSourceMethodFound);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -72,7 +72,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.NoDataSourceMethodFoundAssertion,
+                    Rules.NoDataSourceMethodFound,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;
@@ -90,7 +90,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         
         context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.InvalidDataSourceAssertion,
+                    Rules.NoTestDataSourceProvided,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                     argumentType,
                     methodParameterType)

@@ -11,7 +11,7 @@ namespace TUnit.Analyzers;
 public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.InvalidDataAssertion, Rules.NoDataProvidedAssertion, Rules.BadNullabilityAssertion);
+        ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability);
 
     public override void InitializeInternal(AnalysisContext context)
     { 
@@ -46,7 +46,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         if (!dataDrivenTestAttribute.ConstructorArguments.Any())
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(Rules.NoDataProvidedAssertion,
+                Diagnostic.Create(Rules.NoTestDataProvided,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;
@@ -61,7 +61,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         if (methodParameterTypes.Count != attributeTypesPassedIn.Count)
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(Rules.InvalidDataAssertion,
+                Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                     dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                     string.Join(", ", attributeTypesPassedIn.Select(x => x?.ToDisplayString()) ?? ImmutableArray<string>.Empty),
                     string.Join(", ", methodParameterTypes.Select(x => x?.ToDisplayString())))
@@ -78,7 +78,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
                 methodParameterType.NullableAnnotation == NullableAnnotation.NotAnnotated)
             {
                 context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.BadNullabilityAssertion,
+                    Diagnostic.Create(Rules.MethodParameterBadNullability,
                         methodSymbol.Parameters[i].Locations.FirstOrDefault(),
                         methodSymbol.Parameters[i].Name)
                 );
@@ -93,7 +93,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
                 !context.Compilation.HasImplicitConversion(attributeArgumentType, methodParameterType))
             {
                 context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.InvalidDataAssertion,
+                    Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                         attributeArgumentType.ToDisplayString(),
                         methodParameterType.ToDisplayString())

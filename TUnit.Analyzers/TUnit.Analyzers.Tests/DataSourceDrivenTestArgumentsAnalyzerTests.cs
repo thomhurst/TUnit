@@ -28,7 +28,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
                             }
                             """;
 
-        var expected = Verifier.Diagnostic(Rules.InvalidDataSourceAssertion.Id).WithLocation(0)
+        var expected = Verifier.Diagnostic(Rules.NoTestDataSourceProvided.Id).WithLocation(0)
             .WithArguments("int", "string");
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
