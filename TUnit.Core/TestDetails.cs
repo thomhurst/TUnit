@@ -72,7 +72,12 @@ internal record TestDetails
         MaxLineNumber = sourceLocation.MaxLineNumber;
 
         UniqueId = $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
+
+        CustomProperties = methodAndClassAttributes.OfType<PropertyAttribute>()
+            .ToDictionary(x => x.Name, x => x.Value);
     }
+
+    public Dictionary<string,string> CustomProperties { get; }
 
     private bool GetIsSingleTest()
     {

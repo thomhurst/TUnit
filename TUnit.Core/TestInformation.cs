@@ -27,4 +27,5 @@ public record TestInformation
     public int CurrentExecutionCount { get; internal set; }
     public required TimeSpan? Timeout { get; init; }
     public required string[]? NotInParallelConstraintKeys { get; init; }
+    public IReadOnlyDictionary<string, string> CustomProperties { get; init; }
 }

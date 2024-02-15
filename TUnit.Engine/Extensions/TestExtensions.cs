@@ -33,6 +33,7 @@ internal static class TestExtensions
             RepeatCount = testCase.GetPropertyValue(TUnitTestProperties.RepeatCount, 0),
             RetryCount = testCase.GetPropertyValue(TUnitTestProperties.RetryCount, 0),
             NotInParallelConstraintKeys = testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]),
+            CustomProperties = testCase.Traits.ToDictionary(x => x.Name, x => x.Value).AsReadOnly()
         };
     }
 
@@ -66,6 +67,11 @@ internal static class TestExtensions
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RepeatCount, testDetails.RepeatCount);
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RetryCount, testDetails.RetryCount);
 
+        foreach (var customProperty in testDetails.CustomProperties)
+        {
+            testCase.Traits.Add(customProperty.Key, customProperty.Value);
+        }
+        
         var testParameterTypes = TestDetails.GetParameterTypes(testDetails.MethodParameterTypes);
         
         var managedMethod = $"{testMethodName}{testParameterTypes}";
