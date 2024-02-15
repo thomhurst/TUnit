@@ -1,4 +1,4 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class CombinativeAttribute : TUnitAttribute;
+public class CombinativeTestAttribute : TUnitAttribute;

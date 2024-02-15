@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -9,12 +7,8 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace TUnit.Analyzers;
 
-/// <summary>
-/// A sample analyzer that reports the company name being used in class declarations.
-/// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
-/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
+public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(
@@ -30,7 +24,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
             Rules.TestDataSourceTooManyArgumentsInTestMethod
         );
 
-    public override void Initialize(AnalysisContext context)
+    public override void InitializeInternal(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
@@ -38,8 +32,6 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 
         context.RegisterSyntaxNodeAction(AnalyzeMethod, SyntaxKind.MethodDeclaration);
         context.RegisterSyntaxNodeAction(AnalyzeClass, SyntaxKind.ClassDeclaration);
-
-        // Check other 'context.Register...' methods that might be helpful for your purposes.
     }
     
     private void AnalyzeMethod(SyntaxNodeAnalysisContext context)

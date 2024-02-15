@@ -9,5 +9,4 @@ await PipelineHostBuilder.Create()
         collection.AddModulesFromAssembly(typeof(Program).Assembly);
     })
     .AddRequirement<BuiltTestProjectRequirement>()
-    .SetLogLevel(LogLevel.Debug)
     .ExecutePipelineAsync();

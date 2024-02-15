@@ -10,14 +10,15 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
         int runCount,
         SourceLocation sourceLocation)
     {
-        if (!methodInfo.GetCustomAttributes<TestAttribute>().Any())
+        if (!methodInfo.GetCustomAttributes<TestAttribute>().Any()
+            && !methodInfo.GetCustomAttributes<CombinativeTestAttribute>().Any())
         {
             yield break;
         }
 
         var count = 1;
         
-        var hasCombinativeAttribute = methodInfo.GetCustomAttribute<CombinativeAttribute>() != null;
+        var hasCombinativeAttribute = methodInfo.GetCustomAttribute<CombinativeTestAttribute>() != null;
 
         foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
         {
