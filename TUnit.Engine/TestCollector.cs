@@ -14,6 +14,6 @@ internal class TestCollector(CacheableAssemblyLoader assemblyLoader, TestsLoader
         
         return allAssemblies
             .Select(x => new TypeInformation(x))
-            .SelectMany(x => testsLoader.GetTests(x, allAssemblies));
+            .SelectMany(testsLoader.GetTests);
     }
 }

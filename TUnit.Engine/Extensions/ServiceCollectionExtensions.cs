@@ -9,7 +9,6 @@ public static class ServiceCollectionExtensions
     {
         return services.AddSingleton<MethodInvoker>()
             .AddSingleton<DataSourceRetriever>()
-            .AddSingleton<ClassLoader>()
             .AddSingleton<Disposer>()
             .AddSingleton<CacheableAssemblyLoader>()
             .AddSingleton(new ConsoleInterceptor())

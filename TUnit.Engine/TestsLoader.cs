@@ -7,12 +7,11 @@ using TUnit.Engine.TestParsers;
 namespace TUnit.Engine;
 
 internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever, 
-    ClassLoader classLoader, 
     IEnumerable<ITestParser> testParsers)
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(DataDrivenTestAttribute), typeof(DataSourceDrivenTestAttribute)];
 
-    public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation, Assembly[] allAssemblies)
+    public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation)
     {
         var nonAbstractClasses = typeInformation.Types.Where(x => !x.IsAbstract);
 
