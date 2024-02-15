@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestCollector>()
             .AddSingleton<SourceLocationRetriever>()
             .AddSingleton<ReflectionMetadataProvider>()
-            .AddSingleton<TUnitTestFilterProvider>()
+            .AddSingleton<TestFilterProvider>()
             .AddSingleton<TestClassCreator>()
             .AddSingleton<TestMethodRetriever>()
             .AddSingleton<TestGrouper>()

@@ -54,7 +54,7 @@ public class TestExecutor : ITestExecutor2
 
     private IEnumerable<TestCase> Filter(IEnumerable<TestCase> tests, IServiceProvider serviceProvider)
     {
-        var testFilterProvider = serviceProvider.GetRequiredService<TUnitTestFilterProvider>();
+        var testFilterProvider = serviceProvider.GetRequiredService<TestFilterProvider>();
         
         return testFilterProvider.FilterTests(tests);
     }

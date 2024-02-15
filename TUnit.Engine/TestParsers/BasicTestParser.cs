@@ -10,7 +10,8 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
         int runCount,
         SourceLocation sourceLocation)
     {
-        if (!methodInfo.GetCustomAttributes<TestAttribute>().Any())
+        if (!methodInfo.GetCustomAttributes<TestAttribute>().Any()
+            && !methodInfo.GetCustomAttributes<CombinativeTestAttribute>().Any())
         {
             yield break;
         }
