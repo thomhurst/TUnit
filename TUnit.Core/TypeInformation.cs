@@ -20,9 +20,4 @@ internal record TypeInformation
 
     public Type[] Types { get; }
     public Assembly Assembly { get; init; }
-
-    public void Deconstruct(out Assembly Assembly)
-    {
-        Assembly = this.Assembly;
-    }
 }
