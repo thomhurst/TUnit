@@ -9,6 +9,7 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 [DependsOn<GetPackageProjectsModule>]
+[DependsOn<RunTUnitEngineTestsModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
     protected override async Task<List<PackedProject>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
