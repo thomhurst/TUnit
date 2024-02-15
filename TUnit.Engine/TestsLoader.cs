@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using TUnit.Core;
 using TUnit.Engine.Models;
 using TUnit.Engine.TestParsers;

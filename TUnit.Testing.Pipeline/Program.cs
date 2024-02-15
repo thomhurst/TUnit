@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using ModularPipelines.Enums;
+﻿using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Host;
 using ModularPipelines.Options;
