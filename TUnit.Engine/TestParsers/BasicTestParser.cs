@@ -17,7 +17,7 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
 
         var count = 1;
         
-        var hasCombinativeAttribute = methodInfo.GetCustomAttribute<CombinativeAttribute>() != null;
+        var hasCombinativeAttribute = methodInfo.GetCustomAttribute<CombinativeTestAttribute>() != null;
 
         foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
         {

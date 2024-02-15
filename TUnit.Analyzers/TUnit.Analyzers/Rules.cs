@@ -44,6 +44,9 @@ internal static class Rules
 
     public static readonly DiagnosticDescriptor TestDataSourceTooManyArgumentsInTestMethod =
         CreateDescriptor("TUnit0013", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor ConflictingTestAttributes =
+        CreateDescriptor("TUnit0014", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

@@ -409,5 +409,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0013Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are conflicting test attributes..
+        /// </summary>
+        internal static string TUnit0014Description {
+            get {
+                return ResourceManager.GetString("TUnit0014Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are conflicting test attributes.
+        /// </summary>
+        internal static string TUnit0014MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0014MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are conflicting test attributes.
+        /// </summary>
+        internal static string TUnit0014Title {
+            get {
+                return ResourceManager.GetString("TUnit0014Title", resourceCulture);
+            }
+        }
     }
 }
