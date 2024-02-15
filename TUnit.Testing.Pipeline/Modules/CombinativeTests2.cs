@@ -5,17 +5,17 @@ using ModularPipelines.DotNet.Enums;
 
 namespace TUnit.Testing.Pipeline.Modules;
 
-public class CombinativeTests1 : TestModule
+public class CombinativeTests2 : TestModule
 {
     protected override async Task<DotNetTestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "TestClass=CombinativeTests&TestName=CombinativeTest_One",
+            "TestClass=CombinativeTests&TestName=CombinativeTest_Two",
             new List<Action<DotNetTestResult>>
             {
                 result => result.Successful.Should().BeTrue(),
-                result => result.UnitTestResults.Should().HaveCount(24),
-                result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Passed).Should().HaveCount(24),
+                result => result.UnitTestResults.Should().HaveCount(200_000),
+                result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Passed).Should().HaveCount(200_000),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Failed).Should().HaveCount(0),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.NotExecuted).Should().HaveCount(0),
             });
