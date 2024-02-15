@@ -24,7 +24,9 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
             Rules.TestDataSourceMethodAbstract,
             Rules.TestDataSourceMethodNotParameterless,
             Rules.WrongArgumentTypeTestDataSource,
-            Rules.TestDataSourceMethodNotReturnsNothing
+            Rules.TestDataSourceMethodNotReturnsNothing,
+            Rules.TestDataSourceNoArgumentInTestMethod,
+            Rules.TestDataSourceTooManyArgumentsInTestMethod
         );
 
     public override void Initialize(AnalysisContext context)
@@ -66,11 +68,32 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private void CheckAttributeAgainstMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol,
+    private void CheckAttributeAgainstMethod(SyntaxNodeAnalysisContext context, IMethodSymbol testMethod,
         AttributeData dataSourceDrivenAttribute)
     {
-        var methodParameterType = methodSymbol.Parameters.Select(x => x.Type).FirstOrDefault();
-        var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, methodSymbol.ContainingType);
+        if (testMethod.Parameters.Length == 0)
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TestDataSourceNoArgumentInTestMethod,
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+            );
+            return;
+        }
+        
+        if (testMethod.Parameters.Length > 1)
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TestDataSourceTooManyArgumentsInTestMethod,
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+            );
+            return;
+        }
+        
+        var methodParameterType = testMethod.Parameters.Select(x => x.Type).FirstOrDefault();
+        
+        var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, testMethod.ContainingType);
         
         if (methodContainingTestData is null)
         {
@@ -126,15 +149,15 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 
         var enumerableOfMethodType = CreateEnumerableOfType(context, methodParameterType!);
 
-        if (SymbolEqualityComparer.Default.Equals(argumentType, methodParameterType)
-            || SymbolEqualityComparer.Default.Equals(argumentType, enumerableOfMethodType))
+        if (context.Compilation.HasImplicitConversion(argumentType, methodParameterType)
+            || context.Compilation.HasImplicitConversion(argumentType, enumerableOfMethodType))
         {
             return;
         }
         
         context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.NoTestDataSourceProvided,
+                    Rules.WrongArgumentTypeTestDataSource,
                     dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                     argumentType,
                     methodParameterType)

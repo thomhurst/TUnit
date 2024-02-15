@@ -40,11 +40,35 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
         const string text = """
                             using TUnit.Assertions;
                             using TUnit.Core;
-                            
+
                             public class MyClass
                             {
                                 [DataSourceDrivenTest(nameof(Data))]
                                 public void MyTest(int value)
+                                {
+                                }
+                                
+                                public static int Data()
+                                {
+                                    return 1;
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [Test]
+    public async Task DataDriven_Argument_Is_Flagged_When_Argument_Missing()
+    {
+        const string text = """
+                            using TUnit.Assertions;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [DataSourceDrivenTest(nameof(Data))]
+                                public void MyTest()
                                 {
                                 }
                                 

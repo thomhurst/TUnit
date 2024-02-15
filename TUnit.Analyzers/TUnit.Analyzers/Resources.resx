@@ -67,7 +67,7 @@
         <value>Data source doesn't match method argument type.</value><comment>An optional longer localizable description of the diagnostic.</comment>
     </data>
     <data name="TUnit0006MessageFormat" xml:space="preserve">
-        <value>The types don't match: {0} and {1}</value><comment>The format-able message the diagnostic displays.</comment>
+        <value>The data source type {0} doesn't match the parameter type {1}</value><comment>The format-able message the diagnostic displays.</comment>
     </data>
     <data name="TUnit0006Title" xml:space="preserve">
         <value>Data source doesn't match method argument type</value><comment>The title of the diagnostic.</comment>
@@ -116,5 +116,23 @@
     </data>
     <data name="TUnit0011Title" xml:space="preserve">
         <value>Data source method returns void</value><comment>The title of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0012Description" xml:space="preserve">
+        <value>There is no argument for the data source.</value><comment>An optional longer localizable description of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0012MessageFormat" xml:space="preserve">
+        <value>There is no argument for the data source</value><comment>The format-able message the diagnostic displays.</comment>
+    </data>
+    <data name="TUnit0012Title" xml:space="preserve">
+        <value>There is no argument for the data source</value><comment>The title of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0013Description" xml:space="preserve">
+        <value>A data source test must only have 1 matching parameter.</value><comment>An optional longer localizable description of the diagnostic.</comment>
+    </data>
+    <data name="TUnit0013MessageFormat" xml:space="preserve">
+        <value>A data source test must only have 1 matching parameter</value><comment>The format-able message the diagnostic displays.</comment>
+    </data>
+    <data name="TUnit0013Title" xml:space="preserve">
+        <value>A data source test must only have 1 matching parameter</value><comment>The title of the diagnostic.</comment>
     </data>
 </root>

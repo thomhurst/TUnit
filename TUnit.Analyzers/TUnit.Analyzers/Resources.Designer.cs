@@ -204,7 +204,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The types don&apos;t match: {0} and {1}.
+        ///   Looks up a localized string similar to The data source type {0} doesn&apos;t match the parameter type {1}.
         /// </summary>
         internal static string TUnit0006MessageFormat {
             get {
@@ -353,6 +353,60 @@ namespace TUnit.Analyzers {
         internal static string TUnit0011Title {
             get {
                 return ResourceManager.GetString("TUnit0011Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no argument for the data source..
+        /// </summary>
+        internal static string TUnit0012Description {
+            get {
+                return ResourceManager.GetString("TUnit0012Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no argument for the data source.
+        /// </summary>
+        internal static string TUnit0012MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0012MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no argument for the data source.
+        /// </summary>
+        internal static string TUnit0012Title {
+            get {
+                return ResourceManager.GetString("TUnit0012Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A data source test must only have 1 matching parameter..
+        /// </summary>
+        internal static string TUnit0013Description {
+            get {
+                return ResourceManager.GetString("TUnit0013Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A data source test must only have 1 matching parameter.
+        /// </summary>
+        internal static string TUnit0013MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0013MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A data source test must only have 1 matching parameter.
+        /// </summary>
+        internal static string TUnit0013Title {
+            get {
+                return ResourceManager.GetString("TUnit0013Title", resourceCulture);
             }
         }
     }
