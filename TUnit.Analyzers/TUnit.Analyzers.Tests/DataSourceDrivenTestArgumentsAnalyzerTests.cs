@@ -38,9 +38,11 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
     public async Task DataDriven_Argument_Is_Not_Flagged_When_Matches_Parameter_Type()
     {
         const string text = """
+                            using TUnit.Assertions;
+                            using TUnit.Core;
+                            
                             public class MyClass
                             {
-                            
                                 [DataSourceDrivenTest(nameof(Data))]
                                 public void MyTest(int value)
                                 {
@@ -49,6 +51,33 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
                                 public static int Data()
                                 {
                                     return 1;
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [Test]
+    public async Task DataDriven_Argument_Is_Not_Flagged_When_Data_Within_Another_Class()
+    {
+        const string text = """
+                            using TUnit.Assertions;
+                            using TUnit.Core;
+                            
+                            public static class MyData
+                            {
+                                public static int One()
+                                {
+                                    return 1;
+                                }
+                            }
+                            
+                            public class MyClass
+                            {
+                                [DataSourceDrivenTest(typeof(MyData), nameof(MyData.One))]
+                                public void MyTest(int value)
+                                {
                                 }
                             }
                             """;

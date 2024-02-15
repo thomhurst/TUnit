@@ -12,6 +12,5 @@ public class DataSourceClassCombinedWithDataSourceMethod
     [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.Three))]
     public void Test()
     {
-        
     }
 }

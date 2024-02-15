@@ -193,5 +193,167 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0005Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source doesn&apos;t match method argument type..
+        /// </summary>
+        internal static string TUnit0006Description {
+            get {
+                return ResourceManager.GetString("TUnit0006Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The types don&apos;t match: {0} and {1}.
+        /// </summary>
+        internal static string TUnit0006MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0006MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source doesn&apos;t match method argument type.
+        /// </summary>
+        internal static string TUnit0006Title {
+            get {
+                return ResourceManager.GetString("TUnit0006Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method must be static..
+        /// </summary>
+        internal static string TUnit0007Description {
+            get {
+                return ResourceManager.GetString("TUnit0007Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method must be static.
+        /// </summary>
+        internal static string TUnit0007MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0007MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method must be static.
+        /// </summary>
+        internal static string TUnit0007Title {
+            get {
+                return ResourceManager.GetString("TUnit0007Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method must be public..
+        /// </summary>
+        internal static string TUnit0008Description {
+            get {
+                return ResourceManager.GetString("TUnit0008Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method must be public.
+        /// </summary>
+        internal static string TUnit0008MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0008MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method must be public.
+        /// </summary>
+        internal static string TUnit0008Title {
+            get {
+                return ResourceManager.GetString("TUnit0008Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method cannot be abstract..
+        /// </summary>
+        internal static string TUnit0009Description {
+            get {
+                return ResourceManager.GetString("TUnit0009Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method cannot be abstract.
+        /// </summary>
+        internal static string TUnit0009MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0009MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method cannot be abstract.
+        /// </summary>
+        internal static string TUnit0009Title {
+            get {
+                return ResourceManager.GetString("TUnit0009Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method should be parameterless..
+        /// </summary>
+        internal static string TUnit0010Description {
+            get {
+                return ResourceManager.GetString("TUnit0010Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method should be parameterless.
+        /// </summary>
+        internal static string TUnit0010MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0010MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method should be parameterless.
+        /// </summary>
+        internal static string TUnit0010Title {
+            get {
+                return ResourceManager.GetString("TUnit0010Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method returns void..
+        /// </summary>
+        internal static string TUnit0011Description {
+            get {
+                return ResourceManager.GetString("TUnit0011Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method returns void.
+        /// </summary>
+        internal static string TUnit0011MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0011MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data source method returns void.
+        /// </summary>
+        internal static string TUnit0011Title {
+            get {
+                return ResourceManager.GetString("TUnit0011Title", resourceCulture);
+            }
+        }
     }
 }

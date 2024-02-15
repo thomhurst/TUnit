@@ -16,7 +16,16 @@ namespace TUnit.Analyzers;
 public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.NoTestDataSourceProvided, Rules.NoDataSourceMethodFound);
+        ImmutableArray.Create(
+            Rules.NoTestDataSourceProvided,
+            Rules.NoDataSourceMethodFound,
+            Rules.TestDataSourceMethodNotStatic,
+            Rules.TestDataSourceMethodNotPublic,
+            Rules.TestDataSourceMethodAbstract,
+            Rules.TestDataSourceMethodNotParameterless,
+            Rules.WrongArgumentTypeTestDataSource,
+            Rules.TestDataSourceMethodNotReturnsNothing
+        );
 
     public override void Initialize(AnalysisContext context)
     {
@@ -50,30 +59,65 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
         
-        foreach (var dataDrivenTestAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+        foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                                 == "global::TUnit.Core.DataSourceDrivenTestAttribute"))
         {
-            CheckAttributeAgainstMethod(context, methodSymbol, dataDrivenTestAttribute);
+            CheckAttributeAgainstMethod(context, methodSymbol, dataSourceDrivenAttribute);
         }
     }
 
     private void CheckAttributeAgainstMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol,
-        AttributeData dataDrivenTestAttribute)
+        AttributeData dataSourceDrivenAttribute)
     {
         var methodParameterType = methodSymbol.Parameters.Select(x => x.Type).FirstOrDefault();
-        var methodContainingTestData = FindMethodContainingTestData(context, dataDrivenTestAttribute, methodSymbol.ContainingType);
-
-        if (methodContainingTestData is null 
-            || methodContainingTestData.ReturnsVoid
-            || !methodContainingTestData.IsStatic
-            || methodContainingTestData.DeclaredAccessibility != Accessibility.Public
-            || methodContainingTestData.Parameters.Any()
-            )
+        var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, methodSymbol.ContainingType);
+        
+        if (methodContainingTestData is null)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.NoDataSourceMethodFound,
-                    dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+            );
+            return;
+        }
+        
+        if (methodContainingTestData.ReturnsVoid)
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TestDataSourceMethodNotReturnsNothing,
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+            );
+            return;
+        }
+        
+        if (!methodContainingTestData.IsStatic)
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TestDataSourceMethodNotStatic,
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+            );
+            return;
+        }
+        
+        if (methodContainingTestData.DeclaredAccessibility != Accessibility.Public)
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TestDataSourceMethodNotPublic,
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+            );
+            return;
+        }
+        
+        if (methodContainingTestData.Parameters.Any())
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TestDataSourceMethodNotParameterless,
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;
         }
@@ -91,7 +135,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.NoTestDataSourceProvided,
-                    dataDrivenTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                     argumentType,
                     methodParameterType)
             );
@@ -104,22 +148,20 @@ public class DataSourceDrivenTestArgumentsAnalyzer : DiagnosticAnalyzer
             .Construct(typeSymbol);
     }
 
-    private IMethodSymbol? FindMethodContainingTestData(SyntaxNodeAnalysisContext context, AttributeData dataDrivenTestAttribute,
+    private IMethodSymbol? FindMethodContainingTestData(SyntaxNodeAnalysisContext context, AttributeData dataSourceDrivenAttribute,
         INamedTypeSymbol classContainingTest)
     {
-        if (dataDrivenTestAttribute.ConstructorArguments.Length == 1)
+        if (dataSourceDrivenAttribute.ConstructorArguments.Length == 1)
         {
-            var methodName = dataDrivenTestAttribute.ConstructorArguments.First().Value as string;
+            var methodName = dataSourceDrivenAttribute.ConstructorArguments.First().Value as string;
             return classContainingTest.GetMembers().OfType<IMethodSymbol>().FirstOrDefault(x => x.Name == methodName);
         }
         else
         {
-            var methodName = dataDrivenTestAttribute.ConstructorArguments[1].Value as string;
+            var methodName = dataSourceDrivenAttribute.ConstructorArguments[1].Value as string;
 
             var @class =
-                dataDrivenTestAttribute.ConstructorArguments[0].Value is not Type classType
-                    ? classContainingTest
-                    : context.Compilation.GetTypeByMetadataName(classType.AssemblyQualifiedName ?? classType.FullName!);
+                dataSourceDrivenAttribute.ConstructorArguments[0].Value as INamedTypeSymbol ?? classContainingTest;
             
             return @class?.GetMembers().OfType<IMethodSymbol>().FirstOrDefault(x => x.Name == methodName);
         }
