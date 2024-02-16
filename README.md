@@ -62,8 +62,12 @@ With TUnit assertions, I wanted to make these impossible to compile. So type con
 
 So in TUnit, this will compile:
 
-`await Assert.That(() => 1).Throws.Nothing;`
+```csharp
+await Assert.That(() => GetSomeValue()).Throws.Nothing;
+```
 
 This won't:
 
-`await Assert.That(1).Throws.Nothing;`
+```csharp
+await Assert.That(GetSomeValue()).Throws.Nothing;
+```
