@@ -14,17 +14,17 @@ public class ExceptionMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr
     public ExceptionMessage(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType,
         BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder.AppendExpression("Message");;
+        AssertionBuilder = assertionBuilder.AppendExpression("Message");
     }
 
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return EqualTo(expected, StringComparison.Ordinal);
+        return EqualTo(expected, StringComparison.Ordinal, expectedExpression);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison)
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string expression1 = "", [CallerArgumentExpression("stringComparison")] string expression2 = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder, expected, (actual, _, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), expected, (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return string.Equals(actual.Message, expected, stringComparison);

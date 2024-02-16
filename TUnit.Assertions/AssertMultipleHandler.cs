@@ -17,7 +17,7 @@ public class AssertMultipleHandler
 
     public async Task AssertAsync()
     {
-        AssertionsTracker.Current.Clear();;
+        AssertionsTracker.Current.Clear();
         
         _action();
         

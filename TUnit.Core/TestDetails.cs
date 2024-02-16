@@ -49,7 +49,7 @@ internal record TestDetails
         RepeatCount = methodAndClassAttributes
             .OfType<RepeatAttribute>()
             .FirstOrDefault()
-            ?.Times ?? 0;;
+            ?.Times ?? 0;
 
         if (RepeatCount > 0)
         {

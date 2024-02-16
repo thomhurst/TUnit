@@ -13,12 +13,12 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
     public StringLength(AssertionBuilder<string> assertionBuilder, ConnectorType connectorType,
         BaseAssertCondition<string, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder.AppendExpression("Length");;
+        AssertionBuilder = assertionBuilder.AppendExpression("Length");
     }
 
     public BaseAssertCondition<string, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, expected, (@string, _, _) =>
+        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
                 return @string.Length == expected;
@@ -28,8 +28,8 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> IsEmpty =>
-        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, 0, (@string, _, _) =>
+    public BaseAssertCondition<string, TAnd, TOr> Zero =>
+        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
                 return @string.Length == 0;
@@ -38,8 +38,8 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}")
         );
 
-    public BaseAssertCondition<string, TAnd, TOr> IsNotEmpty =>
-        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, default, (@string, _, _) =>
+    public BaseAssertCondition<string, TAnd, TOr> Positive =>
+        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), default, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
                 return @string.Length > 0;
@@ -52,7 +52,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
     public BaseAssertCondition<string, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(
-            AssertionBuilder,
+            AssertionBuilder.AppendCallerMethod(expectedExpression),
             expected,
             (@string, _, _) =>
             {
@@ -66,7 +66,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, expected, (@string, _, _) =>
+        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
                 return @string.Length >= expected;
@@ -78,7 +78,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, expected, (@string, _, _) =>
+        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
                 return @string.Length < expected;
@@ -90,7 +90,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, expected, (@string, _, _) =>
+        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(@string);
                 return @string.Length <= expected;

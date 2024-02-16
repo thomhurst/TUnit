@@ -15,12 +15,12 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     public EnumerableCount(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType,
         BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder.AppendExpression("Count");;
+        AssertionBuilder = assertionBuilder.AppendExpression("Count");
     }
 
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, expected, (enumerable, expected, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) == expected;
@@ -31,7 +31,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     }
 
     public BaseAssertCondition<TActual, TAnd, TOr> Empty =>
-        Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, 0, (enumerable, expected, _) =>
+        Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (enumerable, expected, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) == expected;
@@ -43,7 +43,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     public BaseAssertCondition<TActual, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(
-            AssertionBuilder,
+            AssertionBuilder.AppendCallerMethod(expectedExpression),
             expected,
             (enumerable, _, _) =>
             {
@@ -57,7 +57,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, expected, (enumerable, expected, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) >= expected;
@@ -69,7 +69,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, expected, (enumerable, expected, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) < expected;
@@ -81,7 +81,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, expected, (enumerable, expected, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _) =>
             {
                 ArgumentNullException.ThrowIfNull(enumerable);
                 return GetCount(enumerable) <= expected;
