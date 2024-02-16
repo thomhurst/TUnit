@@ -51,6 +51,11 @@ This assertion makes no sense, because we're passing in a string. This can never
 As does this:
 `Assert.That(1, Does.Contain("Foo!"));`
 
+Some methods also just read a little bit weird:
+`Assert.That(() => Something(), Throws.Exception.Message.Contain(someMessage));`
+
+"Throws Exception Message Contain someMessage" - It's not terrible, but it could read a little better.
+
 With TUnit assertions, I wanted to make these impossible to compile. So type constraints are built into the assertions themselves. There should be no way for a non-delegate to be able to do a `Throws` assertion, or for an `int` assertion to check for `string` conditions.
 
 So in TUnit, this will compile:
