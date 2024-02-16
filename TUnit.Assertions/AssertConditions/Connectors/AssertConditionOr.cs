@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.AssertConditions.Connectors;
 
-public class AssertConditionOr<TActual, TAnd, TOr> : BaseAssertCondition<TActual, TAnd, TOr>
+internal class AssertConditionOr<TActual, TAnd, TOr> : BaseAssertCondition<TActual, TAnd, TOr>
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
