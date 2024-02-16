@@ -9,11 +9,11 @@ public abstract class Connector<TActual, TAnd, TOr>
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    internal ConnectorType ConnectorType { get; }
+    protected internal ConnectorType ConnectorType { get; }
     
-    internal BaseAssertCondition<TActual, TAnd, TOr>? OtherAssertCondition { get; }
+    protected internal BaseAssertCondition<TActual, TAnd, TOr>? OtherAssertCondition { get; }
 
-    public Connector(ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition)
+    protected Connector(ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition)
     {
         ConnectorType = connectorType;
         OtherAssertCondition = otherAssertCondition;
