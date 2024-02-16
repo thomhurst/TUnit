@@ -19,6 +19,15 @@ public abstract class Connector<TActual, TAnd, TOr>
         OtherAssertCondition = otherAssertCondition;
     }
 
+    /// <summary>
+    /// This method is responsible for combining assert conditions with other assert conditions
+    /// if we are in the context of using `And` / `Or` operators.
+    /// This should be called to wrap every condition to ensure they operate correctly with and/or conditions
+    /// </summary>
+    /// <param name="assertCondition"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    [EditorBrowsable(EditorBrowsableState.Advanced)]
     public BaseAssertCondition<TActual, TAnd, TOr> Wrap(BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
     {
         return ConnectorType switch

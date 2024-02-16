@@ -13,16 +13,6 @@ public class EqualsAssertionTests
         );
     }
     
-    // [Test]
-    // public void Assertion_Message_Has_Correct_Expression2()
-    // {
-    //     var one = "1";
-    //     NUnitAssert.That(async () =>
-    //             await TUnitAssert.That(() => { }).Throws.Exception().With.InnerException.With.Message.EqualTo("2", StringComparison.Ordinal),
-    //         Throws.Exception.Message.Contain("Assert.That(one).Is.EqualTo(\"2\", StringComparison.Ordinal).And.Is.Not.EqualTo(\"1\").And.Is.TypeOf(System.String")
-    //     );
-    // }
-    
     [Test]
     public void Long()
     {

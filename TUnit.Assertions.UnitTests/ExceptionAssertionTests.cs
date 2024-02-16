@@ -1,0 +1,17 @@
+﻿namespace TUnit.Assertions.UnitTests;
+
+public class ExceptionAssertionTests
+{
+    [Test]
+    public async Task Assertion_Message_Has_Correct_Expression2()
+    {
+        await TUnitAssert.That(InnerExceptionThrower.Throw)
+            .Throws.Exception()
+            .With.InnerException
+            .With.InnerException
+            .With.InnerException
+            .With.InnerException
+            .With.InnerException
+            .With.Message.EqualTo("Message 6");
+    }
+}
