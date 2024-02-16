@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions.Connectors;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
@@ -31,7 +32,7 @@ public class Property<TActual, TExpected, TAnd, TOr>(AssertionBuilder<TActual> a
         _otherAssertConditions = otherAssertConditions;
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TExpected expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TExpected expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         var assertCondition = new PropertyEqualsAssertCondition<TActual, TExpected, TAnd, TOr>(assertionBuilder, name, expected);
 

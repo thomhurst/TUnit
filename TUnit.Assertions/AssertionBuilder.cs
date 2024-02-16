@@ -35,11 +35,16 @@ public abstract class AssertionBuilder<TActual>
     
     internal AssertionBuilder<TActual> AppendCallerMethod(string? expectedExpression, [CallerMemberName] string methodName = "")
     {
+        return AppendCallerMethodWithMultipleExpressions([expectedExpression], methodName);
+    }
+    
+    internal AssertionBuilder<TActual> AppendCallerMethodWithMultipleExpressions(string?[] expressions, [CallerMemberName] string methodName = "")
+    {
         if (string.IsNullOrEmpty(methodName))
         {
             return this;
         }
 
-        return AppendExpression($"{methodName}({expectedExpression})");
+        return AppendExpression($"{methodName}({string.Join(", ", expressions)})");
     }
 }

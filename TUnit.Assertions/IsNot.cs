@@ -18,7 +18,7 @@ public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
     
     public BaseAssertCondition<TActual, TAnd, TOr> Null()
     {
-        return Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null)));
+        return Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
     }
     
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string expectedExpression = "") => Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected),

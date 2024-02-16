@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions;
@@ -15,7 +16,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         AssertionBuilder = assertionBuilder.AppendExpression("Length");;
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> EqualTo(int expected)
+    public BaseAssertCondition<string, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, expected, (@string, _, _) =>
             {
@@ -48,7 +49,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         ));
 
 
-    public BaseAssertCondition<string, TAnd, TOr> GreaterThan(int expected)
+    public BaseAssertCondition<string, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(
             AssertionBuilder,
@@ -63,7 +64,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> GreaterThanOrEqualTo(int expected)
+    public BaseAssertCondition<string, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, expected, (@string, _, _) =>
             {
@@ -75,7 +76,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> LessThan(int expected)
+    public BaseAssertCondition<string, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, expected, (@string, _, _) =>
             {
@@ -87,7 +88,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> LessThanOrEqualTo(int expected)
+    public BaseAssertCondition<string, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder, expected, (@string, _, _) =>
             {

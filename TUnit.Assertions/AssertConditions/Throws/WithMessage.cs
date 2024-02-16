@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
@@ -13,7 +14,7 @@ public class WithMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         AssertionBuilder = assertionBuilder;
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return EqualTo(expected, StringComparison.Ordinal);
     }
@@ -23,7 +24,7 @@ public class WithMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         return Wrap(new ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr>(AssertionBuilder, expected, stringComparison));
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Containing(string expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> Containing(string expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Containing(expected, StringComparison.Ordinal);
     }

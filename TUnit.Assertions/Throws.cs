@@ -20,7 +20,7 @@ public class Throws<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public WithMessage<TActual, TAnd, TOr> WithMessage => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Nothing() => Wrap(new ThrowsNothingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null)));
+    public BaseAssertCondition<TActual, TAnd, TOr> Nothing() => Wrap(new ThrowsNothingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
 
     public BaseAssertCondition<TActual, TAnd, TOr> Exception() =>
         Wrap(new ThrowsAnythingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder));
