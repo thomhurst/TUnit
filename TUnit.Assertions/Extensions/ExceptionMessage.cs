@@ -24,7 +24,7 @@ public class ExceptionMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr
 
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string expression1 = "", [CallerArgumentExpression("stringComparison")] string expression2 = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), expected, (actual, _, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), expected, (actual, _, _, self) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return string.Equals(actual.Message, expected, stringComparison);

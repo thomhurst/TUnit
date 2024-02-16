@@ -30,7 +30,7 @@ public class ThrowsException<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     public BaseAssertCondition<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
         Wrap(new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression),
             default,
-            (_, exception, _) => action(_exceptionSelector(exception)),
+            (_, exception, _, self) => action(_exceptionSelector(exception)),
             (_, exception) => messageFactory(_exceptionSelector(exception))
         ));
 }

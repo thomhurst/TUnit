@@ -15,7 +15,11 @@ public class ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr> : A
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
-        ArgumentNullException.ThrowIfNull(exception);
+        if (exception is null)
+        {
+            WithMessage((_, _) => "Exception is null");
+            return false;
+        }
         
         return exception.GetType() == typeof(TExpected);
     }

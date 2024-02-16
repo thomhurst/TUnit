@@ -34,7 +34,7 @@ public static class IsExtensions
         return @is.Wrap(new DelegateAssertCondition<TActual,TActual,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), 
             expected,
-            (actual, _, _) =>
+            (actual, _, _, self) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);
@@ -56,10 +56,14 @@ public static class IsExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value > expected;
             },
             (value, _) => $"{value} was not greater than {expected}"));
@@ -70,10 +74,14 @@ public static class IsExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value >= expected;
             },
             (value, _) => $"{value} was not greater than or equal to {expected}"));
@@ -84,9 +92,13 @@ public static class IsExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
 
                 return value < expected;
             },
@@ -98,9 +110,13 @@ public static class IsExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
 
                 return value <= expected;
             },
@@ -112,9 +128,13 @@ public static class IsExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
 
                 return value % 2 == 0;
             },
@@ -126,9 +146,13 @@ public static class IsExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
 
                 return value % 2 != 0;
             },
@@ -140,9 +164,13 @@ public static class IsExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
 
                 return value < TActual.Zero;
             },
@@ -154,9 +182,13 @@ public static class IsExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
 
                 return value > TActual.Zero;
             },
@@ -174,11 +206,8 @@ public static class IsExtensions
         return @is.Wrap(new DelegateAssertCondition<TimeSpan,TimeSpan,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), 
             expected,
-            (actual, _, _) =>
+            (actual, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(actual);
-                ArgumentNullException.ThrowIfNull(expected);
-                
                 return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
             },
             (timeSpan, _) => $"{timeSpan} is not between {timeSpan.Subtract(tolerance)} and {timeSpan.Add(tolerance)}"));
@@ -195,10 +224,8 @@ public static class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value > expected;
             },
             (value, _) => $"{value} was not greater than {expected}"));
@@ -208,10 +235,8 @@ public static class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value >= expected;
             },
             (value, _) => $"{value} was not greater than or equal to {expected}"));
@@ -221,10 +246,8 @@ public static class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value < expected;
             },
             (value, _) => $"{value} was not less than {expected}"));
@@ -234,10 +257,8 @@ public static class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value <= expected;
             },
             (value, _) => $"{value} was not less than or equal to {expected}"));
@@ -251,10 +272,8 @@ public static class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value >= lowerBound && value <= upperBound;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}"));
@@ -264,10 +283,8 @@ public static class IsExtensions
         where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
         where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value >= lowerBound && value <= upperBound;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}"));
@@ -277,10 +294,8 @@ public static class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value > expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}"));
@@ -290,10 +305,8 @@ public static class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value >= expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}"));
@@ -303,10 +316,8 @@ public static class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value < expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}"));
@@ -316,10 +327,8 @@ public static class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<TAnd, DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<TOr, DateTimeOffset, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value <= expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}"));
@@ -329,10 +338,8 @@ public static class IsExtensions
         where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
         where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value > expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}"));
@@ -342,10 +349,8 @@ public static class IsExtensions
         where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
         where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value >= expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}"));
@@ -355,10 +360,8 @@ public static class IsExtensions
         where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
         where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value < expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}"));
@@ -368,10 +371,8 @@ public static class IsExtensions
         where TAnd : And<DateTime, TAnd, TOr>, IAnd<TAnd, DateTime, TAnd, TOr>
         where TOr : Or<DateTime, TAnd, TOr>, IOr<TOr, DateTime, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateTime, DateTime, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value <= expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}"));
@@ -381,10 +382,8 @@ public static class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value > expected;
             },
             (value, _) => $"{value} was not greater than {expected}"));
@@ -394,10 +393,8 @@ public static class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value >= expected;
             },
             (value, _) => $"{value} was not greater than or equal to {expected}"));
@@ -407,10 +404,8 @@ public static class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value < expected;
             },
             (value, _) => $"{value} was not less than {expected}"));
@@ -420,10 +415,8 @@ public static class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value <= expected;
             },
             (value, _) => $"{value} was not less than or equal to {expected}"));
@@ -433,10 +426,8 @@ public static class IsExtensions
         where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
         where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value > expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}"));
@@ -446,10 +437,8 @@ public static class IsExtensions
         where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
         where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value >= expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}"));
@@ -459,10 +448,8 @@ public static class IsExtensions
         where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
         where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value < expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}"));
@@ -472,10 +459,8 @@ public static class IsExtensions
         where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
         where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value <= expected;
             },
             (value, _) => $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}"));
@@ -507,9 +492,14 @@ public static class IsExtensions
     {
         return @is.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _) =>
+            (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
                 return value == string.Empty;
             },
             (s, _) => $"'{s}' was not empty"));
@@ -521,7 +511,7 @@ public static class IsExtensions
     {
         return @is.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _) => string.IsNullOrEmpty(value),
+            (value, _, _, self) => string.IsNullOrEmpty(value),
             (s, _) => $"'{s}' is not null or empty"));
     }
     
@@ -531,7 +521,7 @@ public static class IsExtensions
     {
         return @is.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _) => string.IsNullOrWhiteSpace(value),
+            (value, _, _, self) => string.IsNullOrWhiteSpace(value),
             (s, _) => $"'{s}' is not null or whitespace"));
     }
 
@@ -561,12 +551,8 @@ public static class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-                ArgumentNullException.ThrowIfNull(lowerBound);
-                ArgumentNullException.ThrowIfNull(upperBound);
-
                 return value >= lowerBound && value <= upperBound;
             },
             (value, _) => $"{value} was not between {lowerBound} and {upperBound}"));
@@ -576,12 +562,8 @@ public static class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<TAnd, DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<TOr, DateOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _) =>
+        return @is.Wrap(new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-                ArgumentNullException.ThrowIfNull(lowerBound);
-                ArgumentNullException.ThrowIfNull(upperBound);
-
                 return value >= lowerBound && value <= upperBound;
             },
             (value, _) => $"{value} was not between {lowerBound} and {upperBound}"));
@@ -591,14 +573,7 @@ public static class IsExtensions
         where TAnd : And<TimeOnly, TAnd, TOr>, IAnd<TAnd, TimeOnly, TAnd, TOr>
         where TOr : Or<TimeOnly, TAnd, TOr>, IOr<TOr, TimeOnly, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _) =>
-            {
-                ArgumentNullException.ThrowIfNull(value);
-                ArgumentNullException.ThrowIfNull(lowerBound);
-                ArgumentNullException.ThrowIfNull(upperBound);
-
-                return value >= lowerBound && value <= upperBound;
-            },
+        return @is.Wrap(new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), default, (value, _, _, self) => value >= lowerBound && value <= upperBound,
             (value, _) => $"{value} was not between {lowerBound} and {upperBound}"));
     }
 

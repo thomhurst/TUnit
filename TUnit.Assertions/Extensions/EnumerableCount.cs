@@ -20,9 +20,14 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(enumerable);
+                if (enumerable is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+
                 return GetCount(enumerable) == expected;
             },
             (enumerable, _) =>
@@ -31,9 +36,14 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     }
 
     public BaseAssertCondition<TActual, TAnd, TOr> Empty =>
-        Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (enumerable, expected, _) =>
+        Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (enumerable, expected, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(enumerable);
+                if (enumerable is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return GetCount(enumerable) == expected;
             },
             (enumerable, _) =>
@@ -45,9 +55,14 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(
             AssertionBuilder.AppendCallerMethod(expectedExpression),
             expected,
-            (enumerable, _, _) =>
+            (enumerable, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(enumerable);
+                if (enumerable is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return GetCount(enumerable) > expected;
             },
             (enumerable, _) =>
@@ -57,9 +72,14 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(enumerable);
+                if (enumerable is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return GetCount(enumerable) >= expected;
             },
             (enumerable, _) =>
@@ -69,9 +89,14 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(enumerable);
+                if (enumerable is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return GetCount(enumerable) < expected;
             },
             (enumerable, _) =>
@@ -81,9 +106,14 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _) =>
+        return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (enumerable, expected, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(enumerable);
+                if (enumerable is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return GetCount(enumerable) <= expected;
             },
             (enumerable, _) =>
@@ -93,8 +123,6 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     private int GetCount(TActual? actualValue)
     {
-        ArgumentNullException.ThrowIfNull(actualValue);
-
         if (actualValue is ICollection collection)
         {
             return collection.Count;
@@ -105,6 +133,6 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             return list.Count;
         }
 
-        return actualValue.Cast<object>().Count();
+        return actualValue?.Cast<object>().Count() ?? 0;
     }
 }

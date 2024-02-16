@@ -15,8 +15,17 @@ public class StringContainsAssertCondition<TAnd, TOr> : AssertCondition<string, 
     
     protected internal override bool Passes(string? actualValue, Exception? exception)
     {
-        ArgumentNullException.ThrowIfNull(actualValue);
-        ArgumentNullException.ThrowIfNull(ExpectedValue);
+        if (actualValue is null)
+        {
+            WithMessage((_, _) => "Actual string is null");
+            return false;
+        }
+        
+        if (ExpectedValue is null)
+        {
+            WithMessage((_, _) => "Expected string is null");
+            return false;
+        }
         
         return actualValue.Contains(ExpectedValue, _stringComparison);
     }

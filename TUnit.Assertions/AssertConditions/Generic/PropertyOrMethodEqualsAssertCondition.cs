@@ -11,6 +11,12 @@ public class PropertyOrMethodEqualsAssertCondition<TActual, TExpected, TAnd, TOr
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
+        if (actualValue is null)
+        {
+            WithMessage((_, _) => $"{typeof(TActual).Name} property {propertyName} is null");
+            return false;
+        }
+        
         var propertyValue = GetPropertyValue(actualValue);
 
         WithMessage((_, _) => $"Expected {ExpectedValue} but received {propertyValue}");
@@ -18,10 +24,8 @@ public class PropertyOrMethodEqualsAssertCondition<TActual, TExpected, TAnd, TOr
         return Equals(propertyValue, ExpectedValue);
     }
 
-    private object? GetPropertyValue(object? actualValue)
+    private object? GetPropertyValue(object actualValue)
     {
-        ArgumentNullException.ThrowIfNull(actualValue);
-
         if (actualValue.GetType().GetProperty(propertyName) is null
             && actualValue.GetType().GetProperty(propertyName) is null)
         {

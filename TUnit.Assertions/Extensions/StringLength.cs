@@ -18,10 +18,15 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _) =>
+        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (actual, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(@string);
-                return @string.Length == expected;
+                if (actual is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
+                return actual.Length == expected;
             },
             (@string, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}")
@@ -29,9 +34,14 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
     }
 
     public BaseAssertCondition<string, TAnd, TOr> Zero =>
-        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (@string, _, _) =>
+        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (@string, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(@string);
+                if (@string is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
                 return @string.Length == 0;
             },
             (@string, _) =>
@@ -39,9 +49,14 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         );
 
     public BaseAssertCondition<string, TAnd, TOr> Positive =>
-        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), default, (@string, _, _) =>
+        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), default, (@string, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(@string);
+                if (@string is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
                 return @string.Length > 0;
             },
             (@string, _) =>
@@ -54,9 +69,14 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(
             AssertionBuilder.AppendCallerMethod(expectedExpression),
             expected,
-            (@string, _, _) =>
+            (@string, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(@string);
+                if (@string is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
                 return @string.Length > expected;
             },
             (@string, _) =>
@@ -66,9 +86,14 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _) =>
+        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(@string);
+                if (@string is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
                 return @string.Length >= expected;
             },
             (@string, _) =>
@@ -78,9 +103,14 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _) =>
+        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(@string);
+                if (@string is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
                 return @string.Length < expected;
             },
             (@string, _) =>
@@ -90,9 +120,14 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _) =>
+        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected, (@string, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(@string);
+                if (@string is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
                 return @string.Length <= expected;
             },
             (@string, _) =>

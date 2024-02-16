@@ -47,9 +47,13 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
 
                 return value <= expected;
             },
@@ -61,10 +65,14 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value < expected;
             },
             (value, _) => $"{value} was greater than or equal to {expected}"));
@@ -75,10 +83,14 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value >= expected;
             },
             (value, _) => $"{value} was less than {expected}"));
@@ -89,10 +101,14 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value > expected;
             },
             (value, _) => $"{value} was less than or equal to {expected}"));
@@ -103,10 +119,14 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value % 2 != 0;
             },
             (value, _) => $"{value} was even"));
@@ -117,10 +137,14 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value % 2 == 0;
             },
             (value, _) => $"{value} was odd"));
@@ -131,10 +155,14 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value >= TActual.Zero;
             },
             (value, _) => $"{value} was negative"));
@@ -145,10 +173,14 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    return false;
+                }
+                
                 return value <= TActual.Zero;
             },
             (value, _) => $"{value} was positive"));
@@ -170,12 +202,7 @@ public static class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
-            {
-                ArgumentNullException.ThrowIfNull(value);
-
-                return value <= expected;
-            },
+        return isNot.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) => value <= expected,
             (value, _) => $"{value} was greater than {expected}"));
     }
     
@@ -183,10 +210,8 @@ public static class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value < expected;
             },
             (value, _) => $"{value} was greater than or equal to {expected}"));
@@ -196,10 +221,8 @@ public static class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value >= expected;
             },
             (value, _) => $"{value} was less than {expected}"));
@@ -209,10 +232,8 @@ public static class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return isNot.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _) =>
+        return isNot.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), default, (value, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(value);
-
                 return value > expected;
             },
             (value, _) => $"{value} was less than or equal to {expected}"));
@@ -246,7 +267,7 @@ public static class IsNotExtensions
     {
         return isNot.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
             isNot.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _) => value != string.Empty,
+            (value, _, _, self) => value != string.Empty,
             (s, _) => $"'{s}' is empty"));
     }
     
@@ -256,7 +277,7 @@ public static class IsNotExtensions
     {
         return isNot.Wrap(new DelegateAssertCondition<string, int, TAnd,TOr>(
             isNot.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _) => !string.IsNullOrEmpty(value),
+            (value, _, _, self) => !string.IsNullOrEmpty(value),
             (s, _) => $"'{s}' is null or empty"));
     }
     
@@ -266,7 +287,7 @@ public static class IsNotExtensions
     {
         return isNot.Wrap(new DelegateAssertCondition<string, int,TAnd,TOr>(
             isNot.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _) => !string.IsNullOrWhiteSpace(value),
+            (value, _, _, self) => !string.IsNullOrWhiteSpace(value),
             (s, _) => $"'{s}' is null or whitespace"));
     }
 

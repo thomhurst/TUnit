@@ -17,8 +17,17 @@ public class ThrowsWithMessageContainingAssertCondition<TActual, TAnd, TOr> : As
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
-        ArgumentNullException.ThrowIfNull(exception);
-        ArgumentNullException.ThrowIfNull(ExpectedValue);
+        if (exception is null)
+        {
+            WithMessage((_, _) => "Exception is null");
+            return false;
+        }
+        
+        if (ExpectedValue is null)
+        {
+            WithMessage((_, _) => "Expected message is null");
+            return false;
+        }
         
         return exception.Message.Contains(ExpectedValue, _stringComparison);
     }

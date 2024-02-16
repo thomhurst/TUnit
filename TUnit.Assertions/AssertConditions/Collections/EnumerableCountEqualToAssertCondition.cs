@@ -16,13 +16,17 @@ public class EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr> : AssertC
     
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
+        if (actualValue is null)
+        {
+            WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+            return false;
+        }
+        
         return GetCount(actualValue) == ExpectedValue;
     }
 
-    private int GetCount(TActual? actualValue)
+    private int GetCount(TActual actualValue)
     {
-        ArgumentNullException.ThrowIfNull(actualValue);
-
         if (actualValue is ICollection collection)
         {
             return collection.Count;

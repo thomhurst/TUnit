@@ -183,7 +183,7 @@ public class Tests
     [TestCategory("Fail")]
     public async Task Throws1()
     {
-        await Assert.That(() => new string([])).Throws.Exception();
+        await Assert.That(() => new string([])).Throws.Exception().OfAnyType();
     }
 
     [Test]
@@ -193,14 +193,14 @@ public class Tests
         await Assert.That(async () =>
         {
             await Task.Yield();
-        }).Throws.Exception();
+        }).Throws.Exception().OfAnyType();
     }
 
     [Test]
     [TestCategory("Pass")]
     public async Task Throws3()
     {
-        await Assert.That(() => throw new ApplicationException()).Throws.Exception();
+        await Assert.That(() => throw new ApplicationException()).Throws.Exception().OfAnyType();
     }
 
     [Test]

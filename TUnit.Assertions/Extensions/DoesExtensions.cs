@@ -47,9 +47,14 @@ public static class DoesExtensions
         return does.Wrap(new DelegateAssertCondition<string, string, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), 
             expected,
-            (actual, _, _) =>
+            (actual, _, _, self) =>
             {
-                ArgumentNullException.ThrowIfNull(actual);
+                if (actual is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
                 return actual.StartsWith(expected, stringComparison);
             },
             (actual, _) => $"\"{actual}\" does not start with \"{expected}\""));
@@ -70,7 +75,7 @@ public static class DoesExtensions
         return does.Wrap(new DelegateAssertCondition<string, string, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), 
             expected,
-            (actual, _, _) =>
+            (actual, _, _, self) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.EndsWith(expected, stringComparison);
@@ -92,7 +97,7 @@ public static class DoesExtensions
         return does.Wrap(new DelegateAssertCondition<string, Regex, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethod(expression), 
             regex,
-            (actual, _, _) =>
+            (actual, _, _, self) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return regex.IsMatch(actual);
