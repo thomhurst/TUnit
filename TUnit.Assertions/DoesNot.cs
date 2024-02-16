@@ -3,7 +3,7 @@ using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions;
 
-public class DoesNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
+public class DoesNot<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {

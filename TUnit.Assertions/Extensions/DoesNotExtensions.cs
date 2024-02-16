@@ -15,8 +15,7 @@ public static class DoesNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return doesNot.Invert(new EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr>(doesNot.AssertionBuilder.AppendCallerMethod(expectedExpression), expected),
-            (_, _) => $"{expected} was found in the collection");
+        return doesNot.Wrap(new EnumerableNotContainsAssertCondition<TActual, TInner, TAnd, TOr>(doesNot.AssertionBuilder.AppendCallerMethod(expectedExpression), expected));
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> Contain<TAnd, TOr>(this DoesNot<string, TAnd, TOr> doesNot, string expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
@@ -30,8 +29,7 @@ public static class DoesNotExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return doesNot.Invert(new StringContainsAssertCondition<TAnd, TOr>(doesNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), expected, stringComparison),
-            (s, _) => $"{expected} was found in {s}");
+        return doesNot.Wrap(new StringNotContainsAssertCondition<TAnd, TOr>(doesNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), expected, stringComparison));
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> StartWith<TAnd, TOr>(this DoesNot<string, TAnd, TOr> doesNot, string expected, [CallerArgumentExpression("expected")] string expectedExpression = "")

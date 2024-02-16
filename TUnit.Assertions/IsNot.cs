@@ -5,7 +5,7 @@ using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions;
 
-public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
+public class IsNot<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
@@ -21,11 +21,9 @@ public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
         return Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
     }
     
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string expectedExpression = "") => Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected),
-        (actual, _) => $"Expected {actual} to equal {expected}");
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string expectedExpression = "") => Wrap(new NotEqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected));
     
-    public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Invert(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName)),
-        (actual, _) => $"Expected {actual} to not be of type {typeof(TExpected)}");
+    public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Wrap(new NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName)));
     
     public BaseAssertCondition<TActual, TAnd, TOr> AssignableTo<TExpected>() => Wrap(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
         default,

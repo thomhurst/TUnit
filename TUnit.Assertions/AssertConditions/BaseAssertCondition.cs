@@ -107,20 +107,11 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     {
         ActualValue = actualValue;
         Exception = exception;
-        return IsInverted ? !Passes(actualValue, exception) : Passes(actualValue, exception);
+        return Passes(actualValue, exception);
     }
 
     protected internal abstract bool Passes(TActual? actualValue, Exception? exception);
 
     public TAnd And { get; }
     public TOr Or { get; }
-
-    internal BaseAssertCondition<TActual, TAnd, TOr> Invert(Func<TActual?, Exception?, string> messageFactory)
-    {
-        WithMessage(messageFactory);
-        IsInverted = true;
-        return this;
-    }
-    
-    protected bool IsInverted { get; set; }
 }

@@ -26,8 +26,7 @@ public static class IsNotExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return isNot.Invert(new StringEqualsAssertCondition<TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), expected, stringComparison),
-            (s, _) => $"{s} was equal to {expected}");
+        return isNot.Wrap(new StringNotEqualsAssertCondition<TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), expected, stringComparison));
     }
 
     #endregion
@@ -39,8 +38,7 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), TActual.Zero),
-            (value, _) => $"{value} was Zero");
+        return isNot.Wrap(new NotEqualsAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), TActual.Zero));
     }
     
     public static BaseAssertCondition<TActual, TAnd, TOr> GreaterThan<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string expectedExpression = "") where TActual : INumber<TActual>
@@ -194,8 +192,7 @@ public static class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return isNot.Invert(new EqualsAssertCondition<TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), TimeSpan.Zero),
-            (value, _) => $"{value} was Zero");
+        return isNot.Wrap(new NotEqualsAssertCondition<TimeSpan, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), TimeSpan.Zero));
     }
     
     public static BaseAssertCondition<TimeSpan, TAnd, TOr> GreaterThan<TAnd, TOr>(this IsNot<TimeSpan, TAnd, TOr> isNot, TimeSpan expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
@@ -248,8 +245,7 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Invert(new EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), expected),
-            (inners, _) => $"{inners} was empty");
+        return isNot.Wrap(new EnumerableNotEquivalentToAssertCondition<TActual, TInner, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(expectedExpression), expected));
     }
     
     public static BaseAssertCondition<TActual, TAnd, TOr> Empty<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot)
@@ -257,8 +253,7 @@ public static class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Invert(new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), 0),
-            (inners, _) => $"{inners} was empty");
+        return isNot.Wrap(new EnumerableCountNotEqualToAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), 0));
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> Empty<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
