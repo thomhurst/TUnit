@@ -26,20 +26,19 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
 {
     protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
     
-    protected string GetCallerExpression()
+    protected string GetAssertionExpression()
     {
-        if (AssertionBuilder.CallerExpression?.TrimStart('"').TrimEnd('"')
+        var assertionExpression = AssertionBuilder.ExpressionBuilder?.ToString();
+        
+        if (assertionExpression?.TrimStart('"').TrimEnd('"')
             == ActualValue?.ToString())
         {
             return string.Empty;
         }
         
-        return string.IsNullOrEmpty(AssertionBuilder.CallerExpression)
+        return string.IsNullOrEmpty(assertionExpression)
             ? string.Empty
-            : $"""
-
-                  for: {AssertionBuilder.CallerExpression}
-               """;
+            : assertionExpression;
     }
 
     internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
@@ -75,7 +74,10 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
         }
         catch (Exception e)
         {
-            throw new AssertionException(e.Message + GetCallerExpression(), e);
+            throw new AssertionException($"""
+                                          {GetAssertionExpression()}
+                                          {e.Message}
+                                          """, e);
         }
     }
 
@@ -85,7 +87,8 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
 
     protected internal override string Message =>
         $"""
-         {MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}{GetCallerExpression()}{GetExtraMessage()}
+         {GetAssertionExpression()}
+         {MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}{GetExtraMessage()}
          
          """;
 

@@ -14,7 +14,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     public EnumerableCount(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType,
         BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder;
+        AssertionBuilder = assertionBuilder.AppendExpression("Count");;
     }
 
     public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(int expected)

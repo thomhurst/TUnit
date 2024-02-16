@@ -12,7 +12,7 @@ public class DelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
     public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
     public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
-    internal DelegateAssertionBuilder(Func<TActual> function, string? callerExpression) : base(callerExpression)
+    internal DelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(expressionBuilder)
     {
         _function = function;
     }
@@ -31,7 +31,7 @@ public class DelegateAssertionBuilder : AssertionBuilder<object?>
     
     public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
 
-    internal DelegateAssertionBuilder(Action action, string? callerExpression) : base(callerExpression)
+    internal DelegateAssertionBuilder(Action action, string? expressionBuilder) : base(expressionBuilder)
     {
         _action = action;
     }

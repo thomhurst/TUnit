@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 
@@ -12,7 +13,7 @@ public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
     
     public IsNot(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder;
+        AssertionBuilder = assertionBuilder.AppendExpression("Not");
     }
     
     public BaseAssertCondition<TActual, TAnd, TOr> Null()
@@ -20,7 +21,7 @@ public class IsNot<TActual, TAnd, TOr> : NotConnector<TActual, TAnd, TOr>
         return Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder));
     }
     
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected) => Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder, expected),
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string expectedExpression = "") => Invert(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected),
         (actual, _) => $"Expected {actual} to equal {expected}");
     
     public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Invert(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder),

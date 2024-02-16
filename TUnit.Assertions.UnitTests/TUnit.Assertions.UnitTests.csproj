@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
       <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
     </ItemGroup>
 

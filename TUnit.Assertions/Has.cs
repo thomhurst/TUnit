@@ -12,7 +12,9 @@ public class Has<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public Has(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder;
+        AssertionBuilder = assertionBuilder
+            .AppendConnector(connectorType)
+            .AppendExpression("Has");
     }
     
     public Property<TActual, TAnd, TOr> Property(string name) => new(AssertionBuilder, name);

@@ -12,7 +12,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
     public StringLength(AssertionBuilder<string> assertionBuilder, ConnectorType connectorType,
         BaseAssertCondition<string, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder;
+        AssertionBuilder = assertionBuilder.AppendExpression("Length");;
     }
 
     public BaseAssertCondition<string, TAnd, TOr> EqualTo(int expected)
