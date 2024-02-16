@@ -30,12 +30,22 @@ public abstract class Connector<TActual, TAnd, TOr>
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     public BaseAssertCondition<TActual, TAnd, TOr> Wrap(BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
     {
-        return ConnectorType switch
+        if (ConnectorType == ConnectorType.None)
         {
-            ConnectorType.None => assertCondition,
-            ConnectorType.And => new AssertConditionAnd<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition),
-            ConnectorType.Or => new AssertConditionOr<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition),
-            _ => throw new ArgumentOutOfRangeException(nameof(ConnectorType), ConnectorType, "Unknown connector type")
-        };
+            assertCondition.IsWrapped = true;
+            return assertCondition;
+        }
+
+        if (ConnectorType == ConnectorType.And)
+        {
+            return new AssertConditionAnd<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition);
+        }
+
+        if (ConnectorType == ConnectorType.Or)
+        {
+            return new AssertConditionOr<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition);
+        }
+
+        throw new ArgumentOutOfRangeException(nameof(ConnectorType), ConnectorType, "Unknown connector type");
     }
 }

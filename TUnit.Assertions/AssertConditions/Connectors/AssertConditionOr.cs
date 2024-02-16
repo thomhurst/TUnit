@@ -14,6 +14,9 @@ public class AssertConditionOr<TActual, TAnd, TOr> : BaseAssertCondition<TActual
         ArgumentNullException.ThrowIfNull(condition1);
         ArgumentNullException.ThrowIfNull(condition2);
 
+        condition1.IsWrapped = true;
+        condition2.IsWrapped = true;
+        
         _condition1 = condition1;
         _condition2 = condition2;
         

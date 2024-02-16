@@ -18,6 +18,8 @@ public abstract class BaseAssertCondition
     {
         return string.Empty;
     }
+    
+    internal bool IsWrapped { get; set; }
 }
 
 public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition
@@ -105,6 +107,12 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     
     internal bool Assert(TActual? actualValue, Exception? exception)
     {
+        if (!IsWrapped)
+        {
+            throw new ArgumentException(
+                $"{GetType().Name} isn't configured properly. It won't work with 'And' / 'Or' conditions. Call `Wrap(AssertCondition)` to properly configure it.");
+        }
+        
         ActualValue = actualValue;
         Exception = exception;
         return Passes(actualValue, exception);
