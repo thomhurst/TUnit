@@ -51,6 +51,8 @@ This assertion makes no sense, because we're passing in a string. This can never
 As does this:
 `Assert.That(1, Does.Contain("Foo!"));`
 
+An integer can not contain a string. Of course these will fail at runtime, but we could move these errors up to compile time for faster feedback. This is very useful for long pipelines or build times.
+
 Some methods also just read a little bit weird:
 `Assert.That(() => Something(), Throws.Exception.Message.Contain(someMessage));`
 
