@@ -7,7 +7,7 @@ public class EqualsAssertionTests
     public async Task String()
     {
         var one = "1";
-        await Assert.That(one).Is.EqualTo("2").And.Is.Not.EqualTo("1");
+        await Assert.That(one).Is.EqualTo("2").And.Is.Not.EqualTo("1").And.Is.TypeOf<string>();
     }
     
     [Test]
