@@ -9,9 +9,9 @@ T(est)Unit!
         
         await Assert.That(value)
             .Is.Not.Null
-            .And.Is.EqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase)
+            .And..Does.StartWith("H")
             .And.Has.Count().EqualTo(12)
-            .And.Does.StartWith("H");
+            .And.Is.EqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
     }
 ```
 
