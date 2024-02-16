@@ -18,7 +18,7 @@ public class Throws<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             .AppendExpression("Throws");
     }
 
-    public ExceptionWith<TActual, TAnd, TOr> With => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
+    public ExceptionWith<TActual, TAnd, TOr> With => new(AssertionBuilder, ConnectorType, OtherAssertCondition, exception => exception);
 
     public BaseAssertCondition<TActual, TAnd, TOr> Nothing() => Wrap(new ThrowsNothingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
 

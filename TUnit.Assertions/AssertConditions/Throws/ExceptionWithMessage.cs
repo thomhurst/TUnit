@@ -9,7 +9,8 @@ public class ExceptionWithMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd,
 {
     protected AssertionBuilder<TActual> AssertionBuilder { get; }
     
-    public ExceptionWithMessage(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+    public ExceptionWithMessage(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType,
+        BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition, Func<Exception?, Exception?> exceptionSelector) : base(connectorType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder
             .AppendExpression("Message");

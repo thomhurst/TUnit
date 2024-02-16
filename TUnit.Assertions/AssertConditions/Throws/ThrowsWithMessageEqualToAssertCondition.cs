@@ -17,7 +17,11 @@ public class ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr> : Asser
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
-        ArgumentNullException.ThrowIfNull(exception);
+        if (exception is null)
+        {
+            WithMessage((_, _) => "No exception was thrown");
+            return false;
+        }
         
         return string.Equals(exception.Message, ExpectedValue, _stringComparison);
     }
