@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 
@@ -12,10 +13,12 @@ public class Has<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public Has(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder;
+        AssertionBuilder = assertionBuilder
+            .AppendConnector(connectorType)
+            .AppendExpression("Has");
     }
     
-    public Property<TActual, TAnd, TOr> Property(string name) => new(AssertionBuilder, name);
+    public Property<TActual, TAnd, TOr> Property(string name, [CallerArgumentExpression("name")] string expression = "") => new(AssertionBuilder.AppendCallerMethod(expression), name);
 
-    public Property<TActual, TPropertyType, TAnd, TOr> Property<TPropertyType>(string name) => new(AssertionBuilder, name);
+    public Property<TActual, TPropertyType, TAnd, TOr> Property<TPropertyType>(string name, [CallerArgumentExpression("name")] string expression = "") => new(AssertionBuilder.AppendCallerMethod(expression), name);
 }

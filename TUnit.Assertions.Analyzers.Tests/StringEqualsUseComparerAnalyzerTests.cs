@@ -28,6 +28,8 @@ public class StringEqualsUseComparerAnalyzerTests
         var expected = Verifier.Diagnostic().WithLocation(0);
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+        
+        NUnit.Framework.Assert.That("1", Is.EqualTo("1"));
     }
     
     [Test]

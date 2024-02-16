@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions;
@@ -13,10 +14,10 @@ public class ExceptionMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr
     public ExceptionMessage(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType,
         BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder;
+        AssertionBuilder = assertionBuilder.AppendExpression("Message");;
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return EqualTo(expected, StringComparison.Ordinal);
     }

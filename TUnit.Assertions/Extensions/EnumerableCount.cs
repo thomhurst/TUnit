@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 
@@ -14,10 +15,10 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     public EnumerableCount(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType,
         BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder;
+        AssertionBuilder = assertionBuilder.AppendExpression("Count");;
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(int expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, expected, (enumerable, expected, _) =>
             {
@@ -39,7 +40,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {0}")
         );
 
-    public BaseAssertCondition<TActual, TAnd, TOr> GreaterThan(int expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(
             AssertionBuilder,
@@ -54,7 +55,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo(int expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, expected, (enumerable, expected, _) =>
             {
@@ -66,7 +67,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> LessThan(int expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, expected, (enumerable, expected, _) =>
             {
@@ -78,7 +79,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo(int expected)
+    public BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
         return Wrap(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder, expected, (enumerable, expected, _) =>
             {

@@ -1,2 +1,3 @@
 global using NUnit.Framework;
-global using Assert = TUnit.Assertions.Assert;
+global using NUnitAssert = NUnit.Framework.Assert;
+global using TUnitAssert = TUnit.Assertions.Assert;
