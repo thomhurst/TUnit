@@ -6,7 +6,8 @@ public class ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr> : As
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    public ThrowsSubClassOfAssertCondition(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder, default)
+    public ThrowsSubClassOfAssertCondition(AssertionBuilder<TActual> assertionBuilder,
+        Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, default)
     {
     }
     

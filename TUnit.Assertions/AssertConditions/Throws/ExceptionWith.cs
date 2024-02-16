@@ -20,6 +20,6 @@ public class ExceptionWith<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     public ExceptionWithMessage<TActual, TAnd, TOr> Message =>
         new ExceptionWithMessage<TActual, TAnd, TOr>(AssertionBuilder, ConnectorType, OtherAssertCondition, _exceptionSelector);
     
-    public ExceptionWith<TActual, TAnd, TOr> InnerException =>
-        new ExceptionWith<TActual, TAnd, TOr>(AssertionBuilder, ConnectorType, OtherAssertCondition, e => e?.InnerException);
+    public ThrowsException<TActual, TAnd, TOr> InnerException =>
+        new ThrowsException<TActual, TAnd, TOr>(AssertionBuilder, ConnectorType, OtherAssertCondition, e => _exceptionSelector(e)?.InnerException);
 }

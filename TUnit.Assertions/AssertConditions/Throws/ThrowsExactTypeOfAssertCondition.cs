@@ -6,7 +6,8 @@ public class ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr> : A
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    public ThrowsExactTypeOfAssertCondition(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder, default)
+    public ThrowsExactTypeOfAssertCondition(AssertionBuilder<TActual> assertionBuilder,
+        Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, default)
     {
     }
     
