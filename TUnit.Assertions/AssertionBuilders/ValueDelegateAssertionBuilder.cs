@@ -13,7 +13,7 @@ public class ValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
     public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
     public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
-    internal ValueDelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(expressionBuilder)
+    internal ValueDelegateAssertionBuilder(Func<TActual> function, string expressionBuilder) : base(expressionBuilder)
     {
         _function = function;
     }

@@ -13,7 +13,7 @@ public class AsyncValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TAct
     public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
     public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
-    internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string? expressionBuilder) : base(expressionBuilder)
+    internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(expressionBuilder)
     {
         _function = function;
     }

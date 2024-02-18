@@ -11,15 +11,20 @@ public abstract class AssertionBuilder<TActual>
     internal string? RawActualExpression { get; }
     public AssertionMessage? AssertionMessage { get; protected set; }
 
-    protected AssertionBuilder(string? actual)
+    protected AssertionBuilder(string actual)
     {
-        RawActualExpression = actual;
-        
-        ExpressionBuilder = string.IsNullOrEmpty(actual) 
-            ? null 
-            : new StringBuilder($"Assert.That({actual})");
+        if (string.IsNullOrEmpty(actual))
+        {
+            RawActualExpression = null;
+            ExpressionBuilder = null;
+        }
+        else
+        {
+            RawActualExpression = actual;
+            ExpressionBuilder = new StringBuilder($"Assert.That({actual})");
+        }
     }
-    
+
     protected internal abstract Task<AssertionData<TActual>> GetAssertionData();
 
     internal AssertionBuilder<TActual> AppendExpression(string expression)

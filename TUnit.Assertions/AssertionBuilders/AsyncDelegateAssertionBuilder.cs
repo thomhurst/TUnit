@@ -10,7 +10,7 @@ public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?>
     
     public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
 
-    internal AsyncDelegateAssertionBuilder(Func<Task> function, string? expressionBuilder) : base(expressionBuilder)
+    internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(expressionBuilder)
     {
         _function = function;
     }

@@ -10,7 +10,7 @@ public class DelegateAssertionBuilder : AssertionBuilder<object?>
     
     public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
 
-    internal DelegateAssertionBuilder(Action action, string? expressionBuilder) : base(expressionBuilder)
+    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(expressionBuilder)
     {
         _action = action;
     }
