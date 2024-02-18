@@ -27,4 +27,16 @@ public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?>
         AssertionMessage = message;
         return this;
     }
+                    
+    public AsyncDelegateAssertionBuilder WithMessage(Func<Exception?, string> message)
+    {
+        AssertionMessage = (AssertionMessageDelegate) message;
+        return this;
+    }
+    
+    public AsyncDelegateAssertionBuilder WithMessage(Func<string> message)
+    {
+        AssertionMessage = (AssertionMessageDelegate) message;
+        return this;
+    }
 }

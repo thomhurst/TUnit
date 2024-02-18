@@ -30,4 +30,16 @@ public class AsyncValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TAct
         AssertionMessage = message;
         return this;
     }
+            
+    public AsyncValueDelegateAssertionBuilder<TActual> WithMessage(Func<TActual?, Exception?, string> message)
+    {
+        AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
+        return this;
+    }
+    
+    public AsyncValueDelegateAssertionBuilder<TActual> WithMessage(Func<string> message)
+    {
+        AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
+        return this;
+    }
 }

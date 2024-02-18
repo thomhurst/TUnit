@@ -28,4 +28,16 @@ public class ValueAssertionBuilder<TActual> : AssertionBuilder<TActual>
         AssertionMessage = message;
         return this;
     }
+    
+    public ValueAssertionBuilder<TActual> WithMessage(Func<TActual?, string> message)
+    {
+        AssertionMessage = (AssertionMessageValue<TActual>) message;
+        return this;
+    }
+    
+    public ValueAssertionBuilder<TActual> WithMessage(Func<string> message)
+    {
+        AssertionMessage = (AssertionMessageValue<TActual>) message;
+        return this;
+    }
 }

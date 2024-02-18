@@ -30,4 +30,16 @@ public class ValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
         AssertionMessage = message;
         return this;
     }
+        
+    public ValueDelegateAssertionBuilder<TActual> WithMessage(Func<TActual?, Exception?, string> message)
+    {
+        AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
+        return this;
+    }
+    
+    public ValueDelegateAssertionBuilder<TActual> WithMessage(Func<string> message)
+    {
+        AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
+        return this;
+    }
 }
