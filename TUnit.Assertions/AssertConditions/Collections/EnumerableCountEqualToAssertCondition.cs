@@ -19,7 +19,7 @@ public class EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr> : AssertC
     {
         if (actualValue is null)
         {
-            WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+            WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
             return false;
         }
         

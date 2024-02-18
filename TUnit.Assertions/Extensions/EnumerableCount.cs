@@ -25,7 +25,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
 
@@ -41,7 +41,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
                 
@@ -60,7 +60,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
                 
@@ -77,7 +77,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
                 
@@ -94,7 +94,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
                 
@@ -111,7 +111,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
                 

@@ -8,10 +8,13 @@ namespace TUnit.Assertions.AssertionBuilders;
 public abstract class AssertionBuilder<TActual>
 {
     internal StringBuilder? ExpressionBuilder { get; }
+    internal string? RawActualExpression { get; }
     public AssertionMessage? AssertionMessage { get; protected set; }
 
     protected AssertionBuilder(string? actual)
     {
+        RawActualExpression = actual;
+        
         ExpressionBuilder = string.IsNullOrEmpty(actual) 
             ? null 
             : new StringBuilder($"Assert.That({actual})");

@@ -14,7 +14,7 @@ public class PropertyOrMethodEqualsAssertCondition<TActual, TExpected, TAnd, TOr
     {
         if (actualValue is null)
         {
-            WithMessage((_, _) => $"{typeof(TActual).Name} property {propertyName} is null");
+            WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} property {propertyName} is null");
             return false;
         }
         

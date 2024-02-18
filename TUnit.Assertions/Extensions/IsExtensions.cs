@@ -60,7 +60,7 @@ public static class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{@is.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
                 
@@ -78,7 +78,7 @@ public static class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{@is.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
                 
@@ -96,7 +96,7 @@ public static class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{@is.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
 
@@ -114,7 +114,7 @@ public static class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{@is.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
 
@@ -132,7 +132,7 @@ public static class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{@is.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
 
@@ -150,7 +150,7 @@ public static class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{@is.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
 
@@ -168,7 +168,7 @@ public static class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{@is.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
 
@@ -186,7 +186,7 @@ public static class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{typeof(TActual).Name} is null");
+                    self.WithMessage((_, _) => $"{@is.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                     return false;
                 }
 
