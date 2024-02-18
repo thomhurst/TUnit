@@ -10,7 +10,6 @@ public class DataDrivenTestArgumentsAnalyzerTests
     public async Task DataDriven_Argument_Is_Flagged_When_No_Parameters_Passed()
     {
         const string text = """
-                            using TUnit.Assertions;
                             using TUnit.Core;
 
                             public class MyClass
@@ -24,7 +23,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                             }
                             """;
 
-        var expected = Verifier.Diagnostic().WithLocation(0)
+        var expected = Verifier.Diagnostic(Rules.NoTestDataProvided).WithLocation(0)
             .WithArguments("int", "string");
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
@@ -34,7 +33,6 @@ public class DataDrivenTestArgumentsAnalyzerTests
     public async Task DataDriven_Argument_Is_Flagged_When_Does_Not_Match_Parameter_Type()
     {
         const string text = """
-                            using TUnit.Assertions;
                             using TUnit.Core;
 
                             public class MyClass
@@ -48,7 +46,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                             }
                             """;
 
-        var expected = Verifier.Diagnostic().WithLocation(0)
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
             .WithArguments("int", "string");
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
@@ -58,6 +56,8 @@ public class DataDrivenTestArgumentsAnalyzerTests
     public async Task DataDriven_Argument_Is_Not_Flagged_When_Matches_Parameter_Type()
     {
         const string text = """
+                            using TUnit.Core;
+                            
                             public class MyClass
                             {
                             

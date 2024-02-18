@@ -11,6 +11,7 @@ public class StringEqualsUseComparerAnalyzerTests
         const string text = """
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
+                            using TUnit.Assertions.Extensions.Is;
                             using TUnit.Core;
                             
                             public class MyClass
@@ -28,8 +29,6 @@ public class StringEqualsUseComparerAnalyzerTests
         var expected = Verifier.Diagnostic().WithLocation(0);
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
-        
-        NUnit.Framework.Assert.That("1", Is.EqualTo("1"));
     }
     
     [Test]
@@ -39,6 +38,7 @@ public class StringEqualsUseComparerAnalyzerTests
                             using System;
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
+                            using TUnit.Assertions.Extensions.Is;
                             using TUnit.Core;
 
                             public class MyClass
