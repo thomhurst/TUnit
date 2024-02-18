@@ -3,7 +3,7 @@ using System.Text;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Messages;
 
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.AssertionBuilders;
 
 public abstract class AssertionBuilder<TActual>
 {

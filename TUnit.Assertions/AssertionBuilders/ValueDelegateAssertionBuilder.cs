@@ -2,9 +2,9 @@
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Messages;
 
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.AssertionBuilders;
 
-public class DelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
+public class ValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
 {
     private readonly Func<TActual> _function;
     
@@ -13,7 +13,7 @@ public class DelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
     public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
     public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
-    internal DelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(expressionBuilder)
+    internal ValueDelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(expressionBuilder)
     {
         _function = function;
     }
@@ -24,23 +24,10 @@ public class DelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
         
         return Task.FromResult(assertionData);
     }
-}
-
-public class DelegateAssertionBuilder : AssertionBuilder<object?>
-{
-    private readonly Action _action;
     
-    public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
-
-    internal DelegateAssertionBuilder(Action action, string? expressionBuilder) : base(expressionBuilder)
+    public ValueDelegateAssertionBuilder<TActual> WithMessage(AssertionMessageValueDelegate<TActual> message)
     {
-        _action = action;
-    }
-
-    protected internal override Task<AssertionData<object?>> GetAssertionData()
-    {
-        var exception = _action.InvokeAndGetException();
-        
-        return Task.FromResult(new AssertionData<object?>(null, exception));
+        AssertionMessage = message;
+        return this;
     }
 }

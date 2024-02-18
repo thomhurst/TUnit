@@ -1,9 +1,10 @@
 ﻿using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.Messages;
 
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.AssertionBuilders;
 
-public class AsyncDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
+public class AsyncValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
 {
     private readonly Func<Task<TActual>> _function;
     
@@ -12,7 +13,7 @@ public class AsyncDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
     public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
     public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
-    internal AsyncDelegateAssertionBuilder(Func<Task<TActual>> function, string? expressionBuilder) : base(expressionBuilder)
+    internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string? expressionBuilder) : base(expressionBuilder)
     {
         _function = function;
     }
@@ -23,23 +24,10 @@ public class AsyncDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
         
         return assertionData;
     }
-}
-
-public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?>
-{
-    private readonly Func<Task> _function;
     
-    public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
-
-    internal AsyncDelegateAssertionBuilder(Func<Task> function, string? expressionBuilder) : base(expressionBuilder)
+    public AsyncValueDelegateAssertionBuilder<TActual> WithMessage(AssertionMessageValueDelegate<TActual> message)
     {
-        _function = function;
-    }
-
-    protected internal override async Task<AssertionData<object?>> GetAssertionData()
-    {
-        var exception = await _function.InvokeAndGetExceptionAsync();
-        
-        return new AssertionData<object?>(null, exception);
+        AssertionMessage = message;
+        return this;
     }
 }

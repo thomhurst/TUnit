@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
+using TUnit.Assertions.AssertionBuilders;
 using TUnit.Core;
 
 namespace TUnit.Assertions.Analyzers.Tests.Verifiers;

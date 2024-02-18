@@ -2,7 +2,7 @@
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Messages;
 
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.AssertionBuilders;
 
 
 public class ValueAssertionBuilder<TActual> : AssertionBuilder<TActual>
@@ -21,5 +21,11 @@ public class ValueAssertionBuilder<TActual> : AssertionBuilder<TActual>
     protected internal override Task<AssertionData<TActual>> GetAssertionData()
     {
         return Task.FromResult(new AssertionData<TActual>(_value, null));
+    }
+    
+    public ValueAssertionBuilder<TActual> WithMessage(AssertionMessageValue<TActual> message)
+    {
+        AssertionMessage = message;
+        return this;
     }
 }

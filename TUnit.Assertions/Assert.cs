@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
-using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions;
 
@@ -17,9 +17,9 @@ public static class Assert
         return new DelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static DelegateAssertionBuilder<TActual> That<TActual>(Func<TActual> value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
+    public static ValueDelegateAssertionBuilder<TActual> That<TActual>(Func<TActual> value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
     {
-        return new DelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
+        return new ValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
     public static AsyncDelegateAssertionBuilder That(Func<Task> value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
@@ -27,9 +27,9 @@ public static class Assert
         return new AsyncDelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static AsyncDelegateAssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
+    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression("value")] string? doNotPopulateThisValue = null)
     {
-        return new AsyncDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
+        return new AsyncValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
 
     public static AssertMultipleHandler Multiple(Action action)
