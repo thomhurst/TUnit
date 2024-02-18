@@ -1,8 +1,5 @@
 #nullable disable
 
-using System.Collections;
-using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.Extensions.Has;
