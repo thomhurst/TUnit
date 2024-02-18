@@ -9,7 +9,7 @@ using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
 
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.Extensions.Is.Not;
 
 public static class IsNotExtensions
 {

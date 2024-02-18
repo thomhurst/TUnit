@@ -3,7 +3,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.Extensions;
 
 public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
     where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>

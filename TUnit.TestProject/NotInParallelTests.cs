@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Assertions;
+using TUnit.Assertions.Extensions.Is;
 using TUnit.Core;
 
 namespace TUnit.TestProject;

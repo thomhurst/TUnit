@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 

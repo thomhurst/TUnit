@@ -2,22 +2,13 @@
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
 
-namespace TUnit.Assertions;
+namespace TUnit.Assertions.Extensions.Does.Not;
 
-public static class DoesNotExtensions
+public static partial class DoesNotExtensions_Generic
 {
-    public static BaseAssertCondition<TActual, TAnd, TOr> Contain<TActual, TInner, TAnd, TOr>(this DoesNot<TActual, TAnd, TOr> doesNot, TInner expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
-        where TActual : IEnumerable<TInner>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
-    {
-        return doesNot.Wrap(new EnumerableNotContainsAssertCondition<TActual, TInner, TAnd, TOr>(doesNot.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected));
-    }
-    
     public static BaseAssertCondition<string, TAnd, TOr> Contain<TAnd, TOr>(this DoesNot<string, TAnd, TOr> doesNot, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>

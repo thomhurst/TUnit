@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions;
 

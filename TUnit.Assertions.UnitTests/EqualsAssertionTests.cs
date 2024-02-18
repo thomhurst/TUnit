@@ -1,3 +1,5 @@
+using TUnit.Assertions.Extensions.Is;
+
 namespace TUnit.Assertions.UnitTests;
 
 public class EqualsAssertionTests
