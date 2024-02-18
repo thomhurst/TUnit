@@ -48,12 +48,12 @@ public class StringEqualsUseComparerAnalyzer : DiagnosticAnalyzer
         }
 
         if (methodSymbol.ToDisplayString() !=
-            "TUnit.Assertions.Is<string, TUnit.Assertions.AssertConditions.Operators.ValueAnd<string>, TUnit.Assertions.AssertConditions.Operators.ValueOr<string>>.EqualTo(string)")
+            "TUnit.Assertions.Is<string, TUnit.Assertions.AssertConditions.Operators.ValueAnd<string>, TUnit.Assertions.AssertConditions.Operators.ValueOr<string>>.EqualTo<TUnit.Assertions.AssertConditions.Operators.ValueAnd<string>, TUnit.Assertions.AssertConditions.Operators.ValueOr<string>>(string, string)")
         {
             return;
         }
 
-        if (methodSymbol.Parameters.Length == 1)
+        if (methodSymbol.Parameters.Length == 2)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.StringEqualsUseComparer, context.Node.GetLocation())
