@@ -24,6 +24,14 @@ public class Tests
         var value = "1";
         await Assert.That(value).Is.EqualTo("1");
     }
+    
+    [Test]
+    [TestCategory("Pass")]
+    public async Task LessThan()
+    {
+        int value = 1;
+        await Assert.That(value).Is.LessThan(2);
+    }
 
     [Test]
     [TestCategory("Fail")]
