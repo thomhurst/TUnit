@@ -157,5 +157,32 @@ namespace TUnit.Assertions.Analyzers {
                 return ResourceManager.GetString("TUnitAnalyzers0003Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not populate this argument. The compiler will do this..
+        /// </summary>
+        internal static string TUnitAnalyzers0004Description {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0004Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not populate this argument. The compiler will do this.
+        /// </summary>
+        internal static string TUnitAnalyzers0004MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0004MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compiler argument populated.
+        /// </summary>
+        internal static string TUnitAnalyzers0004Title {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0004Title", resourceCulture);
+            }
+        }
     }
 }

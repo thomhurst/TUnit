@@ -276,8 +276,7 @@ public class Tests
     {
         string? item = null;
 
-        await Assert.That(item, null)
-            .WithMessage(i => $"Some message: {i}")
+        await Assert.That(item)
             .Is.Not.Null()
             .And.Is.Not.Empty();
     }
