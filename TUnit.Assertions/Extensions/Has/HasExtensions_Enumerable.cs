@@ -5,7 +5,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
 
-namespace TUnit.Assertions.Extensions.Has;
+namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {

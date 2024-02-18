@@ -6,7 +6,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
 
-namespace TUnit.Assertions.Extensions.Does;
+namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesExtensions
 {

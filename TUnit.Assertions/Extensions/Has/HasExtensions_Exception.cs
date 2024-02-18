@@ -2,7 +2,7 @@
 
 using TUnit.Assertions.AssertConditions.Operators;
 
-namespace TUnit.Assertions.Extensions.Has;
+namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {

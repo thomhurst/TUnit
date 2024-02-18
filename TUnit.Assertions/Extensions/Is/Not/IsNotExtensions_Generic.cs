@@ -5,7 +5,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 
-namespace TUnit.Assertions.Extensions.Is.Not;
+namespace TUnit.Assertions.Extensions;
 
 public static partial class IsNotExtensions
 {

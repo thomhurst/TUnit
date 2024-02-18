@@ -3,7 +3,6 @@
 
 using System.Threading.Tasks;
 using TUnit.Assertions;
-using TUnit.Assertions.Extensions.Is;
 using TUnit.Core;
 
 namespace TUnit.Analyzers.Sample;

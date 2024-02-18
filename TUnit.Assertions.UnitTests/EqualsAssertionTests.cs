@@ -1,4 +1,4 @@
-using TUnit.Assertions.Extensions.Is;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 
