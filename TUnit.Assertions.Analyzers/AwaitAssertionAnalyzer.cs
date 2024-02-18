@@ -40,11 +40,6 @@ public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (memberAccessExpressionSyntax.ToString() is not "Assert.That" and not "Assert.Multiple")
-        {
-            return;
-        }
-
         var symbol = context.SemanticModel.GetSymbolInfo(memberAccessExpressionSyntax);
 
         if (symbol.Symbol is not IMethodSymbol methodSymbol)

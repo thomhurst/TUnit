@@ -11,10 +11,10 @@ public class ZeroAssertionTests
     }
     
     [Test]
-    public void Long()
+    public async Task Long()
     {
         long zero = 0;
-        Assert.That(zero);
+        await Assert.That(zero).Is.EqualTo(0);
     }
     
     [Test]
@@ -32,10 +32,10 @@ public class ZeroAssertionTests
     }
     
     [Test]
-    public void Long_Bad()
+    public async Task Long_Bad()
     {
         long zero = 1;
-        Assert.That(zero);
+        await Assert.That(zero).Is.Not.EqualTo(1);
     }
     
     [Test]
