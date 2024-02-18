@@ -18,6 +18,7 @@ public class EnumerableNotContainsAssertCondition<TActual, TInner, TAnd, TOr> : 
     {
         if (actualValue is null)
         {
+            WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
             return false;
         }
         

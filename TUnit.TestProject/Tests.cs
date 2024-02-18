@@ -253,6 +253,14 @@ public class Tests
     
     [Test]
     [TestCategory("Pass")]
+    public async Task DistinctItems()
+    {
+        var list = new List<int> { 1, 2, 3, 4, 5 };
+        await Assert.That(list).Has.DistinctItems();
+    }
+    
+    [Test]
+    [TestCategory("Pass")]
     public async Task Enumerable_NotEmpty()
     {
         var list = new List<int> { 1, 2, 3 };
