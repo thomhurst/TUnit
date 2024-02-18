@@ -4,10 +4,10 @@ namespace TUnit.Assertions.UnitTests;
 public class ZeroAssertionTests
 {
     [Test]
-    public void Int()
+    public async Task Int()
     {
         int zero = 0;
-        Assert.That<long>(zero).Is.EqualTo(0);
+        await TUnitAssert.That<long>(zero).Is.EqualTo(0);
     }
     
     [Test]
@@ -18,17 +18,17 @@ public class ZeroAssertionTests
     }
     
     [Test]
-    public void Short()
+    public async Task Short()
     {
         short zero = 0;
-        Assert.That<long>(zero);
+        await Assert.That<long>(zero).Is.EqualTo(0);
     }
     
     [Test]
-    public void Int_Bad()
+    public async Task Int_Bad()
     {
         int zero = 1;
-        Assert.That<long>(zero);
+        await Assert.That<long>(zero).Is.EqualTo(0);
     }
     
     [Test]
@@ -39,9 +39,9 @@ public class ZeroAssertionTests
     }
     
     [Test]
-    public void Short_Bad()
+    public async Task Short_Bad()
     {
         short zero = 1;
-        Assert.That<long>(zero);
+        await Assert.That<long>(zero).Is.EqualTo(0);
     }
 }

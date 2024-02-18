@@ -14,37 +14,37 @@ public class EqualsAssertionTests
     }
     
     [Test]
-    public void Long()
+    public async Task Long()
     {
         long zero = 0;
-        TUnitAssert.That(zero);
+        await TUnitAssert.That(zero).Is.EqualTo(0);
     }
     
     [Test]
-    public void Short()
+    public async Task Short()
     {
         short zero = 0;
-        TUnitAssert.That<long>(zero);
+        await TUnitAssert.That<long>(zero).Is.EqualTo(0);
     }
     
     [Test]
-    public void Int_Bad()
+    public async Task Int_Bad()
     {
         int zero = 1;
-        TUnitAssert.That<long>(zero);
+        await TUnitAssert.That<long>(zero).Is.EqualTo(0);
     }
     
     [Test]
-    public void Long_Bad()
+    public async Task Long_Bad()
     {
         long zero = 1;
-        TUnitAssert.That(zero);
+        await TUnitAssert.That(zero).Is.EqualTo(0);
     }
     
     [Test]
-    public void Short_Bad()
+    public async Task Short_Bad()
     {
         short zero = 1;
-        TUnitAssert.That<long>(zero);
+        await TUnitAssert.That<long>(zero).Is.EqualTo(0);
     }
 }
