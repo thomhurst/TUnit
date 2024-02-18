@@ -16,6 +16,7 @@ internal class AssertConditionAnd<TActual, TAnd, TOr> : BaseAssertCondition<TAct
 
         condition1.IsWrapped = true;
         condition2.IsWrapped = true;
+        IsWrapped = true;
         
         _condition1 = condition1;
         _condition2 = condition2;
