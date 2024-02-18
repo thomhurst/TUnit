@@ -245,6 +245,14 @@ public class Tests
     
     [Test]
     [TestCategory("Pass")]
+    public async Task Single()
+    {
+        var list = new List<int> { 1 };
+        await Assert.That(list).Has.SingleItem();
+    }
+    
+    [Test]
+    [TestCategory("Pass")]
     public async Task Enumerable_NotEmpty()
     {
         var list = new List<int> { 1, 2, 3 };
