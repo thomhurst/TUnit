@@ -20,11 +20,6 @@ public class Is<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             .AppendExpression("Is");
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
-    {
-        return Wrap(new EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected));
-    }
-
     public BaseAssertCondition<TActual, TAnd, TOr> SameReference(TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Wrap(new SameReferenceAssertCondition<TActual, TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected));

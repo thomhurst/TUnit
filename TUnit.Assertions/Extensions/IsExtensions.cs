@@ -13,7 +13,26 @@ namespace TUnit.Assertions;
 
 public static class IsExtensions
 {
+    #region Generic
+
+    public static BaseAssertCondition<TActual, TAnd, TOr> EqualTo<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
+        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    {
+        return @is.Wrap(new EqualsAssertCondition<TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected));
+    }
+
+    #endregion
+    
+    
     #region Strings
+    
+    public static BaseAssertCondition<string, TAnd, TOr> EqualTo<TAnd, TOr>(this Is<string, TAnd, TOr> @is, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    {
+        return EqualTo(@is, expected, StringComparison.Ordinal, doNotPopulateThisValue1, doNotPopulateThisValue2);
+    }
     
     public static BaseAssertCondition<string, TAnd, TOr> EqualTo<TAnd, TOr>(this Is<string, TAnd, TOr> @is, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>

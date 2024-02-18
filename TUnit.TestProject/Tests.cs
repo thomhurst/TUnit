@@ -19,7 +19,7 @@ public class Tests
     public async Task Test1()
     {
         var value = "1";
-        await Assert.That(value).Is.EqualTo("1", StringComparison.Ordinal);
+        await Assert.That(value).Is.EqualTo("1");
     }
 
     [Test]
