@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions;
 
@@ -12,7 +13,7 @@ public class AsyncDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
     public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
     public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
-    internal AsyncDelegateAssertionBuilder(Func<Task<TActual>> function, string? expressionBuilder) : base(expressionBuilder)
+    internal AsyncDelegateAssertionBuilder(Func<Task<TActual>> function, AssertionMessageValueDelegate<TActual>? message, string? expressionBuilder) : base(expressionBuilder, message)
     {
         _function = function;
     }
@@ -31,7 +32,8 @@ public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?>
     
     public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
 
-    internal AsyncDelegateAssertionBuilder(Func<Task> function, string? expressionBuilder) : base(expressionBuilder)
+    internal AsyncDelegateAssertionBuilder(Func<Task> function, AssertionMessageDelegate? message,
+        string? expressionBuilder) : base(expressionBuilder, message)
     {
         _function = function;
     }

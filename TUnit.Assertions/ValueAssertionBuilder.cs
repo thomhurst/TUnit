@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions;
 
@@ -12,7 +13,7 @@ public class ValueAssertionBuilder<TActual> : AssertionBuilder<TActual>
     public Is<TActual, ValueAnd<TActual>, ValueOr<TActual>> Is => new(this, ConnectorType.None, null);
     public Has<TActual, ValueAnd<TActual>, ValueOr<TActual>> Has => new(this, ConnectorType.None, null);
 
-    internal ValueAssertionBuilder(TActual value, string? expressionBuilder) : base(expressionBuilder)
+    internal ValueAssertionBuilder(TActual value, AssertionMessageValue<TActual>? message, string? expressionBuilder) : base(expressionBuilder, message)
     {
         _value = value;
     }

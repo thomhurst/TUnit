@@ -17,14 +17,14 @@ public class ExceptionMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr
         AssertionBuilder = assertionBuilder.AppendExpression("Message");
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return EqualTo(expected, StringComparison.Ordinal, expectedExpression);
+        return EqualTo(expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string expression1 = "", [CallerArgumentExpression("stringComparison")] string expression2 = "")
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return Wrap(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([expression1, expression2]), expected, (actual, _, _, self) =>
+        return Wrap(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, (actual, _, _, self) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return string.Equals(actual.Message, expected, stringComparison);

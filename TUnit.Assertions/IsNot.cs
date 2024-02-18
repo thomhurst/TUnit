@@ -21,7 +21,7 @@ public class IsNot<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         return Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
     }
     
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string expectedExpression = "") => Wrap(new NotEqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression), expected));
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") => Wrap(new NotEqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected));
     
     public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Wrap(new NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName)));
     

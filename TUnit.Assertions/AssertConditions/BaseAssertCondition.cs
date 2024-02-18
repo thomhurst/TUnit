@@ -62,7 +62,13 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
         
         if (!Assert(assertionData.Result, assertionData.Exception))
         {
-            throw new AssertionException(Message);
+            throw new AssertionException(
+                $"""
+                 {AssertionBuilder.AssertionMessage?.GetValue(assertionData.Result, assertionData.Exception)}
+                 
+                 {Message}
+                 """.Trim()
+            );
         }
     }
     

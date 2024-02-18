@@ -25,13 +25,13 @@ public class EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr> : AssertC
         return GetCount(actualValue) == ExpectedValue;
     }
 
-    private int GetCount(TActual actualValue)
+    private int GetCount(TActual? actualValue)
     {
         if (actualValue is ICollection collection)
         {
             return collection.Count;
         }
         
-        return actualValue.Cast<object>().Count();
+        return actualValue?.Cast<object>().Count() ?? 0;
     }
 }

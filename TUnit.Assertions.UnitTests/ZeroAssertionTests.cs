@@ -7,7 +7,7 @@ public class ZeroAssertionTests
     public void Int()
     {
         int zero = 0;
-        Assert.That<long>(zero);
+        Assert.That<long>(zero, "").Is.EqualTo(0);
     }
     
     [Test]

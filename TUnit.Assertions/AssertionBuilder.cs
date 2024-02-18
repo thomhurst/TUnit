@@ -1,18 +1,23 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions;
 
 public abstract class AssertionBuilder<TActual>
 {
-    public StringBuilder? ExpressionBuilder { get; }
+    internal StringBuilder? ExpressionBuilder { get; }
+    
+    internal AssertionMessage? AssertionMessage { get; }
 
-    public AssertionBuilder(string? actual)
+    protected AssertionBuilder(string? actual, AssertionMessage? message)
     {
         ExpressionBuilder = string.IsNullOrEmpty(actual) 
             ? null 
             : new StringBuilder($"Assert.That({actual})");
+
+        AssertionMessage = message;
     }
     
     protected internal abstract Task<AssertionData<TActual>> GetAssertionData();
@@ -33,9 +38,9 @@ public abstract class AssertionBuilder<TActual>
         return AppendExpression(connectorType.ToString());
     }
     
-    internal AssertionBuilder<TActual> AppendCallerMethod(string? expectedExpression, [CallerMemberName] string methodName = "")
+    internal AssertionBuilder<TActual> AppendCallerMethod(string? doNotPopulateThisValue, [CallerMemberName] string methodName = "")
     {
-        return AppendCallerMethodWithMultipleExpressions([expectedExpression], methodName);
+        return AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue], methodName);
     }
     
     internal AssertionBuilder<TActual> AppendCallerMethodWithMultipleExpressions(string?[] expressions, [CallerMemberName] string methodName = "")

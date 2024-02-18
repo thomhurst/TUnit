@@ -27,8 +27,8 @@ public class ThrowsException<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     public BaseAssertCondition<TActual, TAnd, TOr> SubClassOf<TExpected>() =>
         Wrap(new ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector));
     
-    public BaseAssertCondition<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        Wrap(new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression),
+    public BaseAssertCondition<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string doNotPopulateThisValue = "") =>
+        Wrap(new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
             default,
             (_, exception, _, self) => action(_exceptionSelector(exception)),
             (_, exception) => messageFactory(_exceptionSelector(exception))

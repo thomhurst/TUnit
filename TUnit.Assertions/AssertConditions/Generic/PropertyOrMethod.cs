@@ -32,7 +32,7 @@ public class PropertyOrMethod<TActual, TExpected, TAnd, TOr>(AssertionBuilder<TA
         _otherAssertConditions = otherAssertConditions;
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TExpected expected, [CallerArgumentExpression("expected")] string expectedExpression = "")
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TExpected expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         var assertCondition = new PropertyEqualsAssertCondition<TActual, TExpected, TAnd, TOr>(assertionBuilder, name, expected);
 
