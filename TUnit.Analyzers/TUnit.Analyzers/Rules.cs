@@ -24,19 +24,19 @@ internal static class Rules
     public static readonly DiagnosticDescriptor WrongArgumentTypeTestDataSource =
         CreateDescriptor("TUnit0006", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor MethodNotStatic =
+    public static readonly DiagnosticDescriptor MethodMustBeStatic =
         CreateDescriptor("TUnit0007", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor MethodNotPublic =
+    public static readonly DiagnosticDescriptor MethodMustBePublic =
         CreateDescriptor("TUnit0008", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor MethodAbstract =
+    public static readonly DiagnosticDescriptor MethodMustNotBeAbstract =
         CreateDescriptor("TUnit0009", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor MethodNotParameterless =
+    public static readonly DiagnosticDescriptor MethodMustBeParameterless =
         CreateDescriptor("TUnit0010", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor MethodNotReturnsNothing =
+    public static readonly DiagnosticDescriptor MethodMustReturnData =
         CreateDescriptor("TUnit0011", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor NoArgumentInTestMethod =
@@ -50,6 +50,9 @@ internal static class Rules
     
     public static readonly DiagnosticDescriptor MissingTimeoutCancellationTokenAttributes =
         CreateDescriptor("TUnit0015", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor MethodMustNotBeStatic =
+        CreateDescriptor("TUnit0016", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

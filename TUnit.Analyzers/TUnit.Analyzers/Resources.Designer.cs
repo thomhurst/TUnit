@@ -463,5 +463,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0015Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method must not be static..
+        /// </summary>
+        internal static string TUnit0016Description {
+            get {
+                return ResourceManager.GetString("TUnit0016Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method must not be static.
+        /// </summary>
+        internal static string TUnit0016MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0016MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method must not be static.
+        /// </summary>
+        internal static string TUnit0016Title {
+            get {
+                return ResourceManager.GetString("TUnit0016Title", resourceCulture);
+            }
+        }
     }
 }

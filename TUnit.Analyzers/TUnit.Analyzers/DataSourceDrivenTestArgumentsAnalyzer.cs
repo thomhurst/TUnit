@@ -14,12 +14,12 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         ImmutableArray.Create(
             Rules.NoTestDataSourceProvided,
             Rules.NoDataSourceMethodFound,
-            Rules.MethodNotStatic,
-            Rules.MethodNotPublic,
-            Rules.MethodAbstract,
-            Rules.MethodNotParameterless,
+            Rules.MethodMustBeStatic,
+            Rules.MethodMustBePublic,
+            Rules.MethodMustNotBeAbstract,
+            Rules.MethodMustBeParameterless,
             Rules.WrongArgumentTypeTestDataSource,
-            Rules.MethodNotReturnsNothing,
+            Rules.MethodMustReturnData,
             Rules.NoArgumentInTestMethod,
             Rules.TooManyArgumentsInTestMethod
         );
@@ -121,7 +121,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.MethodNotReturnsNothing,
+                    Rules.MethodMustReturnData,
                     dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;
@@ -131,7 +131,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.MethodNotStatic,
+                    Rules.MethodMustBeStatic,
                     dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;
@@ -141,7 +141,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.MethodNotPublic,
+                    Rules.MethodMustBePublic,
                     dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;
@@ -151,7 +151,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.MethodNotParameterless,
+                    Rules.MethodMustBeParameterless,
                     dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
             );
             return;

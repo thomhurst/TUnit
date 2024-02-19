@@ -153,4 +153,13 @@
     <data name="TUnit0015Title" xml:space="preserve">
         <value>Missing TimeoutAttribute cancellation token parameter</value>
     </data>
+    <data name="TUnit0016Description" xml:space="preserve">
+        <value>Method must not be static.</value>
+    </data>
+    <data name="TUnit0016MessageFormat" xml:space="preserve">
+        <value>Method must not be static</value>
+    </data>
+    <data name="TUnit0016Title" xml:space="preserve">
+        <value>Method must not be static</value>
+    </data>
 </root>

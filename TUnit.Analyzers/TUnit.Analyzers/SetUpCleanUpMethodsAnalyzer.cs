@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class OnlyOnceMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
+public class SetUpCleanUpMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic);
+        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustNotBeStatic);
 
     public override void InitializeInternal(AnalysisContext context)
     { 
@@ -35,8 +35,8 @@ public class OnlyOnceMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var onlyOnceAttributes = attributes.Where(x =>
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is "global::TUnit.Core.OnlyOnceSetUpAttribute"
-                or "global::TUnit.Core.OnlyOnceCleanUpAttribute")
+                is "global::TUnit.Core.SetUpAttribute"
+                or "global::TUnit.Core.CleanUpAttribute")
             .ToList();
 
         if (!onlyOnceAttributes.Any())
@@ -44,9 +44,9 @@ public class OnlyOnceMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!methodSymbol.IsStatic)
+        if (methodSymbol.IsStatic)
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeStatic,
+            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustNotBeStatic,
                 methodDeclarationSyntax.GetLocation())
             );
         }
