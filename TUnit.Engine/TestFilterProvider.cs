@@ -19,9 +19,6 @@ internal class TestFilterProvider(IRunContext runContext, IMessageLogger message
         
         SupportedProperties[nameof(TUnitTestProperties.Category)] =
             TUnitTestProperties.Category;
-        
-        SupportedProperties[nameof(TUnitTestProperties.NotCategory)] =
-            TUnitTestProperties.NotCategory;
     }
     
     public IEnumerable<TestCase> FilterTests(IEnumerable<TestCase> tests)

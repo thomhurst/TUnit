@@ -37,5 +37,4 @@ internal static class TUnitTestProperties
     public static TestProperty TestClass => ManagedType;
     public static TestProperty TestName => GetOrRegisterTestProperty<string>(nameof(TestName), nameof(TestName));
     public static TestProperty Category => GetOrRegisterTestProperty<string[]>(nameof(Category), nameof(Category));
-    public static TestProperty NotCategory => GetOrRegisterTestProperty<string>(nameof(NotCategory), nameof(NotCategory));
 }

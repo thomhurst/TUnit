@@ -11,4 +11,3 @@ TUnit supports the following properties for filtering:
 - TestName
 - TestClass
 - Category
-- NotCategory
