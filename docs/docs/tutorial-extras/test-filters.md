@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 8
 ---
 
 # Test Filters
@@ -11,3 +11,9 @@ TUnit supports the following properties for filtering:
 - TestName
 - TestClass
 - Category
+
+TUnit also supports filtering by your own [properties](properties). So you could do:
+
+`dotnet test --filter "MyFilterName~SomeValue"`
+
+And if your test had a property with the name "MyFilterName" and its value contained "SomeValue", then your test would be executed.

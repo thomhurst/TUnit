@@ -7,6 +7,8 @@ internal class CacheableAssemblyLoader
 {
     private readonly ConcurrentDictionary<string, Assembly> _assemblies = new();
 
+    public ICollection<Assembly> CachedAssemblies => _assemblies.Values;
+
     public Assembly? GetOrLoadAssembly(string source)
     {
         var rootedSource = Path.IsPathRooted(source) ? source : Path.Combine(Directory.GetCurrentDirectory(), source);

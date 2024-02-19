@@ -43,7 +43,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
     private void CheckAttributeAgainstMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol,
         AttributeData dataDrivenTestAttribute)
     {
-        if (!dataDrivenTestAttribute.ConstructorArguments.Any())
+        if (dataDrivenTestAttribute.ConstructorArguments.IsDefaultOrEmpty)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.NoTestDataProvided,

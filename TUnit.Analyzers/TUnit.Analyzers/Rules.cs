@@ -24,29 +24,32 @@ internal static class Rules
     public static readonly DiagnosticDescriptor WrongArgumentTypeTestDataSource =
         CreateDescriptor("TUnit0006", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor TestDataSourceMethodNotStatic =
+    public static readonly DiagnosticDescriptor MethodNotStatic =
         CreateDescriptor("TUnit0007", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor TestDataSourceMethodNotPublic =
+    public static readonly DiagnosticDescriptor MethodNotPublic =
         CreateDescriptor("TUnit0008", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor TestDataSourceMethodAbstract =
+    public static readonly DiagnosticDescriptor MethodAbstract =
         CreateDescriptor("TUnit0009", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor TestDataSourceMethodNotParameterless =
+    public static readonly DiagnosticDescriptor MethodNotParameterless =
         CreateDescriptor("TUnit0010", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor TestDataSourceMethodNotReturnsNothing =
+    public static readonly DiagnosticDescriptor MethodNotReturnsNothing =
         CreateDescriptor("TUnit0011", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor TestDataSourceNoArgumentInTestMethod =
+    public static readonly DiagnosticDescriptor NoArgumentInTestMethod =
         CreateDescriptor("TUnit0012", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor TestDataSourceTooManyArgumentsInTestMethod =
+    public static readonly DiagnosticDescriptor TooManyArgumentsInTestMethod =
         CreateDescriptor("TUnit0013", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor ConflictingTestAttributes =
         CreateDescriptor("TUnit0014", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor MissingTimeoutCancellationTokenAttributes =
+        CreateDescriptor("TUnit0015", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

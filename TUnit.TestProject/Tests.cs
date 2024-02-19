@@ -12,7 +12,7 @@ public class Tests
     {
         Console.WriteLine("Blah!");
 
-        await Assert.That(TestContext.Current.GetOutput()).Is.EqualTo("Blah!");
+        await Assert.That(TestContext.Current.GetConsoleOutput()).Is.EqualTo("Blah!", StringComparison.Ordinal);
     }
     
     [Test]
@@ -225,9 +225,9 @@ public class Tests
 
     [Test, Timeout(500)]
     [TestCategory("Fail")]
-    public async Task Timeout1()
+    public async Task Timeout1(CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 
     [Test]

@@ -2,14 +2,16 @@
 
 public class TestContext
 {
-    public CancellationToken CancellationToken { get; internal set; } = CancellationToken.None;
-    
+    internal CancellationTokenSource? CancellationTokenSource { get; set; }
+    public CancellationToken CancellationToken => CancellationTokenSource?.Token ?? default;
+
     internal readonly StringWriter OutputWriter = new();
-    
+
     private static readonly AsyncLocal<TestContext> AsyncLocal = new();
 
     public TestInformation TestInformation { get; }
-    
+
+
     internal TestContext(TestInformation testInformation)
     {
         TestInformation = testInformation;
@@ -22,20 +24,26 @@ public class TestContext
     }
 
     public string? SkipReason { get; private set; }
+
+
     public void SkipTest(string reason)
     {
         SkipReason = reason;
+        CancellationTokenSource?.Cancel();
     }
-    
+
     public string? FailReason { get; private set; }
+
+
     public void FailTest(string reason)
     {
         FailReason = reason;
+        CancellationTokenSource?.Cancel();
     }
-    
+
     public TUnitTestResult? Result { get; internal set; }
 
-    public string GetOutput()
+    public string GetConsoleOutput()
     {
         return OutputWriter.ToString().Trim();
     }

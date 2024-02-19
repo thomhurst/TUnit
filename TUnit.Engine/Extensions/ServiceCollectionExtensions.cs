@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestGrouper>()
             .AddSingleton<CombinativeSolver>()
             .AddSingleton<SingleTestExecutor>()
-            .AddSingleton<SystemResourceMonitor>();
+            .AddSingleton<SystemResourceMonitor>()
+            .AddSingleton<ClassWalker>();
     }
 }
