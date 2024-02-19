@@ -18,6 +18,8 @@ const config: Config = {
   organizationName: 'thomhurst', // Usually your GitHub org/user name.
   projectName: 'TUnit', // Usually your repo name.
 
+  deploymentBranch: 'gh-pages',
+
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
@@ -104,7 +106,7 @@ const config: Config = {
             // },
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/thomhurst/TUnit',
             },
           ],
         },
