@@ -19,14 +19,16 @@ internal class SingleTestExecutor
     private readonly IMessageLogger _messageLogger;
     private readonly ITestExecutionRecorder _testExecutionRecorder;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    
+    private readonly ClassWalker _classWalker;
+
     public SingleTestExecutor(MethodInvoker methodInvoker, 
         TestClassCreator testClassCreator,
         TestMethodRetriever testMethodRetriever,
         Disposer disposer,
         IMessageLogger messageLogger,
         ITestExecutionRecorder testExecutionRecorder,
-        CancellationTokenSource cancellationTokenSource)
+        CancellationTokenSource cancellationTokenSource,
+        ClassWalker classWalker)
     {
         _methodInvoker = methodInvoker;
         _testClassCreator = testClassCreator;
@@ -35,6 +37,7 @@ internal class SingleTestExecutor
         _messageLogger = messageLogger;
         _testExecutionRecorder = testExecutionRecorder;
         _cancellationTokenSource = cancellationTokenSource;
+        _classWalker = classWalker;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
@@ -46,7 +49,7 @@ internal class SingleTestExecutor
         _testExecutionRecorder.RecordResult(new TestResult(testCase)
         {
             DisplayName = testCase.DisplayName,
-            Outcome = GetOutcome(result.Status),
+            Outcome = GetOutcome(result.TestContext, result.Status),
             ComputerName = result.ComputerName,
             Duration = result.Duration,
             StartTime = result.Start,
@@ -124,13 +127,14 @@ internal class SingleTestExecutor
 
             return new TUnitTestResult
             {
+                TestContext = testContext,
                 Duration = end - start,
                 Start = start,
                 End = end,
                 ComputerName = Environment.MachineName,
                 Exception = null,
                 Status = testContext!.SkipReason != null ? Status.Skipped : Status.Passed,
-                Output = testContext?.GetOutput() ?? testContext!.FailReason ?? testContext.SkipReason
+                Output = testContext?.GetConsoleOutput() ?? testContext!.FailReason ?? testContext.SkipReason
             };
         }
         catch (Exception e)
@@ -144,8 +148,8 @@ internal class SingleTestExecutor
                 End = end,
                 ComputerName = Environment.MachineName,
                 Exception = e,
-                Status = Status.Failed,
-                Output = testContext?.GetOutput()
+                Status = testContext?.SkipReason != null ? Status.Skipped : Status.Failed,
+                Output = testContext?.GetConsoleOutput()
             };
             
             if (testContext != null)
@@ -171,9 +175,10 @@ internal class SingleTestExecutor
                 await ExecuteCore(testContext, testInformation, @class);
                 break;
             }
-            catch
+            catch (Exception e)
             {
-                if (i == retryCount)
+                if (i == retryCount 
+                    || !await ShouldRetry(testInformation, e))
                 {
                     throw;
                 }
@@ -181,6 +186,18 @@ internal class SingleTestExecutor
                 _messageLogger.SendMessage(TestMessageLevel.Warning, $"{testInformation.TestName} failed, retrying...");
             }
         }
+    }
+
+    private static async Task<bool> ShouldRetry(TestInformation testInformation, Exception e)
+    {
+        var retryAttribute = testInformation.LazyRetryAttribute.Value;
+
+        if (retryAttribute == null)
+        {
+            return false;
+        }
+        
+        return await retryAttribute.ShouldRetry(testInformation, e);
     }
 
     private async Task ExecuteCore(TestContext testContext, TestInformation testInformation, object? @class)
@@ -197,7 +214,7 @@ internal class SingleTestExecutor
             testLevelCancellationTokenSource.CancelAfter(testInformation.Timeout.Value);
         }
 
-        testContext.CancellationToken = testLevelCancellationTokenSource.Token;
+        testContext.CancellationTokenSource = testLevelCancellationTokenSource;
 
         try
         {
@@ -216,7 +233,7 @@ internal class SingleTestExecutor
     {
         
         var methodResult = _methodInvoker.InvokeMethod(@class, testInformation.MethodInfo, BindingFlags.Default,
-            testInformation.TestMethodArguments);
+            testInformation.TestMethodArguments, cancellationTokenSource.Token);
 
         if (testInformation.Timeout == null || testInformation.Timeout.Value == default)
         {
@@ -232,16 +249,17 @@ internal class SingleTestExecutor
 
     private async Task ExecuteSetUps(object? @class, Type testDetailsClassType)
     {
-        await _oneTimeSetUpRegistry.GetOrAdd(testDetailsClassType.FullName!, _ => ExecuteOneTimeSetUps(@class, testDetailsClassType));
+        await _oneTimeSetUpRegistry.GetOrAdd(testDetailsClassType.FullName!, _ => ExecuteOnlyOnceSetUps(@class, testDetailsClassType));
 
-        var setUpMethods = testDetailsClassType
-            .GetMethods()
+        var setUpMethods = _classWalker.GetSelfAndBaseTypes(testDetailsClassType)
+            .Reverse()
+            .SelectMany(x => x.GetMethods())
             .Where(x => !x.IsStatic)
             .Where(x => x.GetCustomAttributes<SetUpAttribute>().Any());
 
         foreach (var setUpMethod in setUpMethods)
         {
-            await _methodInvoker.InvokeMethod(@class, setUpMethod, BindingFlags.Default, null);
+            await _methodInvoker.InvokeMethod(@class, setUpMethod, BindingFlags.Default, null, default);
         }
     }
     
@@ -252,8 +270,8 @@ internal class SingleTestExecutor
             return;
         }
         
-        var cleanUpMethods = @class.GetType()
-            .GetMethods()
+        var cleanUpMethods = _classWalker.GetSelfAndBaseTypes(@class.GetType())
+            .SelectMany(x => x.GetMethods())
             .Where(x => !x.IsStatic)
             .Where(x => x.GetCustomAttributes<CleanUpAttribute>().Any());
 
@@ -263,7 +281,7 @@ internal class SingleTestExecutor
         {
             try
             {
-                await _methodInvoker.InvokeMethod(@class, cleanUpMethod, BindingFlags.Default, null);
+                await _methodInvoker.InvokeMethod(@class, cleanUpMethod, BindingFlags.Default, null, default);
             }
             catch (Exception e)
             {
@@ -290,21 +308,32 @@ internal class SingleTestExecutor
         }
     }
 
-    private async Task ExecuteOneTimeSetUps(object? @class, Type testDetailsClassType)
+    private async Task ExecuteOnlyOnceSetUps(object? @class, Type testDetailsClassType)
     {
-        var oneTimeSetUpMethods = testDetailsClassType
-            .GetMethods()
+        var oneTimeSetUpMethods = _classWalker.GetSelfAndBaseTypes(testDetailsClassType)
+            .Reverse()
+            .SelectMany(x => x.GetMethods())
             .Where(x => x.IsStatic)
-            .Where(x => x.GetCustomAttributes<OneTimeSetUpAttribute>().Any());
+            .Where(x => x.GetCustomAttributes<OnlyOnceSetUpAttribute>().Any());
 
         foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
         {
-            await _methodInvoker.InvokeMethod(@class, oneTimeSetUpMethod, BindingFlags.Static | BindingFlags.Public, null);
+            await _methodInvoker.InvokeMethod(@class, oneTimeSetUpMethod, BindingFlags.Static | BindingFlags.Public, null, default);
         }
     }
-    
-    private TestOutcome GetOutcome(Status resultStatus)
+
+    private TestOutcome GetOutcome(TestContext? resultTestContext, Status resultStatus)
     {
+        if (!string.IsNullOrEmpty(resultTestContext?.FailReason))
+        {
+            return TestOutcome.Failed;
+        }
+
+        if (!string.IsNullOrEmpty(resultTestContext?.SkipReason))
+        {
+            return TestOutcome.Skipped;
+        }
+        
         return resultStatus switch
         {
             Status.None => TestOutcome.None,

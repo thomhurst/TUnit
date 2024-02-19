@@ -6,6 +6,14 @@ public record TestInformation
 {
     internal TestInformation()
     {
+        LazyTestAndClassAttributes = new(
+            () => MethodInfo!.GetCustomAttributes()
+                .Concat(ClassType!.GetCustomAttributes())
+        );
+
+        LazyRetryAttribute = new(
+            () => LazyTestAndClassAttributes.Value.OfType<RetryAttribute>().FirstOrDefault()
+        );
     }
     
     public required string TestName { get; init; }
@@ -28,4 +36,8 @@ public record TestInformation
     public required TimeSpan? Timeout { get; init; }
     public required string[]? NotInParallelConstraintKeys { get; init; }
     public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
+
+    internal Lazy<IEnumerable<Attribute>> LazyTestAndClassAttributes { get; }
+    
+    internal Lazy<RetryAttribute?> LazyRetryAttribute { get; }
 }

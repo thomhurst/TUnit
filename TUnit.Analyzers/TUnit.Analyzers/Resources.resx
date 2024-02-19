@@ -73,49 +73,49 @@
         <value>Data source doesn't match method argument type</value>
     </data>
     <data name="TUnit0007Description" xml:space="preserve">
-        <value>Data source method must be static.</value>
+        <value>Method must be static.</value>
     </data>
     <data name="TUnit0007MessageFormat" xml:space="preserve">
-        <value>Data source method must be static</value>
+        <value>Method must be static</value>
     </data>
     <data name="TUnit0007Title" xml:space="preserve">
-        <value>Data source method must be static</value>
+        <value>Method must be static</value>
     </data>
     <data name="TUnit0008Description" xml:space="preserve">
-        <value>Data source method must be public.</value>
+        <value>Method must be public.</value>
     </data>
     <data name="TUnit0008MessageFormat" xml:space="preserve">
-        <value>Data source method must be public</value>
+        <value>Method must be public</value>
     </data>
     <data name="TUnit0008Title" xml:space="preserve">
-        <value>Data source method must be public</value>
+        <value>Method must be public</value>
     </data>
     <data name="TUnit0009Description" xml:space="preserve">
-        <value>Data source method cannot be abstract.</value>
+        <value>Method cannot be abstract.</value>
     </data>
     <data name="TUnit0009MessageFormat" xml:space="preserve">
-        <value>Data source method cannot be abstract</value>
+        <value>Method cannot be abstract</value>
     </data>
     <data name="TUnit0009Title" xml:space="preserve">
-        <value>Data source method cannot be abstract</value>
+        <value>Method cannot be abstract</value>
     </data>
     <data name="TUnit0010Description" xml:space="preserve">
-        <value>Data source method should be parameterless.</value>
+        <value>Method should be parameterless.</value>
     </data>
     <data name="TUnit0010MessageFormat" xml:space="preserve">
-        <value>Data source method should be parameterless</value>
+        <value>Method should be parameterless</value>
     </data>
     <data name="TUnit0010Title" xml:space="preserve">
-        <value>Data source method should be parameterless</value>
+        <value>Method should be parameterless</value>
     </data>
     <data name="TUnit0011Description" xml:space="preserve">
-        <value>Data source method returns void.</value>
+        <value>Method returns void.</value>
     </data>
     <data name="TUnit0011MessageFormat" xml:space="preserve">
-        <value>Data source method returns void</value>
+        <value>Method returns void</value>
     </data>
     <data name="TUnit0011Title" xml:space="preserve">
-        <value>Data source method returns void</value>
+        <value>Method returns void</value>
     </data>
     <data name="TUnit0012Description" xml:space="preserve">
         <value>There is no argument for the data source.</value>
@@ -143,5 +143,14 @@
     </data>
     <data name="TUnit0014Title" xml:space="preserve">
         <value>There are conflicting test attributes</value>
+    </data>
+    <data name="TUnit0015Description" xml:space="preserve">
+        <value>Missing TimeoutAttribute cancellation token parameter.</value>
+    </data>
+    <data name="TUnit0015MessageFormat" xml:space="preserve">
+        <value>Missing TimeoutAttribute cancellation token parameter</value>
+    </data>
+    <data name="TUnit0015Title" xml:space="preserve">
+        <value>Missing TimeoutAttribute cancellation token parameter</value>
     </data>
 </root>

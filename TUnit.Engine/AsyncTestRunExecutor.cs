@@ -9,22 +9,46 @@ using TUnit.Engine.Models;
 namespace TUnit.Engine;
 
 internal class AsyncTestRunExecutor
-    (
-        SingleTestExecutor singleTestExecutor, 
+{
+    private int _currentlyExecutingTests;
+    private OneTimeCleanUpTracker _oneTimeCleanupTracker = null!;
+    
+    private readonly ConcurrentDictionary<Assembly, SemaphoreSlim> _semaphoreSlimByAssembly = new();
+
+    private readonly SingleTestExecutor _singleTestExecutor;
+    private readonly MethodInvoker _methodInvoker;
+    private readonly ITestExecutionRecorder _testExecutionRecorder;
+    private readonly CacheableAssemblyLoader _assemblyLoader;
+    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly TestGrouper _testGrouper;
+    private readonly SystemResourceMonitor _systemResourceMonitor;
+    private readonly CacheableAssemblyLoader _cacheableAssemblyLoader;
+    private readonly ClassWalker _classWalker;
+
+    public AsyncTestRunExecutor(SingleTestExecutor singleTestExecutor, 
         MethodInvoker methodInvoker, 
         ITestExecutionRecorder testExecutionRecorder,
         CacheableAssemblyLoader assemblyLoader,
         CancellationTokenSource cancellationTokenSource,
         TestGrouper testGrouper,
-        SystemResourceMonitor systemResourceMonitor
-        )
-{
-    private int _currentlyExecutingTests;
-    private OneTimeCleanUpTracker _oneTimeCleanupTracker = null!;
+        SystemResourceMonitor systemResourceMonitor,
+        CacheableAssemblyLoader cacheableAssemblyLoader,
+        ClassWalker classWalker)
+    {
+        _singleTestExecutor = singleTestExecutor;
+        _methodInvoker = methodInvoker;
+        _testExecutionRecorder = testExecutionRecorder;
+        _assemblyLoader = assemblyLoader;
+        _cancellationTokenSource = cancellationTokenSource;
+        _testGrouper = testGrouper;
+        _systemResourceMonitor = systemResourceMonitor;
+        _cacheableAssemblyLoader = cacheableAssemblyLoader;
+        _classWalker = classWalker;
+    }
 
     public async Task RunInAsyncContext(IEnumerable<TestCase> testCases)
     {
-        var tests = testGrouper.OrganiseTests(testCases);
+        var tests = _testGrouper.OrganiseTests(testCases);
 
         var oneTimeCleanUps = new ConcurrentQueue<Task>();
 
@@ -39,7 +63,7 @@ internal class AsyncTestRunExecutor
         
         await ProcessTests(tests.NotInParallel, false);
 
-        await WhenAllSafely(oneTimeCleanUps, testExecutionRecorder);
+        await WhenAllSafely(oneTimeCleanUps, _testExecutionRecorder);
     }
     
     private async Task ProcessKeyedNotInParallelTests(List<TestCase> testsToProcess)
@@ -94,7 +118,7 @@ internal class AsyncTestRunExecutor
             }
         }
 
-        await WhenAllSafely(executing, testExecutionRecorder);
+        await WhenAllSafely(executing, _testExecutionRecorder);
     }
 
     private async Task ProcessTests(Queue<TestCase> queue, bool runInParallel)
@@ -108,19 +132,19 @@ internal class AsyncTestRunExecutor
             _oneTimeCleanupTracker.Remove(testWithResult.Test, testWithResult.ResultTask);
         }
 
-        await WhenAllSafely(executing, testExecutionRecorder);
+        await WhenAllSafely(executing, _testExecutionRecorder);
     }
 
     private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestCase> queue, bool runInParallel)
     {
         while (queue.Count > 0)
         {
-            if (cancellationTokenSource.IsCancellationRequested)
+            if (_cancellationTokenSource.IsCancellationRequested)
             {
                 break;
             }
             
-            if (_currentlyExecutingTests < 1 || !systemResourceMonitor.IsSystemStrained())
+            if (_currentlyExecutingTests < 1 || !_systemResourceMonitor.IsSystemStrained())
             {
                 var test = queue.Dequeue();
 
@@ -135,9 +159,15 @@ internal class AsyncTestRunExecutor
 
     private async Task<TestWithResult> ProcessTest(TestCase test, bool runInParallel)
     {
+        var testAssembly = _cacheableAssemblyLoader.GetOrLoadAssembly(test.Source);
+        var semaphoreSlim = _semaphoreSlimByAssembly.GetOrAdd(testAssembly ?? Assembly.GetCallingAssembly(), GetSemaphoreSlim);
+        await semaphoreSlim.WaitAsync();
+        
         Interlocked.Increment(ref _currentlyExecutingTests);
 
-        var executionTask = singleTestExecutor.ExecuteTest(test);
+        var executionTask = _singleTestExecutor.ExecuteTest(test);
+
+        _ = executionTask.ContinueWith(_ => semaphoreSlim.Release());
 
         if (!runInParallel)
         {
@@ -151,7 +181,7 @@ internal class AsyncTestRunExecutor
 
     private async Task ExecuteOneTimeCleanUps(TestCase testDetails)
     {
-        var assembly = assemblyLoader.GetOrLoadAssembly(testDetails.Source);
+        var assembly = _assemblyLoader.GetOrLoadAssembly(testDetails.Source);
         
         var classType =
             assembly?.GetType(testDetails.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""));
@@ -161,14 +191,14 @@ internal class AsyncTestRunExecutor
             return;
         }
         
-        var oneTimeCleanUpMethods = classType
-            .GetMethods()
+        var oneTimeCleanUpMethods = _classWalker.GetSelfAndBaseTypes(classType)
+            .SelectMany(x => x.GetMethods())
             .Where(x => x.IsStatic)
-            .Where(x => x.GetCustomAttributes<OneTimeCleanUpAttribute>().Any());
+            .Where(x => x.GetCustomAttributes<OnlyOnceCleanUpAttribute>().Any());
 
         foreach (var oneTimeCleanUpMethod in oneTimeCleanUpMethods)
         {
-            await methodInvoker.InvokeMethod(null, oneTimeCleanUpMethod, BindingFlags.Static | BindingFlags.Public, null);
+            await _methodInvoker.InvokeMethod(null, oneTimeCleanUpMethod, BindingFlags.Static | BindingFlags.Public, null, default);
         }
     }
 
@@ -182,5 +212,16 @@ internal class AsyncTestRunExecutor
         {
             messageLogger?.SendMessage(TestMessageLevel.Error, e.ToString());
         }
+    }
+    
+    private SemaphoreSlim GetSemaphoreSlim(Assembly? assembly)
+    {
+        var maximumConcurrentTestsAttribute =
+            assembly?.GetCustomAttribute<MaximumConcurrentTestsAttribute>();
+
+        var maximumConcurrentTests = maximumConcurrentTestsAttribute?.MaximumConcurrentTests
+                                     ?? Environment.ProcessorCount * Environment.ProcessorCount;
+
+        return new SemaphoreSlim(maximumConcurrentTests, maximumConcurrentTests);
     }
 }

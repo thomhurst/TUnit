@@ -64,7 +64,7 @@ internal class DataSourceRetriever(MethodInvoker methodInvoker)
     { 
         var method = @class.GetMethods().First(x => x.IsStatic && x.Name == methodName);
         
-        var result = methodInvoker.InvokeMethod(null, method, BindingFlags.Static | BindingFlags.Public, null).Result;
+        var result = methodInvoker.InvokeMethod(null, method, BindingFlags.Static | BindingFlags.Public, null, default).Result;
         
         if (result is null)
         {

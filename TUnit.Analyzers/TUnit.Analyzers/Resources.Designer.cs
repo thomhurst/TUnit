@@ -222,7 +222,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method must be static..
+        ///   Looks up a localized string similar to Method must be static..
         /// </summary>
         internal static string TUnit0007Description {
             get {
@@ -231,7 +231,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method must be static.
+        ///   Looks up a localized string similar to Method must be static.
         /// </summary>
         internal static string TUnit0007MessageFormat {
             get {
@@ -240,7 +240,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method must be static.
+        ///   Looks up a localized string similar to Method must be static.
         /// </summary>
         internal static string TUnit0007Title {
             get {
@@ -249,7 +249,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method must be public..
+        ///   Looks up a localized string similar to Method must be public..
         /// </summary>
         internal static string TUnit0008Description {
             get {
@@ -258,7 +258,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method must be public.
+        ///   Looks up a localized string similar to Method must be public.
         /// </summary>
         internal static string TUnit0008MessageFormat {
             get {
@@ -267,7 +267,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method must be public.
+        ///   Looks up a localized string similar to Method must be public.
         /// </summary>
         internal static string TUnit0008Title {
             get {
@@ -276,7 +276,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method cannot be abstract..
+        ///   Looks up a localized string similar to Method cannot be abstract..
         /// </summary>
         internal static string TUnit0009Description {
             get {
@@ -285,7 +285,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method cannot be abstract.
+        ///   Looks up a localized string similar to Method cannot be abstract.
         /// </summary>
         internal static string TUnit0009MessageFormat {
             get {
@@ -294,7 +294,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method cannot be abstract.
+        ///   Looks up a localized string similar to Method cannot be abstract.
         /// </summary>
         internal static string TUnit0009Title {
             get {
@@ -303,7 +303,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method should be parameterless..
+        ///   Looks up a localized string similar to Method should be parameterless..
         /// </summary>
         internal static string TUnit0010Description {
             get {
@@ -312,7 +312,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method should be parameterless.
+        ///   Looks up a localized string similar to Method should be parameterless.
         /// </summary>
         internal static string TUnit0010MessageFormat {
             get {
@@ -321,7 +321,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method should be parameterless.
+        ///   Looks up a localized string similar to Method should be parameterless.
         /// </summary>
         internal static string TUnit0010Title {
             get {
@@ -330,7 +330,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method returns void..
+        ///   Looks up a localized string similar to Method returns void..
         /// </summary>
         internal static string TUnit0011Description {
             get {
@@ -339,7 +339,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method returns void.
+        ///   Looks up a localized string similar to Method returns void.
         /// </summary>
         internal static string TUnit0011MessageFormat {
             get {
@@ -348,7 +348,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data source method returns void.
+        ///   Looks up a localized string similar to Method returns void.
         /// </summary>
         internal static string TUnit0011Title {
             get {
@@ -434,6 +434,33 @@ namespace TUnit.Analyzers {
         internal static string TUnit0014Title {
             get {
                 return ResourceManager.GetString("TUnit0014Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing TimeoutAttribute cancellation token parameter..
+        /// </summary>
+        internal static string TUnit0015Description {
+            get {
+                return ResourceManager.GetString("TUnit0015Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing TimeoutAttribute cancellation token parameter.
+        /// </summary>
+        internal static string TUnit0015MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0015MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing TimeoutAttribute cancellation token parameter.
+        /// </summary>
+        internal static string TUnit0015Title {
+            get {
+                return ResourceManager.GetString("TUnit0015Title", resourceCulture);
             }
         }
     }

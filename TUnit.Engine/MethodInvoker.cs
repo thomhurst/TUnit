@@ -1,15 +1,22 @@
 ﻿using System.Globalization;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
+using TUnit.Core;
 
 namespace TUnit.Engine;
 
 internal class MethodInvoker
 {
-    public async Task<object?> InvokeMethod(object? @class, MethodInfo methodInfo, BindingFlags bindingFlags, object?[]? arguments)
+    public async Task<object?> InvokeMethod(object? @class, MethodInfo methodInfo, BindingFlags bindingFlags,
+        object?[]? arguments, CancellationToken token)
     {
         try
         {
+            if (methodInfo.GetCustomAttribute<TimeoutAttribute>() != null)
+            {
+                arguments = (arguments ?? Array.Empty<object?>()).Append(token).ToArray();
+            }
+            
             var result = methodInfo.Invoke(@class, bindingFlags, null, arguments, CultureInfo.InvariantCulture);
 
             if (result is ValueTask valueTask)

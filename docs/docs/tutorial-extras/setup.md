@@ -1,9 +1,50 @@
 ---
-sidebar_position: 2
+sidebar_position: 1
 ---
 
-# Repeating
+# Test Set Ups
 
-If you want to repeat a test, add a `[RepeatAttribute]` onto your test method or class. This takes an `int` of how many times you'd like to repeat. Each repeat will show in the test explorer as a new test.
+Most setup for a test can be performed in the constructor (think setting up mocks, assigning fields.)
 
-This can be used on base classes and inherited to affect all tests in sub-classes.
+However some scenarios require further setup that could be an asynchronous operation.
+E.g. pinging a service to wake it up in preparation for the tests.
+
+For this, we can declare a method with a `[SetUp]` or an `[OnlyOnceSetUp]` attribute.
+
+- `[SetUp]` methods should NOT be static, and they will be executed repeatedly before each test in their class starts.
+- `[OnlyOnceSetUp]` methods SHOULD be static, and they will be executed only once, before any test in their class starts.
+
+Methods will be executed bottom-up, so the base class set ups will execute first and then the inheriting class.
+
+```csharp
+using TUnit.Core;
+
+namespace MyTestProject;
+
+public class MyTestClass
+{
+    private int _value;
+    private static HttpResponseMessage? _pingResponse;
+
+    [OnlyOnceSetUp]
+    public static async Task Ping()
+    {
+        _pingResponse = await new HttpClient().GetAsync("https://localhost/ping");
+    }
+    
+    [SetUp]
+    public async Task Setup()
+    {
+        await Task.CompletedTask;
+        
+        _value = 99;
+    }
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(_value).Is.EqualTo(99);
+        await Assert.That(_pingResponse?.StatusCode).Is.Not.Null().And.Is.EqualTo(HttpStatusCode.OK);
+    }
+}
+```
