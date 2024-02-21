@@ -12,7 +12,7 @@ If we want test data represented in the form of objects, or just to use somethin
 Instead of the `[Test]` or `[DataDrivenTest]` attributes, we'll use a `[DataSourceDrivenTest]` attribute.
 This has two options:
 - If you pass in one argument, this is the method name containing your data. TUnit will assume this is in the current test class.
-- If you pass in two arguments, the first should be type `Type` of the class containing your test source data method, and the second should be the name of the method.
+- If you pass in two arguments, the first should be the `Type` of the class containing your test source data method, and the second should be the name of the method.
 
 Your method can also either return your object type, or an `IEnumerable` of your object type, and your test will be executed multiple times, with each object from the `IEnumerable`.
 
