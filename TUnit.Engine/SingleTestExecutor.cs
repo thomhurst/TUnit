@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Models;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
@@ -20,6 +21,9 @@ internal class SingleTestExecutor
     private readonly ITestExecutionRecorder _testExecutionRecorder;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly ClassWalker _classWalker;
+    private readonly TestFilterProvider _testFilterProvider;
+    
+    public GroupedTests GroupedTests { get; private set; }
 
     public SingleTestExecutor(MethodInvoker methodInvoker, 
         TestClassCreator testClassCreator,
@@ -28,7 +32,8 @@ internal class SingleTestExecutor
         IMessageLogger messageLogger,
         ITestExecutionRecorder testExecutionRecorder,
         CancellationTokenSource cancellationTokenSource,
-        ClassWalker classWalker)
+        ClassWalker classWalker,
+        TestFilterProvider testFilterProvider)
     {
         _methodInvoker = methodInvoker;
         _testClassCreator = testClassCreator;
@@ -38,6 +43,7 @@ internal class SingleTestExecutor
         _testExecutionRecorder = testExecutionRecorder;
         _cancellationTokenSource = cancellationTokenSource;
         _classWalker = classWalker;
+        _testFilterProvider = testFilterProvider;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
@@ -62,11 +68,17 @@ internal class SingleTestExecutor
         return result;
     }
 
+    internal void SetAllTests(GroupedTests tests)
+    {
+        GroupedTests = tests;
+    }
+
     private async Task<TUnitTestResult> ExecuteInternal(TestCase testCase)
     {
         var start = DateTimeOffset.Now;
         
-        if (testCase.GetPropertyValue(TUnitTestProperties.IsSkipped, false))
+        if (testCase.GetPropertyValue(TUnitTestProperties.IsSkipped, false)
+            || !IsExplicitlyRun(testCase))
         {
             _messageLogger.SendMessage(TestMessageLevel.Informational, $"Skipping {testCase.DisplayName}...");
 
@@ -161,6 +173,26 @@ internal class SingleTestExecutor
             
             return unitTestResult;
         }
+    }
+
+    private bool IsExplicitlyRun(TestCase testCase)
+    {
+        if (_testFilterProvider.IsFilteredTestRun)
+        {
+            return true;
+        }
+
+        var explicitFor = testCase.GetPropertyValue(TUnitTestProperties.ExplicitFor, string.Empty);
+
+        if (string.IsNullOrEmpty(explicitFor))
+        {
+            // Isn't required to be 'Explicitly' run
+            return true;
+        }
+
+        // If all tests being run are from the same "Explicit" attribute, e.g. same class or same method, then yes these have been run explicitly.
+        return GroupedTests.AllTests.All(x => x.GetPropertyValue(TUnitTestProperties.ExplicitFor, string.Empty)
+                                              == explicitFor);
     }
 
     private async Task ExecuteWithRetries(TestContext testContext, TestInformation testInformation, object? @class)

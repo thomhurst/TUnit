@@ -12,6 +12,10 @@ internal class ConsoleInterceptor : TextWriter
     public ConsoleInterceptor()
     {
         DefaultOut = Console.Out;
+    }
+
+    public void Initialize()
+    {
         Console.SetOut(this);
     }
     

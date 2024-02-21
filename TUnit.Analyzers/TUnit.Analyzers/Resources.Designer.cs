@@ -490,5 +490,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0016Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Explicit attribute cannot be on both method and class..
+        /// </summary>
+        internal static string TUnit0017Description {
+            get {
+                return ResourceManager.GetString("TUnit0017Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Explicit attribute cannot be on both method and class.
+        /// </summary>
+        internal static string TUnit0017MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0017MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Explicit attribute cannot be on both method and class.
+        /// </summary>
+        internal static string TUnit0017Title {
+            get {
+                return ResourceManager.GetString("TUnit0017Title", resourceCulture);
+            }
+        }
     }
 }

@@ -5,6 +5,8 @@ public class NotInParallelAttribute : Attribute
 {
     public string[] ConstraintKeys { get; } = Array.Empty<string>();
 
+    public int Order { get; init; }
+    
     public NotInParallelAttribute()
     {
     }

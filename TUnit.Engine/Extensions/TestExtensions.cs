@@ -57,11 +57,13 @@ internal static class TestExtensions
         testCase.SetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, testDetails.ClassType.AssemblyQualifiedName);
 
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.IsSkipped, testDetails.IsSkipped);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ExplicitFor, testDetails.ExplicitFor);
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.IsStatic, testDetails.MethodInfo.IsStatic);
         
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Category, testDetails.Categories.ToArray());
         
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.NotInParallelConstraintKeys, testDetails.NotInParallelConstraintKeys);
+        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Order, testDetails.Order);
         
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Timeout, testDetails.Timeout?.TotalMilliseconds);
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RepeatCount, testDetails.RepeatCount);
@@ -95,6 +97,14 @@ internal static class TestExtensions
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassArguments, testDetails.ClassArgumentValues.SerializeArgumentsSafely());
         
         return testCase;
+    }
+
+    public static ConstraintKeysCollection GetConstraintKeys(this TestCase testCase)
+    {
+        return new ConstraintKeysCollection(
+            testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys,
+                Array.Empty<string>())
+        );
     }
 
     private static Guid GetId(string fullyQualifiedName)

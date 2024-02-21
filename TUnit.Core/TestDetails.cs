@@ -51,17 +51,22 @@ internal record TestDetails
             .FirstOrDefault()
             ?.Times ?? 0;
 
+        ExplicitFor = methodAndClassAttributes
+            .OfType<ExplicitAttribute>()
+            .FirstOrDefault()
+            ?.For;
+
         if (RepeatCount > 0)
         {
             CurrentExecutionCount = count;
         }
         
-        Order = methodAndClassAttributes
-            .OfType<OrderAttribute>()
-            .FirstOrDefault()
-            ?.Order ?? int.MaxValue;
+        var notInParallelAttribute = methodAndClassAttributes
+            .OfType<NotInParallelAttribute>()
+            .FirstOrDefault();
         
-        NotInParallelConstraintKeys = GetNotInParallelConstraintKeys(methodAndClassAttributes);
+        NotInParallelConstraintKeys = notInParallelAttribute?.ConstraintKeys;
+        Order = notInParallelAttribute?.Order ?? int.MaxValue;
         
         AddCategories(methodAndClassAttributes);
         
@@ -90,15 +95,6 @@ internal record TestDetails
         if (ClassParameterTypes?.Any() == true)
             return false;
         return true;
-    }
-
-    private static string[]? GetNotInParallelConstraintKeys(IEnumerable<Attribute> methodAndClassAttributes)
-    {
-        var notInParallelAttribute = methodAndClassAttributes
-            .OfType<NotInParallelAttribute>()
-            .FirstOrDefault();
-
-        return notInParallelAttribute?.ConstraintKeys;
     }
 
     public string[]? NotInParallelConstraintKeys { get; }
@@ -179,6 +175,7 @@ internal record TestDetails
     public bool IsSkipped => !string.IsNullOrEmpty(SkipReason);
     public string TestNameWithArguments { get; }
     public string TestNameWithParameterTypes { get; }
+    public string? ExplicitFor { get; }
 
     public static string GetParameterTypes(Type[]? types)
     {

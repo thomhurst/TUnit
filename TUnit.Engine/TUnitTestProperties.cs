@@ -19,6 +19,7 @@ internal static class TUnitTestProperties
         GetOrRegisterTestProperty<string>(nameof(AssemblyQualifiedClassName), nameof(AssemblyQualifiedClassName));
 
     public static TestProperty IsSkipped => GetOrRegisterTestProperty<bool>(nameof(IsSkipped), nameof(IsSkipped));
+    public static TestProperty ExplicitFor => GetOrRegisterTestProperty<string?>(nameof(ExplicitFor), nameof(ExplicitFor));
     public static TestProperty IsStatic => GetOrRegisterTestProperty<bool>(nameof(IsStatic), nameof(IsStatic));
     public static TestProperty Order => GetOrRegisterTestProperty<int>(nameof(Order), nameof(Order));
     public static TestProperty RepeatCount => GetOrRegisterTestProperty<int>(nameof(RepeatCount), nameof(RepeatCount));

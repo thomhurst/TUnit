@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine;
@@ -24,6 +25,7 @@ internal class AsyncTestRunExecutor
     private readonly SystemResourceMonitor _systemResourceMonitor;
     private readonly CacheableAssemblyLoader _cacheableAssemblyLoader;
     private readonly ClassWalker _classWalker;
+    private readonly ConsoleInterceptor _consoleInterceptor;
 
     public AsyncTestRunExecutor(SingleTestExecutor singleTestExecutor, 
         MethodInvoker methodInvoker, 
@@ -33,7 +35,8 @@ internal class AsyncTestRunExecutor
         TestGrouper testGrouper,
         SystemResourceMonitor systemResourceMonitor,
         CacheableAssemblyLoader cacheableAssemblyLoader,
-        ClassWalker classWalker)
+        ClassWalker classWalker,
+        ConsoleInterceptor consoleInterceptor)
     {
         _singleTestExecutor = singleTestExecutor;
         _methodInvoker = methodInvoker;
@@ -44,11 +47,16 @@ internal class AsyncTestRunExecutor
         _systemResourceMonitor = systemResourceMonitor;
         _cacheableAssemblyLoader = cacheableAssemblyLoader;
         _classWalker = classWalker;
+        _consoleInterceptor = consoleInterceptor;
     }
 
     public async Task RunInAsyncContext(IEnumerable<TestCase> testCases)
     {
+        _consoleInterceptor.Initialize();
+        
         var tests = _testGrouper.OrganiseTests(testCases);
+        
+        _singleTestExecutor.SetAllTests(tests);
 
         var oneTimeCleanUps = new ConcurrentQueue<Task>();
 
@@ -65,14 +73,39 @@ internal class AsyncTestRunExecutor
 
         await WhenAllSafely(oneTimeCleanUps, _testExecutionRecorder);
     }
-    
+
     private async Task ProcessKeyedNotInParallelTests(List<TestCase> testsToProcess)
     {
         var currentlyExecutingByKeysLock = new object();
-        var currentlyExecutingByKeys = new List<(string[] Keys, Task)>();
+        var currentlyExecutingByKeys = new List<(ConstraintKeysCollection Keys, Task)>();
 
         var executing = new List<Task>();
+
+        var orderedKeyedTests = testsToProcess
+            .Where(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue) != int.MaxValue)
+            .Where(x => x.GetConstraintKeys().Count > 0);
         
+        foreach (var group in orderedKeyedTests.GroupBy(x => x.GetConstraintKeys()))
+        {
+            executing.Add(Task.Run(async () =>
+            {
+                foreach (var testToProcess in group.OrderBy(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue)))
+                {
+                    testsToProcess.Remove(testToProcess);
+
+                    var testWithResult = await ProcessTest(testToProcess, true);
+
+                    _oneTimeCleanupTracker.Remove(testWithResult.Test, testWithResult.ResultTask);
+
+                    await testWithResult.ResultTask;
+                }
+            }));
+        }
+
+        await WhenAllSafely(executing, _testExecutionRecorder);
+        
+        executing.Clear();
+
         while (testsToProcess.Count > 0)
         {
             // Reversing allows us to remove from the collection
@@ -80,12 +113,11 @@ internal class AsyncTestRunExecutor
             {
                 var testToProcess = testsToProcess[i];
 
-                var notInParallelKeys =
-                    testToProcess.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, Array.Empty<string>());
+                var notInParallelKeys = testToProcess.GetConstraintKeys();
 
                 lock (currentlyExecutingByKeysLock)
                 {
-                    if (currentlyExecutingByKeys.Any(x => x.Keys.Intersect(notInParallelKeys).Any()))
+                    if (currentlyExecutingByKeys.Any(x => x.Keys == notInParallelKeys))
                     {
                         // There are currently executing tasks with that same 
                         continue;

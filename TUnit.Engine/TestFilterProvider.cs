@@ -9,6 +9,8 @@ internal class TestFilterProvider(IRunContext runContext, IMessageLogger message
     private static readonly Dictionary<string, TestProperty> SupportedProperties 
         = new(StringComparer.OrdinalIgnoreCase);
 
+    public bool IsFilteredTestRun { get; private set; }
+    
     static TestFilterProvider()
     {
         SupportedProperties[nameof(TUnitTestProperties.TestName)] =
@@ -37,6 +39,8 @@ internal class TestFilterProvider(IRunContext runContext, IMessageLogger message
             
             yield break;
         }
+
+        IsFilteredTestRun = true;
         
         foreach (var test in tests)
         {

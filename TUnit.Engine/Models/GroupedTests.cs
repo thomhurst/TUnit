@@ -9,6 +9,6 @@ internal record GroupedTests
     public required List<TestCase> KeyedNotInParallel { get; init; }
 
     public required Queue<TestCase> Parallel { get; init; }
-
-    public required IReadOnlyList<TestCase> LastTestOfClasses { get; init; }
+    
+    public int TestCount => AllTests.Count;
 }
