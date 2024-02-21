@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.1.1">
 <title data-rh="true">Data Source Driven Tests | TUnit</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://thomhurst.github.io/TUnit/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://thomhurst.github.io/TUnit/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://thomhurst.github.io/TUnit/docs/tutorial-basics/data-source-driven-tests"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Data Source Driven Tests | TUnit"><meta data-rh="true" name="description" content="A limitation of passing data into the [DataDrivenTest] is that the data must be constant values. For example, we can&#x27;t new up an object and pass it into this attribute as an argument. This is a constraint of the language and we can&#x27;t change that."><meta data-rh="true" property="og:description" content="A limitation of passing data into the [DataDrivenTest] is that the data must be constant values. For example, we can&#x27;t new up an object and pass it into this attribute as an argument. This is a constraint of the language and we can&#x27;t change that."><link data-rh="true" rel="icon" href="/TUnit/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://thomhurst.github.io/TUnit/docs/tutorial-basics/data-source-driven-tests"><link data-rh="true" rel="alternate" href="https://thomhurst.github.io/TUnit/docs/tutorial-basics/data-source-driven-tests" hreflang="en"><link data-rh="true" rel="alternate" href="https://thomhurst.github.io/TUnit/docs/tutorial-basics/data-source-driven-tests" hreflang="x-default"><link rel="stylesheet" href="/TUnit/assets/css/styles.890c17de.css">
-<script src="/TUnit/assets/js/runtime~main.31832eb4.js" defer="defer"></script>
+<script src="/TUnit/assets/js/runtime~main.9e75f3a0.js" defer="defer"></script>
 <script src="/TUnit/assets/js/main.6699c17d.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -15,7 +15,7 @@
 This has two options:</p>
 <ul>
 <li>If you pass in one argument, this is the method name containing your data. TUnit will assume this is in the current test class.</li>
-<li>If you pass in two arguments, the first should be type <code>Type</code> of the class containing your test source data method, and the second should be the name of the method.</li>
+<li>If you pass in two arguments, the first should be the <code>Type</code> of the class containing your test source data method, and the second should be the name of the method.</li>
 </ul>
 <p>Your method can also either return your object type, or an <code>IEnumerable</code> of your object type, and your test will be executed multiple times, with each object from the <code>IEnumerable</code>.</p>
 <p>Here&#x27;s an example returning a simple object:</p>
