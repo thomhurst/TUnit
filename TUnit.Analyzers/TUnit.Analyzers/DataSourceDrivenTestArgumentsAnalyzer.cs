@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
@@ -50,7 +51,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         var attributes = methodSymbol.GetAttributes();
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                                        == "global::TUnit.Core.DataSourceDrivenTestAttribute"))
+                                                                        == WellKnown.AttributeFullyQualifiedClasses.DataSourceDrivenTest))
         {
             CheckAttributeAgainstMethod(context, methodSymbol.Parameters, dataSourceDrivenAttribute, methodSymbol.ContainingType);
         }
@@ -72,7 +73,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         var attributes = namedTypeSymbol.GetAttributes();
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                                        == "global::TUnit.Core.DataSourceDrivenTestAttribute"))
+                                                                        == WellKnown.AttributeFullyQualifiedClasses.DataSourceDrivenTest))
         {
             CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol);
         }

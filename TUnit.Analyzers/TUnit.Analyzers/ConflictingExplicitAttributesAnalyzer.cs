@@ -4,14 +4,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
 {
-    private static readonly string[] TestAttributes = [ "global::TUnit.Core.TestAttribute", "global::TUnit.Core.DataDrivenTestAttribute", "global::TUnit.Core.DataSourceDrivenTestAttribute", "global::TUnit.Core.CombinativeTestAttribute"];
-
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.ConflictingExplicitAttributes);
 
@@ -35,7 +34,7 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
 
         var methodExplicitAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            == "global::TUnit.Core.ExplicitAttribute");
+            == WellKnown.AttributeFullyQualifiedClasses.Explicit);
 
         if (methodExplicitAttribute == null)
         {
@@ -44,7 +43,7 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
         
         var classExplicitAttribute = methodSymbol.ContainingType.GetAttributes()
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == "global::TUnit.Core.ExplicitAttribute");
+                                 == WellKnown.AttributeFullyQualifiedClasses.Explicit);
         
         if (classExplicitAttribute == null)
         {

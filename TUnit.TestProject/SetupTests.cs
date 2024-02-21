@@ -53,4 +53,11 @@ public class SetupTests : Base3
         await Assert.That(_value).Is.EqualTo(99);
         await Assert.That(_pingResponse?.StatusCode).Is.Not.Null().And.Is.EqualTo(HttpStatusCode.OK);
     }
+    
+    [Test]
+    public async Task Test2()
+    {
+        await Assert.That(_value).Is.EqualTo(99);
+        await Assert.That(_pingResponse?.StatusCode).Is.Not.Null().And.Is.EqualTo(HttpStatusCode.OK);
+    }
 }

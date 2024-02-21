@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
@@ -33,7 +34,7 @@ public class CombinativeTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var combinativeValuesAttribute = parameterSymbol.GetAttributes()
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                        == "global::TUnit.Core.CombinativeValuesAttribute");
+                        == WellKnown.AttributeFullyQualifiedClasses.CombinativeValues);
 
         if (combinativeValuesAttribute is null)
         {

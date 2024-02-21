@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
@@ -34,7 +35,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
         
         foreach (var dataDrivenTestAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                == "global::TUnit.Core.DataDrivenTestAttribute"))
+                                                == WellKnown.AttributeFullyQualifiedClasses.DataDrivenTest))
         {
             CheckAttributeAgainstMethod(context, methodSymbol, dataDrivenTestAttribute);
         }

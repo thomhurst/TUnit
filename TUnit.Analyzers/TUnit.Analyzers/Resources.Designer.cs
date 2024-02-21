@@ -517,5 +517,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0017Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test classes should not have instance data. Consider making this static if you need to store it. And beware of race conditions if you haven&apos;t marked tests with [NotInParallel]..
+        /// </summary>
+        internal static string TUnit0018Description {
+            get {
+                return ResourceManager.GetString("TUnit0018Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test classes should not have instance data.
+        /// </summary>
+        internal static string TUnit0018MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0018MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test classes should not have instance data.
+        /// </summary>
+        internal static string TUnit0018Title {
+            get {
+                return ResourceManager.GetString("TUnit0018Title", resourceCulture);
+            }
+        }
     }
 }
