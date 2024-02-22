@@ -14,7 +14,7 @@ internal class AsyncTestRunExecutor
     private int _currentlyExecutingTests;
     private OneTimeCleanUpTracker _oneTimeCleanupTracker = null!;
     
-    private readonly ConcurrentDictionary<Assembly, SemaphoreSlim> _semaphoreSlimByAssembly = new();
+    private readonly ConcurrentDictionary<CachedAssemblyInformation, SemaphoreSlim> _semaphoreSlimByAssembly = new();
 
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly MethodInvoker _methodInvoker;
@@ -26,6 +26,8 @@ internal class AsyncTestRunExecutor
     private readonly CacheableAssemblyLoader _cacheableAssemblyLoader;
     private readonly ClassWalker _classWalker;
     private readonly ConsoleInterceptor _consoleInterceptor;
+    private readonly AssemblySetUpExecutor _assemblySetUpExecutor;
+    private readonly AssemblyCleanUpExecutor _assemblyCleanUpExecutor;
 
     public AsyncTestRunExecutor(SingleTestExecutor singleTestExecutor, 
         MethodInvoker methodInvoker, 
@@ -36,7 +38,9 @@ internal class AsyncTestRunExecutor
         SystemResourceMonitor systemResourceMonitor,
         CacheableAssemblyLoader cacheableAssemblyLoader,
         ClassWalker classWalker,
-        ConsoleInterceptor consoleInterceptor)
+        ConsoleInterceptor consoleInterceptor,
+        AssemblySetUpExecutor assemblySetUpExecutor,
+        AssemblyCleanUpExecutor assemblyCleanUpExecutor)
     {
         _singleTestExecutor = singleTestExecutor;
         _methodInvoker = methodInvoker;
@@ -48,6 +52,8 @@ internal class AsyncTestRunExecutor
         _cacheableAssemblyLoader = cacheableAssemblyLoader;
         _classWalker = classWalker;
         _consoleInterceptor = consoleInterceptor;
+        _assemblySetUpExecutor = assemblySetUpExecutor;
+        _assemblyCleanUpExecutor = assemblyCleanUpExecutor;
     }
 
     public async Task RunInAsyncContext(IEnumerable<TestCase> testCases)
@@ -70,6 +76,11 @@ internal class AsyncTestRunExecutor
         await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel);
         
         await ProcessTests(tests.NotInParallel, false);
+        
+        foreach (var cachedAssemblyInformation in _cacheableAssemblyLoader.CachedAssemblies)
+        {
+            oneTimeCleanUps.Enqueue(_assemblyCleanUpExecutor.ExecuteCleanUps(cachedAssemblyInformation));
+        }
 
         await WhenAllSafely(oneTimeCleanUps, _testExecutionRecorder);
     }
@@ -191,11 +202,14 @@ internal class AsyncTestRunExecutor
 
     private async Task<TestWithResult> ProcessTest(TestCase test, bool runInParallel)
     {
-        var testAssembly = _cacheableAssemblyLoader.GetOrLoadAssembly(test.Source);
-        var semaphoreSlim = _semaphoreSlimByAssembly.GetOrAdd(testAssembly ?? Assembly.GetCallingAssembly(), GetSemaphoreSlim);
+        var cachedAssemblyInformation = _cacheableAssemblyLoader.GetOrLoadAssembly(test.Source);
+        
+        var semaphoreSlim = _semaphoreSlimByAssembly.GetOrAdd(cachedAssemblyInformation, GetSemaphoreSlim);
         await semaphoreSlim.WaitAsync();
         
         Interlocked.Increment(ref _currentlyExecutingTests);
+
+        await _assemblySetUpExecutor.ExecuteSetUps(cachedAssemblyInformation);
 
         var executionTask = _singleTestExecutor.ExecuteTest(test);
 
@@ -213,10 +227,10 @@ internal class AsyncTestRunExecutor
 
     private async Task ExecuteOneTimeCleanUps(TestCase testDetails)
     {
-        var assembly = _assemblyLoader.GetOrLoadAssembly(testDetails.Source);
+        var cachedAssemblyInformation = _assemblyLoader.GetOrLoadAssembly(testDetails.Source);
         
         var classType =
-            assembly?.GetType(testDetails.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""));
+            cachedAssemblyInformation.Assembly.GetType(testDetails.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""));
 
         if (classType is null)
         {
@@ -246,10 +260,10 @@ internal class AsyncTestRunExecutor
         }
     }
     
-    private SemaphoreSlim GetSemaphoreSlim(Assembly? assembly)
+    private SemaphoreSlim GetSemaphoreSlim(CachedAssemblyInformation? cachedAssemblyInformation)
     {
         var maximumConcurrentTestsAttribute =
-            assembly?.GetCustomAttribute<MaximumConcurrentTestsAttribute>();
+            cachedAssemblyInformation?.Assembly.GetCustomAttribute<MaximumConcurrentTestsAttribute>();
 
         var maximumConcurrentTests = maximumConcurrentTestsAttribute?.MaximumConcurrentTests
                                      ?? Environment.ProcessorCount * Environment.ProcessorCount;

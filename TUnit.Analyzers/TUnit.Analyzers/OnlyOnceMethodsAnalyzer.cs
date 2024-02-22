@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
@@ -11,7 +12,7 @@ namespace TUnit.Analyzers;
 public class OnlyOnceMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic);
+        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic);
 
     public override void InitializeInternal(AnalysisContext context)
     { 
@@ -35,8 +36,11 @@ public class OnlyOnceMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var onlyOnceAttributes = attributes.Where(x =>
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is "global::TUnit.Core.OnlyOnceSetUpAttribute"
-                or "global::TUnit.Core.OnlyOnceCleanUpAttribute")
+                is WellKnown.AttributeFullyQualifiedClasses.OnceOnlySetUp
+                or WellKnown.AttributeFullyQualifiedClasses.OnceOnlyCleanUp
+                or WellKnown.AttributeFullyQualifiedClasses.AssemblySetUp
+                or WellKnown.AttributeFullyQualifiedClasses.AssemblyCleanUp
+            )
             .ToList();
 
         if (!onlyOnceAttributes.Any())
@@ -61,6 +65,13 @@ public class OnlyOnceMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
         if (!methodSymbol.Parameters.IsDefaultOrEmpty)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeParameterless,
+                methodDeclarationSyntax.GetLocation())
+            );
+        }
+        
+        if(methodSymbol.DeclaredAccessibility != Accessibility.Public)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
                 methodDeclarationSyntax.GetLocation())
             );
         }

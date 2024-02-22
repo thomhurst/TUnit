@@ -10,14 +10,14 @@ internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever,
 {
     private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(DataDrivenTestAttribute), typeof(DataSourceDrivenTestAttribute), typeof(CombinativeTestAttribute)];
 
-    public IEnumerable<TestDetails> GetTests(TypeInformation typeInformation)
+    public IEnumerable<TestDetails> GetTests(CachedAssemblyInformation cachedAssemblyInformation)
     {
-        var nonAbstractClasses = typeInformation.Types.Where(x => !x.IsAbstract);
+        var nonAbstractClasses = cachedAssemblyInformation.Types.Where(x => !x.IsAbstract);
 
         foreach (var testMethod in GetTestMethods(nonAbstractClasses))
         {
             var sourceLocation = sourceLocationRetriever
-                .GetSourceLocation(typeInformation.Assembly.Location, testMethod.MethodInfo.DeclaringType!.FullName!, testMethod.MethodInfo.Name);
+                .GetSourceLocation(cachedAssemblyInformation.Assembly.Location, testMethod.MethodInfo.DeclaringType!.FullName!, testMethod.MethodInfo.Name);
 
             var repeatCount = testMethod.MethodInfo.GetCustomAttributes<RepeatAttribute>()
                 .Concat(testMethod.TestClass.GetCustomAttributes<RepeatAttribute>())

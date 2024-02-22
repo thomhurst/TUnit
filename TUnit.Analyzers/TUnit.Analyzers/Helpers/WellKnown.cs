@@ -4,13 +4,18 @@ internal static class WellKnown
 {
     public static class AttributeFullyQualifiedClasses
     {
-        public static readonly string Explicit = "global::TUnit.Core.ExplicitAttribute";
-        public static readonly string CombinativeValues = "global::TUnit.Core.CombinativeValuesAttribute";
+        public const string Explicit = "global::TUnit.Core.ExplicitAttribute";
+        public const string CombinativeValues = "global::TUnit.Core.CombinativeValuesAttribute";
+
+        public const string OnceOnlySetUp = "global::TUnit.Core.OnlyOnceSetUpAttribute";
+        public const string OnceOnlyCleanUp = "global::TUnit.Core.OnlyOnceCleanUpAttribute";
+        public const string AssemblySetUp = "global::TUnit.Core.AssemblySetUpAttribute";
+        public const string AssemblyCleanUp = "global::TUnit.Core.AssemblyCleanUpAttribute";
         
-        public static readonly string CombinativeTest = "global::TUnit.Core.CombinativeTestAttribute";
-        public static readonly string Test = "global::TUnit.Core.TestAttribute";
-        public static readonly string DataDrivenTest = "global::TUnit.Core.DataDrivenTestAttribute";
-        public static readonly string DataSourceDrivenTest = "global::TUnit.Core.DataSourceDrivenTestAttribute";
+        public const string CombinativeTest = "global::TUnit.Core.CombinativeTestAttribute";
+        public const string Test = "global::TUnit.Core.TestAttribute";
+        public const string DataDrivenTest = "global::TUnit.Core.DataDrivenTestAttribute";
+        public const string DataSourceDrivenTest = "global::TUnit.Core.DataSourceDrivenTestAttribute";
 
         public static readonly string[] TestAttributes =
         [

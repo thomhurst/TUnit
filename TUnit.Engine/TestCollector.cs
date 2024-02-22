@@ -7,13 +7,8 @@ internal class TestCollector(CacheableAssemblyLoader assemblyLoader, TestsLoader
 {
     public IEnumerable<TestDetails> TestsFromSources(IEnumerable<string> sources)
     {
-        var allAssemblies = sources
+        return sources
             .Select(assemblyLoader.GetOrLoadAssembly)
-            .OfType<Assembly>()
-            .ToArray();
-        
-        return allAssemblies
-            .Select(x => new TypeInformation(x))
             .SelectMany(testsLoader.GetTests);
     }
 }
