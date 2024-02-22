@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<DataSourceRetriever>()
             .AddSingleton<Disposer>()
             .AddSingleton<CacheableAssemblyLoader>()
-            .AddSingleton(new ConsoleInterceptor())
+            .AddSingleton<ConsoleInterceptor>()
             .AddSingleton<TestsLoader>()
             .AddSingleton<ITestParser, BasicTestParser>()
             .AddSingleton<ITestParser, DataDrivenTestParser>()

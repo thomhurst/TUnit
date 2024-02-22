@@ -13,7 +13,7 @@ namespace TUnit.Analyzers;
 public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.InstanceDataInTestClass);
+        ImmutableArray.Create(Rules.InstanceAssignmentInTestClass);
 
     public override void InitializeInternal(AnalysisContext context)
     { 
@@ -57,40 +57,48 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var fieldOrPropertySyntax = fieldOrProperty.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
 
-            if (tests
-                    .Select(x => x.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax())
-                    .OfType<MethodDeclarationSyntax>()
-                    .Count(x => x.DescendantNodes().Any(n => IsMatching(context, n, fieldOrPropertySyntax)))
-                > 1)
+            var methodDeclarationSyntaxes = tests
+                .Select(x => x.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax())
+                .OfType<MethodDeclarationSyntax>();
+            
+            foreach (var methodDeclarationSyntax in methodDeclarationSyntaxes)
+            {
+                CheckMethod(context, methodDeclarationSyntax, fieldOrPropertySyntax);
+            }
+        }
+    }
+
+    private void CheckMethod(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclarationSyntax,
+        SyntaxNode? fieldOrPropertySyntax)
+    {
+        var descendantNodes = methodDeclarationSyntax.DescendantNodes();
+        
+        foreach (var descendantNode in descendantNodes)
+        {
+            if (IsAssignment(descendantNode, fieldOrPropertySyntax))
             {
                 context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.InstanceDataInTestClass,
-                        fieldOrProperty.Locations.FirstOrDefault())
+                    Diagnostic.Create(Rules.InstanceAssignmentInTestClass,
+                        descendantNode.GetLocation())
                 );
             }
         }
     }
 
-    private bool IsMatching(SyntaxNodeAnalysisContext context, SyntaxNode syntaxNode, SyntaxNode? fieldOrPropertySyntax)
+    private bool IsAssignment(SyntaxNode syntaxNode, SyntaxNode? fieldOrPropertySyntax)
     {
-        if (syntaxNode is not MemberAccessExpressionSyntax memberAccessExpressionSyntax
-            || fieldOrPropertySyntax is null)
+        if (syntaxNode is not AssignmentExpressionSyntax assignmentExpressionSyntax)
         {
             return false;
         }
 
-        var symbol = context.SemanticModel.GetDeclaredSymbol(fieldOrPropertySyntax);
+        var assignmentSyntaxChild = assignmentExpressionSyntax.ChildNodes().FirstOrDefault();
 
-        var field = symbol as IFieldSymbol;
-        var property = symbol as IPropertySymbol;
-
-        var memberAccessName = memberAccessExpressionSyntax.Name.Identifier.FullSpan.ToString();
-        if (memberAccessName == field?.ToDisplayString()
-            || memberAccessName == property?.ToDisplayString())
+        if (assignmentSyntaxChild is not IdentifierNameSyntax identifierNameSyntax)
         {
-            return true;
+            return false;
         }
 
-        return false;
+        return identifierNameSyntax.Identifier.ValueText == fieldOrPropertySyntax?.ToString();
     }
 }

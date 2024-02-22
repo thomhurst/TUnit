@@ -57,7 +57,7 @@ internal static class Rules
     public static readonly DiagnosticDescriptor ConflictingExplicitAttributes =
         CreateDescriptor("TUnit0017", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor InstanceDataInTestClass =
+    public static readonly DiagnosticDescriptor InstanceAssignmentInTestClass =
         CreateDescriptor("TUnit0018", UsageCategory, DiagnosticSeverity.Warning);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)

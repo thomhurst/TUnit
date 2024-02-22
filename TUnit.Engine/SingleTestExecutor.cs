@@ -104,34 +104,27 @@ internal class SingleTestExecutor
                 var methodInfo = _testMethodRetriever.GetTestMethod(classType, testCase);
 
                 var testInformation = testCase.ToTestInformation(classType, classInstance, methodInfo);
-                
+
                 testContext = new TestContext(testInformation);
                 TestContext.Current = testContext;
 
                 var customTestAttributes = methodInfo.GetCustomAttributes()
                     .Concat(classType.GetCustomAttributes())
                     .OfType<ITestAttribute>();
-                
+
                 foreach (var customTestAttribute in customTestAttributes)
                 {
                     await customTestAttribute.ApplyToTest(testContext);
                 }
-                
-                try
-                {
-                    if (testContext.FailReason != null)
-                    {
-                        throw new Exception(testContext.FailReason);
-                    }
 
-                    if(testContext.SkipReason == null)
-                    {
-                        await ExecuteWithRetries(testContext, testInformation, classInstance);
-                    }
-                }
-                finally
+                if (testContext.FailReason != null)
                 {
-                    await _disposer.DisposeAsync(classInstance);
+                    throw new Exception(testContext.FailReason);
+                }
+
+                if (testContext.SkipReason == null)
+                {
+                    await ExecuteWithRetries(testContext, testInformation, classInstance);
                 }
             });
 
@@ -163,17 +156,28 @@ internal class SingleTestExecutor
                 Status = testContext?.SkipReason != null ? Status.Skipped : Status.Failed,
                 Output = testContext?.GetConsoleOutput()
             };
-            
+
             if (testContext != null)
             {
                 testContext.Result = unitTestResult;
             }
-            
+
             await ExecuteCleanUps(classInstance);
-            
+
             return unitTestResult;
         }
+        finally
+        {
+            await _disposer.DisposeAsync(classInstance);
+
+            lock (consoleStandardOutLock)
+            {
+                testContext?.Dispose();
+            }
+        }
     }
+
+    private readonly object consoleStandardOutLock = new();
 
     private bool IsExplicitlyRun(TestCase testCase)
     {
@@ -220,16 +224,26 @@ internal class SingleTestExecutor
         }
     }
 
-    private static async Task<bool> ShouldRetry(TestInformation testInformation, Exception e)
+    private async Task<bool> ShouldRetry(TestInformation testInformation, Exception e)
     {
-        var retryAttribute = testInformation.LazyRetryAttribute.Value;
-
-        if (retryAttribute == null)
+        try
         {
+            var retryAttribute = testInformation.LazyRetryAttribute.Value;
+
+            if (retryAttribute == null)
+            {
+                return false;
+            }
+
+            return await retryAttribute.ShouldRetry(testInformation, e);
+        }
+        catch (Exception exception)
+        {
+            _messageLogger.SendMessage(TestMessageLevel.Error, exception.ToString());
             return false;
         }
-        
-        return await retryAttribute.ShouldRetry(testInformation, e);
+
+        ;
     }
 
     private async Task ExecuteCore(TestContext testContext, TestInformation testInformation, object? @class)

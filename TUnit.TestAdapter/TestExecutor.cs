@@ -30,6 +30,8 @@ public class TestExecutor : ITestExecutor2
             .RunInAsyncContext(Filter(testCases, serviceProvider))
             .GetAwaiter()
             .GetResult();
+        
+        (serviceProvider as ServiceProvider)?.Dispose();
     }
 
     public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
@@ -50,6 +52,8 @@ public class TestExecutor : ITestExecutor2
             .RunInAsyncContext(Filter(tests, serviceProvider))
             .GetAwaiter()
             .GetResult();
+        
+        (serviceProvider as ServiceProvider)?.Dispose();
     }
 
     private IEnumerable<TestCase> Filter(IEnumerable<TestCase> tests, IServiceProvider serviceProvider)

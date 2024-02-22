@@ -1,8 +1,11 @@
 ﻿namespace TUnit.Core;
 
-public class TestContext
+public class TestContext : IDisposable
 {
+    internal EventHandler? OnDispose;
+
     internal CancellationTokenSource? CancellationTokenSource { get; set; }
+    
     public CancellationToken CancellationToken => CancellationTokenSource?.Token ?? default;
 
     internal readonly StringWriter OutputWriter = new();
@@ -10,7 +13,6 @@ public class TestContext
     private static readonly AsyncLocal<TestContext> AsyncLocal = new();
 
     public TestInformation TestInformation { get; }
-
 
     internal TestContext(TestInformation testInformation)
     {
@@ -46,5 +48,12 @@ public class TestContext
     public string GetConsoleOutput()
     {
         return OutputWriter.ToString().Trim();
+    }
+
+    public void Dispose()
+    {
+        OnDispose?.Invoke(this, EventArgs.Empty);
+        OutputWriter.Dispose();
+        CancellationTokenSource?.Dispose();
     }
 }

@@ -20,7 +20,9 @@ public class TestDiscoverer : ITestDiscoverer
         IMessageLogger logger,
         ITestCaseDiscoverySink discoverySink)
     {
-        var testCollector = BuildServices(discoveryContext, logger)
+        var serviceProvider = BuildServices(discoveryContext, logger);
+        
+        var testCollector = serviceProvider
             .GetRequiredService<TestCollector>();
 
         var tests = testCollector.TestsFromSources(sources);
@@ -30,6 +32,8 @@ public class TestDiscoverer : ITestDiscoverer
             logger.SendMessage(TestMessageLevel.Informational, "Test found: " + test.TestNameWithArguments);
             discoverySink.SendTestCase(test.ToTestCase());
         }
+        
+        (serviceProvider as ServiceProvider)?.Dispose();
     }
     
     private IServiceProvider BuildServices(IDiscoveryContext discoveryContext, IMessageLogger messageLogger)

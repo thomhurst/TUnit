@@ -519,7 +519,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test classes should not have instance data. Consider making this static if you need to store it. And beware of race conditions if you haven&apos;t marked tests with [NotInParallel]..
+        ///   Looks up a localized string similar to Test methods should not assign instance data. Consider making this static if you need to store it. And beware of race conditions if you haven&apos;t marked tests with [NotInParallel]..
         /// </summary>
         internal static string TUnit0018Description {
             get {
@@ -528,7 +528,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test classes should not have instance data.
+        ///   Looks up a localized string similar to Test methods should not assign instance data.
         /// </summary>
         internal static string TUnit0018MessageFormat {
             get {
@@ -537,7 +537,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test classes should not have instance data.
+        ///   Looks up a localized string similar to Test methods should not assign instance data.
         /// </summary>
         internal static string TUnit0018Title {
             get {
