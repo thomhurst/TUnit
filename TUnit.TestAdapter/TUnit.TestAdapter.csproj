@@ -17,6 +17,12 @@
         <Files Include="$(MSBuildThisFileDirectory)/../lib/netstandard2.0/**/TUnit.TestAdapter.dll" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.0.2" />
+      <PackageReference Include="Microsoft.Testing.Platform" Version="1.0.2" />
+      <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.0.2" />
+    </ItemGroup>
+
     <Target Name="_AddTestAdapterToOutput" AfterTargets="Build">
         <Copy SourceFiles="@(Files)" DestinationFolder="$(TargetDir)" />
     </Target>

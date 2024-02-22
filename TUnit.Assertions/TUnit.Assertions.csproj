@@ -11,4 +11,8 @@
     <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
 </ItemGroup>
 
+<ItemGroup>
+  <Compile Remove="AssertConditions\Generic\EquatableAssertCondition.cs" />
+</ItemGroup>
+
 </Project>
