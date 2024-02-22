@@ -1,25 +1,26 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
+using TUnit.Core;
 
 namespace TUnit.Engine;
 
 internal class CacheableAssemblyLoader
 {
-    private readonly ConcurrentDictionary<string, Assembly> _assemblies = new();
+    private readonly ConcurrentDictionary<string, CachedAssemblyInformation> _assemblies = new();
 
-    public ICollection<Assembly> CachedAssemblies => _assemblies.Values;
+    public ICollection<CachedAssemblyInformation> CachedAssemblies => _assemblies.Values;
 
-    public Assembly? GetOrLoadAssembly(string source)
+    public CachedAssemblyInformation GetOrLoadAssembly(string source)
     {
         var rootedSource = Path.IsPathRooted(source) ? source : Path.Combine(Directory.GetCurrentDirectory(), source);
 
         try
         {
-            return _assemblies.GetOrAdd(rootedSource, _ => Assembly.LoadFile(rootedSource));
+            return _assemblies.GetOrAdd(rootedSource, _ => new CachedAssemblyInformation(Assembly.LoadFile(rootedSource)));
         }
         catch
         {
-            return null;
+            return new CachedAssemblyInformation(Assembly.GetCallingAssembly());
         }
     }
 }

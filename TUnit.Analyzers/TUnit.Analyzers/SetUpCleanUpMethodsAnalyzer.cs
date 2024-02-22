@@ -11,7 +11,11 @@ namespace TUnit.Analyzers;
 public class SetUpCleanUpMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustNotBeStatic);
+        ImmutableArray.Create(
+            Rules.MethodMustBeParameterless, 
+            Rules.MethodMustNotBeAbstract, 
+            Rules.MethodMustNotBeStatic,
+            Rules.MethodMustBePublic);
 
     public override void InitializeInternal(AnalysisContext context)
     { 
@@ -47,6 +51,14 @@ public class SetUpCleanUpMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
         if (methodSymbol.IsStatic)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustNotBeStatic,
+                methodDeclarationSyntax.GetLocation())
+            );
+        }
+        
+                
+        if(methodSymbol.DeclaredAccessibility != Accessibility.Public)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
                 methodDeclarationSyntax.GetLocation())
             );
         }

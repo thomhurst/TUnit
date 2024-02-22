@@ -22,8 +22,8 @@ internal class SingleTestExecutor
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly ClassWalker _classWalker;
     private readonly TestFilterProvider _testFilterProvider;
-    
-    public GroupedTests GroupedTests { get; private set; }
+
+    public GroupedTests GroupedTests { get; private set; } = null!;
 
     public SingleTestExecutor(MethodInvoker methodInvoker, 
         TestClassCreator testClassCreator,
