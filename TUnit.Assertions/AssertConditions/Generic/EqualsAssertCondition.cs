@@ -15,6 +15,11 @@ public class EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder<TActual>
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
+        if (actualValue is IEquatable<TActual> equatable)
+        {
+            return equatable.Equals(ExpectedValue);
+        }
+        
         return Equals(actualValue, ExpectedValue);
     }
 }
