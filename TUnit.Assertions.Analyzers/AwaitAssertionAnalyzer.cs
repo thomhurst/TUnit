@@ -55,13 +55,6 @@ public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That"
-            && memberAccessExpressionSyntax.GetAllAncestorSyntaxesOfType<InvocationExpressionSyntax>()
-                .Any(x => x.ToString().StartsWith("Assert.Multiple")))
-        {
-            return;
-        }
-
         var expressionStatementParent = memberAccessExpressionSyntax.GetAncestorSyntaxOfType<ExpressionStatementSyntax>();
 
         if (expressionStatementParent is null)
@@ -72,6 +65,20 @@ public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
         if (expressionStatementParent.DescendantNodes().Any(x => x is AwaitExpressionSyntax))
         {
             return;
+        }
+        
+        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That")
+        {
+            var symbols =  memberAccessExpressionSyntax.GetAllAncestorSyntaxesOfType<InvocationExpressionSyntax>()
+                .Select(x => context.SemanticModel.GetSymbolInfo(x))
+                .Select(x => x.CandidateSymbols.FirstOrDefault() ?? x.Symbol)
+                .Select(x => x?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
+                .OfType<string>();
+
+            if (symbols.Any(x => x == "global::TUnit.Assertions.Assert.Multiple"))
+            {
+                return;
+            }
         }
         
         context.ReportDiagnostic(

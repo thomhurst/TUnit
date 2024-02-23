@@ -11,7 +11,7 @@ public class AwaitAssertionAnalyzerTests
         const string text = """
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
-                            using TUnit.Assertions.Extensions.Is;
+                            using TUnit.Assertions.Extensions;
                             using TUnit.Core;
                             
                             public class MyClass
@@ -37,7 +37,7 @@ public class AwaitAssertionAnalyzerTests
         const string text = """
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
-                            using TUnit.Assertions.Extensions.Is;
+                            using TUnit.Assertions.Extensions;
                             using TUnit.Core;
 
                             public class MyClass
@@ -65,8 +65,7 @@ public class AwaitAssertionAnalyzerTests
                             using System.Collections.Generic;
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
-                            using TUnit.Assertions.Extensions.Is;
-                            using TUnit.Assertions.Extensions.Has;
+                            using TUnit.Assertions.Extensions;
                             using TUnit.Core;
 
                             public class MyClass
