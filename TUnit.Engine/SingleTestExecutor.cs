@@ -170,14 +170,14 @@ internal class SingleTestExecutor
         {
             await _disposer.DisposeAsync(classInstance);
 
-            lock (consoleStandardOutLock)
+            lock (_consoleStandardOutLock)
             {
                 testContext?.Dispose();
             }
         }
     }
 
-    private readonly object consoleStandardOutLock = new();
+    private readonly object _consoleStandardOutLock = new();
 
     private bool IsExplicitlyRun(TestCase testCase)
     {
