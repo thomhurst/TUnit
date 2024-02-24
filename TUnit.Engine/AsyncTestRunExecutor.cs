@@ -205,9 +205,8 @@ internal class AsyncTestRunExecutor
         var cachedAssemblyInformation = _cacheableAssemblyLoader.GetOrLoadAssembly(test.Source);
         
         var semaphoreSlim = _semaphoreSlimByAssembly.GetOrAdd(cachedAssemblyInformation, GetSemaphoreSlim);
-        await semaphoreSlim.WaitAsync();
         
-        Interlocked.Increment(ref _currentlyExecutingTests);
+        await NotifyTestStart(semaphoreSlim);
 
         try
         {
@@ -216,8 +215,7 @@ internal class AsyncTestRunExecutor
         }
         catch
         {
-            semaphoreSlim.Release();
-            Interlocked.Decrement(ref _currentlyExecutingTests);
+            NotifyTestEnd(semaphoreSlim);
             throw;
         }
         
@@ -225,8 +223,7 @@ internal class AsyncTestRunExecutor
 
         _ = executionTask.ContinueWith(_ =>
         {
-            Interlocked.Decrement(ref _currentlyExecutingTests);
-            return semaphoreSlim.Release();
+            NotifyTestEnd(semaphoreSlim);
         });
 
         if (!runInParallel)
@@ -235,6 +232,18 @@ internal class AsyncTestRunExecutor
         }
         
         return new TestWithResult(test, executionTask);
+    }
+
+    private void NotifyTestEnd(SemaphoreSlim semaphoreSlim)
+    {
+        Interlocked.Decrement(ref _currentlyExecutingTests);
+        semaphoreSlim.Release();
+    }
+
+    private async Task NotifyTestStart(SemaphoreSlim semaphoreSlim)
+    {
+        await semaphoreSlim.WaitAsync();
+        Interlocked.Increment(ref _currentlyExecutingTests);
     }
 
     private async Task ExecuteOneTimeCleanUps(TestCase testDetails)
