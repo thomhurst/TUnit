@@ -209,18 +209,30 @@ internal class AsyncTestRunExecutor
         
         Interlocked.Increment(ref _currentlyExecutingTests);
 
-        await _assemblySetUpExecutor.ExecuteSetUps(cachedAssemblyInformation);
+        try
+        {
+            await _assemblySetUpExecutor.ExecuteSetUps(cachedAssemblyInformation);
 
+        }
+        catch
+        {
+            semaphoreSlim.Release();
+            Interlocked.Decrement(ref _currentlyExecutingTests);
+            throw;
+        }
+        
         var executionTask = _singleTestExecutor.ExecuteTest(test);
 
-        _ = executionTask.ContinueWith(_ => semaphoreSlim.Release());
+        _ = executionTask.ContinueWith(_ =>
+        {
+            Interlocked.Decrement(ref _currentlyExecutingTests);
+            return semaphoreSlim.Release();
+        });
 
         if (!runInParallel)
         {
             await executionTask;
         }
-                
-        Interlocked.Decrement(ref _currentlyExecutingTests);
         
         return new TestWithResult(test, executionTask);
     }
