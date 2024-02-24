@@ -8,7 +8,7 @@ namespace TUnit.Engine;
 
 internal class ConsoleInterceptor : TextWriter
 {
-    private readonly IMessageLogger _messageLogger;
+    private readonly IMessageLogger? _messageLogger;
     public override Encoding Encoding => InnerWriter.Encoding;
 
     public static TextWriter DefaultOut { get; }
@@ -20,7 +20,7 @@ internal class ConsoleInterceptor : TextWriter
             var testContext = TestContext.Current;
 
             // testContext.OnDispose ??= (_, _) => DefaultOut.WriteLine(testContext.GetConsoleOutput());
-            testContext.OnDispose ??= (_, _) => _messageLogger.SendMessage(TestMessageLevel.Informational, testContext.GetConsoleOutput());
+            testContext.OnDispose ??= (_, _) => _messageLogger?.SendMessage(TestMessageLevel.Informational, testContext.GetConsoleOutput());
             
             return testContext.OutputWriter;
         }
