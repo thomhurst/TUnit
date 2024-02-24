@@ -13,28 +13,7 @@ internal class ConsoleInterceptor : TextWriter
 
     public static TextWriter DefaultOut { get; }
     
-    public StringWriter InnerWriter
-    {
-        get
-        {
-            var testContext = TestContext.Current;
-
-            testContext.OnDispose ??= (_, _) =>
-            {
-                try
-                {
-
-                    _messageLogger?.SendMessage(TestMessageLevel.Informational, testContext.GetConsoleOutput());
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            };
-            
-            return testContext.OutputWriter;
-        }
-    }
+    public StringWriter InnerWriter => TestContext.Current.OutputWriter;
 
     static ConsoleInterceptor()
     {
@@ -49,6 +28,22 @@ internal class ConsoleInterceptor : TextWriter
     public void Initialize()
     {
         Console.SetOut(this);
+    }
+
+    public void SetModule(TestContext testContext)
+    {
+        testContext.OnDispose = (_, _) =>
+        {
+            try
+            {
+
+                _messageLogger?.SendMessage(TestMessageLevel.Informational, testContext.GetConsoleOutput());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        };
     }
     
     public new void Dispose()
