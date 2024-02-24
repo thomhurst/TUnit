@@ -27,7 +27,6 @@ public class TestContext : IDisposable
 
     public string? SkipReason { get; private set; }
 
-
     public void SkipTest(string reason)
     {
         SkipReason = reason;
@@ -35,7 +34,6 @@ public class TestContext : IDisposable
     }
 
     public string? FailReason { get; private set; }
-
 
     public void FailTest(string reason)
     {
