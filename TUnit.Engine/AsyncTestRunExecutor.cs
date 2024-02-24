@@ -211,7 +211,6 @@ internal class AsyncTestRunExecutor
         try
         {
             await _assemblySetUpExecutor.ExecuteSetUps(cachedAssemblyInformation);
-
         }
         catch
         {
