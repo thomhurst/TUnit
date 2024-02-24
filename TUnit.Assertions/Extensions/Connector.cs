@@ -48,4 +48,24 @@ public abstract class Connector<TActual, TAnd, TOr>
 
         throw new ArgumentOutOfRangeException(nameof(ConnectorType), ConnectorType, "Unknown connector type");
     }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public override bool Equals(object? obj)
+    {
+        // ReSharper disable once BaseObjectEqualsIsObjectEquals
+        return base.Equals(obj);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public override int GetHashCode()
+    {
+        // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
+        return base.GetHashCode();
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public override string? ToString()
+    {
+        return base.ToString();
+    }
 }

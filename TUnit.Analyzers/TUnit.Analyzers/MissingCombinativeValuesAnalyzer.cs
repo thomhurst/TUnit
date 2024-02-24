@@ -1,9 +1,13 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
+using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
@@ -38,9 +42,11 @@ public class MissingCombinativeValuesAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var parameters = methodSymbol.Parameters;
+        var parameters = methodSymbol.Parameters.IsDefaultOrEmpty
+            ? []
+            : methodSymbol.Parameters.ToList();
 
-        if (parameters.IsDefaultOrEmpty)
+        if (!parameters.Any())
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.NoTestDataProvided,
@@ -49,11 +55,18 @@ public class MissingCombinativeValuesAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
         
+        if (methodSymbol.HasTimeoutAttribute(out _)
+            && SymbolEqualityComparer.Default.Equals(parameters.LastOrDefault()?.Type,
+                context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!)))
+        {
+            parameters.RemoveAt(parameters.Count - 1);
+        }
+        
         foreach (var parameterSymbol in parameters)
         {
             var combinativeValueAttribute = parameterSymbol.GetAttributes().FirstOrDefault(attribute =>
                 attribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == "global::TUnit.Core.CombinativeValuesAttribute");
+                == WellKnown.AttributeFullyQualifiedClasses.CombinativeValues);
 
             if (combinativeValueAttribute is null
                 || combinativeValueAttribute.ConstructorArguments.IsDefaultOrEmpty

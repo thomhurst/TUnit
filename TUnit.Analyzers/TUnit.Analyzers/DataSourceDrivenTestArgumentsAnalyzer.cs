@@ -1,9 +1,12 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
@@ -48,12 +51,23 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             return;
         }
 
+        var methodParameterTypes = methodSymbol.Parameters.IsDefault 
+            ? []
+            : methodSymbol.Parameters.ToList();
+        
+        if (methodSymbol.HasTimeoutAttribute(out _)
+            && SymbolEqualityComparer.Default.Equals(methodParameterTypes.LastOrDefault()?.Type,
+                context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!)))
+        {
+            methodParameterTypes.RemoveAt(methodParameterTypes.Count - 1);
+        }
+
         var attributes = methodSymbol.GetAttributes();
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                                                         == WellKnown.AttributeFullyQualifiedClasses.DataSourceDrivenTest))
         {
-            CheckAttributeAgainstMethod(context, methodSymbol.Parameters, dataSourceDrivenAttribute, methodSymbol.ContainingType);
+            CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType);
         }
     }
     

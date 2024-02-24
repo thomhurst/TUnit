@@ -84,7 +84,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
     {
         const string text = """
                             using TUnit.Core;
-                            
+
                             public static class MyData
                             {
                                 public static int One()
@@ -92,11 +92,39 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
                                     return 1;
                                 }
                             }
-                            
+
                             public class MyClass
                             {
                                 [DataSourceDrivenTest(typeof(MyData), nameof(MyData.One))]
                                 public void MyTest(int value)
+                                {
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [Test]
+    public async Task DataDriven_Argument_Is_Not_Flagged_When_Timeout_CancellationToken()
+    {
+        const string text = """
+                            using System.Threading;
+                            using TUnit.Core;
+
+                            public static class MyData
+                            {
+                                public static int One()
+                                {
+                                    return 1;
+                                }
+                            }
+
+                            public class MyClass
+                            {
+                                [Timeout(30_000)]
+                                [DataSourceDrivenTest(typeof(MyData), nameof(MyData.One))]
+                                public void MyTest(int value, CancellationToken token)
                                 {
                                 }
                             }

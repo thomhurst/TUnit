@@ -1,9 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
@@ -58,6 +60,13 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributeTypesPassedIn = 
             objectArrayArgument.IsNull ? [null] : 
             objectArrayArgument.Values.Select(x => x.IsNull ? null : x.Type).ToList();
+
+        if (methodSymbol.HasTimeoutAttribute(out _)
+            && SymbolEqualityComparer.Default.Equals(methodParameterTypes.LastOrDefault(),
+                context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!)))
+        {
+            methodParameterTypes.RemoveAt(methodParameterTypes.Count - 1);
+        }
         
         if (methodParameterTypes.Count != attributeTypesPassedIn.Count)
         {
