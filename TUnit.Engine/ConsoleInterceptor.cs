@@ -19,8 +19,18 @@ internal class ConsoleInterceptor : TextWriter
         {
             var testContext = TestContext.Current;
 
-            // testContext.OnDispose ??= (_, _) => DefaultOut.WriteLine(testContext.GetConsoleOutput());
-            testContext.OnDispose ??= (_, _) => _messageLogger?.SendMessage(TestMessageLevel.Informational, testContext.GetConsoleOutput());
+            testContext.OnDispose ??= (_, _) =>
+            {
+                try
+                {
+
+                    _messageLogger?.SendMessage(TestMessageLevel.Informational, testContext.GetConsoleOutput());
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            };
             
             return testContext.OutputWriter;
         }
