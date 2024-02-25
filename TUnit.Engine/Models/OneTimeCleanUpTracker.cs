@@ -26,7 +26,7 @@ public class OneTimeCleanUpTracker
 
             if (!_innerDictionary.TryGetValue(className, out var list))
             {
-                throw new ArgumentNullException($"No tests for class {className} were found");
+                return;
             }
 
             list.Remove(testCase);
