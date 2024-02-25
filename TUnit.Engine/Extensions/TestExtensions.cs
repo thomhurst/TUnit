@@ -99,15 +99,6 @@ internal static class TestExtensions
         return testCase;
     }
 
-    public static ConstraintKeysCollection GetConstraintKeys(this TestCase testCase)
-    {
-        var constraintKeys = testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]);
-        
-        return new ConstraintKeysCollection(
-             constraintKeys ?? Array.Empty<string>()
-        );
-    }
-
     private static Guid GetId(string fullyQualifiedName)
     {
         var idProvider = new TestIdProvider();
