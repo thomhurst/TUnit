@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Globalization;
+using System.Reflection;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.TestPlatform.AdapterUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using TUnit.Core;
@@ -97,6 +99,70 @@ internal static class TestExtensions
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassArguments, testDetails.ClassArgumentValues.SerializeArgumentsSafely());
         
         return testCase;
+    }
+    
+    public static TestNode ToTestNode(this TestDetails testDetails)
+    {
+        var testNode = new TestNode
+        {
+            Uid = new TestNodeUid(testDetails.UniqueId),
+            DisplayName = testDetails.TestNameWithArguments,
+            Properties = new PropertyBag(
+            [
+                new TestFileLocationProperty(testDetails.FileName!, new LinePositionSpan()
+                {
+                    Start = new LinePosition(testDetails.MinLineNumber, 0),
+                    End = new LinePosition(testDetails.MaxLineNumber, 0)
+                }),
+                new TestMethodIdentifierProperty(
+                    Namespace: testDetails.Namespace,
+                    AssemblyFullName: testDetails.Assembly.FullName!,
+                    TypeName: testDetails.ClassType.FullName!,
+                    MethodName: testDetails.TestName,
+                    ParameterTypeFullNames: testDetails.MethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
+                    ReturnTypeFullName: testDetails.ReturnType
+                    ),
+                new DiscoveredTestNodeStateProperty(),
+            ])
+        };
+
+        if (testDetails.IsSkipped)
+        {
+            testNode.Properties.Add(new SkippedTestNodeStateProperty());
+        }
+        
+        if(testDetails.ExplicitFor != null)
+        {
+            testNode.Properties.Add(new TestMetadataProperty(nameof(testDetails.ExplicitFor), testDetails.ExplicitFor));
+        }
+
+        testNode.Properties.Add(new TestMetadataProperty(nameof(testDetails.Order), testDetails.Order.ToString()));
+        
+        testNode.Properties.Add(new TestMetadataProperty(nameof(TUnitTestProperties.IsStatic), testDetails.MethodInfo.IsStatic.ToString()));
+        
+        testNode.Properties.Add(new TestMetadataProperty(nameof(TUnitTestProperties.Category), testDetails.Categories.ToArray().ToJson()));
+        
+        if(testDetails.NotInParallelConstraintKeys != null)
+        {
+            testNode.Properties.Add(new TestMetadataProperty(nameof(TUnitTestProperties.NotInParallelConstraintKeys), testDetails.NotInParallelConstraintKeys.ToJson()));
+        }
+
+        testNode.Properties.Add(new TestMetadataProperty(nameof(TUnitTestProperties.Order), testDetails.Order.ToString()));
+        
+        if(testDetails.Timeout != null)
+        {
+            testNode.Properties.Add(new TestMetadataProperty(nameof(TUnitTestProperties.Timeout), testDetails.Timeout.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture)));
+        }
+
+        testNode.Properties.Add(new TestMetadataProperty(nameof(TUnitTestProperties.RepeatCount), testDetails.RepeatCount.ToString()));
+        testNode.Properties.Add(new TestMetadataProperty(nameof(TUnitTestProperties.RetryCount), testDetails.RetryCount.ToString()));
+
+        foreach (var customProperty in testDetails.CustomProperties)
+        {
+            testNode.Properties.Add(new KeyValuePairStringProperty(customProperty.Key, customProperty.Value));
+        }
+        
+        return testNode;
     }
 
     public static ConstraintKeysCollection GetConstraintKeys(this TestCase testCase)

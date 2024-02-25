@@ -28,6 +28,8 @@ internal record TestDetails
         ClassName = ClassType.Name;
         FullyQualifiedClassName = ClassType.FullName!;
         Assembly = ClassType.Assembly;
+        Namespace = ClassType.Namespace!;
+        ReturnType = methodInfo.ReturnType.AssemblyQualifiedName!;
         Source = sourceLocation.RawSource;
 
         var methodAndClassAttributes = methodInfo.GetCustomAttributes()
@@ -81,6 +83,10 @@ internal record TestDetails
         CustomProperties = methodAndClassAttributes.OfType<PropertyAttribute>()
             .ToDictionary(x => x.Name, x => x.Value);
     }
+
+    public string ReturnType { get; }
+
+    public string Namespace { get; }
 
     public Dictionary<string,string> CustomProperties { get; }
 

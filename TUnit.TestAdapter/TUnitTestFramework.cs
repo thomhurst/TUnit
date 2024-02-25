@@ -54,6 +54,15 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             case VSTestDiscoverTestExecutionRequest vsTestDiscoverTestExecutionRequest:
                 break;
             case DiscoverTestExecutionRequest discoverTestExecutionRequest:
+                switch (discoverTestExecutionRequest.Session)
+                {
+                    case CloseTestSessionContext closeTestSessionContext:
+                        break;
+                    case CreateTestSessionContext createTestSessionContext:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
                 switch (discoverTestExecutionRequest.Filter)
                 {
                     case VSTestTestExecutionFilter vsTestTestExecutionFilter:
