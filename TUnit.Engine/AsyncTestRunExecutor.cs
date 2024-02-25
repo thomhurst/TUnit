@@ -96,7 +96,7 @@ internal class AsyncTestRunExecutor
             {
                 var notInParallelTestCase = notInParallelTestCases.First();
 
-                testsToProcess.Add(notInParallelTestCase);
+                testsToRemove.Add(notInParallelTestCase);
 
                 var testWithResult = await ProcessTest(notInParallelTestCase.TestCase, true);
 
