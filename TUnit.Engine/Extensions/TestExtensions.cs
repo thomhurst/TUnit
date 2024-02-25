@@ -62,7 +62,7 @@ internal static class TestExtensions
         
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Category, testDetails.Categories.ToArray());
         
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.NotInParallelConstraintKeys, testDetails.NotInParallelConstraintKeys);
+        testCase.SetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, testDetails.NotInParallelConstraintKeys);
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Order, testDetails.Order);
         
         testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Timeout, testDetails.Timeout?.TotalMilliseconds);
@@ -101,9 +101,10 @@ internal static class TestExtensions
 
     public static ConstraintKeysCollection GetConstraintKeys(this TestCase testCase)
     {
+        var constraintKeys = testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]);
+        
         return new ConstraintKeysCollection(
-            testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys,
-                Array.Empty<string>())
+             constraintKeys ?? Array.Empty<string>()
         );
     }
 

@@ -22,6 +22,7 @@ internal class SingleTestExecutor
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly ClassWalker _classWalker;
     private readonly TestFilterProvider _testFilterProvider;
+    private readonly ConsoleInterceptor _consoleInterceptor;
 
     public GroupedTests GroupedTests { get; private set; } = null!;
 
@@ -33,7 +34,8 @@ internal class SingleTestExecutor
         ITestExecutionRecorder testExecutionRecorder,
         CancellationTokenSource cancellationTokenSource,
         ClassWalker classWalker,
-        TestFilterProvider testFilterProvider)
+        TestFilterProvider testFilterProvider,
+        ConsoleInterceptor consoleInterceptor)
     {
         _methodInvoker = methodInvoker;
         _testClassCreator = testClassCreator;
@@ -44,6 +46,7 @@ internal class SingleTestExecutor
         _cancellationTokenSource = cancellationTokenSource;
         _classWalker = classWalker;
         _testFilterProvider = testFilterProvider;
+        _consoleInterceptor = consoleInterceptor;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
@@ -106,6 +109,9 @@ internal class SingleTestExecutor
                 var testInformation = testCase.ToTestInformation(classType, classInstance, methodInfo);
 
                 testContext = new TestContext(testInformation);
+                
+                _consoleInterceptor.SetModule(testContext);
+                
                 TestContext.Current = testContext;
 
                 var customTestAttributes = methodInfo.GetCustomAttributes()
@@ -170,14 +176,14 @@ internal class SingleTestExecutor
         {
             await _disposer.DisposeAsync(classInstance);
 
-            lock (consoleStandardOutLock)
+            lock (_consoleStandardOutLock)
             {
                 testContext?.Dispose();
             }
         }
     }
 
-    private readonly object consoleStandardOutLock = new();
+    private readonly object _consoleStandardOutLock = new();
 
     private bool IsExplicitlyRun(TestCase testCase)
     {

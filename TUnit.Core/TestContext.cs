@@ -19,14 +19,13 @@ public class TestContext : IDisposable
         TestInformation = testInformation;
     }
 
-    public static TestContext Current
+    public static TestContext? Current
     {
-        get => AsyncLocal.Value!;
-        set => AsyncLocal.Value = value;
+        get => AsyncLocal.Value;
+        internal set => AsyncLocal.Value = value!;
     }
 
     public string? SkipReason { get; private set; }
-
 
     public void SkipTest(string reason)
     {
@@ -35,7 +34,6 @@ public class TestContext : IDisposable
     }
 
     public string? FailReason { get; private set; }
-
 
     public void FailTest(string reason)
     {

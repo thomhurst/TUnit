@@ -4,6 +4,7 @@ internal static class WellKnown
 {
     public static class AttributeFullyQualifiedClasses
     {
+        public const string TimeoutAttribute = "global::TUnit.Core.TimeoutAttribute";
         public const string Explicit = "global::TUnit.Core.ExplicitAttribute";
         public const string CombinativeValues = "global::TUnit.Core.CombinativeValuesAttribute";
 
@@ -16,7 +17,7 @@ internal static class WellKnown
         public const string Test = "global::TUnit.Core.TestAttribute";
         public const string DataDrivenTest = "global::TUnit.Core.DataDrivenTestAttribute";
         public const string DataSourceDrivenTest = "global::TUnit.Core.DataSourceDrivenTestAttribute";
-
+        
         public static readonly string[] TestAttributes =
         [
             Test, DataDrivenTest, DataSourceDrivenTest, CombinativeTest

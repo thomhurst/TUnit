@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
