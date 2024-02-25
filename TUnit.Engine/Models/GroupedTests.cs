@@ -6,7 +6,7 @@ internal record GroupedTests
 {
     public required IReadOnlyList<TestCase> AllTests { get; init; }
     public required Queue<TestCase> NotInParallel { get; init; }
-    public required List<TestCase> KeyedNotInParallel { get; init; }
+    public required List<NotInParallelTestCase> KeyedNotInParallel { get; init; }
 
     public required Queue<TestCase> Parallel { get; init; }
     
