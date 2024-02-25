@@ -17,29 +17,28 @@ public class OneTimeCleanUpTracker
     }
 
     private readonly object _removeLock = new();
-    
+
     public void Remove(TestCase testCase, Task executingTask)
     {
-        lock (_removeLock)
+        var className = GetClassName(testCase);
+
+        if (!_innerDictionary.TryGetValue(className, out var list))
         {
-            var className = GetClassName(testCase);
-
-            if (!_innerDictionary.TryGetValue(className, out var list))
-            {
-                return;
-            }
-
-            list.Remove(testCase);
-
-            if (list.Count == 0)
-            {
-                _innerDictionary.Remove(className);
-                
-                executingTask.ContinueWith(_ =>
-                    _onLastTestForClassProcessed(testCase, executingTask)
-                );
-            }
+            return;
         }
+
+        executingTask.ContinueWith(_ =>
+        {
+            lock (_removeLock)
+            {
+                list.Remove(testCase);
+
+                if (list.Count == 0)
+                {
+                    _onLastTestForClassProcessed(testCase, executingTask);
+                }
+            }
+        });
     }
 
     private string GetClassName(TestCase testCase)
