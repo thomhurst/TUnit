@@ -4,12 +4,10 @@ namespace TUnit.Engine;
 
 internal class ConstraintKeysCollection : IReadOnlyList<string>, IEquatable<ConstraintKeysCollection>
 {
-    public string Id { get; }
     private readonly IReadOnlyList<string> _constraintKeys;
 
-    public ConstraintKeysCollection(IReadOnlyList<string> constraintKeys, string Id)
+    public ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
     {
-        this.Id = Id;
         _constraintKeys = constraintKeys;
     }
     
@@ -29,8 +27,8 @@ internal class ConstraintKeysCollection : IReadOnlyList<string>, IEquatable<Cons
         {
             return false;
         }
-
-        return Id == other.Id;
+        
+        return _constraintKeys.Intersect(other._constraintKeys).Any();
     }
 
     public override bool Equals(object? obj)
@@ -61,7 +59,7 @@ internal class ConstraintKeysCollection : IReadOnlyList<string>, IEquatable<Cons
 
     public string this[int index] => _constraintKeys[index];
 
-    public sealed class ConstraintKeysCollectionEqualityComparer : IEqualityComparer<ConstraintKeysCollection>
+    private sealed class ConstraintKeysCollectionEqualityComparer : IEqualityComparer<ConstraintKeysCollection>
     {
         public bool Equals(ConstraintKeysCollection? x, ConstraintKeysCollection? y)
         {

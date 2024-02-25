@@ -34,7 +34,7 @@ internal class TestGrouper
                 keyedNotInParallel.Add(new NotInParallelTestCase
                 {
                     TestCase = test,
-                    ConstraintKeys = new ConstraintKeysCollection(notInParallelConstraintKey, test.Id.ToString())
+                    ConstraintKeys = new ConstraintKeysCollection(notInParallelConstraintKey)
                 });
             }
         }
