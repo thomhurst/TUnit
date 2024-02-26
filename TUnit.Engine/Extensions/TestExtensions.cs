@@ -96,11 +96,11 @@ internal static class TestExtensions
 
     public static T GetRequiredProperty<T>(this TestNode testNode) where T : IProperty
     {
-        return testNode.Properties.OfType<T>().First();
+        return testNode.Properties.Single<T>();
     }
 
     public static T? GetProperty<T>(this TestNode testNode) where T : IProperty
     {
-        return testNode.Properties.OfType<T>().FirstOrDefault();
+        return testNode.Properties.SingleOrDefault<T>();
     }
 }
