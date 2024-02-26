@@ -83,29 +83,12 @@ internal class SingleTestExecutor : IDataProducer
 
         var start = DateTimeOffset.Now;
 
-        try
-        {
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
+        await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
             {
                 Uid = testNode.Uid,
                 DisplayName = testNode.DisplayName,
                 Properties = new PropertyBag(new InProgressTestNodeStateProperty())
             }));
-        }
-        catch (Exception e)
-        {
-            if (!Debugger.IsAttached)
-            {
-                Debugger.Launch();
-            }
-
-            var groupedTests = JsonSerializer.Serialize(GroupedTests);
-             
-            throw new Exception($"""
-                                 Test has been invoked more than once:
-                                 {testNode}
-                                 """, e);
-        }
 
         var skipReason = testNode.GetProperty<SkipReasonProperty>()?.SkipReason;
         if (skipReason != null || !IsExplicitlyRun(testNode))

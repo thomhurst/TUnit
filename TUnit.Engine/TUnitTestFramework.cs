@@ -41,11 +41,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     
     public async Task<CreateTestSessionResult> CreateTestSessionAsync(CreateTestSessionContext context)
     {
-        if (!Debugger.IsAttached)
-        {
-            //Debugger.Launch();
-        }
-
         await Task.CompletedTask;
 
         return new CreateTestSessionResult
@@ -56,11 +51,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
-        if (!Debugger.IsAttached)
-        {
-            //Debugger.Launch();
-        }
-        
         await using (_myServiceProvider)
         {
             try
