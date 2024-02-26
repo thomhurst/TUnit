@@ -20,6 +20,8 @@ internal class TUnitTestDiscoverer
     {
         var filter = discoverTestExecutionRequest?.Filter as TestNodeUidListFilter ?? new TestNodeUidListFilter([]);
 
+        var hasFilter = filter.TestNodeUids.Any();
+
         var assemblies = testAssemblies();
         
         foreach (var assembly in assemblies.Select(x => new CachedAssemblyInformation(x)))
@@ -33,7 +35,8 @@ internal class TUnitTestDiscoverer
 
                 var testNode = testDetails.ToTestNode();
 
-                if (filter.TestNodeUids.Contains(testNode.Uid))
+                if (!hasFilter ||
+                    filter.TestNodeUids.Contains(testNode.Uid))
                 {
                     yield return testNode;
                 }
