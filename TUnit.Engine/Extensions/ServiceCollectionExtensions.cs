@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.TestParsers;
 
@@ -6,9 +7,11 @@ namespace TUnit.Engine.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddFromFrameworkServiceProvider(this IServiceCollection services, IServiceProvider serviceProvider)
+    public static IServiceCollection AddFromFrameworkServiceProvider(this IServiceCollection services,
+        IServiceProvider serviceProvider, IExtension extension)
     {
         return services
+            .AddSingleton(extension)
             .AddTransient(_ => serviceProvider.GetConfiguration())
             .AddTransient(_ => serviceProvider.GetLoggerFactory())
             .AddTransient(_ => serviceProvider.GetMessageBus())
@@ -18,7 +21,9 @@ public static class ServiceCollectionExtensions
         
     public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
     {
-        return services.AddSingleton<MethodInvoker>()
+        return services
+            .AddSingleton(new CancellationTokenSource())
+            .AddSingleton<MethodInvoker>()
             .AddSingleton<DataSourceRetriever>()
             .AddSingleton<Disposer>()
             .AddSingleton<CacheableAssemblyLoader>()

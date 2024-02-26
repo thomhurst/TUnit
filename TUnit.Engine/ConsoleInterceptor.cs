@@ -21,9 +21,9 @@ internal class ConsoleInterceptor : TextWriter
         DefaultOut = Console.Out;
     }
 
-    public ConsoleInterceptor(ILogger<ConsoleInterceptor> logger)
+    public ConsoleInterceptor(ILoggerFactory loggerFactory)
     {
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<ConsoleInterceptor>();
     }
 
     public void Initialize()

@@ -35,7 +35,7 @@ internal class SingleTestExecutor : IDataProducer
         TestClassCreator testClassCreator,
         TestMethodRetriever testMethodRetriever,
         Disposer disposer,
-        ILogger<SingleTestExecutor> logger,
+        ILoggerFactory loggerFactory,
         CancellationTokenSource cancellationTokenSource,
         ClassWalker classWalker,
         ConsoleInterceptor consoleInterceptor,
@@ -46,7 +46,7 @@ internal class SingleTestExecutor : IDataProducer
         _testClassCreator = testClassCreator;
         _testMethodRetriever = testMethodRetriever;
         _disposer = disposer;
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<SingleTestExecutor>();
         _cancellationTokenSource = cancellationTokenSource;
         _classWalker = classWalker;
         _consoleInterceptor = consoleInterceptor;

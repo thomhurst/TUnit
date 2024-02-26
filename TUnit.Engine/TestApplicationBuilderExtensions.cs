@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
-using Microsoft.Testing.Platform.MSBuild;
 
 namespace TUnit.Engine;
 

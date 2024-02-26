@@ -41,7 +41,7 @@ internal class AsyncTestRunExecutor
         ConsoleInterceptor consoleInterceptor,
         AssemblySetUpExecutor assemblySetUpExecutor,
         AssemblyCleanUpExecutor assemblyCleanUpExecutor,
-        ILogger<AsyncTestRunExecutor> logger)
+        ILoggerFactory loggerFactory)
     {
         _singleTestExecutor = singleTestExecutor;
         _methodInvoker = methodInvoker;
@@ -54,7 +54,7 @@ internal class AsyncTestRunExecutor
         _consoleInterceptor = consoleInterceptor;
         _assemblySetUpExecutor = assemblySetUpExecutor;
         _assemblyCleanUpExecutor = assemblyCleanUpExecutor;
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<AsyncTestRunExecutor>();
     }
 
     public async Task RunInAsyncContext(IEnumerable<TestNode> testCases, TestSessionContext session)

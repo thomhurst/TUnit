@@ -6,9 +6,9 @@ internal class Disposer
 {
     private readonly ILogger<Disposer> _logger;
 
-    public Disposer(ILogger<Disposer> logger)
+    public Disposer(ILoggerFactory loggerFactory)
     {
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<Disposer>();
     }
     
     public async ValueTask DisposeAsync(object? obj)

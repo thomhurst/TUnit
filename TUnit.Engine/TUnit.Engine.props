@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    
+    <ItemGroup>
+        <!--
+          !!! IMPORTANT !!!
+          DO NOT CHANGE THE GUID, IT'S A WELL KNOWN EXTENSION POINT AND THIS EXTENSION NEEDS TO BE REGISTERED AT THE END
+          WE HAVE CODE INSIDE THE TASK 'TestingPlatformEntryPoint' TO ENSURE THE ORDER OF THE REGISTRATION BASED ON THIS GUID
+        -->
+        <TestingPlatformBuilderHook Include="2E8E7F63-61DB-4EDB-A21E-5BF48279A7B8" >
+            <DisplayName>TUnit</DisplayName>
+            <TypeFullName>TUnit.Engine.TestingPlatformBuilderHook</TypeFullName>
+        </TestingPlatformBuilderHook>
+    </ItemGroup>
+    
+</Project>

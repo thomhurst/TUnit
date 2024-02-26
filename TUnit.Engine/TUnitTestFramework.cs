@@ -28,7 +28,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
         _myServiceProvider = new ServiceCollection()
             .AddTestEngineServices()
-            .AddFromFrameworkServiceProvider(serviceProvider)
+            .AddFromFrameworkServiceProvider(serviceProvider, extension)
             .BuildServiceProvider();
     }
 
