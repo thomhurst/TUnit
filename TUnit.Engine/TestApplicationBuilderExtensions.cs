@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
-using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.MSBuild;
+using TUnit.Engine;
 
 namespace TUnit.TestAdapter;
 

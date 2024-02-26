@@ -7,7 +7,6 @@ internal interface ITestParser
 {
     IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo,
         Type type,
-        int runCount,
-        SourceLocation sourceLocation
+        int runCount
     );
 }

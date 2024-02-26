@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.TestParsers;
 using TUnit.TestAdapter;
 
@@ -10,7 +10,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddFromFrameworkServiceProvider(this IServiceCollection services, IServiceProvider serviceProvider)
     {
         return services
-            .AddSingleton(typeof(ILogger<>), (t) => serviceProvider.GetService(t.GetType()));
+            .AddTransient(_ => serviceProvider.GetConfiguration())
+            .AddTransient(_ => serviceProvider.GetLoggerFactory())
+            .AddTransient(_ => serviceProvider.GetMessageBus())
+            .AddTransient(_ => serviceProvider.GetCommandLineOptions())
+            .AddTransient(_ => serviceProvider.GetOutputDevice());
     }
         
     public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
@@ -25,9 +29,6 @@ public static class ServiceCollectionExtensions
             .AddSingleton<ITestParser, DataDrivenTestParser>()
             .AddSingleton<ITestParser, DataSourceDrivenTestParser>()
             .AddSingleton<AsyncTestRunExecutor>()
-            .AddSingleton<TestCollector>()
-            .AddSingleton<SourceLocationRetriever>()
-            .AddSingleton<ReflectionMetadataProvider>()
             .AddSingleton<TestFilterProvider>()
             .AddSingleton<TestClassCreator>()
             .AddSingleton<TestMethodRetriever>()

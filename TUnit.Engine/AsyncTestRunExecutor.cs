@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Logging;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
+using TUnit.Engine.Models.Properties;
 
 namespace TUnit.Engine;
 
@@ -16,7 +18,6 @@ internal class AsyncTestRunExecutor
 
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly MethodInvoker _methodInvoker;
-    private readonly ITestExecutionRecorder _testExecutionRecorder;
     private readonly CacheableAssemblyLoader _assemblyLoader;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly TestGrouper _testGrouper;
@@ -26,10 +27,10 @@ internal class AsyncTestRunExecutor
     private readonly ConsoleInterceptor _consoleInterceptor;
     private readonly AssemblySetUpExecutor _assemblySetUpExecutor;
     private readonly AssemblyCleanUpExecutor _assemblyCleanUpExecutor;
+    private readonly ILogger<AsyncTestRunExecutor> _logger;
 
     public AsyncTestRunExecutor(SingleTestExecutor singleTestExecutor, 
-        MethodInvoker methodInvoker, 
-        ITestExecutionRecorder testExecutionRecorder,
+        MethodInvoker methodInvoker,
         CacheableAssemblyLoader assemblyLoader,
         CancellationTokenSource cancellationTokenSource,
         TestGrouper testGrouper,
@@ -38,11 +39,11 @@ internal class AsyncTestRunExecutor
         ClassWalker classWalker,
         ConsoleInterceptor consoleInterceptor,
         AssemblySetUpExecutor assemblySetUpExecutor,
-        AssemblyCleanUpExecutor assemblyCleanUpExecutor)
+        AssemblyCleanUpExecutor assemblyCleanUpExecutor,
+        ILogger<AsyncTestRunExecutor> logger)
     {
         _singleTestExecutor = singleTestExecutor;
         _methodInvoker = methodInvoker;
-        _testExecutionRecorder = testExecutionRecorder;
         _assemblyLoader = assemblyLoader;
         _cancellationTokenSource = cancellationTokenSource;
         _testGrouper = testGrouper;
@@ -52,6 +53,7 @@ internal class AsyncTestRunExecutor
         _consoleInterceptor = consoleInterceptor;
         _assemblySetUpExecutor = assemblySetUpExecutor;
         _assemblyCleanUpExecutor = assemblyCleanUpExecutor;
+        _logger = logger;
     }
 
     public async Task RunInAsyncContext(IEnumerable<TestNode> testCases)
@@ -80,7 +82,7 @@ internal class AsyncTestRunExecutor
             oneTimeCleanUps.Enqueue(_assemblyCleanUpExecutor.ExecuteCleanUps(cachedAssemblyInformation));
         }
 
-        await WhenAllSafely(oneTimeCleanUps, _testExecutionRecorder);
+        await WhenAllSafely(oneTimeCleanUps);
     }
 
     private async Task ProcessKeyedNotInParallelTests(List<TestNode> testsToProcess)
@@ -91,14 +93,14 @@ internal class AsyncTestRunExecutor
         var executing = new List<Task>();
 
         var orderedKeyedTests = testsToProcess
-            .Where(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue) != int.MaxValue)
+            .Where(x => x.GetRequiredProperty<OrderProperty>().Order != int.MaxValue)
             .Where(x => x.GetConstraintKeys().Count > 0);
         
         foreach (var group in orderedKeyedTests.GroupBy(x => x.GetConstraintKeys()))
         {
             executing.Add(Task.Run(async () =>
             {
-                foreach (var testToProcess in group.OrderBy(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue)))
+                foreach (var testToProcess in group.OrderBy(x => x.GetRequiredProperty<OrderProperty>().Order))
                 {
                     testsToProcess.Remove(testToProcess);
 
@@ -111,7 +113,7 @@ internal class AsyncTestRunExecutor
             }));
         }
 
-        await WhenAllSafely(executing, _testExecutionRecorder);
+        await WhenAllSafely(executing);
         
         executing.Clear();
 
@@ -159,7 +161,7 @@ internal class AsyncTestRunExecutor
             }
         }
 
-        await WhenAllSafely(executing, _testExecutionRecorder);
+        await WhenAllSafely(executing);
     }
 
     private async Task ProcessTests(Queue<TestNode> queue, bool runInParallel)
@@ -173,7 +175,7 @@ internal class AsyncTestRunExecutor
             _oneTimeCleanupTracker.Remove(testWithResult.Test, testWithResult.ResultTask);
         }
 
-        await WhenAllSafely(executing, _testExecutionRecorder);
+        await WhenAllSafely(executing);
     }
 
     private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestNode> queue, bool runInParallel)
@@ -200,7 +202,7 @@ internal class AsyncTestRunExecutor
 
     private async Task<TestWithResult> ProcessTest(TestNode test, bool runInParallel)
     {
-        var cachedAssemblyInformation = _cacheableAssemblyLoader.GetOrLoadAssembly(test.Source);
+        var cachedAssemblyInformation = _cacheableAssemblyLoader.GetOrLoadAssembly(test.GetRequiredProperty<AssemblyProperty>().FullyQualifiedAssembly);
         
         var semaphoreSlim = _semaphoreSlimByAssembly.GetOrAdd(cachedAssemblyInformation, GetSemaphoreSlim);
         
@@ -245,10 +247,10 @@ internal class AsyncTestRunExecutor
 
     private async Task ExecuteOneTimeCleanUps(TestNode testDetails)
     {
-        var cachedAssemblyInformation = _assemblyLoader.GetOrLoadAssembly(testDetails.Source);
+        var cachedAssemblyInformation = _assemblyLoader.GetOrLoadAssembly(testDetails.GetRequiredProperty<AssemblyProperty>().FullyQualifiedAssembly);
         
         var classType =
-            cachedAssemblyInformation.Assembly.GetType(testDetails.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""));
+            cachedAssemblyInformation.Assembly.GetType(testDetails.GetRequiredProperty<AssemblyProperty>().FullyQualifiedAssembly);
 
         if (classType is null)
         {
@@ -266,7 +268,7 @@ internal class AsyncTestRunExecutor
         }
     }
 
-    private async Task WhenAllSafely(IEnumerable<Task> tasks, IMessageLogger? messageLogger)
+    private async Task WhenAllSafely(IEnumerable<Task> tasks)
     {
         try
         {
@@ -274,7 +276,7 @@ internal class AsyncTestRunExecutor
         }
         catch (Exception e)
         {
-            messageLogger?.SendMessage(TestMessageLevel.Error, e.ToString());
+            await _logger.LogErrorAsync(e);
         }
     }
     

@@ -1,10 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
+using TUnit.Engine.Models.Properties;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
@@ -15,8 +18,8 @@ internal class SingleTestExecutor
     private readonly TestClassCreator _testClassCreator;
     private readonly TestMethodRetriever _testMethodRetriever;
     private readonly Disposer _disposer;
-    private readonly IMessageLogger _messageLogger;
-    private readonly ITestExecutionRecorder _testExecutionRecorder;
+    private readonly ILogger<SingleTestExecutor> _logger;
+    private readonly IMessageBus _messageBus;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly ClassWalker _classWalker;
     private readonly TestFilterProvider _testFilterProvider;
@@ -28,8 +31,8 @@ internal class SingleTestExecutor
         TestClassCreator testClassCreator,
         TestMethodRetriever testMethodRetriever,
         Disposer disposer,
-        IMessageLogger messageLogger,
-        ITestExecutionRecorder testExecutionRecorder,
+        ILogger<SingleTestExecutor> logger,
+        IMessageBus messageBus,
         CancellationTokenSource cancellationTokenSource,
         ClassWalker classWalker,
         TestFilterProvider testFilterProvider,
@@ -39,8 +42,8 @@ internal class SingleTestExecutor
         _testClassCreator = testClassCreator;
         _testMethodRetriever = testMethodRetriever;
         _disposer = disposer;
-        _messageLogger = messageLogger;
-        _testExecutionRecorder = testExecutionRecorder;
+        _logger = logger;
+        _messageBus = messageBus;
         _cancellationTokenSource = cancellationTokenSource;
         _classWalker = classWalker;
         _testFilterProvider = testFilterProvider;
@@ -51,37 +54,11 @@ internal class SingleTestExecutor
 
     public async Task<TUnitTestResult> ExecuteTest(TestNode testNode)
     {
-        var result = await ExecuteInternal(testNode);
+         var start = DateTimeOffset.Now;
         
-        _testExecutionRecorder.RecordResult(new TestResult(testNode)
+        if (testNode.GetProperty<SkippedTestNodeStateProperty>() != null || !IsExplicitlyRun(testNode))
         {
-            DisplayName = testNode.DisplayName,
-            Outcome = GetOutcome(result.TestContext, result.Status),
-            ComputerName = result.ComputerName,
-            Duration = result.Duration,
-            StartTime = result.Start,
-            EndTime = result.End,
-            Messages = { new TestResultMessage("Output", result.Output) },
-            ErrorMessage = result.Exception?.Message,
-            ErrorStackTrace = result.Exception?.StackTrace,
-        });
-
-        return result;
-    }
-
-    internal void SetAllTests(GroupedTests tests)
-    {
-        GroupedTests = tests;
-    }
-
-    private async Task<TUnitTestResult> ExecuteInternal(TestNode testNode)
-    {
-        var start = DateTimeOffset.Now;
-        
-        if (testNode.GetPropertyValue(TUnitTestProperties.IsSkipped, false)
-            || !IsExplicitlyRun(testNode))
-        {
-            _messageLogger.SendMessage(TestMessageLevel.Informational, $"Skipping {testNode.DisplayName}...");
+            await _logger.LogInformationAsync($"Skipping {testNode.DisplayName}...");
 
             return new TUnitTestResult
             {
@@ -90,7 +67,7 @@ internal class SingleTestExecutor
                 End = start,
                 ComputerName = Environment.MachineName,
                 Exception = null,
-                Status = Status.Skipped
+                Status = Status.Skipped,
             };
         }
         
@@ -181,6 +158,11 @@ internal class SingleTestExecutor
         }
     }
 
+    internal void SetAllTests(GroupedTests tests)
+    {
+        GroupedTests = tests;
+    }
+
     private readonly object _consoleStandardOutLock = new();
 
     private bool IsExplicitlyRun(TestNode testNode)
@@ -190,7 +172,7 @@ internal class SingleTestExecutor
             return true;
         }
 
-        var explicitFor = testNode.GetPropertyValue(TUnitTestProperties.ExplicitFor, string.Empty);
+        var explicitFor = testNode.GetProperty<ExplicitForProperty>()?.ExplicitFor;
 
         if (string.IsNullOrEmpty(explicitFor))
         {
@@ -199,8 +181,7 @@ internal class SingleTestExecutor
         }
 
         // If all tests being run are from the same "Explicit" attribute, e.g. same class or same method, then yes these have been run explicitly.
-        return GroupedTests.AllTests.All(x => x.GetPropertyValue(TUnitTestProperties.ExplicitFor, string.Empty)
-                                              == explicitFor);
+        return GroupedTests.AllTests.All(x => x.GetProperty<ExplicitForProperty>()?.ExplicitFor == explicitFor);
     }
 
     private async Task ExecuteWithRetries(TestContext testContext, TestInformation testInformation, object? @class)
@@ -223,7 +204,7 @@ internal class SingleTestExecutor
                     throw;
                 }
                 
-                _messageLogger.SendMessage(TestMessageLevel.Warning, $"{testInformation.TestName} failed, retrying...");
+                await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying...");
             }
         }
     }
@@ -243,7 +224,7 @@ internal class SingleTestExecutor
         }
         catch (Exception exception)
         {
-            _messageLogger.SendMessage(TestMessageLevel.Error, exception.ToString());
+            await _logger.LogErrorAsync(exception);
             return false;
         }
 
@@ -341,23 +322,17 @@ internal class SingleTestExecutor
 
         if (exceptions.Count == 1)
         {
-            _messageLogger.SendMessage(TestMessageLevel.Error, $"""
-                                                               Error running CleanUp:
-                                                                  {exceptions.First().Message}
-                                                                  {exceptions.First().StackTrace}
-                                                               """);
+            await _logger.LogErrorAsync("Error running CleanUp");
+            await _logger.LogErrorAsync(exceptions.First());
         }
         else if (exceptions.Count > 1)
         {
             var aggregateException = new AggregateException(exceptions);
-            _messageLogger.SendMessage(TestMessageLevel.Error, $"""
-                                                                Error running CleanUp:
-                                                                   {aggregateException.Message}
-                                                                   {aggregateException.StackTrace}
-                                                                """);
+            await _logger.LogErrorAsync("Error running CleanUp");
+            await _logger.LogErrorAsync(aggregateException);
         }
     }
-
+                                         
     private async Task ExecuteOnlyOnceSetUps(object? @class, Type testDetailsClassType)
     {
         var oneTimeSetUpMethods = _classWalker.GetSelfAndBaseTypes(testDetailsClassType)
@@ -372,24 +347,24 @@ internal class SingleTestExecutor
         }
     }
 
-    private TestOutcome GetOutcome(TestContext? resultTestContext, Status resultStatus)
+    private IProperty GetOutcomeProperty(TestContext? resultTestContext, Status resultStatus)
     {
         if (!string.IsNullOrEmpty(resultTestContext?.FailReason))
         {
-            return TestOutcome.Failed;
+            return new FailedTestNodeStateProperty(resultTestContext.FailReason);
         }
 
         if (!string.IsNullOrEmpty(resultTestContext?.SkipReason))
         {
-            return TestOutcome.Skipped;
+            return new SkippedTestNodeStateProperty(resultTestContext.SkipReason);
         }
         
         return resultStatus switch
         {
-            Status.None => TestOutcome.None,
-            Status.Passed => TestOutcome.Passed,
-            Status.Failed => TestOutcome.Failed,
-            Status.Skipped => TestOutcome.Skipped,
+            Status.None => new ErrorTestNodeStateProperty(),
+            Status.Passed => new PassedTestNodeStateProperty(),
+            Status.Failed => new FailedTestNodeStateProperty(),
+            Status.Skipped => new SkippedTestNodeStateProperty(),
             _ => throw new ArgumentOutOfRangeException(nameof(resultStatus), resultStatus, null)
         };
     }

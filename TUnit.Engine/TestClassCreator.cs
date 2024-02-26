@@ -1,4 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using TUnit.Engine.Extensions;
+using TUnit.Engine.Models.Properties;
 
 namespace TUnit.Engine;
 
@@ -6,18 +8,16 @@ internal class TestClassCreator
 {
     public object? CreateClass(TestNode testNode, out Type classType)
     {
-        var fullTypeName = testNode.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, "");
+        var fullTypeName = testNode.GetRequiredProperty<ClassInformationProperty>().AssemblyQualifiedName;
         
         classType = Type.GetType(fullTypeName, throwOnError: true)!;
 
-        if (testNode.GetPropertyValue(TUnitTestProperties.IsStatic, false))
+        if (testNode.GetRequiredProperty<TestInformationProperty>().IsStatic)
         {
             return null;
         }
         
-        var classArguments = testNode
-            .GetPropertyValue(TUnitTestProperties.ClassArguments, null as string)
-            .DeserializeArgumentsSafely();
+        var classArguments = testNode.GetRequiredProperty<ClassArgumentsProperty>().Arguments;
 
         return CreateClass(classType, classArguments);
     }

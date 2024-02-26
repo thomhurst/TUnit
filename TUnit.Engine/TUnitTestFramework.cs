@@ -1,22 +1,19 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Testing.Extensions.VSTestBridge;
-using Microsoft.Testing.Extensions.VSTestBridge.Requests;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using TUnit.Engine.Extensions;
+using TUnit.TestAdapter;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 {
     private readonly IExtension _extension;
     private readonly Func<IEnumerable<Assembly>> _getTestAssemblies;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ITestFrameworkCapabilities _capabilities;
     private readonly ServiceProvider _myServiceProvider;
 
@@ -27,12 +24,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         _extension = extension;
         _getTestAssemblies = getTestAssemblies;
-        _serviceProvider = serviceProvider;
         _capabilities = capabilities;
-
+        
         _myServiceProvider = new ServiceCollection()
             .AddTestEngineServices()
-            .AddFromFrameworkServiceProvider()
+            .AddFromFrameworkServiceProvider(serviceProvider)
             .BuildServiceProvider();
     }
 
@@ -62,7 +58,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 switch (context.Request)
                 {
                     case DiscoverTestExecutionRequest discoverTestExecutionRequest:
-                        foreach (var testNode in _serviceProvider.GetRequiredService<TUnitTestDiscoverer>()
+                        foreach (var testNode in _myServiceProvider.GetRequiredService<TUnitTestDiscoverer>()
                                      .DiscoverTests(discoverTestExecutionRequest, _getTestAssemblies, context.CancellationToken))
                         {
                             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(

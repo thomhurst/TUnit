@@ -1,8 +1,9 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Logging;
 
 namespace TUnit.Engine;
 
-internal class TestFilterProvider(IRunContext runContext, IMessageLogger messageLogger)
+internal class TestFilterProvider(IRunContext runContext, ILogger<T> logger)
 {
     private static readonly Dictionary<string, TestProperty> SupportedProperties 
         = new(StringComparer.OrdinalIgnoreCase);
@@ -26,7 +27,7 @@ internal class TestFilterProvider(IRunContext runContext, IMessageLogger message
         var filterExpression = runContext.GetTestCaseFilter(SupportedProperties.Keys, 
             propertyName => SupportedProperties.GetValueOrDefault(propertyName));
 
-        messageLogger.SendMessage(TestMessageLevel.Informational, $"TestCaseFilterValue is: {filterExpression?.TestCaseFilterValue}");
+        logger.SendMessage(TestMessageLevel.Informational, $"TestCaseFilterValue is: {filterExpression?.TestCaseFilterValue}");
         
         if (string.IsNullOrWhiteSpace(filterExpression?.TestCaseFilterValue))
         {

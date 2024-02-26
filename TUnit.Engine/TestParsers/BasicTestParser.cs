@@ -7,8 +7,7 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
 {
     public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
         Type type, 
-        int runCount,
-        SourceLocation sourceLocation)
+        int runCount)
     {
         if (!methodInfo.GetCustomAttributes<TestAttribute>().Any()
             && !methodInfo.GetCustomAttributes<CombinativeTestAttribute>().Any())

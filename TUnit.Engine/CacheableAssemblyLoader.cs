@@ -10,17 +10,9 @@ internal class CacheableAssemblyLoader
 
     public ICollection<CachedAssemblyInformation> CachedAssemblies => _assemblies.Values;
 
-    public CachedAssemblyInformation GetOrLoadAssembly(string source)
+    public CachedAssemblyInformation GetOrLoadAssembly(string assemblyFullName)
     {
-        var rootedSource = Path.IsPathRooted(source) ? source : Path.Combine(Directory.GetCurrentDirectory(), source);
-
-        try
-        {
-            return _assemblies.GetOrAdd(rootedSource, _ => new CachedAssemblyInformation(Assembly.LoadFile(rootedSource)));
-        }
-        catch
-        {
-            return new CachedAssemblyInformation(Assembly.GetCallingAssembly());
-        }
+        return _assemblies.GetOrAdd(assemblyFullName,
+            _ => new CachedAssemblyInformation(Assembly.Load(assemblyFullName)));
     }
 }

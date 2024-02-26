@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using TUnit.Engine.Extensions;
+using TUnit.Engine.Models.Properties;
 
 namespace TUnit.Engine;
 
@@ -8,7 +10,7 @@ internal class TestMethodRetriever
     public MethodInfo GetTestMethod(Type classType, TestNode testNode)
     {
         var matchingMethodNames = classType.GetMethods()
-            .Where(x => x.Name == testNode.GetPropertyValue(TUnitTestProperties.TestName, ""))
+            .Where(x => x.Name == testNode.GetRequiredProperty<TestInformationProperty>().TestName)
             .ToList();
 
         if (matchingMethodNames.Count == 1)
@@ -17,7 +19,8 @@ internal class TestMethodRetriever
         }
 
         var testParameterTypeNames =
-            testNode.GetPropertyValue(TUnitTestProperties.MethodParameterTypeNames, Array.Empty<string>());
+            testNode.GetProperty<MethodParameterTypesProperty>()?.FullyQualifiedTypeNames
+            ?? [];
 
         return matchingMethodNames.First(x => x.GetParameters()
             .Select(p => p.ParameterType.FullName)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using TUnit.Core;
 
 namespace TUnit.Engine.Models;
 
@@ -43,6 +44,6 @@ public class OneTimeCleanUpTracker
 
     private string GetClassName(TestNode testNode)
     {
-        return testNode.GetPropertyValue(TUnitTestProperties.TestClass, string.Empty);
+        return testNode.Properties.OfType<TestMetadataProperty>().First(x => x.Key == nameof(TestDetails.ClassName)).Value;
     }
 }

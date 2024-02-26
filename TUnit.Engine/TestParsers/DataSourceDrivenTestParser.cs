@@ -7,8 +7,7 @@ internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetrieve
 {
     public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
         Type type, 
-        int runCount,
-        SourceLocation sourceLocation)
+        int runCount)
     {
         var testDataSourceAttributes = methodInfo.GetCustomAttributes<DataSourceDrivenTestAttribute>().ToList();
         
