@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Models.Properties;
 
-public class NotInParallelConstraintKeysProperty(IReadOnlyList<string>? constraintKeys) : IProperty
+internal class NotInParallelConstraintKeysProperty(IReadOnlyList<string>? constraintKeys) : IProperty
 {
-    public IReadOnlyList<string>? ConstraintKeys { get; } = constraintKeys;
+    public ConstraintKeysCollection? ConstraintKeys { get; } = constraintKeys == null ? null : new ConstraintKeysCollection(constraintKeys);
 }

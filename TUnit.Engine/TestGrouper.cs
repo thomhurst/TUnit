@@ -16,7 +16,7 @@ internal class TestGrouper
             .ToList();
 
         var notInParallel = new Queue<TestNode>();
-        var keyedNotInParallel = new List<TestNode>();
+        var keyedNotInParallel = new List<NotInParallelTestCase>();
         var parallel = new Queue<TestNode>();
 
         foreach (var test in allTestsOrderedByClass)
@@ -33,7 +33,11 @@ internal class TestGrouper
             }
             else
             {
-                keyedNotInParallel.Add(test);
+                keyedNotInParallel.Add(new NotInParallelTestCase
+                {
+                    TestNode = test,
+                    ConstraintKeys = notInParallelConstraintKey
+                });
             }
         }
 

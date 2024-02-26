@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Models.Properties;
 
-public class MethodParameterTypesProperty : IProperty
+internal class MethodParameterTypesProperty : IProperty
 {
     public IReadOnlyList<string>? FullyQualifiedTypeNames { get; }
 

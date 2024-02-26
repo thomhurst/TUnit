@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Models.Properties;
 
-public class TestInformationProperty : IProperty
+internal class TestInformationProperty : IProperty
 {
     public string UniqueId { get; }
     public string TestName { get; }

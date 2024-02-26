@@ -5,11 +5,11 @@ using TUnit.Engine.Json;
 namespace TUnit.Engine.Models.Properties;
 
 [JsonConverter(typeof(ObjectArrayConverter))]
-public class ClassArgumentsProperty : IProperty
+internal class ClassArgumentsProperty : IProperty
 {
     public object?[]? Arguments { get; }
 
-    public ClassArgumentsProperty(object?[]? arguments)
+    internal ClassArgumentsProperty(object?[]? arguments)
     {
         Arguments = arguments;
     }

@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Models.Properties;
 
-public class SkipReasonProperty : IProperty
+internal class SkipReasonProperty : IProperty
 {
     public string SkipReason { get; }
 

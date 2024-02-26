@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Models.Properties;
 
-public class CustomProperty : IProperty
+internal class CustomProperty : IProperty
 {
     public string Key { get; }
     public string Value { get; }

@@ -86,83 +86,41 @@ internal class AsyncTestRunExecutor
         await WhenAllSafely(oneTimeCleanUps);
     }
 
-    private async Task ProcessKeyedNotInParallelTests(List<TestNode> testsToProcess, TestSessionContext session)
+    private async Task ProcessKeyedNotInParallelTests(List<NotInParallelTestCase> testsToProcess, TestSessionContext session)
     {
-        var currentlyExecutingByKeysLock = new object();
-        var currentlyExecutingByKeys = new List<(ConstraintKeysCollection Keys, Task)>();
-
-        var executing = new List<Task>();
-
-        var orderedKeyedTests = testsToProcess
-            .Where(x => x.GetRequiredProperty<OrderProperty>().Order != int.MaxValue)
-            .Where(x => x.GetConstraintKeys().Count > 0);
-        
-        foreach (var group in orderedKeyedTests.GroupBy(x => x.GetConstraintKeys()))
-        {
-            executing.Add(Task.Run(async () =>
-            {
-                foreach (var testToProcess in group.OrderBy(x => x.GetRequiredProperty<OrderProperty>().Order))
-                {
-                    testsToProcess.Remove(testToProcess);
-
-                    var testWithResult = await ProcessTest(testToProcess, true, session);
-
-                    _oneTimeCleanupTracker.Remove(testWithResult.Test, testWithResult.ResultTask);
-
-                    await testWithResult.ResultTask;
-                }
-            }));
-        }
-
-        await WhenAllSafely(executing);
-        
-        executing.Clear();
-
         while (testsToProcess.Count > 0)
         {
-            // Reversing allows us to remove from the collection
-            for (var i = testsToProcess.Count - 1; i >= 0; i--)
+            var executing = new List<Task>();
+            var testsToRemove = new List<NotInParallelTestCase>();
+
+            foreach (var notInParallelTestCases in GetOrderedTests())
             {
-                var testToProcess = testsToProcess[i];
+                var notInParallelTestCase = notInParallelTestCases.First();
 
-                var notInParallelKeys = testToProcess.GetConstraintKeys();
+                testsToRemove.Add(notInParallelTestCase);
 
-                lock (currentlyExecutingByKeysLock)
-                {
-                    if (currentlyExecutingByKeys.Any(x => x.Keys == notInParallelKeys))
-                    {
-                        // There are currently executing tasks with that same 
-                        continue;
-                    }
-                }
+                var testWithResult = await ProcessTest(notInParallelTestCase.TestNode, true, session);
 
-                // Remove from collection as we're now processing it
-                testsToProcess.RemoveAt(i);
-
-                var testWithResult = await ProcessTest(testToProcess, true, session);
-
-                var tuple = (notInParallelKeys, testWithResult.ResultTask);
-
-                lock (currentlyExecutingByKeysLock)
-                {
-                    currentlyExecutingByKeys.Add(tuple);
-                }
-
-                _ = testWithResult.ResultTask.ContinueWith(_ =>
-                {
-                    lock (currentlyExecutingByKeysLock)
-                    {
-                        return currentlyExecutingByKeys.Remove(tuple);
-                    }
-                });
-                
-                executing.Add(testWithResult.ResultTask);
-            
                 _oneTimeCleanupTracker.Remove(testWithResult.Test, testWithResult.ResultTask);
+
+                executing.Add(testWithResult.ResultTask);
+            }
+
+            await WhenAllSafely(executing);
+
+            foreach (var notInParallelTestCase in testsToRemove)
+            {
+                testsToProcess.Remove(notInParallelTestCase);
+            }
+
+            List<IGrouping<ConstraintKeysCollection, NotInParallelTestCase>> GetOrderedTests()
+            {
+                return testsToProcess
+                    .OrderBy(x => x.TestNode.GetRequiredProperty<OrderProperty>().Order)
+                    .GroupBy(x => x.TestNode.GetRequiredProperty<NotInParallelConstraintKeysProperty>().ConstraintKeys!)
+                    .ToList();
             }
         }
-
-        await WhenAllSafely(executing);
     }
 
     private async Task ProcessTests(Queue<TestNode> queue, bool runInParallel, TestSessionContext session)

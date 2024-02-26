@@ -84,23 +84,6 @@ internal static class TestExtensions
         return testNode;
     }
 
-    public static ConstraintKeysCollection GetConstraintKeys(this TestNode testNode)
-    {
-        var constraintKeys = testNode.GetRequiredProperty<NotInParallelConstraintKeysProperty>().ConstraintKeys;
-        
-        return new ConstraintKeysCollection(
-             constraintKeys ?? Array.Empty<string>()
-        );
-    }
-
-    public static string GetPropertyValue(this TestNode testNode, string key)
-    {
-        return testNode.Properties
-            .OfType<TestMetadataProperty>()
-            .First(x => x.Key == key)
-            .Value;
-    }
-    
     public static T GetRequiredProperty<T>(this TestNode testNode) where T : IProperty
     {
         return testNode.Properties.OfType<T>().First();

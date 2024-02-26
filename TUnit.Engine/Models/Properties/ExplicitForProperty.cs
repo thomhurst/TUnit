@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Models.Properties;
 
-public class ExplicitForProperty(string explicitFor) : IProperty
+internal class ExplicitForProperty(string explicitFor) : IProperty
 {
     public string ExplicitFor { get; } = explicitFor;
 }

@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Models.Properties;
 
-public class AssemblyProperty : IProperty
+internal class AssemblyProperty : IProperty
 {
     public string FullyQualifiedAssembly { get; }
 

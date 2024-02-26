@@ -5,7 +5,7 @@ using TUnit.Engine.Json;
 namespace TUnit.Engine.Models.Properties;
 
 [JsonConverter(typeof(ObjectArrayConverter))]
-public class MethodArgumentsProperty : IProperty
+internal class MethodArgumentsProperty : IProperty
 {
     public object?[]? Arguments { get; }
 
