@@ -91,13 +91,12 @@ internal class AsyncTestRunExecutor
         while (testsToProcess.Count > 0)
         {
             var executing = new List<Task>();
-            var testsToRemove = new List<NotInParallelTestCase>();
 
             foreach (var notInParallelTestCases in GetOrderedTests())
             {
                 var notInParallelTestCase = notInParallelTestCases.First();
 
-                testsToRemove.Add(notInParallelTestCase);
+                testsToProcess.Remove(notInParallelTestCase);
 
                 var testWithResult = await ProcessTest(notInParallelTestCase.TestNode, true, session);
 
@@ -107,11 +106,6 @@ internal class AsyncTestRunExecutor
             }
 
             await WhenAllSafely(executing);
-
-            foreach (var notInParallelTestCase in testsToRemove)
-            {
-                testsToProcess.Remove(notInParallelTestCase);
-            }
 
             List<IGrouping<ConstraintKeysCollection, NotInParallelTestCase>> GetOrderedTests()
             {
