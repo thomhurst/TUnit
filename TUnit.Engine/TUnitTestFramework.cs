@@ -1,10 +1,13 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
+using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
@@ -15,6 +18,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly Func<IEnumerable<Assembly>> _getTestAssemblies;
     private readonly ITestFrameworkCapabilities _capabilities;
     private readonly ServiceProvider _myServiceProvider;
+    private readonly ILogger<TUnitTestFramework> _logger;
 
     public TUnitTestFramework(IExtension extension,
         Func<IEnumerable<Assembly>> getTestAssemblies,
@@ -24,6 +28,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _extension = extension;
         _getTestAssemblies = getTestAssemblies;
         _capabilities = capabilities;
+
+        _logger = serviceProvider.GetLoggerFactory()
+            .CreateLogger<TUnitTestFramework>();
         
         _myServiceProvider = new ServiceCollection()
             .AddTestEngineServices()
@@ -50,11 +57,13 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
+        var stopwatch = new Stopwatch();
+        
         await using (_myServiceProvider)
         {
             try
             {
-                var testNodes = _myServiceProvider.GetRequiredService<TUnitTestDiscoverer>()
+                var testNodes = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
                     .DiscoverTests(context.Request as TestExecutionRequest, _getTestAssemblies, context.CancellationToken)
                     .ToList();
 
@@ -70,7 +79,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 }
                 else if (context.Request is RunTestExecutionRequest)
                 {
-                    await _myServiceProvider.GetRequiredService<TestsExecutor>()
+                    stopwatch.Start();
+                    
+                    await ServiceProviderServiceExtensions.GetRequiredService<TestsExecutor>(_myServiceProvider)
                         .ExecuteAsync(testNodes, context.Request.Session);
                 }
                 else
@@ -80,6 +91,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             }
             finally
             {
+                var time = stopwatch.Elapsed;
+                await _logger.LogInformationAsync($"Time elapsed: {time}");
                 context.Complete();
             }
         }
