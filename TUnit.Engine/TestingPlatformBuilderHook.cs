@@ -5,11 +5,8 @@ namespace TUnit.Engine;
 
 public static class TestingPlatformBuilderHook
 {
-#pragma warning disable IDE0060 // Remove unused parameter
-    // ReSharper disable once UnusedParameter.Global
-    public static void AddExtensions(ITestApplicationBuilder testApplicationBuilder, string[] arguments)
-#pragma warning restore IDE0060 // Remove unused parameter
-    {
+    public static void AddExtensions(
+        ITestApplicationBuilder testApplicationBuilder,
+        string[] _) =>
         testApplicationBuilder.AddTUnit(() => [Assembly.GetEntryAssembly()!]);
-    }
 }
