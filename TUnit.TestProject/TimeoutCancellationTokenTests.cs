@@ -18,7 +18,8 @@ public class TimeoutCancellationTokenTests
         await Assert.That(1).Is.EqualTo(1);
     }
 
-    [DataDrivenTest(1)]
+    [DataDrivenTest]
+    [Arguments(1)]
     [Timeout(30_000)]
     public async Task DataTest(int value, CancellationToken cancellationToken)
     {

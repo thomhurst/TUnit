@@ -7,7 +7,7 @@ namespace TUnit.Engine;
 
 internal class TestsLoader(IEnumerable<ITestParser> testParsers)
 {
-    private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(DataDrivenTestAttribute), typeof(DataSourceDrivenTestAttribute), typeof(CombinativeTestAttribute)];
+    private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(ArgumentsAttribute), typeof(DataSourceDrivenTestAttribute), typeof(CombinativeTestAttribute)];
 
     public IEnumerable<TestDetails> GetTests(CachedAssemblyInformation cachedAssemblyInformation)
     {

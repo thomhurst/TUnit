@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<ConsoleInterceptor>()
             .AddSingleton<TestsLoader>()
             .AddSingleton<ITestParser, BasicTestParser>()
-            .AddSingleton<ITestParser, DataDrivenTestParser>()
+            .AddSingleton<ITestParser, ArgumentsParser>()
             .AddSingleton<ITestParser, DataSourceDrivenTestParser>()
             .AddSingleton<AsyncTestRunExecutor>()
             .AddSingleton<TestClassCreator>()

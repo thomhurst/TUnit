@@ -3,24 +3,24 @@ using TUnit.Core;
 
 namespace TUnit.Engine.TestParsers;
 
-internal class DataDrivenTestParser(DataSourceRetriever dataSourceRetriever) : ITestParser
+internal class ArgumentsParser(DataSourceRetriever dataSourceRetriever) : ITestParser
 {
     public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
         Type type, 
         int runCount)
     {
-        var dataDrivenTestAttributes = methodInfo.GetCustomAttributes<DataDrivenTestAttribute>().ToList();
+        var ArgumentsAttributes = methodInfo.GetCustomAttributes<ArgumentsAttribute>().ToList();
         
-        if (!dataDrivenTestAttributes.Any())
+        if (!ArgumentsAttributes.Any())
         {
             yield break;
         }
         
         var count = 0;
         
-        foreach (var dataDrivenTestAttribute in dataDrivenTestAttributes)
+        foreach (var ArgumentsAttribute in ArgumentsAttributes)
         {
-            var arguments = dataDrivenTestAttribute.Values;
+            var arguments = ArgumentsAttribute.Values;
                     
             foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
             {

@@ -180,4 +180,13 @@
     <data name="TUnit0018Title" xml:space="preserve">
         <value>Test methods should not assign instance data</value>
     </data>
+    <data name="TUnit0019Description" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute.</value>
+    </data>
+    <data name="TUnit0019MessageFormat" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute</value>
+    </data>
+    <data name="TUnit0019Title" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute</value>
+    </data>
 </root>

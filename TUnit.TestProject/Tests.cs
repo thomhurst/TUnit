@@ -57,22 +57,24 @@ public class Tests
         await Assert.That(value).Is.EqualTo("1");
     }
 
-    [DataDrivenTest("1")]
-    [DataDrivenTest("2")]
-    [DataDrivenTest("3")]
-    [DataDrivenTest("4")]
-    [DataDrivenTest("5")]
+    [DataDrivenTest]
+    [Arguments("1")]
+    [Arguments("2")]
+    [Arguments("3")]
+    [Arguments("4")]
+    [Arguments("5")]
     [TestCategory("Fail")]
     public async Task ParameterisedTests1(string value)
     {
         await Assert.That(value).Is.EqualTo("1").And.Has.Length().EqualTo(1);
     }
 
-    [DataDrivenTest("1")]
-    [DataDrivenTest("2")]
-    [DataDrivenTest("3")]
-    [DataDrivenTest("4")]
-    [DataDrivenTest("5")]
+    [DataDrivenTest]
+    [Arguments("1")]
+    [Arguments("2")]
+    [Arguments("3")]
+    [Arguments("4")]
+    [Arguments("5")]
     [TestCategory("Fail")]
     public async Task ParameterisedTests2(string value)
     {
@@ -384,17 +386,17 @@ public class Tests
     //     await Assert.That(value).Is.EqualTo(1);
     // }
 
-    // [DataDrivenTest]
+    // [Arguments]
     // public void No_Arg()
     // {
     // }
     
-    // [DataDrivenTest()]
+    // [Arguments()]
     // public void No_Arg2()
     // {
     // }
     
-    // [DataDrivenTest("")]
+    // [Arguments("")]
     // public void WrongType(int i)
     // {
     // }

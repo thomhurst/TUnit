@@ -43,7 +43,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         if (!Debugger.IsAttached)
         {
-            Debugger.Launch();
+            //Debugger.Launch();
         }
 
         await Task.CompletedTask;
@@ -58,7 +58,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         if (!Debugger.IsAttached)
         {
-            Debugger.Launch();
+            //Debugger.Launch();
         }
         
         await using (_myServiceProvider)
@@ -66,8 +66,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             try
             {
                 var testNodes = _myServiceProvider.GetRequiredService<TUnitTestDiscoverer>()
-                    .DiscoverTests(context.Request as TestExecutionRequest, _getTestAssemblies, context.CancellationToken);
-                
+                    .DiscoverTests(context.Request as TestExecutionRequest, _getTestAssemblies, context.CancellationToken)
+                    .ToList();
+
                 switch (context.Request)
                 {
                     case DiscoverTestExecutionRequest discoverTestExecutionRequest:

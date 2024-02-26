@@ -28,7 +28,7 @@ internal record TestDetails
         FullyQualifiedClassName = ClassType.FullName!;
         Assembly = ClassType.Assembly;
         Namespace = ClassType.Namespace!;
-        ReturnType = methodInfo.ReturnType.AssemblyQualifiedName!;
+        ReturnType = methodInfo.ReturnType.FullName!;
 
         var methodAndClassAttributes = methodInfo.GetCustomAttributes()
             .Concat(ClassType.GetCustomAttributes())
@@ -77,7 +77,7 @@ internal record TestDetails
         MinLineNumber = baseTestAttribute.Line;
         MaxLineNumber = baseTestAttribute.Line;
 
-        UniqueId = $"{AssemblyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
+        UniqueId = $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
 
         CustomProperties = methodAndClassAttributes.OfType<PropertyAttribute>()
             .ToDictionary(x => x.Name, x => x.Value);
