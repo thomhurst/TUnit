@@ -49,7 +49,6 @@ internal static class TestExtensions
                     ParameterTypeFullNames: testDetails.MethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
                     ReturnTypeFullName: testDetails.ReturnType
                     ),
-                new DiscoveredTestNodeStateProperty(),
                 new TimeoutProperty(testDetails.Timeout ?? TimeSpan.FromMinutes(30)),
                 new CategoriesProperty(testDetails.Categories),
                 new RepeatCountProperty(testDetails.RepeatCount),

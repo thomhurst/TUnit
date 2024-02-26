@@ -330,7 +330,15 @@ internal class SingleTestExecutor : IDataProducer
         }
         
         var timeoutTask = Task.Delay(testInformation.Timeout.Value, cancellationTokenSource.Token)
-            .ContinueWith(_ => throw new TimeoutException(testInformation));
+            .ContinueWith(t =>
+            {
+                if (t.IsCanceled)
+                {
+                    return;
+                }
+                
+                throw new TimeoutException(testInformation);
+            });
 
         await await Task.WhenAny(timeoutTask, methodResult);
     }
