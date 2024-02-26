@@ -2,9 +2,8 @@
 using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.MSBuild;
-using TUnit.Engine;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 public static class TestApplicationBuilderExtensions
 {
@@ -16,9 +15,6 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.AddMSBuild();
         testApplicationBuilder.RegisterTestFramework(
             _ => new TestFrameworkCapabilities(),
-            (capabilities, serviceProvider) =>
-            {
-                return new TUnitTestFramework(extension, getTestAssemblies, serviceProvider, capabilities);
-            });
+            (capabilities, serviceProvider) => new TUnitTestFramework(extension, getTestAssemblies, serviceProvider, capabilities));
     }
 }

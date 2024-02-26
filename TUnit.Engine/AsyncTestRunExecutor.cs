@@ -2,6 +2,7 @@
 using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
@@ -56,7 +57,7 @@ internal class AsyncTestRunExecutor
         _logger = logger;
     }
 
-    public async Task RunInAsyncContext(IEnumerable<TestNode> testCases)
+    public async Task RunInAsyncContext(IEnumerable<TestNode> testCases, TestSessionContext session)
     {
         _consoleInterceptor.Initialize();
         
@@ -71,11 +72,11 @@ internal class AsyncTestRunExecutor
             oneTimeCleanUps.Enqueue(ExecuteOneTimeCleanUps(testNode));
         });
         
-        await ProcessTests(tests.Parallel, true);
+        await ProcessTests(tests.Parallel, true, session);
 
-        await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel);
+        await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, session);
         
-        await ProcessTests(tests.NotInParallel, false);
+        await ProcessTests(tests.NotInParallel, false, session);
         
         foreach (var cachedAssemblyInformation in _cacheableAssemblyLoader.CachedAssemblies)
         {
@@ -85,7 +86,7 @@ internal class AsyncTestRunExecutor
         await WhenAllSafely(oneTimeCleanUps);
     }
 
-    private async Task ProcessKeyedNotInParallelTests(List<TestNode> testsToProcess)
+    private async Task ProcessKeyedNotInParallelTests(List<TestNode> testsToProcess, TestSessionContext session)
     {
         var currentlyExecutingByKeysLock = new object();
         var currentlyExecutingByKeys = new List<(ConstraintKeysCollection Keys, Task)>();
@@ -104,7 +105,7 @@ internal class AsyncTestRunExecutor
                 {
                     testsToProcess.Remove(testToProcess);
 
-                    var testWithResult = await ProcessTest(testToProcess, true);
+                    var testWithResult = await ProcessTest(testToProcess, true, session);
 
                     _oneTimeCleanupTracker.Remove(testWithResult.Test, testWithResult.ResultTask);
 
@@ -138,7 +139,7 @@ internal class AsyncTestRunExecutor
                 // Remove from collection as we're now processing it
                 testsToProcess.RemoveAt(i);
 
-                var testWithResult = await ProcessTest(testToProcess, true);
+                var testWithResult = await ProcessTest(testToProcess, true, session);
 
                 var tuple = (notInParallelKeys, testWithResult.ResultTask);
 
@@ -164,11 +165,11 @@ internal class AsyncTestRunExecutor
         await WhenAllSafely(executing);
     }
 
-    private async Task ProcessTests(Queue<TestNode> queue, bool runInParallel)
+    private async Task ProcessTests(Queue<TestNode> queue, bool runInParallel, TestSessionContext session)
     {
         var executing = new List<Task>();
         
-        await foreach (var testWithResult in ProcessQueue(queue, runInParallel))
+        await foreach (var testWithResult in ProcessQueue(queue, runInParallel, session))
         {
             executing.Add(testWithResult.ResultTask);
             
@@ -178,7 +179,8 @@ internal class AsyncTestRunExecutor
         await WhenAllSafely(executing);
     }
 
-    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestNode> queue, bool runInParallel)
+    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestNode> queue, bool runInParallel,
+        TestSessionContext session)
     {
         while (queue.Count > 0)
         {
@@ -191,7 +193,7 @@ internal class AsyncTestRunExecutor
             {
                 var test = queue.Dequeue();
 
-                yield return await ProcessTest(test, runInParallel);
+                yield return await ProcessTest(test, runInParallel, session);
             }
             else
             {
@@ -200,7 +202,7 @@ internal class AsyncTestRunExecutor
         }
     }
 
-    private async Task<TestWithResult> ProcessTest(TestNode test, bool runInParallel)
+    private async Task<TestWithResult> ProcessTest(TestNode test, bool runInParallel, TestSessionContext session)
     {
         var cachedAssemblyInformation = _cacheableAssemblyLoader.GetOrLoadAssembly(test.GetRequiredProperty<AssemblyProperty>().FullyQualifiedAssembly);
         
@@ -218,7 +220,7 @@ internal class AsyncTestRunExecutor
             throw;
         }
         
-        var executionTask = _singleTestExecutor.ExecuteTest(test);
+        var executionTask = _singleTestExecutor.ExecuteTest(test, session);
 
         _ = executionTask.ContinueWith(_ =>
         {

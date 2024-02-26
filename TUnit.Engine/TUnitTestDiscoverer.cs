@@ -2,10 +2,9 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
-using TUnit.Engine;
 using TUnit.Engine.Extensions;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 internal class TUnitTestDiscoverer
 {
@@ -16,10 +15,10 @@ internal class TUnitTestDiscoverer
         _testsLoader = testsLoader;
     }
     
-    public IEnumerable<TestNode> DiscoverTests(DiscoverTestExecutionRequest discoverTestExecutionRequest,
+    public IEnumerable<TestNode> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest,
         Func<IEnumerable<Assembly>> testAssemblies, CancellationToken cancellationToken)
     {
-        var filter = discoverTestExecutionRequest.Filter as TestNodeUidListFilter ?? new TestNodeUidListFilter([]);
+        var filter = discoverTestExecutionRequest?.Filter as TestNodeUidListFilter ?? new TestNodeUidListFilter([]);
 
         var assemblies = testAssemblies();
         

@@ -68,7 +68,7 @@ internal static class TestExtensions
 
         if (testDetails.IsSkipped)
         {
-            testNode.Properties.Add(new SkippedTestNodeStateProperty());
+            testNode.Properties.Add(new SkipReasonProperty(testDetails.SkipReason ?? string.Empty));
         }
         
         if(testDetails.ExplicitFor != null)

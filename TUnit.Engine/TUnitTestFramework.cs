@@ -6,7 +6,6 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Engine.Extensions;
-using TUnit.TestAdapter;
 
 namespace TUnit.Engine;
 
@@ -55,11 +54,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             try
             {
+                var testNodes = _myServiceProvider.GetRequiredService<TUnitTestDiscoverer>()
+                    .DiscoverTests(context.Request as TestExecutionRequest, _getTestAssemblies, context.CancellationToken);
+                
                 switch (context.Request)
                 {
                     case DiscoverTestExecutionRequest discoverTestExecutionRequest:
-                        foreach (var testNode in _myServiceProvider.GetRequiredService<TUnitTestDiscoverer>()
-                                     .DiscoverTests(discoverTestExecutionRequest, _getTestAssemblies, context.CancellationToken))
+                        
+                        foreach (var testNode in testNodes)
                         {
                             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
                                 sessionUid: context.Request.Session.SessionUid,
@@ -68,6 +70,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                         }
                         break;
                     case RunTestExecutionRequest runTestExecutionRequest:
+                        await _myServiceProvider.GetRequiredService<AsyncTestRunExecutor>()
+                            .RunInAsyncContext(testNodes, runTestExecutionRequest.Session);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

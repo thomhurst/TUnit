@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.TestParsers;
-using TUnit.TestAdapter;
 
 namespace TUnit.Engine.Extensions;
 
@@ -29,7 +28,6 @@ public static class ServiceCollectionExtensions
             .AddSingleton<ITestParser, DataDrivenTestParser>()
             .AddSingleton<ITestParser, DataSourceDrivenTestParser>()
             .AddSingleton<AsyncTestRunExecutor>()
-            .AddSingleton<TestFilterProvider>()
             .AddSingleton<TestClassCreator>()
             .AddSingleton<TestMethodRetriever>()
             .AddSingleton<TestGrouper>()

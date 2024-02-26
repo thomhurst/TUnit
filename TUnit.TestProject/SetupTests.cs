@@ -43,7 +43,7 @@ public class SetupTests : Base3
     [SetUp]
     public async Task Setup()
     {
-        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.TestInformation.TestName}");
+        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current?.TestInformation.TestName}");
     }
 
     [Test]

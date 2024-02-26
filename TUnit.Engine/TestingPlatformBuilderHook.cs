@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Testing.Platform.Builder;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 public static class TestingPlatformBuilderHook
 {

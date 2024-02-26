@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 public class AssemblyLoader
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions;
 
-namespace TUnit.TestAdapter;
+namespace TUnit.Engine;
 
 public class TUnitExtension : IExtension
 {
