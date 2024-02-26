@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
@@ -40,6 +41,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     
     public async Task<CreateTestSessionResult> CreateTestSessionAsync(CreateTestSessionContext context)
     {
+        if (!Debugger.IsAttached)
+        {
+            Debugger.Launch();
+        }
+
         await Task.CompletedTask;
 
         return new CreateTestSessionResult
@@ -50,6 +56,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
+        if (!Debugger.IsAttached)
+        {
+            Debugger.Launch();
+        }
+        
         await using (_myServiceProvider)
         {
             try
