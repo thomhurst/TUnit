@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<ITestParser, BasicTestParser>()
             .AddSingleton<ITestParser, DataDrivenTestsParser>()
             .AddSingleton<ITestParser, DataSourceDrivenTestParser>()
-            .AddSingleton<AsyncTestRunExecutor>()
+            .AddSingleton<TestsExecutor>()
             .AddSingleton<TestClassCreator>()
             .AddSingleton<TestMethodRetriever>()
             .AddSingleton<TestGrouper>()

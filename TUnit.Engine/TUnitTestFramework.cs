@@ -59,24 +59,24 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     .DiscoverTests(context.Request as TestExecutionRequest, _getTestAssemblies, context.CancellationToken)
                     .ToList();
 
-                switch (context.Request)
+                if (context.Request is DiscoverTestExecutionRequest)
                 {
-                    case DiscoverTestExecutionRequest discoverTestExecutionRequest:
-                        
-                        foreach (var testNode in testNodes)
-                        {
-                            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-                                sessionUid: context.Request.Session.SessionUid,
-                                testNode: testNode)
-                            );
-                        }
-                        break;
-                    case RunTestExecutionRequest runTestExecutionRequest:
-                        await _myServiceProvider.GetRequiredService<AsyncTestRunExecutor>()
-                            .RunInAsyncContext(testNodes, runTestExecutionRequest.Session);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    foreach (var testNode in testNodes)
+                    {
+                        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+                            sessionUid: context.Request.Session.SessionUid,
+                            testNode: testNode)
+                        );
+                    }
+                }
+                else if (context.Request is RunTestExecutionRequest)
+                {
+                    await _myServiceProvider.GetRequiredService<TestsExecutor>()
+                        .ExecuteAsync(testNodes, context.Request.Session);
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
                 }
             }
             finally

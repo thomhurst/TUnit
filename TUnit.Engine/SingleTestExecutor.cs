@@ -57,7 +57,7 @@ internal class SingleTestExecutor : IDataProducer
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
 
-    public async Task<TUnitTestResult> ExecuteTest(TestNode testNode, TestSessionContext session)
+    public async Task<TUnitTestResult> ExecuteTestAsync(TestNode testNode, TestSessionContext session)
     {
         if(_cancellationTokenSource.IsCancellationRequested)
         {

@@ -10,7 +10,7 @@ using TUnit.Engine.Models.Properties;
 
 namespace TUnit.Engine;
 
-internal class AsyncTestRunExecutor
+internal class TestsExecutor
 {
     private int _currentlyExecutingTests;
     private OneTimeCleanUpTracker _oneTimeCleanupTracker = null!;
@@ -28,9 +28,9 @@ internal class AsyncTestRunExecutor
     private readonly ConsoleInterceptor _consoleInterceptor;
     private readonly AssemblySetUpExecutor _assemblySetUpExecutor;
     private readonly AssemblyCleanUpExecutor _assemblyCleanUpExecutor;
-    private readonly ILogger<AsyncTestRunExecutor> _logger;
+    private readonly ILogger<TestsExecutor> _logger;
 
-    public AsyncTestRunExecutor(SingleTestExecutor singleTestExecutor, 
+    public TestsExecutor(SingleTestExecutor singleTestExecutor, 
         MethodInvoker methodInvoker,
         CacheableAssemblyLoader assemblyLoader,
         CancellationTokenSource cancellationTokenSource,
@@ -54,10 +54,10 @@ internal class AsyncTestRunExecutor
         _consoleInterceptor = consoleInterceptor;
         _assemblySetUpExecutor = assemblySetUpExecutor;
         _assemblyCleanUpExecutor = assemblyCleanUpExecutor;
-        _logger = loggerFactory.CreateLogger<AsyncTestRunExecutor>();
+        _logger = loggerFactory.CreateLogger<TestsExecutor>();
     }
 
-    public async Task RunInAsyncContext(IEnumerable<TestNode> testCases, TestSessionContext session)
+    public async Task ExecuteAsync(IEnumerable<TestNode> testCases, TestSessionContext session)
     {
         _consoleInterceptor.Initialize();
         
@@ -172,7 +172,7 @@ internal class AsyncTestRunExecutor
             throw;
         }
         
-        var executionTask = _singleTestExecutor.ExecuteTest(test, session);
+        var executionTask = _singleTestExecutor.ExecuteTestAsync(test, session);
 
         _ = executionTask.ContinueWith(_ =>
         {
