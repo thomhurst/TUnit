@@ -52,8 +52,13 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
     
     private IEnumerable<IEnumerable<object?>> GetCombinativeValues(MethodInfo methodInfo)
     {
-        var parameters = methodInfo.GetParameters();
+        ParameterInfo[] parameters = methodInfo.GetParameters();
 
+        if (methodInfo.GetCustomAttribute<TimeoutAttribute>() != null)
+        {
+            parameters = parameters.Take(parameters.Length - 1).ToArray();
+        }
+        
         var parametersWithValues = parameters
             .Select(GetCombinativeValues)
             .ToList();

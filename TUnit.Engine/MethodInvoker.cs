@@ -16,9 +16,9 @@ internal class MethodInvoker
             {
                 arguments = (arguments ?? Array.Empty<object?>()).Append(token).ToArray();
             }
-            
-            var result = methodInfo.Invoke(@class, bindingFlags, null, arguments, CultureInfo.InvariantCulture);
 
+            var result = methodInfo.Invoke(@class, bindingFlags, null, arguments, CultureInfo.InvariantCulture);
+            
             if (result is ValueTask valueTask)
             { 
                 await valueTask;
