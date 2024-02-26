@@ -53,14 +53,25 @@ internal static class TestExtensions
                 new CategoriesProperty(testDetails.Categories),
                 new RepeatCountProperty(testDetails.RepeatCount),
                 new RetryCountProperty(testDetails.RetryCount),
-                new ClassInformationProperty(testDetails.ClassName, testDetails.FullyQualifiedClassName, testDetails.AssemblyQualifiedClassName),
+                new ClassInformationProperty
+                {
+                    SimpleName = testDetails.ClassName, 
+                    FullyQualifiedName = testDetails.FullyQualifiedClassName, 
+                    AssemblyQualifiedName = testDetails.AssemblyQualifiedClassName
+                },
                 new ClassParameterTypesProperty(testDetails.ClassParameterTypes?.Select(x => x.FullName!).ToArray()),
                 new MethodParameterTypesProperty(testDetails.MethodParameterTypes?.Select(x => x.FullName!).ToArray()),
                 new ClassArgumentsProperty(testDetails.ClassArgumentValues),
                 new MethodArgumentsProperty(testDetails.MethodArgumentValues),
                 new NotInParallelConstraintKeysProperty(testDetails.NotInParallelConstraintKeys),
                 new OrderProperty(testDetails.Order),
-                new TestInformationProperty(testDetails.UniqueId, testDetails.TestName, testDetails.MethodInfo.IsStatic, testDetails.IsSingleTest),
+                new TestInformationProperty
+                {
+                    UniqueId = testDetails.UniqueId, 
+                    TestName = testDetails.TestName, 
+                    IsStatic = testDetails.MethodInfo.IsStatic, 
+                    IsSingleTest = testDetails.IsSingleTest
+                },
                 new AssemblyProperty(testDetails.Assembly.FullName!)
             ])
         };
