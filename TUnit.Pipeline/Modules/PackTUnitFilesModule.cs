@@ -4,7 +4,6 @@ using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Git.Extensions;
-using ModularPipelines.Git.Models;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
