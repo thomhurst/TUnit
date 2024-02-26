@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-
-namespace TUnit.Engine;
+﻿namespace TUnit.Engine;
 
 internal class Disposer
 {

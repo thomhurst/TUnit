@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 
 namespace TUnit.Engine;
 
@@ -23,7 +21,7 @@ internal class TestFilterProvider(IRunContext runContext, IMessageLogger message
             TUnitTestProperties.Category;
     }
     
-    public IEnumerable<TestCase> FilterTests(IEnumerable<TestCase> tests)
+    public IEnumerable<TestNode> FilterTests(IEnumerable<TestNode> tests)
     {
         var filterExpression = runContext.GetTestCaseFilter(SupportedProperties.Keys, 
             propertyName => SupportedProperties.GetValueOrDefault(propertyName));

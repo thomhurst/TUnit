@@ -1,22 +1,21 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using TUnit.Engine.Extensions;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 
 namespace TUnit.Engine;
 
 internal class TestClassCreator
 {
-    public object? CreateClass(TestCase testCase, out Type classType)
+    public object? CreateClass(TestNode testNode, out Type classType)
     {
-        var fullTypeName = testCase.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, "");
+        var fullTypeName = testNode.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, "");
         
         classType = Type.GetType(fullTypeName, throwOnError: true)!;
 
-        if (testCase.GetPropertyValue(TUnitTestProperties.IsStatic, false))
+        if (testNode.GetPropertyValue(TUnitTestProperties.IsStatic, false))
         {
             return null;
         }
         
-        var classArguments = testCase
+        var classArguments = testNode
             .GetPropertyValue(TUnitTestProperties.ClassArguments, null as string)
             .DeserializeArgumentsSafely();
 

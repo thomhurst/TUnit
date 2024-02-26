@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Engine.Models;
 using TUnit.Engine.TestParsers;

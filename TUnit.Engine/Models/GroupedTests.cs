@@ -1,14 +1,14 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 
 namespace TUnit.Engine.Models;
 
 internal record GroupedTests
 {
-    public required IReadOnlyList<TestCase> AllTests { get; init; }
-    public required Queue<TestCase> NotInParallel { get; init; }
-    public required List<TestCase> KeyedNotInParallel { get; init; }
+    public required IReadOnlyList<TestNode> AllTests { get; init; }
+    public required Queue<TestNode> NotInParallel { get; init; }
+    public required List<TestNode> KeyedNotInParallel { get; init; }
 
-    public required Queue<TestCase> Parallel { get; init; }
+    public required Queue<TestNode> Parallel { get; init; }
     
     public int TestCount => AllTests.Count;
 }

@@ -1,8 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
@@ -51,13 +49,13 @@ internal class SingleTestExecutor
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
 
-    public async Task<TUnitTestResult> ExecuteTest(TestCase testCase)
+    public async Task<TUnitTestResult> ExecuteTest(TestNode testNode)
     {
-        var result = await ExecuteInternal(testCase);
+        var result = await ExecuteInternal(testNode);
         
-        _testExecutionRecorder.RecordResult(new TestResult(testCase)
+        _testExecutionRecorder.RecordResult(new TestResult(testNode)
         {
-            DisplayName = testCase.DisplayName,
+            DisplayName = testNode.DisplayName,
             Outcome = GetOutcome(result.TestContext, result.Status),
             ComputerName = result.ComputerName,
             Duration = result.Duration,
@@ -76,14 +74,14 @@ internal class SingleTestExecutor
         GroupedTests = tests;
     }
 
-    private async Task<TUnitTestResult> ExecuteInternal(TestCase testCase)
+    private async Task<TUnitTestResult> ExecuteInternal(TestNode testNode)
     {
         var start = DateTimeOffset.Now;
         
-        if (testCase.GetPropertyValue(TUnitTestProperties.IsSkipped, false)
-            || !IsExplicitlyRun(testCase))
+        if (testNode.GetPropertyValue(TUnitTestProperties.IsSkipped, false)
+            || !IsExplicitlyRun(testNode))
         {
-            _messageLogger.SendMessage(TestMessageLevel.Informational, $"Skipping {testCase.DisplayName}...");
+            _messageLogger.SendMessage(TestMessageLevel.Informational, $"Skipping {testNode.DisplayName}...");
 
             return new TUnitTestResult
             {
@@ -102,11 +100,11 @@ internal class SingleTestExecutor
         {
             await Task.Run(async () =>
             {
-                classInstance = _testClassCreator.CreateClass(testCase, out var classType);
+                classInstance = _testClassCreator.CreateClass(testNode, out var classType);
 
-                var methodInfo = _testMethodRetriever.GetTestMethod(classType, testCase);
+                var methodInfo = _testMethodRetriever.GetTestMethod(classType, testNode);
 
-                var testInformation = testCase.ToTestInformation(classType, classInstance, methodInfo);
+                var testInformation = testNode.ToTestInformation(classType, classInstance, methodInfo);
 
                 testContext = new TestContext(testInformation);
                 
@@ -185,14 +183,14 @@ internal class SingleTestExecutor
 
     private readonly object _consoleStandardOutLock = new();
 
-    private bool IsExplicitlyRun(TestCase testCase)
+    private bool IsExplicitlyRun(TestNode testNode)
     {
         if (_testFilterProvider.IsFilteredTestRun)
         {
             return true;
         }
 
-        var explicitFor = testCase.GetPropertyValue(TUnitTestProperties.ExplicitFor, string.Empty);
+        var explicitFor = testNode.GetPropertyValue(TUnitTestProperties.ExplicitFor, string.Empty);
 
         if (string.IsNullOrEmpty(explicitFor))
         {

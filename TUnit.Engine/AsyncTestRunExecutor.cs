@@ -1,8 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
@@ -56,7 +54,7 @@ internal class AsyncTestRunExecutor
         _assemblyCleanUpExecutor = assemblyCleanUpExecutor;
     }
 
-    public async Task RunInAsyncContext(IEnumerable<TestCase> testCases)
+    public async Task RunInAsyncContext(IEnumerable<TestNode> testCases)
     {
         _consoleInterceptor.Initialize();
         
@@ -66,9 +64,9 @@ internal class AsyncTestRunExecutor
 
         var oneTimeCleanUps = new ConcurrentQueue<Task>();
 
-        _oneTimeCleanupTracker = new OneTimeCleanUpTracker(tests.AllTests, (testCase, executingTask) =>
+        _oneTimeCleanupTracker = new OneTimeCleanUpTracker(tests.AllTests, (testNode, executingTask) =>
         {
-            oneTimeCleanUps.Enqueue(ExecuteOneTimeCleanUps(testCase));
+            oneTimeCleanUps.Enqueue(ExecuteOneTimeCleanUps(testNode));
         });
         
         await ProcessTests(tests.Parallel, true);
@@ -85,7 +83,7 @@ internal class AsyncTestRunExecutor
         await WhenAllSafely(oneTimeCleanUps, _testExecutionRecorder);
     }
 
-    private async Task ProcessKeyedNotInParallelTests(List<TestCase> testsToProcess)
+    private async Task ProcessKeyedNotInParallelTests(List<TestNode> testsToProcess)
     {
         var currentlyExecutingByKeysLock = new object();
         var currentlyExecutingByKeys = new List<(ConstraintKeysCollection Keys, Task)>();
@@ -164,7 +162,7 @@ internal class AsyncTestRunExecutor
         await WhenAllSafely(executing, _testExecutionRecorder);
     }
 
-    private async Task ProcessTests(Queue<TestCase> queue, bool runInParallel)
+    private async Task ProcessTests(Queue<TestNode> queue, bool runInParallel)
     {
         var executing = new List<Task>();
         
@@ -178,7 +176,7 @@ internal class AsyncTestRunExecutor
         await WhenAllSafely(executing, _testExecutionRecorder);
     }
 
-    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestCase> queue, bool runInParallel)
+    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestNode> queue, bool runInParallel)
     {
         while (queue.Count > 0)
         {
@@ -200,7 +198,7 @@ internal class AsyncTestRunExecutor
         }
     }
 
-    private async Task<TestWithResult> ProcessTest(TestCase test, bool runInParallel)
+    private async Task<TestWithResult> ProcessTest(TestNode test, bool runInParallel)
     {
         var cachedAssemblyInformation = _cacheableAssemblyLoader.GetOrLoadAssembly(test.Source);
         
@@ -245,7 +243,7 @@ internal class AsyncTestRunExecutor
         Interlocked.Increment(ref _currentlyExecutingTests);
     }
 
-    private async Task ExecuteOneTimeCleanUps(TestCase testDetails)
+    private async Task ExecuteOneTimeCleanUps(TestNode testDetails)
     {
         var cachedAssemblyInformation = _assemblyLoader.GetOrLoadAssembly(testDetails.Source);
         

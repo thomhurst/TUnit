@@ -1,13 +1,13 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 
 namespace TUnit.Engine.Models;
 
 public class OneTimeCleanUpTracker
 {
-    private readonly Action<TestCase, Task> _onLastTestForClassProcessed;
-    private readonly Dictionary<string, List<TestCase>> _innerDictionary;
+    private readonly Action<TestNode, Task> _onLastTestForClassProcessed;
+    private readonly Dictionary<string, List<TestNode>> _innerDictionary;
 
-    public OneTimeCleanUpTracker(IEnumerable<TestCase> tests, Action<TestCase, Task> onLastTestForClassProcessed)
+    public OneTimeCleanUpTracker(IEnumerable<TestNode> tests, Action<TestNode, Task> onLastTestForClassProcessed)
     {
         _onLastTestForClassProcessed = onLastTestForClassProcessed;
         
@@ -18,9 +18,9 @@ public class OneTimeCleanUpTracker
 
     private readonly object _removeLock = new();
 
-    public void Remove(TestCase testCase, Task executingTask)
+    public void Remove(TestNode testNode, Task executingTask)
     {
-        var className = GetClassName(testCase);
+        var className = GetClassName(testNode);
 
         if (!_innerDictionary.TryGetValue(className, out var list))
         {
@@ -31,18 +31,18 @@ public class OneTimeCleanUpTracker
         {
             lock (_removeLock)
             {
-                list.Remove(testCase);
+                list.Remove(testNode);
 
                 if (list.Count == 0)
                 {
-                    _onLastTestForClassProcessed(testCase, executingTask);
+                    _onLastTestForClassProcessed(testNode, executingTask);
                 }
             }
         });
     }
 
-    private string GetClassName(TestCase testCase)
+    private string GetClassName(TestNode testNode)
     {
-        return testCase.GetPropertyValue(TUnitTestProperties.TestClass, string.Empty);
+        return testNode.GetPropertyValue(TUnitTestProperties.TestClass, string.Empty);
     }
 }

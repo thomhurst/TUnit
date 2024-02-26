@@ -1,10 +1,9 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+﻿using Microsoft.Testing.Platform.Logging;
 using TUnit.Core;
 
 namespace TUnit.Engine;
 
-internal class SourceLocationRetriever(IMessageLogger logger) : IDisposable
+internal class SourceLocationRetriever(ILogger<SourceLocationRetriever> logger) : IDisposable
 {
     private static SourceLocation GetEmptySourceLocation(string source) => new(source, null, 0, 0);
     

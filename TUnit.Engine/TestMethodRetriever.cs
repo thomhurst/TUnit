@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.Testing.Platform.Extensions.Messages;
 
 namespace TUnit.Engine;
 
 internal class TestMethodRetriever
 {
-    public MethodInfo GetTestMethod(Type classType, TestCase testCase)
+    public MethodInfo GetTestMethod(Type classType, TestNode testNode)
     {
         var matchingMethodNames = classType.GetMethods()
-            .Where(x => x.Name == testCase.GetPropertyValue(TUnitTestProperties.TestName, ""))
+            .Where(x => x.Name == testNode.GetPropertyValue(TUnitTestProperties.TestName, ""))
             .ToList();
 
         if (matchingMethodNames.Count == 1)
@@ -17,7 +17,7 @@ internal class TestMethodRetriever
         }
 
         var testParameterTypeNames =
-            testCase.GetPropertyValue(TUnitTestProperties.MethodParameterTypeNames, Array.Empty<string>());
+            testNode.GetPropertyValue(TUnitTestProperties.MethodParameterTypeNames, Array.Empty<string>());
 
         return matchingMethodNames.First(x => x.GetParameters()
             .Select(p => p.ParameterType.FullName)

@@ -6,14 +6,12 @@ internal record TestDetails
 {
     public TestDetails(MethodInfo methodInfo,
         Type classType,
-        SourceLocation sourceLocation,
         object?[]? methodArguments, 
         object?[]? classArguments, 
         int count)
     {
         MethodInfo = methodInfo;
         ClassType = classType;
-        SourceLocation = sourceLocation;
         Count = count;
 
         MethodParameterTypes = methodArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
@@ -30,7 +28,6 @@ internal record TestDetails
         Assembly = ClassType.Assembly;
         Namespace = ClassType.Namespace!;
         ReturnType = methodInfo.ReturnType.AssemblyQualifiedName!;
-        Source = sourceLocation.RawSource;
 
         var methodAndClassAttributes = methodInfo.GetCustomAttributes()
             .Concat(ClassType.GetCustomAttributes())
@@ -73,10 +70,11 @@ internal record TestDetails
         AddCategories(methodAndClassAttributes);
         
         Timeout = GetTimeout(methodAndClassAttributes);
-        
-        FileName = sourceLocation.FileName;
-        MinLineNumber = sourceLocation.MinLineNumber;
-        MaxLineNumber = sourceLocation.MaxLineNumber;
+
+        var baseTestAttribute = methodAndClassAttributes.OfType<BaseTestAttribute>().First();
+        FileName = baseTestAttribute.File;
+        MinLineNumber = baseTestAttribute.Line;
+        MaxLineNumber = baseTestAttribute.Line;
 
         UniqueId = $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
 
@@ -158,8 +156,7 @@ internal record TestDetails
     public string FullyQualifiedClassName { get; }
 
     public Assembly Assembly { get; }
-    
-    public string Source { get; }
+
     public MethodInfo MethodInfo { get; }
     public Type ClassType { get; }
     public string? FileName { get; }
@@ -174,7 +171,6 @@ internal record TestDetails
     public Type[]? ClassParameterTypes { get; }
     public object?[]? MethodArgumentValues { get; }
     public object?[]? ClassArgumentValues { get; }
-    public SourceLocation SourceLocation { get; }
     public int Count { get; }
 
     public string? SkipReason { get; }

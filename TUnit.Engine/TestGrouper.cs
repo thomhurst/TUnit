@@ -1,11 +1,11 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine;
 
 internal class TestGrouper
 {
-    public GroupedTests OrganiseTests(IEnumerable<TestCase> testCases)
+    public GroupedTests OrganiseTests(IEnumerable<TestNode> testCases)
     {
         var allTestsOrderedByClass = testCases
             .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
@@ -13,9 +13,9 @@ internal class TestGrouper
             .OrderByDescending(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue))
             .ToList();
 
-        var notInParallel = new Queue<TestCase>();
-        var keyedNotInParallel = new List<TestCase>();
-        var parallel = new Queue<TestCase>();
+        var notInParallel = new Queue<TestNode>();
+        var keyedNotInParallel = new List<TestNode>();
+        var parallel = new Queue<TestNode>();
 
         foreach (var test in allTestsOrderedByClass)
         {

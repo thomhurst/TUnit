@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class DataSourceDrivenTestAttribute : TUnitAttribute
+public class DataSourceDrivenTestAttribute : BaseTestAttribute
 {
     public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }

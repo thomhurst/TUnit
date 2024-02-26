@@ -31,7 +31,6 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
                         yield return new TestDetails(
                             methodInfo: methodInfo,
                             classType: type,
-                            sourceLocation: sourceLocation,
                             methodArguments: combinativeValue.ToArray(),
                             classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
                             count: count++
@@ -43,7 +42,6 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
                     yield return new TestDetails(
                         methodInfo: methodInfo,
                         classType: type,
-                        sourceLocation: sourceLocation,
                         methodArguments: null,
                         classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
                         count: count++

@@ -30,7 +30,6 @@ internal class DataDrivenTestParser(DataSourceRetriever dataSourceRetriever) : I
                     yield return new TestDetails(
                         methodInfo: methodInfo,
                         classType: type,
-                        sourceLocation: sourceLocation,
                         methodArguments: arguments,
                         classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
                         count: count++

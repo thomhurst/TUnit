@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Extensions.VSTestBridge;
 using Microsoft.Testing.Extensions.VSTestBridge.Requests;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
@@ -7,6 +8,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.TestAdapter;
 
@@ -16,6 +18,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly Func<IEnumerable<Assembly>> _getTestAssemblies;
     private readonly IServiceProvider _serviceProvider;
     private readonly ITestFrameworkCapabilities _capabilities;
+    private readonly ServiceProvider _myServiceProvider;
 
     public TUnitTestFramework(IExtension extension,
         Func<IEnumerable<Assembly>> getTestAssemblies,
@@ -26,6 +29,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _getTestAssemblies = getTestAssemblies;
         _serviceProvider = serviceProvider;
         _capabilities = capabilities;
+
+        _myServiceProvider = new ServiceCollection()
+            .AddTestEngineServices()
+            .AddFromFrameworkServiceProvider()
+            .BuildServiceProvider();
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -47,65 +55,42 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
-        switch (context.Request)
+        await using (_myServiceProvider)
         {
-            case VSTestRunTestExecutionRequest vsTestRunTestExecutionRequest:
-                break;
-            case VSTestDiscoverTestExecutionRequest vsTestDiscoverTestExecutionRequest:
-                break;
-            case DiscoverTestExecutionRequest discoverTestExecutionRequest:
-                switch (discoverTestExecutionRequest.Session)
+            try
+            {
+                switch (context.Request)
                 {
-                    case CloseTestSessionContext closeTestSessionContext:
+                    case DiscoverTestExecutionRequest discoverTestExecutionRequest:
+                        foreach (var testNode in _serviceProvider.GetRequiredService<TUnitTestDiscoverer>()
+                                     .DiscoverTests(discoverTestExecutionRequest, _getTestAssemblies, context.CancellationToken))
+                        {
+                            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+                                sessionUid: context.Request.Session.SessionUid,
+                                testNode: testNode)
+                            );
+                        }
                         break;
-                    case CreateTestSessionContext createTestSessionContext:
+                    case RunTestExecutionRequest runTestExecutionRequest:
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                switch (discoverTestExecutionRequest.Filter)
-                {
-                    case VSTestTestExecutionFilter vsTestTestExecutionFilter:
-                        break;
-                    case TestNodeUidListFilter testNodeUidListFilter:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                break;
-            case RunTestExecutionRequest runTestExecutionRequest:
-                switch (runTestExecutionRequest.Session)
-                {
-                    case CloseTestSessionContext closeTestSessionContext:
-                        break;
-                    case CreateTestSessionContext createTestSessionContext:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                break;
-            case TestExecutionRequest testExecutionRequest:
-                switch (testExecutionRequest.Session)
-                {
-                    
-                }
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            }
+            finally
+            {
+                context.Complete();
+            }
         }
-        
-        await Task.CompletedTask;
     }
     
-    public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
+    public Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {
-        await Task.CompletedTask;
-        
-        return new CloseTestSessionResult
+        return Task.FromResult(new CloseTestSessionResult
         {
             IsSuccess = true
-        };
+        });
     }
 
-    public Type[] DataTypesProduced { get; } = Array.Empty<Type>();
+    public Type[] DataTypesProduced { get; } = [typeof(TestNodeUpdateMessage)];
 }

@@ -28,7 +28,6 @@ internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetrieve
                     yield return new TestDetails(
                         methodInfo: methodInfo,
                         classType: type,
-                        sourceLocation: sourceLocation,
                         methodArguments: GetDataSourceArguments(methodArguments),
                         classArguments: GetDataSourceArguments(classArguments),
                         count: count++

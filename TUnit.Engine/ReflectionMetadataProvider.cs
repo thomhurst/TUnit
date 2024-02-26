@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace TUnit.Engine
 {

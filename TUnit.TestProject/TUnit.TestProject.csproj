@@ -10,7 +10,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
         <PackageReference Include="coverlet.collector" Version="6.0.0" />
         <PackageReference Include="System.Text.Json" Version="8.0.2" />
     </ItemGroup>
@@ -20,7 +19,6 @@
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-      <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 

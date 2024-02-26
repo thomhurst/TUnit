@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 
 namespace TUnit.Engine;
 
@@ -7,13 +7,13 @@ internal static class TUnitTestProperties
     public static TestProperty GetOrRegisterTestProperty<T>(string id, string label)
     {
         return TestProperty.Find(id)
-               ?? TestProperty.Register(id, label, typeof(T), typeof(TestCase));
+               ?? TestProperty.Register(id, label, typeof(T), typeof(TestNode));
     }
 
     public static TestProperty UniqueId => GetOrRegisterTestProperty<string>(nameof(UniqueId), nameof(UniqueId));
-    public static TestProperty Hierarchy => GetOrRegisterTestProperty<string[]>("TestCase.Hierarchy", "Hierarchy");
-    public static TestProperty ManagedType => GetOrRegisterTestProperty<string>("TestCase.ManagedType", "ManagedType");
-    public static TestProperty ManagedMethod => GetOrRegisterTestProperty<string>("TestCase.ManagedMethod", "ManagedMethod");
+    public static TestProperty Hierarchy => GetOrRegisterTestProperty<string[]>("TestNode.Hierarchy", "Hierarchy");
+    public static TestProperty ManagedType => GetOrRegisterTestProperty<string>("TestNode.ManagedType", "ManagedType");
+    public static TestProperty ManagedMethod => GetOrRegisterTestProperty<string>("TestNode.ManagedMethod", "ManagedMethod");
 
     public static TestProperty AssemblyQualifiedClassName =>
         GetOrRegisterTestProperty<string>(nameof(AssemblyQualifiedClassName), nameof(AssemblyQualifiedClassName));

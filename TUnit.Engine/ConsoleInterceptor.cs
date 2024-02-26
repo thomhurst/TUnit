@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Text;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using TUnit.Core;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
