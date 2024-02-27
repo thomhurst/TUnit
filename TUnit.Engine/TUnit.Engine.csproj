@@ -15,6 +15,13 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Content Include="TUnit.Engine.props">
+            <Pack>true</Pack>
+            <PackagePath>build/$(TargetFramework)/</PackagePath>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     </ItemGroup>
     
