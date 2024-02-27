@@ -29,15 +29,12 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         
         var version = versionResult.Value!;
         
-        var packageVersion = version.SemVer;
+        // TODO: Full version
+        var packageVersion = version.NuGetPreReleaseTagV2;
         
         if (context.Git().Information.BranchName == "main")
         {
             packageVersion += "-alpha01";
-        }
-        else
-        {
-            packageVersion += version.CommitsSinceVersionSource;
         }
 
         await projects.Value!.SelectAsync(async project =>
