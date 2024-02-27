@@ -58,6 +58,6 @@ public class TestContext : IDisposable
     }
 
     public static string OutputDirectory
-        => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-           ?? Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+        => Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
+        ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 }
