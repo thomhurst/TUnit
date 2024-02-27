@@ -320,11 +320,9 @@ internal class SingleTestExecutor : IDataProducer
         {
             await ExecuteTestMethodWithTimeout(testInformation, @class, testLevelCancellationTokenSource);
         }
-        catch
+        finally
         {
-            testLevelCancellationTokenSource.Cancel();
             testLevelCancellationTokenSource.Dispose();
-            throw;
         }
     }
 
@@ -343,7 +341,7 @@ internal class SingleTestExecutor : IDataProducer
         var timeoutTask = Task.Delay(testInformation.Timeout.Value, cancellationTokenSource.Token)
             .ContinueWith(t =>
             {
-                if (t.IsCanceled)
+                if (methodResult.IsCompleted)
                 {
                     return;
                 }

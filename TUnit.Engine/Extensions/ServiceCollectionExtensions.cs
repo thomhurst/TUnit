@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<AssemblySetUpExecutor>()
             .AddSingleton<AssemblyCleanUpExecutor>()
             .AddSingleton<AssemblyLoader>()
-            .AddSingleton<TUnitTestDiscoverer>();
+            .AddSingleton<TUnitTestDiscoverer>()
+            .AddSingleton<TestFilterService>();
     }
 }

@@ -92,7 +92,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             finally
             {
                 var time = stopwatch.Elapsed;
+
                 await _logger.LogInformationAsync($"Time elapsed: {time}");
+                
                 context.Complete();
             }
         }

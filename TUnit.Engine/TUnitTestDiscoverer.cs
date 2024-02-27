@@ -9,19 +9,17 @@ namespace TUnit.Engine;
 internal class TUnitTestDiscoverer
 {
     private readonly TestsLoader _testsLoader;
+    private readonly TestFilterService _testFilterService;
 
-    public TUnitTestDiscoverer(TestsLoader testsLoader)
+    public TUnitTestDiscoverer(TestsLoader testsLoader, TestFilterService testFilterService)
     {
         _testsLoader = testsLoader;
+        _testFilterService = testFilterService;
     }
     
     public IEnumerable<TestNode> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest,
         Func<IEnumerable<Assembly>> testAssemblies, CancellationToken cancellationToken)
     {
-        var filter = discoverTestExecutionRequest?.Filter as TestNodeUidListFilter ?? new TestNodeUidListFilter([]);
-
-        var hasFilter = filter.TestNodeUids.Any();
-
         var assemblies = testAssemblies();
         
         foreach (var assembly in assemblies.Select(x => new CachedAssemblyInformation(x)))
@@ -35,8 +33,7 @@ internal class TUnitTestDiscoverer
 
                 var testNode = testDetails.ToTestNode();
 
-                if (!hasFilter ||
-                    filter.TestNodeUids.Contains(testNode.Uid))
+                if (_testFilterService.MatchesTest(discoverTestExecutionRequest?.Filter, testNode))
                 {
                     yield return testNode;
                 }
