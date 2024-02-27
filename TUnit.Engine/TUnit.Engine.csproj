@@ -18,7 +18,7 @@
     <ItemGroup>
         <Content Include="TUnit.Engine.props">
             <Pack>true</Pack>
-            <PackagePath>build/$(TargetFramework)/</PackagePath>
+            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
         </Content>
     </ItemGroup>
 

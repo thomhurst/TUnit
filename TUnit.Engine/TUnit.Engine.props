@@ -2,6 +2,7 @@
 <Project>
     
     <PropertyGroup>
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
