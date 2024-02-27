@@ -16,7 +16,7 @@ public class CopyToLocalNuGetModule : Module<List<File>>
         return context.Git()
             .RootDirectory
             .GetFiles(x => x.Extension.EndsWith("nupkg"))
-            .Select(x => x.CopyTo(context.FileSystem.GetFolder(Environment.SpecialFolder.ProgramFilesX86).Parent!.GetFolder("LocalNuget").Create()))
+            .Select(x => x.CopyTo(context.Git().RootDirectory.Root.GetFolder("LocalNuget")))
             .ToList();
     }
 }
