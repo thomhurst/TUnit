@@ -11,7 +11,8 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
-[RunOnlyOnBranch("main")]
+// TODO: Re-add
+// [RunOnlyOnBranch("main")]
 [DependsOn<PackTUnitFilesModule>]
 public class UploadToNuGetModule : Module<CommandResult[]>
 {
