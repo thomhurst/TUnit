@@ -15,8 +15,6 @@ namespace TUnit.TestAdapter;
 [ExtensionUri(TestAdapterConstants.ExecutorUriString)]
 public class TestExecutor : ITestExecutor2
 {
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
-    
     public void RunTests(IEnumerable<TestCase>? testCases, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
     {
         if (testCases is null)
@@ -65,7 +63,7 @@ public class TestExecutor : ITestExecutor2
 
     public void Cancel()
     {
-        _cancellationTokenSource.Cancel();
+        EngineCancellationToken.CancellationTokenSource.Cancel();
     }
 
     public bool ShouldAttachToTestHost(IEnumerable<TestCase>? tests, IRunContext runContext)
@@ -85,7 +83,7 @@ public class TestExecutor : ITestExecutor2
             .AddSingleton(frameworkHandle ?? new NoOpFrameworkHandle())
             .AddSingleton<ITestExecutionRecorder>(x => x.GetRequiredService<IFrameworkHandle>())
             .AddSingleton<IMessageLogger>(x => x.GetRequiredService<IFrameworkHandle>())
-            .AddSingleton(_cancellationTokenSource)
+            .AddSingleton(EngineCancellationToken.CancellationTokenSource)
             .AddTestEngineServices()
             .BuildServiceProvider();
     }

@@ -31,6 +31,7 @@ public class SampleSourceGenerator : ISourceGenerator
                                                   [ModuleInitializer]
                                                   public static void Initialise()
                                                   {
+                                              
                                               """);
         foreach (var method in context.Compilation
                      .SyntaxTrees
@@ -79,7 +80,7 @@ public class SampleSourceGenerator : ISourceGenerator
             switch (attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
             {
                 case "global::TUnit.Core.TestAttribute":
-                    sourceBuilder.AppendLine($"TestDictionary.AddTest(\"\", () => new {className}().{methodName}());");
+                    sourceBuilder.AppendLine($"\t\tTestDictionary.AddTest(\"\", () => new {className}().{GenerateTestMethodInvocation(methodSymbol)});");
                     break;
                 case "global::TUnit.Core.DataDrivenTestAttribute":
                     break;
@@ -89,6 +90,13 @@ public class SampleSourceGenerator : ISourceGenerator
                     break;
             }
         }
+    }
+
+    private string GenerateTestMethodInvocation(IMethodSymbol method)
+    {
+        var methodName = method.Name;
+        
+        return $"{methodName}({method.Parameters.LastOrDefault()?.Name})";
     }
 }
 
