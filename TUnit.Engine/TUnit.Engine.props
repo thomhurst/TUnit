@@ -1,0 +1,5 @@
+<Project>
+    <ItemGroup>
+        <PackageReference Include="TUnit.Engine.SourceGenerator" />
+    </ItemGroup>
+</Project>
