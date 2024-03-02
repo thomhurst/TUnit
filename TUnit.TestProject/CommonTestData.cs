@@ -10,4 +10,6 @@ public static class CommonTestData
     public static int One() => 1;
     public static int Two() => 2;
     public static int Three() => 3;
+
+    public static object?[]? MultipleArgs() => [1, "2", true];
 }

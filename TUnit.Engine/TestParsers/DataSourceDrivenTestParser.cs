@@ -44,6 +44,11 @@ internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetrieve
         {
             return null;
         }
+
+        if (methodArguments is object?[] methodArgumentsArray)
+        {
+            return methodArgumentsArray;
+        }
         
         return [methodArguments];
     }

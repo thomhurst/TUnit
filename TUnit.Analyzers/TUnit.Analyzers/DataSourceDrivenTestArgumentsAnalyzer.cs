@@ -107,16 +107,6 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             return;
         }
         
-        if (parameters.Length > 1)
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.TooManyArgumentsInTestMethod,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
-            );
-            return;
-        }
-        
         var methodParameterType = parameters.Select(x => x.Type).FirstOrDefault();
         
         var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, fallbackClassToSearchForDataSourceIn);
@@ -174,9 +164,26 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         var argumentType = methodContainingTestData.ReturnType;
 
         var enumerableOfMethodType = CreateEnumerableOfType(context, methodParameterType!);
+        
+        if (parameters.Length > 1 &&
+            !context.Compilation.HasImplicitConversion(argumentType, context.Compilation.GetSpecialType(SpecialType.System_Collections_IEnumerable)))
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TooManyArgumentsInTestMethod,
+                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+            );
+            return;
+        }
 
         if (context.Compilation.HasImplicitConversion(argumentType, methodParameterType)
             || context.Compilation.HasImplicitConversion(argumentType, enumerableOfMethodType))
+        {
+            return;
+        }
+
+        if (context.Compilation.HasImplicitConversion(argumentType,
+                context.Compilation.GetSpecialType(SpecialType.System_Collections_IEnumerable)))
         {
             return;
         }

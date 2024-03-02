@@ -6,6 +6,12 @@ namespace TUnit.Engine;
 
 internal class DataSourceRetriever(MethodInvoker methodInvoker)
 {
+    private interface IDataSourceResult;
+
+    private record ArrayData(object?[]? Array) : IDataSourceResult;
+
+    private record Data(object? Value) : IDataSourceResult;
+    
     public IEnumerable<object?> GetTestDataSourceArguments(MethodInfo methodInfo)
     {
         var testDataSourceAttributes = methodInfo.GetCustomAttributes<DataSourceDrivenTestAttribute>().ToList();
@@ -20,7 +26,15 @@ internal class DataSourceRetriever(MethodInvoker methodInvoker)
         
         foreach (var testDataSourceAttribute in testDataSourceAttributes)
         {
-            foreach (var testDataSourceArgument in GetTestDataSourceArguments(fallbackTypeToSearchForMethodIn: methodInfo.DeclaringType!, testDataSourceAttribute, parameterType))
+            var testDataSourceArguments = GetTestDataSourceArguments(fallbackTypeToSearchForMethodIn: methodInfo.DeclaringType!, testDataSourceAttribute, parameterType);
+
+            if (testDataSourceArguments is object?[] objectArray)
+            {
+                yield return objectArray;
+                continue;
+            }
+            
+            foreach (var testDataSourceArgument in testDataSourceArguments)
             {
                 yield return testDataSourceArgument;
             }
@@ -72,7 +86,8 @@ internal class DataSourceRetriever(MethodInvoker methodInvoker)
             yield break;
         }
 
-        if (result.GetType().IsAssignableTo(expectedParameterType))
+        if (result.GetType().IsAssignableTo(expectedParameterType)
+            || result.GetType().IsAssignableTo(typeof(object?[])))
         {
             yield return result;
             yield break;
@@ -82,14 +97,13 @@ internal class DataSourceRetriever(MethodInvoker methodInvoker)
             typeof(IEnumerable<>).MakeGenericType(expectedParameterType) 
             : null;
 
-        if (!result.GetType().IsAssignableTo(enumerableOfParameterType))
+        if (result.GetType().IsAssignableTo(enumerableOfParameterType)
+            || result.GetType().IsAssignableTo(typeof(IEnumerable<object?[]>)))
         {
-            yield break;
-        }
-
-        foreach (var obj in (IEnumerable) result)
-        {
-            yield return obj;
+            foreach (var obj in (IEnumerable) result)
+            {
+                yield return obj;
+            }
         }
     }
 }
