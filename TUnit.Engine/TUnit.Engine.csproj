@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hardware.Info" Version="100.0.1.1" />
+        <PackageReference Include="Hardware.Info" Version="100.1.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
         <PackageReference Include="Microsoft.Testing.Platform" Version="1.0.2" />
         <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0" />
