@@ -10,7 +10,7 @@ internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetrieve
         int runCount,
         SourceLocation sourceLocation)
     {
-        var testDataSourceAttributes = methodInfo.GetCustomAttributes<DataSourceDrivenTestAttribute>().ToList();
+        var testDataSourceAttributes = methodInfo.GetCustomAttributes<MethodDataAttribute>().ToList();
         
         if (!testDataSourceAttributes.Any())
         {

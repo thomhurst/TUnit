@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -69,18 +70,16 @@ public class SampleSourceGenerator : ISourceGenerator
         }
 
         var attributes = symbol.GetAttributes();
-
-        var className =
-            methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-
-        var methodName = methodSymbol.Name;
         
         foreach (var attributeData in attributes)
         {
             switch (attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
             {
                 case "global::TUnit.Core.TestAttribute":
-                    sourceBuilder.AppendLine($"\t\tTestDictionary.AddTest(\"\", () => new {className}().{GenerateTestMethodInvocation(methodSymbol)});");
+                    foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
+                    {
+                        sourceBuilder.AppendLine($"\t\tTestDictionary.AddTest(\"\", () => {classInvocation}.{GenerateTestMethodInvocation(methodSymbol)});");
+                    }
                     break;
                 case "global::TUnit.Core.DataDrivenTestAttribute":
                     break;
@@ -92,11 +91,47 @@ public class SampleSourceGenerator : ISourceGenerator
         }
     }
 
+    private IEnumerable<string> GenerateClassInvocations(INamedTypeSymbol namedTypeSymbol)
+    {
+        var className =
+            namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+
+        if (namedTypeSymbol.InstanceConstructors.First().Parameters.IsDefaultOrEmpty)
+        {
+            yield return $"new {className}()";
+        }
+
+        foreach (var methodDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
+                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                         is "global::TUnit.Core.MethodDataAttribute"))
+        {
+            var args = methodDataAttribute.ConstructorArguments.Length == 1
+                ? $"{className}.{methodDataAttribute.ConstructorArguments.First().Value}()"
+                : $"{methodDataAttribute.ConstructorArguments[0].Value}.{methodDataAttribute.ConstructorArguments[1].Value}()";
+            
+            yield return $"new {className}({args})";
+        }
+        
+        foreach (var classDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
+                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                         is "global::TUnit.Core.ClassDataAttribute"))
+        {
+            yield return $"new {className}(new {classDataAttribute.ConstructorArguments.First().Value}())";
+        }
+    }
+
     private string GenerateTestMethodInvocation(IMethodSymbol method)
     {
         var methodName = method.Name;
+
+        if (method.GetAttributes().Any(x =>
+                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                    is "global::TUnit.Core.TimeoutAttribute"))
+        {
+            return $"{methodName}(EngineCancellationToken.Token)";
+        }
         
-        return $"{methodName}({method.Parameters.LastOrDefault()?.Name})";
+        return $"{methodName}()";
     }
 }
 
