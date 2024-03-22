@@ -86,7 +86,7 @@ public class SampleSourceGenerator : ISourceGenerator
                     {
                         var usingDisposablePrefix = GetDisposableUsingPrefix(methodSymbol.ContainingType);
                         sourceBuilder.AppendLine($$"""
-                                                        TestDictionary.AddTest("", async () => 
+                                                        global::TUnit.Engine.TestDictionary.AddTest("", async () => 
                                                         {
                                                             {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
                                                             {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
