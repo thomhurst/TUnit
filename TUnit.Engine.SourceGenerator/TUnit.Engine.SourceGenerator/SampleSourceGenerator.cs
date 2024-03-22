@@ -71,8 +71,11 @@ public class SampleSourceGenerator : ISourceGenerator
         }
 
         var attributes = symbol.GetAttributes();
+
+        var isAwaitable = methodSymbol.IsAsync
+                                    || methodSymbol.IsAwaitableNonDynamic(semanticModel, method.MethodDeclarationSyntax.SpanStart);
         
-        var methodAwaitablePrefix = methodSymbol.IsAsync ? "await " : string.Empty;
+        var methodAwaitablePrefix = isAwaitable? "await " : string.Empty;
         
         foreach (var attributeData in attributes)
         {
