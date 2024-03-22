@@ -71,14 +71,8 @@ public class SampleSourceGenerator : ISourceGenerator
         }
 
         var attributes = symbol.GetAttributes();
-
-        var isAsyncMethod = methodSymbol.ReturnType
-            .ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            .StartsWith($"global::{typeof(Task).FullName}");
-
-        var asyncKeyword = isAsyncMethod ? "async " : string.Empty;
         
-        var methodAwaitablePrefix = isAsyncMethod ? "await " : string.Empty;
+        var methodAwaitablePrefix = methodSymbol.IsAsync ? "await " : string.Empty;
         
         foreach (var attributeData in attributes)
         {
@@ -89,10 +83,11 @@ public class SampleSourceGenerator : ISourceGenerator
                     {
                         var usingDisposablePrefix = GetDisposableUsingPrefix(methodSymbol.ContainingType);
                         sourceBuilder.AppendLine($$"""
-                                                        TestDictionary.AddTest("", {{asyncKeyword}}() => 
+                                                        TestDictionary.AddTest("", async () => 
                                                         {
                                                             {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
                                                             {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
+                                                            await global::System.Threading.Tasks.Task.CompletedTask;
                                                         });
                                                  """);
                     }

@@ -17,6 +17,6 @@ public static class TypeExtensions
     {
         return namedTypeSymbol.AllInterfaces.Any(x =>
             x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
-            == $"global::{typeof(IAsyncDisposable).FullName}");
+            == $"global::System.IAsyncDisposable");
     }
 }
