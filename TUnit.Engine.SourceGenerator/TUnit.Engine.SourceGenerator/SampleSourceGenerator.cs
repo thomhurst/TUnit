@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -78,7 +77,12 @@ public class SampleSourceGenerator : ISourceGenerator
                 case "global::TUnit.Core.TestAttribute":
                     foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
                     {
-                        sourceBuilder.AppendLine($"\t\tTestDictionary.AddTest(\"\", () => {classInvocation}.{GenerateTestMethodInvocation(methodSymbol)});");
+                        sourceBuilder.AppendLine($$"""
+                                                        TestDictionary.AddTest("", () => 
+                                                        {
+                                                            {{classInvocation}}.{{GenerateTestMethodInvocation(methodSymbol)}}
+                                                        });
+                                                 """);
                     }
                     break;
                 case "global::TUnit.Core.DataDrivenTestAttribute":
@@ -94,7 +98,7 @@ public class SampleSourceGenerator : ISourceGenerator
     private IEnumerable<string> GenerateClassInvocations(INamedTypeSymbol namedTypeSymbol)
     {
         var className =
-            namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+            namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
 
         if (namedTypeSymbol.InstanceConstructors.First().Parameters.IsDefaultOrEmpty)
         {
@@ -117,6 +121,52 @@ public class SampleSourceGenerator : ISourceGenerator
                          is "global::TUnit.Core.ClassDataAttribute"))
         {
             yield return $"new {className}(new {classDataAttribute.ConstructorArguments.First().Value}())";
+        }
+        
+        foreach (var classDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
+                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                         is "global::TUnit.Core.InjectAttribute"))
+        {
+            var genericType = classDataAttribute.AttributeClass!.TypeArguments.First();
+            var fullyQualifiedGenericType =
+                genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            var sharedArgument = classDataAttribute.NamedArguments.First(x => x.Key == "Shared").Value;
+
+            if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                is "global::TUnit.Core.None")
+            {
+                yield return $"new {className}(new {genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}())";
+            }
+            
+            if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                is "global::TUnit.Core.Globally")
+            {
+
+                yield return $"""
+                              var obj = global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}());
+                              return new {className}(obj);
+                              """;
+            }
+            
+            if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                is "global::TUnit.Core.ForClass")
+            {
+
+                yield return $"""
+                              var obj = global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}());
+                              return new {className}(obj);
+                              """;
+            }
+            
+            if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                is "global::TUnit.Core.ForKey")
+            {
+                var key = sharedArgument.Value?.GetType().GetProperty("Key")?.GetValue(sharedArgument.Value);
+                yield return $"""
+                              var obj = global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey("{key}", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}());
+                              return new {className}(obj);
+                              """;
+            }
         }
     }
 
