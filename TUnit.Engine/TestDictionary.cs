@@ -3,21 +3,24 @@ using TUnit.Core;
 
 namespace TUnit.Engine;
 
-public class TestDictionary
+public static class TestDictionary
 {
     private static readonly Dictionary<string, Func<Task>> Tests = new();
 
     public static void AddTest(string testId, Func<Task> action)
     {
-        Tests[testId] = action;
-    }
-    
-    public static void AddTest(string testId, Action action)
-    {
-        Tests[testId] = () =>
+        var count = 1;
+
+        while (Tests.ContainsKey($"{testId} {count}"))
         {
-            action();
-            return Task.CompletedTask;
-        };
+            count++;
+        }
+        
+        Tests[$"{testId} {count}"] = action;
+    }
+
+    public static Func<Task> GetTest(string id)
+    {
+        return Tests[id];
     }
 }

@@ -75,8 +75,6 @@ public class SampleSourceGenerator : ISourceGenerator
         var isAwaitable = methodSymbol.IsAsync
                                     || methodSymbol.IsAwaitableNonDynamic(semanticModel, method.MethodDeclarationSyntax.SpanStart);
         
-        var methodAwaitablePrefix = isAwaitable? "await " : string.Empty;
-        
         foreach (var attributeData in attributes)
         {
             switch (attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
@@ -84,15 +82,9 @@ public class SampleSourceGenerator : ISourceGenerator
                 case "global::TUnit.Core.TestAttribute":
                     foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
                     {
-                        var usingDisposablePrefix = GetDisposableUsingPrefix(methodSymbol.ContainingType);
-                        sourceBuilder.AppendLine($$"""
-                                                        global::TUnit.Engine.TestDictionary.AddTest("", async () => 
-                                                        {
-                                                            {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
-                                                            {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
-                                                            await global::System.Threading.Tasks.Task.CompletedTask;
-                                                        });
-                                                 """);
+                        sourceBuilder.AppendLine(
+                            GenerateTestInvocationCode(methodSymbol, classInvocation, isAwaitable)
+                        );
                     }
                     break;
                 case "global::TUnit.Core.DataDrivenTestAttribute":
@@ -103,6 +95,62 @@ public class SampleSourceGenerator : ISourceGenerator
                     break;
             }
         }
+    }
+
+    private string GenerateTestInvocationCode(IMethodSymbol methodSymbol, string classInvocation,
+        bool isMethodAwaitable)
+    {
+        var testId = GetTestId(methodSymbol);
+        
+        var methodAwaitablePrefix = isMethodAwaitable? "await " : string.Empty;
+
+        var usingDisposablePrefix = GetDisposableUsingPrefix(methodSymbol.ContainingType);
+        
+        return $$"""
+                        global::TUnit.Engine.TestDictionary.AddTest("{{testId}}", async () =>
+                        {
+                            {{GenerateOneTimeSetUps()}}
+                            {{GenerateSetUps()}}
+                            {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
+                            {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
+                            await global::System.Threading.Tasks.Task.CompletedTask;
+                            {{GenerateTearDowns()}}
+                            
+                            // TODO: This needs logic as to when it's called
+                            {{GenerateOneTimeTearDowns()}}
+                        });
+                 """;
+    }
+
+    private string GenerateOneTimeSetUps()
+    {
+        // TODO: Store this Task within a concurrent dictionary, so we can just re-await the initial call
+        return $"// No One Time Set Ups";
+    }
+    
+    private string GenerateSetUps()
+    {
+        return $"// No Instance Set Ups";
+    }
+    
+    private string GenerateOneTimeTearDowns()
+    {
+        return $"// No One Time Tear Downs";
+    }
+    
+    private string GenerateTearDowns()
+    {
+        return $"// No Instance Tear Downs";
+    }
+
+    private string GetTestId(IMethodSymbol methodSymbol)
+    {
+        var containingType =
+            methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+
+        var methodName = methodSymbol.Name;
+
+        return $"{containingType} | {methodName}";
     }
 
     private string GetDisposableUsingPrefix(INamedTypeSymbol type)
@@ -195,18 +243,26 @@ public class SampleSourceGenerator : ISourceGenerator
         }
     }
 
-    private string GenerateTestMethodInvocation(IMethodSymbol method)
+    private string GenerateTestMethodInvocation(IMethodSymbol method, params string[] methodArguments)
     {
         var methodName = method.Name;
+
+        var args = string.Join(", ", methodArguments);
 
         if (method.GetAttributes().Any(x =>
                 x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                     is "global::TUnit.Core.TimeoutAttribute"))
         {
-            return $"{methodName}(EngineCancellationToken.Token)";
+            // TODO : We don't want Engine cancellation token? We want a new linked one that'll cancel after the specified timeout in the attribute
+            if(string.IsNullOrEmpty(args))
+            {
+                return $"{methodName}(EngineCancellationToken.Token)";
+            }
+
+            return $"{methodName}({args}, EngineCancellationToken.Token)";
         }
         
-        return $"{methodName}()";
+        return $"{methodName}({args})";
     }
 }
 
