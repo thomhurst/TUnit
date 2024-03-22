@@ -22,9 +22,5 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.0"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\..\TUnit.Core\TUnit.Core.csproj" />
-    </ItemGroup>
-
 
 </Project>

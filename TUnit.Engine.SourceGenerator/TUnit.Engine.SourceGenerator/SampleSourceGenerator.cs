@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Engine.SourceGenerator.Extensions;
 
 namespace TUnit.Engine.SourceGenerator;
 
@@ -69,6 +71,14 @@ public class SampleSourceGenerator : ISourceGenerator
         }
 
         var attributes = symbol.GetAttributes();
+
+        var isAsyncMethod = methodSymbol.ReturnType
+            .ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+            .StartsWith($"global::{typeof(Task).FullName}");
+
+        var asyncKeyword = isAsyncMethod ? "async " : string.Empty;
+        
+        var methodAwaitablePrefix = isAsyncMethod ? "await " : string.Empty;
         
         foreach (var attributeData in attributes)
         {
@@ -77,10 +87,12 @@ public class SampleSourceGenerator : ISourceGenerator
                 case "global::TUnit.Core.TestAttribute":
                     foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
                     {
+                        var usingDisposablePrefix = GetDisposableUsingPrefix(methodSymbol.ContainingType);
                         sourceBuilder.AppendLine($$"""
-                                                        TestDictionary.AddTest("", () => 
+                                                        TestDictionary.AddTest("", {{asyncKeyword}}() => 
                                                         {
-                                                            {{classInvocation}}.{{GenerateTestMethodInvocation(methodSymbol)}}
+                                                            {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
+                                                            {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
                                                         });
                                                  """);
                     }
@@ -93,6 +105,21 @@ public class SampleSourceGenerator : ISourceGenerator
                     break;
             }
         }
+    }
+
+    private string GetDisposableUsingPrefix(INamedTypeSymbol type)
+    {
+        if (type.IsAsyncDisposable())
+        {
+            return "await using ";
+        }
+
+        if (type.IsDisposable())
+        {
+            return "using ";
+        }
+
+        return string.Empty;
     }
 
     private IEnumerable<string> GenerateClassInvocations(INamedTypeSymbol namedTypeSymbol)
