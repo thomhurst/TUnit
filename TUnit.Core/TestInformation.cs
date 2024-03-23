@@ -21,7 +21,7 @@ public record TestInformation
     public required string[]? TestMethodParameterTypes { get; init; }
     public required object?[]? TestMethodArguments { get; init; }
     
-    public required string[]? TestClassParameterTypes { get; init; }
+    public required Type[]? TestClassParameterTypes { get; init; }
     public required object?[]? TestClassArguments { get; init; }
     
     public required List<string> Categories { get; init; }

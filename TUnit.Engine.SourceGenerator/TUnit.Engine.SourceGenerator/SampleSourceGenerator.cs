@@ -112,6 +112,8 @@ public class SampleSourceGenerator : ISourceGenerator
                  
                             {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
                  
+                            var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
+                 
                             using var testContext = new global::TUnit.Core.TestContext(new global::TUnit.Core.TestInformation()
                             {
                                 Categories = [],
@@ -121,12 +123,12 @@ public class SampleSourceGenerator : ISourceGenerator
                                 TestClassArguments = [],
                                 TestMethodArguments = [],
                                 TestClassParameterTypes = classInstance.GetType().GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
-                                TestMethodParameterTypes = [],
+                                TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
                                 NotInParallelConstraintKeys = [],
                                 RepeatCount = 0,
                                 RetryCount = 0,
-                                MethodInfo = null, // global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}}),
-                                TestName = "",
+                                MethodInfo = methodInfo,
+                                TestName = "{{methodSymbol.Name}}",
                                 CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
                             });
                             

@@ -26,4 +26,8 @@
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="GeneratedCode\" />
+    </ItemGroup>
+
 </Project>
