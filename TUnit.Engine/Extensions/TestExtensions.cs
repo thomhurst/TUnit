@@ -28,7 +28,7 @@ internal static class TestExtensions
             TestClassArguments = testCase.GetPropertyValue(TUnitTestProperties.ClassArguments, null as string).DeserializeArgumentsSafely(),
             TestMethodArguments = testCase.GetPropertyValue(TUnitTestProperties.MethodArguments, null as string).DeserializeArgumentsSafely(),
             TestClassParameterTypes = classParameterTypes.Select(x => x.GetType()).ToArray(),
-            TestMethodParameterTypes = methodParameterTypes,
+            TestMethodParameterTypes = methodParameterTypes.Select(x => x.GetType()).ToArray(),
             Timeout = timeoutMilliseconds is null ? null : TimeSpan.FromMilliseconds(timeoutMilliseconds.Value),
             RepeatCount = testCase.GetPropertyValue(TUnitTestProperties.RepeatCount, 0),
             RetryCount = testCase.GetPropertyValue(TUnitTestProperties.RetryCount, 0),
