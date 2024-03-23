@@ -105,20 +105,41 @@ public class SampleSourceGenerator : ISourceGenerator
         var methodAwaitablePrefix = isMethodAwaitable? "await " : string.Empty;
 
         var usingDisposablePrefix = GetDisposableUsingPrefix(methodSymbol.ContainingType);
-        
         return $$"""
-                        global::TUnit.Engine.TestDictionary.AddTest("{{testId}}", async () =>
+                        global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => global::System.Threading.Tasks.Task.Run(async () =>
                         {
                             {{GenerateOneTimeSetUps()}}
-                            {{GenerateSetUps()}}
+                 
                             {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
+                 
+                            using var testContext = new global::TUnit.Core.TestContext(new global::TUnit.Core.TestInformation()
+                            {
+                                Categories = [],
+                                ClassInstance = classInstance,
+                                ClassType = classInstance.GetType(),
+                                Timeout = global::System.TimeSpan.Zero,
+                                TestClassArguments = [],
+                                TestMethodArguments = [],
+                                TestClassParameterTypes = classInstance.GetType().GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
+                                TestMethodParameterTypes = [],
+                                NotInParallelConstraintKeys = [],
+                                RepeatCount = 0,
+                                RetryCount = 0,
+                                MethodInfo = null, // global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}}),
+                                TestName = "",
+                                CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
+                            });
+                            
+                            global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
+                            
+                            {{GenerateSetUps()}}
                             {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
                             await global::System.Threading.Tasks.Task.CompletedTask;
                             {{GenerateTearDowns()}}
                             
                             // TODO: This needs logic as to when it's called
                             {{GenerateOneTimeTearDowns()}}
-                        });
+                        }));
                  """;
     }
 

@@ -4,7 +4,7 @@ namespace TUnit.Core;
 
 public record TestInformation
 {
-    internal TestInformation()
+    public TestInformation()
     {
         LazyTestAndClassAttributes = new(
             () => MethodInfo!.GetCustomAttributes()

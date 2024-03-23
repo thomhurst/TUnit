@@ -112,8 +112,6 @@ internal class SingleTestExecutor
                 
                 _consoleInterceptor.SetModule(testContext);
                 
-                TestContext.Current = testContext;
-
                 var customTestAttributes = methodInfo.GetCustomAttributes()
                     .Concat(classType.GetCustomAttributes())
                     .OfType<ITestAttribute>();
