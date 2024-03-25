@@ -29,7 +29,7 @@ public class SetUpWriter
         
         foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
         {
-            stringBuilder.AppendLine($"                   await RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}());");
+            stringBuilder.AppendLine($"               await RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}());");
         }
         
         return stringBuilder.ToString();

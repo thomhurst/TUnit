@@ -199,7 +199,7 @@ public class SampleSourceGenerator : ISourceGenerator
                                 
                                 global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
                                 
-                                {{SetUpWriter.GenerateCode(classType)}}
+                 {{SetUpWriter.GenerateCode(classType)}}
                                 {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
                                 await global::System.Threading.Tasks.Task.CompletedTask;
                             }
