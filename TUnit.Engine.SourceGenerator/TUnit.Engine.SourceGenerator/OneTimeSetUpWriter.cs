@@ -34,7 +34,7 @@ public class OneTimeSetUpWriter
         
         foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
         {
-            stringBuilder.AppendLine($"                   await RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}());");
+            stringBuilder.AppendLine($"                   await RunAsync({classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name});");
         }
 
         stringBuilder.AppendLine("               });");
