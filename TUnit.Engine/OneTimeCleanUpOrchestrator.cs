@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace TUnit.Engine;
 
-public static class OneTimeTearDownOrchestrator
+public static class OneTimeCleanUpOrchestrator
 {
     private static readonly ConcurrentDictionary<Type, int> RemainingTests = new();
 

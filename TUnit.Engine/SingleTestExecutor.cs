@@ -77,7 +77,7 @@ internal class SingleTestExecutor
 
         foreach (var test in tests.AllTests)
         {
-            OneTimeTearDownOrchestrator.RegisterTest(Type.GetType(test.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, string.Empty))!);
+            OneTimeCleanUpOrchestrator.RegisterTest(Type.GetType(test.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, string.Empty))!);
         }
     }
 
