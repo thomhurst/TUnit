@@ -143,15 +143,24 @@ public class SampleSourceGenerator : ISourceGenerator
         var testId = GetTestId(methodSymbol);
         
         var methodAwaitablePrefix = isMethodAwaitable? "await " : string.Empty;
+        
+        var classType = methodSymbol.ContainingType;
 
-        var fullyQualifiedClassType = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        var disposeCall = classType.IsAsyncDisposable()
+            ? "await (classInstance?.DisposeAsync() ?? global::System.Threading.Tasks.ValueTask.CompletedTask);"
+            : classType.IsDisposable()
+                ? "classInstance?.Dispose();"
+                : string.Empty;
+        
+        var fullyQualifiedClassType = classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
                         global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => global::System.Threading.Tasks.Task.Run(async () =>
                         {
+                            {{fullyQualifiedClassType}} classInstance = null!;
                             var teardownExceptions = new global::System.Collections.Generic.List<global::System.Exception>();
                             try
                             {
-                 {{OneTimeSetUpWriter.GenerateCode(methodSymbol.ContainingType)}}
+                 {{OneTimeSetUpWriter.GenerateCode(classType)}}
                  {{classInvocation}};
                      
                                 var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
@@ -176,19 +185,21 @@ public class SampleSourceGenerator : ISourceGenerator
                                 
                                 global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
                                 
-                                {{SetUpWriter.GenerateCode(methodSymbol.ContainingType)}}
+                                {{SetUpWriter.GenerateCode(classType)}}
                                 {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
                                 await global::System.Threading.Tasks.Task.CompletedTask;
                             }
                             finally
                             {
-                                {{CleanUpWriter.GenerateCode(methodSymbol.ContainingType)}}
+                                {{CleanUpWriter.GenerateCode(classType)}}
                                 var remainingTests = global::TUnit.Engine.OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(typeof({{fullyQualifiedClassType}}));
                                 
                                 if (remainingTests == 0)
                                 {
-                                    {{OneTimeCleanUpWriter.GenerateCode(methodSymbol.ContainingType)}}
+                                    {{OneTimeCleanUpWriter.GenerateCode(classType)}}
                                 }
+                                
+                                {{disposeCall}}
                             }
                         }));
                  """;
@@ -275,7 +286,7 @@ public class SampleSourceGenerator : ISourceGenerator
         {
             yield return $"""
                                          object[] classArgs = [];
-                                         {usingDisposablePrefix}var classInstance = new {className}()
+                                         classInstance = new {className}()
                           """;
         }
 
@@ -290,7 +301,7 @@ public class SampleSourceGenerator : ISourceGenerator
             yield return $"""
                                          var arg = {arg};
                                          object[] classArgs = [arg];
-                                         {usingDisposablePrefix}var classInstance = new {className}(arg)
+                                         classInstance = new {className}(arg)
                           """;
         }
         
@@ -301,7 +312,7 @@ public class SampleSourceGenerator : ISourceGenerator
             yield return $"""
                                          var arg = new {classDataAttribute.ConstructorArguments.First().Value}();
                                          object[] classArgs = [arg];
-                                         {usingDisposablePrefix}var classInstance = new {className}(arg)
+                                         classInstance = new {className}(arg)
                           """;
         }
         
@@ -320,7 +331,7 @@ public class SampleSourceGenerator : ISourceGenerator
                 yield return $"""
                                              var arg = new {genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}();
                                              object[] classArgs = [arg];
-                                             {usingDisposablePrefix}var classInstance = new {className}(arg)
+                                             classInstance = new {className}(arg)
                               """;
             }
             
@@ -331,7 +342,7 @@ public class SampleSourceGenerator : ISourceGenerator
                 yield return $"""
                                              var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}());
                                              object[] classArgs = [arg];
-                                             {usingDisposablePrefix}var classInstance = return new {className}(arg);
+                                             classInstance = return new {className}(arg);
                               """;
             }
             
@@ -342,7 +353,7 @@ public class SampleSourceGenerator : ISourceGenerator
                 yield return $"""
                                              var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}());
                                              object[] classArgs = [arg];
-                                             {usingDisposablePrefix}var classInstance = return new {className}(arg);
+                                             classInstance = return new {className}(arg);
                               """;
             }
             
@@ -353,7 +364,7 @@ public class SampleSourceGenerator : ISourceGenerator
                 yield return $"""
                                              var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey("{key}", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}());
                                              object[] classArgs = [arg];
-                                             {usingDisposablePrefix}var classInstance = return new {className}(arg);
+                                             classInstance = return new {className}(arg);
                               """;
             }
         }
