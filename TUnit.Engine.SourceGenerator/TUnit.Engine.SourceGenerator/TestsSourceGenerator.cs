@@ -13,7 +13,7 @@ namespace TUnit.Engine.SourceGenerator;
 /// When using a simple text file as a baseline, we can create a non-incremental source generator.
 /// </summary>
 [Generator]
-public class SampleSourceGenerator : ISourceGenerator
+public class TestsSourceGenerator : ISourceGenerator
 {
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -312,8 +312,6 @@ public class SampleSourceGenerator : ISourceGenerator
     {
         var className =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-
-        var usingDisposablePrefix = GetDisposableUsingPrefix(namedTypeSymbol);
         
         if (namedTypeSymbol.InstanceConstructors.First().Parameters.IsDefaultOrEmpty)
         {
@@ -325,7 +323,7 @@ public class SampleSourceGenerator : ISourceGenerator
 
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes().Where(x =>
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                         is "global::TUnit.Core.DataSourceDrivenTestAttribute"))
+                         is "global::TUnit.Core.MethodDataAttribute"))
         {
             var arg = dataSourceDrivenTestAttribute.ConstructorArguments.Length == 1
                 ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.First().Value}()"

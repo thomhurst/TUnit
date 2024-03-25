@@ -18,6 +18,7 @@ internal static class WellKnown
         public const string Arguments = "global::TUnit.Core.ArgumentsAttribute";
         public const string DataDrivenTest = "global::TUnit.Core.DataDrivenTestAttribute";
         public const string DataSourceDrivenTest = "global::TUnit.Core.DataSourceDrivenTestAttribute";
+        public const string MethodData = "global::TUnit.Core.MethodDataAttribute";
         
         public static readonly string[] TestAttributes =
         [
