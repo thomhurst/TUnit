@@ -30,6 +30,42 @@ public class SampleSourceGenerator : ISourceGenerator
 
                                               file class TestGenerator
                                               {
+                                                  private static async global::System.Threading.Tasks.Task RunAsync(global::System.Action action)
+                                                  {
+                                                      action();
+                                                      await global::System.Threading.Tasks.Task.CompletedTask;
+                                                  }
+                                                  
+                                                  private static async global::System.Threading.Tasks.Task RunAsync(global::System.Func<global::System.Threading.Tasks.Task> action)
+                                                  {
+                                                      await action();
+                                                  }
+                                              
+                                                  private static async global::System.Threading.Tasks.Task RunSafelyAsync(global::System.Action action, global::System.Collections.Generic.List<global::System.Exception> exceptions)
+                                                  {
+                                                    try
+                                                    {
+                                                        action();
+                                                        await global::System.Threading.Tasks.Task.CompletedTask;
+                                                    }
+                                                    catch (global::System.Exception exception)
+                                                    {
+                                                        exceptions.Add(exception);
+                                                    }
+                                                  }
+                                                  
+                                                  private static async global::System.Threading.Tasks.Task RunSafelyAsync(global::System.Func<global::System.Threading.Tasks.Task> action, global::System.Collections.Generic.List<global::System.Exception> exceptions)
+                                                  {
+                                                    try
+                                                    {
+                                                        await action();
+                                                    }
+                                                    catch (global::System.Exception exception)
+                                                    {
+                                                        exceptions.Add(exception);
+                                                    }
+                                                  }
+                                                    
                                                   [ModuleInitializer]
                                                   public static void Initialise()
                                                   {
@@ -115,7 +151,7 @@ public class SampleSourceGenerator : ISourceGenerator
                             var teardownExceptions = new global::System.Collections.Generic.List<global::System.Exception>();
                             try
                             {
-                 {{GenerateOneTimeSetUps(methodSymbol.ContainingType, semanticModel)}}
+                 {{OneTimeSetUpWriter.GenerateCode(methodSymbol.ContainingType)}}
                  {{classInvocation}};
                      
                                 var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
@@ -140,18 +176,18 @@ public class SampleSourceGenerator : ISourceGenerator
                                 
                                 global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
                                 
-                                {{GenerateSetUps(methodSymbol.ContainingType, semanticModel)}}
+                                {{SetUpWriter.GenerateCode(methodSymbol.ContainingType)}}
                                 {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
                                 await global::System.Threading.Tasks.Task.CompletedTask;
                             }
                             finally
                             {
-                                {{GenerateTearDowns(methodSymbol.ContainingType, semanticModel)}}
+                                {{CleanUpWriter.GenerateCode(methodSymbol.ContainingType)}}
                                 var remainingTests = global::TUnit.Engine.OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(typeof({{fullyQualifiedClassType}}));
                                 
                                 if (remainingTests == 0)
                                 {
-                                    {{GenerateOneTimeTearDowns(methodSymbol.ContainingType, semanticModel)}}
+                                    {{OneTimeCleanUpWriter.GenerateCode(methodSymbol.ContainingType)}}
                                 }
                             }
                         }));
@@ -201,96 +237,6 @@ public class SampleSourceGenerator : ISourceGenerator
     private IEnumerable<AttributeData> GetMethodAndClassAttributes(IMethodSymbol methodSymbol)
     {
         return [..methodSymbol.GetAttributes(), ..methodSymbol.ContainingType.GetAttributes()];
-    }
-
-    private string GenerateMethodsWithAttribute(INamedTypeSymbol classType, 
-        SemanticModel semanticModel, 
-        string fullyQualifiedAttributeLocator,
-        bool delayThrow)
-    {
-        var oneTimeSetUpMethods = classType
-            .GetMembersIncludingBase()
-            .OfType<IMethodSymbol>()
-            .Where(x => x.IsStatic)
-            .Where(x => x.DeclaredAccessibility == Accessibility.Public)
-            .Where(x => x.GetAttributes()
-                .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == fullyQualifiedAttributeLocator)
-            )
-            .ToList();
-        
-        if(!oneTimeSetUpMethods.Any())
-        {
-            return string.Empty;
-        }
-
-        var stringBuilder = new StringBuilder();
-        
-        foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
-        {
-            var awaitablePrefix = oneTimeSetUpMethod.IsAwaitableNonDynamic(semanticModel,
-                oneTimeSetUpMethod.DeclaringSyntaxReferences.First().Span.Start)
-                ? "await "
-                : string.Empty;
-
-            if (delayThrow)
-            {
-                stringBuilder.AppendLine($$"""
-                                                          try
-                                                          {
-                                                             {{awaitablePrefix}}{{classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}}.{{oneTimeSetUpMethod.Name}}();
-                                                          }
-                                                          catch (Exception exception)
-                                                          {
-                                                             teardownExceptions.Add(exception);
-                                                          }
-                                           """);
-            }
-            else
-            {
-                stringBuilder.AppendLine($"""
-                                                         {awaitablePrefix}{classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}();
-                                          """);
-            }
-        }
-
-        return stringBuilder.ToString();
-    }
-
-    private string GenerateOneTimeSetUps(INamedTypeSymbol namedTypeSymbol, SemanticModel semanticModel)
-    {
-        var setUpInvocation = GenerateMethodsWithAttribute(namedTypeSymbol, semanticModel,
-            "global::TUnit.Core.OnlyOnceSetUpAttribute",
-            false);
-
-        return $$"""
-                              await global::TUnit.Engine.OneTimeSetUpOrchestrator.Tasks.GetOrAdd(typeof({{namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}}), async _ =>
-                              {
-                              {{setUpInvocation}}
-                                  await Task.CompletedTask;
-                              });
-               """;
-    }
-
-    private string GenerateSetUps(INamedTypeSymbol namedTypeSymbol, SemanticModel semanticModel)
-    {
-        return GenerateMethodsWithAttribute(namedTypeSymbol, semanticModel,
-            "global::TUnit.Core.SetUpAttribute",
-            false);
-    }
-    
-    private string GenerateOneTimeTearDowns(INamedTypeSymbol namedTypeSymbol, SemanticModel semanticModel)
-    {
-        return GenerateMethodsWithAttribute(namedTypeSymbol, semanticModel,
-            "global::TUnit.Core.OnlyOnceCleanUpAttribute",
-            true);
-    }
-    
-    private string GenerateTearDowns(INamedTypeSymbol namedTypeSymbol, SemanticModel semanticModel)
-    {
-        return GenerateMethodsWithAttribute(namedTypeSymbol, semanticModel,
-            "global::TUnit.Core.CleanUpAttribute",
-            true);
     }
 
     private string GetTestId(IMethodSymbol methodSymbol)

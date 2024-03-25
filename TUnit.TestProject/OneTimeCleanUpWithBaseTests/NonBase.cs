@@ -1,17 +1,17 @@
 ﻿using TUnit.Core;
 
-namespace TUnit.TestProject.OneTimeSetUpWithBaseTests;
+namespace TUnit.TestProject.OneTimeCleanUpWithBaseTests;
 
 public class NonBase : Base1
 {
-    [OnlyOnceSetUp]
-    public static Task NonBaseOneTimeSetup()
+    [OnlyOnceCleanUp]
+    public static Task NonBaseOneTimeCleanUp()
     {
         return Task.CompletedTask;
     }
     
-    [SetUp]
-    public Task NonBaseSetUp()
+    [CleanUp]
+    public Task NonBaseCleanUp()
     {
         return Task.CompletedTask;
     }

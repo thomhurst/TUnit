@@ -9,4 +9,10 @@ public class Base1 : Base2
     {
         return Task.CompletedTask;
     }
+    
+    [SetUp]
+    public Task Base1SetUp()
+    {
+        return Task.CompletedTask;
+    }
 }
