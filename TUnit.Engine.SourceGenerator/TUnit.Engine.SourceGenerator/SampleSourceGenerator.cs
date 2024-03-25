@@ -323,13 +323,13 @@ public class SampleSourceGenerator : ISourceGenerator
                           """;
         }
 
-        foreach (var methodDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
+        foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes().Where(x =>
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                         is "global::TUnit.Core.MethodDataAttribute"))
+                         is "global::TUnit.Core.DataSourceDrivenTestAttribute"))
         {
-            var arg = methodDataAttribute.ConstructorArguments.Length == 1
-                ? $"{className}.{methodDataAttribute.ConstructorArguments.First().Value}()"
-                : $"{methodDataAttribute.ConstructorArguments[0].Value}.{methodDataAttribute.ConstructorArguments[1].Value}()";
+            var arg = dataSourceDrivenTestAttribute.ConstructorArguments.Length == 1
+                ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.First().Value}()"
+                : $"{dataSourceDrivenTestAttribute.ConstructorArguments[0].Value}.{dataSourceDrivenTestAttribute.ConstructorArguments[1].Value}()";
 
             yield return $"""
                                          var arg = {arg};

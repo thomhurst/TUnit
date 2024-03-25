@@ -130,7 +130,7 @@ internal class SingleTestExecutor : IDataProducer
                 
                 _consoleInterceptor.SetModule(testContext);
                 
-                TestContext.Current = testContext;
+                TestDictionary.TestContexts.Value = testContext;
 
                 var customTestAttributes = methodInfo.GetCustomAttributes()
                     .Concat(classType.GetCustomAttributes())
