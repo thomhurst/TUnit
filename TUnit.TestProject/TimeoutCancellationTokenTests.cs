@@ -5,6 +5,7 @@ using TUnit.Core;
 namespace TUnit.TestProject;
 
 [MethodData(nameof(DataSource))]
+[TestCategory("Timeout Cancellation Token Tests")]
 public class TimeoutCancellationTokenTests
 {
     public TimeoutCancellationTokenTests(int value)
@@ -34,6 +35,7 @@ public class TimeoutCancellationTokenTests
     
     [CombinativeTest]
     [Timeout(30_000)]
+    [TestCategory("Blah")]
     public async Task CombinativeTest(
         [CombinativeValues(1, 1, 1)] int value, 
         CancellationToken cancellationToken)
