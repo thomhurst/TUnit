@@ -28,16 +28,16 @@ public class OneTimeSetUpWriter
         var stringBuilder = new StringBuilder();
 
         stringBuilder.AppendLine($$"""
-                                   await global::TUnit.Engine.OneTimeSetUpOrchestrator.Tasks.GetOrAdd(typeof({{classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}}), async _ =>
+                                              await global::TUnit.Engine.OneTimeSetUpOrchestrator.Tasks.GetOrAdd(typeof({{classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}}), async _ =>
                                    {
                                    """);
         
         foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
         {
-            stringBuilder.AppendLine($"                   await RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}());");
+            stringBuilder.AppendLine($"               await RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}());");
         }
 
-        stringBuilder.AppendLine("});");
+        stringBuilder.AppendLine("           });");
 
         return stringBuilder.ToString();
     }
