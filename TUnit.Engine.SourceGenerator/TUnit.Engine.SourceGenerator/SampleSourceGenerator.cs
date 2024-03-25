@@ -205,12 +205,12 @@ public class SampleSourceGenerator : ISourceGenerator
                             }
                             finally
                             {
-                            {{CleanUpWriter.GenerateCode(classType)}}
+                 {{CleanUpWriter.GenerateCode(classType)}}
                                 var remainingTests = global::TUnit.Engine.OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(typeof({{fullyQualifiedClassType}}));
                                 
                                 if (remainingTests == 0)
                                 {
-                                {{OneTimeCleanUpWriter.GenerateCode(classType)}}
+                 {{OneTimeCleanUpWriter.GenerateCode(classType)}}
                                 }
                                 
                                 {{disposeCall}}
