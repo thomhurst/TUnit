@@ -1,13 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project>
-    
+
     <PropertyGroup>
         <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <!--
           !!! IMPORTANT !!!
@@ -19,5 +19,9 @@
             <TypeFullName>TUnit.Engine.TestingPlatformBuilderHook</TypeFullName>
         </TestingPlatformBuilderHook>
     </ItemGroup>
-    
+
+    <ItemGroup>
+        <PackageReference Include="TUnit.Engine.SourceGenerator" />
+    </ItemGroup>
+
 </Project>

@@ -108,14 +108,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo("1");
     }
 
-    [DataSourceDrivenTest(nameof(One))]
+    [MethodData(nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource1(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(nameof(One))]
+    [MethodData(nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource2(int value)
     {
@@ -123,14 +123,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(nameof(Two))]
+    [MethodData(nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource3(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(nameof(Two))]
+    [MethodData(nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource4(int value)
     {
@@ -138,14 +138,14 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(typeof(TestDataSources), nameof(One))]
+    [MethodData(typeof(TestDataSources), nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource5(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(typeof(TestDataSources), nameof(One))]
+    [MethodData(typeof(TestDataSources), nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource6(int value)
     {
@@ -153,7 +153,7 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
     
-    [DataSourceDrivenTest(typeof(TestDataSources), "Two")]
+    [MethodData(typeof(TestDataSources), "Two")]
     [TestCategory("Pass")]
     public async Task TestDataSource_Wrong(int value)
     {
@@ -161,14 +161,14 @@ public class Tests
     }
 
 
-    [DataSourceDrivenTest(typeof(TestDataSources), nameof(Two))]
+    [MethodData(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource7(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(typeof(TestDataSources), nameof(Two))]
+    [MethodData(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource8(int value)
     {

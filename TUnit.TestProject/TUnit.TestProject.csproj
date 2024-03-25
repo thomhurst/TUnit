@@ -12,6 +12,8 @@
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>GeneratedCode</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
     <ItemGroup>

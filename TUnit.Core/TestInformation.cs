@@ -4,7 +4,7 @@ namespace TUnit.Core;
 
 public record TestInformation
 {
-    internal TestInformation()
+    public TestInformation()
     {
         LazyTestAndClassAttributes = new(
             () => MethodInfo!.GetCustomAttributes()
@@ -18,10 +18,10 @@ public record TestInformation
     
     public required string TestName { get; init; }
     
-    public required IReadOnlyList<Type?>? TestMethodParameterTypes { get; init; }
+    public required Type[]? TestMethodParameterTypes { get; init; }
     public required object?[]? TestMethodArguments { get; init; }
     
-    public required IReadOnlyList<Type?>? TestClassParameterTypes { get; init; }
+    public required Type[]? TestClassParameterTypes { get; init; }
     public required object?[]? TestClassArguments { get; init; }
     
     public required IReadOnlyList<string> Categories { get; init; }
