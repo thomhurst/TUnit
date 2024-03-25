@@ -5,18 +5,25 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     </PropertyGroup>
-
+    
     <ItemGroup>
         <PackageReference Include="Hardware.Info" Version="100.0.1.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
         <PackageReference Include="Microsoft.Testing.Platform" Version="1.0.2" />
-        <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0" />
-        <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.9.0" />
+        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="TUnit.Engine.props">
+            <Pack>true</Pack>
+            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     </ItemGroup>
-
+    
 </Project>

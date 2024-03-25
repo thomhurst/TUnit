@@ -9,12 +9,11 @@ using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
-public class GenerateVersionModule : Module<string>
+public class GenerateVersionModule : Module<GitVersionInformation>
 {
-    protected override async Task<string?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected override async Task<GitVersionInformation?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        var git = await context.Git().Versioning.GetGitVersioningInformation();
-        return git.SemVer;
+        return await context.Git().Versioning.GetGitVersioningInformation();
     }
 }
 
@@ -30,7 +29,8 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         
         var version = versionResult.Value!;
         
-        var packageVersion = version;
+        // TODO: Full version
+        var packageVersion = version.NuGetVersionV2;
         
         if (context.Git().Information.BranchName == "main")
         {
@@ -39,8 +39,8 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
 
         await projects.Value!.SelectAsync(async project =>
         {
-            return await context.DotNet().Pack(new DotNetPackOptions(project) { Properties = new[] { new KeyValue("Version", version!), new KeyValue("PackageVersion", packageVersion!) }, IncludeSource = true, }, cancellationToken);
+            return await context.DotNet().Pack(new DotNetPackOptions(project) { Properties = new[] { new KeyValue("Version", version.SemVer!), new KeyValue("PackageVersion", packageVersion!) }, IncludeSource = true, }, cancellationToken);
         }, cancellationToken: cancellationToken).ProcessOneAtATime();
-        return projects.Value!.Select(x => new PackedProject(x.NameWithoutExtension, version!)).ToList();
+        return projects.Value!.Select(x => new PackedProject(x.NameWithoutExtension, version.SemVer!)).ToList();
     }
 }

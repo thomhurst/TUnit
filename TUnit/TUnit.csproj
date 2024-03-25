@@ -10,7 +10,6 @@
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
       <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
-      <ProjectReference Include="..\TUnit.TestAdapter\TUnit.TestAdapter.csproj" />
     </ItemGroup>
     
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">

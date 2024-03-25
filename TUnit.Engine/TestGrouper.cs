@@ -1,31 +1,33 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
+using TUnit.Engine.Models.Properties;
 
 namespace TUnit.Engine;
 
 internal class TestGrouper
 {
-    public GroupedTests OrganiseTests(IEnumerable<TestCase> testCases)
+    public GroupedTests OrganiseTests(IEnumerable<TestNode> testCases)
     {
         var allTestsOrderedByClass = testCases
-            .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
+            .GroupBy(x => x.GetRequiredProperty<ClassInformationProperty>().AssemblyQualifiedName)
             .SelectMany(x => x)
-            .OrderByDescending(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue))
+            .OrderByDescending(x => x.GetRequiredProperty<OrderProperty>().Order)
             .ToList();
 
-        var notInParallel = new Queue<TestCase>();
+        var notInParallel = new Queue<TestNode>();
         var keyedNotInParallel = new List<NotInParallelTestCase>();
-        var parallel = new Queue<TestCase>();
+        var parallel = new Queue<TestNode>();
 
         foreach (var test in allTestsOrderedByClass)
         {
-            var notInParallelConstraintKey = test.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]);
+            var notInParallelConstraintKey = test.GetRequiredProperty<NotInParallelConstraintKeysProperty>().ConstraintKeys;
             
             if (notInParallelConstraintKey == null)
             {
                 parallel.Enqueue(test);
             }
-            else if (notInParallelConstraintKey.Length == 0)
+            else if (notInParallelConstraintKey.Count == 0)
             {
                 notInParallel.Enqueue(test);
             }
@@ -33,8 +35,8 @@ internal class TestGrouper
             {
                 keyedNotInParallel.Add(new NotInParallelTestCase
                 {
-                    TestCase = test,
-                    ConstraintKeys = new ConstraintKeysCollection(notInParallelConstraintKey)
+                    TestNode = test,
+                    ConstraintKeys = notInParallelConstraintKey
                 });
             }
         }

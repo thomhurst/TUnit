@@ -1,128 +1,106 @@
 ﻿using System.Reflection;
-using Microsoft.TestPlatform.AdapterUtilities;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
-using TUnit.Engine.Constants;
+using TUnit.Engine.Models.Properties;
 
 namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
-    public static TestInformation ToTestInformation(this TestCase testCase, Type classType, object? classInstance, MethodInfo methodInfo)
+    public static TestInformation ToTestInformation(this TestNode testNode, Type classType, object? classInstance, MethodInfo methodInfo)
     {
-        var classParameterTypes =
-            testCase.GetPropertyValue(TUnitTestProperties.ClassParameterTypeNames, null as string[]);
-        
-        var methodParameterTypes =
-            testCase.GetPropertyValue(TUnitTestProperties.MethodParameterTypeNames, null as string[]);
-
-        var timeoutMilliseconds = testCase.GetPropertyValue(TUnitTestProperties.Timeout, null as double?);
-        
         return new TestInformation
         {
-            TestName = testCase.GetPropertyValue(TUnitTestProperties.TestName, ""),
+            TestName = testNode.GetRequiredProperty<TestInformationProperty>().TestName,
             MethodInfo = methodInfo,
             ClassType = classType,
             ClassInstance = classInstance,
-            Categories = testCase.GetPropertyValue(TUnitTestProperties.Category, Array.Empty<string>()).ToList(),
-            TestClassArguments = testCase.GetPropertyValue(TUnitTestProperties.ClassArguments, null as string).DeserializeArgumentsSafely(),
-            TestMethodArguments = testCase.GetPropertyValue(TUnitTestProperties.MethodArguments, null as string).DeserializeArgumentsSafely(),
-            TestClassParameterTypes = classParameterTypes,
-            TestMethodParameterTypes = methodParameterTypes,
-            Timeout = timeoutMilliseconds is null ? null : TimeSpan.FromMilliseconds(timeoutMilliseconds.Value),
-            RepeatCount = testCase.GetPropertyValue(TUnitTestProperties.RepeatCount, 0),
-            RetryCount = testCase.GetPropertyValue(TUnitTestProperties.RetryCount, 0),
-            NotInParallelConstraintKeys = testCase.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]),
-            CustomProperties = testCase.Traits.ToDictionary(x => x.Name, x => x.Value).AsReadOnly()
+            Categories = testNode.GetRequiredProperty<CategoriesProperty>().Categories ?? [],
+            TestClassArguments = testNode.GetRequiredProperty<ClassArgumentsProperty>().Arguments,
+            TestMethodArguments = testNode.GetRequiredProperty<MethodArgumentsProperty>().Arguments,
+            TestClassParameterTypes = testNode.GetRequiredProperty<ClassParameterTypesProperty>().FullyQualifiedTypeNames?.Select(Type.GetType).ToArray(),
+            TestMethodParameterTypes = testNode.GetRequiredProperty<MethodParameterTypesProperty>().FullyQualifiedTypeNames?.Select(Type.GetType).ToArray(),
+            Timeout = testNode.GetRequiredProperty<TimeoutProperty>().Timeout,
+            RepeatCount = testNode.GetRequiredProperty<RepeatCountProperty>().Count,
+            RetryCount = testNode.GetRequiredProperty<RetryCountProperty>().Count,
+            NotInParallelConstraintKeys = testNode.GetRequiredProperty<NotInParallelConstraintKeysProperty>().ConstraintKeys?.ToArray(),
+            CustomProperties = testNode.Properties.OfType<CustomProperty>().ToDictionary(x => x.Key, x => x.Value).AsReadOnly()
         };
     }
 
-    public static TestCase ToTestCase(this TestDetails testDetails)
+    public static TestNode ToTestNode(this TestDetails testDetails)
     {
-        var fullyQualifiedName = GetFullyQualifiedName(testDetails);
-        
-        var testCase = new TestCase(fullyQualifiedName, TestAdapterConstants.ExecutorUri, testDetails.Source)
+        var testNode = new TestNode
         {
-            Id = GetId(fullyQualifiedName),
+            Uid = new TestNodeUid(testDetails.UniqueId),
             DisplayName = testDetails.TestNameWithArguments,
-            CodeFilePath = testDetails.FileName,
-            LineNumber = testDetails.MinLineNumber,
+            Properties = new PropertyBag(
+            [
+                new TestFileLocationProperty(testDetails.FileName!, new LinePositionSpan
+                {
+                    Start = new LinePosition(testDetails.MinLineNumber, 0),
+                    End = new LinePosition(testDetails.MaxLineNumber, 0)
+                }),
+                new TestMethodIdentifierProperty(
+                    Namespace: testDetails.Namespace,
+                    AssemblyFullName: testDetails.Assembly.FullName!,
+                    TypeName: testDetails.ClassType.FullName!,
+                    MethodName: testDetails.TestName,
+                    ParameterTypeFullNames: testDetails.MethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
+                    ReturnTypeFullName: testDetails.ReturnType
+                    ),
+                new TimeoutProperty(testDetails.Timeout ?? TimeSpan.FromMinutes(30)),
+                new CategoriesProperty(testDetails.Categories),
+                new RepeatCountProperty(testDetails.RepeatCount),
+                new RetryCountProperty(testDetails.RetryCount),
+                new ClassInformationProperty
+                {
+                    SimpleName = testDetails.ClassName, 
+                    FullyQualifiedName = testDetails.FullyQualifiedClassName, 
+                    AssemblyQualifiedName = testDetails.AssemblyQualifiedClassName
+                },
+                new ClassParameterTypesProperty(testDetails.ClassParameterTypes?.Select(x => x.FullName!).ToArray()),
+                new MethodParameterTypesProperty(testDetails.MethodParameterTypes?.Select(x => x.FullName!).ToArray()),
+                new ClassArgumentsProperty(testDetails.ClassArgumentValues),
+                new MethodArgumentsProperty(testDetails.MethodArgumentValues),
+                new NotInParallelConstraintKeysProperty(testDetails.NotInParallelConstraintKeys),
+                new OrderProperty(testDetails.Order),
+                new TestInformationProperty
+                {
+                    UniqueId = testDetails.UniqueId, 
+                    TestName = testDetails.TestName, 
+                    IsStatic = testDetails.MethodInfo.IsStatic, 
+                    IsSingleTest = testDetails.IsSingleTest
+                },
+                new AssemblyProperty(testDetails.Assembly.FullName!)
+            ])
         };
 
-        testCase.SetPropertyValue(TUnitTestProperties.UniqueId, testDetails.UniqueId);
-
-        var testMethodName = testDetails.MethodInfo.Name;
+        if (testDetails.IsSkipped)
+        {
+            testNode.Properties.Add(new SkipReasonProperty(testDetails.SkipReason ?? string.Empty));
+        }
         
-        testCase.SetPropertyValue(TUnitTestProperties.TestName, testMethodName);
-        testCase.SetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, testDetails.ClassType.AssemblyQualifiedName);
-
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.IsSkipped, testDetails.IsSkipped);
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ExplicitFor, testDetails.ExplicitFor);
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.IsStatic, testDetails.MethodInfo.IsStatic);
+        if(testDetails.ExplicitFor != null)
+        {
+            testNode.Properties.Add(new ExplicitForProperty(testDetails.ExplicitFor));
+        }
         
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Category, testDetails.Categories.ToArray());
-        
-        testCase.SetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, testDetails.NotInParallelConstraintKeys);
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Order, testDetails.Order);
-        
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.Timeout, testDetails.Timeout?.TotalMilliseconds);
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RepeatCount, testDetails.RepeatCount);
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.RetryCount, testDetails.RetryCount);
-
         foreach (var customProperty in testDetails.CustomProperties)
         {
-            testCase.Traits.Add(customProperty.Key, customProperty.Value);
+            testNode.Properties.Add(new CustomProperty(customProperty.Key, customProperty.Value));
         }
         
-        var testParameterTypes = TestDetails.GetParameterTypes(testDetails.MethodParameterTypes);
-        
-        var managedMethod = $"{testMethodName}{testParameterTypes}";
-
-        var hierarchy = new[]
-        {
-            // First option is 'Container' which is empty for C# projects
-            string.Empty,
-            testDetails.ClassType.Namespace ?? string.Empty,
-            testDetails.ClassType.Name,
-            testDetails.TestNameWithParameterTypes
-        };
-        
-        testCase.SetPropertyValue(TUnitTestProperties.Hierarchy, hierarchy);
-        testCase.SetPropertyValue(TUnitTestProperties.ManagedType, testDetails.FullyQualifiedClassName);
-        testCase.SetPropertyValue(TUnitTestProperties.ManagedMethod, managedMethod);
-        
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.MethodParameterTypeNames, testDetails.MethodParameterTypes?.Select(x => x.FullName).ToArray());
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassParameterTypeNames, testDetails.ClassParameterTypes?.Select(x => x.FullName).ToArray());
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.MethodArguments, testDetails.MethodArgumentValues.SerializeArgumentsSafely());
-        testCase.SetPropertyValueIfNotDefault(TUnitTestProperties.ClassArguments, testDetails.ClassArgumentValues.SerializeArgumentsSafely());
-        
-        return testCase;
+        return testNode;
     }
 
-    private static Guid GetId(string fullyQualifiedName)
+    public static T GetRequiredProperty<T>(this TestNode testNode) where T : IProperty
     {
-        var idProvider = new TestIdProvider();
-        idProvider.AppendString(fullyQualifiedName);
-        return idProvider.GetId();
+        return testNode.Properties.Single<T>();
     }
 
-    private static string GetFullyQualifiedName(TestDetails testDetails)
+    public static T? GetProperty<T>(this TestNode testNode) where T : IProperty
     {
-        if(testDetails.IsSingleTest)
-        {
-            return $"{testDetails.ClassType.FullName}.{testDetails.TestName}";
-        }
-
-        return testDetails.UniqueId;
-    }
-
-    private static void SetPropertyValueIfNotDefault<T>(this TestCase testCase, TestProperty property, T value)
-    {
-        if (EqualityComparer<T>.Default.Equals(value,  default))
-        {
-            return;
-        }
-        
-        testCase.SetPropertyValue(property, value);
+        return testNode.Properties.SingleOrDefault<T>();
     }
 }

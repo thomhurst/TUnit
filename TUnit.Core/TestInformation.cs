@@ -18,13 +18,13 @@ public record TestInformation
     
     public required string TestName { get; init; }
     
-    public required string[]? TestMethodParameterTypes { get; init; }
+    public required IReadOnlyList<Type?>? TestMethodParameterTypes { get; init; }
     public required object?[]? TestMethodArguments { get; init; }
     
-    public required string[]? TestClassParameterTypes { get; init; }
+    public required IReadOnlyList<Type?>? TestClassParameterTypes { get; init; }
     public required object?[]? TestClassArguments { get; init; }
     
-    public required List<string> Categories { get; init; }
+    public required IReadOnlyList<string> Categories { get; init; }
     
     public required MethodInfo MethodInfo { get; init; }
     public required Type ClassType { get; init; }
@@ -34,7 +34,7 @@ public record TestInformation
     public required int RetryCount { get; init; }
     public int CurrentExecutionCount { get; internal set; }
     public required TimeSpan? Timeout { get; init; }
-    public required string[]? NotInParallelConstraintKeys { get; init; }
+    public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
     public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
 
     internal Lazy<IEnumerable<Attribute>> LazyTestAndClassAttributes { get; }

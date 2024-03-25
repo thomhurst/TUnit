@@ -15,6 +15,7 @@ internal static class WellKnown
         
         public const string CombinativeTest = "global::TUnit.Core.CombinativeTestAttribute";
         public const string Test = "global::TUnit.Core.TestAttribute";
+        public const string Arguments = "global::TUnit.Core.ArgumentsAttribute";
         public const string DataDrivenTest = "global::TUnit.Core.DataDrivenTestAttribute";
         public const string DataSourceDrivenTest = "global::TUnit.Core.DataSourceDrivenTestAttribute";
         

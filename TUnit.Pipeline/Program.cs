@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModularPipelines.Extensions;
-using ModularPipelines.Git.Models;
 using ModularPipelines.Host;
 using TUnit.Pipeline;
 using TUnit.Pipeline.Modules;

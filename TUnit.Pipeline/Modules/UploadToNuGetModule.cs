@@ -11,11 +11,18 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
-[RunOnlyOnBranch("main")]
+// TODO: Re-add
+// [RunOnlyOnBranch("main")]
 [DependsOn<PackTUnitFilesModule>]
 public class UploadToNuGetModule : Module<CommandResult[]>
 {
     private readonly IOptions<NuGetOptions> _options;
+
+    protected override async Task<SkipDecision> ShouldSkip(IPipelineContext context)
+    {
+        await Task.CompletedTask;
+        return string.IsNullOrEmpty(_options.Value.ApiKey);
+    }
 
     public UploadToNuGetModule(IOptions<NuGetOptions> options)
     {

@@ -544,5 +544,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0018Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        /// </summary>
+        internal static string TUnit0019Description {
+            get {
+                return ResourceManager.GetString("TUnit0019Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0019MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0019MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0019Title {
+            get {
+                return ResourceManager.GetString("TUnit0019Title", resourceCulture);
+            }
+        }
     }
 }

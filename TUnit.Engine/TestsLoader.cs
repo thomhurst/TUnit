@@ -5,10 +5,9 @@ using TUnit.Engine.TestParsers;
 
 namespace TUnit.Engine;
 
-internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever, 
-    IEnumerable<ITestParser> testParsers)
+internal class TestsLoader(IEnumerable<ITestParser> testParsers)
 {
-    private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(DataDrivenTestAttribute), typeof(DataSourceDrivenTestAttribute), typeof(CombinativeTestAttribute)];
+    private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(ArgumentsAttribute), typeof(DataSourceDrivenTestAttribute), typeof(CombinativeTestAttribute)];
 
     public IEnumerable<TestDetails> GetTests(CachedAssemblyInformation cachedAssemblyInformation)
     {
@@ -16,9 +15,6 @@ internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever,
 
         foreach (var testMethod in GetTestMethods(nonAbstractClasses))
         {
-            var sourceLocation = sourceLocationRetriever
-                .GetSourceLocation(cachedAssemblyInformation.Assembly.Location, testMethod.MethodInfo.DeclaringType!.FullName!, testMethod.MethodInfo.Name);
-
             var repeatCount = testMethod.MethodInfo.GetCustomAttributes<RepeatAttribute>()
                 .Concat(testMethod.TestClass.GetCustomAttributes<RepeatAttribute>())
                 .FirstOrDefault()
@@ -29,8 +25,7 @@ internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever,
             var testDetailsEnumerable = testParsers.SelectMany(testParser =>
                 testParser.GetTestCases(testMethod.MethodInfo,
                     testMethod.TestClass,
-                    runCount,
-                    sourceLocation)
+                    runCount)
             );
             
             foreach (var testDetails in testDetailsEnumerable)

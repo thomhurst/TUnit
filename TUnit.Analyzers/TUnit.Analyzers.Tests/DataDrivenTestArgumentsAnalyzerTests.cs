@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.DataDrivenTestArgumentsAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.ArgumentsArgumentsAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
-public class DataDrivenTestArgumentsAnalyzerTests
+public class ArgumentsArgumentsAnalyzerTests
 {
     [Test]
     public async Task DataDriven_Argument_Is_Flagged_When_No_Parameters_Passed()
@@ -15,7 +15,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                             
-                                [{|#0:DataDrivenTest|}]
+                                [{|#0:Arguments|}]
                                 public void MyTest(string value)
                                 {
                                 }
@@ -38,7 +38,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                             
-                                [{|#0:DataDrivenTest(1)|}]
+                                [{|#0:Arguments(1)|}]
                                 public void MyTest(string value)
                                 {
                                 }
@@ -61,7 +61,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                             
-                                [DataDrivenTest(1)]
+                                [Arguments(1)]
                                 public void MyTest(int value)
                                 {
                                 }

@@ -7,8 +7,7 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
 {
     public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
         Type type, 
-        int runCount,
-        SourceLocation sourceLocation)
+        int runCount)
     {
         if (!methodInfo.GetCustomAttributes<TestAttribute>().Any()
             && !methodInfo.GetCustomAttributes<CombinativeTestAttribute>().Any())
@@ -31,7 +30,6 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
                         yield return new TestDetails(
                             methodInfo: methodInfo,
                             classType: type,
-                            sourceLocation: sourceLocation,
                             methodArguments: combinativeValue.ToArray(),
                             classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
                             count: count++
@@ -43,7 +41,6 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
                     yield return new TestDetails(
                         methodInfo: methodInfo,
                         classType: type,
-                        sourceLocation: sourceLocation,
                         methodArguments: null,
                         classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
                         count: count++
@@ -55,8 +52,13 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
     
     private IEnumerable<IEnumerable<object?>> GetCombinativeValues(MethodInfo methodInfo)
     {
-        var parameters = methodInfo.GetParameters();
+        ParameterInfo[] parameters = methodInfo.GetParameters();
 
+        if (methodInfo.GetCustomAttribute<TimeoutAttribute>() != null)
+        {
+            parameters = parameters.Take(parameters.Length - 1).ToArray();
+        }
+        
         var parametersWithValues = parameters
             .Select(GetCombinativeValues)
             .ToList();

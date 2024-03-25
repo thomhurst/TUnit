@@ -1,14 +1,14 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+﻿using Microsoft.Testing.Platform.Logging;
 
 namespace TUnit.Engine;
 
 internal class Disposer
 {
-    private readonly IMessageLogger _messageLogger;
+    private readonly ILogger<Disposer> _logger;
 
-    public Disposer(IMessageLogger messageLogger)
+    public Disposer(ILoggerFactory loggerFactory)
     {
-        _messageLogger = messageLogger;
+        _logger = loggerFactory.CreateLogger<Disposer>();
     }
     
     public async ValueTask DisposeAsync(object? obj)
@@ -27,7 +27,7 @@ internal class Disposer
         }
         catch (Exception e)
         {
-            _messageLogger.SendMessage(TestMessageLevel.Error, e.ToString());
+            await _logger.LogErrorAsync(e);
         }
     }
 }

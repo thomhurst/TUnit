@@ -1,90 +1,108 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
+using TUnit.Engine.Models.Properties;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
 
-internal class SingleTestExecutor
+internal class SingleTestExecutor : IDataProducer
 {
+    private readonly IExtension _extension;
     private readonly MethodInvoker _methodInvoker;
     private readonly TestClassCreator _testClassCreator;
     private readonly TestMethodRetriever _testMethodRetriever;
     private readonly Disposer _disposer;
-    private readonly IMessageLogger _messageLogger;
-    private readonly ITestExecutionRecorder _testExecutionRecorder;
+    private readonly ILogger<SingleTestExecutor> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly ClassWalker _classWalker;
-    private readonly TestFilterProvider _testFilterProvider;
     private readonly ConsoleInterceptor _consoleInterceptor;
+    private readonly IMessageBus _messageBus;
 
     public GroupedTests GroupedTests { get; private set; } = null!;
 
-    public SingleTestExecutor(MethodInvoker methodInvoker, 
+    public SingleTestExecutor(
+        IExtension extension,
+        MethodInvoker methodInvoker, 
         TestClassCreator testClassCreator,
         TestMethodRetriever testMethodRetriever,
         Disposer disposer,
-        IMessageLogger messageLogger,
-        ITestExecutionRecorder testExecutionRecorder,
+        ILoggerFactory loggerFactory,
         CancellationTokenSource cancellationTokenSource,
         ClassWalker classWalker,
-        TestFilterProvider testFilterProvider,
-        ConsoleInterceptor consoleInterceptor)
+        ConsoleInterceptor consoleInterceptor,
+        IMessageBus messageBus)
     {
+        _extension = extension;
         _methodInvoker = methodInvoker;
         _testClassCreator = testClassCreator;
         _testMethodRetriever = testMethodRetriever;
         _disposer = disposer;
-        _messageLogger = messageLogger;
-        _testExecutionRecorder = testExecutionRecorder;
+        _logger = loggerFactory.CreateLogger<SingleTestExecutor>();
         _cancellationTokenSource = cancellationTokenSource;
         _classWalker = classWalker;
-        _testFilterProvider = testFilterProvider;
         _consoleInterceptor = consoleInterceptor;
+        _messageBus = messageBus;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
 
-    public async Task<TUnitTestResult> ExecuteTest(TestCase testCase)
+    public async Task<TUnitTestResult> ExecuteTestAsync(TestNode testNode, TestSessionContext session)
     {
-        var result = await ExecuteInternal(testCase);
-        
-        _testExecutionRecorder.RecordResult(new TestResult(testCase)
+        if(_cancellationTokenSource.IsCancellationRequested)
         {
-            DisplayName = testCase.DisplayName,
-            Outcome = GetOutcome(result.TestContext, result.Status),
-            ComputerName = result.ComputerName,
-            Duration = result.Duration,
-            StartTime = result.Start,
-            EndTime = result.End,
-            Messages = { new TestResultMessage("Output", result.Output) },
-            ErrorMessage = result.Exception?.Message,
-            ErrorStackTrace = result.Exception?.StackTrace,
-        });
+            var now = DateTimeOffset.Now;
+            
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
+            {
+                Uid = testNode.Uid,
+                DisplayName = testNode.DisplayName,
+                Properties = new PropertyBag(new CancelledTestNodeStateProperty())
+            }));
 
-        return result;
-    }
+            return new TUnitTestResult
+            {
+                Duration = TimeSpan.Zero,
+                Start = now,
+                End = now,
+                ComputerName = Environment.MachineName,
+                Exception = null,
+                Status = Status.None,
+            };
+        }
 
-    internal void SetAllTests(GroupedTests tests)
-    {
-        GroupedTests = tests;
-    }
-
-    private async Task<TUnitTestResult> ExecuteInternal(TestCase testCase)
-    {
         var start = DateTimeOffset.Now;
-        
-        if (testCase.GetPropertyValue(TUnitTestProperties.IsSkipped, false)
-            || !IsExplicitlyRun(testCase))
-        {
-            _messageLogger.SendMessage(TestMessageLevel.Informational, $"Skipping {testCase.DisplayName}...");
 
+        await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
+            {
+                Uid = testNode.Uid,
+                DisplayName = testNode.DisplayName,
+                Properties = new PropertyBag(new InProgressTestNodeStateProperty())
+            }));
+
+        var skipReason = testNode.GetProperty<SkipReasonProperty>()?.SkipReason;
+        if (skipReason != null || !IsExplicitlyRun(testNode))
+        {
+            await _logger.LogInformationAsync($"Skipping {testNode.DisplayName}...");
+            
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
+            {
+                Uid = testNode.Uid,
+                DisplayName = testNode.DisplayName,
+                Properties = new PropertyBag
+                (
+                    new SkippedTestNodeStateProperty(skipReason)
+                )
+            }));
+            
             return new TUnitTestResult
             {
                 Duration = TimeSpan.Zero,
@@ -92,7 +110,7 @@ internal class SingleTestExecutor
                 End = start,
                 ComputerName = Environment.MachineName,
                 Exception = null,
-                Status = Status.Skipped
+                Status = Status.Skipped,
             };
         }
         
@@ -102,11 +120,11 @@ internal class SingleTestExecutor
         {
             await Task.Run(async () =>
             {
-                classInstance = _testClassCreator.CreateClass(testCase, out var classType);
+                classInstance = _testClassCreator.CreateClass(testNode, out var classType);
 
-                var methodInfo = _testMethodRetriever.GetTestMethod(classType, testCase);
+                var methodInfo = _testMethodRetriever.GetTestMethod(classType, testNode);
 
-                var testInformation = testCase.ToTestInformation(classType, classInstance, methodInfo);
+                var testInformation = testNode.ToTestInformation(classType, classInstance, methodInfo);
 
                 testContext = new TestContext(testInformation);
                 
@@ -135,7 +153,18 @@ internal class SingleTestExecutor
             });
 
             var end = DateTimeOffset.Now;
-
+            
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
+            {
+                Uid = testNode.Uid,
+                DisplayName = testNode.DisplayName,
+                Properties = new PropertyBag
+                (
+                    new PassedTestNodeStateProperty(),
+                    new TimingProperty(new TimingInfo(start, end, end-start))
+                )
+            }));
+            
             return new TUnitTestResult
             {
                 TestContext = testContext,
@@ -152,6 +181,17 @@ internal class SingleTestExecutor
         {
             var end = DateTimeOffset.Now;
 
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
+            {
+                Uid = testNode.Uid,
+                DisplayName = testNode.DisplayName,
+                Properties = new PropertyBag
+                (
+                    new FailedTestNodeStateProperty(e),
+                    new TimingProperty(new TimingInfo(start, end, end-start))
+                )
+            }));
+            
             var unitTestResult = new TUnitTestResult
             {
                 Duration = end - start,
@@ -183,16 +223,22 @@ internal class SingleTestExecutor
         }
     }
 
+    internal void SetAllTests(GroupedTests tests)
+    {
+        GroupedTests = tests;
+    }
+
     private readonly object _consoleStandardOutLock = new();
 
-    private bool IsExplicitlyRun(TestCase testCase)
+    private bool IsExplicitlyRun(TestNode testNode)
     {
-        if (_testFilterProvider.IsFilteredTestRun)
-        {
-            return true;
-        }
+        // TODO: Re-implement
+        // if (_testFilterProvider.IsFilteredTestRun)
+        // {
+        //     return true;
+        // }
 
-        var explicitFor = testCase.GetPropertyValue(TUnitTestProperties.ExplicitFor, string.Empty);
+        var explicitFor = testNode.GetProperty<ExplicitForProperty>()?.ExplicitFor;
 
         if (string.IsNullOrEmpty(explicitFor))
         {
@@ -201,8 +247,7 @@ internal class SingleTestExecutor
         }
 
         // If all tests being run are from the same "Explicit" attribute, e.g. same class or same method, then yes these have been run explicitly.
-        return GroupedTests.AllTests.All(x => x.GetPropertyValue(TUnitTestProperties.ExplicitFor, string.Empty)
-                                              == explicitFor);
+        return GroupedTests.AllTests.All(x => x.GetProperty<ExplicitForProperty>()?.ExplicitFor == explicitFor);
     }
 
     private async Task ExecuteWithRetries(TestContext testContext, TestInformation testInformation, object? @class)
@@ -225,7 +270,7 @@ internal class SingleTestExecutor
                     throw;
                 }
                 
-                _messageLogger.SendMessage(TestMessageLevel.Warning, $"{testInformation.TestName} failed, retrying...");
+                await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying...");
             }
         }
     }
@@ -245,15 +290,18 @@ internal class SingleTestExecutor
         }
         catch (Exception exception)
         {
-            _messageLogger.SendMessage(TestMessageLevel.Error, exception.ToString());
+            await _logger.LogErrorAsync(exception);
             return false;
         }
-
-        ;
     }
 
     private async Task ExecuteCore(TestContext testContext, TestInformation testInformation, object? @class)
     {
+        if (_cancellationTokenSource.IsCancellationRequested)
+        {
+            return;
+        }
+        
         testInformation.CurrentExecutionCount++;
         
         await ExecuteSetUps(@class, testInformation.ClassType);
@@ -272,18 +320,15 @@ internal class SingleTestExecutor
         {
             await ExecuteTestMethodWithTimeout(testInformation, @class, testLevelCancellationTokenSource);
         }
-        catch
+        finally
         {
-            testLevelCancellationTokenSource.Cancel();
             testLevelCancellationTokenSource.Dispose();
-            throw;
         }
     }
 
     private async Task ExecuteTestMethodWithTimeout(TestInformation testInformation, object? @class,
         CancellationTokenSource cancellationTokenSource)
     {
-        
         var methodResult = _methodInvoker.InvokeMethod(@class, testInformation.MethodInfo, BindingFlags.Default,
             testInformation.TestMethodArguments, cancellationTokenSource.Token);
 
@@ -294,7 +339,15 @@ internal class SingleTestExecutor
         }
         
         var timeoutTask = Task.Delay(testInformation.Timeout.Value, cancellationTokenSource.Token)
-            .ContinueWith(_ => throw new TimeoutException(testInformation));
+            .ContinueWith(t =>
+            {
+                if (methodResult.IsCompleted)
+                {
+                    return;
+                }
+                
+                throw new TimeoutException(testInformation);
+            });
 
         await await Task.WhenAny(timeoutTask, methodResult);
     }
@@ -343,23 +396,17 @@ internal class SingleTestExecutor
 
         if (exceptions.Count == 1)
         {
-            _messageLogger.SendMessage(TestMessageLevel.Error, $"""
-                                                               Error running CleanUp:
-                                                                  {exceptions.First().Message}
-                                                                  {exceptions.First().StackTrace}
-                                                               """);
+            await _logger.LogErrorAsync("Error running CleanUp");
+            await _logger.LogErrorAsync(exceptions.First());
         }
         else if (exceptions.Count > 1)
         {
             var aggregateException = new AggregateException(exceptions);
-            _messageLogger.SendMessage(TestMessageLevel.Error, $"""
-                                                                Error running CleanUp:
-                                                                   {aggregateException.Message}
-                                                                   {aggregateException.StackTrace}
-                                                                """);
+            await _logger.LogErrorAsync("Error running CleanUp");
+            await _logger.LogErrorAsync(aggregateException);
         }
     }
-
+                                         
     private async Task ExecuteOnlyOnceSetUps(object? @class, Type testDetailsClassType)
     {
         var oneTimeSetUpMethods = _classWalker.GetSelfAndBaseTypes(testDetailsClassType)
@@ -374,25 +421,18 @@ internal class SingleTestExecutor
         }
     }
 
-    private TestOutcome GetOutcome(TestContext? resultTestContext, Status resultStatus)
+    public Task<bool> IsEnabledAsync()
     {
-        if (!string.IsNullOrEmpty(resultTestContext?.FailReason))
-        {
-            return TestOutcome.Failed;
-        }
-
-        if (!string.IsNullOrEmpty(resultTestContext?.SkipReason))
-        {
-            return TestOutcome.Skipped;
-        }
-        
-        return resultStatus switch
-        {
-            Status.None => TestOutcome.None,
-            Status.Passed => TestOutcome.Passed,
-            Status.Failed => TestOutcome.Failed,
-            Status.Skipped => TestOutcome.Skipped,
-            _ => throw new ArgumentOutOfRangeException(nameof(resultStatus), resultStatus, null)
-        };
+        return _extension.IsEnabledAsync();
     }
+
+    public string Uid => _extension.Uid;
+
+    public string Version => _extension.Version;
+
+    public string DisplayName => _extension.DisplayName;
+
+    public string Description => _extension.Description;
+    
+    public Type[] DataTypesProduced { get; } = [typeof(TestNodeUpdateMessage)];
 }

@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using System.Reflection;
+
+namespace TUnit.Core;
 
 public class TestContext : IDisposable
 {
@@ -53,5 +55,15 @@ public class TestContext : IDisposable
         OnDispose?.Invoke(this, EventArgs.Empty);
         OutputWriter.Dispose();
         CancellationTokenSource?.Dispose();
+    }
+
+    public static string OutputDirectory
+        => Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
+           ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+    
+    public static string WorkingDirectory
+    {
+        get => Environment.CurrentDirectory;
+        set => Environment.CurrentDirectory = value;
     }
 }
