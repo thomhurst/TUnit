@@ -105,42 +105,53 @@ public class SampleSourceGenerator : ISourceGenerator
         var methodAwaitablePrefix = isMethodAwaitable? "await " : string.Empty;
 
         var usingDisposablePrefix = GetDisposableUsingPrefix(methodSymbol.ContainingType);
+        var fullyQualifiedClassType = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
+                        global::TUnit.Engine.OneTimeTearDownOrchestrator.RegisterTest(typeof({{fullyQualifiedClassType}}));
                         global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => global::System.Threading.Tasks.Task.Run(async () =>
                         {
-                            {{GenerateOneTimeSetUps()}}
-                 
-                            {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
-                 
-                            var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
-                 
-                            using var testContext = new global::TUnit.Core.TestContext(new global::TUnit.Core.TestInformation()
+                            try
                             {
-                                Categories = [],
-                                ClassInstance = classInstance,
-                                ClassType = classInstance.GetType(),
-                                Timeout = global::System.TimeSpan.Zero,
-                                TestClassArguments = [],
-                                TestMethodArguments = [],
-                                TestClassParameterTypes = classInstance.GetType().GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
-                                TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
-                                NotInParallelConstraintKeys = [],
-                                RepeatCount = 0,
-                                RetryCount = 0,
-                                MethodInfo = methodInfo,
-                                TestName = "{{methodSymbol.Name}}",
-                                CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
-                            });
-                            
-                            global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
-                            
-                            {{GenerateSetUps()}}
-                            {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
-                            await global::System.Threading.Tasks.Task.CompletedTask;
-                            {{GenerateTearDowns()}}
-                            
-                            // TODO: This needs logic as to when it's called
-                            {{GenerateOneTimeTearDowns()}}
+                                {{GenerateOneTimeSetUps()}}
+                     
+                                {{usingDisposablePrefix}}var classInstance = {{classInvocation}};
+                     
+                                var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
+                     
+                                using var testContext = new global::TUnit.Core.TestContext(new global::TUnit.Core.TestInformation()
+                                {
+                                    Categories = [],
+                                    ClassInstance = classInstance,
+                                    ClassType = classInstance.GetType(),
+                                    Timeout = global::System.TimeSpan.Zero,
+                                    TestClassArguments = [],
+                                    TestMethodArguments = [],
+                                    TestClassParameterTypes = classInstance.GetType().GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
+                                    TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
+                                    NotInParallelConstraintKeys = [],
+                                    RepeatCount = 0,
+                                    RetryCount = 0,
+                                    MethodInfo = methodInfo,
+                                    TestName = "{{methodSymbol.Name}}",
+                                    CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
+                                });
+                                
+                                global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
+                                
+                                {{GenerateSetUps()}}
+                                {{methodAwaitablePrefix}}classInstance.{{GenerateTestMethodInvocation(methodSymbol)}};
+                                await global::System.Threading.Tasks.Task.CompletedTask;
+                                {{GenerateTearDowns()}}
+                            }
+                            finally
+                            {
+                                var remainingTests = global::TUnit.Engine.OneTimeTearDownOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(typeof({{fullyQualifiedClassType}}));
+                                
+                                if (remainingTests == 0)
+                                {
+                                    {{GenerateOneTimeTearDowns()}}
+                                }
+                            }
                         }));
                  """;
     }
