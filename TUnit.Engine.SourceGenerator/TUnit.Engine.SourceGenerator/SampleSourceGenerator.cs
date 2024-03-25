@@ -121,7 +121,7 @@ public class SampleSourceGenerator : ISourceGenerator
                                 {
                                     Categories = [],
                                     ClassInstance = classInstance,
-                                    ClassType = classInstance.GetType(),
+                                    ClassType = typeof({{fullyQualifiedClassType}}),
                                     Timeout = global::System.TimeSpan.Zero,
                                     TestClassArguments = [],
                                     TestMethodArguments = [],
