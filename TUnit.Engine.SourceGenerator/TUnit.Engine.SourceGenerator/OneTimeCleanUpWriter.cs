@@ -18,6 +18,7 @@ public class OneTimeCleanUpWriter
                 .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                           == "global::TUnit.Core.OnlyOnceCleanUpAttribute")
             )
+            .Reverse()
             .ToList();
         
         if(!oneTimeCleanUpMethods.Any())

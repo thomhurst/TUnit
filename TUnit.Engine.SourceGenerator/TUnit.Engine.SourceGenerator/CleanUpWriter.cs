@@ -18,6 +18,7 @@ public class CleanUpWriter
                 .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                           == "global::TUnit.Core.CleanUpAttribute")
             )
+            .Reverse()
             .ToList();
         
         if(!cleanUp.Any())
