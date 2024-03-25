@@ -31,7 +31,7 @@ public class CleanUpWriter
         foreach (var oneTimeSetUpMethod in cleanUp)
         {
             stringBuilder.AppendLine($$"""
-                                                          await RunSafelyAsync(() => classInstance.{{oneTimeSetUpMethod.Name}}(), teardownExceptions);
+                                           await RunSafelyAsync(() => classInstance.{{oneTimeSetUpMethod.Name}}(), teardownExceptions);
                                        """);
         }
 
