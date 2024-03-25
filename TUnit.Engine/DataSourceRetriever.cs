@@ -8,7 +8,7 @@ internal class DataSourceRetriever(MethodInvoker methodInvoker)
 {
     public IEnumerable<object?> GetTestDataSourceArguments(MethodInfo methodInfo)
     {
-        var testDataSourceAttributes = methodInfo.GetCustomAttributes<DataSourceDrivenTestAttribute>().ToList();
+        var testDataSourceAttributes = methodInfo.GetCustomAttributes<MethodDataAttribute>().ToList();
 
         if (!testDataSourceAttributes.Any())
         {
@@ -29,7 +29,7 @@ internal class DataSourceRetriever(MethodInvoker methodInvoker)
     
     public IEnumerable<object?> GetTestDataSourceArguments(Type type)
     {
-        var testDataSourceAttributes = type.GetCustomAttributes<DataSourceDrivenTestAttribute>().ToList();
+        var testDataSourceAttributes = type.GetCustomAttributes<MethodDataAttribute>().ToList();
 
         if (!testDataSourceAttributes.Any())
         {
@@ -48,10 +48,10 @@ internal class DataSourceRetriever(MethodInvoker methodInvoker)
         }
     }
  
-    public IEnumerable<object?> GetTestDataSourceArguments(Type fallbackTypeToSearchForMethodIn, DataSourceDrivenTestAttribute dataSourceDrivenTestAttribute, Type? expectedParameterType)
+    public IEnumerable<object?> GetTestDataSourceArguments(Type fallbackTypeToSearchForMethodIn, MethodDataAttribute methodDataAttribute, Type? expectedParameterType)
     {
-        var classType = dataSourceDrivenTestAttribute.ClassProvidingDataSource ?? fallbackTypeToSearchForMethodIn;
-        var methodName = dataSourceDrivenTestAttribute.MethodNameProvidingDataSource;
+        var classType = methodDataAttribute.ClassProvidingDataSource ?? fallbackTypeToSearchForMethodIn;
+        var methodName = methodDataAttribute.MethodNameProvidingDataSource;
             
         return GetTestDataSourceArguments(classType, methodName, expectedParameterType);
     }

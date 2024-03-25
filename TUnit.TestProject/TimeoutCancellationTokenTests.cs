@@ -4,7 +4,8 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-[DataSourceDrivenTest(nameof(DataSource))]
+[MethodData(nameof(DataSource))]
+[TestCategory("Timeout Cancellation Token Tests")]
 public class TimeoutCancellationTokenTests
 {
     public TimeoutCancellationTokenTests(int value)
@@ -13,6 +14,7 @@ public class TimeoutCancellationTokenTests
     
     [Test]
     [Timeout(30_000)]
+    [TestCategory("Blah")]
     public async Task Test(CancellationToken cancellationToken)
     {
         await Assert.That(1).Is.EqualTo(1);
@@ -26,7 +28,7 @@ public class TimeoutCancellationTokenTests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(nameof(DataSource))]
+    [MethodData(nameof(DataSource))]
     [Timeout(30_000)]
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
@@ -35,6 +37,7 @@ public class TimeoutCancellationTokenTests
     
     [CombinativeTest]
     [Timeout(30_000)]
+    [TestCategory("Blah")]
     public async Task CombinativeTest(
         [CombinativeValues(1, 1, 1)] int value, 
         CancellationToken cancellationToken)

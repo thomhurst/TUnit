@@ -11,21 +11,15 @@ public class TestContext : IDisposable
     public CancellationToken CancellationToken => CancellationTokenSource?.Token ?? default;
 
     internal readonly StringWriter OutputWriter = new();
-
-    private static readonly AsyncLocal<TestContext> AsyncLocal = new();
-
+    
     public TestInformation TestInformation { get; }
 
-    internal TestContext(TestInformation testInformation)
+    public TestContext(TestInformation testInformation)
     {
         TestInformation = testInformation;
     }
 
-    public static TestContext? Current
-    {
-        get => AsyncLocal.Value;
-        internal set => AsyncLocal.Value = value!;
-    }
+    public static TestContext? Current => TestDictionary.TestContexts.Value;
 
     public string? SkipReason { get; private set; }
 
