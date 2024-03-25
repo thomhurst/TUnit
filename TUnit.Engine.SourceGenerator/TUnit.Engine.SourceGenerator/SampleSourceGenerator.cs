@@ -83,7 +83,7 @@ public class SampleSourceGenerator : ISourceGenerator
                     foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
                     {
                         sourceBuilder.AppendLine(
-                            GenerateTestInvocationCode(methodSymbol, classInvocation, [], isAwaitable)
+                            GenerateTestInvocationCode(semanticModel, methodSymbol, classInvocation, [], isAwaitable)
                         );
                     }
                     break;
@@ -97,7 +97,9 @@ public class SampleSourceGenerator : ISourceGenerator
         }
     }
 
-    private string GenerateTestInvocationCode(IMethodSymbol methodSymbol, 
+    private string GenerateTestInvocationCode(
+        SemanticModel semanticModel,
+        IMethodSymbol methodSymbol, 
         string classInvocation,
         IEnumerable<string> methodArguments,
         bool isMethodAwaitable)
@@ -112,7 +114,7 @@ public class SampleSourceGenerator : ISourceGenerator
                         {
                             try
                             {
-                                {{GenerateOneTimeSetUps()}}
+                 {{GenerateOneTimeSetUps(methodSymbol.ContainingType, semanticModel)}}
                      
                  {{classInvocation}};
                      
@@ -201,10 +203,39 @@ public class SampleSourceGenerator : ISourceGenerator
         return [..methodSymbol.GetAttributes(), ..methodSymbol.ContainingType.GetAttributes()];
     }
 
-    private string GenerateOneTimeSetUps()
+    private string GenerateOneTimeSetUps(INamedTypeSymbol classType, SemanticModel semanticModel)
     {
-        // TODO: Store this Task within a concurrent dictionary, so we can just re-await the initial call
-        return $"// No One Time Set Ups";
+        var oneTimeSetUpMethods = classType
+            .GetMembersIncludingBase()
+            .OfType<IMethodSymbol>()
+            .Where(x => x.IsStatic)
+            .Where(x => x.DeclaredAccessibility == Accessibility.Public)
+            .Where(x => x.GetAttributes()
+                .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                == "global::TUnit.Core.OnlyOnceSetUpAttribute")
+            )
+            .ToList();
+        
+        if(!oneTimeSetUpMethods.Any())
+        {
+            return $"               // No One Time Set Ups";
+        }
+
+        var stringBuilder = new StringBuilder();
+        
+        foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
+        {
+            var awaitablePrefix = oneTimeSetUpMethod.IsAwaitableNonDynamic(semanticModel,
+                oneTimeSetUpMethod.DeclaringSyntaxReferences.First().Span.Start)
+                ? "await "
+                : string.Empty;
+            
+            stringBuilder.AppendLine($"""
+                                                    {awaitablePrefix}{classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}();
+                                     """);
+        }
+
+        return stringBuilder.ToString();
     }
     
     private string GenerateSetUps()
