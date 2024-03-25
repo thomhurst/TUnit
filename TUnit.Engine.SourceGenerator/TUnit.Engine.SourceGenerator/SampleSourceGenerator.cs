@@ -107,7 +107,6 @@ public class SampleSourceGenerator : ISourceGenerator
         var usingDisposablePrefix = GetDisposableUsingPrefix(methodSymbol.ContainingType);
         var fullyQualifiedClassType = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
-                        global::TUnit.Engine.OneTimeTearDownOrchestrator.RegisterTest(typeof({{fullyQualifiedClassType}}));
                         global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => global::System.Threading.Tasks.Task.Run(async () =>
                         {
                             try

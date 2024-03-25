@@ -74,6 +74,11 @@ internal class SingleTestExecutor
     internal void SetAllTests(GroupedTests tests)
     {
         GroupedTests = tests;
+
+        foreach (var test in tests.AllTests)
+        {
+            OneTimeTearDownOrchestrator.RegisterTest(Type.GetType(test.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, string.Empty))!);
+        }
     }
 
     private async Task<TUnitTestResult> ExecuteInternal(TestCase testCase)

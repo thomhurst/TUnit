@@ -18,7 +18,7 @@ public static class OneTimeTearDownOrchestrator
     [MethodImpl(MethodImplOptions.Synchronized)]
     public static int NotifyCompletedTestAndGetRemainingTestsForType(Type testClassType)
     {
-        var count = RemainingTests.GetOrAdd(testClassType, 0);
+        var count = RemainingTests[testClassType];
 
         var remainingTest = count - 1;
         
