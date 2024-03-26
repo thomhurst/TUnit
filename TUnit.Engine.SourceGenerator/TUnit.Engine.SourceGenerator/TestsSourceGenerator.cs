@@ -168,6 +168,7 @@ public class TestsSourceGenerator : ISourceGenerator
 
         var fullyQualifiedClassType = classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
+                        // TODO: Have the Delegate take a IMessageBus
                         global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => global::System.Threading.Tasks.Task.Run(async () =>
                         {
                             {{fullyQualifiedClassType}} classInstance = null!;
