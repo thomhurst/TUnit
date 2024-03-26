@@ -199,6 +199,11 @@ public class TestsSourceGenerator : ISourceGenerator
                                 
                                 global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
                                 
+                                // TODO: ITestAttribute ApplyToTest
+                                // TODO: Run with retries
+                                // TODO: Throw on Fail Reason Not Empty
+                                // TODO: Skip on Skip Reason Not Empty
+                                
                  {{SetUpWriter.GenerateCode(classType)}}
                                 await RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}});
                             }
