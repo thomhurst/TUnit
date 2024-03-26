@@ -84,7 +84,7 @@ public class TestsSourceGenerator : ISourceGenerator
                     foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
                     {
                         sourceBuilder.AppendLine(
-                            GenerateTestInvocationCode(semanticModel, methodSymbol, classInvocation, [], isAwaitable)
+                            GenerateTestInvocationCode(methodSymbol, classInvocation, [])
                         );
                     }
                     break;
@@ -99,16 +99,12 @@ public class TestsSourceGenerator : ISourceGenerator
     }
 
     private string GenerateTestInvocationCode(
-        SemanticModel semanticModel,
         IMethodSymbol methodSymbol, 
         string classInvocation,
-        IEnumerable<string> methodArguments,
-        bool isMethodAwaitable)
+        IEnumerable<string> methodArguments)
     {
         var testId = GetTestId(methodSymbol);
-        
-        var methodAwaitablePrefix = isMethodAwaitable? "await " : string.Empty;
-        
+
         var classType = methodSymbol.ContainingType;
 
         var disposeCall = GenerateDisposeCall(classType);
@@ -128,7 +124,7 @@ public class TestsSourceGenerator : ISourceGenerator
                      
                                 var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
                      
-                                testContext = new global::TUnit.Core.TestContext(new global::TUnit.Core.TestInformation()
+                                var testInformation = new global::TUnit.Core.TestInformation()
                                 {
                                     Categories = [{{string.Join(", ", GetCategories(methodSymbol))}}],
                                     ClassInstance = classInstance,
@@ -138,23 +134,40 @@ public class TestsSourceGenerator : ISourceGenerator
                                     TestMethodArguments = [{{string.Join(", ", methodArguments)}}],
                                     TestClassParameterTypes = classInstance.GetType().GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
                                     TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
-                                    NotInParallelConstraintKeys = [],
+                                    NotInParallelConstraintKeys = {{GetNotInParallelConstraintKeys(methodSymbol)}},
                                     RepeatCount = {{GetRepeatCount(methodSymbol)}},
                                     RetryCount = {{GetRetryCount(methodSymbol)}},
                                     MethodInfo = methodInfo,
                                     TestName = "{{methodSymbol.Name}}",
                                     CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
-                                });
+                                }
                                 
+                                testContext = new global::TUnit.Core.TestContext(testInformation);
+                                
+                                global::TUnit.Engine.ConsoleInterceptor.Instance.SetModule(testContext);
                                 global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
                                 
-                                // TODO: ITestAttribute ApplyToTest
+                                var customTestAttributes = methodInfo.GetCustomAttributes()
+                                 .Concat(typeof({{fullyQualifiedClassType}}).GetCustomAttributes())
+                                 .OfType<global::TUnit.Core.Interfaces.ITestAttribute>();
+                             
+                                 foreach (var customTestAttribute in customTestAttributes)
+                                 {
+                                     await customTestAttribute.Apply(testContext);
+                                 }
+                                 
+                                 if (testContext.FailReason != null)
+                                 {
+                                     throw new global::System.Exception(testContext.FailReason);
+                                 }
+                                
                                 // TODO: Run with retries
-                                // TODO: Throw on Fail Reason Not Empty
                                 // TODO: Skip on Skip Reason Not Empty
                                 
+                                await global::TUnit.Engine.RunHelpers.ExecuteWithRetries(testInformation, async () => {
                  {{SetUpWriter.GenerateCode(classType)}}
-                                await global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}});
+                                    await global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}});
+                                });
                             }
                             finally
                             {
@@ -178,6 +191,22 @@ public class TestsSourceGenerator : ISourceGenerator
                             }
                         }));
                  """;
+    }
+
+    private string GetNotInParallelConstraintKeys(IMethodSymbol methodSymbol)
+    {
+        var notInParallelAttributes = GetMethodAndClassAttributes(methodSymbol)
+            .Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                        == "global::TUnit.Core.NotInParallelAttribute")
+            .ToList();
+
+        if (!notInParallelAttributes.Any())
+        {
+            return "null";
+        }
+        
+        return string.Join(", ", notInParallelAttributes
+            .SelectMany(x => $"\"{x.ConstructorArguments.Select(y => y.Value)}\""));
     }
 
     private static string GenerateDisposeCall(INamedTypeSymbol classType)

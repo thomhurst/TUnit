@@ -2,5 +2,5 @@
 
 public interface ITestAttribute
 {
-    Task ApplyToTest(TestContext testContext);
+    Task Apply(TestContext testContext);
 }

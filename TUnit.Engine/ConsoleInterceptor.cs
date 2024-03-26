@@ -9,6 +9,8 @@ namespace TUnit.Engine;
 
 internal class ConsoleInterceptor : TextWriter
 {
+    public static ConsoleInterceptor Instance { get; private set; }
+
     private readonly ILogger<ConsoleInterceptor>? _logger;
     public override Encoding Encoding => InnerWriter?.Encoding ?? Encoding.UTF8;
 
@@ -24,8 +26,9 @@ internal class ConsoleInterceptor : TextWriter
     public ConsoleInterceptor(ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<ConsoleInterceptor>();
+        Instance = this;
     }
-
+    
     public void Initialize()
     {
         Console.SetOut(this);

@@ -75,9 +75,7 @@ internal class SingleTestExecutor : IDataProducer
                 Status = Status.None,
             };
         }
-
-        await TestDictionary.GetTest(testNode.Uid).Invoke();
-
+        
         var start = DateTimeOffset.Now;
 
         await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
@@ -112,43 +110,11 @@ internal class SingleTestExecutor : IDataProducer
                 Status = Status.Skipped,
             };
         }
-        
-        object? classInstance = null;
-        TestContext? testContext = null;
         try
         {
             await Task.Run(async () =>
             {
-                classInstance = _testClassCreator.CreateClass(testNode, out var classType);
-
-                var methodInfo = _testMethodRetriever.GetTestMethod(classType, testNode);
-
-                var testInformation = testNode.ToTestInformation(classType, classInstance, methodInfo);
-
-                testContext = new TestContext(testInformation);
-                
-                _consoleInterceptor.SetModule(testContext);
-                
-                TestDictionary.TestContexts.Value = testContext;
-
-                var customTestAttributes = methodInfo.GetCustomAttributes()
-                    .Concat(classType.GetCustomAttributes())
-                    .OfType<ITestAttribute>();
-
-                foreach (var customTestAttribute in customTestAttributes)
-                {
-                    await customTestAttribute.ApplyToTest(testContext);
-                }
-
-                if (testContext.FailReason != null)
-                {
-                    throw new Exception(testContext.FailReason);
-                }
-
-                if (testContext.SkipReason == null)
-                {
-                    await ExecuteWithRetries(testContext, testInformation, classInstance);
-                }
+                await ExecuteWithRetries(testContext, testInformation, () => RunTest(testNode));
             });
 
             var end = DateTimeOffset.Now;
@@ -206,9 +172,7 @@ internal class SingleTestExecutor : IDataProducer
             {
                 testContext.Result = unitTestResult;
             }
-
-            await ExecuteCleanUps(classInstance);
-
+            
             return unitTestResult;
         }
         finally
@@ -220,6 +184,11 @@ internal class SingleTestExecutor : IDataProducer
                 testContext?.Dispose();
             }
         }
+    }
+
+    private static async Task RunTest(TestNode testNode)
+    {
+        await TestDictionary.GetTest(testNode.Uid).Invoke();
     }
 
     internal void SetAllTests(GroupedTests tests)
@@ -249,7 +218,7 @@ internal class SingleTestExecutor : IDataProducer
         return GroupedTests.AllTests.All(x => x.GetProperty<ExplicitForProperty>()?.ExplicitFor == explicitFor);
     }
 
-    private async Task ExecuteWithRetries(TestContext testContext, TestInformation testInformation, object? @class)
+    private async Task ExecuteWithRetries(TestContext testContext, TestInformation testInformation, Func<Task> testDelegate)
     {
         var retryCount = testInformation.RetryCount;
         
@@ -258,7 +227,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             try
             {
-                await ExecuteCore(testContext, testInformation, @class);
+                await ExecuteCore(testContext, testDelegate);
                 break;
             }
             catch (Exception e)
@@ -294,17 +263,17 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task ExecuteCore(TestContext testContext, TestInformation testInformation, object? @class)
+    private async Task ExecuteCore(TestContext testContext, Func<Task> testDelegate)
     {
         if (_cancellationTokenSource.IsCancellationRequested)
         {
             return;
         }
+
+        var testInformation = testContext.TestInformation;
         
         testInformation.CurrentExecutionCount++;
         
-        await ExecuteSetUps(@class, testInformation.ClassType);
-
         var testLevelCancellationTokenSource =
             CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
 
@@ -317,7 +286,7 @@ internal class SingleTestExecutor : IDataProducer
 
         try
         {
-            await ExecuteTestMethodWithTimeout(testInformation, @class, testLevelCancellationTokenSource);
+            await ExecuteTestMethodWithTimeout(testInformation, testDelegate, testLevelCancellationTokenSource);
         }
         finally
         {
@@ -325,11 +294,10 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task ExecuteTestMethodWithTimeout(TestInformation testInformation, object? @class,
+    private async Task ExecuteTestMethodWithTimeout(TestInformation testInformation, Func<Task> testDelegate,
         CancellationTokenSource cancellationTokenSource)
     {
-        var methodResult = _methodInvoker.InvokeMethod(@class, testInformation.MethodInfo, BindingFlags.Default,
-            testInformation.TestMethodArguments, cancellationTokenSource.Token);
+        var methodResult = testDelegate();
 
         if (testInformation.Timeout == null || testInformation.Timeout.Value == default)
         {
