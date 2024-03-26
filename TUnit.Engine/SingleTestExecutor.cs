@@ -23,7 +23,6 @@ internal class SingleTestExecutor : IDataProducer
     private readonly Disposer _disposer;
     private readonly ILogger<SingleTestExecutor> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly ClassWalker _classWalker;
     private readonly ConsoleInterceptor _consoleInterceptor;
     private readonly IMessageBus _messageBus;
 
@@ -37,7 +36,6 @@ internal class SingleTestExecutor : IDataProducer
         Disposer disposer,
         ILoggerFactory loggerFactory,
         CancellationTokenSource cancellationTokenSource,
-        ClassWalker classWalker,
         ConsoleInterceptor consoleInterceptor,
         IMessageBus messageBus)
     {
@@ -48,7 +46,6 @@ internal class SingleTestExecutor : IDataProducer
         _disposer = disposer;
         _logger = loggerFactory.CreateLogger<SingleTestExecutor>();
         _cancellationTokenSource = cancellationTokenSource;
-        _classWalker = classWalker;
         _consoleInterceptor = consoleInterceptor;
         _messageBus = messageBus;
     }
@@ -78,6 +75,8 @@ internal class SingleTestExecutor : IDataProducer
                 Status = Status.None,
             };
         }
+
+        await TestDictionary.GetTest(testNode.Uid).Invoke();
 
         var start = DateTimeOffset.Now;
 
@@ -352,74 +351,6 @@ internal class SingleTestExecutor : IDataProducer
         await await Task.WhenAny(timeoutTask, methodResult);
     }
 
-    private async Task ExecuteSetUps(object? @class, Type testDetailsClassType)
-    {
-        await _oneTimeSetUpRegistry.GetOrAdd(testDetailsClassType.FullName!, _ => ExecuteOnlyOnceSetUps(@class, testDetailsClassType));
-
-        var setUpMethods = _classWalker.GetSelfAndBaseTypes(testDetailsClassType)
-            .Reverse()
-            .SelectMany(x => x.GetMethods())
-            .Where(x => !x.IsStatic)
-            .Where(x => x.GetCustomAttributes<SetUpAttribute>().Any());
-
-        foreach (var setUpMethod in setUpMethods)
-        {
-            await _methodInvoker.InvokeMethod(@class, setUpMethod, BindingFlags.Default, null, default);
-        }
-    }
-    
-    private async Task ExecuteCleanUps(object? @class)
-    {
-        if (@class is null)
-        {
-            return;
-        }
-        
-        var cleanUpMethods = _classWalker.GetSelfAndBaseTypes(@class.GetType())
-            .SelectMany(x => x.GetMethods())
-            .Where(x => !x.IsStatic)
-            .Where(x => x.GetCustomAttributes<CleanUpAttribute>().Any());
-
-        var exceptions = new List<Exception>();
-        
-        foreach (var cleanUpMethod in cleanUpMethods)
-        {
-            try
-            {
-                await _methodInvoker.InvokeMethod(@class, cleanUpMethod, BindingFlags.Default, null, default);
-            }
-            catch (Exception e)
-            {
-                exceptions.Add(e);
-            }
-        }
-
-        if (exceptions.Count == 1)
-        {
-            await _logger.LogErrorAsync("Error running CleanUp");
-            await _logger.LogErrorAsync(exceptions.First());
-        }
-        else if (exceptions.Count > 1)
-        {
-            var aggregateException = new AggregateException(exceptions);
-            await _logger.LogErrorAsync("Error running CleanUp");
-            await _logger.LogErrorAsync(aggregateException);
-        }
-    }
-                                         
-    private async Task ExecuteOnlyOnceSetUps(object? @class, Type testDetailsClassType)
-    {
-        var oneTimeSetUpMethods = _classWalker.GetSelfAndBaseTypes(testDetailsClassType)
-            .Reverse()
-            .SelectMany(x => x.GetMethods())
-            .Where(x => x.IsStatic)
-            .Where(x => x.GetCustomAttributes<OnlyOnceSetUpAttribute>().Any());
-
-        foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
-        {
-            await _methodInvoker.InvokeMethod(@class, oneTimeSetUpMethod, BindingFlags.Static | BindingFlags.Public, null, default);
-        }
-    }
 
     public Task<bool> IsEnabledAsync()
     {

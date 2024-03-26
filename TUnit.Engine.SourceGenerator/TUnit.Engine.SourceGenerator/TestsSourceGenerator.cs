@@ -31,59 +31,6 @@ public class TestsSourceGenerator : ISourceGenerator
 
                                               file class TestGenerator
                                               {
-                                                  private static async global::System.Threading.Tasks.Task RunAsync(global::System.Action action)
-                                                  {
-                                                      action();
-                                                      await global::System.Threading.Tasks.Task.CompletedTask;
-                                                  }
-                                                  
-                                                  private static async global::System.Threading.Tasks.Task RunAsync(global::System.Func<global::System.Threading.Tasks.Task> action)
-                                                  {
-                                                      await action();
-                                                  }
-                                                  
-                                                  private static async global::System.Threading.Tasks.ValueTask RunAsync(global::System.Func<global::System.Threading.Tasks.ValueTask> action)
-                                                  {
-                                                      await action();
-                                                  }
-                                              
-                                                  private static async global::System.Threading.Tasks.Task RunSafelyAsync(global::System.Action action, global::System.Collections.Generic.List<global::System.Exception> exceptions)
-                                                  {
-                                                    try
-                                                    {
-                                                        action();
-                                                        await global::System.Threading.Tasks.Task.CompletedTask;
-                                                    }
-                                                    catch (global::System.Exception exception)
-                                                    {
-                                                        exceptions.Add(exception);
-                                                    }
-                                                  }
-                                                  
-                                                  private static async global::System.Threading.Tasks.Task RunSafelyAsync(global::System.Func<global::System.Threading.Tasks.Task> action, global::System.Collections.Generic.List<global::System.Exception> exceptions)
-                                                  {
-                                                    try
-                                                    {
-                                                        await action();
-                                                    }
-                                                    catch (global::System.Exception exception)
-                                                    {
-                                                        exceptions.Add(exception);
-                                                    }
-                                                  }
-                                                  
-                                                  private static async global::System.Threading.Tasks.ValueTask RunSafelyAsync(global::System.Func<global::System.Threading.Tasks.ValueTask> action, global::System.Collections.Generic.List<global::System.Exception> exceptions)
-                                                  {
-                                                    try
-                                                    {
-                                                        await action();
-                                                    }
-                                                    catch (global::System.Exception exception)
-                                                    {
-                                                        exceptions.Add(exception);
-                                                    }
-                                                  }
-                                                    
                                                   [ModuleInitializer]
                                                   public static void Initialise()
                                                   {
@@ -207,7 +154,7 @@ public class TestsSourceGenerator : ISourceGenerator
                                 // TODO: Skip on Skip Reason Not Empty
                                 
                  {{SetUpWriter.GenerateCode(classType)}}
-                                await RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}});
+                                await global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}});
                             }
                             finally
                             {
@@ -237,12 +184,12 @@ public class TestsSourceGenerator : ISourceGenerator
     {
         if (classType.IsAsyncDisposable())
         {
-            return "await RunSafelyAsync(() => classInstance?.DisposeAsync() ?? global::System.Threading.Tasks.ValueTask.CompletedTask, teardownExceptions);";
+            return "await global::TUnit.Engine.RunHelpers.RunSafelyAsync(() => classInstance?.DisposeAsync() ?? global::System.Threading.Tasks.ValueTask.CompletedTask, teardownExceptions);";
         }
         
         if (classType.IsDisposable())
         {
-            return "await RunSafelyAsync(() => classInstance?.Dispose(), teardownExceptions);";
+            return "await global::TUnit.Engine.RunHelpers.RunSafelyAsync(() => classInstance?.Dispose(), teardownExceptions);";
         }
 
         return string.Empty;
