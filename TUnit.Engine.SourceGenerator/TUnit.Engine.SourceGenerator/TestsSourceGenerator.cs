@@ -210,6 +210,8 @@ public class TestsSourceGenerator : ISourceGenerator
                             }
                             finally
                             {
+                                // TODO: TestContext.SetResult
+                                
                  {{CleanUpWriter.GenerateCode(classType)}}
                                 var remainingTests = global::TUnit.Engine.OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(typeof({{fullyQualifiedClassType}}));
                                 
