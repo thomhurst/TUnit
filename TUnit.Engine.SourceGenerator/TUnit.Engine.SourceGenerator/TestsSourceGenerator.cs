@@ -171,6 +171,7 @@ public class TestsSourceGenerator : ISourceGenerator
                         global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => global::System.Threading.Tasks.Task.Run(async () =>
                         {
                             {{fullyQualifiedClassType}} classInstance = null!;
+                            global::TUnit.Core.TestContext textContext = null!;
                             var teardownExceptions = new global::System.Collections.Generic.List<global::System.Exception>();
                             try
                             {
@@ -179,7 +180,7 @@ public class TestsSourceGenerator : ISourceGenerator
                      
                                 var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
                      
-                                using var testContext = new global::TUnit.Core.TestContext(new global::TUnit.Core.TestInformation()
+                                testContext = new global::TUnit.Core.TestContext(new global::TUnit.Core.TestInformation()
                                 {
                                     Categories = [{{string.Join(", ", GetCategories(methodSymbol))}}],
                                     ClassInstance = classInstance,
@@ -218,6 +219,7 @@ public class TestsSourceGenerator : ISourceGenerator
                                 }
                                 
                                 {{disposeCall}}
+                                testContext.Dispose();
                             }
                             
                             if (teardownExceptions.Any())
