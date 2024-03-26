@@ -200,7 +200,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
     private IMethodSymbol? FindMethodContainingTestData(SyntaxNodeAnalysisContext context, AttributeData dataSourceDrivenAttribute,
         INamedTypeSymbol classContainingTest)
     {
-        if (dataSourceDrivenAttribute.ConstructorArguments.Length == 3)
+        if (dataSourceDrivenAttribute.ConstructorArguments.Length == 1)
         {
             var methodName = dataSourceDrivenAttribute.ConstructorArguments.First().Value as string;
             return classContainingTest.GetMembers().OfType<IMethodSymbol>().FirstOrDefault(x => x.Name == methodName);
