@@ -132,7 +132,7 @@ public class TestsSourceGenerator : ISourceGenerator
                                     Timeout = {{GetTimeOut(methodSymbol)}},
                                     TestClassArguments = classArgs,
                                     TestMethodArguments = [{{string.Join(", ", methodArguments)}}],
-                                    TestClassParameterTypes = classInstance.GetType().GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
+                                    TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
                                     TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
                                     NotInParallelConstraintKeys = {{GetNotInParallelConstraintKeys(methodSymbol)}},
                                     RepeatCount = {{GetRepeatCount(methodSymbol)}},
