@@ -14,7 +14,7 @@ public static partial class DoesExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return Contain(does, expected, StringComparison.Ordinal);
+        return Contain(does, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> Contain<TAnd, TOr>(this Does<string, TAnd, TOr> does, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
