@@ -219,7 +219,7 @@ public class TestsSourceGenerator : ISourceGenerator
                                 }
                                 
                                 {{disposeCall}}
-                                testContext.Dispose();
+                                testContext?.Dispose();
                             }
                             
                             if (teardownExceptions.Any())
