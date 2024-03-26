@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public class ClassDataAttribute : TUnitAttribute
 {
     public Type Type { get; }
