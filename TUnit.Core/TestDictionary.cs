@@ -1,5 +1,19 @@
 ﻿namespace TUnit.Core;
 
+public record UninvokedTest
+{
+    public required string Id { get; init; }
+    public required TestContext TestContext { get; init; }
+    
+    public required List<Func<Task>> OneTimeSetUps { get; init; }
+    public required List<Func<Task>> SetUps { get; init; }
+    
+    public required Func<Task> TestBody { get; init; }
+    
+    public required List<Func<Task>> CleanUps { get; init; }
+    public required List<Func<Task>> OneTimeCleanUps { get; init; }
+}
+
 public static class TestDictionary
 {
     public static readonly AsyncLocal<TestContext> TestContexts = new();
