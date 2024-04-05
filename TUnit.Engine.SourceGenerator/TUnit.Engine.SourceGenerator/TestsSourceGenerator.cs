@@ -350,7 +350,6 @@ public class TestsSourceGenerator : ISourceGenerator
             if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                 is "global::TUnit.Core.Globally")
             {
-
                 yield return new ArgumentString(
                     $"global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())",
                     ArgumentsCount.One);
@@ -359,7 +358,6 @@ public class TestsSourceGenerator : ISourceGenerator
             if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                 is "global::TUnit.Core.ForClass")
             {
-
                 yield return new ArgumentString(
                     $"global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())",
                     ArgumentsCount.One
