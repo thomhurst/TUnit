@@ -71,38 +71,54 @@ public class TestsSourceGenerator : ISourceGenerator
             return;
         }
 
-        var attributes = symbol.GetAttributes();
+        AttributeData[] attributes =
+        [
+            ..methodSymbol.GetAttributes(),
+            ..methodSymbol.ContainingType.GetAttributes()
+        ];
         
-        foreach (var attributeData in attributes)
+        var repeatCount = attributes
+            .FirstOrDefault(x =>
+                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+                WellKnownFullyQualifiedClassNames.RepeatAttribute)
+            ?.ConstructorArguments
+            .FirstOrDefault()
+            .Value as int? ?? 1;
+
+        for (var i = 1; i <= repeatCount; i++)
         {
-            switch (attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
+            foreach (var attributeData in attributes)
             {
-                case "global::TUnit.Core.TestAttribute":
-                    foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
-                    {
-                        sourceBuilder.AppendLine(
-                            GenerateTestInvocationCode(methodSymbol, classInvocation, [])
-                        );
-                    }
-                    break;
-                case "global::TUnit.Core.DataDrivenTestAttribute":
-                    break;
-                case "global::TUnit.Core.DataSourceDrivenTestAttribute": 
-                    break;
-                case "global::TUnit.Core.CombinativeTestAttribute": 
-                    break;
+                switch (attributeData.AttributeClass?.ToDisplayString(DisplayFormats
+                            .FullyQualifiedNonGenericWithGlobalPrefix))
+                {
+                    case "global::TUnit.Core.TestAttribute":
+                        foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
+                        {
+                            sourceBuilder.AppendLine(
+                                GenerateTestInvocationCode(methodSymbol, classInvocation, [], i)
+                            );
+                        }
+
+                        break;
+                    case "global::TUnit.Core.DataDrivenTestAttribute":
+                        break;
+                    case "global::TUnit.Core.DataSourceDrivenTestAttribute":
+                        break;
+                    case "global::TUnit.Core.CombinativeTestAttribute":
+                        break;
+                }
             }
         }
     }
 
     private string GenerateTestInvocationCode(
         IMethodSymbol methodSymbol, 
-        string classInvocation,
-        IEnumerable<string> classArguments,
+        ClassInvocationString classInvocation,
         IEnumerable<string> methodArguments,
         int currentCount)
     {
-        var testId = GetTestId(methodSymbol, classArguments, methodArguments, currentCount);
+        var testId = GetTestId(methodSymbol, classInvocation, methodArguments, currentCount);
 
         var classType = methodSymbol.ContainingType;
         
@@ -215,7 +231,7 @@ public class TestsSourceGenerator : ISourceGenerator
     }
 
     private string GetTestId(IMethodSymbol methodSymbol, 
-        IEnumerable<string> classArguments,
+        ClassInvocationString classInvocationString,
         IEnumerable<string> methodArguments, 
         int count)
     {
@@ -231,7 +247,7 @@ public class TestsSourceGenerator : ISourceGenerator
 
         var methodParameterTypes = GetTypes(methodSymbol.Parameters);
         
-        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{string.Join(",", classArguments)}.{methodParameterTypes}.{string.Join(",", methodArguments)}.{count}";
+        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{classInvocationString.Arguments}.{methodParameterTypes}.{string.Join(",", methodArguments)}.{count}";
     }
 
     private IEnumerable<ArgumentString> GetMethodArguments(IMethodSymbol methodSymbol)
@@ -252,7 +268,7 @@ public class TestsSourceGenerator : ISourceGenerator
         return string.Join(",", parameterTypesFullyQualified);
     }
 
-    private IEnumerable<string> GenerateClassInvocations(INamedTypeSymbol namedTypeSymbol)
+    private IEnumerable<ClassInvocationString> GenerateClassInvocations(INamedTypeSymbol namedTypeSymbol)
     {
         var className =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
@@ -263,25 +279,25 @@ public class TestsSourceGenerator : ISourceGenerator
         {
             if (argumentsCount == ArgumentsCount.Zero)
             {
-                yield return $"""
-                                    object[] classArgs = [];
-                                    var classInstance = new {className}()
-                              """;
+                yield return new ClassInvocationString($"""
+                                                              object[] classArgs = [];
+                                                              var classInstance = new {className}()
+                                                        """, string.Empty);
             }
             if (argumentsCount == ArgumentsCount.One)
             {
-                yield return $"""
-                              var arg = {arguments};
-                              object[] classArgs = [arg];
-                              var classInstance = new {className}(arg)
-                              """;
+                yield return new ClassInvocationString($"""
+                                                        var arg = {arguments};
+                                                        object[] classArgs = [arg];
+                                                        var classInstance = new {className}(arg)
+                                                        """, arguments);
             }
             if (argumentsCount == ArgumentsCount.Multiple)
             {
-                yield return $"""
-                              object[] classArgs = [{arguments}];
-                              var classInstance = new {className}({arguments})
-                              """;
+                yield return new ClassInvocationString($"""
+                                                        object[] classArgs = [{arguments}];
+                                                        var classInstance = new {className}({arguments})
+                                                        """, arguments);
             }
         }
     }
@@ -293,7 +309,7 @@ public class TestsSourceGenerator : ISourceGenerator
         
         if (namedTypeSymbol.InstanceConstructors.First().Parameters.IsDefaultOrEmpty)
         {
-            yield return new(string.Empty, ArgumentsCount.Zero);
+            yield return new ArgumentString(string.Empty, ArgumentsCount.Zero);
         }
 
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes().Where(x =>
