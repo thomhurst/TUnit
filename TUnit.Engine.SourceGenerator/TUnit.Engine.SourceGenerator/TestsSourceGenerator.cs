@@ -114,11 +114,11 @@ public class TestsSourceGenerator : ISourceGenerator
 
     private string GenerateTestInvocationCode(
         IMethodSymbol methodSymbol, 
-        ClassInvocationString classInvocation,
+        ClassInvocationString classInvocationString,
         IEnumerable<string> methodArguments,
         int currentCount)
     {
-        var testId = GetTestId(methodSymbol, classInvocation, methodArguments, currentCount);
+        var testId = GetTestId(methodSymbol, classInvocationString, methodArguments, currentCount);
 
         var classType = methodSymbol.ContainingType;
         
@@ -126,7 +126,7 @@ public class TestsSourceGenerator : ISourceGenerator
         return $$"""
                     global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => 
                     {
-                 {{classInvocation}};
+                 {{classInvocationString.ClassInvocation}};
              
                         var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
              
