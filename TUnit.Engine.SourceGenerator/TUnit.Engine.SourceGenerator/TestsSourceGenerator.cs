@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -162,8 +163,12 @@ public class TestsSourceGenerator : ISourceGenerator
             return "null";
         }
         
-        return string.Join(", ", notInParallelAttributes
-            .SelectMany(x => $"\"{x.ConstructorArguments.Select(y => y.Value)}\""));
+        var notInConstraintKeys = notInParallelAttributes
+            .SelectMany(x => x.ConstructorArguments)
+            .SelectMany(x => x.Value is null ? x.Values.Select(x => x.Value) : [x.Value])
+            .Select(x => $"\"{x}\"");
+        
+        return $"[{string.Join(", ", notInConstraintKeys)}]";
     }
 
     private int GetRepeatCount(IMethodSymbol methodSymbol)
