@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator;
@@ -76,7 +77,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
             }
 
             var className = $"{method.MethodSymbol.Name}_{Guid.NewGuid():N}";
-            context.AddSource($"{className}.g.cs", SourceCodeFormatter.Format(WrapInClass(className, classSource)));
+            context.AddSource($"{className}.g.cs", SourceText.From(WrapInClass(className, classSource)));
         }
     }
 

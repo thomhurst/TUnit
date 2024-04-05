@@ -63,11 +63,6 @@ internal class TestsExecutor
         
         var tests = _testGrouper.OrganiseTests(testNodes);
         
-        foreach (var test in tests.AllTests)
-        {
-            OneTimeCleanUpOrchestrator.RegisterTest(Type.GetType(test.GetRequiredProperty<TestMethodIdentifierProperty>().TypeName, throwOnError: true)!);
-        }
-        
         _singleTestExecutor.SetAllTests(tests);
 
         var oneTimeCleanUps = new ConcurrentQueue<Task>();

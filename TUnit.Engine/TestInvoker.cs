@@ -11,6 +11,8 @@ internal class TestInvoker
 
     public async Task Invoke(UnInvokedTest unInvokedTest)
     {
+        OneTimeCleanUpOrchestrator.RegisterTest(unInvokedTest.TestClass.GetType());
+
         var teardownExceptions = new List<Exception>();
         try
         {

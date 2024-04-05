@@ -12,8 +12,8 @@
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>GeneratedCode</CompilerGeneratedFilesOutputPath>
+<!--        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+<!--        <CompilerGeneratedFilesOutputPath>GeneratedCode</CompilerGeneratedFilesOutputPath>-->
     </PropertyGroup>
 
     <ItemGroup>
@@ -34,6 +34,10 @@
             <DisplayName>TUnit</DisplayName>
             <TypeFullName>TUnit.Engine.TestingPlatformBuilderHook</TypeFullName>
         </TestingPlatformBuilderHook>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="GeneratedCode\" />
     </ItemGroup>
 
 </Project>
