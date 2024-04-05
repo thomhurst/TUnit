@@ -106,77 +106,47 @@ public class TestsSourceGenerator : ISourceGenerator
         var testId = GetTestId(methodSymbol);
 
         var classType = methodSymbol.ContainingType;
-
-        var disposeCall = GenerateDisposeCall(classType);
-
+        
         var fullyQualifiedClassType = classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
-                        // TODO: Have the Delegate take a IMessageBus
-                        global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => global::System.Threading.Tasks.Task.Run(async () =>
+                    global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => 
+                    {
+                        {{classInvocation}};
+             
+                        var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
+             
+                        var testInformation = new global::TUnit.Core.TestInformation()
                         {
-                            {{fullyQualifiedClassType}} classInstance = null!;
-                            var teardownExceptions = new global::System.Collections.Generic.List<global::System.Exception>();
-                            try
-                            {
-                 {{classInvocation}};
-                     
-                                var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
-                     
-                                var testInformation = new global::TUnit.Core.TestInformation()
-                                {
-                                    Categories = [{{string.Join(", ", GetCategories(methodSymbol))}}],
-                                    ClassInstance = classInstance,
-                                    ClassType = typeof({{fullyQualifiedClassType}}),
-                                    Timeout = {{GetTimeOut(methodSymbol)}},
-                                    TestClassArguments = classArgs,
-                                    TestMethodArguments = [{{string.Join(", ", methodArguments)}}],
-                                    TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
-                                    TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
-                                    NotInParallelConstraintKeys = {{GetNotInParallelConstraintKeys(methodSymbol)}},
-                                    RepeatCount = {{GetRepeatCount(methodSymbol)}},
-                                    RetryCount = {{GetRetryCount(methodSymbol)}},
-                                    MethodInfo = methodInfo,
-                                    TestName = "{{methodSymbol.Name}}",
-                                    CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
-                                }
-                                
-                                var testContext = new global::TUnit.Core.TestContext(testInformation);
-                                
-                                return new global::TUnit.Core.UnInvokedTest
-                                {
-                                    Id = "",
-                                    TestContext = testContext,
-                                    OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classType)}}],
-                                    BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classType)}}],
-                                    TestClass = classInstance,
-                                    TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}}),
-                                    AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classType)}}],
-                                    OneTimeCleanUps = [{{OneTimeCleanUpWriter.GenerateCode(classType)}}],
-                                };
-                                
-                                
-                            }
-                            finally
-                            {
-                                // TODO: TestContext.SetResult
-                                
-                 
-                                var remainingTests = global::TUnit.Engine.OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(typeof({{fullyQualifiedClassType}}));
-                                
-                                if (remainingTests == 0)
-                                {
-                 
-                                }
-                                
-                                {{disposeCall}}
-                                testContext?.Dispose();
-                            }
-                            
-                            if (teardownExceptions.Any())
-                            {
-                                throw new global::System.AggregateException(teardownExceptions);
-                            }
-                        }));
+                            Categories = [{{string.Join(", ", GetCategories(methodSymbol))}}],
+                            ClassInstance = classInstance,
+                            ClassType = typeof({{fullyQualifiedClassType}}),
+                            Timeout = {{GetTimeOut(methodSymbol)}},
+                            TestClassArguments = classArgs,
+                            TestMethodArguments = [{{string.Join(", ", methodArguments)}}],
+                            TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
+                            TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
+                            NotInParallelConstraintKeys = {{GetNotInParallelConstraintKeys(methodSymbol)}},
+                            RepeatCount = {{GetRepeatCount(methodSymbol)}},
+                            RetryCount = {{GetRetryCount(methodSymbol)}},
+                            MethodInfo = methodInfo,
+                            TestName = "{{methodSymbol.Name}}",
+                            CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
+                        };
+                        
+                        var testContext = new global::TUnit.Core.TestContext(testInformation);
+                        
+                        return new global::TUnit.Core.UnInvokedTest
+                        {
+                            Id = "{{testId}}",
+                            TestContext = testContext,
+                            OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classType)}}],
+                            BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classType)}}],
+                            TestClass = classInstance,
+                            TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}}),
+                            AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classType)}}],
+                            OneTimeCleanUps = [{{OneTimeCleanUpWriter.GenerateCode(classType)}}],
+                        };
+                    });
                  """;
     }
 
@@ -194,21 +164,6 @@ public class TestsSourceGenerator : ISourceGenerator
         
         return string.Join(", ", notInParallelAttributes
             .SelectMany(x => $"\"{x.ConstructorArguments.Select(y => y.Value)}\""));
-    }
-
-    private static string GenerateDisposeCall(INamedTypeSymbol classType)
-    {
-        if (classType.IsAsyncDisposable())
-        {
-            return "await global::TUnit.Engine.RunHelpers.RunSafelyAsync(() => classInstance?.DisposeAsync() ?? global::System.Threading.Tasks.ValueTask.CompletedTask, teardownExceptions);";
-        }
-        
-        if (classType.IsDisposable())
-        {
-            return "await global::TUnit.Engine.RunHelpers.RunSafelyAsync(() => classInstance?.Dispose(), teardownExceptions);";
-        }
-
-        return string.Empty;
     }
 
     private int GetRepeatCount(IMethodSymbol methodSymbol)
@@ -290,7 +245,7 @@ public class TestsSourceGenerator : ISourceGenerator
         {
             yield return $"""
                                          object[] classArgs = [];
-                                         classInstance = new {className}()
+                                         var classInstance = new {className}()
                           """;
         }
 
@@ -305,7 +260,7 @@ public class TestsSourceGenerator : ISourceGenerator
             yield return $"""
                                          var arg = {arg};
                                          object[] classArgs = [arg];
-                                         classInstance = new {className}(arg)
+                                         var classInstance = new {className}(arg)
                           """;
         }
         
@@ -316,7 +271,7 @@ public class TestsSourceGenerator : ISourceGenerator
             yield return $"""
                                          var arg = new {classDataAttribute.ConstructorArguments.First().Value}();
                                          object[] classArgs = [arg];
-                                         classInstance = new {className}(arg)
+                                         var classInstance = new {className}(arg)
                           """;
         }
         
@@ -335,7 +290,7 @@ public class TestsSourceGenerator : ISourceGenerator
                 yield return $"""
                                              var arg = new {genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}();
                                              object[] classArgs = [arg];
-                                             classInstance = new {className}(arg)
+                                             var classInstance = new {className}(arg)
                               """;
             }
             
@@ -346,7 +301,7 @@ public class TestsSourceGenerator : ISourceGenerator
                 yield return $"""
                                              var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}());
                                              object[] classArgs = [arg];
-                                             classInstance = return new {className}(arg);
+                                             var classInstance = return new {className}(arg);
                               """;
             }
             
@@ -357,7 +312,7 @@ public class TestsSourceGenerator : ISourceGenerator
                 yield return $"""
                                              var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}());
                                              object[] classArgs = [arg];
-                                             classInstance = return new {className}(arg);
+                                             var classInstance = return new {className}(arg);
                               """;
             }
             
@@ -368,7 +323,7 @@ public class TestsSourceGenerator : ISourceGenerator
                 yield return $"""
                                              var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey("{key}", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}());
                                              object[] classArgs = [arg];
-                                             classInstance = return new {className}(arg);
+                                             var classInstance = return new {className}(arg);
                               """;
             }
         }

@@ -30,7 +30,7 @@ public class OneTimeSetUpWriter
         
         foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
         {
-            stringBuilder.Append($"() => global::TUnit:Engine.RunHelpers.RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}()),");
+            stringBuilder.Append($"() => global::TUnit.Engine.RunHelpers.RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}()),");
         }
         
         return stringBuilder.ToString();
