@@ -76,7 +76,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
             }
 
             var className = $"{method.MethodSymbol.Name}_{Guid.NewGuid():N}";
-            context.AddSource($"{className}.g.cs", WrapInClass(className, classSource));
+            context.AddSource($"{className}.g.cs", SourceCodeFormatter.Format(WrapInClass(className, classSource)));
         }
     }
 
