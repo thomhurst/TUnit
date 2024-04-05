@@ -37,6 +37,8 @@ public class TestInvoker
                     await RunHelpers.RunSafelyAsync(cleanUp, teardownExceptions);
                 }
                 
+                await DisposeSafely(unInvokedTest.TestClass, teardownExceptions);
+                
                 var remainingTests = OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(unInvokedTest.TestContext.TestInformation.ClassType);
                
                 if (remainingTests == 0)
@@ -47,7 +49,7 @@ public class TestInvoker
                     }
                 }
             }
-           
+            
             if (teardownExceptions.Any())
             {
                 if (teardownExceptions.Count == 1)
@@ -58,6 +60,25 @@ public class TestInvoker
                 throw new AggregateException(teardownExceptions);
             }
         });
+    }
+
+    private async ValueTask DisposeSafely(object testClass, List<Exception> teardownExceptions)
+    {
+        try
+        {
+            if (testClass is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+            }
+            else if (testClass is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+        catch (Exception e)
+        {
+            teardownExceptions.Add(e);
+        }
     }
 
     private static IEnumerable<Task> GetThreadSafeOneTimeSetUps(UnInvokedTest unInvokedTest)
