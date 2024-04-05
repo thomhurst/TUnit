@@ -1,7 +1,5 @@
 using System.IO;
 using System.Linq;
-using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.Tests.Utils;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 

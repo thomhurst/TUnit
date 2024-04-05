@@ -75,7 +75,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
                 continue;
             }
 
-            var className = $"{method.MethodSymbol.ContainingNamespace}_{method.MethodSymbol.Name}_{Guid.NewGuid():N}";
+            var className = $"{method.MethodSymbol.Name}_{Guid.NewGuid():N}";
             context.AddSource($"{className}.g.cs", WrapInClass(className, classSource));
         }
     }
