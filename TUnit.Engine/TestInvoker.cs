@@ -2,83 +2,83 @@
 
 namespace TUnit.Engine;
 
-public class TestInvoker
+internal class TestInvoker
 {
-    public async Task Invoke(UnInvokedTest unInvokedTest)
+    public TestInvoker()
     {
-        await Task.Run(async () =>
-        {
-            var teardownExceptions = new List<Exception>();
-            try
-            {
-                TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
-
-                var threadSafeOneTimeSetUps = GetThreadSafeOneTimeSetUps(unInvokedTest);
-                
-                foreach (var oneTimeSetUp in threadSafeOneTimeSetUps)
-                {
-                    // We should get the same Task for each test within the class
-                    // So we await the same Task to ensure it's finished first
-                    // and also gives the benefit of rethrowing the same exception if it failed
-                    await oneTimeSetUp;
-                }
-                
-                foreach (var setUp in unInvokedTest.BeforeEachTestSetUps)
-                {
-                    await setUp();
-                }
-
-                await unInvokedTest.TestBody();
-            }
-            finally
-            {
-                foreach (var cleanUp in unInvokedTest.AfterEachTestCleanUps)
-                {
-                    await RunHelpers.RunSafelyAsync(cleanUp, teardownExceptions);
-                }
-                
-                await DisposeSafely(unInvokedTest.TestClass, teardownExceptions);
-                
-                var remainingTests = OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(unInvokedTest.TestContext.TestInformation.ClassType);
-               
-                if (remainingTests == 0)
-                {
-                    foreach (var oneTimeCleanUp in unInvokedTest.OneTimeCleanUps)
-                    {
-                        await RunHelpers.RunSafelyAsync(oneTimeCleanUp, teardownExceptions);
-                    }
-                }
-            }
-            
-            if (teardownExceptions.Any())
-            {
-                if (teardownExceptions.Count == 1)
-                {
-                    throw teardownExceptions.First();
-                }
-                
-                throw new AggregateException(teardownExceptions);
-            }
-        });
+        
     }
 
-    private async ValueTask DisposeSafely(object testClass, List<Exception> teardownExceptions)
+    public async Task Invoke(UnInvokedTest unInvokedTest)
     {
+        var teardownExceptions = new List<Exception>();
         try
         {
-            if (testClass is IAsyncDisposable asyncDisposable)
+            TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
+
+            var threadSafeOneTimeSetUps = GetThreadSafeOneTimeSetUps(unInvokedTest);
+
+            foreach (var oneTimeSetUp in threadSafeOneTimeSetUps)
             {
-                await asyncDisposable.DisposeAsync();
+                // We should get the same Task for each test within the class
+                // So we await the same Task to ensure it's finished first
+                // and also gives the benefit of rethrowing the same exception if it failed
+                await oneTimeSetUp;
             }
-            else if (testClass is IDisposable disposable)
+
+            foreach (var setUp in unInvokedTest.BeforeEachTestSetUps)
             {
-                disposable.Dispose();
+                await setUp();
             }
+
+            await unInvokedTest.TestBody();
         }
-        catch (Exception e)
+        finally
         {
-            teardownExceptions.Add(e);
+            foreach (var cleanUp in unInvokedTest.AfterEachTestCleanUps)
+            {
+                await RunHelpers.RunSafelyAsync(cleanUp, teardownExceptions);
+            }
+
+            await RunHelpers.RunSafelyAsync(() => Dispose(unInvokedTest.TestClass), teardownExceptions);
+
+            var remainingTests =
+                OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(unInvokedTest.TestContext
+                    .TestInformation.ClassType);
+
+            if (remainingTests == 0)
+            {
+                foreach (var oneTimeCleanUp in unInvokedTest.OneTimeCleanUps)
+                {
+                    await RunHelpers.RunSafelyAsync(oneTimeCleanUp, teardownExceptions);
+                }
+            }
         }
+
+        if (teardownExceptions.Any())
+        {
+            if (teardownExceptions.Count == 1)
+            {
+                throw teardownExceptions.First();
+            }
+
+            throw new AggregateException(teardownExceptions);
+        }
+    }
+
+    private ValueTask Dispose(object testClass)
+    {
+        if (testClass is IAsyncDisposable asyncDisposable)
+        {
+            return asyncDisposable.DisposeAsync();
+        }
+
+        if (testClass is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        return ValueTask.CompletedTask;
     }
 
     private static IEnumerable<Task> GetThreadSafeOneTimeSetUps(UnInvokedTest unInvokedTest)

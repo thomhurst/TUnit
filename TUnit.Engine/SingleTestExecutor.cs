@@ -199,7 +199,11 @@ internal class SingleTestExecutor : IDataProducer
 
     private async Task RunTest(UnInvokedTest unInvokedTest)
     {
-        await _testInvoker.Invoke(unInvokedTest);
+        await Task.Run(async () =>
+        {
+            ConsoleInterceptor.Instance.SetModule(unInvokedTest.TestContext);
+            await _testInvoker.Invoke(unInvokedTest);
+        });
     }
 
     internal void SetAllTests(GroupedTests tests)
@@ -308,6 +312,7 @@ internal class SingleTestExecutor : IDataProducer
         finally
         {
             testLevelCancellationTokenSource.Dispose();
+            testContext.Dispose();
         }
     }
 
