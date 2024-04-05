@@ -96,6 +96,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
                    {
                         {{methodCode}}
                    }
+               } 
                """;
     }
 
