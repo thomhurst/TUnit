@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Tests.Utils;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
@@ -19,12 +20,7 @@ Customer";
         var generator = new TestsSourceGenerator();
 
         // Source generators should be tested using 'GeneratorDriver'.
-        var driver = CSharpGeneratorDriver.Create(new[] { generator },
-            new[]
-            {
-                // Add the additional file separately from the compilation.
-                new TestAdditionalFile("./DDD.UbiquitousLanguageRegistry.txt", DddRegistryText)
-            });
+        var driver = CSharpGeneratorDriver.Create(generator);
 
         // To run generators, we can use an empty compilation.
         var compilation = CSharpCompilation.Create(nameof(TestsSourceGeneratorTests));
