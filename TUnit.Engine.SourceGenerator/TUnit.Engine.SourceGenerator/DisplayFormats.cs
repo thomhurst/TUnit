@@ -39,4 +39,16 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType
     );
+
+    public static SymbolDisplayFormat FullyQualifiedGenericWithoutGlobalPrefix => new(
+        SymbolDisplayGlobalNamespaceStyle.Omitted,
+        SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        SymbolDisplayMemberOptions.IncludeContainingType,
+        SymbolDisplayDelegateStyle.NameAndSignature,
+        SymbolDisplayExtensionMethodStyle.Default,
+        SymbolDisplayParameterOptions.IncludeType,
+        SymbolDisplayPropertyStyle.NameOnly,
+        SymbolDisplayLocalOptions.IncludeType
+    );
 }

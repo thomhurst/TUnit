@@ -77,10 +77,15 @@ internal record TestDetails
         MinLineNumber = baseTestAttribute.Line;
         MaxLineNumber = baseTestAttribute.Line;
 
-        UniqueId = $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
+        UniqueId = GenerateUniqueId();
 
         CustomProperties = methodAndClassAttributes.OfType<PropertyAttribute>()
             .ToDictionary(x => x.Name, x => x.Value);
+    }
+
+    private string GenerateUniqueId()
+    {
+        return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
     }
 
     public string ReturnType { get; }

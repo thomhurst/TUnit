@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator;
 
@@ -96,9 +98,11 @@ public class TestsSourceGenerator : ISourceGenerator
     private string GenerateTestInvocationCode(
         IMethodSymbol methodSymbol, 
         string classInvocation,
-        IEnumerable<string> methodArguments)
+        IEnumerable<string> classArguments,
+        IEnumerable<string> methodArguments,
+        int currentCount)
     {
-        var testId = GetTestId(methodSymbol);
+        var testId = GetTestId(methodSymbol, classArguments, methodArguments, currentCount);
 
         var classType = methodSymbol.ContainingType;
         
@@ -210,27 +214,86 @@ public class TestsSourceGenerator : ISourceGenerator
         return [..methodSymbol.GetAttributes(), ..methodSymbol.ContainingType.GetAttributes()];
     }
 
-    private string GetTestId(IMethodSymbol methodSymbol)
+    private string GetTestId(IMethodSymbol methodSymbol, 
+        IEnumerable<string> classArguments,
+        IEnumerable<string> methodArguments, 
+        int count)
     {
-        var containingType =
-            methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        // Format must match TestDetails.GenerateUniqueId, but we can't share code
+        // as we're inside a source generator
+        var fullyQualifiedClassName =
+            methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
-        var methodName = methodSymbol.Name;
+        var testName = methodSymbol.Name;
+        
+        var classParameters = methodSymbol.ContainingType.Constructors.First().Parameters;
+        var classParameterTypes = GetTypes(classParameters);
 
-        return $"{containingType} | {methodName}";
+        var methodParameterTypes = GetTypes(methodSymbol.Parameters);
+        
+        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{string.Join(",", classArguments)}.{methodParameterTypes}.{string.Join(",", methodArguments)}.{count}";
+    }
+
+    private IEnumerable<ArgumentString> GetMethodArguments(IMethodSymbol methodSymbol)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    private static string GetTypes(ImmutableArray<IParameterSymbol> parameters)
+    {
+        if (parameters.IsDefaultOrEmpty)
+        {
+            return string.Empty;
+        }
+
+        var parameterTypesFullyQualified = parameters.Select(x => x.Type)
+            .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix));
+        
+        return string.Join(",", parameterTypesFullyQualified);
     }
 
     private IEnumerable<string> GenerateClassInvocations(INamedTypeSymbol namedTypeSymbol)
     {
         var className =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+
+        var args = GetClassArguments(namedTypeSymbol);
+        
+        foreach (var (arguments, argumentsCount) in args)
+        {
+            if (argumentsCount == ArgumentsCount.Zero)
+            {
+                yield return $"""
+                                    object[] classArgs = [];
+                                    var classInstance = new {className}()
+                              """;
+            }
+            if (argumentsCount == ArgumentsCount.One)
+            {
+                yield return $"""
+                              var arg = {arguments};
+                              object[] classArgs = [arg];
+                              var classInstance = new {className}(arg)
+                              """;
+            }
+            if (argumentsCount == ArgumentsCount.Multiple)
+            {
+                yield return $"""
+                              object[] classArgs = [{arguments}];
+                              var classInstance = new {className}({arguments})
+                              """;
+            }
+        }
+    }
+    
+    private IEnumerable<ArgumentString> GetClassArguments(INamedTypeSymbol namedTypeSymbol)
+    {
+        var className =
+            namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         
         if (namedTypeSymbol.InstanceConstructors.First().Parameters.IsDefaultOrEmpty)
         {
-            yield return $"""
-                                object[] classArgs = [];
-                                var classInstance = new {className}()
-                          """;
+            yield return new(string.Empty, ArgumentsCount.Zero);
         }
 
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes().Where(x =>
@@ -241,22 +304,14 @@ public class TestsSourceGenerator : ISourceGenerator
                 ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.First().Value}()"
                 : $"{dataSourceDrivenTestAttribute.ConstructorArguments[0].Value}.{dataSourceDrivenTestAttribute.ConstructorArguments[1].Value}()";
 
-            yield return $"""
-                                var arg = {arg};
-                                object[] classArgs = [arg];
-                                var classInstance = new {className}(arg)
-                          """;
+            yield return new ArgumentString(arg, ArgumentsCount.One);
         }
         
         foreach (var classDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                          is "global::TUnit.Core.ClassDataAttribute"))
         {
-            yield return $"""
-                                var arg = new {classDataAttribute.ConstructorArguments.First().Value}();
-                                object[] classArgs = [arg];
-                                var classInstance = new {className}(arg)
-                          """;
+            yield return new ArgumentString($"new {classDataAttribute.ConstructorArguments.First().Value}()", ArgumentsCount.One);
         }
         
         foreach (var classDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
@@ -271,44 +326,37 @@ public class TestsSourceGenerator : ISourceGenerator
             if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                 is "global::TUnit.Core.None")
             {
-                yield return $"""
-                                    var arg = new {genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}();
-                                    object[] classArgs = [arg];
-                                    var classInstance = new {className}(arg)
-                              """;
+                yield return new ArgumentString(
+                    $"new {genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}()",
+                    ArgumentsCount.One);
             }
             
             if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                 is "global::TUnit.Core.Globally")
             {
 
-                yield return $"""
-                                    var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}());
-                                    object[] classArgs = [arg];
-                                    var classInstance = return new {className}(arg);
-                              """;
+                yield return new ArgumentString(
+                    $"global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())",
+                    ArgumentsCount.One);
             }
             
             if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                 is "global::TUnit.Core.ForClass")
             {
 
-                yield return $"""
-                                    var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}());
-                                    object[] classArgs = [arg];
-                                    var classInstance = return new {className}(arg);
-                              """;
+                yield return new ArgumentString(
+                    $"global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())",
+                    ArgumentsCount.One
+                );
             }
             
             if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                 is "global::TUnit.Core.ForKey")
             {
                 var key = sharedArgument.Value?.GetType().GetProperty("Key")?.GetValue(sharedArgument.Value);
-                yield return $"""
-                                    var arg = global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey("{key}", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}());
-                                    object[] classArgs = [arg];
-                                    var classInstance = return new {className}(arg);
-                              """;
+                yield return new ArgumentString(
+                    $"global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())",
+                    ArgumentsCount.One);
             }
         }
     }
