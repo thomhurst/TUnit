@@ -13,9 +13,14 @@ public class TestInvoker
             {
                 TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
 
-                foreach (var oneTimeSetUp in unInvokedTest.OneTimeSetUps)
+                var threadSafeOneTimeSetUps = GetThreadSafeOneTimeSetUps(unInvokedTest);
+                
+                foreach (var oneTimeSetUp in threadSafeOneTimeSetUps)
                 {
-                    await oneTimeSetUp();
+                    // We should get the same Task for each test within the class
+                    // So we await the same Task to ensure it's finished first
+                    // and also gives the benefit of rethrowing the same exception if it failed
+                    await oneTimeSetUp;
                 }
                 
                 foreach (var setUp in unInvokedTest.BeforeEachTestSetUps)
@@ -53,5 +58,12 @@ public class TestInvoker
                 throw new AggregateException(teardownExceptions);
             }
         });
+    }
+
+    private static IEnumerable<Task> GetThreadSafeOneTimeSetUps(UnInvokedTest unInvokedTest)
+    {
+        return OneTimeSetUpOrchestrator.Tasks.GetOrAdd(
+            unInvokedTest.TestContext.TestInformation.ClassType, _ => unInvokedTest.OneTimeSetUps.Select(x => x.Invoke())
+        );
     }
 }

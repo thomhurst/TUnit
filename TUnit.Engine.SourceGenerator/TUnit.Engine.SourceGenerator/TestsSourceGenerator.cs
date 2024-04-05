@@ -154,30 +154,7 @@ public class TestsSourceGenerator : ISourceGenerator
                                     OneTimeCleanUps = [{{OneTimeCleanUpWriter.GenerateCode(classType)}}],
                                 };
                                 
-                                global::TUnit.Engine.ConsoleInterceptor.Instance.SetModule(testContext);
-                                global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
                                 
-                                var customTestAttributes = methodInfo.GetCustomAttributes()
-                                 .Concat(typeof({{fullyQualifiedClassType}}).GetCustomAttributes())
-                                 .OfType<global::TUnit.Core.Interfaces.ITestAttribute>();
-                             
-                                 foreach (var customTestAttribute in customTestAttributes)
-                                 {
-                                     await customTestAttribute.Apply(testContext);
-                                 }
-                                 
-                                 if (testContext.FailReason != null)
-                                 {
-                                     throw new global::System.Exception(testContext.FailReason);
-                                 }
-                                
-                                // TODO: Run with retries
-                                // TODO: Skip on Skip Reason Not Empty
-                                
-                                await global::TUnit.Engine.RunHelpers.ExecuteWithRetries(testInformation, async () => {
-                 
-                                    await global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}});
-                                });
                             }
                             finally
                             {
