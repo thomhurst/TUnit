@@ -9,7 +9,7 @@ public class SetUpWriter
 {
     public static string GenerateCode(INamedTypeSymbol classType)
     {
-        var oneTimeSetUpMethods = classType
+        var beforeEachTestMethods = classType
             .GetMembersIncludingBase()
             .OfType<IMethodSymbol>()
             .Where(x => !x.IsStatic)
@@ -20,16 +20,16 @@ public class SetUpWriter
             )
             .ToList();
         
-        if(!oneTimeSetUpMethods.Any())
+        if(!beforeEachTestMethods.Any())
         {
             return string.Empty;
         }
 
         var stringBuilder = new StringBuilder();
         
-        foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
+        foreach (var beforeEachTestMethod in beforeEachTestMethods)
         {
-            stringBuilder.AppendLine($"                   await RunAsync(classInstance.{oneTimeSetUpMethod.Name});");
+            stringBuilder.Append($"() => classInstance.{beforeEachTestMethod.Name}(),");
         }
         
         return stringBuilder.ToString();

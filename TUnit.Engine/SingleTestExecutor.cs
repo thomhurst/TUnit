@@ -25,6 +25,7 @@ internal class SingleTestExecutor : IDataProducer
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly ConsoleInterceptor _consoleInterceptor;
     private readonly IMessageBus _messageBus;
+    private readonly TestInvoker _testInvoker;
 
     public GroupedTests GroupedTests { get; private set; } = null!;
 
@@ -37,7 +38,8 @@ internal class SingleTestExecutor : IDataProducer
         ILoggerFactory loggerFactory,
         CancellationTokenSource cancellationTokenSource,
         ConsoleInterceptor consoleInterceptor,
-        IMessageBus messageBus)
+        IMessageBus messageBus,
+        TestInvoker testInvoker)
     {
         _extension = extension;
         _methodInvoker = methodInvoker;
@@ -48,6 +50,7 @@ internal class SingleTestExecutor : IDataProducer
         _cancellationTokenSource = cancellationTokenSource;
         _consoleInterceptor = consoleInterceptor;
         _messageBus = messageBus;
+        _testInvoker = testInvoker;
     }
     
     private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
@@ -110,11 +113,19 @@ internal class SingleTestExecutor : IDataProducer
                 Status = Status.Skipped,
             };
         }
+
+        UnInvokedTest? unInvokedTest;
+        TestContext? testContext = null;
         try
         {
+            var unInvokedTestFunc = TestDictionary.GetTest(testNode.Uid);
+            unInvokedTest = unInvokedTestFunc();
+            testContext = unInvokedTest.TestContext;
+            var testInformation = testContext.TestInformation;
+            
             await Task.Run(async () =>
             {
-                await ExecuteWithRetries(testContext, testInformation, () => RunTest(testNode));
+                await ExecuteWithRetries(unInvokedTest);
             });
 
             var end = DateTimeOffset.Now;
@@ -177,7 +188,7 @@ internal class SingleTestExecutor : IDataProducer
         }
         finally
         {
-            await _disposer.DisposeAsync(classInstance);
+            await _disposer.DisposeAsync(testContext?.TestInformation?.ClassInstance);
 
             lock (_consoleStandardOutLock)
             {
@@ -186,9 +197,9 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private static async Task RunTest(TestNode testNode)
+    private async Task RunTest(UnInvokedTest unInvokedTest)
     {
-        await TestDictionary.GetTest(testNode.Uid).Invoke();
+        await _testInvoker.Invoke(unInvokedTest);
     }
 
     internal void SetAllTests(GroupedTests tests)
@@ -218,8 +229,9 @@ internal class SingleTestExecutor : IDataProducer
         return GroupedTests.AllTests.All(x => x.GetProperty<ExplicitForProperty>()?.ExplicitFor == explicitFor);
     }
 
-    private async Task ExecuteWithRetries(TestContext testContext, TestInformation testInformation, Func<Task> testDelegate)
+    private async Task ExecuteWithRetries(UnInvokedTest unInvokedTest)
     {
+        var testInformation = unInvokedTest.TestContext.TestInformation;
         var retryCount = testInformation.RetryCount;
         
         // +1 for the original non-retry
@@ -227,7 +239,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             try
             {
-                await ExecuteCore(testContext, testDelegate);
+                await ExecuteCore(unInvokedTest);
                 break;
             }
             catch (Exception e)
@@ -263,13 +275,14 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task ExecuteCore(TestContext testContext, Func<Task> testDelegate)
+    private async Task ExecuteCore(UnInvokedTest unInvokedTest)
     {
         if (_cancellationTokenSource.IsCancellationRequested)
         {
             return;
         }
 
+        var testContext = unInvokedTest.TestContext;
         var testInformation = testContext.TestInformation;
         
         testInformation.CurrentExecutionCount++;
@@ -286,7 +299,11 @@ internal class SingleTestExecutor : IDataProducer
 
         try
         {
-            await ExecuteTestMethodWithTimeout(testInformation, testDelegate, testLevelCancellationTokenSource);
+            await ExecuteTestMethodWithTimeout(
+                testInformation,
+                () => RunTest(unInvokedTest),
+                testLevelCancellationTokenSource
+            );
         }
         finally
         {

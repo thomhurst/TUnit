@@ -1,25 +1,11 @@
 ﻿namespace TUnit.Core;
 
-public record UninvokedTest
-{
-    public required string Id { get; init; }
-    public required TestContext TestContext { get; init; }
-    
-    public required List<Func<Task>> OneTimeSetUps { get; init; }
-    public required List<Func<Task>> SetUps { get; init; }
-    
-    public required Func<Task> TestBody { get; init; }
-    
-    public required List<Func<Task>> CleanUps { get; init; }
-    public required List<Func<Task>> OneTimeCleanUps { get; init; }
-}
-
 public static class TestDictionary
 {
     public static readonly AsyncLocal<TestContext> TestContexts = new();
-    private static readonly Dictionary<string, Func<Task>> Tests = new();
+    private static readonly Dictionary<string, Func<UnInvokedTest>> Tests = new();
 
-    public static void AddTest(string testId, Func<Task> action)
+    public static void AddTest(string testId, Func<UnInvokedTest> action)
     {
         var count = 1;
 
@@ -31,8 +17,8 @@ public static class TestDictionary
         Tests[$"{testId} {count}"] = action;
     }
 
-    public static Func<Task> GetTest(string id)
+    public static Func<UnInvokedTest> GetTest(string id)
     {
-        return Tests[id];
+        return Tests[id] ?? throw new Exception($"Test with ID {id} was not found");
     }
 }

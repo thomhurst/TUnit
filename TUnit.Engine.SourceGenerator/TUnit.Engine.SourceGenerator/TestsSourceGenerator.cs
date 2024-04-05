@@ -115,11 +115,9 @@ public class TestsSourceGenerator : ISourceGenerator
                         global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => global::System.Threading.Tasks.Task.Run(async () =>
                         {
                             {{fullyQualifiedClassType}} classInstance = null!;
-                            global::TUnit.Core.TestContext textContext = null!;
                             var teardownExceptions = new global::System.Collections.Generic.List<global::System.Exception>();
                             try
                             {
-                 {{OneTimeSetUpWriter.GenerateCode(classType)}}
                  {{classInvocation}};
                      
                                 var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
@@ -142,7 +140,19 @@ public class TestsSourceGenerator : ISourceGenerator
                                     CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
                                 }
                                 
-                                testContext = new global::TUnit.Core.TestContext(testInformation);
+                                var testContext = new global::TUnit.Core.TestContext(testInformation);
+                                
+                                return new global::TUnit.Core.UnInvokedTest
+                                {
+                                    Id = "",
+                                    TestContext = testContext,
+                                    OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classType)}}],
+                                    BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classType)}}],
+                                    TestClass = classInstance,
+                                    TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}}),
+                                    AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classType)}}],
+                                    OneTimeCleanUps = [{{OneTimeCleanUpWriter.GenerateCode(classType)}}],
+                                };
                                 
                                 global::TUnit.Engine.ConsoleInterceptor.Instance.SetModule(testContext);
                                 global::TUnit.Core.TestDictionary.TestContexts.Value = testContext;
@@ -165,7 +175,7 @@ public class TestsSourceGenerator : ISourceGenerator
                                 // TODO: Skip on Skip Reason Not Empty
                                 
                                 await global::TUnit.Engine.RunHelpers.ExecuteWithRetries(testInformation, async () => {
-                 {{SetUpWriter.GenerateCode(classType)}}
+                 
                                     await global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}});
                                 });
                             }
@@ -173,12 +183,12 @@ public class TestsSourceGenerator : ISourceGenerator
                             {
                                 // TODO: TestContext.SetResult
                                 
-                 {{CleanUpWriter.GenerateCode(classType)}}
+                 
                                 var remainingTests = global::TUnit.Engine.OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(typeof({{fullyQualifiedClassType}}));
                                 
                                 if (remainingTests == 0)
                                 {
-                 {{OneTimeCleanUpWriter.GenerateCode(classType)}}
+                 
                                 }
                                 
                                 {{disposeCall}}

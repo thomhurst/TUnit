@@ -10,7 +10,7 @@ public class Base1 : Base2
         return Task.CompletedTask;
     }
     
-    [CleanUp]
+    [AfterEachTest]
     public Task Base1CleanUp()
     {
         return Task.CompletedTask;

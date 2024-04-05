@@ -10,7 +10,8 @@ public class OneTimeSetUpWriter
     public static string GenerateCode(INamedTypeSymbol classType)
     {
         var oneTimeSetUpMethods = classType
-            .GetMembersIncludingBase()
+            //.GetMembersIncludingBase()
+            .GetMembers()
             .OfType<IMethodSymbol>()
             .Where(x => x.IsStatic)
             .Where(x => x.DeclaredAccessibility == Accessibility.Public)
@@ -26,19 +27,12 @@ public class OneTimeSetUpWriter
         }
 
         var stringBuilder = new StringBuilder();
-
-        stringBuilder.AppendLine($$"""
-                                                  await global::TUnit.Engine.OneTimeSetUpOrchestrator.Tasks.GetOrAdd(typeof({{classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}}), async _ =>
-                                                  {
-                                   """);
         
         foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
         {
-            stringBuilder.AppendLine($"                   await RunAsync({classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name});");
+            stringBuilder.Append($"() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}(),");
         }
-
-        stringBuilder.AppendLine("               });");
-
+        
         return stringBuilder.ToString();
     }
 }

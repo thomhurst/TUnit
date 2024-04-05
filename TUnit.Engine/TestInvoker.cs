@@ -4,39 +4,39 @@ namespace TUnit.Engine;
 
 public class TestInvoker
 {
-    public async Task Invoke(UninvokedTest uninvokedTest)
+    public async Task Invoke(UnInvokedTest unInvokedTest)
     {
         await Task.Run(async () =>
         {
             var teardownExceptions = new List<Exception>();
             try
             {
-                TestDictionary.TestContexts.Value = uninvokedTest.TestContext;
+                TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
 
-                foreach (var oneTimeSetUp in uninvokedTest.OneTimeSetUps)
+                foreach (var oneTimeSetUp in unInvokedTest.OneTimeSetUps)
                 {
                     await oneTimeSetUp();
                 }
                 
-                foreach (var setUp in uninvokedTest.SetUps)
+                foreach (var setUp in unInvokedTest.BeforeEachTestSetUps)
                 {
                     await setUp();
                 }
 
-                await uninvokedTest.TestBody();
+                await unInvokedTest.TestBody();
             }
             finally
             {
-                foreach (var cleanUp in uninvokedTest.CleanUps)
+                foreach (var cleanUp in unInvokedTest.AfterEachTestCleanUps)
                 {
                     await RunHelpers.RunSafelyAsync(cleanUp, teardownExceptions);
                 }
                 
-                var remainingTests = OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(uninvokedTest.TestContext.TestInformation.ClassType);
+                var remainingTests = OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(unInvokedTest.TestContext.TestInformation.ClassType);
                
                 if (remainingTests == 0)
                 {
-                    foreach (var oneTimeCleanUp in uninvokedTest.OneTimeCleanUps)
+                    foreach (var oneTimeCleanUp in unInvokedTest.OneTimeCleanUps)
                     {
                         await RunHelpers.RunSafelyAsync(oneTimeCleanUp, teardownExceptions);
                     }

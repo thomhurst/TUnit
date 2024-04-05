@@ -10,7 +10,7 @@ public class NonBase : Base1
         return Task.CompletedTask;
     }
     
-    [CleanUp]
+    [AfterEachTest]
     public Task NonBaseCleanUp()
     {
         return Task.CompletedTask;
