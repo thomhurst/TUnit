@@ -4,13 +4,13 @@ namespace TUnit.TestProject.OneTimeSetUpWithBaseTests;
 
 public class NonBase : Base1
 {
-    [OnlyOnceSetUp]
+    [OneTimeSetUp]
     public static Task NonBaseOneTimeSetup()
     {
         return Task.CompletedTask;
     }
     
-    [SetUp]
+    [BeforeEachTest]
     public Task NonBaseSetUp()
     {
         return Task.CompletedTask;

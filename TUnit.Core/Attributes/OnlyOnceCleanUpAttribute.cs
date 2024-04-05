@@ -1,4 +1,4 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class OnlyOnceCleanUpAttribute : TUnitAttribute;
+public class OneTimeCleanUpAttribute : TUnitAttribute;

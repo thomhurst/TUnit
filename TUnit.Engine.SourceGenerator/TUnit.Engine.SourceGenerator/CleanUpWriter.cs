@@ -16,7 +16,7 @@ public class CleanUpWriter
             .Where(x => x.DeclaredAccessibility == Accessibility.Public)
             .Where(x => x.GetAttributes()
                 .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                          == "global::TUnit.Core.CleanUpAttribute")
+                          == "global::TUnit.Core.AfterEachTestAttribute")
             )
             .Reverse()
             .ToList();

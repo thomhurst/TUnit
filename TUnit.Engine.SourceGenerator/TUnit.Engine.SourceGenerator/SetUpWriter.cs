@@ -16,7 +16,7 @@ public class SetUpWriter
             .Where(x => x.DeclaredAccessibility == Accessibility.Public)
             .Where(x => x.GetAttributes()
                 .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                          == "global::TUnit.Core.SetUpAttribute")
+                          == "global::TUnit.Core.BeforeEachTestAttribute")
             )
             .ToList();
         

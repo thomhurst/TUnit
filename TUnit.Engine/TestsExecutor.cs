@@ -219,7 +219,7 @@ internal class TestsExecutor
         var oneTimeCleanUpMethods = _classWalker.GetSelfAndBaseTypes(classType)
             .SelectMany(x => x.GetMethods())
             .Where(x => x.IsStatic)
-            .Where(x => x.GetCustomAttributes<OnlyOnceCleanUpAttribute>().Any());
+            .Where(x => x.GetCustomAttributes<OneTimeCleanUpAttribute>().Any());
 
         foreach (var oneTimeCleanUpMethod in oneTimeCleanUpMethods)
         {

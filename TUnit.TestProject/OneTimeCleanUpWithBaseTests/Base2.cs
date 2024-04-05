@@ -4,7 +4,7 @@ namespace TUnit.TestProject.OneTimeCleanUpWithBaseTests;
 
 public class Base2
 {
-    [OnlyOnceCleanUp]
+    [OneTimeCleanUp]
     public static Task Base2OneTimeCleanUp()
     {
         return Task.CompletedTask;

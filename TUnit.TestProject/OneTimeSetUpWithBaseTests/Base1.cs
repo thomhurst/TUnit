@@ -4,13 +4,13 @@ namespace TUnit.TestProject.OneTimeSetUpWithBaseTests;
 
 public class Base1 : Base2
 {
-    [OnlyOnceSetUp]
+    [OneTimeSetUp]
     public static Task Base1OneTimeSetup()
     {
         return Task.CompletedTask;
     }
     
-    [SetUp]
+    [BeforeEachTest]
     public Task Base1SetUp()
     {
         return Task.CompletedTask;
