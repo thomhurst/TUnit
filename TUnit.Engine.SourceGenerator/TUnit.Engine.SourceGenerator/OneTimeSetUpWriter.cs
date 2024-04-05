@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.Extensions;
 
 namespace TUnit.Engine.SourceGenerator;
 

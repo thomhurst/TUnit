@@ -9,7 +9,7 @@ namespace TUnit.Engine;
 
 internal class ConsoleInterceptor : TextWriter
 {
-    public static ConsoleInterceptor Instance { get; private set; }
+    public static ConsoleInterceptor Instance { get; private set; } = null!;
 
     private readonly ILogger<ConsoleInterceptor>? _logger;
     public override Encoding Encoding => InnerWriter?.Encoding ?? Encoding.UTF8;
