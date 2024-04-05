@@ -38,6 +38,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestGrouper>()
             .AddSingleton<CombinativeSolver>()
             .AddSingleton<SingleTestExecutor>()
+            .AddSingleton<TestInvoker>()
             .AddSingleton<SystemResourceMonitor>()
             .AddSingleton<ClassWalker>()
             .AddSingleton<AssemblySetUpExecutor>()
