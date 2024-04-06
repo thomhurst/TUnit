@@ -14,13 +14,16 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
         {
             yield break;
         }
-
-        var count = 1;
         
         var hasCombinativeAttribute = methodInfo.GetCustomAttribute<CombinativeTestAttribute>() != null;
 
+        var classRepeatCount = 0;
+        
         foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
         {
+            classRepeatCount++;
+            var methodRepeatCount = 1;
+
             for (var i = 1; i <= runCount; i++)
             {
                 if (hasCombinativeAttribute)
@@ -32,7 +35,8 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
                             classType: type,
                             methodArguments: combinativeValue.ToArray(),
                             classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
-                            count: count++
+                            currentClassRepeatCount: classRepeatCount,
+                            currentMethodRepeatCount: methodRepeatCount++
                         );
                     }
                 }
@@ -43,7 +47,8 @@ internal class BasicTestParser(DataSourceRetriever dataSourceRetriever, Combinat
                         classType: type,
                         methodArguments: null,
                         classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
-                        count: count++
+                        currentClassRepeatCount: classRepeatCount,
+                        currentMethodRepeatCount: methodRepeatCount++
                     );
                 }
             }

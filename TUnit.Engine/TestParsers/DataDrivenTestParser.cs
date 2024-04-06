@@ -5,25 +5,28 @@ namespace TUnit.Engine.TestParsers;
 
 internal class DataDrivenTestsParser(DataSourceRetriever dataSourceRetriever) : ITestParser
 {
-    public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
-        Type type, 
+    public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo,
+        Type type,
         int runCount)
     {
         if (methodInfo.GetCustomAttribute<DataDrivenTestAttribute>() == null)
         {
             yield break;
         }
-        
+
         var argumentsAttributes = methodInfo.GetCustomAttributes<ArgumentsAttribute>().ToList();
-        
-        var count = 0;
-        
-        foreach (var argumentsAttribute in argumentsAttributes)
+
+        var classRepeatCount = 0;
+        foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
         {
-            var arguments = argumentsAttribute.Values;
-                    
-            foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
+            classRepeatCount++;
+            var methodRepeatCount = 0;
+
+            foreach (var argumentsAttribute in argumentsAttributes)
             {
+                methodRepeatCount++;
+                var arguments = argumentsAttribute.Values;
+
                 for (var i = 1; i <= runCount; i++)
                 {
                     yield return new TestDetails(
@@ -31,7 +34,8 @@ internal class DataDrivenTestsParser(DataSourceRetriever dataSourceRetriever) : 
                         classType: type,
                         methodArguments: arguments,
                         classArguments: DataSourceDrivenTestParser.GetDataSourceArguments(classArguments),
-                        count: count++
+                        currentClassRepeatCount: classRepeatCount,
+                        currentMethodRepeatCount: i + methodRepeatCount
                     );
                 }
             }

@@ -9,7 +9,7 @@ internal static class GenericTestInvocationGenerator
     public static string GenerateTestInvocationCode(WriteableTest writeableTest)
     {
         var methodSymbol = writeableTest.MethodSymbol;
-        var testId = TestInformationGenerator.GetTestId(methodSymbol, writeableTest.CurrentCount);
+        var testId = writeableTest.TestId;
 
         var classType = methodSymbol.ContainingType;
         

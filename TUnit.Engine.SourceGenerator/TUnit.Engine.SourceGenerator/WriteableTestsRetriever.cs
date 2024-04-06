@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
@@ -11,26 +12,46 @@ internal static class WriteableTestsRetriever
     public static IEnumerable<WriteableTest> GetWriteableTests(IMethodSymbol methodSymbol)
     {
         var attributes = methodSymbol.GetAttributes();
-        
+
         var testAttributes = attributes.Where(x =>
             x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
             == WellKnownFullyQualifiedClassNames.BaseTestAttribute).ToList();
-        
+
         if (!testAttributes.Any())
         {
             yield break;
         }
 
-        var testAttribute = testAttributes.First();
-        
-        foreach (var argumentAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                == WellKnownFullyQualifiedClassNames.ArgumentsAttribute))
+        AttributeData[] testDataAttributes =
+        [
+            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.ArgumentsAttribute),
+            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute),
+            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.ClassDataAttribute),
+            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.MethodDataAttribute),
+        ];
+
+        var classIndex = 0;
+        foreach (var classArgument in ClassArgumentsGenerator.GetClassArguments(methodSymbol.ContainingType))
         {
-            yield return new WriteableTest(methodSymbol,
-                ClassInvocationsGenerator.GenerateClassInvocations(),
-                TestArgumentsGenerator.GetTestMethodArguments(methodSymbol, argumentAttribute)
-            );
+            classIndex++;
+
+            var methodIndex = 0;
+            foreach (var argumentAttribute in testDataAttributes)
+            {
+                yield return new WriteableTest(methodSymbol,
+                    [classArgument], // TODO: Be able to accept a true array here
+                    TestArgumentsGenerator.GetTestMethodArguments(methodSymbol, argumentAttribute).ToList(),
+                    classIndex,
+                    ++methodIndex
+                );
+            }
         }
-        
+    }
+
+    private static IEnumerable<AttributeData> GetAttributes(ImmutableArray<AttributeData> attributes, string fullyQualifiedNameWithGlobalPrefix)
+    {
+        return attributes.Where(x =>
+            x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+            == fullyQualifiedNameWithGlobalPrefix);
     }
 }

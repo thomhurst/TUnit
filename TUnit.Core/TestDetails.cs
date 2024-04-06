@@ -8,11 +8,14 @@ internal record TestDetails
         Type classType,
         object?[]? methodArguments, 
         object?[]? classArguments, 
-        int count)
+        int currentClassRepeatCount,
+        int currentMethodRepeatCount)
     {
         MethodInfo = methodInfo;
         ClassType = classType;
-        Count = count;
+
+        CurrentClassRepeatCount = currentClassRepeatCount;
+        CurrentMethodRepeatCount = currentMethodRepeatCount;
 
         MethodParameterTypes = methodArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
         ClassParameterTypes = classArguments?.Select(x => x?.GetType() ?? typeof(object)).ToArray();
@@ -58,7 +61,7 @@ internal record TestDetails
 
         if (RepeatCount > 0)
         {
-            CurrentExecutionCount = count;
+            CurrentExecutionCount = currentMethodRepeatCount;
         }
         
         var notInParallelAttribute = methodAndClassAttributes
@@ -85,7 +88,7 @@ internal record TestDetails
 
     private string GenerateUniqueId()
     {
-        return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetParameterTypes(MethodParameterTypes)}.{Count}";
+        return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{CurrentClassRepeatCount}.{GetParameterTypes(MethodParameterTypes)}.{CurrentMethodRepeatCount}";
         // return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
     }
 
@@ -99,7 +102,7 @@ internal record TestDetails
     {
         if (RetryCount > 0)
             return false;
-        if (Count > 1)
+        if (CurrentMethodRepeatCount > 1)
             return false;
         if (MethodParameterTypes?.Any() == true)
             return false;
@@ -114,7 +117,7 @@ internal record TestDetails
 
     private string GetCountInBrackets()
     {
-        return RepeatCount > 0 ? $" [{Count}]" : string.Empty;
+        return RepeatCount > 0 ? $" [{CurrentMethodRepeatCount}]" : string.Empty;
     }
 
     public bool IsSingleTest { get; }
@@ -179,7 +182,8 @@ internal record TestDetails
     public Type[]? ClassParameterTypes { get; }
     public object?[]? MethodArgumentValues { get; }
     public object?[]? ClassArgumentValues { get; }
-    public int Count { get; }
+    public int CurrentClassRepeatCount { get; }
+    public int CurrentMethodRepeatCount { get; }
 
     public string? SkipReason { get; }
     public bool IsSkipped => !string.IsNullOrEmpty(SkipReason);

@@ -73,7 +73,7 @@ internal static class TestInformationGenerator
         return [..methodSymbol.GetAttributes(), ..methodSymbol.ContainingType.GetAttributes()];
     }
 
-    public static string GetTestId(IMethodSymbol methodSymbol, int count)
+    public static string GetTestId(IMethodSymbol methodSymbol, int classRepeatCount, int methodRepeatCount)
     {
         // Format must match TestDetails.GenerateUniqueId, but we can't share code
         // as we're inside a source generator
@@ -88,7 +88,7 @@ internal static class TestInformationGenerator
         var methodParameterTypes = GetTypes(methodSymbol.Parameters);
         
         //return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{string.Join(",", classArguments)}.{methodParameterTypes}.{string.Join(",", methodArguments)}.{count}";
-        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{methodParameterTypes}.{count}";
+        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{classRepeatCount}.{methodParameterTypes}.{methodRepeatCount}";
     }
 
     private static IEnumerable<ArgumentString> GetMethodArguments(IMethodSymbol methodSymbol)

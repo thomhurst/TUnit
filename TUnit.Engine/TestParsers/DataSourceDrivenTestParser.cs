@@ -5,23 +5,28 @@ namespace TUnit.Engine.TestParsers;
 
 internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetriever) : ITestParser
 {
-    public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo, 
-        Type type, 
+    public IEnumerable<TestDetails> GetTestCases(MethodInfo methodInfo,
+        Type type,
         int runCount)
     {
         var testDataSourceAttributes = methodInfo.GetCustomAttributes<DataSourceDrivenTestAttribute>().ToList();
-        
+
         if (!testDataSourceAttributes.Any())
         {
             yield break;
         }
-        
-        var count = 0;
-        
-        foreach (var methodArguments in dataSourceRetriever.GetTestDataSourceArguments(methodInfo))
+
+        var classRepeatCount = 0;
+
+        foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
         {
-            foreach (var classArguments in dataSourceRetriever.GetTestDataSourceArguments(type))
+            classRepeatCount++;
+            var methodRepeatCount = 0;
+
+            foreach (var methodArguments in dataSourceRetriever.GetTestDataSourceArguments(methodInfo))
             {
+                methodRepeatCount++;
+
                 for (var i = 1; i <= runCount; i++)
                 {
                     yield return new TestDetails(
@@ -29,7 +34,8 @@ internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetrieve
                         classType: type,
                         methodArguments: GetDataSourceArguments(methodArguments),
                         classArguments: GetDataSourceArguments(classArguments),
-                        count: count++
+                        currentClassRepeatCount: classRepeatCount,
+                        currentMethodRepeatCount: i + methodRepeatCount
                     );
                 }
             }
@@ -42,7 +48,7 @@ internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetrieve
         {
             return null;
         }
-        
+
         return [methodArguments];
     }
 }

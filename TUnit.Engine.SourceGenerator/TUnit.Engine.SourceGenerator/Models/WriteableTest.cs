@@ -9,10 +9,11 @@ internal record WriteableTest(
     IMethodSymbol MethodSymbol,
     IReadOnlyList<string> ClassArguments,
     IReadOnlyList<string> MethodArguments,
-    int CurrentCount
+    int CurrentClassCount,
+    int CurrentMethodCount
 )
 {
-    public string TestId => TestInformationGenerator.GetTestId(MethodSymbol, CurrentCount);
+    public string TestId => TestInformationGenerator.GetTestId(MethodSymbol, CurrentClassCount, CurrentMethodCount);
     public string MethodName => MethodSymbol.Name;
     public string ClassName => MethodSymbol.ContainingType.Name;
     public IEnumerable<string> GetClassArgumentVariableNames()

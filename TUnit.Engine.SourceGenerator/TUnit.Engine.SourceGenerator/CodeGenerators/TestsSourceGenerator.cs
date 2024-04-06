@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -106,47 +107,21 @@ public class TestsSourceGenerator : IIncrementalGenerator
 
         var sourceBuilder = new StringBuilder();
         
-        AttributeData[] attributes =
-        [
-            ..methodSymbol.GetAttributes(),
-            ..methodSymbol.ContainingType.GetAttributes()
-        ];
-        
-        var repeatCount = attributes
-            .FirstOrDefault(x =>
-                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
-                WellKnownFullyQualifiedClassNames.RepeatAttribute)
-            ?.ConstructorArguments
-            .FirstOrDefault()
-            .Value as int? ?? 0;
-
-        // +1 for the initial non-repeated run
-        for (var i = 1; i <= repeatCount + 1; i++)
+        foreach (var testInvocationCode in GetTestInvocationCode(methodSymbol))
         {
-            foreach (var attributeData in attributes)
-            {
-                foreach (var classInvocation in ClassInvocationsGenerator.GenerateClassInvocations(methodSymbol.ContainingType))
-                {
-                    var testInvocationCode = GetTestInvocationCode(attributeData, sourceBuilder, methodSymbol, classInvocation, i);
-                    sourceBuilder.AppendLine(testInvocationCode);
-                }
-            }
+            sourceBuilder.AppendLine(testInvocationCode);
         }
-
+        
         return sourceBuilder.ToString();
     }
 
-    private static string GetTestInvocationCode(AttributeData attributeData, StringBuilder sourceBuilder,
-        IMethodSymbol methodSymbol, ClassInvocationString classInvocation, int i)
+    private static IEnumerable<string> GetTestInvocationCode(IMethodSymbol methodSymbol)
     {
-        return attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            switch
-            {
-                "global::TUnit.Core.TestAttribute" => BasicTestInvocationGenerator.GenerateTestInvocationCode(methodSymbol, classInvocation, [], i),
-                "global::TUnit.Core.DataDrivenTestAttribute" => "// TODO: Not yet implemented",
-                "global::TUnit.Core.DataSourceDrivenTestAttribute" => "// TODO: Not yet implemented",
-                "global::TUnit.Core.CombinativeTestAttribute" => "// TODO: Not yet implemented",
-                _ => "// TODO: Not yet implemented"
-            };
+        var writeableTests = WriteableTestsRetriever.GetWriteableTests(methodSymbol);
+        
+        foreach (var writeableTest in writeableTests)
+        {
+            yield return GenericTestInvocationGenerator.GenerateTestInvocationCode(writeableTest);
+        }
     }
 }
