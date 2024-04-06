@@ -18,7 +18,8 @@ internal static class GenericTestInvocationGenerator
                  global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => 
                         {
                  {{string.Join("\r\n", writeableTest.GetClassArgumentsInvocations().Select(x => $"\t\t{x}"))}}
-                            var classInstance = {{writeableTest.ClassName}}({{writeableTest.GetClassArgumentVariableNamesAsList()}});             
+                            var classInstance = new {{writeableTest.ClassName}}({{writeableTest.GetClassArgumentVariableNamesAsList()}});             
+                            object[] classArgs = [{{writeableTest.GetClassArgumentVariableNamesAsList()}}];
                             var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
                  
                  {{string.Join("\r\n", writeableTest.GetMethodArgumentsInvocations().Select(x => $"\t\t{x}"))}}
@@ -50,7 +51,7 @@ internal static class GenericTestInvocationGenerator
                                 OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classType)}}],
                                 BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classType)}}],
                                 TestClass = classInstance,
-                                TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}}),
+                                TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}})),
                                 AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classType)}}],
                                 OneTimeCleanUps = [{{OneTimeCleanUpWriter.GenerateCode(classType)}}],
                             };

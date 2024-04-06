@@ -7,15 +7,15 @@ namespace TUnit.Engine.SourceGenerator.Models;
 
 internal record WriteableTest(
     IMethodSymbol MethodSymbol,
-    IReadOnlyList<string> ClassArguments,
-    IReadOnlyList<string> MethodArguments,
+    IReadOnlyList<Argument> ClassArguments,
+    IReadOnlyList<Argument> MethodArguments,
     int CurrentClassCount,
     int CurrentMethodCount
 )
 {
     public string TestId => TestInformationGenerator.GetTestId(MethodSymbol, CurrentClassCount, CurrentMethodCount);
     public string MethodName => MethodSymbol.Name;
-    public string ClassName => MethodSymbol.ContainingType.Name;
+    public string ClassName => MethodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     public IEnumerable<string> GetClassArgumentVariableNames()
         => Enumerable.Range(0, ClassArguments.Count)
             .Select(i => $"classArg{i}");
@@ -27,7 +27,7 @@ internal record WriteableTest(
         {
             var argument = ClassArguments[i];
             var variable = variableNames[i];
-            yield return $"var {variable} = {argument};";
+            yield return $"{argument.Type} {variable} = {argument.Invocation};";
         }
     }
 
@@ -45,7 +45,7 @@ internal record WriteableTest(
         {
             var argument = MethodArguments[i];
             var variable = variableNames[i];
-            yield return $"var {variable} = {argument};";
+            yield return $"{argument.Type} {variable} = {argument.Invocation};";
         }
     }
     

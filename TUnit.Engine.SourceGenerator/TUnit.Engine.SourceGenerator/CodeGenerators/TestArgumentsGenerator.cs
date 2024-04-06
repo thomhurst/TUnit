@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 public static class TestArgumentsGenerator
 {
-    public static IEnumerable<string> GetTestMethodArguments(IMethodSymbol methodSymbol, AttributeData testAttribute)
+    public static IEnumerable<Argument> GetTestMethodArguments(IMethodSymbol methodSymbol, AttributeData testAttribute)
     {
         AttributeData[] attributes =
         [
@@ -42,30 +43,35 @@ public static class TestArgumentsGenerator
         if (timeoutAttribute != null)
         {
             var timeoutInMillis = (int) timeoutAttribute.ConstructorArguments.First().Value!;
-            yield return $"global::TUnit.Engine.EngineCancellationToken.CreateToken(global::System.TimeSpan.FromMilliseconds({timeoutInMillis}))";
+            yield return new Argument("global::System.Threading.CancellationToken", $"global::TUnit.Engine.EngineCancellationToken.CreateToken(global::System.TimeSpan.FromMilliseconds({timeoutInMillis}))");
         }
     }
 
-    private static string GetMethodData(AttributeData methodData)
+    private static Argument GetMethodData(AttributeData methodData)
     {
         if (methodData.ConstructorArguments.Length == 1)
         {
-            return methodData.ConstructorArguments.First().Value!.ToString();
+            return new Argument("var", methodData.ConstructorArguments.First().Value!.ToString());
         }
 
         var type = (INamedTypeSymbol)methodData.ConstructorArguments[0].Value!;
-        return $"{type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{methodData.ConstructorArguments[1].Value!}";
+        return new Argument("var", $"{type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{methodData.ConstructorArguments[1].Value!}");
     }
     
-    private static string GetClassData(AttributeData methodData)
+    private static Argument GetClassData(AttributeData methodData)
     {
         var type = (INamedTypeSymbol)methodData.ConstructorArguments[0].Value!;
-        return $"new {type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}()";
+        return new Argument("var", $"new {type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}()");
     }
     
-    private static IEnumerable<string> GetDataDrivenTestArguments(AttributeData argumentsAttribute)
+    private static IEnumerable<Argument> GetDataDrivenTestArguments(AttributeData argumentsAttribute)
     {
-        return argumentsAttribute.ConstructorArguments
-            .Select(TypedConstantParser.GetTypedConstantValue);
+        foreach (var typedConstant in argumentsAttribute.ConstructorArguments)
+        {
+            var type = TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(typedConstant);
+            var value = TypedConstantParser.GetTypedConstantValue(typedConstant);
+
+            yield return new Argument(type, value);
+        }
     }
 }

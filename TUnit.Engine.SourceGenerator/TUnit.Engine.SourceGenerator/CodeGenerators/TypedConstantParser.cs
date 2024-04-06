@@ -32,9 +32,14 @@ internal static class TypedConstantParser
         throw new ArgumentOutOfRangeException();
     }
 
-    public static string GetFullyQualifiedTypeNameFromTypedConstantValue(TypedConstant constructorArgument)
+    public static string GetFullyQualifiedTypeNameFromTypedConstantValue(TypedConstant typedConstant)
     {
-        var type = (INamedTypeSymbol) constructorArgument.Value!;
-        return type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        if (typedConstant.Kind == TypedConstantKind.Type)
+        {
+            var type = (INamedTypeSymbol) typedConstant.Value!;
+            return type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        }
+        
+        return typedConstant.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     }
 }
