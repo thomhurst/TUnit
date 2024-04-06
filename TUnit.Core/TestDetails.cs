@@ -88,7 +88,9 @@ internal record TestDetails
 
     private string GenerateUniqueId()
     {
-        return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{CurrentClassRepeatCount}.{GetParameterTypes(MethodParameterTypes)}.{CurrentMethodRepeatCount}";
+        var methodParameterTypes = MethodInfo.GetParameters().Select(x => x.ParameterType).ToArray();
+        
+        return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{CurrentClassRepeatCount}.{GetParameterTypes(methodParameterTypes)}.{CurrentMethodRepeatCount}";
         // return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
     }
 
@@ -193,7 +195,7 @@ internal record TestDetails
 
     public static string GetParameterTypes(Type[]? types)
     {
-        if (types is null)
+        if (types?.Any() != true)
         {
             return string.Empty;
         }
