@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Engine.Models;
 
-internal record DictionaryTypeTypeKey(Type Type1, Type Type2)
+public record DictionaryTypeTypeKey(Type Type1, Type Type2)
 {
     public virtual bool Equals(DictionaryTypeTypeKey? other)
     {

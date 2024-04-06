@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<MethodInvoker>()
             .AddSingleton<DataSourceRetriever>()
             .AddSingleton<Disposer>()
+            .AddSingleton<GlobalDisposer>()
             .AddSingleton<CacheableAssemblyLoader>()
             .AddSingleton<ConsoleInterceptor>()
             .AddSingleton<TestsLoader>()
