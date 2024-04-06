@@ -30,7 +30,11 @@ public static class TestArgumentsGenerator
                     yield return dataDrivenTestArgument;
                 }
                 break;
-            case "global::TUnit.Core.DataSourceDrivenTestAttribute":
+            case WellKnownFullyQualifiedClassNames.MethodDataAttribute:
+                yield return GetMethodData(testAttribute);
+                break;
+            case WellKnownFullyQualifiedClassNames.ClassDataAttribute:
+                yield return GetClassData(testAttribute);
                 break;
             case "global::TUnit.Core.CombinativeTestAttribute":
                 break;
@@ -43,10 +47,21 @@ public static class TestArgumentsGenerator
         }
     }
 
-    private static IEnumerable<string> GetDataSourceDrivenTestArguments(AttributeData argumentsAttribute)
+    private static string GetMethodData(AttributeData methodData)
     {
-        return argumentsAttribute.ConstructorArguments
-            .Select(GetTypedConstantValue);
+        if (methodData.ConstructorArguments.Length == 1)
+        {
+            return methodData.ConstructorArguments.First().Value!.ToString();
+        }
+
+        var type = (INamedTypeSymbol)methodData.ConstructorArguments[0].Value!;
+        return $"{type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{methodData.ConstructorArguments[1].Value!}";
+    }
+    
+    private static string GetClassData(AttributeData methodData)
+    {
+        var type = (INamedTypeSymbol)methodData.ConstructorArguments[0].Value!;
+        return $"new {type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}()";
     }
     
     private static IEnumerable<string> GetDataDrivenTestArguments(AttributeData argumentsAttribute)
