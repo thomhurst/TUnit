@@ -57,6 +57,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
+        EngineCancellationToken.Initialise(context.CancellationToken);
+        
         var stopwatch = new Stopwatch();
         
         await using (_myServiceProvider)
