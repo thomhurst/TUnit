@@ -12,6 +12,7 @@ public class WellKnownFullyQualifiedClassNames
     
     // Test Data Attributes
     public const string ArgumentsAttribute = "global::TUnit.Core.ArgumentsAttribute";
+    public const string ArgumentsAttribute = "global::TUnit.Core.ArgumentsAttribute";
     
     public const string RepeatAttribute = "global::TUnit.Core.RepeatAttribute";
     public const string RetryAttribute = "global::TUnit.Core.RetryAttribute";
