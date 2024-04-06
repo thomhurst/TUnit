@@ -9,7 +9,7 @@ public static class OneTimeCleanUpOrchestrator
     private static readonly ConcurrentDictionary<Type, int> RemainingTests = new();
     private static readonly ConcurrentDictionary<Type, List<Func<Task>>> OneTimeCleanUps = new();
     
-    private static readonly SemaphoreSlim NotifyLock = new(1, 1);
+    private static readonly ConcurrentDictionary<Type, SemaphoreSlim> NotifyLocks = new();
     
     [MethodImpl(MethodImplOptions.Synchronized)]
     public static void RegisterTest(Type testClassType)
@@ -34,7 +34,8 @@ public static class OneTimeCleanUpOrchestrator
     public static async Task NotifyCompletedTestAndRunOneTimeCleanUps(Type testClassType,
         List<Exception> teardownExceptions)
     {
-        await NotifyLock.WaitAsync();
+        var notifyLock = NotifyLocks.GetOrAdd(testClassType, new SemaphoreSlim(1, 1));
+        await notifyLock.WaitAsync();
 
         try
         {
@@ -55,6 +56,8 @@ public static class OneTimeCleanUpOrchestrator
                     {
                         await RunHelpers.RunSafelyAsync(oneTimeCleanUpDelegate, teardownExceptions);
                     }
+
+                    OneTimeCleanUps.Remove(type, out _);
                 }
             
                 type = type.BaseType;
@@ -63,7 +66,12 @@ public static class OneTimeCleanUpOrchestrator
         }
         finally
         {
-            NotifyLock.Release();
+            notifyLock.Release();
+        }
+
+        if (!OneTimeCleanUps.TryGetValue(testClassType, out _))
+        {
+            NotifyLocks.Remove(testClassType, out _);
         }
     }
 }
