@@ -40,7 +40,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
         return node is MethodDeclarationSyntax { AttributeLists.Count: > 0 } methodDeclarationSyntax;
     }
 
-    static Method? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+    static IMethodSymbol? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
     {
         if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
         {
@@ -63,12 +63,12 @@ public class TestsSourceGenerator : IIncrementalGenerator
             return null;
         }
 
-        return new Method(methodDeclarationSyntax, methodSymbol);
+        return methodSymbol;
     }
     
-    private static void Execute(SourceProductionContext context, ImmutableArray<Method?> methods)
+    private static void Execute(SourceProductionContext context, ImmutableArray<IMethodSymbol?> methods)
     {
-        foreach (var method in methods.OfType<Method>())
+        foreach (var method in methods.OfType<IMethodSymbol>())
         {
             var classSource = ProcessTests(method);
                 
@@ -77,7 +77,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
                 continue;
             }
 
-            var className = $"{method.MethodSymbol.Name}_{Guid.NewGuid():N}";
+            var className = $"{method.Name}_{Guid.NewGuid():N}";
             context.AddSource($"{className}.g.cs", SourceText.From(WrapInClass(className, classSource), Encoding.UTF8));
         }
     }
@@ -102,10 +102,8 @@ public class TestsSourceGenerator : IIncrementalGenerator
                """;
     }
 
-    private static string ProcessTests(Method method)
+    private static string ProcessTests(IMethodSymbol methodSymbol)
     {
-        var methodSymbol = method.MethodSymbol;
-        
         if (methodSymbol.ContainingType.IsAbstract)
         {
             return string.Empty;

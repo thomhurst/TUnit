@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
@@ -91,11 +90,6 @@ internal static class TestInformationGenerator
         return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{classRepeatCount}.{methodParameterTypes}.{methodRepeatCount}";
     }
 
-    private static IEnumerable<ArgumentString> GetMethodArguments(IMethodSymbol methodSymbol)
-    {
-        throw new System.NotImplementedException();
-    }
-    
     public static string GetTypes(ImmutableArray<IParameterSymbol> parameters)
     {
         if (parameters.IsDefaultOrEmpty)
