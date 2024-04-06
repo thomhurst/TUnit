@@ -4,6 +4,7 @@ using TUnit.Core;
 
 namespace TUnit.Engine;
 
+// TODO: Rework this to not need to use MethodInvoker
 internal class DataSourceRetriever(MethodInvoker methodInvoker)
 {
     public IEnumerable<object?> GetTestDataSourceArguments(MethodInfo methodInfo)
