@@ -126,7 +126,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
             .FirstOrDefault()
             .Value as int? ?? 1;
 
-        for (var i = 1; i <= repeatCount; i++)
+        for (var i = 1; i < repeatCount; i++)
         {
             foreach (var attributeData in attributes)
             {

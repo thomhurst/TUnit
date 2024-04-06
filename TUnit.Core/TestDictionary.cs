@@ -7,14 +7,7 @@ public static class TestDictionary
 
     public static void AddTest(string testId, Func<UnInvokedTest> action)
     {
-        var count = 1;
-
-        while (Tests.ContainsKey($"{testId} {count}"))
-        {
-            count++;
-        }
-        
-        Tests[$"{testId} {count}"] = action;
+        Tests[testId] = action;
     }
 
     public static Func<UnInvokedTest> GetTest(string id)
