@@ -1,19 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Models;
 
 internal record WriteableTest(
-    string TestId,
-    string ClassName,
+    IMethodSymbol MethodSymbol,
     IReadOnlyList<string> ClassArguments,
-    string MethodName,
     IReadOnlyList<string> MethodArguments,
-    int CurrentCount,
-    IMethodSymbol MethodSymbol
+    int CurrentCount
 )
 {
+    public string TestId => TestInformationGenerator.GetTestId(MethodSymbol, CurrentCount);
+    public string MethodName => MethodSymbol.Name;
+    public string ClassName => MethodSymbol.ContainingType.Name;
     public IEnumerable<string> GetClassArgumentVariableNames()
         => Enumerable.Range(0, ClassArguments.Count)
             .Select(i => $"classArg{i}");

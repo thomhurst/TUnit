@@ -21,8 +21,7 @@ internal static class TypedConstantParser
 
         if (constructorArgument.Kind is TypedConstantKind.Type)
         {
-            var type = (INamedTypeSymbol) constructorArgument.Value!;
-            return $"typeof({type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})";
+            return $"typeof({GetFullyQualifiedTypeNameFromTypedConstantValue(constructorArgument)})";
         }
 
         if (constructorArgument.Kind == TypedConstantKind.Array)
@@ -31,5 +30,11 @@ internal static class TypedConstantParser
         }
 
         throw new ArgumentOutOfRangeException();
+    }
+
+    public static string GetFullyQualifiedTypeNameFromTypedConstantValue(TypedConstant constructorArgument)
+    {
+        var type = (INamedTypeSymbol) constructorArgument.Value!;
+        return type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     }
 }

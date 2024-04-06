@@ -65,7 +65,7 @@ internal static class ClassInvocationsGenerator
 
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes().Where(x =>
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                         is "global::TUnit.Core.MethodDataAttribute"))
+                         is WellKnownFullyQualifiedClassNames.MethodDataAttribute))
         {
             var arg = dataSourceDrivenTestAttribute.ConstructorArguments.Length == 1
                 ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.First().Value}()"
@@ -76,7 +76,7 @@ internal static class ClassInvocationsGenerator
         
         foreach (var classDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                         is "global::TUnit.Core.ClassDataAttribute"))
+                         is WellKnownFullyQualifiedClassNames.ClassDataAttribute))
         {
             yield return new ArgumentString($"new {classDataAttribute.ConstructorArguments.First().Value}()", ArgumentsCount.One);
         }

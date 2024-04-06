@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class InjectAttribute<T> : Attribute where T : new()
+public class InjectAttribute<T> : TUnitAttribute where T : new()
 {
     public SharedType Shared { get; set; } = SharedType.None;
 }
