@@ -23,6 +23,7 @@
     
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.17" />
         <PackageReference Include="System.Text.Json" Version="8.0.2" />
     </ItemGroup>
 
