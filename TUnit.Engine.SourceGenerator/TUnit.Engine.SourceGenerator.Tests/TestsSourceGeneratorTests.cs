@@ -2,6 +2,7 @@ using System.CodeDom.Compiler;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Engine.SourceGenerator.CodeGenerators;
 using Xunit;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
