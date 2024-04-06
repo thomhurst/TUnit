@@ -7,7 +7,7 @@ namespace TUnit.Engine.SourceGenerator;
 
 public class OneTimeCleanUpWriter
 {
-    public static string GenerateCode(INamedTypeSymbol classType)
+    public static string GenerateLazyOneTimeCleanUpCode(INamedTypeSymbol classType)
     {
         var oneTimeCleanUpMethods = classType
             .GetMembersIncludingBase()
@@ -30,7 +30,8 @@ public class OneTimeCleanUpWriter
         
         foreach (var oneTimeCleanUpMethod in oneTimeCleanUpMethods)
         {
-            stringBuilder.Append($"() => global::TUnit.Engine.RunHelpers.RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeCleanUpMethod.Name}()),");
+            var typeContainingCleanUpMethod = oneTimeCleanUpMethod.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            stringBuilder.AppendLine($"global::TUnit.Engine.OneTimeCleanUpOrchestrator.RegisterOneTimeTearDown(typeof({typeContainingCleanUpMethod}), () => global::TUnit.Engine.RunHelpers.RunAsync(() => {typeContainingCleanUpMethod}.{oneTimeCleanUpMethod.Name}()));");
         }
         
         return stringBuilder.ToString();

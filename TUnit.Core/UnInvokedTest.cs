@@ -12,5 +12,4 @@ public record UnInvokedTest
     public required Func<Task> TestBody { get; init; }
     
     public required List<Func<Task>> AfterEachTestCleanUps { get; init; }
-    public required List<Func<Task>> OneTimeCleanUps { get; init; }
 }

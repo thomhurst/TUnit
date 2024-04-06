@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk" InitialTargets="RemoveDirectories">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
@@ -12,14 +12,14 @@
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>GeneratedCode</CompilerGeneratedFilesOutputPath>
+<!--        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+<!--        <CompilerGeneratedFilesOutputPath>GeneratedCode</CompilerGeneratedFilesOutputPath>-->
     </PropertyGroup>
 
-    <Target Name="RemoveDirectories">
-        <RemoveDir
-                Directories="$(MSBuildThisFileDirectory)GeneratedCode" />
-    </Target>
+<!--    <Target Name="RemoveDirectories">-->
+<!--        <RemoveDir-->
+<!--                Directories="$(MSBuildThisFileDirectory)GeneratedCode" />-->
+<!--    </Target>-->
     
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.0" />

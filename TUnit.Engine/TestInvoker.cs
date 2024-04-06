@@ -11,8 +11,6 @@ internal class TestInvoker
 
     public async Task Invoke(UnInvokedTest unInvokedTest)
     {
-        OneTimeCleanUpOrchestrator.RegisterTest(unInvokedTest.TestClass.GetType());
-
         var teardownExceptions = new List<Exception>();
         try
         {
@@ -43,18 +41,8 @@ internal class TestInvoker
             }
 
             await RunHelpers.RunSafelyAsync(() => Dispose(unInvokedTest.TestClass), teardownExceptions);
-
-            var remainingTests =
-                OneTimeCleanUpOrchestrator.NotifyCompletedTestAndGetRemainingTestsForType(unInvokedTest.TestContext
-                    .TestInformation.ClassType);
-
-            if (remainingTests == 0)
-            {
-                foreach (var oneTimeCleanUp in unInvokedTest.OneTimeCleanUps)
-                {
-                    await RunHelpers.RunSafelyAsync(oneTimeCleanUp, teardownExceptions);
-                }
-            }
+            
+            await OneTimeCleanUpOrchestrator.NotifyCompletedTestAndRunOneTimeCleanUps(unInvokedTest.TestContext.TestInformation.ClassType, teardownExceptions);
         }
 
         if (teardownExceptions.Any())

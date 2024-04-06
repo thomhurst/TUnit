@@ -40,7 +40,7 @@ public class SetupTests : Base3
     private HttpResponseMessage? _response;
 
     [OneTimeSetUp]
-    public static void SetUpLocalWebServer()
+    public static async Task SetUpLocalWebServer()
     {
         var builder = WebApplication.CreateBuilder();
         _app = builder.Build();
@@ -48,7 +48,7 @@ public class SetupTests : Base3
         _app.MapGet("/ping", context => 
             Task.FromResult($"Hello {context.Request.Query["testName"]}!"));
 
-        _ = _app.RunAsync();
+        await _app.StartAsync();
         _serverAddress = _app.Services.GetRequiredService<IServer>()
             .Features
             .Get<IServerAddressesFeature>()!

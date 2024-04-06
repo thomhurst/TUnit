@@ -62,7 +62,7 @@ internal static class WriteableTestsRetriever
 
                         yield break;
                     }
-
+                    
                     yield return new WriteableTest(methodSymbol,
                         [classArgument], // TODO: Be able to accept a true array here
                         TestArgumentsGenerator.GetTestMethodArguments(methodSymbol, argumentAttribute).ToList(),

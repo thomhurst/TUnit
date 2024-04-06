@@ -15,6 +15,8 @@ internal static class GenericTestInvocationGenerator
         
         var fullyQualifiedClassType = classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
+                 global::TUnit.Engine.OneTimeCleanUpOrchestrator.RegisterTest(typeof({{fullyQualifiedClassType}}));
+                 {{OneTimeCleanUpWriter.GenerateLazyOneTimeCleanUpCode(classType)}}
                  global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => 
                         {
                  {{string.Join("\r\n", writeableTest.GetClassArgumentsInvocations().Select(x => $"\t\t{x}"))}}
@@ -50,7 +52,6 @@ internal static class GenericTestInvocationGenerator
                                 TestClass = classInstance,
                                 TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}})),
                                 AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classType)}}],
-                                OneTimeCleanUps = [{{OneTimeCleanUpWriter.GenerateCode(classType)}}],
                             };
                         });
                  """;
