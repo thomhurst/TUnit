@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.Testing.Platform.Extensions;
+﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
@@ -15,13 +14,9 @@ namespace TUnit.Engine;
 internal class SingleTestExecutor : IDataProducer
 {
     private readonly IExtension _extension;
-    private readonly MethodInvoker _methodInvoker;
-    private readonly TestClassCreator _testClassCreator;
-    private readonly TestMethodRetriever _testMethodRetriever;
     private readonly Disposer _disposer;
     private readonly ILogger<SingleTestExecutor> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly ConsoleInterceptor _consoleInterceptor;
     private readonly IMessageBus _messageBus;
     private readonly TestInvoker _testInvoker;
 
@@ -29,29 +24,19 @@ internal class SingleTestExecutor : IDataProducer
 
     public SingleTestExecutor(
         IExtension extension,
-        MethodInvoker methodInvoker, 
-        TestClassCreator testClassCreator,
-        TestMethodRetriever testMethodRetriever,
         Disposer disposer,
         ILoggerFactory loggerFactory,
         CancellationTokenSource cancellationTokenSource,
-        ConsoleInterceptor consoleInterceptor,
         IMessageBus messageBus,
         TestInvoker testInvoker)
     {
         _extension = extension;
-        _methodInvoker = methodInvoker;
-        _testClassCreator = testClassCreator;
-        _testMethodRetriever = testMethodRetriever;
         _disposer = disposer;
         _logger = loggerFactory.CreateLogger<SingleTestExecutor>();
         _cancellationTokenSource = cancellationTokenSource;
-        _consoleInterceptor = consoleInterceptor;
         _messageBus = messageBus;
         _testInvoker = testInvoker;
     }
-    
-    private readonly ConcurrentDictionary<string, Task> _oneTimeSetUpRegistry = new();
 
     public async Task<TUnitTestResult> ExecuteTestAsync(TestNode testNode, TestSessionContext session)
     {
