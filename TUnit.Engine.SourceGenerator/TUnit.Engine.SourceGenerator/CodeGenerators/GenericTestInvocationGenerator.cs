@@ -9,6 +9,7 @@ internal static class GenericTestInvocationGenerator
     public static string GenerateTestInvocationCode(WriteableTest writeableTest)
     {
         var methodSymbol = writeableTest.MethodSymbol;
+        var classSymbol = writeableTest.ClassSymbol;
         var testId = writeableTest.TestId;
 
         var classType = methodSymbol.ContainingType;
@@ -25,17 +26,17 @@ internal static class GenericTestInvocationGenerator
                  {{string.Join("\r\n", writeableTest.GetMethodArgumentsInvocations().Select(x => $"\t\t{x}"))}}
                             var testInformation = new global::TUnit.Core.TestInformation()
                             {
-                                Categories = [{{string.Join(", ", TestInformationGenerator.GetCategories(methodSymbol))}}],
+                                Categories = [{{string.Join(", ", TestInformationGenerator.GetCategories(methodSymbol, classSymbol))}}],
                                 ClassInstance = classInstance,
                                 ClassType = typeof({{fullyQualifiedClassType}}),
-                                Timeout = {{TestInformationGenerator.GetTimeOut(methodSymbol)}},
+                                Timeout = {{TestInformationGenerator.GetTimeOut(methodSymbol, classSymbol)}},
                                 TestClassArguments = [{{writeableTest.GetClassArgumentVariableNamesAsList()}}],
                                 TestMethodArguments = [{{writeableTest.GetMethodArgumentVariableNamesAsList()}}],
                                 TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
                                 TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
-                                NotInParallelConstraintKeys = {{TestInformationGenerator.GetNotInParallelConstraintKeys(methodSymbol)}},
-                                RepeatCount = {{TestInformationGenerator.GetRepeatCount(methodSymbol)}},
-                                RetryCount = {{TestInformationGenerator.GetRetryCount(methodSymbol)}},
+                                NotInParallelConstraintKeys = {{TestInformationGenerator.GetNotInParallelConstraintKeys(methodSymbol, classSymbol)}},
+                                RepeatCount = {{TestInformationGenerator.GetRepeatCount(methodSymbol, classSymbol)}},
+                                RetryCount = {{TestInformationGenerator.GetRetryCount(methodSymbol, classSymbol)}},
                                 MethodInfo = methodInfo,
                                 TestName = "{{methodSymbol.Name}}",
                                 CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()

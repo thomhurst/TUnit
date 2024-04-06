@@ -8,12 +8,14 @@ namespace TUnit.Engine.SourceGenerator.Models;
 internal record WriteableTest
 {
     public WriteableTest(IMethodSymbol MethodSymbol,
+        INamedTypeSymbol ClassSymbol,
         IReadOnlyList<Argument> ClassArguments,
         IReadOnlyList<Argument> MethodArguments,
         int CurrentClassCount,
         int CurrentMethodCount)
     {
         this.MethodSymbol = MethodSymbol;
+        this.ClassSymbol = ClassSymbol;
         this.ClassArguments = Map(ClassArguments);
         this.MethodArguments = Map(MethodArguments);
         this.CurrentClassCount = CurrentClassCount;
@@ -64,8 +66,9 @@ internal record WriteableTest
 
     public string TestId => TestInformationGenerator.GetTestId(MethodSymbol, CurrentClassCount, CurrentMethodCount);
     public string MethodName => MethodSymbol.Name;
-    public string ClassName => MethodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    public string ClassName => ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     public IMethodSymbol MethodSymbol { get; init; }
+    public INamedTypeSymbol ClassSymbol { get; }
     public IReadOnlyList<Argument> ClassArguments { get; init; }
     public IReadOnlyList<Argument> MethodArguments { get; init; }
     public int CurrentClassCount { get; init; }

@@ -9,11 +9,10 @@ namespace TUnit.Engine.SourceGenerator;
 
 internal static class WriteableTestsRetriever
 {
-    public static IEnumerable<WriteableTest> GetWriteableTests(IMethodSymbol methodSymbol)
+    public static IEnumerable<WriteableTest> GetWriteableTests(ClassMethod classMethod)
     {
-        var attributes = methodSymbol.GetAttributes();
-
-
+        var attributes = classMethod.MethodSymbol.GetAttributes();
+        
         if (!attributes.Any(x =>
                 x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                 == WellKnownFullyQualifiedClassNames.BaseTestAttribute))
@@ -37,22 +36,23 @@ internal static class WriteableTestsRetriever
         ];
 
         var classIndex = 0;
-        foreach (var classArgument in ClassArgumentsGenerator.GetClassArguments(methodSymbol.ContainingType))
+        foreach (var classArgument in ClassArgumentsGenerator.GetClassArguments(classMethod.NamedTypeSymbol))
         {
             classIndex++;
 
             var methodIndex = 0;
             foreach (var argumentAttribute in testDataAttributes)
             {
-                for (var i = 0; i < TestInformationGenerator.GetRepeatCount(methodSymbol) + 1; i++)
+                for (var i = 0; i < TestInformationGenerator.GetRepeatCount(classMethod.MethodSymbol, classMethod.NamedTypeSymbol) + 1; i++)
                 {
                     if (argumentAttribute.AttributeClass?.ToDisplayString(DisplayFormats
                             .FullyQualifiedNonGenericWithGlobalPrefix)
                         == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute)
                     {
-                        foreach (var combinativeTestData in ParseCombinativeTestsData(methodSymbol))
+                        foreach (var combinativeTestData in ParseCombinativeTestsData(classMethod.MethodSymbol))
                         {
-                            yield return new WriteableTest(methodSymbol,
+                            yield return new WriteableTest(classMethod.MethodSymbol,
+                                classMethod.NamedTypeSymbol,
                                 [classArgument], // TODO: Be able to accept a true array here
                                 combinativeTestData.ToList(),
                                 classIndex,
@@ -63,9 +63,10 @@ internal static class WriteableTestsRetriever
                         yield break;
                     }
                     
-                    yield return new WriteableTest(methodSymbol,
+                    yield return new WriteableTest(classMethod.MethodSymbol,
+                        classMethod.NamedTypeSymbol,
                         [classArgument], // TODO: Be able to accept a true array here
-                        TestArgumentsGenerator.GetTestMethodArguments(methodSymbol, argumentAttribute).ToList(),
+                        TestArgumentsGenerator.GetTestMethodArguments(classMethod.MethodSymbol, argumentAttribute).ToList(),
                         classIndex,
                         ++methodIndex
                     );

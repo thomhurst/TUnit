@@ -7,9 +7,9 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 internal static class TestInformationGenerator
 {
-    public static string GetNotInParallelConstraintKeys(IMethodSymbol methodSymbol)
+    public static string GetNotInParallelConstraintKeys(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
     {
-        var notInParallelAttributes = GetMethodAndClassAttributes(methodSymbol)
+        var notInParallelAttributes = GetMethodAndClassAttributes(methodSymbol, namedTypeSymbol)
             .Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                         == "global::TUnit.Core.NotInParallelAttribute")
             .ToList();
@@ -27,25 +27,25 @@ internal static class TestInformationGenerator
         return $"[{string.Join(", ", notInConstraintKeys)}]";
     }
 
-    public static int GetRepeatCount(IMethodSymbol methodSymbol)
+    public static int GetRepeatCount(IMethodSymbol methodSymbol, INamedTypeSymbol classSymbol)
     {
-        return GetMethodAndClassAttributes(methodSymbol)
+        return GetMethodAndClassAttributes(methodSymbol, classSymbol)
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                  == "global::TUnit.Core.RepeatAttribute")
             ?.ConstructorArguments.First().Value as int? ?? 0;
     }
 
-    public static int GetRetryCount(IMethodSymbol methodSymbol)
+    public static int GetRetryCount(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
     {
-        return GetMethodAndClassAttributes(methodSymbol)
+        return GetMethodAndClassAttributes(methodSymbol, namedTypeSymbol)
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                  == "global::TUnit.Core.RetryAttribute")
             ?.ConstructorArguments.First().Value as int? ?? 0;
     }
 
-    public static string GetTimeOut(IMethodSymbol methodSymbol)
+    public static string GetTimeOut(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
     {
-        var timeoutAttribute = GetMethodAndClassAttributes(methodSymbol)
+        var timeoutAttribute = GetMethodAndClassAttributes(methodSymbol, namedTypeSymbol)
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                  == "global::TUnit.Core.TimeoutAttribute");
 
@@ -59,17 +59,18 @@ internal static class TestInformationGenerator
         return $"global::System.TimeSpan.FromMilliseconds({timeoutMillis})";
     }
 
-    public static IEnumerable<string> GetCategories(IMethodSymbol methodSymbol)
+    public static IEnumerable<string> GetCategories(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
     {
-        return GetMethodAndClassAttributes(methodSymbol)
+        return GetMethodAndClassAttributes(methodSymbol, namedTypeSymbol)
             .Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                         == "global::TUnit.Core.TestCategoryAttribute")
             .Select(x => $"\"{x.ConstructorArguments.First().Value}\"");
     }
 
-    public static IEnumerable<AttributeData> GetMethodAndClassAttributes(IMethodSymbol methodSymbol)
+    public static IEnumerable<AttributeData> GetMethodAndClassAttributes(IMethodSymbol methodSymbol,
+        INamedTypeSymbol classSymbol)
     {
-        return [..methodSymbol.GetAttributes(), ..methodSymbol.ContainingType.GetAttributes()];
+        return [..methodSymbol.GetAttributes(), ..classSymbol.GetAttributes()];
     }
 
     public static string GetTestId(IMethodSymbol methodSymbol, int classRepeatCount, int methodRepeatCount)

@@ -7,7 +7,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Extensions;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
@@ -24,60 +24,72 @@ public class TestsSourceGenerator : IIncrementalGenerator
         {
             // Debugger.Launch();
         }
-        
+
         var testMethods = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (s, _) => IsSyntaxTargetForGeneration(s), 
+                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null)
             .Collect();
-            
+        
         context.RegisterSourceOutput(testMethods, Execute);
     }
     
     static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        return node is MethodDeclarationSyntax { AttributeLists.Count: > 0 } methodDeclarationSyntax;
+        return node is ClassDeclarationSyntax;
     }
 
-    static IMethodSymbol? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+    static IEnumerable<ClassMethod> GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
     {
-        if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
+        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
         {
-            return null;
+            yield break;
         }
-        
+
         var symbol = context.SemanticModel.GetDeclaredSymbol(context.Node);
-        
-        if (symbol is not IMethodSymbol methodSymbol)
+
+        if (symbol is not INamedTypeSymbol namedTypeSymbol)
         {
-            return null;
+            yield break;
         }
 
-        var attributes = methodSymbol.GetAttributes();
-
-        if (!attributes.Any(x =>
-                x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
-                == WellKnownFullyQualifiedClassNames.BaseTestAttribute))
+        if (namedTypeSymbol.IsAbstract)
         {
-            return null;
+            yield break;
         }
 
-        return methodSymbol;
+        var methods = namedTypeSymbol
+            .GetMembersIncludingBase()
+            .OfType<IMethodSymbol>();
+
+        foreach (var methodSymbol in methods)
+        {
+            var attributes = methodSymbol.GetAttributes();
+
+            if (!attributes.Any(x =>
+                    x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
+                    == WellKnownFullyQualifiedClassNames.BaseTestAttribute))
+            {
+                continue;
+            }
+
+            yield return new ClassMethod(namedTypeSymbol, methodSymbol);
+        }
     }
-    
-    private static void Execute(SourceProductionContext context, ImmutableArray<IMethodSymbol?> methods)
+
+    private static void Execute(SourceProductionContext context, ImmutableArray<IEnumerable<ClassMethod>> classMethods)
     {
-        foreach (var method in methods.OfType<IMethodSymbol>())
+        foreach (var classMethod in classMethods.SelectMany(x => x))
         {
-            var classSource = ProcessTests(method);
+            var classSource = ProcessTests(classMethod);
                 
             if (string.IsNullOrEmpty(classSource))
             {
                 continue;
             }
 
-            var className = $"{method.Name}_{Guid.NewGuid():N}";
+            var className = $"{classMethod.MethodSymbol.Name}_{Guid.NewGuid():N}";
             context.AddSource($"{className}.g.cs", SourceText.From(WrapInClass(className, classSource), Encoding.UTF8));
         }
     }
@@ -102,16 +114,11 @@ public class TestsSourceGenerator : IIncrementalGenerator
                """;
     }
 
-    private static string ProcessTests(IMethodSymbol methodSymbol)
+    private static string ProcessTests(ClassMethod classMethod)
     {
-        if (methodSymbol.ContainingType.IsAbstract)
-        {
-            return string.Empty;
-        }
-
         var sourceBuilder = new StringBuilder();
         
-        foreach (var testInvocationCode in GetTestInvocationCode(methodSymbol))
+        foreach (var testInvocationCode in GetTestInvocationCode(classMethod))
         {
             sourceBuilder.AppendLine(testInvocationCode);
         }
@@ -119,9 +126,9 @@ public class TestsSourceGenerator : IIncrementalGenerator
         return sourceBuilder.ToString();
     }
 
-    private static IEnumerable<string> GetTestInvocationCode(IMethodSymbol methodSymbol)
+    private static IEnumerable<string> GetTestInvocationCode(ClassMethod classMethod)
     {
-        var writeableTests = WriteableTestsRetriever.GetWriteableTests(methodSymbol);
+        var writeableTests = WriteableTestsRetriever.GetWriteableTests(classMethod);
         
         foreach (var writeableTest in writeableTests)
         {
@@ -129,3 +136,5 @@ public class TestsSourceGenerator : IIncrementalGenerator
         }
     }
 }
+
+public record ClassMethod(INamedTypeSymbol NamedTypeSymbol, IMethodSymbol MethodSymbol);
