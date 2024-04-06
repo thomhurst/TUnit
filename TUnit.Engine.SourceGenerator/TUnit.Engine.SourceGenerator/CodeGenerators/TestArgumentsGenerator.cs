@@ -51,11 +51,11 @@ internal static class TestArgumentsGenerator
     {
         if (methodData.ConstructorArguments.Length == 1)
         {
-            return new Argument("var", methodData.ConstructorArguments.First().Value!.ToString());
+            return new Argument("var", $"{methodData.ConstructorArguments.First().Value!}()");
         }
 
         var type = (INamedTypeSymbol)methodData.ConstructorArguments[0].Value!;
-        return new Argument("var", $"{type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{methodData.ConstructorArguments[1].Value!}");
+        return new Argument("var", $"{type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{methodData.ConstructorArguments[1].Value!}()");
     }
     
     private static Argument GetClassData(AttributeData methodData)
