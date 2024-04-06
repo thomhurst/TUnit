@@ -127,26 +127,26 @@ public class TestsSourceGenerator : IIncrementalGenerator
             {
                 foreach (var classInvocation in ClassInvocationsGenerator.GenerateClassInvocations(methodSymbol.ContainingType))
                 {
-                    switch (attributeData.AttributeClass?.ToDisplayString(DisplayFormats
-                                .FullyQualifiedNonGenericWithGlobalPrefix))
-                    {
-                        case "global::TUnit.Core.TestAttribute":
-                            sourceBuilder.AppendLine(
-                                BasicTestInvocationGenerator.GenerateTestInvocationCode(methodSymbol, classInvocation, [], i)
-                            );
-
-                            break;
-                        case "global::TUnit.Core.DataDrivenTestAttribute":
-                            break;
-                        case "global::TUnit.Core.DataSourceDrivenTestAttribute":
-                            break;
-                        case "global::TUnit.Core.CombinativeTestAttribute":
-                            break;
-                    }
+                    var testInvocationCode = GetTestInvocationCode(attributeData, sourceBuilder, methodSymbol, classInvocation, i);
+                    sourceBuilder.AppendLine(testInvocationCode);
                 }
             }
         }
 
         return sourceBuilder.ToString();
+    }
+
+    private static string GetTestInvocationCode(AttributeData attributeData, StringBuilder sourceBuilder,
+        IMethodSymbol methodSymbol, ClassInvocationString classInvocation, int i)
+    {
+        return attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+            switch
+            {
+                "global::TUnit.Core.TestAttribute" => BasicTestInvocationGenerator.GenerateTestInvocationCode(methodSymbol, classInvocation, [], i),
+                "global::TUnit.Core.DataDrivenTestAttribute" => "// TODO: Not yet implemented",
+                "global::TUnit.Core.DataSourceDrivenTestAttribute" => "// TODO: Not yet implemented",
+                "global::TUnit.Core.CombinativeTestAttribute" => "// TODO: Not yet implemented",
+                _ => "// TODO: Not yet implemented"
+            };
     }
 }

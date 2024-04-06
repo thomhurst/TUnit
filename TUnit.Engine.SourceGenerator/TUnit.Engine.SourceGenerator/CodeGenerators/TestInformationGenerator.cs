@@ -74,7 +74,7 @@ internal static class TestInformationGenerator
     }
 
     public static string GetTestId(IMethodSymbol methodSymbol, 
-        ClassInvocationString classInvocationString,
+        IEnumerable<string> classArguments,
         IEnumerable<string> methodArguments, 
         int count)
     {
@@ -90,7 +90,8 @@ internal static class TestInformationGenerator
 
         var methodParameterTypes = GetTypes(methodSymbol.Parameters);
         
-        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{classInvocationString.Arguments}.{methodParameterTypes}.{string.Join(",", methodArguments)}.{count}";
+        //return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{string.Join(",", classArguments)}.{methodParameterTypes}.{string.Join(",", methodArguments)}.{count}";
+        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{methodParameterTypes}.{count}";
     }
 
     private static IEnumerable<ArgumentString> GetMethodArguments(IMethodSymbol methodSymbol)
