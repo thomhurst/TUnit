@@ -131,24 +131,24 @@ public class TestsSourceGenerator : IIncrementalGenerator
         {
             foreach (var attributeData in attributes)
             {
-                switch (attributeData.AttributeClass?.ToDisplayString(DisplayFormats
-                            .FullyQualifiedNonGenericWithGlobalPrefix))
+                foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
                 {
-                    case "global::TUnit.Core.TestAttribute":
-                        foreach (var classInvocation in GenerateClassInvocations(methodSymbol.ContainingType))
-                        {
+                    switch (attributeData.AttributeClass?.ToDisplayString(DisplayFormats
+                                .FullyQualifiedNonGenericWithGlobalPrefix))
+                    {
+                        case "global::TUnit.Core.TestAttribute":
                             sourceBuilder.AppendLine(
                                 GenerateTestInvocationCode(methodSymbol, classInvocation, [], i)
                             );
-                        }
 
-                        break;
-                    case "global::TUnit.Core.DataDrivenTestAttribute":
-                        break;
-                    case "global::TUnit.Core.DataSourceDrivenTestAttribute":
-                        break;
-                    case "global::TUnit.Core.CombinativeTestAttribute":
-                        break;
+                            break;
+                        case "global::TUnit.Core.DataDrivenTestAttribute":
+                            break;
+                        case "global::TUnit.Core.DataSourceDrivenTestAttribute":
+                            break;
+                        case "global::TUnit.Core.CombinativeTestAttribute":
+                            break;
+                    }
                 }
             }
         }
@@ -168,44 +168,44 @@ public class TestsSourceGenerator : IIncrementalGenerator
         
         var fullyQualifiedClassType = classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
-                    global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => 
-                    {
+                 global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => 
+                        {
                  {{classInvocationString.ClassInvocation}};
              
-                        var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
-             
-                        var testInformation = new global::TUnit.Core.TestInformation()
-                        {
-                            Categories = [{{string.Join(", ", GetCategories(methodSymbol))}}],
-                            ClassInstance = classInstance,
-                            ClassType = typeof({{fullyQualifiedClassType}}),
-                            Timeout = {{GetTimeOut(methodSymbol)}},
-                            TestClassArguments = classArgs,
-                            TestMethodArguments = [{{string.Join(", ", methodArguments)}}],
-                            TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
-                            TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
-                            NotInParallelConstraintKeys = {{GetNotInParallelConstraintKeys(methodSymbol)}},
-                            RepeatCount = {{GetRepeatCount(methodSymbol)}},
-                            RetryCount = {{GetRetryCount(methodSymbol)}},
-                            MethodInfo = methodInfo,
-                            TestName = "{{methodSymbol.Name}}",
-                            CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
-                        };
-                        
-                        var testContext = new global::TUnit.Core.TestContext(testInformation);
-                        
-                        return new global::TUnit.Core.UnInvokedTest
-                        {
-                            Id = "{{testId}}",
-                            TestContext = testContext,
-                            OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classType)}}],
-                            BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classType)}}],
-                            TestClass = classInstance,
-                            TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}}),
-                            AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classType)}}],
-                            OneTimeCleanUps = [{{OneTimeCleanUpWriter.GenerateCode(classType)}}],
-                        };
-                    });
+                            var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
+                 
+                            var testInformation = new global::TUnit.Core.TestInformation()
+                            {
+                                Categories = [{{string.Join(", ", GetCategories(methodSymbol))}}],
+                                ClassInstance = classInstance,
+                                ClassType = typeof({{fullyQualifiedClassType}}),
+                                Timeout = {{GetTimeOut(methodSymbol)}},
+                                TestClassArguments = classArgs,
+                                TestMethodArguments = [{{string.Join(", ", methodArguments)}}],
+                                TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
+                                TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
+                                NotInParallelConstraintKeys = {{GetNotInParallelConstraintKeys(methodSymbol)}},
+                                RepeatCount = {{GetRepeatCount(methodSymbol)}},
+                                RetryCount = {{GetRetryCount(methodSymbol)}},
+                                MethodInfo = methodInfo,
+                                TestName = "{{methodSymbol.Name}}",
+                                CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
+                            };
+                            
+                            var testContext = new global::TUnit.Core.TestContext(testInformation);
+                            
+                            return new global::TUnit.Core.UnInvokedTest
+                            {
+                                Id = "{{testId}}",
+                                TestContext = testContext,
+                                OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classType)}}],
+                                BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classType)}}],
+                                TestClass = classInstance,
+                                TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{GenerateTestMethodInvocation(methodSymbol)}}),
+                                AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classType)}}],
+                                OneTimeCleanUps = [{{OneTimeCleanUpWriter.GenerateCode(classType)}}],
+                            };
+                        });
                  """;
     }
 
@@ -324,23 +324,23 @@ public class TestsSourceGenerator : IIncrementalGenerator
             if (argumentsCount == ArgumentsCount.Zero)
             {
                 yield return new ClassInvocationString($"""
-                                                              object[] classArgs = [];
-                                                              var classInstance = new {className}()
+                                                                object[] classArgs = [];
+                                                                var classInstance = new {className}()
                                                         """, string.Empty);
             }
             if (argumentsCount == ArgumentsCount.One)
             {
                 yield return new ClassInvocationString($"""
-                                                        var arg = {arguments};
-                                                        object[] classArgs = [arg];
-                                                        var classInstance = new {className}(arg)
+                                                                var arg = {arguments};
+                                                                object[] classArgs = [arg];
+                                                                var classInstance = new {className}(arg)
                                                         """, arguments);
             }
             if (argumentsCount == ArgumentsCount.Multiple)
             {
                 yield return new ClassInvocationString($"""
-                                                        object[] classArgs = [{arguments}];
-                                                        var classInstance = new {className}({arguments})
+                                                                object[] classArgs = [{arguments}];
+                                                                var classInstance = new {className}({arguments})
                                                         """, arguments);
             }
         }
