@@ -24,7 +24,9 @@ internal static class TestExtensions
             RepeatCount = testNode.GetRequiredProperty<RepeatCountProperty>().Count,
             RetryCount = testNode.GetRequiredProperty<RetryCountProperty>().Count,
             NotInParallelConstraintKeys = testNode.GetRequiredProperty<NotInParallelConstraintKeysProperty>().ConstraintKeys?.ToArray(),
-            CustomProperties = testNode.Properties.OfType<CustomProperty>().ToDictionary(x => x.Key, x => x.Value).AsReadOnly()
+            CustomProperties = testNode.Properties.OfType<CustomProperty>().ToDictionary(x => x.Key, x => x.Value).AsReadOnly(),
+            MethodRepeatCount = testNode.GetRequiredProperty<TestInformationProperty>().MethodExecutionCount,
+            ClassRepeatCount = testNode.GetRequiredProperty<TestInformationProperty>().ClassExecutionCount,
         };
     }
 
@@ -70,7 +72,9 @@ internal static class TestExtensions
                     UniqueId = testDetails.UniqueId, 
                     TestName = testDetails.TestName, 
                     IsStatic = testDetails.MethodInfo.IsStatic, 
-                    IsSingleTest = testDetails.IsSingleTest
+                    IsSingleTest = testDetails.IsSingleTest,
+                    ClassExecutionCount = testDetails.CurrentClassRepeatCount,
+                    MethodExecutionCount = testDetails.CurrentMethodRepeatCount
                 },
                 new AssemblyProperty(testDetails.Assembly.FullName!)
             ])

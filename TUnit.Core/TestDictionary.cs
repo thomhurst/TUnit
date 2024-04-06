@@ -10,8 +10,15 @@ public static class TestDictionary
         Tests[testId] = action;
     }
 
-    public static Func<UnInvokedTest> GetTest(string id)
+    internal static Func<UnInvokedTest> GetTest(string id)
     {
         return Tests[id] ?? throw new Exception($"Test with ID {id} was not found");
+    }
+    
+    internal static IEnumerable<TestInformation> GetAllTestDetails()
+    {
+        return Tests.Values
+            .Select(x => x.Invoke())
+            .Select(x => x.TestContext.TestInformation);
     }
 }

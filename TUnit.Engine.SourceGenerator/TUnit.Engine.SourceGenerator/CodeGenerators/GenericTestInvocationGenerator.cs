@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
@@ -37,7 +36,9 @@ internal static class GenericTestInvocationGenerator
                                 RetryCount = {{TestInformationGenerator.GetRetryCount(methodSymbol, classSymbol)}},
                                 MethodInfo = methodInfo,
                                 TestName = "{{methodSymbol.Name}}",
-                                CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>()
+                                CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>(),
+                                MethodRepeatCount = {{writeableTest.CurrentMethodCount}},
+                                ClassRepeatCount = {{writeableTest.CurrentClassCount}},
                             };
                             
                             var testContext = new global::TUnit.Core.TestContext(testInformation);
@@ -54,27 +55,5 @@ internal static class GenericTestInvocationGenerator
                             };
                         });
                  """;
-    }
-    
-    private static string GenerateTestMethodInvocation(IMethodSymbol method, params string[] methodArguments)
-    {
-        var methodName = method.Name;
-
-        var args = string.Join(", ", methodArguments);
-
-        if (method.GetAttributes().Any(x =>
-                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                    is "global::TUnit.Core.TimeoutAttribute"))
-        {
-            // TODO : We don't want Engine cancellation token? We want a new linked one that'll cancel after the specified timeout in the attribute
-            if(string.IsNullOrEmpty(args))
-            {
-                return $"{methodName}(EngineCancellationToken.Token)";
-            }
-
-            return $"{methodName}({args}, EngineCancellationToken.Token)";
-        }
-        
-        return $"{methodName}({args})";
     }
 }

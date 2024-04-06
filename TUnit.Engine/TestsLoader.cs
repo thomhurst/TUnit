@@ -11,28 +11,36 @@ internal class TestsLoader(IEnumerable<ITestParser> testParsers)
 
     public IEnumerable<TestDetails> GetTests(CachedAssemblyInformation cachedAssemblyInformation)
     {
-        var nonAbstractClasses = cachedAssemblyInformation.Types.Where(x => !x.IsAbstract);
-
-        foreach (var testMethod in GetTestMethods(nonAbstractClasses))
-        {
-            var repeatCount = testMethod.MethodInfo.GetCustomAttributes<RepeatAttribute>()
-                .Concat(testMethod.TestClass.GetCustomAttributes<RepeatAttribute>())
-                .FirstOrDefault()
-                ?.Times ?? 0;
-
-            var runCount = repeatCount + 1;
-            
-            var testDetailsEnumerable = testParsers.SelectMany(testParser =>
-                testParser.GetTestCases(testMethod.MethodInfo,
-                    testMethod.TestClass,
-                    runCount)
-            );
-            
-            foreach (var testDetails in testDetailsEnumerable)
-            {
-                yield return testDetails;
-            }
-        }
+        return TestDictionary.GetAllTestDetails()
+            .Select(x => new TestDetails(
+                x.MethodInfo, 
+                x.ClassType,
+                x.TestMethodArguments,
+                x.TestClassArguments,
+                x.ClassRepeatCount,
+                x.MethodRepeatCount));
+        // var nonAbstractClasses = cachedAssemblyInformation.Types.Where(x => !x.IsAbstract);
+        //
+        // foreach (var testMethod in GetTestMethods(nonAbstractClasses))
+        // {
+        //     var repeatCount = testMethod.MethodInfo.GetCustomAttributes<RepeatAttribute>()
+        //         .Concat(testMethod.TestClass.GetCustomAttributes<RepeatAttribute>())
+        //         .FirstOrDefault()
+        //         ?.Times ?? 0;
+        //
+        //     var runCount = repeatCount + 1;
+        //     
+        //     var testDetailsEnumerable = testParsers.SelectMany(testParser =>
+        //         testParser.GetTestCases(testMethod.MethodInfo,
+        //             testMethod.TestClass,
+        //             runCount)
+        //     );
+        //     
+        //     foreach (var testDetails in testDetailsEnumerable)
+        //     {
+        //         yield return testDetails;
+        //     }
+        // }
     }
 
     private static IEnumerable<TestMethod> GetTestMethods(IEnumerable<Type> nonAbstractClasses)

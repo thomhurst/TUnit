@@ -33,6 +33,10 @@ public record TestInformation
     public required int RepeatCount { get; init; }
     public required int RetryCount { get; init; }
     public int CurrentExecutionCount { get; internal set; }
+    
+    public required int MethodRepeatCount { get; init; }
+    public  required int ClassRepeatCount { get; init; }
+
     public required TimeSpan? Timeout { get; init; }
     public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
     public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
