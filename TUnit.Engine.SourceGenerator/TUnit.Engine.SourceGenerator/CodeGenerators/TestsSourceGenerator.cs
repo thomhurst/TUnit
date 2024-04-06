@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -117,6 +118,11 @@ public class TestsSourceGenerator : IIncrementalGenerator
 
     private static IEnumerable<string> GetTestInvocationCode(IMethodSymbol methodSymbol)
     {
+        if (!Debugger.IsAttached)
+        {
+            // Debugger.Launch();
+        }
+        
         var writeableTests = WriteableTestsRetriever.GetWriteableTests(methodSymbol);
         
         foreach (var writeableTest in writeableTests)

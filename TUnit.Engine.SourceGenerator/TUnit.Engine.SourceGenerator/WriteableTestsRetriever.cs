@@ -13,11 +13,9 @@ internal static class WriteableTestsRetriever
     {
         var attributes = methodSymbol.GetAttributes();
 
-        var testAttributes = attributes.Where(x =>
-            x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            == WellKnownFullyQualifiedClassNames.BaseTestAttribute).ToList();
 
-        if (!testAttributes.Any())
+        if (!attributes.Any(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                                 == WellKnownFullyQualifiedClassNames.BaseTestAttribute))
         {
             yield break;
         }

@@ -9,6 +9,11 @@ internal static class TestArgumentsGenerator
 {
     public static IEnumerable<Argument> GetTestMethodArguments(IMethodSymbol methodSymbol, AttributeData testAttribute)
     {
+        if (!methodSymbol.Parameters.Any())
+        {
+            yield return Argument.NoArguments;
+        }
+        
         AttributeData[] attributes =
         [
             ..methodSymbol.GetAttributes(),
@@ -21,9 +26,6 @@ internal static class TestArgumentsGenerator
 
         switch (testAttribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
         {
-            case WellKnownFullyQualifiedClassNames.TestAttribute:
-                // Basic Test Attributes don't take arguments
-                break;
             case WellKnownFullyQualifiedClassNames.ArgumentsAttribute:
                 foreach (var dataDrivenTestArgument in GetDataDrivenTestArguments(testAttribute))
                 {

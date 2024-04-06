@@ -5,17 +5,59 @@ using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Models;
 
-internal record WriteableTest(
-    IMethodSymbol MethodSymbol,
-    IReadOnlyList<Argument> ClassArguments,
-    IReadOnlyList<Argument> MethodArguments,
-    int CurrentClassCount,
-    int CurrentMethodCount
-)
+internal record WriteableTest
 {
+    public WriteableTest(IMethodSymbol MethodSymbol,
+        IReadOnlyList<Argument> ClassArguments,
+        IReadOnlyList<Argument> MethodArguments,
+        int CurrentClassCount,
+        int CurrentMethodCount)
+    {
+        this.MethodSymbol = MethodSymbol;
+        this.ClassArguments = Map(ClassArguments);
+        this.MethodArguments = Map(MethodArguments);
+        this.CurrentClassCount = CurrentClassCount;
+        this.CurrentMethodCount = CurrentMethodCount;
+    }
+
+    private IReadOnlyList<Argument>? Map(IReadOnlyList<Argument> arguments)
+    {
+        return arguments
+            .Where(x => x != Argument.NoArguments)
+            .Select(x => MapPrimitive(x))
+            .ToList();
+    }
+
+    private Argument MapPrimitive(Argument argument)
+    {
+        if (argument.Type == "global::System.Char")
+        {
+            return argument with
+            {
+                Invocation = $"'{argument.Invocation}'"
+            };
+        }
+        
+        if (argument.Type == "global::System.String")
+        {
+            return argument with
+            {
+                Invocation = $"\"{argument.Invocation}\""
+            };
+        }
+        
+        return argument;
+    }
+
     public string TestId => TestInformationGenerator.GetTestId(MethodSymbol, CurrentClassCount, CurrentMethodCount);
     public string MethodName => MethodSymbol.Name;
     public string ClassName => MethodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    public IMethodSymbol MethodSymbol { get; init; }
+    public IReadOnlyList<Argument> ClassArguments { get; init; }
+    public IReadOnlyList<Argument> MethodArguments { get; init; }
+    public int CurrentClassCount { get; init; }
+    public int CurrentMethodCount { get; init; }
+
     public IEnumerable<string> GetClassArgumentVariableNames()
         => Enumerable.Range(0, ClassArguments.Count)
             .Select(i => $"classArg{i}");
@@ -51,4 +93,13 @@ internal record WriteableTest(
     
     public string GetMethodArgumentVariableNamesAsList()
         => string.Join(",", GetMethodArgumentVariableNames());
+
+    public void Deconstruct(out IMethodSymbol MethodSymbol, out IReadOnlyList<Argument> ClassArguments, out IReadOnlyList<Argument> MethodArguments, out int CurrentClassCount, out int CurrentMethodCount)
+    {
+        MethodSymbol = this.MethodSymbol;
+        ClassArguments = this.ClassArguments;
+        MethodArguments = this.MethodArguments;
+        CurrentClassCount = this.CurrentClassCount;
+        CurrentMethodCount = this.CurrentMethodCount;
+    }
 }
