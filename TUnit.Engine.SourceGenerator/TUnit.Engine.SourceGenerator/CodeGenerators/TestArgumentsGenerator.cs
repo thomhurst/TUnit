@@ -66,7 +66,7 @@ internal static class TestArgumentsGenerator
     
     private static IEnumerable<Argument> GetDataDrivenTestArguments(AttributeData argumentsAttribute)
     {
-        foreach (var typedConstant in argumentsAttribute.ConstructorArguments)
+        foreach (var typedConstant in argumentsAttribute.ConstructorArguments.First().Values)
         {
             var type = TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(typedConstant);
             var value = TypedConstantParser.GetTypedConstantValue(typedConstant);
