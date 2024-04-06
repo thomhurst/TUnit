@@ -324,24 +324,34 @@ public class TestsSourceGenerator : IIncrementalGenerator
             if (argumentsCount == ArgumentsCount.Zero)
             {
                 yield return new ClassInvocationString($"""
-                                                                object[] classArgs = [];
-                                                                var classInstance = new {className}()
+                                                                    object[] classArgs = [];
+                                                                    var classInstance = new {className}()
                                                         """, string.Empty);
             }
             if (argumentsCount == ArgumentsCount.One)
             {
                 yield return new ClassInvocationString($"""
-                                                                var arg = {arguments};
-                                                                object[] classArgs = [arg];
-                                                                var classInstance = new {className}(arg)
+                                                                    var arg = {arguments};
+                                                                    object[] classArgs = [arg];
+                                                                    var classInstance = new {className}(arg)
                                                         """, arguments);
             }
             if (argumentsCount == ArgumentsCount.Multiple)
             {
-                yield return new ClassInvocationString($"""
-                                                                object[] classArgs = [{arguments}];
-                                                                var classInstance = new {className}({arguments})
-                                                        """, arguments);
+                var stringBuilder = new StringBuilder();
+                var splitArguments = arguments.Split(',');
+                var variableNames = Enumerable.Range(0, splitArguments.Length).Select(i => $"arg{i}").ToList();
+                
+                for (var index = 0; index < splitArguments.Length; index++)
+                {
+                    var argument = splitArguments[index];
+                    stringBuilder.AppendLine($"            var {variableNames[index]} = {argument};");
+                }
+
+                stringBuilder.AppendLine($"            object[] classArgs = [{string.Join(",", variableNames)}]");
+                stringBuilder.AppendLine($"            var classInstance = new {className}({string.Join(",", variableNames)});");
+
+                yield return new ClassInvocationString(stringBuilder.ToString(), arguments);
             }
         }
     }
