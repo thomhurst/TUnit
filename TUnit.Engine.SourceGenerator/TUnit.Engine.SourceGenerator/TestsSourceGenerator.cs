@@ -345,7 +345,8 @@ public class TestsSourceGenerator : IIncrementalGenerator
                 for (var index = 0; index < splitArguments.Length; index++)
                 {
                     var argument = splitArguments[index];
-                    stringBuilder.AppendLine($"            var {variableNames[index]} = {argument};");
+                    var variableName = variableNames[index];
+                    stringBuilder.AppendLine($"            var {variableName} = {argument};");
                 }
 
                 stringBuilder.AppendLine($"            object[] classArgs = [{string.Join(",", variableNames)}]");
