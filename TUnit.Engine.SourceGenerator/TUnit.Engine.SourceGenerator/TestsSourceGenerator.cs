@@ -124,9 +124,10 @@ public class TestsSourceGenerator : IIncrementalGenerator
                 WellKnownFullyQualifiedClassNames.RepeatAttribute)
             ?.ConstructorArguments
             .FirstOrDefault()
-            .Value as int? ?? 1;
+            .Value as int? ?? 0;
 
-        for (var i = 0; i <= repeatCount; i++)
+        // +1 for the initial non-repeated run
+        for (var i = 1; i <= repeatCount + 1; i++)
         {
             foreach (var attributeData in attributes)
             {
