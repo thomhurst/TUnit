@@ -15,7 +15,7 @@ internal static class BasicTestInvocationGenerator
         IEnumerable<string> methodArguments,
         int currentCount)
     {
-        var testId = TestInformationGenerator.GetTestId(methodSymbol, classInvocationString, methodArguments, currentCount);
+        var testId = TestInformationGenerator.GetTestId(methodSymbol, currentCount);
 
         var classType = methodSymbol.ContainingType;
         

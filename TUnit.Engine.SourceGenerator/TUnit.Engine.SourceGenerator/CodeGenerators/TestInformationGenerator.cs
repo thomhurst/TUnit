@@ -73,10 +73,7 @@ internal static class TestInformationGenerator
         return [..methodSymbol.GetAttributes(), ..methodSymbol.ContainingType.GetAttributes()];
     }
 
-    public static string GetTestId(IMethodSymbol methodSymbol, 
-        IEnumerable<string> classArguments,
-        IEnumerable<string> methodArguments, 
-        int count)
+    public static string GetTestId(IMethodSymbol methodSymbol, int count)
     {
         // Format must match TestDetails.GenerateUniqueId, but we can't share code
         // as we're inside a source generator

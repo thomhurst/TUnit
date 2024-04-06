@@ -36,7 +36,7 @@ public static class TestArgumentsGenerator
             case WellKnownFullyQualifiedClassNames.ClassDataAttribute:
                 yield return GetClassData(testAttribute);
                 break;
-            case "global::TUnit.Core.CombinativeTestAttribute":
+            case WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute:
                 break;
         }
         
@@ -67,20 +67,6 @@ public static class TestArgumentsGenerator
     private static IEnumerable<string> GetDataDrivenTestArguments(AttributeData argumentsAttribute)
     {
         return argumentsAttribute.ConstructorArguments
-            .Select(GetTypedConstantValue);
-    }
-
-    private static string GetTypedConstantValue(TypedConstant constructorArgument)
-    {
-        return constructorArgument.Kind switch
-        {
-            TypedConstantKind.Error => "null",
-            TypedConstantKind.Primitive => $"{constructorArgument.Value}",
-            TypedConstantKind.Enum => $"{constructorArgument.Value}",
-            TypedConstantKind.Type => $"{constructorArgument.Value}",
-            TypedConstantKind.Array =>
-                $"[{string.Join(",", constructorArgument.Values.Select(GetTypedConstantValue))}]",
-            _ => throw new ArgumentOutOfRangeException()
-        };
+            .Select(TypedConstantParser.GetTypedConstantValue);
     }
 }
