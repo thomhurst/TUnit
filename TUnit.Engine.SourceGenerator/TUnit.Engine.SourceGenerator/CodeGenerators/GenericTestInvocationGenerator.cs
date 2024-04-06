@@ -11,13 +11,11 @@ internal static class GenericTestInvocationGenerator
         var methodSymbol = writeableTest.MethodSymbol;
         var classSymbol = writeableTest.ClassSymbol;
         var testId = writeableTest.TestId;
-
-        var classType = methodSymbol.ContainingType;
         
-        var fullyQualifiedClassType = classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        var fullyQualifiedClassType = classSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
                  global::TUnit.Engine.OneTimeCleanUpOrchestrator.RegisterTest(typeof({{fullyQualifiedClassType}}));
-                 {{OneTimeCleanUpWriter.GenerateLazyOneTimeCleanUpCode(classType)}}
+                 {{OneTimeCleanUpWriter.GenerateLazyOneTimeCleanUpCode(classSymbol)}}
                  global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => 
                         {
                  {{string.Join("\r\n", writeableTest.GetClassArgumentsInvocations().Select(x => $"\t\t{x}"))}}
@@ -48,11 +46,11 @@ internal static class GenericTestInvocationGenerator
                             {
                                 Id = "{{testId}}",
                                 TestContext = testContext,
-                                OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classType)}}],
-                                BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classType)}}],
+                                OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classSymbol)}}],
+                                BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classSymbol)}}],
                                 TestClass = classInstance,
                                 TestBody = () => global::TUnit.Engine.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}})),
-                                AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classType)}}],
+                                AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classSymbol)}}],
                             };
                         });
                  """;
