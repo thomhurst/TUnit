@@ -91,7 +91,6 @@ internal record TestDetails
         var methodParameterTypes = MethodInfo.GetParameters().Select(x => x.ParameterType).ToArray();
         
         return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{CurrentClassRepeatCount}.{GetParameterTypes(methodParameterTypes)}.{CurrentMethodRepeatCount}";
-        // return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{GetArgumentValues(ClassArgumentValues)}.{GetParameterTypes(MethodParameterTypes)}.{GetArgumentValues(MethodArgumentValues)}.{Count}";
     }
 
     public string ReturnType { get; }
