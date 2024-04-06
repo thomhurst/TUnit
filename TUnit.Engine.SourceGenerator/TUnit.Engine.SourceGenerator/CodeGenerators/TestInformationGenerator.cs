@@ -82,12 +82,13 @@ internal static class TestInformationGenerator
         var testName = methodSymbol.Name;
         
         var classParameters = methodSymbol.ContainingType.Constructors.First().Parameters;
+        
         var classParameterTypes = GetTypes(classParameters);
 
         var methodParameterTypes = GetTypes(methodSymbol.Parameters);
         
         //return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{string.Join(",", classArguments)}.{methodParameterTypes}.{string.Join(",", methodArguments)}.{count}";
-        return $"{fullyQualifiedClassName}.{testName}.({classParameterTypes}).{classRepeatCount}.({methodParameterTypes}).{methodRepeatCount}";
+        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{classRepeatCount}.{methodParameterTypes}.{methodRepeatCount}";
     }
 
     public static string GetTypes(ImmutableArray<IParameterSymbol> parameters)
@@ -100,6 +101,6 @@ internal static class TestInformationGenerator
         var parameterTypesFullyQualified = parameters.Select(x => x.Type)
             .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix));
         
-        return string.Join(",", parameterTypesFullyQualified);
+        return $"({string.Join(",", parameterTypesFullyQualified)})";
     }
 }
