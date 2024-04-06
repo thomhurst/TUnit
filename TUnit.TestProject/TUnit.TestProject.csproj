@@ -41,9 +41,5 @@
             <TypeFullName>TUnit.Engine.TestingPlatformBuilderHook</TypeFullName>
         </TestingPlatformBuilderHook>
     </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="GeneratedCode\" />
-    </ItemGroup>
 
 </Project>

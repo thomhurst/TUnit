@@ -20,6 +20,11 @@ public class TestsSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        if (!Debugger.IsAttached)
+        {
+            // Debugger.Launch();
+        }
+        
         var testMethods = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s), 
@@ -118,11 +123,6 @@ public class TestsSourceGenerator : IIncrementalGenerator
 
     private static IEnumerable<string> GetTestInvocationCode(IMethodSymbol methodSymbol)
     {
-        if (!Debugger.IsAttached)
-        {
-            // Debugger.Launch();
-        }
-        
         var writeableTests = WriteableTestsRetriever.GetWriteableTests(methodSymbol);
         
         foreach (var writeableTest in writeableTests)
