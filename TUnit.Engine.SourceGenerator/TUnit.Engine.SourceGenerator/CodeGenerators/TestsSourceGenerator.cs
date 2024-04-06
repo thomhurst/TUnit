@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -17,11 +16,6 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 [Generator]
 public class TestsSourceGenerator : IIncrementalGenerator
 {
-    public void Initialize(GeneratorInitializationContext context)
-    {
-        // No initialization required for this generator.
-    }
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var testMethods = context.SyntaxProvider
@@ -154,17 +148,5 @@ public class TestsSourceGenerator : IIncrementalGenerator
         }
 
         return sourceBuilder.ToString();
-    }
-}
-
-public record Method
-{
-    public MethodDeclarationSyntax MethodDeclarationSyntax { get; }
-    public IMethodSymbol MethodSymbol { get; }
-
-    public Method(MethodDeclarationSyntax methodDeclarationSyntax, IMethodSymbol methodSymbol)
-    {
-        MethodDeclarationSyntax = methodDeclarationSyntax;
-        MethodSymbol = methodSymbol;
     }
 }
