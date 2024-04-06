@@ -20,15 +20,15 @@ internal record WriteableTest
         this.CurrentMethodCount = CurrentMethodCount;
     }
 
-    private IReadOnlyList<Argument>? Map(IReadOnlyList<Argument> arguments)
+    private IReadOnlyList<Argument> Map(IEnumerable<Argument> arguments)
     {
         return arguments
             .Where(x => x != Argument.NoArguments)
-            .Select(x => MapPrimitive(x))
+            .Select(MapSpecialTypes)
             .ToList();
     }
 
-    private Argument MapPrimitive(Argument argument)
+    private Argument MapSpecialTypes(Argument argument)
     {
         if (argument.Type == "global::System.Char")
         {
@@ -93,13 +93,4 @@ internal record WriteableTest
     
     public string GetMethodArgumentVariableNamesAsList()
         => string.Join(",", GetMethodArgumentVariableNames());
-
-    public void Deconstruct(out IMethodSymbol MethodSymbol, out IReadOnlyList<Argument> ClassArguments, out IReadOnlyList<Argument> MethodArguments, out int CurrentClassCount, out int CurrentMethodCount)
-    {
-        MethodSymbol = this.MethodSymbol;
-        ClassArguments = this.ClassArguments;
-        MethodArguments = this.MethodArguments;
-        CurrentClassCount = this.CurrentClassCount;
-        CurrentMethodCount = this.CurrentMethodCount;
-    }
 }
