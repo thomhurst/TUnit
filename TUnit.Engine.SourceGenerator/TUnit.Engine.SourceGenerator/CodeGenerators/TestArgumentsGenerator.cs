@@ -5,7 +5,7 @@ using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
-public static class TestArgumentsGenerator
+internal static class TestArgumentsGenerator
 {
     public static IEnumerable<Argument> GetTestMethodArguments(IMethodSymbol methodSymbol, AttributeData testAttribute)
     {

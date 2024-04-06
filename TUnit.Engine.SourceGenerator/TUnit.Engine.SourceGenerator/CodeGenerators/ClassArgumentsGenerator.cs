@@ -5,7 +5,7 @@ using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
-public static class ClassArgumentsGenerator
+internal static class ClassArgumentsGenerator
 {
     public static IEnumerable<Argument> GetClassArguments(INamedTypeSymbol namedTypeSymbol)
     {
