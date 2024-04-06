@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
     {
         return services
-            .AddSingleton(new CancellationTokenSource())
+            .AddSingleton(EngineCancellationToken.CancellationTokenSource)
             .AddSingleton<MethodInvoker>()
             .AddSingleton<DataSourceRetriever>()
             .AddSingleton<Disposer>()
