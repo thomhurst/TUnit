@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Engine.SourceGenerator;
 
-public class WellKnownFullyQualifiedClassNames
+public static class WellKnownFullyQualifiedClassNames
 {
     // Test Definition Attributes
     public const string BaseTestAttribute = "global::TUnit.Core.BaseTestAttribute";
@@ -12,8 +12,12 @@ public class WellKnownFullyQualifiedClassNames
     
     // Test Data Attributes
     public const string ArgumentsAttribute = "global::TUnit.Core.ArgumentsAttribute";
-    public const string ArgumentsAttribute = "global::TUnit.Core.ArgumentsAttribute";
+    public const string MethodDataAttribute = "global::TUnit.Core.MethodDataAttribute";
+    public const string ClassDataAttribute = "global::TUnit.Core.ClassDataAttribute";
+    public const string InjectAttribute = "global::TUnit.Core.InjectAttribute";
+    public const string CombinativeValuesAttribute = "global::TUnit.Core.CombinativeValuesAttribute";
     
+    // Test Metadata Attributes
     public const string RepeatAttribute = "global::TUnit.Core.RepeatAttribute";
     public const string RetryAttribute = "global::TUnit.Core.RetryAttribute";
     public const string TimeoutAttribute = "global::TUnit.Core.TimeoutAttribute";
