@@ -73,12 +73,13 @@ internal static class TestInformationGenerator
         return [..methodSymbol.GetAttributes(), ..classSymbol.GetAttributes()];
     }
 
-    public static string GetTestId(IMethodSymbol methodSymbol, int classRepeatCount, int methodRepeatCount)
+    public static string GetTestId(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, int classRepeatCount,
+        int methodRepeatCount)
     {
         // Format must match TestDetails.GenerateUniqueId, but we can't share code
         // as we're inside a source generator
         var fullyQualifiedClassName =
-            methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
+            classSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
         var testName = methodSymbol.Name;
         

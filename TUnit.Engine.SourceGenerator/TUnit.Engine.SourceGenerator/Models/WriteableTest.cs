@@ -64,7 +64,7 @@ internal record WriteableTest
         return argument;
     }
 
-    public string TestId => TestInformationGenerator.GetTestId(MethodSymbol, CurrentClassCount, CurrentMethodCount);
+    public string TestId => TestInformationGenerator.GetTestId(ClassSymbol, MethodSymbol, CurrentClassCount, CurrentMethodCount);
     public string MethodName => MethodSymbol.Name;
     public string ClassName => ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     public IMethodSymbol MethodSymbol { get; init; }
