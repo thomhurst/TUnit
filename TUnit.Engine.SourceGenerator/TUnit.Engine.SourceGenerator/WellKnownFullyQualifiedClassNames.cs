@@ -21,4 +21,9 @@ public static class WellKnownFullyQualifiedClassNames
     public const string RepeatAttribute = "global::TUnit.Core.RepeatAttribute";
     public const string RetryAttribute = "global::TUnit.Core.RetryAttribute";
     public const string TimeoutAttribute = "global::TUnit.Core.TimeoutAttribute";
+    
+    // Test Hooks Attributes
+    public const string AssemblySetUpAttribute = "global::TUnit.Core.AssemblySetUpAttribute";
+    public const string AssemblyCleanUpAttribute = "global::TUnit.Core.AssemblyCleanUpAttribute";
+
 }

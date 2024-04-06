@@ -42,8 +42,6 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestInvoker>()
             .AddSingleton<SystemResourceMonitor>()
             .AddSingleton<ClassWalker>()
-            .AddSingleton<AssemblySetUpExecutor>()
-            .AddSingleton<AssemblyCleanUpExecutor>()
             .AddSingleton<AssemblyLoader>()
             .AddSingleton<TUnitTestDiscoverer>()
             .AddSingleton<TestFilterService>();
