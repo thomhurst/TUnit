@@ -14,8 +14,9 @@ internal static class WriteableTestsRetriever
         var attributes = methodSymbol.GetAttributes();
 
 
-        if (!attributes.Any(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == WellKnownFullyQualifiedClassNames.BaseTestAttribute))
+        if (!attributes.Any(x =>
+                x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                == WellKnownFullyQualifiedClassNames.BaseTestAttribute))
         {
             yield break;
         }
@@ -24,10 +25,10 @@ internal static class WriteableTestsRetriever
         [
             // Tests that don't have data
             ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.TestAttribute),
-            
+
             // Combinative tests - These have to be evaluated specially to work out all the combinations
             ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.CombinativeTestAttribute),
-            
+
             // Test data which will produce tests
             ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.ArgumentsAttribute),
             ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute),
@@ -43,29 +44,32 @@ internal static class WriteableTestsRetriever
             var methodIndex = 0;
             foreach (var argumentAttribute in testDataAttributes)
             {
-                if (argumentAttribute.AttributeClass?.ToDisplayString(DisplayFormats
-                        .FullyQualifiedNonGenericWithGlobalPrefix)
-                    == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute)
+                for (var i = 0; i < TestInformationGenerator.GetRepeatCount(methodSymbol) + 1; i++)
                 {
-                    foreach (var combinativeTestData in ParseCombinativeTestsData(methodSymbol))
+                    if (argumentAttribute.AttributeClass?.ToDisplayString(DisplayFormats
+                            .FullyQualifiedNonGenericWithGlobalPrefix)
+                        == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute)
                     {
-                        yield return new WriteableTest(methodSymbol,
-                            [classArgument], // TODO: Be able to accept a true array here
-                            combinativeTestData.ToList(),
-                            classIndex,
-                            ++methodIndex
-                        );
+                        foreach (var combinativeTestData in ParseCombinativeTestsData(methodSymbol))
+                        {
+                            yield return new WriteableTest(methodSymbol,
+                                [classArgument], // TODO: Be able to accept a true array here
+                                combinativeTestData.ToList(),
+                                classIndex,
+                                ++methodIndex
+                            );
+                        }
+
+                        yield break;
                     }
 
-                    yield break;
+                    yield return new WriteableTest(methodSymbol,
+                        [classArgument], // TODO: Be able to accept a true array here
+                        TestArgumentsGenerator.GetTestMethodArguments(methodSymbol, argumentAttribute).ToList(),
+                        classIndex,
+                        ++methodIndex
+                    );
                 }
-                
-                yield return new WriteableTest(methodSymbol,
-                    [classArgument], // TODO: Be able to accept a true array here
-                    TestArgumentsGenerator.GetTestMethodArguments(methodSymbol, argumentAttribute).ToList(),
-                    classIndex,
-                    ++methodIndex
-                );
             }
         }
     }
