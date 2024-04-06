@@ -19,7 +19,6 @@ internal static class GenericTestInvocationGenerator
                         {
                  {{string.Join("\r\n", writeableTest.GetClassArgumentsInvocations().Select(x => $"\t\t{x}"))}}
                             var classInstance = new {{writeableTest.ClassName}}({{writeableTest.GetClassArgumentVariableNamesAsList()}});             
-                            object[] classArgs = [{{writeableTest.GetClassArgumentVariableNamesAsList()}}];
                             var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
                  
                  {{string.Join("\r\n", writeableTest.GetMethodArgumentsInvocations().Select(x => $"\t\t{x}"))}}
@@ -30,7 +29,7 @@ internal static class GenericTestInvocationGenerator
                                 ClassInstance = classInstance,
                                 ClassType = typeof({{fullyQualifiedClassType}}),
                                 Timeout = {{TestInformationGenerator.GetTimeOut(methodSymbol)}},
-                                TestClassArguments = classArgs,
+                                TestClassArguments = [{{writeableTest.GetClassArgumentVariableNamesAsList()}}],
                                 TestMethodArguments = [{{writeableTest.GetMethodArgumentVariableNamesAsList()}}],
                                 TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
                                 TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
