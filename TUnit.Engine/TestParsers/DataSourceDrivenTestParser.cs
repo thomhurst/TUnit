@@ -25,8 +25,6 @@ internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetrieve
 
             foreach (var methodArguments in dataSourceRetriever.GetTestDataSourceArguments(methodInfo))
             {
-                methodRepeatCount++;
-
                 for (var i = 1; i <= runCount; i++)
                 {
                     yield return new TestDetails(
@@ -35,7 +33,7 @@ internal class DataSourceDrivenTestParser(DataSourceRetriever dataSourceRetrieve
                         methodArguments: GetDataSourceArguments(methodArguments),
                         classArguments: GetDataSourceArguments(classArguments),
                         currentClassRepeatCount: classRepeatCount,
-                        currentMethodRepeatCount: i + methodRepeatCount
+                        currentMethodRepeatCount: ++methodRepeatCount
                     );
                 }
             }
