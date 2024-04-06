@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
@@ -52,8 +53,8 @@ public class SetupTests : Base3
             var builder = WebApplication.CreateBuilder();
             _app = builder.Build();
 
-            _app.MapGet("/ping", context => 
-                Task.FromResult($"Hello {context.Request.Query["testName"]}!"));
+            _app.MapGet("/ping", ([FromQuery] string testName) => 
+            $"Hello {testName}!");
 
             await _app.StartAsync();
             _serverAddress = _app.Services.GetRequiredService<IServer>()
@@ -84,7 +85,7 @@ public class SetupTests : Base3
     [BeforeEachTest]
     public async Task Setup()
     {
-        _response = await new HttpClient().GetAsync($"{_serverAddress}/?testName={TestContext.Current?.TestInformation.TestName}");
+        _response = await new HttpClient().GetAsync($"{_serverAddress}/ping/?testName={TestContext.Current?.TestInformation.TestName}");
     }
 
     [Test]
@@ -93,7 +94,7 @@ public class SetupTests : Base3
         await Assert.That(_response?.StatusCode).Is.Not.Null().And.Is.EqualTo(HttpStatusCode.OK);
         
         await Assert.That(await _response!.Content.ReadAsStringAsync())
-            .Is.EqualTo("Hello Test1!");
+            .Is.EqualTo("Hello TestServerResponse1!");
     }
     
     [Test]
@@ -103,6 +104,6 @@ public class SetupTests : Base3
             .And.Is.EqualTo(HttpStatusCode.OK);
 
         await Assert.That(await _response!.Content.ReadAsStringAsync())
-            .Is.EqualTo("Hello Test2!");
+            .Is.EqualTo("Hello TestServerResponse2!");
     }
 }
