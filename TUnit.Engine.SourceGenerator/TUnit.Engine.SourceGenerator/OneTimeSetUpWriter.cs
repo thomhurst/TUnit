@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Extensions;
 
 namespace TUnit.Engine.SourceGenerator;
 
@@ -8,9 +9,8 @@ public class OneTimeSetUpWriter
 {
     public static string GenerateCode(INamedTypeSymbol classType)
     {
-        var oneTimeSetUpMethods = classType
-            //.GetMembersIncludingBase()
-            .GetMembers()
+        var oneTimeSetUpMethodGroupings = classType
+            .GetMembersIncludingBase()
             .OfType<IMethodSymbol>()
             .Where(x => x.IsStatic)
             .Where(x => x.DeclaredAccessibility == Accessibility.Public)
@@ -18,18 +18,23 @@ public class OneTimeSetUpWriter
                 .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                           == "global::TUnit.Core.OneTimeSetUpAttribute")
             )
+            .GroupBy(x => x.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
             .ToList();
         
-        if(!oneTimeSetUpMethods.Any())
+        if(!oneTimeSetUpMethodGroupings.Any())
         {
             return string.Empty;
         }
 
         var stringBuilder = new StringBuilder();
         
-        foreach (var oneTimeSetUpMethod in oneTimeSetUpMethods)
+        foreach (var oneTimeSetUpMethods in oneTimeSetUpMethodGroupings)
         {
-            stringBuilder.Append($"() => global::TUnit.Engine.RunHelpers.RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{oneTimeSetUpMethod.Name}()),");
+            var methodFuncs = string.Join(", ",
+                oneTimeSetUpMethods.Select(x =>
+                    $"() => global::TUnit.Engine.RunHelpers.RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{x.Name}())"));
+            
+            stringBuilder.Append($"new global::TUnit.Core.OneTimeSetUpModel(typeof({oneTimeSetUpMethods.Key}), [{methodFuncs}]),");
         }
         
         return stringBuilder.ToString();

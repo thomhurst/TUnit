@@ -39,26 +39,44 @@ public class SetupTests : Base3
     private static string _serverAddress = null!;
     private HttpResponseMessage? _response;
 
+    
+    private static int OneTimeSetUpExecutionCount = 0;
+    private static int OneTimeCleanUpExecutionCount = 0;
+
     [OneTimeSetUp]
     public static async Task SetUpLocalWebServer()
     {
-        var builder = WebApplication.CreateBuilder();
-        _app = builder.Build();
+        try
+        {
+            Interlocked.Increment(ref OneTimeSetUpExecutionCount);
+            var builder = WebApplication.CreateBuilder();
+            _app = builder.Build();
 
-        _app.MapGet("/ping", context => 
-            Task.FromResult($"Hello {context.Request.Query["testName"]}!"));
+            _app.MapGet("/ping", context => 
+                Task.FromResult($"Hello {context.Request.Query["testName"]}!"));
 
-        await _app.StartAsync();
-        _serverAddress = _app.Services.GetRequiredService<IServer>()
-            .Features
-            .Get<IServerAddressesFeature>()!
-            .Addresses
-            .Last();
+            await _app.StartAsync();
+            _serverAddress = _app.Services.GetRequiredService<IServer>()
+                .Features
+                .Get<IServerAddressesFeature>()!
+                .Addresses
+                .Last();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw new Exception($$"""
+                                  OneTimeSetUp Count: {{OneTimeSetUpExecutionCount}}
+                                  OneTimeCleanUp Count: {{OneTimeCleanUpExecutionCount}}
+                                  """, e);
+        }
     }
 
     [OneTimeCleanUp]
     public static async Task StopServer()
     {
+        Interlocked.Increment(ref OneTimeCleanUpExecutionCount);
+
         await _app.StopAsync();
         await _app.DisposeAsync();
     }
@@ -70,7 +88,7 @@ public class SetupTests : Base3
     }
 
     [Test]
-    public async Task Test()
+    public async Task TestServerResponse1()
     {
         await Assert.That(_response?.StatusCode).Is.Not.Null().And.Is.EqualTo(HttpStatusCode.OK);
         
@@ -79,7 +97,7 @@ public class SetupTests : Base3
     }
     
     [Test]
-    public async Task Test2()
+    public async Task TestServerResponse2()
     {
         await Assert.That(_response?.StatusCode).Is.Not.Null()
             .And.Is.EqualTo(HttpStatusCode.OK);

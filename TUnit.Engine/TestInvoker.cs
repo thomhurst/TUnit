@@ -1,14 +1,10 @@
-﻿using TUnit.Core;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Core;
 
 namespace TUnit.Engine;
 
 internal class TestInvoker
 {
-    public TestInvoker()
-    {
-        
-    }
-
     public async Task Invoke(UnInvokedTest unInvokedTest)
     {
         var teardownExceptions = new List<Exception>();
@@ -71,10 +67,17 @@ internal class TestInvoker
         return ValueTask.CompletedTask;
     }
 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     private static IEnumerable<Task> GetThreadSafeOneTimeSetUps(UnInvokedTest unInvokedTest)
     {
-        return OneTimeSetUpOrchestrator.Tasks.GetOrAdd(
-            unInvokedTest.TestContext.TestInformation.ClassType, _ => unInvokedTest.OneTimeSetUps.Select(x => x.Invoke())
-        );
+        foreach (var (type, funcs) in unInvokedTest.OneTimeSetUps)
+        {
+            var tasks = OneTimeSetUpOrchestrator.GetOrAdd(type, () => funcs.Select(x => x.Invoke()).ToList());
+            
+            foreach (var task in tasks)
+            {
+                yield return task;
+            }
+        }
     }
 }
