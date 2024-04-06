@@ -20,9 +20,7 @@ internal static class GenericTestInvocationGenerator
                  {{string.Join("\r\n", writeableTest.GetClassArgumentsInvocations().Select(x => $"\t\t{x}"))}}
                             var classInstance = new {{writeableTest.ClassName}}({{writeableTest.GetClassArgumentVariableNamesAsList()}});             
                             var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
-                 
                  {{string.Join("\r\n", writeableTest.GetMethodArgumentsInvocations().Select(x => $"\t\t{x}"))}}
-                 
                             var testInformation = new global::TUnit.Core.TestInformation()
                             {
                                 Categories = [{{string.Join(", ", TestInformationGenerator.GetCategories(methodSymbol))}}],

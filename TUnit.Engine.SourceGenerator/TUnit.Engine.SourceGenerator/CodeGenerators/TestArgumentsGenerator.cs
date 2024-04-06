@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -14,16 +15,6 @@ internal static class TestArgumentsGenerator
             yield return Argument.NoArguments;
         }
         
-        AttributeData[] attributes =
-        [
-            ..methodSymbol.GetAttributes(),
-            ..methodSymbol.ContainingType.GetAttributes(),
-        ];
-
-        var timeoutAttribute = attributes.FirstOrDefault(x =>
-            x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            == WellKnownFullyQualifiedClassNames.TimeoutAttribute);
-
         switch (testAttribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
         {
             case WellKnownFullyQualifiedClassNames.ArgumentsAttribute:
@@ -41,11 +32,13 @@ internal static class TestArgumentsGenerator
             case WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute:
                 break;
         }
+
+        var timeoutCancellationTokenArgument =
+            TimeoutCancellationTokenGenerator.GetCancellationTokenArgument(methodSymbol);
         
-        if (timeoutAttribute != null)
+        if (timeoutCancellationTokenArgument != null)
         {
-            var timeoutInMillis = (int) timeoutAttribute.ConstructorArguments.First().Value!;
-            yield return new Argument("global::System.Threading.CancellationToken", $"global::TUnit.Engine.EngineCancellationToken.CreateToken(global::System.TimeSpan.FromMilliseconds({timeoutInMillis}))");
+            yield return timeoutCancellationTokenArgument;
         }
     }
 

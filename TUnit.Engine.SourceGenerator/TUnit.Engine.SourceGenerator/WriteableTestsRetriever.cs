@@ -72,11 +72,7 @@ internal static class WriteableTestsRetriever
 
     private static IEnumerable<IEnumerable<Argument>> ParseCombinativeTestsData(IMethodSymbol methodSymbol)
     {
-        var combinativeValuesAttributes = methodSymbol.GetAttributes().Where(x =>
-            x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            == WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute);
-
-        return CombinativeValuesGenerator.GetTestsArguments(combinativeValuesAttributes);
+        return CombinativeValuesGenerator.GetTestsArguments(methodSymbol);
     }
 
     private static IEnumerable<AttributeData> GetAttributes(ImmutableArray<AttributeData> attributes, string fullyQualifiedNameWithGlobalPrefix)

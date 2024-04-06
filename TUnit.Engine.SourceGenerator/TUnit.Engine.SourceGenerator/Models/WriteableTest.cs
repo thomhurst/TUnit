@@ -30,11 +30,24 @@ internal record WriteableTest
 
     private Argument MapSpecialTypes(Argument argument)
     {
+        if (argument.Invocation == "null")
+        {
+            return argument;
+        }
+        
         if (argument.Type == "global::System.Char")
         {
             return argument with
             {
                 Invocation = $"'{argument.Invocation}'"
+            };
+        }
+        
+        if (argument.Type == "global::System.Boolean")
+        {
+            return argument with
+            {
+                Invocation = argument.Invocation.ToLower()
             };
         }
         
