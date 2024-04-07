@@ -42,4 +42,8 @@
         <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="TestParsers\" />
+    </ItemGroup>
+
 </Project>

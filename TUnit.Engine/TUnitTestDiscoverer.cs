@@ -24,7 +24,7 @@ internal class TUnitTestDiscoverer
         
         foreach (var assembly in assemblies.Select(x => new CachedAssemblyInformation(x)))
         {
-            foreach (var testDetails in _testsLoader.GetTests(assembly))
+            foreach (var testDetails in _testsLoader.GetTests())
             {
                 if (cancellationToken.IsCancellationRequested)
                 {

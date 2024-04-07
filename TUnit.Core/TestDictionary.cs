@@ -17,6 +17,7 @@ public static class TestDictionary
     
     internal static IEnumerable<TestInformation> GetAllTestDetails()
     {
+        // TODO: Not sure I love that we have to invoke the func
         return Tests.Values
             .Select(x => x.Invoke())
             .Select(x => x.TestContext.TestInformation);
