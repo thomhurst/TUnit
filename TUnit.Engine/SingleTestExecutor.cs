@@ -101,10 +101,8 @@ internal class SingleTestExecutor : IDataProducer
         TestContext? testContext = null;
         try
         {
-            var unInvokedTestFunc = TestDictionary.GetTest(testNode.Uid);
-            unInvokedTest = unInvokedTestFunc();
+            unInvokedTest = TestDictionary.GetTest(testNode.Uid).Value;
             testContext = unInvokedTest.TestContext;
-            var testInformation = testContext.TestInformation;
             
             await Task.Run(async () =>
             {
