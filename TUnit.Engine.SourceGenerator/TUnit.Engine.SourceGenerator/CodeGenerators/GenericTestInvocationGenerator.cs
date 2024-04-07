@@ -37,8 +37,8 @@ internal static class GenericTestInvocationGenerator
                                 MethodInfo = methodInfo,
                                 TestName = "{{methodSymbol.Name}}",
                                 CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>(),
-                                MethodRepeatCount = {{writeableTest.CurrentMethodCount}},
-                                ClassRepeatCount = {{writeableTest.CurrentClassCount}},
+                                MethodRepeatCount = {{writeableTest.CurrentMethodRepeatCount}},
+                                ClassRepeatCount = {{writeableTest.CurrentClassRepeatCount}},
                             };
                             
                             var testContext = new global::TUnit.Core.TestContext(testInformation);

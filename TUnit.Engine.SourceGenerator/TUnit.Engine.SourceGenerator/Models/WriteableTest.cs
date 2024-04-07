@@ -11,15 +11,15 @@ internal record WriteableTest
         INamedTypeSymbol ClassSymbol,
         IReadOnlyList<Argument> ClassArguments,
         IReadOnlyList<Argument> MethodArguments,
-        int CurrentClassCount,
-        int CurrentMethodCount)
+        int CurrentClassRepeatCount,
+        int CurrentMethodRepeatCount)
     {
         this.MethodSymbol = MethodSymbol;
         this.ClassSymbol = ClassSymbol;
         this.ClassArguments = Map(ClassArguments);
         this.MethodArguments = Map(MethodArguments);
-        this.CurrentClassCount = CurrentClassCount;
-        this.CurrentMethodCount = CurrentMethodCount;
+        this.CurrentClassRepeatCount = CurrentClassRepeatCount;
+        this.CurrentMethodRepeatCount = CurrentMethodRepeatCount;
     }
 
     private IReadOnlyList<Argument> Map(IEnumerable<Argument> arguments)
@@ -64,15 +64,15 @@ internal record WriteableTest
         return argument;
     }
 
-    public string TestId => TestInformationGenerator.GetTestId(ClassSymbol, MethodSymbol, CurrentClassCount, CurrentMethodCount);
+    public string TestId => TestInformationGenerator.GetTestId(ClassSymbol, MethodSymbol, CurrentClassRepeatCount, CurrentMethodRepeatCount);
     public string MethodName => MethodSymbol.Name;
     public string ClassName => ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     public IMethodSymbol MethodSymbol { get; init; }
     public INamedTypeSymbol ClassSymbol { get; }
     public IReadOnlyList<Argument> ClassArguments { get; init; }
     public IReadOnlyList<Argument> MethodArguments { get; init; }
-    public int CurrentClassCount { get; init; }
-    public int CurrentMethodCount { get; init; }
+    public int CurrentClassRepeatCount { get; init; }
+    public int CurrentMethodRepeatCount { get; init; }
 
     public IEnumerable<string> GetClassArgumentVariableNames()
         => Enumerable.Range(0, ClassArguments.Count)
