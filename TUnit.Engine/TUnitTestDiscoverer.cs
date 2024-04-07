@@ -1,7 +1,5 @@
-﻿using System.Reflection;
-using Microsoft.Testing.Platform.Extensions.Messages;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
-using TUnit.Core;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
@@ -17,26 +15,20 @@ internal class TUnitTestDiscoverer
         _testFilterService = testFilterService;
     }
     
-    public IEnumerable<TestNode> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest,
-        Func<IEnumerable<Assembly>> testAssemblies, CancellationToken cancellationToken)
+    public IEnumerable<TestNode> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest, CancellationToken cancellationToken)
     {
-        var assemblies = testAssemblies();
-        
-        foreach (var assembly in assemblies.Select(x => new CachedAssemblyInformation(x)))
+        foreach (var testDetails in _testsLoader.GetTests())
         {
-            foreach (var testDetails in _testsLoader.GetTests())
+            if (cancellationToken.IsCancellationRequested)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    yield break;
-                }
+                yield break;
+            }
 
-                var testNode = testDetails.ToTestNode();
+            var testNode = testDetails.ToTestNode();
 
-                if (_testFilterService.MatchesTest(discoverTestExecutionRequest?.Filter, testNode))
-                {
-                    yield return testNode;
-                }
+            if (_testFilterService.MatchesTest(discoverTestExecutionRequest?.Filter, testNode))
+            {
+                yield return testNode;
             }
         }
     }

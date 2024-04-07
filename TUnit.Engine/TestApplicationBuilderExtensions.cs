@@ -6,7 +6,7 @@ namespace TUnit.Engine;
 
 public static class TestApplicationBuilderExtensions
 {
-    public static void AddTUnit(this ITestApplicationBuilder testApplicationBuilder, Func<IEnumerable<Assembly>> getTestAssemblies)
+    public static void AddTUnit(this ITestApplicationBuilder testApplicationBuilder)
     {
         TUnitExtension extension = new();
         
@@ -14,6 +14,6 @@ public static class TestApplicationBuilderExtensions
         
         testApplicationBuilder.RegisterTestFramework(
             _ => new TestFrameworkCapabilities(),
-            (capabilities, serviceProvider) => new TUnitTestFramework(extension, getTestAssemblies, serviceProvider, capabilities));
+            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
     }
 }

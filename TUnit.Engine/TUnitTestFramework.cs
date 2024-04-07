@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
@@ -15,18 +14,15 @@ namespace TUnit.Engine;
 internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 {
     private readonly IExtension _extension;
-    private readonly Func<IEnumerable<Assembly>> _getTestAssemblies;
     private readonly ITestFrameworkCapabilities _capabilities;
     private readonly ServiceProvider _myServiceProvider;
     private readonly ILogger<TUnitTestFramework> _logger;
 
     public TUnitTestFramework(IExtension extension,
-        Func<IEnumerable<Assembly>> getTestAssemblies,
         IServiceProvider serviceProvider,
         ITestFrameworkCapabilities capabilities)
     {
         _extension = extension;
-        _getTestAssemblies = getTestAssemblies;
         _capabilities = capabilities;
 
         _logger = serviceProvider.GetLoggerFactory()
@@ -66,7 +62,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             try
             {
                 var testNodes = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
-                    .DiscoverTests(context.Request as TestExecutionRequest, _getTestAssemblies, context.CancellationToken)
+                    .DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken)
                     .ToList();
 
                 if (context.Request is DiscoverTestExecutionRequest)

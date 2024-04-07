@@ -1,8 +1,6 @@
-﻿using System.Reflection;
-using Microsoft.Testing.Platform.Extensions.Messages;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.TestHost;
-using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 using TUnit.Engine.Models.Properties;
@@ -38,6 +36,7 @@ internal class TestsExecutor
     public async Task ExecuteAsync(IEnumerable<TestNode> testNodes, TestSessionContext session)
     {
         _consoleInterceptor.Initialize();
+        var start = DateTimeOffset.Now;
 
         try
         {
@@ -57,6 +56,8 @@ internal class TestsExecutor
         finally
         {
             await AssemblyHookOrchestrators.ExecuteCleanups();
+            await _logger.LogInformationAsync(
+                $"Tests finished after {(start - DateTimeOffset.Now).TotalSeconds} seconds");
         }
     }
 
@@ -163,16 +164,5 @@ internal class TestsExecutor
         {
             await _logger.LogErrorAsync(e);
         }
-    }
-    
-    private SemaphoreSlim GetSemaphoreSlim(CachedAssemblyInformation? cachedAssemblyInformation)
-    {
-        var maximumConcurrentTestsAttribute =
-            cachedAssemblyInformation?.Assembly.GetCustomAttribute<MaximumConcurrentTestsAttribute>();
-
-        var maximumConcurrentTests = maximumConcurrentTestsAttribute?.MaximumConcurrentTests
-                                     ?? Environment.ProcessorCount * Environment.ProcessorCount;
-
-        return new SemaphoreSlim(maximumConcurrentTests, maximumConcurrentTests);
     }
 }
