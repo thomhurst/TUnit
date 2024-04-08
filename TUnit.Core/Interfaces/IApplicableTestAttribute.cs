@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.Interfaces;
 
-public interface ITestAttribute
+public interface IApplicableTestAttribute
 {
     Task Apply(TestContext testContext);
 }

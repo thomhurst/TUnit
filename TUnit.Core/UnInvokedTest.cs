@@ -1,9 +1,13 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core.Interfaces;
+
+namespace TUnit.Core;
 
 public record UnInvokedTest
 {
     public required string Id { get; init; }
     public required TestContext TestContext { get; init; }
+    
+    public required List<IApplicableTestAttribute> ApplicableTestAttributes { get; init; }
     
     // List per Type - So new one for base classes
     public required List<OneTimeSetUpModel> OneTimeSetUps { get; init; }

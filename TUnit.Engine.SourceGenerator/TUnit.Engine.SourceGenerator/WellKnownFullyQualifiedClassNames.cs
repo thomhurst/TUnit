@@ -26,4 +26,6 @@ public static class WellKnownFullyQualifiedClassNames
     public const string AssemblySetUpAttribute = "global::TUnit.Core.AssemblySetUpAttribute";
     public const string AssemblyCleanUpAttribute = "global::TUnit.Core.AssemblyCleanUpAttribute";
 
+    // Interfaces
+    public const string IApplicableTestAttribute = "global::TUnit.Core.Interfaces.IApplicableTestAttribute";
 }

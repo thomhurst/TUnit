@@ -20,23 +20,7 @@ public class TestContext : IDisposable
     }
 
     public static TestContext? Current => TestDictionary.TestContexts.Value;
-
-    public string? SkipReason { get; private set; }
-
-    public void SkipTest(string reason)
-    {
-        SkipReason = reason;
-        CancellationTokenSource?.Cancel();
-    }
-
-    public string? FailReason { get; private set; }
-
-    public void FailTest(string reason)
-    {
-        FailReason = reason;
-        CancellationTokenSource?.Cancel();
-    }
-
+    
     public TUnitTestResult? Result { get; internal set; }
 
     public string GetConsoleOutput()

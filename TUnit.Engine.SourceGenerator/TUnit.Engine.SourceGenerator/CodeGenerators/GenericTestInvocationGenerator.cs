@@ -47,6 +47,7 @@ internal static class GenericTestInvocationGenerator
                             {
                                 Id = "{{testId}}",
                                 TestContext = testContext,
+                                ApplicableTestAttributes = [{{CustomTestAttributeGenerator.WriteCustomAttributes(classSymbol, methodSymbol)}}],
                                 OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classSymbol)}}],
                                 BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classSymbol)}}],
                                 TestClass = classInstance,

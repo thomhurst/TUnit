@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 using TUnit.Engine.Models.Properties;
@@ -65,14 +66,52 @@ internal class SingleTestExecutor : IDataProducer
         var start = DateTimeOffset.Now;
 
         await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
+        {
+            Uid = testNode.Uid,
+            DisplayName = testNode.DisplayName,
+            Properties = new PropertyBag(new InProgressTestNodeStateProperty())
+        }));
+
+        UnInvokedTest? unInvokedTest;
+        TestContext? testContext = null;
+        try
+        {
+            unInvokedTest = TestDictionary.GetTest(testNode.Uid).Value;
+            testContext = unInvokedTest.TestContext;
+
+            foreach (var applicableTestAttribute in unInvokedTest.ApplicableTestAttributes)
+            {
+                await applicableTestAttribute.Apply(testContext);
+            }
+            
+            await Task.Run(async () => { await ExecuteWithRetries(unInvokedTest); });
+
+            var end = DateTimeOffset.Now;
+
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
             {
                 Uid = testNode.Uid,
                 DisplayName = testNode.DisplayName,
-                Properties = new PropertyBag(new InProgressTestNodeStateProperty())
+                Properties = new PropertyBag
+                (
+                    new PassedTestNodeStateProperty(),
+                    new TimingProperty(new TimingInfo(start, end, end - start))
+                )
             }));
 
-        var skipReason = testNode.GetProperty<SkipReasonProperty>()?.SkipReason;
-        if (skipReason != null || !IsExplicitlyRun(testNode))
+            return new TUnitTestResult
+            {
+                TestContext = testContext,
+                Duration = end - start,
+                Start = start,
+                End = end,
+                ComputerName = Environment.MachineName,
+                Exception = null,
+                Status = Status.Passed,
+                Output = testContext.GetConsoleOutput()
+            };
+        }
+        catch (SkipTestException skipTestException)
         {
             await _logger.LogInformationAsync($"Skipping {testNode.DisplayName}...");
             
@@ -82,11 +121,11 @@ internal class SingleTestExecutor : IDataProducer
                 DisplayName = testNode.DisplayName,
                 Properties = new PropertyBag
                 (
-                    new SkippedTestNodeStateProperty(skipReason)
+                    new SkippedTestNodeStateProperty(skipTestException.Reason)
                 )
             }));
             
-            return new TUnitTestResult
+            var unitTestResult = new TUnitTestResult
             {
                 Duration = TimeSpan.Zero,
                 Start = start,
@@ -95,44 +134,13 @@ internal class SingleTestExecutor : IDataProducer
                 Exception = null,
                 Status = Status.Skipped,
             };
-        }
-
-        UnInvokedTest? unInvokedTest;
-        TestContext? testContext = null;
-        try
-        {
-            unInvokedTest = TestDictionary.GetTest(testNode.Uid).Value;
-            testContext = unInvokedTest.TestContext;
             
-            await Task.Run(async () =>
+            if (testContext != null)
             {
-                await ExecuteWithRetries(unInvokedTest);
-            });
-
-            var end = DateTimeOffset.Now;
+                testContext.Result = unitTestResult;
+            }
             
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
-            {
-                Uid = testNode.Uid,
-                DisplayName = testNode.DisplayName,
-                Properties = new PropertyBag
-                (
-                    new PassedTestNodeStateProperty(),
-                    new TimingProperty(new TimingInfo(start, end, end-start))
-                )
-            }));
-            
-            return new TUnitTestResult
-            {
-                TestContext = testContext,
-                Duration = end - start,
-                Start = start,
-                End = end,
-                ComputerName = Environment.MachineName,
-                Exception = null,
-                Status = testContext!.SkipReason != null ? Status.Skipped : Status.Passed,
-                Output = testContext?.GetConsoleOutput() ?? testContext!.FailReason ?? testContext.SkipReason
-            };
+            return unitTestResult;
         }
         catch (Exception e)
         {
@@ -156,7 +164,7 @@ internal class SingleTestExecutor : IDataProducer
                 End = end,
                 ComputerName = Environment.MachineName,
                 Exception = e,
-                Status = testContext?.SkipReason != null ? Status.Skipped : Status.Failed,
+                Status = Status.Failed,
                 Output = testContext?.GetConsoleOutput()
             };
 
@@ -169,7 +177,7 @@ internal class SingleTestExecutor : IDataProducer
         }
         finally
         {
-            await _disposer.DisposeAsync(testContext?.TestInformation?.ClassInstance);
+            await _disposer.DisposeAsync(testContext?.TestInformation.ClassInstance);
 
             lock (_consoleStandardOutLock)
             {
