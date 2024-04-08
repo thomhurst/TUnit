@@ -79,7 +79,7 @@ public class AssemblySetUpCleanUpGenerator : IIncrementalGenerator
                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                     == WellKnownFullyQualifiedClassNames.AssemblyCleanUpAttribute))
             {
-                var className = $"AssemblyCleanUp_{method.ContainingType.Name}_{Guid.NewGuid()}";
+                var className = $"AssemblyCleanUp_{method.ContainingType.Name}_{Guid.NewGuid():N}";
 
                 var code = $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterCleanUp(global::TUnit.Engine.RunHelpers(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()))";
                 
