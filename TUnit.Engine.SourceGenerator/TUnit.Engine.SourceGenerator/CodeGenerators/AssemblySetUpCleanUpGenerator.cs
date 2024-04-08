@@ -98,7 +98,7 @@ public class AssemblySetUpCleanUpGenerator : IIncrementalGenerator
 
                  namespace TUnit.Engine;
 
-                 file class AssemblySetUpCleanUp_{{className}}_{{Guid.NewGuid()}}
+                 file class {{className}}
                  {
                      [ModuleInitializer]
                      public static void Initialise()
