@@ -81,7 +81,7 @@ public class AssemblySetUpCleanUpGenerator : IIncrementalGenerator
             {
                 var className = $"AssemblyCleanUp_{method.ContainingType.Name}_{Guid.NewGuid():N}";
 
-                var code = $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterCleanUp(global::TUnit.Engine.RunHelpers(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()))";
+                var code = $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterCleanUp(() => global::TUnit.Engine.RunHelpers(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()))";
                 
                 context.AddSource($"{className}.g.cs", WrapInClass(className, code));
             }
