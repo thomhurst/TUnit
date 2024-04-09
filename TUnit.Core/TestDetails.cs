@@ -4,7 +4,9 @@ namespace TUnit.Core;
 
 internal record TestDetails
 {
-    public TestDetails(MethodInfo methodInfo,
+    public TestDetails(
+        string testId,
+        MethodInfo methodInfo,
         Type classType,
         object?[]? methodArguments, 
         object?[]? classArguments, 
@@ -80,17 +82,10 @@ internal record TestDetails
         MinLineNumber = baseTestAttribute.Line;
         MaxLineNumber = baseTestAttribute.Line;
 
-        UniqueId = GenerateUniqueId();
+        UniqueId = testId;
 
         CustomProperties = methodAndClassAttributes.OfType<PropertyAttribute>()
             .ToDictionary(x => x.Name, x => x.Value);
-    }
-
-    private string GenerateUniqueId()
-    {
-        var methodParameterTypes = MethodInfo.GetParameters().Select(x => x.ParameterType).ToArray();
-        
-        return $"{FullyQualifiedClassName}.{TestName}.{GetParameterTypes(ClassParameterTypes)}.{CurrentClassRepeatCount}.{GetParameterTypes(methodParameterTypes)}.{CurrentMethodRepeatCount}";
     }
 
     public string ReturnType { get; }

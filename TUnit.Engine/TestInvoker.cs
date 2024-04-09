@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using TUnit.Core;
+﻿using TUnit.Core;
 
 namespace TUnit.Engine;
 
@@ -12,16 +11,8 @@ internal class TestInvoker
         {
             TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
 
-            var threadSafeOneTimeSetUps = GetThreadSafeOneTimeSetUps(unInvokedTest);
-
-            foreach (var oneTimeSetUp in threadSafeOneTimeSetUps)
-            {
-                // We should get the same Task for each test within the class
-                // So we await the same Task to ensure it's finished first
-                // and also gives the benefit of rethrowing the same exception if it failed
-                await oneTimeSetUp;
-            }
-
+            await OneTimeHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
+            
             foreach (var setUp in unInvokedTest.BeforeEachTestSetUps)
             {
                 await setUp();
@@ -38,7 +29,7 @@ internal class TestInvoker
 
             await RunHelpers.RunSafelyAsync(() => Dispose(unInvokedTest.TestClass), teardownExceptions);
             
-            await OneTimeCleanUpOrchestrator.NotifyCompletedTestAndRunOneTimeCleanUps(unInvokedTest.TestContext.TestInformation.ClassType, teardownExceptions);
+            await OneTimeHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, teardownExceptions);
         }
 
         if (teardownExceptions.Any())
@@ -65,19 +56,5 @@ internal class TestInvoker
         }
 
         return ValueTask.CompletedTask;
-    }
-
-    [MethodImpl(MethodImplOptions.Synchronized)]
-    private static IEnumerable<Task> GetThreadSafeOneTimeSetUps(UnInvokedTest unInvokedTest)
-    {
-        foreach (var (type, funcs) in unInvokedTest.OneTimeSetUps)
-        {
-            var tasks = OneTimeSetUpOrchestrator.GetOrAdd(type, () => funcs.Select(x => x.Invoke()).ToList());
-            
-            foreach (var task in tasks)
-            {
-                yield return task;
-            }
-        }
     }
 }

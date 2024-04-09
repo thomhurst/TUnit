@@ -2,17 +2,17 @@
 
 public static class AssemblyHookOrchestrators
 {
-    private static readonly List<Func<Task>> SetUps = new();
-    private static readonly List<Func<Task>> CleanUps = new();
+    private static readonly List<Lazy<Task>> SetUps = new();
+    private static readonly List<Lazy<Task>> CleanUps = new();
 
-    public static void RegisterSetUp(Func<Task> func) => SetUps.Add(func);
-    public static void RegisterCleanUp(Func<Task> func) => SetUps.Add(func);
+    public static void RegisterSetUp(Func<Task> func) => SetUps.Add(new Lazy<Task>(func));
+    public static void RegisterCleanUp(Func<Task> func) => CleanUps.Add(new Lazy<Task>(func));
 
     public static async Task ExecuteSetups()
     {
         foreach (var setUp in SetUps)
         {
-            await setUp();
+            await setUp.Value;
         }
     }
 
@@ -20,11 +20,11 @@ public static class AssemblyHookOrchestrators
     {
         var exceptions = new List<Exception>();
         
-        foreach (var setUp in CleanUps)
+        foreach (var cleanUp in CleanUps)
         {
             try
             {
-                await setUp();
+                await cleanUp.Value;
             }
             catch (Exception e)
             {

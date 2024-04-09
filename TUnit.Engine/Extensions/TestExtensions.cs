@@ -11,6 +11,7 @@ internal static class TestExtensions
     {
         return new TestInformation
         {
+            TestId = testNode.Uid,
             TestName = testNode.GetRequiredProperty<TestInformationProperty>().TestName,
             MethodInfo = methodInfo,
             ClassType = classType,

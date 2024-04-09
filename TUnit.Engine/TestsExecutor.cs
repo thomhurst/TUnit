@@ -36,6 +36,7 @@ internal class TestsExecutor
     public async Task ExecuteAsync(IEnumerable<TestNode> testNodes, TestSessionContext session)
     {
         _consoleInterceptor.Initialize();
+        
         var start = DateTimeOffset.Now;
 
         try
@@ -43,6 +44,12 @@ internal class TestsExecutor
             await AssemblyHookOrchestrators.ExecuteSetups();
         
             var tests = _testGrouper.OrganiseTests(testNodes);
+            
+            foreach (var testNode in tests.AllTests)
+            {
+                // TODO: Can we get the type better?
+                OneTimeHookOrchestrator.RegisterInstance(Type.GetType(testNode.GetRequiredProperty<TestMethodIdentifierProperty>().TypeName)!);
+            }
         
             // TODO: I don't love this - Late setting a property.
             _singleTestExecutor.SetAllTests(tests);

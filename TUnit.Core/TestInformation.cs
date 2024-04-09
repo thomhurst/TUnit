@@ -16,6 +16,8 @@ public record TestInformation
         );
     }
     
+    public required string TestId { get; init; }
+    
     public required string TestName { get; init; }
     
     public required Type[]? TestMethodParameterTypes { get; init; }

@@ -25,6 +25,8 @@ public static class WellKnownFullyQualifiedClassNames
     // Test Hooks Attributes
     public const string AssemblySetUpAttribute = "global::TUnit.Core.AssemblySetUpAttribute";
     public const string AssemblyCleanUpAttribute = "global::TUnit.Core.AssemblyCleanUpAttribute";
+    public const string OneTimeSetUpAttribute = "global::TUnit.Core.OneTimeSetUpAttribute";
+    public const string OneTimeCleanUpAttribute = "global::TUnit.Core.OneTimeCleanUpAttribute";
 
     // Interfaces
     public const string IApplicableTestAttribute = "global::TUnit.Core.Interfaces.IApplicableTestAttribute";
