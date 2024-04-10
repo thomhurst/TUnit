@@ -42,7 +42,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
 
     static IEnumerable<ClassMethod> GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
     {
-        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
+        if (context.Node is not ClassDeclarationSyntax)
         {
             yield break;
         }

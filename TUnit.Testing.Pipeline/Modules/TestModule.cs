@@ -21,7 +21,7 @@ public abstract class TestModule : Module<DotNetTestResult>
 
         var trxFile = File.GetNewTemporaryFilePath();
         
-        var results = await context.DotNet().Test(new DotNetTestOptions(project)
+        await context.DotNet().Test(new DotNetTestOptions(project)
         {
             NoBuild = true,
             Filter = filter,
