@@ -29,7 +29,7 @@ public class SetUpWriter
         
         foreach (var beforeEachTestMethod in beforeEachTestMethods)
         {
-            stringBuilder.Append($"() => global::TUnit.Core.RunHelpers.RunAsync(() => classInstance.{beforeEachTestMethod.Name}()),");
+            stringBuilder.Append($"classInstance => global::TUnit.Core.RunHelpers.RunAsync(() => classInstance.{beforeEachTestMethod.Name}()),");
         }
         
         return stringBuilder.ToString();

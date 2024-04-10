@@ -41,7 +41,7 @@ internal static class GenericTestInvocationGenerator
                      
                      var testContext = new global::TUnit.Core.TestContext(testInformation);
                  
-                    var unInvokedTest = new global::TUnit.Core.UnInvokedTest
+                    var unInvokedTest = new global::TUnit.Core.UnInvokedTest<{{fullyQualifiedClassType}}>
                          {
                              Id = "{{testId}}",
                              TestContext = testContext,
