@@ -76,7 +76,7 @@ internal class SingleTestExecutor : IDataProducer
         TestContext? testContext = null;
         try
         {
-            unInvokedTest = TestDictionary.GetTest(testNode.Uid).Value;
+            unInvokedTest = TestDictionary.GetTest(testNode.Uid);
             testContext = unInvokedTest.TestContext;
 
             foreach (var applicableTestAttribute in unInvokedTest.ApplicableTestAttributes)
