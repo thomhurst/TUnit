@@ -31,7 +31,7 @@ public class OneTimeCleanUpWriter
         foreach (var oneTimeCleanUpMethod in oneTimeCleanUpMethods)
         {
             var typeContainingCleanUpMethod = oneTimeCleanUpMethod.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-            stringBuilder.AppendLine($"global::TUnit.Engine.OneTimeHookOrchestrator.RegisterOneTimeTearDown(typeof({typeContainingCleanUpMethod}), () => global::TUnit.Engine.RunHelpers.RunAsync(() => {typeContainingCleanUpMethod}.{oneTimeCleanUpMethod.Name}()));");
+            stringBuilder.AppendLine($"global::TUnit.Engine.OneTimeCleanUpOrchestrator.RegisterOneTimeTearDown(typeof({typeContainingCleanUpMethod}), () => global::TUnit.Core.RunHelpers.RunAsync(() => {typeContainingCleanUpMethod}.{oneTimeCleanUpMethod.Name}()));");
         }
         
         return stringBuilder.ToString();
