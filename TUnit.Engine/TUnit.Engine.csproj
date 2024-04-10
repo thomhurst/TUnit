@@ -43,7 +43,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="TestParsers\" />
+        <ProjectCapability Remove="TestContainer" />
     </ItemGroup>
 
 </Project>
