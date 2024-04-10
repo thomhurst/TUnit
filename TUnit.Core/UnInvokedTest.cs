@@ -1,5 +1,5 @@
-﻿using TUnit.Core.Interfaces;
-using TUnit.Engine;
+﻿using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 

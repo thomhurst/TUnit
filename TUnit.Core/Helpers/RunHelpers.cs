@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.Engine;
+﻿namespace TUnit.Core.Helpers;
 
 public static class RunHelpers
 {

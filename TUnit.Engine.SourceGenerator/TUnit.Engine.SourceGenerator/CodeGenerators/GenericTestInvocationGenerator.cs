@@ -13,47 +13,48 @@ internal static class GenericTestInvocationGenerator
         
         var fullyQualifiedClassType = classSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return $$"""
-                 global::TUnit.Core.TestDictionary.AddTest("{{testId}}", () => 
-                        {
+                 {
                  {{string.Join("\r\n", writeableTest.GetClassArgumentsInvocations().Select(x => $"\t\t{x}"))}}
-                            var classInstance = new {{writeableTest.ClassName}}({{writeableTest.GetClassArgumentVariableNamesAsList()}});             
-                            var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
+                     var classInstance = new {{writeableTest.ClassName}}({{writeableTest.GetClassArgumentVariableNamesAsList()}});             
+                     var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
                  {{string.Join("\r\n", writeableTest.GetMethodArgumentsInvocations().Select(x => $"\t\t{x}"))}}
-                            var testInformation = new global::TUnit.Core.TestInformation()
-                            {
-                                TestId = "{{testId}}",
-                                Categories = [{{string.Join(", ", TestInformationGenerator.GetCategories(methodSymbol, classSymbol))}}],
-                                ClassInstance = classInstance,
-                                ClassType = typeof({{fullyQualifiedClassType}}),
-                                Timeout = {{TestInformationGenerator.GetTimeOut(methodSymbol, classSymbol)}},
-                                TestClassArguments = [{{writeableTest.GetClassArgumentVariableNamesAsList()}}],
-                                TestMethodArguments = [{{writeableTest.GetMethodArgumentVariableNamesAsList()}}],
-                                TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
-                                TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
-                                NotInParallelConstraintKeys = {{TestInformationGenerator.GetNotInParallelConstraintKeys(methodSymbol, classSymbol)}},
-                                RepeatCount = {{TestInformationGenerator.GetRepeatCount(methodSymbol, classSymbol)}},
-                                RetryCount = {{TestInformationGenerator.GetRetryCount(methodSymbol, classSymbol)}},
-                                MethodInfo = methodInfo,
-                                TestName = "{{methodSymbol.Name}}",
-                                CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>(),
-                                MethodRepeatCount = {{writeableTest.CurrentMethodRepeatCount}},
-                                ClassRepeatCount = {{writeableTest.CurrentClassRepeatCount}},
-                            };
-                            
-                            var testContext = new global::TUnit.Core.TestContext(testInformation);
-                            
-                            return new global::TUnit.Core.UnInvokedTest
-                            {
-                                Id = "{{testId}}",
-                                TestContext = testContext,
-                                ApplicableTestAttributes = [{{CustomTestAttributeGenerator.WriteCustomAttributes(classSymbol, methodSymbol)}}],
-                                OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classSymbol)}}],
-                                BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classSymbol)}}],
-                                TestClass = classInstance,
-                                TestBody = () => global::TUnit.Core.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}})),
-                                AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classSymbol)}}],
-                            };
-                        });
+                     var testInformation = new global::TUnit.Core.TestInformation()
+                     {
+                         TestId = "{{testId}}",
+                         Categories = [{{string.Join(", ", TestInformationGenerator.GetCategories(methodSymbol, classSymbol))}}],
+                         ClassInstance = classInstance,
+                         ClassType = typeof({{fullyQualifiedClassType}}),
+                         Timeout = {{TestInformationGenerator.GetTimeOut(methodSymbol, classSymbol)}},
+                         TestClassArguments = [{{writeableTest.GetClassArgumentVariableNamesAsList()}}],
+                         TestMethodArguments = [{{writeableTest.GetMethodArgumentVariableNamesAsList()}}],
+                         TestClassParameterTypes = typeof({{fullyQualifiedClassType}}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),
+                         TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
+                         NotInParallelConstraintKeys = {{TestInformationGenerator.GetNotInParallelConstraintKeys(methodSymbol, classSymbol)}},
+                         RepeatCount = {{TestInformationGenerator.GetRepeatCount(methodSymbol, classSymbol)}},
+                         RetryCount = {{TestInformationGenerator.GetRetryCount(methodSymbol, classSymbol)}},
+                         MethodInfo = methodInfo,
+                         TestName = "{{methodSymbol.Name}}",
+                         CustomProperties = new global::System.Collections.Generic.Dictionary<string, string>(),
+                         MethodRepeatCount = {{writeableTest.CurrentMethodRepeatCount}},
+                         ClassRepeatCount = {{writeableTest.CurrentClassRepeatCount}},
+                     };
+                     
+                     var testContext = new global::TUnit.Core.TestContext(testInformation);
+                 
+                    var unInvokedTest = new global::TUnit.Core.UnInvokedTest
+                         {
+                             Id = "{{testId}}",
+                             TestContext = testContext,
+                             ApplicableTestAttributes = [{{CustomTestAttributeGenerator.WriteCustomAttributes(classSymbol, methodSymbol)}}],
+                             OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classSymbol)}}],
+                             BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classSymbol)}}],
+                             TestClass = classInstance,
+                             TestBody = () => global::TUnit.Core.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}})),
+                             AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classSymbol)}}],
+                         };
+                 
+                     global::TUnit.Core.TestDictionary.AddTest("{{testId}}", unInvokedTest);
+                 }
                  """;
     }
 }
