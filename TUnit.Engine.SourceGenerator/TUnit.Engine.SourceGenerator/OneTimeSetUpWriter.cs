@@ -32,7 +32,7 @@ public class OneTimeSetUpWriter
         {
             var methodFuncs = string.Join(", ",
                 oneTimeSetUpMethods.Select(x =>
-                    $"() => global::TUnit.Core.RunHelpers.RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{x.Name}())"));
+                    $"() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{x.Name}())"));
             
             stringBuilder.Append($"new global::TUnit.Core.OneTimeSetUpModel(typeof({oneTimeSetUpMethods.Key}), [{methodFuncs}]),");
         }

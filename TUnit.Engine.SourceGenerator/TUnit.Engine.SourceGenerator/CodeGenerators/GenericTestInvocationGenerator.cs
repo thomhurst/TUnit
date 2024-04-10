@@ -48,7 +48,7 @@ internal static class GenericTestInvocationGenerator
                              ApplicableTestAttributes = [{{CustomTestAttributeGenerator.WriteCustomAttributes(classSymbol, methodSymbol)}}],
                              OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classSymbol)}}],
                              BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classSymbol)}}],
-                             TestBody = () => global::TUnit.Core.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}})),
+                             TestBody = classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}})),
                              AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classSymbol)}}],
                          };
                  

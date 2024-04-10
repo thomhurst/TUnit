@@ -30,7 +30,7 @@ public class CleanUpWriter
         
         foreach (var oneTimeSetUpMethod in cleanUp)
         {
-            stringBuilder.Append($"classInstance => global::TUnit.Core.RunHelpers.RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}()),");
+            stringBuilder.Append($"classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}()),");
         }
         
         return stringBuilder.ToString();
