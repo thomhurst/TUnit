@@ -15,14 +15,14 @@ internal static class GenericTestInvocationGenerator
         return $$"""
                  {
                  {{string.Join("\r\n", writeableTest.GetClassArgumentsInvocations().Select(x => $"\t\t{x}"))}}
-                     var classInstance = new {{writeableTest.ClassName}}({{writeableTest.GetClassArgumentVariableNamesAsList()}});             
-                     var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(classInstance.{{methodSymbol.Name}});
+                     var resettableClassFactory = new global::TUnit.Core.ResettableLazy<{{fullyQualifiedClassType}}>(() => new {{writeableTest.ClassName}}({{writeableTest.GetClassArgumentVariableNamesAsList()}}));             
+                     var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(() => resettableClassFactory.Value.{{methodSymbol.Name}});
                  {{string.Join("\r\n", writeableTest.GetMethodArgumentsInvocations().Select(x => $"\t\t{x}"))}}
                      var testInformation = new global::TUnit.Core.TestInformation()
                      {
                          TestId = "{{testId}}",
                          Categories = [{{string.Join(", ", TestInformationGenerator.GetCategories(methodSymbol, classSymbol))}}],
-                         ClassInstance = classInstance,
+                         ClassInstance = null, // TODO
                          ClassType = typeof({{fullyQualifiedClassType}}),
                          Timeout = {{TestInformationGenerator.GetTimeOut(methodSymbol, classSymbol)}},
                          TestClassArguments = [{{writeableTest.GetClassArgumentVariableNamesAsList()}}],
@@ -41,14 +41,13 @@ internal static class GenericTestInvocationGenerator
                      
                      var testContext = new global::TUnit.Core.TestContext(testInformation);
                  
-                    var unInvokedTest = new global::TUnit.Core.UnInvokedTest<{{fullyQualifiedClassType}}>
+                    var unInvokedTest = new global::TUnit.Core.UnInvokedTest<{{fullyQualifiedClassType}}>(resettableClassFactory)
                          {
                              Id = "{{testId}}",
                              TestContext = testContext,
                              ApplicableTestAttributes = [{{CustomTestAttributeGenerator.WriteCustomAttributes(classSymbol, methodSymbol)}}],
                              OneTimeSetUps = [{{OneTimeSetUpWriter.GenerateCode(classSymbol)}}],
                              BeforeEachTestSetUps = [{{SetUpWriter.GenerateCode(classSymbol)}}],
-                             TestClass = classInstance,
                              TestBody = () => global::TUnit.Core.RunHelpers.RunAsync(() => classInstance.{{writeableTest.MethodName}}({{writeableTest.GetMethodArgumentVariableNamesAsList()}})),
                              AfterEachTestCleanUps = [{{CleanUpWriter.GenerateCode(classSymbol)}}],
                          };
