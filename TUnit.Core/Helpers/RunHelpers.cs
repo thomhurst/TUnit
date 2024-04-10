@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine;
 
-public class RunHelpers
+public static class RunHelpers
 {
     public static Task RunAsync(Action action)
     {
@@ -97,5 +97,20 @@ public class RunHelpers
             Console.WriteLine(exception);
             return false;
         }
+    }
+    
+    public static ValueTask Dispose(object? obj)
+    {
+        if (obj is IAsyncDisposable asyncDisposable)
+        {
+            return asyncDisposable.DisposeAsync();
+        }
+
+        if (obj is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        return ValueTask.CompletedTask;
     }
 }

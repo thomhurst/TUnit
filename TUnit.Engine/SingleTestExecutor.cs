@@ -300,8 +300,8 @@ internal class SingleTestExecutor : IDataProducer
         }
         finally
         {
+            unInvokedTest.ResetTestInstance();
             testLevelCancellationTokenSource.Dispose();
-            testContext.Dispose();
         }
     }
 

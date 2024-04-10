@@ -12,22 +12,14 @@ internal class TestInvoker
             TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
 
             await OneTimeHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
-            
-            foreach (var setUp in unInvokedTest.BeforeEachTestSetUps)
-            {
-                await setUp();
-            }
 
-            await unInvokedTest.TestBody();
+            await unInvokedTest.RunBeforeEachTestSetUps();
+
+            await unInvokedTest.ExecuteTest();
         }
         finally
         {
-            foreach (var cleanUp in unInvokedTest.AfterEachTestCleanUps)
-            {
-                await RunHelpers.RunSafelyAsync(cleanUp, teardownExceptions);
-            }
-
-            await RunHelpers.RunSafelyAsync(() => Dispose(unInvokedTest.TestClass), teardownExceptions);
+            await unInvokedTest.RunAfterEachTestCleanUps(teardownExceptions);
             
             await OneTimeHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, teardownExceptions);
         }
@@ -41,20 +33,5 @@ internal class TestInvoker
 
             throw new AggregateException(teardownExceptions);
         }
-    }
-
-    private ValueTask Dispose(object testClass)
-    {
-        if (testClass is IAsyncDisposable asyncDisposable)
-        {
-            return asyncDisposable.DisposeAsync();
-        }
-
-        if (testClass is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-
-        return ValueTask.CompletedTask;
     }
 }
