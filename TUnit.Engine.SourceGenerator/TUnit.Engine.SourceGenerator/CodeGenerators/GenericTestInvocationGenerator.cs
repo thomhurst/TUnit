@@ -16,7 +16,7 @@ internal static class GenericTestInvocationGenerator
                  sourceBuilder.WriteLine("{");
                  sourceBuilder.WriteLine(string.Join("\r\n", writeableTest.GetClassArgumentsInvocations().Select(x => $"\t\t{x}")));
                  sourceBuilder.WriteLine($"var resettableClassFactory = new global::TUnit.Core.ResettableLazy<{fullyQualifiedClassType}>(() => new {writeableTest.ClassName}({writeableTest.GetClassArgumentVariableNamesAsList()}));");           
-                 sourceBuilder.WriteLine("var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(() => resettableClassFactory.Value.{methodSymbol.Name});");
+                 sourceBuilder.WriteLine($"var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(() => resettableClassFactory.Value.{methodSymbol.Name});");
                  sourceBuilder.WriteLine(string.Join("\r\n", writeableTest.GetMethodArgumentsInvocations().Select(x => $"\t\t{x}")));
                  sourceBuilder.WriteLine("var testInformation = new global::TUnit.Core.TestInformation()");
                  sourceBuilder.WriteLine("{");
@@ -52,7 +52,7 @@ internal static class GenericTestInvocationGenerator
                  sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{CleanUpWriter.GenerateCode(classSymbol)}],");
                  sourceBuilder.WriteLine("};");
                  sourceBuilder.WriteLine();
-                 sourceBuilder.WriteLine($"    global::TUnit.Core.TestDictionary.AddTest(\"{testId}\", unInvokedTest);");
+                 sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.AddTest(\"{testId}\", unInvokedTest);");
                  sourceBuilder.WriteLine("}");
     }
 }
