@@ -25,12 +25,13 @@ public class RetryTestsTestsSourceGeneratorTests
         var driver = CSharpGeneratorDriver.Create(generator);
 
         // To run generators, we can use an empty compilation.
-        var compilation = CSharpCompilation.Create(
-            nameof(RetryTestsTestsSourceGeneratorTests),
-            new []{ CSharpSyntaxTree.ParseText(source) })
-            .AddReferences(MetadataReference.CreateFromFile(typeof(Core.TestAttribute).Assembly.Location))
-            .AddReferences(MetadataReference.CreateFromFile(typeof(Engine.TUnitRunner).Assembly.Location));
 
+        var compilation = CSharpCompilation.Create(
+                nameof(RetryTestsTestsSourceGeneratorTests),
+                new[] { CSharpSyntaxTree.ParseText(source) },
+                options: new CSharpCompilationOptions(OutputKind.ConsoleApplication))
+            .AddReferences(ReferencesHelper.References);
+        
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out _);
 

@@ -37,10 +37,11 @@ internal static class TestInformationGenerator
 
     public static int GetRetryCount(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
     {
-        return GetMethodAndClassAttributes(methodSymbol, namedTypeSymbol)
+        var retryAttribute = GetMethodAndClassAttributes(methodSymbol, namedTypeSymbol)
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == "global::TUnit.Core.RetryAttribute")
-            ?.ConstructorArguments.First().Value as int? ?? 0;
+                                 == "global::TUnit.Core.RetryAttribute");
+        
+        return retryAttribute?.ConstructorArguments.First().Value as int? ?? 0;
     }
 
     public static string GetTimeOut(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
