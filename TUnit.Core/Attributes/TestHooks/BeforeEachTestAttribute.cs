@@ -1,4 +1,4 @@
 ﻿namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method)]
 public class BeforeEachTestAttribute : TUnitAttribute;

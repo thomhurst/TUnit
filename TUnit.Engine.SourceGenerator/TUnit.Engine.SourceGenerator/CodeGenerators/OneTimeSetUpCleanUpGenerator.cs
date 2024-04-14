@@ -8,7 +8,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 
 [Generator]
-public class OneTimeSetUpCleanUpGenerator : IIncrementalGenerator
+public class BeforeAllTestsInClassCleanUpGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -51,8 +51,8 @@ public class OneTimeSetUpCleanUpGenerator : IIncrementalGenerator
         if (!attributes.Any(x =>
                 x.AttributeClass?.ToDisplayString(
                     DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is WellKnownFullyQualifiedClassNames.OneTimeSetUpAttribute
-                or WellKnownFullyQualifiedClassNames.OneTimeCleanUpAttribute))
+                is WellKnownFullyQualifiedClassNames.BeforeAllTestsInClassAttribute
+                or WellKnownFullyQualifiedClassNames.AfterAllTestsInClassAttribute))
         {
             return null;
         }
@@ -69,9 +69,9 @@ public class OneTimeSetUpCleanUpGenerator : IIncrementalGenerator
             
             if (method.GetAttributes().Any(x =>
                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                    == WellKnownFullyQualifiedClassNames.OneTimeSetUpAttribute))
+                    == WellKnownFullyQualifiedClassNames.BeforeAllTestsInClassAttribute))
             {
-                var className = $"OneTimeSetUp_{method.ContainingType.Name}_{Guid.NewGuid():N}";
+                var className = $"BeforeAllTestsInClass_{method.ContainingType.Name}_{Guid.NewGuid():N}";
 
                 var sourceBuilder = new SourceCodeWriter();
                 
@@ -88,7 +88,7 @@ public class OneTimeSetUpCleanUpGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("public static void Initialise()");
                 sourceBuilder.WriteLine("{");
                 
-                sourceBuilder.WriteLine($"global::TUnit.Engine.OneTimeHookOrchestrator.RegisterSetUp(typeof({classContainingMethod}), () => global::TUnit.Engine.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
+                sourceBuilder.WriteLine($"global::TUnit.Engine.ClassHookOrchestrator.RegisterSetUp(typeof({classContainingMethod}), () => global::TUnit.Engine.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
                 
                 sourceBuilder.WriteLine("}");
                 sourceBuilder.WriteLine("}");
@@ -98,9 +98,9 @@ public class OneTimeSetUpCleanUpGenerator : IIncrementalGenerator
             
             if (method.GetAttributes().Any(x =>
                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                    == WellKnownFullyQualifiedClassNames.OneTimeCleanUpAttribute))
+                    == WellKnownFullyQualifiedClassNames.AfterAllTestsInClassAttribute))
             {
-                var className = $"OneTimeCleanUp_{method.ContainingType.Name}_{Guid.NewGuid():N}";
+                var className = $"AfterAllTestsInClass_{method.ContainingType.Name}_{Guid.NewGuid():N}";
 
                 var sourceBuilder = new SourceCodeWriter();
                 
@@ -117,7 +117,7 @@ public class OneTimeSetUpCleanUpGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("public static void Initialise()");
                 sourceBuilder.WriteLine("{");
                 
-                sourceBuilder.WriteLine($"global::TUnit.Engine.OneTimeHookOrchestrator.RegisterCleanUp(typeof({classContainingMethod}), () => global::TUnit.Engine.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
+                sourceBuilder.WriteLine($"global::TUnit.Engine.ClassHookOrchestrator.RegisterCleanUp(typeof({classContainingMethod}), () => global::TUnit.Engine.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
                 
                 sourceBuilder.WriteLine("}");
                 sourceBuilder.WriteLine("}");

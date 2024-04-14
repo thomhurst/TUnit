@@ -1,10 +1,10 @@
 ﻿using TUnit.Core;
 
-namespace TUnit.TestProject.OneTimeSetUpWithBaseTests;
+namespace TUnit.TestProject.BeforeAllTestsInClassWithBaseTests;
 
 public class NonBase : Base1
 {
-    [OneTimeSetUp]
+    [BeforeAllTestsInClass]
     public static Task NonBaseOneTimeSetup()
     {
         return Task.CompletedTask;

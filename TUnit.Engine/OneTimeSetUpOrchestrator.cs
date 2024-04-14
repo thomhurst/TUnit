@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace TUnit.Engine;
 
-public static class OneTimeHookOrchestrator
+public static class ClassHookOrchestrator
 {
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> CleanUps = new();

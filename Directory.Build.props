@@ -17,9 +17,6 @@
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>TUnit</_Parameter1>
         </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>TUnit.TestAdapter</_Parameter1>
-        </AssemblyAttribute>
     </ItemGroup>
 
     <ItemGroup>
@@ -36,6 +33,6 @@
     </ItemGroup>
     
     <PropertyGroup>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+<!--        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
     </PropertyGroup>
 </Project>

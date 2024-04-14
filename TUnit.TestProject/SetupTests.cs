@@ -12,7 +12,7 @@ namespace TUnit.TestProject;
 
 public class Base1
 {
-    [OneTimeSetUp]
+    [BeforeAllTestsInClass]
     public static async Task Setup1()
     {
     }
@@ -20,7 +20,7 @@ public class Base1
 
 public class Base2 : Base1
 {
-    [OneTimeSetUp]
+    [BeforeAllTestsInClass]
     public static async Task Setup2()
     {
     }
@@ -28,7 +28,7 @@ public class Base2 : Base1
 
 public class Base3 : Base2
 {
-    [OneTimeSetUp]
+    [BeforeAllTestsInClass]
     public static async Task Setup3()
     {
     }
@@ -41,15 +41,15 @@ public class SetupTests : Base3
     private HttpResponseMessage? _response;
 
     
-    private static int OneTimeSetUpExecutionCount = 0;
-    private static int OneTimeCleanUpExecutionCount = 0;
+    private static int BeforeAllTestsInClassExecutionCount = 0;
+    private static int AfterAllTestsInClassExecutionCount = 0;
 
-    [OneTimeSetUp]
+    [BeforeAllTestsInClass]
     public static async Task SetUpLocalWebServer()
     {
         try
         {
-            Interlocked.Increment(ref OneTimeSetUpExecutionCount);
+            Interlocked.Increment(ref BeforeAllTestsInClassExecutionCount);
             var builder = WebApplication.CreateBuilder();
             _app = builder.Build();
 
@@ -67,16 +67,16 @@ public class SetupTests : Base3
         {
             Console.WriteLine(e);
             throw new Exception($$"""
-                                  OneTimeSetUp Count: {{OneTimeSetUpExecutionCount}}
-                                  OneTimeCleanUp Count: {{OneTimeCleanUpExecutionCount}}
+                                  BeforeAllTestsInClass Count: {{BeforeAllTestsInClassExecutionCount}}
+                                  AfterAllTestsInClass Count: {{AfterAllTestsInClassExecutionCount}}
                                   """, e);
         }
     }
 
-    [OneTimeCleanUp]
+    [AfterAllTestsInClass]
     public static async Task StopServer()
     {
-        Interlocked.Increment(ref OneTimeCleanUpExecutionCount);
+        Interlocked.Increment(ref AfterAllTestsInClassExecutionCount);
 
         await _app.StopAsync();
         await _app.DisposeAsync();

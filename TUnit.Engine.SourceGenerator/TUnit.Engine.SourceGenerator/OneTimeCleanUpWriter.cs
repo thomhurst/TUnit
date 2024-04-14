@@ -5,9 +5,9 @@ using TUnit.Engine.SourceGenerator.Extensions;
 
 namespace TUnit.Engine.SourceGenerator;
 
-public class OneTimeCleanUpWriter
+public class AfterAllTestsInClassWriter
 {
-    public static string GenerateLazyOneTimeCleanUpCode(INamedTypeSymbol classType)
+    public static string GenerateLazyAfterAllTestsInClassCode(INamedTypeSymbol classType)
     {
         var oneTimeCleanUpMethods = classType
             .GetMembersIncludingBase()
@@ -16,7 +16,7 @@ public class OneTimeCleanUpWriter
             .Where(x => x.DeclaredAccessibility == Accessibility.Public)
             .Where(x => x.GetAttributes()
                 .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                          == "global::TUnit.Core.OneTimeCleanUpAttribute")
+                          == "global::TUnit.Core.AfterAllTestsInClassAttribute")
             )
             .Reverse()
             .ToList();
@@ -31,7 +31,7 @@ public class OneTimeCleanUpWriter
         foreach (var oneTimeCleanUpMethod in oneTimeCleanUpMethods)
         {
             var typeContainingCleanUpMethod = oneTimeCleanUpMethod.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-            stringBuilder.AppendLine($"global::TUnit.Engine.OneTimeCleanUpOrchestrator.RegisterOneTimeTearDown(typeof({typeContainingCleanUpMethod}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {typeContainingCleanUpMethod}.{oneTimeCleanUpMethod.Name}()));");
+            stringBuilder.AppendLine($"global::TUnit.Engine.AfterAllTestsInClassOrchestrator.RegisterOneTimeTearDown(typeof({typeContainingCleanUpMethod}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {typeContainingCleanUpMethod}.{oneTimeCleanUpMethod.Name}()));");
         }
         
         return stringBuilder.ToString();

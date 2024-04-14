@@ -58,7 +58,7 @@ public abstract class UnInvokedTest
     public required List<IApplicableTestAttribute> ApplicableTestAttributes { get; init; }
     
     // List per Type - So new one for base classes
-    public required List<OneTimeSetUpModel> OneTimeSetUps { get; init; }
+    public required List<BeforeAllTestsInClassModel> BeforeAllTestsInClasss { get; init; }
 
     public abstract Task RunBeforeEachTestSetUps();
     public abstract Task ExecuteTest();

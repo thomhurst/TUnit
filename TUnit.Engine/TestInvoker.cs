@@ -11,7 +11,7 @@ internal class TestInvoker
         {
             TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
 
-            await OneTimeHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
+            await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
 
             await unInvokedTest.RunBeforeEachTestSetUps();
 
@@ -21,7 +21,7 @@ internal class TestInvoker
         {
             await unInvokedTest.RunAfterEachTestCleanUps(teardownExceptions);
             
-            await OneTimeHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, teardownExceptions);
+            await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, teardownExceptions);
         }
 
         if (teardownExceptions.Any())

@@ -1,3 +1,3 @@
 ﻿namespace TUnit.Core;
 
-public record OneTimeSetUpModel(Type Type, List<Func<Task>> Func);
+public record BeforeAllTestsInClassModel(Type Type, List<Func<Task>> Func);

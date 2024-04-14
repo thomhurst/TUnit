@@ -1,11 +1,11 @@
 ﻿using TUnit.Core;
 
-namespace TUnit.TestProject.OneTimeCleanUpWithBaseTests;
+namespace TUnit.TestProject.AfterAllTestsInClassWithBaseTests;
 
 public class Base1 : Base2
 {
-    [OneTimeCleanUp]
-    public static Task Base1OneTimeCleanUp()
+    [AfterAllTestsInClass]
+    public static Task Base1AfterAllTestsInClass()
     {
         return Task.CompletedTask;
     }

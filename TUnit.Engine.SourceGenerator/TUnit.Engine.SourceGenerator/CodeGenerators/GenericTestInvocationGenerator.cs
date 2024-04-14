@@ -46,7 +46,7 @@ internal static class GenericTestInvocationGenerator
                  sourceBuilder.WriteLine($"Id = \"{testId}\",");
                  sourceBuilder.WriteLine("TestContext = testContext,");
                  sourceBuilder.WriteLine($"ApplicableTestAttributes = [{CustomTestAttributeGenerator.WriteCustomAttributes(classSymbol, methodSymbol)}],");
-                 sourceBuilder.WriteLine($"OneTimeSetUps = [{OneTimeSetUpWriter.GenerateCode(classSymbol)}],");
+                 sourceBuilder.WriteLine($"BeforeAllTestsInClasss = [{BeforeAllTestsInClassWriter.GenerateCode(classSymbol)}],");
                  sourceBuilder.WriteLine($"BeforeEachTestSetUps = [{SetUpWriter.GenerateCode(classSymbol)}],");
                  sourceBuilder.WriteLine($"TestBody = classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{writeableTest.MethodName}({writeableTest.GetMethodArgumentVariableNamesAsList()})),");
                  sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{CleanUpWriter.GenerateCode(classSymbol)}],");

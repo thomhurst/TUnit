@@ -1,6 +1,7 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.TestHost;
+using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 using TUnit.Engine.Models.Properties;
@@ -47,8 +48,8 @@ internal class TestsExecutor
             
             foreach (var testNode in tests.AllTests)
             {
-                // TODO: Can we get the type better?
-                OneTimeHookOrchestrator.RegisterInstance(Type.GetType(testNode.GetRequiredProperty<TestMethodIdentifierProperty>().TypeName)!);
+                var matchingTest = TestDictionary.GetTest(testNode.Uid);
+                ClassHookOrchestrator.RegisterInstance(matchingTest.TestContext.TestInformation.ClassType);
             }
         
             // TODO: I don't love this - Late setting a property.

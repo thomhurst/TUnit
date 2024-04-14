@@ -5,7 +5,7 @@ using TUnit.Engine.SourceGenerator.Extensions;
 
 namespace TUnit.Engine.SourceGenerator;
 
-public class OneTimeSetUpWriter
+public class BeforeAllTestsInClassWriter
 {
     public static string GenerateCode(INamedTypeSymbol classType)
     {
@@ -16,7 +16,7 @@ public class OneTimeSetUpWriter
             .Where(x => x.DeclaredAccessibility == Accessibility.Public)
             .Where(x => x.GetAttributes()
                 .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                          == "global::TUnit.Core.OneTimeSetUpAttribute")
+                          == "global::TUnit.Core.BeforeAllTestsInClassAttribute")
             )
             .GroupBy(x => x.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
             .ToList();
@@ -34,7 +34,7 @@ public class OneTimeSetUpWriter
                 oneTimeSetUpMethods.Select(x =>
                     $"() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{x.Name}())"));
             
-            stringBuilder.Append($"new global::TUnit.Core.OneTimeSetUpModel(typeof({oneTimeSetUpMethods.Key}), [{methodFuncs}]),");
+            stringBuilder.Append($"new global::TUnit.Core.BeforeAllTestsInClassModel(typeof({oneTimeSetUpMethods.Key}), [{methodFuncs}]),");
         }
         
         return stringBuilder.ToString();
