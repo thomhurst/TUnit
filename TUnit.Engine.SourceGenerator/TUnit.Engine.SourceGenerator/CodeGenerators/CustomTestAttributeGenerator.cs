@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
@@ -7,7 +8,7 @@ public static class CustomTestAttributeGenerator
 {
     public static string WriteCustomAttributes(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol)
     {
-        AttributeData[] attributes =
+        IEnumerable<AttributeData> attributes =
         [
             ..methodSymbol.GetAttributes(),
             ..namedTypeSymbol.GetAttributes()

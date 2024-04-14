@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator;
@@ -13,14 +14,12 @@ internal static class WriteableTestsRetriever
     {
         var attributes = classMethod.MethodSymbol.GetAttributes();
         
-        if (!attributes.Any(x =>
-                x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == WellKnownFullyQualifiedClassNames.BaseTestAttribute))
+        if (!attributes.Any(x => x.AttributeClass?.IsTestClass() == true))
         {
             yield break;
         }
 
-        AttributeData[] testDataAttributes =
+        IEnumerable<AttributeData> testDataAttributes =
         [
             // Tests that don't have data
             ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.TestAttribute),

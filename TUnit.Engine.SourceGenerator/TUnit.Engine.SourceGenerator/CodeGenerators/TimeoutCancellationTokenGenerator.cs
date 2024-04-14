@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -8,7 +9,7 @@ internal class TimeoutCancellationTokenGenerator
 {
     public static Argument? GetCancellationTokenArgument(IMethodSymbol methodSymbol)
     {
-        AttributeData[] attributes =
+        IEnumerable<AttributeData> attributes =
         [
             ..methodSymbol.GetAttributes(),
             ..methodSymbol.ContainingType.GetAttributes(),

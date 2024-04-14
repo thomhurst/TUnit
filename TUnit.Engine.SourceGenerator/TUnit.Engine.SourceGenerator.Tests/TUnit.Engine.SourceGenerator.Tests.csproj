@@ -20,6 +20,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\TUnit.Core\TUnit.Core.csproj" />
+        <ProjectReference Include="..\..\TUnit.Engine\TUnit.Engine.csproj" />
         <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"/>
     </ItemGroup>
 
