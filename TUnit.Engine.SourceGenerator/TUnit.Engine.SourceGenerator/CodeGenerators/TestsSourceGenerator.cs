@@ -96,7 +96,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
 
     private static string? ProcessTests(ClassMethod classMethod, string className)
     {
-        var writeableTests = WriteableTestsRetriever.GetWriteableTests(classMethod);
+        var writeableTests = WriteableTestsRetriever.GetWriteableTests(classMethod).ToList();
 
         if (!writeableTests.Any())
         {
