@@ -29,12 +29,11 @@ public class TestsSourceGenerator : IIncrementalGenerator
             .CreateSyntaxProvider(
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
-            .Where(static m => m is not null)
-            .Collect();
+            .Where(static m => m is not null);
         
         context.RegisterSourceOutput(testMethods, Execute);
     }
-    
+
     static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
         return node is ClassDeclarationSyntax;
@@ -78,9 +77,9 @@ public class TestsSourceGenerator : IIncrementalGenerator
         }
     }
 
-    private static void Execute(SourceProductionContext context, ImmutableArray<IEnumerable<ClassMethod>> classMethods)
+    private static void Execute(SourceProductionContext context, IEnumerable<ClassMethod> classMethods)
     {
-        foreach (var classMethod in classMethods.SelectMany(x => x))
+        foreach (var classMethod in classMethods)
         {
             var className = $"{classMethod.MethodSymbol.Name}_{Guid.NewGuid():N}";
 

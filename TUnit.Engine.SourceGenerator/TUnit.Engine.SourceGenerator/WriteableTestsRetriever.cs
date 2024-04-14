@@ -43,7 +43,8 @@ internal static class WriteableTestsRetriever
             var methodIndex = 0;
             foreach (var argumentAttribute in testDataAttributes)
             {
-                for (var i = 0; i < TestInformationGenerator.GetRepeatCount(classMethod.MethodSymbol, classMethod.NamedTypeSymbol) + 1; i++)
+                var runCount = TestInformationGenerator.GetRepeatCount(classMethod.MethodSymbol, classMethod.NamedTypeSymbol) + 1;
+                for (var i = 0; i < runCount; i++)
                 {
                     if (argumentAttribute.AttributeClass?.ToDisplayString(DisplayFormats
                             .FullyQualifiedNonGenericWithGlobalPrefix)
