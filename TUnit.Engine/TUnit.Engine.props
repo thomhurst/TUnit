@@ -22,6 +22,7 @@
 
     <ItemGroup>
         <PackageReference Include="TUnit.Engine.SourceGenerator" />
+        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.1.0" />
     </ItemGroup>
 
 </Project>
