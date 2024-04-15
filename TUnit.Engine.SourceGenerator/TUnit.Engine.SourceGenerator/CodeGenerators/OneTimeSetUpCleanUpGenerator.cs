@@ -88,7 +88,7 @@ public class BeforeAllTestsInClassCleanUpGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("public static void Initialise()");
                 sourceBuilder.WriteLine("{");
                 
-                sourceBuilder.WriteLine($"global::TUnit.Engine.ClassHookOrchestrator.RegisterSetUp(typeof({classContainingMethod}), () => global::TUnit.Engine.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
+                sourceBuilder.WriteLine($"global::TUnit.Engine.ClassHookOrchestrator.RegisterSetUp(typeof({classContainingMethod}), () => global::TUnit.Core.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
                 
                 sourceBuilder.WriteLine("}");
                 sourceBuilder.WriteLine("}");
@@ -117,7 +117,7 @@ public class BeforeAllTestsInClassCleanUpGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("public static void Initialise()");
                 sourceBuilder.WriteLine("{");
                 
-                sourceBuilder.WriteLine($"global::TUnit.Engine.ClassHookOrchestrator.RegisterCleanUp(typeof({classContainingMethod}), () => global::TUnit.Engine.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
+                sourceBuilder.WriteLine($"global::TUnit.Engine.ClassHookOrchestrator.RegisterCleanUp(typeof({classContainingMethod}), () => global::TUnit.Core.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
                 
                 sourceBuilder.WriteLine("}");
                 sourceBuilder.WriteLine("}");
