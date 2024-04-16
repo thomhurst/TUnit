@@ -12,10 +12,13 @@ public static class ClassHookOrchestrator
     private static readonly ConcurrentDictionary<Type, int> InstanceTrackers = new();
 
     [MethodImpl(MethodImplOptions.Synchronized)]
-    public static void RegisterInstance(Type type)
+    public static void RegisterInstance(Type classType)
     {
-        var count = InstanceTrackers.GetOrAdd(type, _ => 0);
-        InstanceTrackers[type] = count + 1;
+        foreach (var type in GetTypesIncludingBase(classType))
+        {
+            var count = InstanceTrackers.GetOrAdd(type, _ => 0);
+            InstanceTrackers[type] = count + 1;
+        }
     }
     
     [MethodImpl(MethodImplOptions.Synchronized)]
