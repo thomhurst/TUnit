@@ -9,9 +9,9 @@ updates:
     schedule:
       interval: "daily"    
     groups:
-      test-dependencies:
+      docusaurus:
         patterns:
-          - *docusaurus*
+          - "*docusaurus*"
   - package-ecosystem: "nuget"
     directory: "/"
     open-pull-requests-limit: 20
