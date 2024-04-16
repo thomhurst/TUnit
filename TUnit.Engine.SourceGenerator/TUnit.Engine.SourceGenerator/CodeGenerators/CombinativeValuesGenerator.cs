@@ -9,7 +9,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 internal static class CombinativeValuesGenerator
 {
     // We return a List of a List. Inner List is for each test.
-    public static IEnumerable<IEnumerable<Argument>> GetTestsArguments(IMethodSymbol methodSymbol)
+    public static IEnumerable<IEnumerable<Argument>> GetTestsArguments(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
     {
         var combinativeValuesAttributes = methodSymbol.Parameters
             .Select(x => x.GetAttributes().FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
@@ -24,17 +24,17 @@ internal static class CombinativeValuesGenerator
 
         return GetCombinativeArgumentsList(mappedToConstructorArrays)
             .Select(x =>
-                MapToArgumentEnumerable(x, methodSymbol)
+                MapToArgumentEnumerable(x, methodAndClassAttributes)
             );
     }
 
-    private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> x, IMethodSymbol methodSymbol)
+    private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> x, AttributeData[] methodAndClassAttributes)
     {
         var enumerable = x.Select(y =>
             new Argument(y.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 TypedConstantParser.GetTypedConstantValue(y)));
 
-        var timeoutCancellationToken = TimeoutCancellationTokenGenerator.GetCancellationTokenArgument(methodSymbol);
+        var timeoutCancellationToken = TimeoutCancellationTokenGenerator.GetCancellationTokenArgument(methodAndClassAttributes);
 
         if (timeoutCancellationToken != null)
         {

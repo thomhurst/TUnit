@@ -1,12 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine;
 
 public static class ClassHookOrchestrator
 {
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
-    private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> CleanUps = new();
+    private static readonly ConcurrentDictionary<Type, List<Func<Task>>> CleanUps = new();
 
     private static readonly ConcurrentDictionary<Type, int> InstanceTrackers = new();
 
@@ -30,7 +31,7 @@ public static class ClassHookOrchestrator
     {
         var taskFunctions = CleanUps.GetOrAdd(type, _ => []);
         
-        taskFunctions.Add(new Lazy<Task>(taskFactory));
+        taskFunctions.Add(taskFactory);
     }
     
     public static async Task ExecuteSetups(Type testClassType)
@@ -56,7 +57,8 @@ public static class ClassHookOrchestrator
         }
     }
     
-    public static async Task ExecuteCleanUpsIfLastInstance(Type testClassType, List<Exception> cleanUpExceptions)
+    public static async Task ExecuteCleanUpsIfLastInstance(object? classInstance, Type testClassType,
+        List<Exception> cleanUpExceptions)
     {
         var typesIncludingBase = GetTypesIncludingBase(testClassType);
 
@@ -77,16 +79,11 @@ public static class ClassHookOrchestrator
 
             foreach (var cleanUp in cleanUpsForType)
             {
-                try
-                {
-                    await cleanUp.Value;
-                }
-                catch (Exception e)
-                {
-                    cleanUpExceptions.Add(e);
-                }
+                await RunHelpers.RunSafelyAsync(cleanUp, cleanUpExceptions);
             }
         }
+
+        await RunHelpers.RunSafelyAsync(() => RunHelpers.Dispose(classInstance), cleanUpExceptions);
         
         if (cleanUpExceptions.Count == 1)
         {

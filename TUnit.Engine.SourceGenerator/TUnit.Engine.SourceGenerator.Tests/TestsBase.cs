@@ -1,23 +1,23 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
-using Xunit;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
-public class RetryTestsTestsSourceGeneratorTests
+public class TestsBase
 {
-    [Fact]
-    public async Task GenerateClasses()
+    protected TestsBase()
     {
-        var source = await File.ReadAllTextAsync(
-            Path.Combine(Git.RootDirectory.FullName,
-                "TUnit.TestProject",
-                "RetryTests.cs")
-        );
+    }
+    
+    public async Task RunTest(string inputFile, Action<string[]> assertions)
+    {
+        var source = await File.ReadAllTextAsync(inputFile);
+        
         // Create an instance of the source generator.
         var generator = new TestsSourceGenerator();
 
@@ -27,7 +27,7 @@ public class RetryTestsTestsSourceGeneratorTests
         // To run generators, we can use an empty compilation.
 
         var compilation = CSharpCompilation.Create(
-                nameof(RetryTestsTestsSourceGeneratorTests),
+                GetType().Name,
                 new[] { CSharpSyntaxTree.ParseText(source) },
                 options: new CSharpCompilationOptions(OutputKind.ConsoleApplication))
             .AddReferences(ReferencesHelper.References);
@@ -38,14 +38,10 @@ public class RetryTestsTestsSourceGeneratorTests
         // Retrieve all files in the compilation.
         var generatedFiles = newCompilation.SyntaxTrees
             .Select(t => t.GetText().ToString())
+            .Except([source])
+            .Reverse()
             .ToArray();
 
-        // In this case, it is enough to check the file name.
-        Assert.Equivalent(new[]
-        {
-            "User.g.cs",
-            "Document.g.cs",
-            "Customer.g.cs"
-        }, generatedFiles);
+        assertions(generatedFiles);
     }
 }

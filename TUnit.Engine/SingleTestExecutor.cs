@@ -84,7 +84,16 @@ internal class SingleTestExecutor : IDataProducer
                 await applicableTestAttribute.Apply(testContext);
             }
             
-            await Task.Run(async () => { await ExecuteWithRetries(unInvokedTest); });
+            await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
+
+            try
+            {
+                await Task.Run(async () => { await ExecuteWithRetries(unInvokedTest); });
+            }
+            finally
+            {
+                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassInstance, unInvokedTest.TestContext.TestInformation.ClassType, new List<Exception>());
+            }
 
             var end = DateTimeOffset.Now;
 
@@ -280,7 +289,7 @@ internal class SingleTestExecutor : IDataProducer
         
         testInformation.CurrentExecutionCount++;
         
-        var testLevelCancellationTokenSource =
+        using var testLevelCancellationTokenSource =
             CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
 
         if (testInformation.Timeout != null && testInformation.Timeout.Value != default)
@@ -301,7 +310,6 @@ internal class SingleTestExecutor : IDataProducer
         finally
         {
             unInvokedTest.ResetTestInstance();
-            testLevelCancellationTokenSource.Dispose();
         }
     }
 
@@ -327,7 +335,16 @@ internal class SingleTestExecutor : IDataProducer
                 throw new TimeoutException(testInformation);
             });
 
-        await await Task.WhenAny(timeoutTask, methodResult);
+        var failQuicklyTask = Task.Run(async () =>
+        {
+            while (!methodResult.IsCompleted && !timeoutTask.IsCompleted)
+            {
+                cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                await Task.Delay(TimeSpan.FromSeconds(5));
+            }
+        });
+
+        await await Task.WhenAny(methodResult, timeoutTask, failQuicklyTask);
     }
 
 

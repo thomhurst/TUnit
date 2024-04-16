@@ -21,13 +21,19 @@ public static class WellKnownFullyQualifiedClassNames
     public const string RepeatAttribute = "global::TUnit.Core.RepeatAttribute";
     public const string RetryAttribute = "global::TUnit.Core.RetryAttribute";
     public const string TimeoutAttribute = "global::TUnit.Core.TimeoutAttribute";
+    public const string CustomPropertyAttribute = "global::TUnit.Core.PropertyAttribute";
     
     // Test Hooks Attributes
     public const string AssemblySetUpAttribute = "global::TUnit.Core.AssemblySetUpAttribute";
     public const string AssemblyCleanUpAttribute = "global::TUnit.Core.AssemblyCleanUpAttribute";
     public const string BeforeAllTestsInClassAttribute = "global::TUnit.Core.BeforeAllTestsInClassAttribute";
     public const string AfterAllTestsInClassAttribute = "global::TUnit.Core.AfterAllTestsInClassAttribute";
+    public const string GlobalBeforeEachTestAttribute = "global::TUnit.Core.GlobalBeforeEachTestAttribute";
+    public const string GlobalAfterEachTestAttribute = "global::TUnit.Core.GlobalAfterEachTestAttribute";
 
     // Interfaces
     public const string IApplicableTestAttribute = "global::TUnit.Core.Interfaces.IApplicableTestAttribute";
+ 
+    // Other
+    public const string TestContext = "global::TUnit.Core.TestContext";
 }

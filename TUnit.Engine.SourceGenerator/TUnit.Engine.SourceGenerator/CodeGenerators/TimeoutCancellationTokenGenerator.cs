@@ -7,14 +7,8 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 internal class TimeoutCancellationTokenGenerator
 {
-    public static Argument? GetCancellationTokenArgument(IMethodSymbol methodSymbol)
+    public static Argument? GetCancellationTokenArgument(AttributeData[] attributes)
     {
-        IEnumerable<AttributeData> attributes =
-        [
-            ..methodSymbol.GetAttributes(),
-            ..methodSymbol.ContainingType.GetAttributes(),
-        ];
-        
         var timeoutAttribute = attributes.FirstOrDefault(x =>
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
             == WellKnownFullyQualifiedClassNames.TimeoutAttribute);

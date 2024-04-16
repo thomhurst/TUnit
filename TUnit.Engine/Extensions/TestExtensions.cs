@@ -7,30 +7,6 @@ namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
-    public static TestInformation ToTestInformation(this TestNode testNode, Type classType, object? classInstance, MethodInfo methodInfo)
-    {
-        return new TestInformation
-        {
-            TestId = testNode.Uid,
-            TestName = testNode.GetRequiredProperty<TestInformationProperty>().TestName,
-            MethodInfo = methodInfo,
-            ClassType = classType,
-            ClassInstance = classInstance,
-            Categories = testNode.GetRequiredProperty<CategoriesProperty>().Categories ?? [],
-            TestClassArguments = testNode.GetRequiredProperty<ClassArgumentsProperty>().Arguments,
-            TestMethodArguments = testNode.GetRequiredProperty<MethodArgumentsProperty>().Arguments,
-            TestClassParameterTypes = testNode.GetRequiredProperty<ClassParameterTypesProperty>().FullyQualifiedTypeNames?.Select(Type.GetType).OfType<Type>().ToArray(),
-            TestMethodParameterTypes = testNode.GetRequiredProperty<MethodParameterTypesProperty>().FullyQualifiedTypeNames?.Select(Type.GetType).OfType<Type>().ToArray(),
-            Timeout = testNode.GetRequiredProperty<TimeoutProperty>().Timeout,
-            RepeatCount = testNode.GetRequiredProperty<RepeatCountProperty>().Count,
-            RetryCount = testNode.GetRequiredProperty<RetryCountProperty>().Count,
-            NotInParallelConstraintKeys = testNode.GetRequiredProperty<NotInParallelConstraintKeysProperty>().ConstraintKeys?.ToArray(),
-            CustomProperties = testNode.Properties.OfType<CustomProperty>().ToDictionary(x => x.Key, x => x.Value).AsReadOnly(),
-            MethodRepeatCount = testNode.GetRequiredProperty<TestInformationProperty>().MethodExecutionCount,
-            ClassRepeatCount = testNode.GetRequiredProperty<TestInformationProperty>().ClassExecutionCount,
-        };
-    }
-
     public static TestNode ToTestNode(this TestDetails testDetails)
     {
         var testNode = new TestNode

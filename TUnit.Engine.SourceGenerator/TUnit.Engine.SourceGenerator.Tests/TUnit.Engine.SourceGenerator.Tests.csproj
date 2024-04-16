@@ -7,6 +7,8 @@
         <IsPackable>false</IsPackable>
 
         <RootNamespace>TUnit.Engine.SourceGenerator.Tests</RootNamespace>
+
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

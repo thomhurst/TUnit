@@ -2,7 +2,14 @@
 
 namespace TUnit.Core;
 
-public record TestInformation
+public record TestInformation<TClassType> : TestInformation
+{
+    public required ResettableLazy<TClassType?> LazyClassInstance { get; init; }
+
+    public override object? ClassInstance => LazyClassInstance.Value;
+} 
+
+public abstract record TestInformation
 {
     public TestInformation()
     {
@@ -30,8 +37,7 @@ public record TestInformation
     
     public required MethodInfo MethodInfo { get; init; }
     public required Type ClassType { get; init; }
-    public required object? ClassInstance { get; init; }
-    
+    public abstract object? ClassInstance { get; }
     public required int RepeatCount { get; init; }
     public required int RetryCount { get; init; }
     public int CurrentExecutionCount { get; internal set; }

@@ -8,7 +8,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 
 [Generator]
-public class AssemblySetUpCleanUpGenerator : IIncrementalGenerator
+public class GlobalBeforeAfterEachTestWriter : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -51,8 +51,8 @@ public class AssemblySetUpCleanUpGenerator : IIncrementalGenerator
         if (!attributes.Any(x =>
                 x.AttributeClass?.ToDisplayString(
                     DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is WellKnownFullyQualifiedClassNames.AssemblySetUpAttribute
-                or WellKnownFullyQualifiedClassNames.AssemblyCleanUpAttribute))
+                is WellKnownFullyQualifiedClassNames.GlobalBeforeEachTestAttribute
+                or WellKnownFullyQualifiedClassNames.GlobalAfterEachTestAttribute))
         {
             return null;
         }
@@ -64,11 +64,14 @@ public class AssemblySetUpCleanUpGenerator : IIncrementalGenerator
     {
         foreach (var method in methodSymbols.OfType<IMethodSymbol>())
         {
+            var classContainingMethod =
+                method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            
             if (method.GetAttributes().Any(x =>
                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                    == WellKnownFullyQualifiedClassNames.AssemblySetUpAttribute))
+                    == WellKnownFullyQualifiedClassNames.GlobalBeforeEachTestAttribute))
             {
-                var className = $"AssemblySetUp_{method.ContainingType.Name}_{Guid.NewGuid():N}";
+                var className = $"GlobalBeforeEachTest_{method.ContainingType.Name}_{Guid.NewGuid():N}";
 
                 using var sourceBuilder = new SourceCodeWriter();
                 
@@ -85,19 +88,19 @@ public class AssemblySetUpCleanUpGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("public static void Initialise()");
                 sourceBuilder.WriteLine("{");
                 
-                sourceBuilder.WriteLine($"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterSetUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
+                sourceBuilder.WriteLine($"global::TUnit.Engine.GlobalTestHookOrchestrator.RegisterSetUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}{MethodParenthesisGenerator.WriteParenthesis(method)}));");
                 
                 sourceBuilder.WriteLine("}");
                 sourceBuilder.WriteLine("}");
-
+                
                 context.AddSource($"{className}.g.cs", sourceBuilder.ToString());
             }
             
             if (method.GetAttributes().Any(x =>
                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                    == WellKnownFullyQualifiedClassNames.AssemblyCleanUpAttribute))
+                    == WellKnownFullyQualifiedClassNames.GlobalAfterEachTestAttribute))
             {
-                var className = $"AssemblyCleanUp_{method.ContainingType.Name}_{Guid.NewGuid():N}";
+                var className = $"GlobalAfterEachTest_{method.ContainingType.Name}_{Guid.NewGuid():N}";
 
                 using var sourceBuilder = new SourceCodeWriter();
                 
@@ -114,11 +117,11 @@ public class AssemblySetUpCleanUpGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("public static void Initialise()");
                 sourceBuilder.WriteLine("{");
                 
-                sourceBuilder.WriteLine($"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterCleanUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}()));");
+                sourceBuilder.WriteLine($"global::TUnit.Engine.GlobalTestHookOrchestrator.RegisterCleanUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {method.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{method.Name}{MethodParenthesisGenerator.WriteParenthesis(method)}));");
                 
                 sourceBuilder.WriteLine("}");
                 sourceBuilder.WriteLine("}");
-                
+
                 context.AddSource($"{className}.g.cs", sourceBuilder.ToString());
             }
         }

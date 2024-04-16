@@ -7,7 +7,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 internal static class TestArgumentsGenerator
 {
-    public static IEnumerable<Argument> GetTestMethodArguments(IMethodSymbol methodSymbol, AttributeData testAttribute)
+    public static IEnumerable<Argument> GetTestMethodArguments(IMethodSymbol methodSymbol, AttributeData testAttribute, AttributeData[] methodAndClassAttributes)
     {
         if (!methodSymbol.Parameters.Any())
         {
@@ -33,7 +33,7 @@ internal static class TestArgumentsGenerator
         }
 
         var timeoutCancellationTokenArgument =
-            TimeoutCancellationTokenGenerator.GetCancellationTokenArgument(methodSymbol);
+            TimeoutCancellationTokenGenerator.GetCancellationTokenArgument(methodAndClassAttributes);
         
         if (timeoutCancellationTokenArgument != null)
         {

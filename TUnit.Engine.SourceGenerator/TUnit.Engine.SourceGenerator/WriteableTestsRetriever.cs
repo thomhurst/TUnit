@@ -12,26 +12,33 @@ internal static class WriteableTestsRetriever
 {
     public static IEnumerable<WriteableTest> GetWriteableTests(ClassMethod classMethod)
     {
-        var attributes = classMethod.MethodSymbol.GetAttributes();
+        var methodOnlyAttributes = classMethod.MethodSymbol.GetAttributes();
         
-        if (!attributes.Any(x => x.AttributeClass?.IsTestClass() == true))
+        if (!methodOnlyAttributes.Any(x => x.AttributeClass?.IsTestClass() == true))
         {
             yield break;
         }
+        
+        AttributeData[] methodAndClassAttributes =
+        [
+            ..classMethod.MethodSymbol.GetAttributes(),
+            ..classMethod.NamedTypeSymbol.GetAttributes(),
+            ..classMethod.MethodSymbol.ContainingType.GetAttributes(),
+        ];
 
         IEnumerable<AttributeData> testDataAttributes =
         [
             // Tests that don't have data
-            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.TestAttribute),
+            ..GetAttributes(methodOnlyAttributes, WellKnownFullyQualifiedClassNames.TestAttribute),
 
             // Combinative tests - These have to be evaluated specially to work out all the combinations
-            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.CombinativeTestAttribute),
+            ..GetAttributes(methodOnlyAttributes, WellKnownFullyQualifiedClassNames.CombinativeTestAttribute),
 
             // Test data which will produce tests
-            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.ArgumentsAttribute),
-            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute),
-            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.ClassDataAttribute),
-            ..GetAttributes(attributes, WellKnownFullyQualifiedClassNames.MethodDataAttribute),
+            ..GetAttributes(methodOnlyAttributes, WellKnownFullyQualifiedClassNames.ArgumentsAttribute),
+            ..GetAttributes(methodOnlyAttributes, WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute),
+            ..GetAttributes(methodOnlyAttributes, WellKnownFullyQualifiedClassNames.ClassDataAttribute),
+            ..GetAttributes(methodOnlyAttributes, WellKnownFullyQualifiedClassNames.MethodDataAttribute),
         ];
 
         var classIndex = 0;
@@ -42,14 +49,14 @@ internal static class WriteableTestsRetriever
             var methodIndex = 0;
             foreach (var argumentAttribute in testDataAttributes)
             {
-                var runCount = TestInformationGenerator.GetRepeatCount(classMethod.MethodSymbol, classMethod.NamedTypeSymbol) + 1;
+                var runCount = TestInformationGenerator.GetRepeatCount(methodAndClassAttributes) + 1;
                 for (var i = 0; i < runCount; i++)
                 {
                     if (argumentAttribute.AttributeClass?.ToDisplayString(DisplayFormats
                             .FullyQualifiedNonGenericWithGlobalPrefix)
                         == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute)
                     {
-                        foreach (var combinativeTestData in ParseCombinativeTestsData(classMethod.MethodSymbol))
+                        foreach (var combinativeTestData in ParseCombinativeTestsData(classMethod.MethodSymbol, methodAndClassAttributes))
                         {
                             yield return new WriteableTest(classMethod.MethodSymbol,
                                 classMethod.NamedTypeSymbol,
@@ -66,7 +73,7 @@ internal static class WriteableTestsRetriever
                     yield return new WriteableTest(classMethod.MethodSymbol,
                         classMethod.NamedTypeSymbol,
                         [classArgument], // TODO: Be able to accept a true array here
-                        TestArgumentsGenerator.GetTestMethodArguments(classMethod.MethodSymbol, argumentAttribute).ToList(),
+                        TestArgumentsGenerator.GetTestMethodArguments(classMethod.MethodSymbol, argumentAttribute, methodAndClassAttributes).ToList(),
                         classIndex,
                         ++methodIndex
                     );
@@ -75,9 +82,9 @@ internal static class WriteableTestsRetriever
         }
     }
 
-    private static IEnumerable<IEnumerable<Argument>> ParseCombinativeTestsData(IMethodSymbol methodSymbol)
+    private static IEnumerable<IEnumerable<Argument>> ParseCombinativeTestsData(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
     {
-        return CombinativeValuesGenerator.GetTestsArguments(methodSymbol);
+        return CombinativeValuesGenerator.GetTestsArguments(methodSymbol, methodAndClassAttributes);
     }
 
     private static IEnumerable<AttributeData> GetAttributes(ImmutableArray<AttributeData> attributes, string fullyQualifiedNameWithGlobalPrefix)
