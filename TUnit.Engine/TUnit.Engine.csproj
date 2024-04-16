@@ -24,13 +24,6 @@
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     </ItemGroup>
-    
-    <ItemGroup>
-        <Content Include="TUnit.Engine.props">
-            <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-        </Content>
-    </ItemGroup>
 
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
         <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"
@@ -39,10 +32,6 @@
 
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
         <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectCapability Remove="TestContainer" />
     </ItemGroup>
 
 </Project>

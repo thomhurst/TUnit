@@ -34,6 +34,15 @@ internal static class TestInformationGenerator
                                  == "global::TUnit.Core.RepeatAttribute")
             ?.ConstructorArguments.First().Value as int? ?? 0;
     }
+    
+    public static (string FilePath, int LineNumber) GetTestLocation(AttributeData[] methodAndClassAttributes)
+    {
+        var testAttribute = methodAndClassAttributes
+            .First(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                                 == WellKnownFullyQualifiedClassNames.BaseTestAttribute);
+
+        return (TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[0]), int.Parse(TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[1])));
+    }
 
     public static int GetRetryCount(AttributeData[] methodAndClassAttributes)
     {
@@ -42,6 +51,15 @@ internal static class TestInformationGenerator
                                  == "global::TUnit.Core.RetryAttribute");
         
         return retryAttribute?.ConstructorArguments.First().Value as int? ?? 0;
+    }
+
+    public static int GetOrder(AttributeData[] methodAndClassAttributes)
+    {
+        var retryAttribute = methodAndClassAttributes
+            .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                                 == "global::TUnit.Core.OrderAttribute");
+        
+        return retryAttribute?.ConstructorArguments.First().Value as int? ?? int.MaxValue;
     }
 
     public static string GetTimeOut(AttributeData[] methodAndClassAttributes)

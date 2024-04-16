@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.Testing.Platform.Extensions.Messages;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Engine.Models.Properties;
 
@@ -7,26 +6,26 @@ namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
-    public static TestNode ToTestNode(this TestDetails testDetails)
+    public static TestNode ToTestNode(this TestInformation testDetails)
     {
         var testNode = new TestNode
         {
-            Uid = new TestNodeUid(testDetails.UniqueId),
-            DisplayName = testDetails.TestNameWithArguments,
+            Uid = new TestNodeUid(testDetails.TestId),
+            DisplayName = testDetails.TestName,
             Properties = new PropertyBag(
             [
-                new TestFileLocationProperty(testDetails.FileName!, new LinePositionSpan
+                new TestFileLocationProperty(testDetails.TestFilePath!, new LinePositionSpan
                 {
-                    Start = new LinePosition(testDetails.MinLineNumber, 0),
-                    End = new LinePosition(testDetails.MaxLineNumber, 0)
+                    Start = new LinePosition(testDetails.TestLineNumber, 0),
+                    End = new LinePosition(testDetails.TestLineNumber, 0)
                 }),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.Namespace,
-                    AssemblyFullName: testDetails.Assembly.FullName!,
+                    Namespace: testDetails.ClassType.Namespace!,
+                    AssemblyFullName: testDetails.ClassType.Assembly.FullName!,
                     TypeName: testDetails.ClassType.FullName!,
                     MethodName: testDetails.TestName,
-                    ParameterTypeFullNames: testDetails.MethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
-                    ReturnTypeFullName: testDetails.ReturnType
+                    ParameterTypeFullNames: testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
+                    ReturnTypeFullName: testDetails.ReturnType.FullName!
                     ),
                 new TimeoutProperty(testDetails.Timeout ?? TimeSpan.FromMinutes(30)),
                 new CategoriesProperty(testDetails.Categories),
@@ -34,43 +33,27 @@ internal static class TestExtensions
                 new RetryCountProperty(testDetails.RetryCount),
                 new ClassInformationProperty
                 {
-                    SimpleName = testDetails.ClassName, 
-                    FullyQualifiedName = testDetails.FullyQualifiedClassName, 
-                    AssemblyQualifiedName = testDetails.AssemblyQualifiedClassName
+                    SimpleName = testDetails.ClassType.Name, 
+                    FullyQualifiedName = testDetails.ClassType.FullName!, 
+                    AssemblyQualifiedName = testDetails.ClassType.AssemblyQualifiedName!
                 },
-                new ClassParameterTypesProperty(testDetails.ClassParameterTypes?.Select(x => x.FullName!).ToArray()),
-                new MethodParameterTypesProperty(testDetails.MethodParameterTypes?.Select(x => x.FullName!).ToArray()),
-                new ClassArgumentsProperty(testDetails.ClassArgumentValues),
-                new MethodArgumentsProperty(testDetails.MethodArgumentValues),
+                new ClassParameterTypesProperty(testDetails.TestClassParameterTypes?.Select(x => x.FullName!).ToArray()),
+                new MethodParameterTypesProperty(testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray()),
+                new ClassArgumentsProperty(testDetails.TestClassArguments),
+                new MethodArgumentsProperty(testDetails.TestMethodArguments),
                 new NotInParallelConstraintKeysProperty(testDetails.NotInParallelConstraintKeys),
                 new OrderProperty(testDetails.Order),
                 new TestInformationProperty
                 {
-                    UniqueId = testDetails.UniqueId, 
+                    UniqueId = testDetails.TestId, 
                     TestName = testDetails.TestName, 
                     IsStatic = testDetails.MethodInfo.IsStatic, 
-                    IsSingleTest = testDetails.IsSingleTest,
-                    ClassExecutionCount = testDetails.CurrentClassRepeatCount,
-                    MethodExecutionCount = testDetails.CurrentMethodRepeatCount
+                    ClassExecutionCount = testDetails.ClassRepeatCount,
+                    MethodExecutionCount = testDetails.MethodRepeatCount
                 },
-                new AssemblyProperty(testDetails.Assembly.FullName!)
+                new AssemblyProperty(testDetails.ClassType.Assembly.FullName!)
             ])
         };
-
-        if (testDetails.IsSkipped)
-        {
-            testNode.Properties.Add(new SkipReasonProperty(testDetails.SkipReason ?? string.Empty));
-        }
-        
-        if(testDetails.ExplicitFor != null)
-        {
-            testNode.Properties.Add(new ExplicitForProperty(testDetails.ExplicitFor));
-        }
-        
-        foreach (var customProperty in testDetails.CustomProperties)
-        {
-            testNode.Properties.Add(new CustomProperty(customProperty.Key, customProperty.Value));
-        }
         
         return testNode;
     }

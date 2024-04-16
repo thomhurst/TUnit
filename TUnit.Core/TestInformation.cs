@@ -52,4 +52,10 @@ public abstract record TestInformation
     internal Lazy<IEnumerable<Attribute>> LazyTestAndClassAttributes { get; }
     
     internal Lazy<RetryAttribute?> LazyRetryAttribute { get; }
+    
+    public required Type ReturnType { get; init; }
+    
+    public required int Order { get; init; }
+    public required string TestFilePath { get; init; }
+    public required int TestLineNumber { get; init; }
 }

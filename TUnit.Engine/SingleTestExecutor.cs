@@ -7,7 +7,6 @@ using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
-using TUnit.Engine.Models.Properties;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
@@ -219,16 +218,19 @@ internal class SingleTestExecutor : IDataProducer
         //     return true;
         // }
 
-        var explicitFor = testNode.GetProperty<ExplicitForProperty>()?.ExplicitFor;
+        return false;
 
-        if (string.IsNullOrEmpty(explicitFor))
-        {
-            // Isn't required to be 'Explicitly' run
-            return true;
-        }
-
-        // If all tests being run are from the same "Explicit" attribute, e.g. same class or same method, then yes these have been run explicitly.
-        return GroupedTests.AllTests.All(x => x.GetProperty<ExplicitForProperty>()?.ExplicitFor == explicitFor);
+        // TODO:
+        // var explicitFor = testNode.GetProperty<ExplicitForProperty>()?.ExplicitFor;
+        //
+        // if (string.IsNullOrEmpty(explicitFor))
+        // {
+        //     // Isn't required to be 'Explicitly' run
+        //     return true;
+        // }
+        //
+        // // If all tests being run are from the same "Explicit" attribute, e.g. same class or same method, then yes these have been run explicitly.
+        // return GroupedTests.AllTests.All(x => x.GetProperty<ExplicitForProperty>()?.ExplicitFor == explicitFor);
     }
 
     private async Task ExecuteWithRetries(UnInvokedTest unInvokedTest)

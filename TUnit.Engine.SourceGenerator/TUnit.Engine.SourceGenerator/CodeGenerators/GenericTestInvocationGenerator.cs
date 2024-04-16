@@ -73,6 +73,20 @@ internal static class GenericTestInvocationGenerator
                  
                  sourceBuilder.WriteLine($"MethodRepeatCount = {writeableTest.CurrentMethodRepeatCount},");
                  sourceBuilder.WriteLine($"ClassRepeatCount = {writeableTest.CurrentClassRepeatCount},");
+                 
+                 var returnType = methodSymbol.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+                 if (returnType == "global::System.Void")
+                 {
+                     returnType = "void";
+                 }
+                 sourceBuilder.WriteLine($"ReturnType = typeof({returnType}),");
+                 
+                 sourceBuilder.WriteLine($"Order = {TestInformationGenerator.GetOrder(methodAndClassAttributes)},");
+
+                 var testLocation = TestInformationGenerator.GetTestLocation(methodAndClassAttributes);
+                 sourceBuilder.WriteLine($"TestFilePath = @\"{testLocation.FilePath}\",");
+                 sourceBuilder.WriteLine($"TestLineNumber = {testLocation.LineNumber},");
+                 
                  sourceBuilder.WriteLine("};");
                  sourceBuilder.WriteLine();
                  sourceBuilder.WriteLine("var testContext = new global::TUnit.Core.TestContext(testInformation);");
