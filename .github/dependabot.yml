@@ -7,7 +7,11 @@ updates:
   - package-ecosystem: "npm"
     directory: "/docs"
     schedule:
-      interval: "daily"
+      interval: "daily"    
+    groups:
+      test-dependencies:
+        patterns:
+          - *docusaurus*
   - package-ecosystem: "nuget"
     directory: "/"
     open-pull-requests-limit: 20
