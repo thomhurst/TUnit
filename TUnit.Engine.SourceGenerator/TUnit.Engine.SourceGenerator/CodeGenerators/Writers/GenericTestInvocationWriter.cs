@@ -76,7 +76,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"MethodRepeatCount = {testSourceDataModel.CurrentMethodRepeatCount},");
         sourceBuilder.WriteLine($"ClassRepeatCount = {testSourceDataModel.CurrentClassRepeatCount},");
 
-        sourceBuilder.WriteLine($"ReturnType = typeof({testSourceDataModel.ReturnType}),");
+        sourceBuilder.WriteLine($"ReturnType = {testSourceDataModel.ReturnType},");
 
         sourceBuilder.WriteLine($"Order = {testSourceDataModel.Order},");
 
