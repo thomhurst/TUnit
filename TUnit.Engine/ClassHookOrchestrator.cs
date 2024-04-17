@@ -7,10 +7,6 @@ namespace TUnit.Engine;
 
 public static class ClassHookOrchestrator
 {
-    static ClassHookOrchestrator()
-    {
-        Debugger.Launch();
-    }
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
     private static readonly ConcurrentDictionary<Type, List<Func<Task>>> CleanUps = new();
 
