@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using TUnit.Engine.SourceGenerator.Enums;
 using System.Linq;
 
 namespace TUnit.Engine.SourceGenerator.Models;

@@ -15,7 +15,7 @@ internal static class DataSourceDrivenArgumentsRetriever
             .Select(ParseMethodData);
         
         var classData = testAndClassAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                           == WellKnownFullyQualifiedClassNames.MethodDataAttribute.WithGlobalPrefix)
+                                                           == WellKnownFullyQualifiedClassNames.ClassDataAttribute.WithGlobalPrefix)
             .Select(ParseClassData);
 
         return methodData.Concat(classData);

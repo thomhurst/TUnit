@@ -20,7 +20,7 @@ internal static class DataDrivenArgumentsRetriever
         var objectArray = argumentAttribute.ConstructorArguments.First().Values;
 
         return objectArray.Select(x =>
-            new Argument(x.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            new Argument(TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
                 TypedConstantParser.GetTypedConstantValue(x))
         ).WithTimeoutArgument(testAndClassAttributes);
     }

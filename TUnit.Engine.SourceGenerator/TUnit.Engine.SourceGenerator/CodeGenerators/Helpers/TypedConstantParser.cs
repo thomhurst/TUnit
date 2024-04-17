@@ -39,6 +39,11 @@ internal static class TypedConstantParser
             var type = (INamedTypeSymbol) typedConstant.Value!;
             return type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         }
+
+        if (typedConstant.Kind is not TypedConstantKind.Error and not TypedConstantKind.Array)
+        {
+            return $"global::{typedConstant.Value!.GetType().FullName}";
+        }
         
         return typedConstant.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     }
