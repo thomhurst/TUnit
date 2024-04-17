@@ -8,7 +8,7 @@ public static class AttributeDataExtensions
 {
     public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)
     {
-        return attributeData?.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+        return attributeData?.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     }
 
     public static TestType GetTestType(this AttributeData? attributeData)

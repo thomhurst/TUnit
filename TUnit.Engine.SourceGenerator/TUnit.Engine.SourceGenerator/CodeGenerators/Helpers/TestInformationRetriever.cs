@@ -40,7 +40,7 @@ internal static class TestInformationRetriever
     {
         var testAttribute = methodAndClassAttributes
             .First(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == WellKnownFullyQualifiedClassNames.BaseTestAttribute);
+                                 == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
 
         return new TestLocation
         {
