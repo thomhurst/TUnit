@@ -15,7 +15,6 @@ internal static class ClassArgumentsRetriever
         
         if (namedTypeSymbol.InstanceConstructors.First().Parameters.IsDefaultOrEmpty)
         {
-            yield return Argument.NoArguments;
             yield break;
         }
 

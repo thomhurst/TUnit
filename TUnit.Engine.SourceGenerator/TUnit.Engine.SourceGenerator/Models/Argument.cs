@@ -2,8 +2,6 @@
 
 internal record Argument
 {
-    public static readonly Argument NoArguments = new("NONE", "NONE");
-
     public Argument(string type, string invocation)
     {
         Type = type;
