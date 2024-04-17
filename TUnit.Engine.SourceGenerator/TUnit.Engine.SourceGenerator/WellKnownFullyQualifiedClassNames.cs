@@ -17,6 +17,9 @@ public static class WellKnownFullyQualifiedClassNames
     public const string InjectAttribute = "global::TUnit.Core.InjectAttribute";
     public const string CombinativeValuesAttribute = "global::TUnit.Core.CombinativeValuesAttribute";
     
+    // Market Attributes
+    public const string InheritsTestsAttribute = "global::TUnit.Core.InheritsTestsAttribute";
+    
     // Test Metadata Attributes
     public const string RepeatAttribute = "global::TUnit.Core.RepeatAttribute";
     public const string RetryAttribute = "global::TUnit.Core.RetryAttribute";
