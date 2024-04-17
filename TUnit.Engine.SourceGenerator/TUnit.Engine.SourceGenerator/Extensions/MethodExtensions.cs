@@ -9,7 +9,7 @@ public static class MethodExtensions
     public static AttributeData? GetTestAttribute(this IMethodSymbol methodSymbol)
     {
         return methodSymbol.GetAttributes()
-            .FirstOrDefault(x => x.GetFullyQualifiedAttributeTypeName() 
+            .FirstOrDefault(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
                                  == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
     }
 
