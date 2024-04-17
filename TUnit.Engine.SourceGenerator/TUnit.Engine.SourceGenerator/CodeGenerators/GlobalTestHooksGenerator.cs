@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Engine.SourceGenerator.Enums;
@@ -15,14 +13,14 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.BeforeAllTestsInClassAttribute.WithoutGlobalPrefix,
+                WellKnownFullyQualifiedClassNames.GlobalBeforeEachTestAttribute.WithoutGlobalPrefix,
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
         var cleanUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.AfterAllTestsInClassAttribute.WithoutGlobalPrefix,
+                WellKnownFullyQualifiedClassNames.GlobalAfterEachTestAttribute.WithoutGlobalPrefix,
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
@@ -56,33 +54,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             MinimalTypeName = methodSymbol.ContainingType.Name,
-            KnownArguments = GetKnownArguments(methodSymbol.Parameters)
         };
-    }
-    
-    private static KnownArguments GetKnownArguments(ImmutableArray<IParameterSymbol> methodSymbolParameters)
-    {
-        if (methodSymbolParameters.IsDefaultOrEmpty)
-        {
-            return KnownArguments.None;
-        }
-
-        var knownArguments = KnownArguments.None;
-
-        foreach (var displayString in methodSymbolParameters.Select(parameter => parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)))
-        {
-            if (displayString == WellKnownFullyQualifiedClassNames.TestContext)
-            {
-                knownArguments |= KnownArguments.TestContext;
-            }
-        
-            if (displayString == "global::System.Threading.CancellationToken")
-            {
-                knownArguments |= KnownArguments.CancellationToken;
-            }
-        }
-
-        return knownArguments;
     }
 
     private void Execute(SourceProductionContext context, GlobalTestHooksDataModel? model, HookType hookType)
