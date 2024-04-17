@@ -44,7 +44,8 @@ internal static class TestSourceDataModelRetriever
         var methodCount = 0;
         foreach (var testArgument in testArguments)
         {
-            yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, testArgument, 1, ++methodCount);
+            methodCount++;
+            yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, testArgument, 1, methodCount);
         }
     }
 
@@ -55,16 +56,18 @@ internal static class TestSourceDataModelRetriever
         var classCount = 0;
         foreach (var classArgument in classArguments)
         {
+            classCount++;
             if (!testArguments.Any())
             {
-                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, [], ++classCount, 1);
+                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, [], classCount, 1);
                 yield break;
             }
 
             var methodCount = 0;
             foreach (var testArgument in testArguments)
             {
-                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, testArgument, ++classCount, ++methodCount);
+                methodCount++;
+                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, testArgument, classCount, methodCount);
             }
         }
     }
