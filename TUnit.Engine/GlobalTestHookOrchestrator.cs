@@ -1,39 +1,40 @@
 ﻿using System.Runtime.CompilerServices;
+using TUnit.Core;
 
 namespace TUnit.Engine;
 
 public static class GlobalTestHookOrchestrator
 {
-    private static readonly List<Func<Task>> SetUps = new();
-    private static readonly List<Func<Task>> CleanUps = new();
+    private static readonly List<Func<TestContext, Task>> SetUps = new();
+    private static readonly List<Func<TestContext, Task>> CleanUps = new();
 
     [MethodImpl(MethodImplOptions.Synchronized)]
-    public static void RegisterSetUp(Func<Task> taskFactory)
+    public static void RegisterSetUp(Func<TestContext, Task> taskFactory)
     {
         SetUps.Add(taskFactory);
     }
 
     [MethodImpl(MethodImplOptions.Synchronized)]
-    public static void RegisterCleanUp(Func<Task> taskFactory)
+    public static void RegisterCleanUp(Func<TestContext, Task> taskFactory)
     {
         CleanUps.Add(taskFactory);
     }
 
-    public static async Task ExecuteSetups()
+    public static async Task ExecuteSetups(TestContext testContext)
     {
         foreach (var setUp in SetUps)
         {
-            await setUp();
+            await setUp(testContext);
         }
     }
 
-    public static async Task ExecuteCleanUps(List<Exception> cleanUpExceptions)
+    public static async Task ExecuteCleanUps(TestContext testContext, List<Exception> cleanUpExceptions)
     {
         foreach (var cleanUp in CleanUps)
         {
             try
             {
-                await cleanUp();
+                await cleanUp(testContext);
             }
             catch (Exception e)
             {

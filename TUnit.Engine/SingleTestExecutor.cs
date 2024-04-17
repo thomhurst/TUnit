@@ -84,14 +84,17 @@ internal class SingleTestExecutor : IDataProducer
             }
             
             await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
-
+            await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext);
+            
             try
             {
                 await Task.Run(async () => { await ExecuteWithRetries(unInvokedTest); });
             }
             finally
             {
-                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassInstance, unInvokedTest.TestContext.TestInformation.ClassType, new List<Exception>());
+                var cleanUpExceptions = new List<Exception>();
+                await GlobalTestHookOrchestrator.ExecuteCleanUps(unInvokedTest.TestContext, cleanUpExceptions);
+                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassInstance, unInvokedTest.TestContext.TestInformation.ClassType, cleanUpExceptions);
             }
 
             var end = DateTimeOffset.Now;
