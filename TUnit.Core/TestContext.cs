@@ -14,6 +14,8 @@ public class TestContext : IDisposable
     
     public TestInformation TestInformation { get; }
 
+    public Dictionary<string, object> ObjectBag { get; } = new();
+
     public TestContext(TestInformation testInformation)
     {
         TestInformation = testInformation;
