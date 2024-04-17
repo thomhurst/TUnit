@@ -20,19 +20,14 @@ internal static class MethodArgumentsRetriever
         var allAttributes = methodSymbol.GetAttributesIncludingClass(namedTypeSymbol);
 
         var testType = testAttribute.GetTestType();
-        
-        switch (testType)
+
+        return testType switch
         {
-            case TestType.Basic:
-                return [BasicTestArgumentsRetriever.Parse(allAttributes)];
-            case TestType.DataDriven:
-                return DataDrivenArgumentsRetriever.Parse(allAttributes);
-            case TestType.DataSourceDriven:
-                return DataSourceDrivenArgumentsRetriever.Parse(allAttributes);
-            case TestType.Combinative:
-                return CombinativeValuesRetriever.Parse(methodSymbol, allAttributes);
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            TestType.Basic => [BasicTestArgumentsRetriever.Parse(allAttributes)],
+            TestType.DataDriven => DataDrivenArgumentsRetriever.Parse(allAttributes),
+            TestType.DataSourceDriven => DataSourceDrivenArgumentsRetriever.Parse(allAttributes),
+            TestType.Combinative => CombinativeValuesRetriever.Parse(methodSymbol, allAttributes),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 }
