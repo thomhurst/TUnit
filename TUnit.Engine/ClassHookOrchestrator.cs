@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Helpers;
 
@@ -6,6 +7,10 @@ namespace TUnit.Engine;
 
 public static class ClassHookOrchestrator
 {
+    static ClassHookOrchestrator()
+    {
+        Debugger.Launch();
+    }
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
     private static readonly ConcurrentDictionary<Type, List<Func<Task>>> CleanUps = new();
 
@@ -103,7 +108,7 @@ public static class ClassHookOrchestrator
     {
         var type = testClassType;
         
-        while (type != null)
+        while (type != null && type != typeof(object))
         {
             yield return type;
             type = type.BaseType;
