@@ -6,36 +6,39 @@ using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
-
 [Generator]
 internal class ClassHooksGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var testMethods = context.SyntaxProvider
-            .CreateSyntaxProvider(
+        var setUpMethods = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                WellKnownFullyQualifiedClassNames.BeforeAllTestsInClassAttribute.WithoutGlobalPrefix,
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
-
-        context.RegisterSourceOutput(testMethods, Execute);
+        
+        var cleanUpMethods = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                WellKnownFullyQualifiedClassNames.AfterAllTestsInClassAttribute.WithoutGlobalPrefix,
+                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
+                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
+            .Where(static m => m is not null);
+        
+        context.RegisterSourceOutput(setUpMethods,
+            (productionContext, model) => Execute(productionContext, model, HookType.SetUp));
+        context.RegisterSourceOutput(cleanUpMethods,
+            (productionContext, model) => Execute(productionContext, model, HookType.CleanUp));
     }
 
     static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        return node is MethodDeclarationSyntax { AttributeLists.Count: > 0 };
+        return node is MethodDeclarationSyntax;
     }
 
-    static ClassHooksDataModel? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+    static ClassHooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
-        if (context.Node is not MethodDeclarationSyntax)
-        {
-            return null;
-        }
-
-        var symbol = context.SemanticModel.GetDeclaredSymbol(context.Node);
-
-        if (symbol is not IMethodSymbol methodSymbol)
+        if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
             return null;
         }
@@ -45,41 +48,15 @@ internal class ClassHooksGenerator : IIncrementalGenerator
             return null;
         }
 
-        var attributes = methodSymbol.GetAttributes();
-
-        var hookType = HookType.None;
-        
-        foreach (var attributeData in attributes)
-        {
-            var displayString = attributeData.AttributeClass?.ToDisplayString(
-                DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-
-            if (displayString is WellKnownFullyQualifiedClassNames.BeforeAllTestsInClassAttribute)
-            {
-                hookType |= HookType.SetUp;
-            }
-            
-            if (displayString is WellKnownFullyQualifiedClassNames.AfterAllTestsInClassAttribute)
-            {
-                hookType |= HookType.CleanUp;
-            }
-        }
-        
-        if (hookType == HookType.None)
-        {
-            return null;
-        }
-
         return new ClassHooksDataModel
         {
-            HookType = hookType,
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             MinimalTypeName = methodSymbol.ContainingType.Name
         };
     }
 
-    private void Execute(SourceProductionContext context, ClassHooksDataModel? model)
+    private void Execute(SourceProductionContext context, ClassHooksDataModel? model, HookType hookType)
     {
         if (model is null)
         {
@@ -103,13 +80,12 @@ internal class ClassHooksGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("public static void Initialise()");
         sourceBuilder.WriteLine("{");
 
-        if (model.HookType.HasFlag(HookType.SetUp))
+        if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
                 $"global::TUnit.Engine.ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}()));");
         }
-
-        if (model.HookType.HasFlag(HookType.CleanUp))
+        else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
                 $"global::TUnit.Engine.ClassHookOrchestrator.RegisterCleanUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}()));");

@@ -1,42 +1,45 @@
-﻿namespace TUnit.Engine.SourceGenerator;
+﻿using TUnit.Engine.SourceGenerator.Models;
+
+namespace TUnit.Engine.SourceGenerator;
 
 public static class WellKnownFullyQualifiedClassNames
 {
     // Test Definition Attributes
-    public const string BaseTestAttribute = "global::TUnit.Core.BaseTestAttribute";
+    public static readonly FullyQualifiedTypeName BaseTestAttribute = "TUnit.Core.BaseTestAttribute";
 
-    public const string TestAttribute = "global::TUnit.Core.TestAttribute";
-    public const string DataDrivenTestAttribute = "global::TUnit.Core.DataDrivenTestAttribute";
-    public const string DataSourceDrivenTestAttribute = "global::TUnit.Core.DataSourceDrivenTestAttribute";
-    public const string CombinativeTestAttribute = "global::TUnit.Core.CombinativeTestAttribute";
+    public static readonly FullyQualifiedTypeName TestAttribute = "TUnit.Core.TestAttribute";
+    public static readonly FullyQualifiedTypeName DataDrivenTestAttribute = "TUnit.Core.DataDrivenTestAttribute";
+    public static readonly FullyQualifiedTypeName DataSourceDrivenTestAttribute = "TUnit.Core.DataSourceDrivenTestAttribute";
+    public static readonly FullyQualifiedTypeName CombinativeTestAttribute = "TUnit.Core.CombinativeTestAttribute";
     
     // Test Data Attributes
-    public const string ArgumentsAttribute = "global::TUnit.Core.ArgumentsAttribute";
-    public const string MethodDataAttribute = "global::TUnit.Core.MethodDataAttribute";
-    public const string ClassDataAttribute = "global::TUnit.Core.ClassDataAttribute";
-    public const string InjectAttribute = "global::TUnit.Core.InjectAttribute";
-    public const string CombinativeValuesAttribute = "global::TUnit.Core.CombinativeValuesAttribute";
+    public static readonly FullyQualifiedTypeName ArgumentsAttribute = "TUnit.Core.ArgumentsAttribute";
+    public static readonly FullyQualifiedTypeName MethodDataAttribute = "TUnit.Core.MethodDataAttribute";
+    public static readonly FullyQualifiedTypeName ClassDataAttribute = "TUnit.Core.ClassDataAttribute";
+    public static readonly FullyQualifiedTypeName InjectAttribute = "TUnit.Core.InjectAttribute";
+    public static readonly FullyQualifiedTypeName CombinativeValuesAttribute = "TUnit.Core.CombinativeValuesAttribute";
     
     // Marker Attributes
-    public const string InheritsTestsAttribute = "global::TUnit.Core.InheritsTestsAttribute";
+    public static readonly FullyQualifiedTypeName InheritsTestsAttribute = "TUnit.Core.InheritsTestsAttribute";
     
     // Test Metadata Attributes
-    public const string RepeatAttribute = "global::TUnit.Core.RepeatAttribute";
-    public const string RetryAttribute = "global::TUnit.Core.RetryAttribute";
-    public const string TimeoutAttribute = "global::TUnit.Core.TimeoutAttribute";
-    public const string CustomPropertyAttribute = "global::TUnit.Core.PropertyAttribute";
+    public static readonly FullyQualifiedTypeName RepeatAttribute = "TUnit.Core.RepeatAttribute";
+    public static readonly FullyQualifiedTypeName RetryAttribute = "TUnit.Core.RetryAttribute";
+    public static readonly FullyQualifiedTypeName TimeoutAttribute = "TUnit.Core.TimeoutAttribute";
+    public static readonly FullyQualifiedTypeName CustomPropertyAttribute = "TUnit.Core.PropertyAttribute";
     
     // Test Hooks Attributes
-    public const string AssemblySetUpAttribute = "global::TUnit.Core.AssemblySetUpAttribute";
-    public const string AssemblyCleanUpAttribute = "global::TUnit.Core.AssemblyCleanUpAttribute";
-    public const string BeforeAllTestsInClassAttribute = "global::TUnit.Core.BeforeAllTestsInClassAttribute";
-    public const string AfterAllTestsInClassAttribute = "global::TUnit.Core.AfterAllTestsInClassAttribute";
-    public const string GlobalBeforeEachTestAttribute = "global::TUnit.Core.GlobalBeforeEachTestAttribute";
-    public const string GlobalAfterEachTestAttribute = "global::TUnit.Core.GlobalAfterEachTestAttribute";
+    public static readonly FullyQualifiedTypeName AssemblySetUpAttribute = "TUnit.Core.AssemblySetUpAttribute";
+    public static readonly FullyQualifiedTypeName AssemblyCleanUpAttribute = "TUnit.Core.AssemblyCleanUpAttribute";
+    public static readonly FullyQualifiedTypeName BeforeAllTestsInClassAttribute = "TUnit.Core.BeforeAllTestsInClassAttribute";
+    public static readonly FullyQualifiedTypeName AfterAllTestsInClassAttribute = "TUnit.Core.AfterAllTestsInClassAttribute";
+    public static readonly FullyQualifiedTypeName GlobalBeforeEachTestAttribute = "TUnit.Core.GlobalBeforeEachTestAttribute";
+    public static readonly FullyQualifiedTypeName GlobalAfterEachTestAttribute = "TUnit.Core.GlobalAfterEachTestAttribute";
 
     // Interfaces
-    public const string IApplicableTestAttribute = "global::TUnit.Core.Interfaces.IApplicableTestAttribute";
+    public static readonly FullyQualifiedTypeName IApplicableTestAttribute = "TUnit.Core.Interfaces.IApplicableTestAttribute";
  
     // Other
-    public const string TestContext = "global::TUnit.Core.TestContext";
+    public static readonly FullyQualifiedTypeName TestContext = "TUnit.Core.TestContext";
+    public static readonly FullyQualifiedTypeName CancellationToken = "System.Threading.CancellationToken";
 }

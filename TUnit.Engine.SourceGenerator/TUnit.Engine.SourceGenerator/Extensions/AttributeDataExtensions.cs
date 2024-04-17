@@ -6,18 +6,35 @@ namespace TUnit.Engine.SourceGenerator.Extensions;
 
 public static class AttributeDataExtensions
 {
+    public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)
+    {
+        return attributeData?.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+    }
+
     public static TestType GetTestType(this AttributeData? attributeData)
     {
-        var displayString =
-            attributeData?.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+        var displayString = attributeData?.GetFullyQualifiedAttributeTypeName();
 
-        return displayString switch
+        if (displayString == WellKnownFullyQualifiedClassNames.TestAttribute.WithGlobalPrefix)
         {
-            WellKnownFullyQualifiedClassNames.TestAttribute => TestType.Basic,
-            WellKnownFullyQualifiedClassNames.DataDrivenTestAttribute => TestType.DataDriven,
-            WellKnownFullyQualifiedClassNames.DataSourceDrivenTestAttribute => TestType.DataSourceDriven,
-            WellKnownFullyQualifiedClassNames.CombinativeTestAttribute => TestType.Combinative,
-            _ => throw new ArgumentException($"{displayString ?? "null"} does not map to a known test type")
-        };
+            return TestType.Basic;
+        }
+
+        if (displayString == WellKnownFullyQualifiedClassNames.DataDrivenTestAttribute.WithGlobalPrefix)
+        {
+            return TestType.DataDriven;
+        }
+
+        if (displayString == WellKnownFullyQualifiedClassNames.DataSourceDrivenTestAttribute.WithGlobalPrefix)
+        {
+            return TestType.DataSourceDriven;
+        }
+
+        if (displayString == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute.WithGlobalPrefix)
+        {
+            return TestType.Combinative;
+        }
+
+        throw new ArgumentException($"{displayString ?? "null"} does not map to a known test type");
     }
 }

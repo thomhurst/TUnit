@@ -1,16 +1,18 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal class TimeoutCancellationTokenRetriever
 {
-    public static Argument? GetCancellationTokenArgument(AttributeData[] attributes)
+    public static Argument? GetCancellationTokenArgument(IEnumerable<AttributeData> attributes)
     {
         var timeoutAttribute = attributes.FirstOrDefault(x =>
-            x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            == WellKnownFullyQualifiedClassNames.TimeoutAttribute);
+            x.GetFullyQualifiedAttributeTypeName()
+            == WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix);
         
         if (timeoutAttribute != null)
         {

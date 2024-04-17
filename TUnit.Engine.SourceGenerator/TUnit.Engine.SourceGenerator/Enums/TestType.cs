@@ -2,8 +2,9 @@
 
 public enum TestType
 {
+    Unknown,
     Basic,
     DataDriven,
     DataSourceDriven,
-    Combinative
+    Combinative,
 }

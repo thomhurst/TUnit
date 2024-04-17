@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.Enums;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 [Generator]
-internal class AssemblyHooksGenerator : IIncrementalGenerator
+internal class InheritsTestsGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.AssemblySetUpAttribute.WithoutGlobalPrefix,
+                WellKnownFullyQualifiedClassNames.InheritsTestsAttribute.WithoutGlobalPrefix,
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
@@ -25,45 +28,54 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
-        context.RegisterSourceOutput(setUpMethods,
-            (productionContext, model) => Execute(productionContext, model, HookType.SetUp));
-        context.RegisterSourceOutput(cleanUpMethods,
-            (productionContext, model) => Execute(productionContext, model, HookType.CleanUp));
+        context.RegisterSourceOutput(setUpMethods, Execute);
+        context.RegisterSourceOutput(cleanUpMethods, Execute);
     }
 
     static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        return node is MethodDeclarationSyntax;
+        return node is ClassDeclarationSyntax;
     }
 
-    static AssemblyHooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
+    static InheritsTestsDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
-        if (context.TargetSymbol is not IMethodSymbol methodSymbol)
+        if (context.TargetSymbol is not INamedTypeSymbol namedTypeSymbol)
+        {
+            return null;
+        }
+        
+        if (namedTypeSymbol.IsAbstract)
         {
             return null;
         }
 
-        if (!methodSymbol.IsStatic)
+        if (namedTypeSymbol.IsStatic)
         {
             return null;
         }
 
-        return new AssemblyHooksDataModel
+        if (namedTypeSymbol.DeclaredAccessibility != Accessibility.Public)
         {
-            MethodName = methodSymbol.Name,
-            FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            MinimalTypeName = methodSymbol.ContainingType.Name
-        };
+            return null;
+        }
+
+        return new InheritsTestsDataModel(namedTypeSymbol.Name,
+            namedTypeSymbol.GetMembersIncludingBase()
+                .OfType<IMethodSymbol>()
+                .Where(x => x.MethodKind != MethodKind.Constructor)
+                .Where(x => x.IsTest())
+                .Select(x => x.ParseTestDatas(namedTypeSymbol, TestType.Unknown))
+        );
     }
 
-    private void Execute(SourceProductionContext context, AssemblyHooksDataModel? model, HookType hookType)
+    private void Execute(SourceProductionContext context, InheritsTestsDataModel? model)
     {
         if (model is null)
         {
             return;
         }
         
-        var className = $"AssemblyHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
+        var className = $"{model.MinimalTypeName}_Inherited_{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 
@@ -80,16 +92,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("public static void Initialise()");
         sourceBuilder.WriteLine("{");
 
-        if (hookType == HookType.SetUp)
-        {
-            sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterSetUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}()));");
-        }
-        else if (hookType == HookType.CleanUp)
-        {
-            sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterCleanUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}()));");
-        }
+       // TODO:
 
         sourceBuilder.WriteLine("}");
         sourceBuilder.WriteLine("}");

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
@@ -18,9 +19,9 @@ internal static class ClassArgumentsRetriever
             yield break;
         }
 
-        foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes().Where(x =>
-                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                         is WellKnownFullyQualifiedClassNames.MethodDataAttribute))
+        foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
+                     .Where(x => x.GetFullyQualifiedAttributeTypeName() 
+                                 == WellKnownFullyQualifiedClassNames.MethodDataAttribute.WithGlobalPrefix))
         {
             var arg = dataSourceDrivenTestAttribute.ConstructorArguments.Length == 1
                 ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.First().Value}()"
@@ -28,18 +29,18 @@ internal static class ClassArgumentsRetriever
 
             yield return new Argument("var", arg);
         }
-        
-        foreach (var classDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
-                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                         is WellKnownFullyQualifiedClassNames.ClassDataAttribute))
+
+        foreach (var classDataAttribute in namedTypeSymbol.GetAttributes()
+                     .Where(x => x.GetFullyQualifiedAttributeTypeName()
+                                 == WellKnownFullyQualifiedClassNames.ClassDataAttribute.WithGlobalPrefix)) 
         {
             var fullyQualifiedTypeNameFromTypedConstantValue = TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(classDataAttribute.ConstructorArguments.First());
             yield return new Argument(fullyQualifiedTypeNameFromTypedConstantValue, $"new {fullyQualifiedTypeNameFromTypedConstantValue}()");
         }
-        
-        foreach (var classDataAttribute in namedTypeSymbol.GetAttributes().Where(x =>
-                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                         is "global::TUnit.Core.InjectAttribute"))
+
+        foreach (var classDataAttribute in namedTypeSymbol.GetAttributes()
+                     .Where(x => x.GetFullyQualifiedAttributeTypeName()
+                         is "global::TUnit.Core.InjectAttribute")) 
         {
             var genericType = classDataAttribute.AttributeClass!.TypeArguments.First();
             var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);

@@ -37,7 +37,7 @@ public static class MethodParenthesisRetriever
             return "testContext";
         }
         
-        if (displayString == "global::System.Threading.CancellationToken")
+        if (displayString == WellKnownFullyQualifiedClassNames.CancellationToken)
         {
             return "global::TUnit.Engine.EngineCancellationToken.CancellationTokenSource.Token";
         }

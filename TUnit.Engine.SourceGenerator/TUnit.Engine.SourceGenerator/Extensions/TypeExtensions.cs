@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Tags;
 
 namespace TUnit.Engine.SourceGenerator.Extensions;
 
@@ -10,11 +9,12 @@ internal static class TypeExtensions
 {
     public static bool IsTestClass(this INamedTypeSymbol namedTypeSymbol)
     {
-        return namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            is WellKnownFullyQualifiedClassNames.TestAttribute
-            or WellKnownFullyQualifiedClassNames.DataDrivenTestAttribute
-            or WellKnownFullyQualifiedClassNames.DataSourceDrivenTestAttribute
-            or WellKnownFullyQualifiedClassNames.CombinativeTestAttribute;
+        var displayString = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+
+        return displayString == WellKnownFullyQualifiedClassNames.TestAttribute.WithGlobalPrefix
+               || displayString == WellKnownFullyQualifiedClassNames.DataDrivenTestAttribute.WithGlobalPrefix
+               || displayString == WellKnownFullyQualifiedClassNames.DataSourceDrivenTestAttribute.WithGlobalPrefix
+               || displayString == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute.WithGlobalPrefix;
     }
     
     public static IEnumerable<ISymbol> GetMembersIncludingBase(this INamedTypeSymbol namedTypeSymbol)

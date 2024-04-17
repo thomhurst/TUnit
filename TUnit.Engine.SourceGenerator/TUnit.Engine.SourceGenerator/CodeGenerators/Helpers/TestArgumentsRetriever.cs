@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
@@ -9,27 +10,30 @@ internal static class TestArgumentsRetriever
 {
     public static IEnumerable<Argument> GetTestMethodArguments(IMethodSymbol methodSymbol, AttributeData testAttribute, AttributeData[] methodAndClassAttributes)
     {
-        if (!methodSymbol.Parameters.Any())
+        if (methodSymbol.Parameters.IsDefaultOrEmpty)
         {
-            yield return Argument.NoArguments;
+            yield break;
         }
+
+        var attributeTypeName = testAttribute.GetFullyQualifiedAttributeTypeName();
         
-        switch (testAttribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
+        if (attributeTypeName == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
         {
-            case WellKnownFullyQualifiedClassNames.ArgumentsAttribute:
-                foreach (var dataDrivenTestArgument in GetDataDrivenTestArguments(testAttribute))
-                {
-                    yield return dataDrivenTestArgument;
-                }
-                break;
-            case WellKnownFullyQualifiedClassNames.MethodDataAttribute:
-                yield return GetMethodData(testAttribute);
-                break;
-            case WellKnownFullyQualifiedClassNames.ClassDataAttribute:
-                yield return GetClassData(testAttribute);
-                break;
-            case WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute:
-                break;
+            foreach (var dataDrivenTestArgument in GetDataDrivenTestArguments(testAttribute))
+            {
+                yield return dataDrivenTestArgument;
+            }
+        }
+        else if (attributeTypeName == WellKnownFullyQualifiedClassNames.MethodDataAttribute.WithGlobalPrefix)
+        {
+            yield return GetMethodData(testAttribute);
+        }
+        else if (attributeTypeName == WellKnownFullyQualifiedClassNames.ClassDataAttribute.WithGlobalPrefix)
+        {
+            yield return GetClassData(testAttribute);
+        }
+        else if (attributeTypeName == WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute.WithGlobalPrefix)
+        {
         }
 
         var timeoutCancellationTokenArgument =
