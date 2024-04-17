@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
@@ -100,6 +101,10 @@ internal static class TestSourceDataModelRetriever
             MethodArguments = testArguments.ToArray(),
             FilePath = $"@{testAttribute.ConstructorArguments[0].Value}",
             LineNumber = (int)testAttribute.ConstructorArguments[1].Value!,
+            BeforeEachTestInvocations = BeforeEachTestRetriever.GenerateCode(namedTypeSymbol),
+            AfterEachTestInvocations = AfterEachTestRetriever.GenerateCode(namedTypeSymbol),
+            CustomProperties = CustomPropertiesRetriever.GetCustomProperties(allAttributes),
+            ApplicableTestAttributes = CustomTestAttributeRetriever.GetCustomAttributes(namedTypeSymbol, methodSymbol),
         };
     }
 }

@@ -5,7 +5,7 @@ using TUnit.Engine.SourceGenerator.Extensions;
 
 namespace TUnit.Engine.SourceGenerator;
 
-public class CleanUpWriter
+public class AfterEachTestRetriever
 {
     public static string GenerateCode(INamedTypeSymbol classType)
     {

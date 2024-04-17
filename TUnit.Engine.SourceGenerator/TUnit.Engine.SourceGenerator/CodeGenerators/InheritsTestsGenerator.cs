@@ -64,7 +64,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
                 .OfType<IMethodSymbol>()
                 .Where(x => x.MethodKind != MethodKind.Constructor)
                 .Where(x => x.IsTest())
-                .Select(x => x.ParseTestDatas(namedTypeSymbol, TestType.Unknown))
+                .SelectMany(x => x.ParseTestDatas(namedTypeSymbol, TestType.Unknown))
         );
     }
 

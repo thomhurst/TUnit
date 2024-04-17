@@ -19,7 +19,7 @@ public class TestsBase
         var source = await File.ReadAllTextAsync(inputFile);
         
         // Create an instance of the source generator.
-        var generator = new TestsSourceGenerator();
+        var generator = new TestsGenerator();
 
         // Source generators should be tested using 'GeneratorDriver'.
         var driver = CSharpGeneratorDriver.Create(generator);

@@ -6,7 +6,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 public static class CustomTestAttributeRetriever
 {
-    public static string WriteCustomAttributes(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol)
+    public static string GetCustomAttributes(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol)
     {
         IEnumerable<AttributeData> attributes =
         [

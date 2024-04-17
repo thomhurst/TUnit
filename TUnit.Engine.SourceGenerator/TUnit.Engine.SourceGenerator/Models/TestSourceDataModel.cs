@@ -26,7 +26,11 @@ internal record TestSourceDataModel
     public required string Timeout { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
-    
+    public required IEnumerable<string> CustomProperties { get; init; }
+    public required string ApplicableTestAttributes { get; init; }
+    public required string BeforeEachTestInvocations { get; init; }
+    public required string AfterEachTestInvocations { get; init; }
+
     public IEnumerable<string> GetClassArgumentVariableNames()
         => Enumerable.Range(0, ClassArguments.Length)
             .Select(i => $"classArg{i}");
