@@ -14,7 +14,7 @@ public static class GlobalTestHookOrchestrator
     }
 
     [MethodImpl(MethodImplOptions.Synchronized)]
-    public static void RegisterCleanUp(Type type, Func<Task> taskFactory)
+    public static void RegisterCleanUp(Func<Task> taskFactory)
     {
         CleanUps.Add(taskFactory);
     }
