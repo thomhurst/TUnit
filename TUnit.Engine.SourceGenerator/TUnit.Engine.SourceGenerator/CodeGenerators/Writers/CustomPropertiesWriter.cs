@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
 public class CustomPropertiesWriter
 {

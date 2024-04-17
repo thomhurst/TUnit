@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -42,14 +43,14 @@ internal static class WriteableTestsRetriever
         ];
 
         var classIndex = 0;
-        foreach (var classArgument in ClassArgumentsGenerator.GetClassArguments(classMethod.NamedTypeSymbol))
+        foreach (var classArgument in ClassArgumentsRetriever.GetClassArguments(classMethod.NamedTypeSymbol))
         {
             classIndex++;
 
             var methodIndex = 0;
             foreach (var argumentAttribute in testDataAttributes)
             {
-                var runCount = TestInformationGenerator.GetRepeatCount(methodAndClassAttributes) + 1;
+                var runCount = TestInformationRetriever.GetRepeatCount(methodAndClassAttributes) + 1;
                 for (var i = 0; i < runCount; i++)
                 {
                     if (argumentAttribute.AttributeClass?.ToDisplayString(DisplayFormats
@@ -73,7 +74,7 @@ internal static class WriteableTestsRetriever
                     yield return new WriteableTest(classMethod.MethodSymbol,
                         classMethod.NamedTypeSymbol,
                         [classArgument], // TODO: Be able to accept a true array here
-                        TestArgumentsGenerator.GetTestMethodArguments(classMethod.MethodSymbol, argumentAttribute, methodAndClassAttributes).ToList(),
+                        TestArgumentsRetriever.GetTestMethodArguments(classMethod.MethodSymbol, argumentAttribute, methodAndClassAttributes).ToList(),
                         classIndex,
                         ++methodIndex
                     );
@@ -84,7 +85,7 @@ internal static class WriteableTestsRetriever
 
     private static IEnumerable<IEnumerable<Argument>> ParseCombinativeTestsData(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
     {
-        return CombinativeValuesGenerator.GetTestsArguments(methodSymbol, methodAndClassAttributes);
+        return CombinativeValuesRetriever.GetTestsArguments(methodSymbol, methodAndClassAttributes);
     }
 
     private static IEnumerable<AttributeData> GetAttributes(ImmutableArray<AttributeData> attributes, string fullyQualifiedNameWithGlobalPrefix)

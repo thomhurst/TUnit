@@ -1,10 +1,10 @@
-﻿using System.Linq;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.Models;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
-internal static class GenericTestInvocationGenerator
+internal static class GenericTestInvocationWriter
 {
     public static void GenerateTestInvocationCode(SourceCodeWriter sourceBuilder, WriteableTest writeableTest)
     {
@@ -55,17 +55,17 @@ internal static class GenericTestInvocationGenerator
                  sourceBuilder.WriteLine($"var testInformation = new global::TUnit.Core.TestInformation<{fullyQualifiedClassType}>()");
                  sourceBuilder.WriteLine("{");
                  sourceBuilder.WriteLine($"TestId = \"{testId}\",");
-                 sourceBuilder.WriteLine($"Categories = [{string.Join(", ", TestInformationGenerator.GetCategories(methodAndClassAttributes))}],");
+                 sourceBuilder.WriteLine($"Categories = [{string.Join(", ", TestInformationRetriever.GetCategories(methodAndClassAttributes))}],");
                  sourceBuilder.WriteLine("LazyClassInstance = resettableClassFactory,");
                  sourceBuilder.WriteLine($"ClassType = typeof({fullyQualifiedClassType}),");
-                 sourceBuilder.WriteLine($"Timeout = {TestInformationGenerator.GetTimeOut(methodAndClassAttributes)},");
+                 sourceBuilder.WriteLine($"Timeout = {TestInformationRetriever.GetTimeOut(methodAndClassAttributes)},");
                  sourceBuilder.WriteLine($"TestClassArguments = [{writeableTest.GetClassArgumentVariableNamesAsList()}],");
                  sourceBuilder.WriteLine($"TestMethodArguments = [{writeableTest.GetMethodArgumentVariableNamesAsList()}],");
                  sourceBuilder.WriteLine($"TestClassParameterTypes = typeof({fullyQualifiedClassType}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),");
                  sourceBuilder.WriteLine("TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),");
-                 sourceBuilder.WriteLine($"NotInParallelConstraintKeys = {TestInformationGenerator.GetNotInParallelConstraintKeys(methodAndClassAttributes)},");
-                 sourceBuilder.WriteLine($"RepeatCount = {TestInformationGenerator.GetRepeatCount(methodAndClassAttributes)},");
-                 sourceBuilder.WriteLine($"RetryCount = {TestInformationGenerator.GetRetryCount(methodAndClassAttributes)},");
+                 sourceBuilder.WriteLine($"NotInParallelConstraintKeys = {TestInformationRetriever.GetNotInParallelConstraintKeys(methodAndClassAttributes)},");
+                 sourceBuilder.WriteLine($"RepeatCount = {TestInformationRetriever.GetRepeatCount(methodAndClassAttributes)},");
+                 sourceBuilder.WriteLine($"RetryCount = {TestInformationRetriever.GetRetryCount(methodAndClassAttributes)},");
                  sourceBuilder.WriteLine("MethodInfo = methodInfo,");
                  sourceBuilder.WriteLine($"TestName = \"{methodSymbol.Name}\",");
 
@@ -81,9 +81,9 @@ internal static class GenericTestInvocationGenerator
                  }
                  sourceBuilder.WriteLine($"ReturnType = typeof({returnType}),");
                  
-                 sourceBuilder.WriteLine($"Order = {TestInformationGenerator.GetOrder(methodAndClassAttributes)},");
+                 sourceBuilder.WriteLine($"Order = {TestInformationRetriever.GetOrder(methodAndClassAttributes)},");
 
-                 var testLocation = TestInformationGenerator.GetTestLocation(methodAndClassAttributes);
+                 var testLocation = TestInformationRetriever.GetTestLocation(methodAndClassAttributes);
                  sourceBuilder.WriteLine($"TestFilePath = @\"{testLocation.FilePath}\",");
                  sourceBuilder.WriteLine($"TestLineNumber = {testLocation.LineNumber},");
                  
@@ -95,7 +95,7 @@ internal static class GenericTestInvocationGenerator
                  sourceBuilder.WriteLine("{");
                  sourceBuilder.WriteLine($"Id = \"{testId}\",");
                  sourceBuilder.WriteLine("TestContext = testContext,");
-                 sourceBuilder.WriteLine($"ApplicableTestAttributes = [{CustomTestAttributeGenerator.WriteCustomAttributes(classSymbol, methodSymbol)}],");
+                 sourceBuilder.WriteLine($"ApplicableTestAttributes = [{CustomTestAttributeRetriever.WriteCustomAttributes(classSymbol, methodSymbol)}],");
                  sourceBuilder.WriteLine($"BeforeEachTestSetUps = [{SetUpWriter.GenerateCode(classSymbol)}],");
                  sourceBuilder.WriteLine($"TestBody = classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{writeableTest.MethodName}({writeableTest.GetMethodArgumentVariableNamesAsList()})),");
                  sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{CleanUpWriter.GenerateCode(classSymbol)}],");

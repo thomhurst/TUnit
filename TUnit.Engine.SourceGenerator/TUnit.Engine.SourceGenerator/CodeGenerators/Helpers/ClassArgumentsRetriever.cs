@@ -3,9 +3,9 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Models;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class ClassArgumentsGenerator
+internal static class ClassArgumentsRetriever
 {
     public static IEnumerable<Argument> GetClassArguments(INamedTypeSymbol namedTypeSymbol)
     {

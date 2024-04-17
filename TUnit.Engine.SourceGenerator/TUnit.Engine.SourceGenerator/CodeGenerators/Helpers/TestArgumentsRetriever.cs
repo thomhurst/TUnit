@@ -3,9 +3,9 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Models;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class TestArgumentsGenerator
+internal static class TestArgumentsRetriever
 {
     public static IEnumerable<Argument> GetTestMethodArguments(IMethodSymbol methodSymbol, AttributeData testAttribute, AttributeData[] methodAndClassAttributes)
     {
@@ -33,7 +33,7 @@ internal static class TestArgumentsGenerator
         }
 
         var timeoutCancellationTokenArgument =
-            TimeoutCancellationTokenGenerator.GetCancellationTokenArgument(methodAndClassAttributes);
+            TimeoutCancellationTokenRetriever.GetCancellationTokenArgument(methodAndClassAttributes);
         
         if (timeoutCancellationTokenArgument != null)
         {

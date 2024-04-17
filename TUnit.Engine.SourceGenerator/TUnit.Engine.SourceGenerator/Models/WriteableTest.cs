@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 namespace TUnit.Engine.SourceGenerator.Models;
 
@@ -26,45 +27,10 @@ internal record WriteableTest
     {
         return arguments
             .Where(x => x != Argument.NoArguments)
-            .Select(MapSpecialTypes)
             .ToList();
     }
 
-    private Argument MapSpecialTypes(Argument argument)
-    {
-        if (argument.Invocation == "null")
-        {
-            return argument;
-        }
-        
-        if (argument.Type == "global::System.Char")
-        {
-            return argument with
-            {
-                Invocation = $"'{argument.Invocation}'"
-            };
-        }
-        
-        if (argument.Type == "global::System.Boolean")
-        {
-            return argument with
-            {
-                Invocation = argument.Invocation.ToLower()
-            };
-        }
-        
-        if (argument.Type == "global::System.String")
-        {
-            return argument with
-            {
-                Invocation = $"\"{argument.Invocation}\""
-            };
-        }
-        
-        return argument;
-    }
-
-    public string TestId => TestInformationGenerator.GetTestId(ClassSymbol, MethodSymbol, CurrentClassRepeatCount, CurrentMethodRepeatCount);
+    public string TestId => TestInformationRetriever.GetTestId(ClassSymbol, MethodSymbol, CurrentClassRepeatCount, CurrentMethodRepeatCount);
     public string MethodName => MethodSymbol.Name;
     public string ClassName => ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     public IMethodSymbol MethodSymbol { get; init; }

@@ -2,10 +2,11 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Models;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class TestInformationGenerator
+internal static class TestInformationRetriever
 {
     public static string GetNotInParallelConstraintKeys(AttributeData[] methodAndClassAttributes)
     {
@@ -35,13 +36,17 @@ internal static class TestInformationGenerator
             ?.ConstructorArguments.First().Value as int? ?? 0;
     }
     
-    public static (string FilePath, int LineNumber) GetTestLocation(AttributeData[] methodAndClassAttributes)
+    public static TestLocation GetTestLocation(AttributeData[] methodAndClassAttributes)
     {
         var testAttribute = methodAndClassAttributes
             .First(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                  == WellKnownFullyQualifiedClassNames.BaseTestAttribute);
 
-        return (TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[0]), int.Parse(TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[1])));
+        return new TestLocation
+        {
+            FilePath = TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[0]),
+            LineNumber = int.Parse(TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[1]))
+        };
     }
 
     public static int GetRetryCount(AttributeData[] methodAndClassAttributes)

@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -14,7 +16,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 /// When using a simple text file as a baseline, we can create a non-incremental source generator.
 /// </summary>
 [Generator]
-public class TestsSourceGenerator : IIncrementalGenerator
+internal class TestsSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -26,12 +28,12 @@ public class TestsSourceGenerator : IIncrementalGenerator
         var testMethods = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
+                transform: static (ctx, _) => new TestSourceCollection(GetSemanticTargetForGeneration(ctx)))
             .Where(static m => m is not null);
 
         context.RegisterSourceOutput(
             testMethods,
-            static (productionContext, methods) => Execute(productionContext, methods)
+            static (productionContext, testSourceCollection) => Execute(productionContext, testSourceCollection)
         );
     }
 
@@ -40,7 +42,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
         return node is ClassDeclarationSyntax;
     }
 
-    static IEnumerable<ClassMethod> GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+    static IEnumerable<TestSourceDataModel> GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
     {
         if (context.Node is not ClassDeclarationSyntax)
         {
@@ -73,30 +75,30 @@ public class TestsSourceGenerator : IIncrementalGenerator
                 continue;
             }
 
-            yield return new ClassMethod(namedTypeSymbol, methodSymbol);
+            yield return new TestSourceDataModel(namedTypeSymbol, methodSymbol);
         }
     }
 
-    private static void Execute(SourceProductionContext context, IEnumerable<ClassMethod> classMethods)
+    private static void Execute(SourceProductionContext context, TestSourceCollection testSourceCollection)
     {
-        foreach (var classMethod in classMethods)
+        foreach (var testSourceDataModel in testSourceCollection.TestSourceDataModels)
         {
-            var className = $"{classMethod.MethodSymbol.Name}_{Guid.NewGuid():N}";
+            var className = $"{testSourceDataModel.MethodName}_{Guid.NewGuid():N}";
 
-            var classSource = ProcessTests(classMethod, className);
+            var classSource = ProcessTests(testSourceDataModel, className);
                 
             if (string.IsNullOrEmpty(classSource))
             {
                 continue;
             }
 
-            context.AddSource($"{className}.g.cs", classSource);
+            context.AddSource($"{className}.g.cs", classSource!);
         }
     }
 
-    private static string? ProcessTests(ClassMethod classMethod, string className)
+    private static string? ProcessTests(TestSourceDataModel testSourceDataModel, string className)
     {
-        var writeableTests = WriteableTestsRetriever.GetWriteableTests(classMethod).ToList();
+        var writeableTests = WriteableTestsRetriever.GetWriteableTests(testSourceDataModel).ToList();
 
         if (!writeableTests.Any())
         {
@@ -130,7 +132,7 @@ public class TestsSourceGenerator : IIncrementalGenerator
     {
         foreach (var writeableTest in writeableTests)
         {
-            GenericTestInvocationGenerator.GenerateTestInvocationCode(sourceBuilder, writeableTest);
+            GenericTestInvocationWriter.GenerateTestInvocationCode(sourceBuilder, writeableTest);
         }
     }
 }

@@ -2,9 +2,9 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-public static class CustomTestAttributeGenerator
+public static class CustomTestAttributeRetriever
 {
     public static string WriteCustomAttributes(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol)
     {

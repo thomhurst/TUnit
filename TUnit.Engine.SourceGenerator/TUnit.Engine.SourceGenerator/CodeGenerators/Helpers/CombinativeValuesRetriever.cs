@@ -4,9 +4,9 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Models;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class CombinativeValuesGenerator
+internal static class CombinativeValuesRetriever
 {
     // We return a List of a List. Inner List is for each test.
     public static IEnumerable<IEnumerable<Argument>> GetTestsArguments(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
@@ -34,7 +34,7 @@ internal static class CombinativeValuesGenerator
             new Argument(y.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 TypedConstantParser.GetTypedConstantValue(y)));
 
-        var timeoutCancellationToken = TimeoutCancellationTokenGenerator.GetCancellationTokenArgument(methodAndClassAttributes);
+        var timeoutCancellationToken = TimeoutCancellationTokenRetriever.GetCancellationTokenArgument(methodAndClassAttributes);
 
         if (timeoutCancellationToken != null)
         {

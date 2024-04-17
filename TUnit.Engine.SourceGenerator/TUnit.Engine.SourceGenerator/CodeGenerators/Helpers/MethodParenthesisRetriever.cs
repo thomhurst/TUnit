@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Enums;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-public static class MethodParenthesisGenerator
+public static class MethodParenthesisRetriever
 {
     public static string WriteParenthesis(IMethodSymbol methodSymbol)
     {
@@ -14,6 +16,16 @@ public static class MethodParenthesisGenerator
         }
         
         return $"({string.Join(", ", methodSymbol.Parameters.Select(GetArgumentForParameter))})";
+    }
+    
+    public static string WriteParenthesis(KnownArguments knownArguments)
+    {
+        if (knownArguments == KnownArguments.None)
+        {
+            return "()";
+        }
+        
+        return $"({string.Join(", ", GetArgumentVariables(knownArguments))})";
     }
 
     private static string GetArgumentForParameter(IParameterSymbol parameter)
@@ -31,5 +43,18 @@ public static class MethodParenthesisGenerator
         }
 
         throw new NotImplementedException($"No known argument for {displayString}");
+    }
+    
+    private static IEnumerable<string> GetArgumentVariables(KnownArguments knownArguments)
+    {
+        if (knownArguments.HasFlag(KnownArguments.TestContext))
+        {
+            yield return "testContext";
+        }
+
+        if (knownArguments.HasFlag(KnownArguments.CancellationToken))
+        {
+            yield return "global::TUnit.Engine.EngineCancellationToken.CancellationTokenSource.Token";
+        }
     }
 }
