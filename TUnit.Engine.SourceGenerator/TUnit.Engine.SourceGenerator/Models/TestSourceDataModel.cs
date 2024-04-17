@@ -24,6 +24,8 @@ internal record TestSourceDataModel
     public required string Categories { get; init; }
     public required string NotInParallelConstraintKeys { get; init; }
     public required string Timeout { get; init; }
+    public required string FilePath { get; init; }
+    public required int LineNumber { get; init; }
     
     public IEnumerable<string> GetClassArgumentVariableNames()
         => Enumerable.Range(0, ClassArguments.Length)

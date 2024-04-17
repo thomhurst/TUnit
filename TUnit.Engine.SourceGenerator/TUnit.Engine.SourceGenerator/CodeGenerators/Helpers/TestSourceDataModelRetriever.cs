@@ -81,7 +81,8 @@ internal static class TestSourceDataModelRetriever
 
         return new TestSourceDataModel
         {
-            TestId = TestInformationRetriever.GetTestId(namedTypeSymbol, methodSymbol, currentClassCount, currentMethodCount),
+            TestId = TestInformationRetriever.GetTestId(namedTypeSymbol, methodSymbol, currentClassCount,
+                currentMethodCount),
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName =
                 namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
@@ -97,6 +98,8 @@ internal static class TestSourceDataModelRetriever
             NotInParallelConstraintKeys = TestInformationRetriever.GetNotInParallelConstraintKeys(allAttributes),
             ClassArguments = classArgument == null ? [] : [classArgument], // TODO: Proper array at some point?
             MethodArguments = testArguments.ToArray(),
+            FilePath = $"@{testAttribute.ConstructorArguments[0].Value}",
+            LineNumber = (int)testAttribute.ConstructorArguments[1].Value!,
         };
     }
 }
