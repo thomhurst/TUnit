@@ -99,7 +99,7 @@ internal static class TestSourceDataModelRetriever
             NotInParallelConstraintKeys = TestInformationRetriever.GetNotInParallelConstraintKeys(allAttributes),
             ClassArguments = classArgument == null ? [] : [classArgument], // TODO: Proper array at some point?
             MethodArguments = testArguments.ToArray(),
-            FilePath = $"@{testAttribute.ConstructorArguments[0].Value}",
+            FilePath = testAttribute.ConstructorArguments[0].Value!.ToString(),
             LineNumber = (int)testAttribute.ConstructorArguments[1].Value!,
             BeforeEachTestInvocations = BeforeEachTestRetriever.GenerateCode(namedTypeSymbol),
             AfterEachTestInvocations = AfterEachTestRetriever.GenerateCode(namedTypeSymbol),
