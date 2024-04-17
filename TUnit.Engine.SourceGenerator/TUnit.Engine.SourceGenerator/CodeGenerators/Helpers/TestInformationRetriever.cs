@@ -122,4 +122,16 @@ internal static class TestInformationRetriever
         
         return $"({string.Join(",", parameterTypesFullyQualified)})";
     }
+
+    public static string GetReturnType(IMethodSymbol methodSymbol)
+    {
+        var returnType = methodSymbol.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        
+        if (returnType == "global::System.Void")
+        {
+            return "typeof(void)";
+        }
+
+        return $"typeof({returnType})";
+    }
 }

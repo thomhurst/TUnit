@@ -9,18 +9,17 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class MethodArgumentsRetriever
 {
-    public static IEnumerable<IEnumerable<Argument>> GetMethodArguments(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
+    public static IEnumerable<IEnumerable<Argument>> GetMethodArguments(IMethodSymbol methodSymbol, 
+        INamedTypeSymbol namedTypeSymbol,
+        TestType testType)
     {
         if (methodSymbol.Parameters.IsDefaultOrEmpty)
         {
             return [];
         }
         
-        var testAttribute = methodSymbol.GetTestAttribute();
         var allAttributes = methodSymbol.GetAttributesIncludingClass(namedTypeSymbol);
-
-        var testType = testAttribute.GetTestType();
-
+        
         return testType switch
         {
             TestType.Basic => [BasicTestArgumentsRetriever.Parse(allAttributes)],

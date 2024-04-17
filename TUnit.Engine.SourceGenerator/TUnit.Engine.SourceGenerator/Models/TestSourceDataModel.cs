@@ -9,9 +9,6 @@ internal record TestSourceDataModel
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
-    public required HookType HookType { get; init; }
-    public required KnownArguments KnownArguments { get; init; }
-    
     public required Argument[] ClassArguments { get; init; }
     public required Argument[] MethodArguments { get; init; }
     
