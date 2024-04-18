@@ -1,18 +1,18 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace TUnit.Engine.SourceGenerator.Models;
 
-internal record TestSourceCollection
+internal record TestCollectionDataModel
 {
     public IEnumerable<TestSourceDataModel> TestSourceDataModels { get; }
 
-    public TestSourceCollection(IEnumerable<TestSourceDataModel> testSourceDataModels)
+    public TestCollectionDataModel(IEnumerable<TestSourceDataModel> testSourceDataModels)
     {
         TestSourceDataModels = testSourceDataModels;
     }
 
-    public virtual bool Equals(TestSourceCollection? other)
+    public virtual bool Equals(TestCollectionDataModel? other)
     {
         if (ReferenceEquals(null, other))
         {

@@ -18,28 +18,28 @@ internal class TestsGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 WellKnownFullyQualifiedClassNames.TestAttribute.WithoutGlobalPrefix,
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, TestType.Basic))
+                transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.Basic)))
             .Where(static m => m is not null);
         
         var dataDrivenTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 WellKnownFullyQualifiedClassNames.DataDrivenTestAttribute.WithoutGlobalPrefix,
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, TestType.DataDriven))
+                transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.DataDriven)))
             .Where(static m => m is not null);
         
         var dataSourceDrivenTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 WellKnownFullyQualifiedClassNames.DataSourceDrivenTestAttribute.WithoutGlobalPrefix,
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, TestType.DataSourceDriven))
+                transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.DataSourceDriven)))
             .Where(static m => m is not null);
         
         var combinativeTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 WellKnownFullyQualifiedClassNames.CombinativeTestAttribute.WithoutGlobalPrefix,
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, TestType.Combinative))
+                transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.Combinative)))
             .Where(static m => m is not null);
         
         context.RegisterSourceOutput(basicTests, Execute);
@@ -81,9 +81,9 @@ internal class TestsGenerator : IIncrementalGenerator
         }
     }
 
-    private void Execute(SourceProductionContext context, IEnumerable<TestSourceDataModel> models)
+    private void Execute(SourceProductionContext context, TestCollectionDataModel testCollection)
     {
-        foreach (var model in models)
+        foreach (var model in testCollection.TestSourceDataModels)
         {
             var className = $"{model.MethodName}_{model.MinimalTypeName}_{Guid.NewGuid():N}";
 
