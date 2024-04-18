@@ -39,7 +39,6 @@ public class TestsBase
         var generatedFiles = newCompilation.SyntaxTrees
             .Select(t => t.GetText().ToString())
             .Except([source])
-            .Reverse()
             .ToArray();
 
         assertions(generatedFiles);

@@ -65,4 +65,68 @@ internal record TestSourceDataModel
     
     public string GetMethodArgumentVariableNamesAsList()
         => string.Join(",", GetMethodArgumentVariableNames());
+
+    public virtual bool Equals(TestSourceDataModel? other)
+    {
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return FullyQualifiedTypeName == other.FullyQualifiedTypeName
+               && MinimalTypeName == other.MinimalTypeName
+               && MethodName == other.MethodName 
+               && ClassArguments.SequenceEqual(other.ClassArguments) 
+               && MethodArguments.SequenceEqual(other.MethodArguments) 
+               && TestId == other.TestId 
+               && Order == other.Order 
+               && RetryCount == other.RetryCount 
+               && RepeatCount == other.RepeatCount 
+               && CurrentMethodRepeatCount == other.CurrentMethodRepeatCount 
+               && CurrentClassRepeatCount == other.CurrentClassRepeatCount 
+               && ReturnType == other.ReturnType 
+               && Categories == other.Categories 
+               && NotInParallelConstraintKeys == other.NotInParallelConstraintKeys 
+               && Timeout == other.Timeout 
+               && FilePath == other.FilePath 
+               && LineNumber == other.LineNumber 
+               && CustomProperties.SequenceEqual(other.CustomProperties) 
+               && ApplicableTestAttributes == other.ApplicableTestAttributes 
+               && BeforeEachTestInvocations == other.BeforeEachTestInvocations 
+               && AfterEachTestInvocations == other.AfterEachTestInvocations;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = FullyQualifiedTypeName.GetHashCode();
+            hashCode = (hashCode * 397) ^ MinimalTypeName.GetHashCode();
+            hashCode = (hashCode * 397) ^ MethodName.GetHashCode();
+            hashCode = (hashCode * 397) ^ ClassArguments.GetHashCode();
+            hashCode = (hashCode * 397) ^ MethodArguments.GetHashCode();
+            hashCode = (hashCode * 397) ^ TestId.GetHashCode();
+            hashCode = (hashCode * 397) ^ Order;
+            hashCode = (hashCode * 397) ^ RetryCount;
+            hashCode = (hashCode * 397) ^ RepeatCount;
+            hashCode = (hashCode * 397) ^ CurrentMethodRepeatCount;
+            hashCode = (hashCode * 397) ^ CurrentClassRepeatCount;
+            hashCode = (hashCode * 397) ^ ReturnType.GetHashCode();
+            hashCode = (hashCode * 397) ^ Categories.GetHashCode();
+            hashCode = (hashCode * 397) ^ NotInParallelConstraintKeys.GetHashCode();
+            hashCode = (hashCode * 397) ^ Timeout.GetHashCode();
+            hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
+            hashCode = (hashCode * 397) ^ LineNumber;
+            hashCode = (hashCode * 397) ^ CustomProperties.GetHashCode();
+            hashCode = (hashCode * 397) ^ ApplicableTestAttributes.GetHashCode();
+            hashCode = (hashCode * 397) ^ BeforeEachTestInvocations.GetHashCode();
+            hashCode = (hashCode * 397) ^ AfterEachTestInvocations.GetHashCode();
+            return hashCode;
+        }
+    }
 }

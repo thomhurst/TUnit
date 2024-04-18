@@ -23,51 +23,65 @@ internal static class TestSourceDataModelRetriever
 
         var classArguments = ClassArgumentsRetriever.GetClassArguments(namedTypeSymbol).ToArray();
         var testArguments = MethodArgumentsRetriever.GetMethodArguments(methodSymbol, namedTypeSymbol, testType).ToArray();
+        var repeatCount =
+            TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
 
+        var runCount = repeatCount + 1;
+        
         if (!classArguments.Any())
         {
-            return GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, testAttribute, testArguments);
+            return GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, runCount, testAttribute, testArguments);
         }
 
-        return GenerateMultipleClassInstances(methodSymbol, namedTypeSymbol, testAttribute, classArguments, testArguments);
+        return GenerateMultipleClassInstances(methodSymbol, namedTypeSymbol, runCount, testAttribute, classArguments, testArguments);
     }
 
     private static IEnumerable<TestSourceDataModel> GenerateSingleClassInstance(IMethodSymbol methodSymbol,
-        INamedTypeSymbol namedTypeSymbol, AttributeData testAttribute, IEnumerable<Argument>[] testArguments)
+        INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute,
+        IEnumerable<Argument>[] testArguments)
     {
-        if (!testArguments.Any())
-        {
-            yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, [], 1, 1);
-            yield break;
-        }
-
         var methodCount = 0;
-        foreach (var testArgument in testArguments)
+
+        for (var i = 1; i <= runCount; i++)
         {
-            methodCount++;
-            yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, testArgument, 1, methodCount);
+            if (!testArguments.Any())
+            {
+                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, [], 1, ++methodCount);
+                continue;
+            }
+
+            foreach (var testArgument in testArguments)
+            {
+                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, testArgument, 1,
+                    ++methodCount);
+            }
         }
     }
 
     private static IEnumerable<TestSourceDataModel> GenerateMultipleClassInstances(IMethodSymbol methodSymbol,
-        INamedTypeSymbol namedTypeSymbol, AttributeData testAttribute, Argument[] classArguments,
+        INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, Argument[] classArguments,
         IEnumerable<Argument>[] testArguments)
     {
         var classCount = 0;
         foreach (var classArgument in classArguments)
         {
             classCount++;
-            if (!testArguments.Any())
-            {
-                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, [], classCount, 1);
-                yield break;
-            }
-
             var methodCount = 0;
-            foreach (var testArgument in testArguments)
+
+            for (var i = 1; i <= runCount; i++)
             {
-                methodCount++;
-                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, testArgument, classCount, methodCount);
+                if (!testArguments.Any())
+                {
+                    yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, [],
+                        classCount, ++methodCount);
+                    continue;
+                }
+                
+                foreach (var testArgument in testArguments)
+                {
+                    yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument,
+                        testArgument, classCount, ++methodCount);
+                }
             }
         }
     }

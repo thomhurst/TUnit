@@ -14,8 +14,11 @@ public class NotInParallelTests : TestsBase
             "NotInParallelTests.cs"),
         generatedFiles =>
         {
-            Assert.Equal(4, Regex.Matches(generatedFiles[0], @"NotInParallelConstraintKeys = \[\],").Count);
-            Assert.Equal(4, Regex.Matches(generatedFiles[1], @"NotInParallelConstraintKeys = \[\],").Count);
-            Assert.Equal(4, Regex.Matches(generatedFiles[2], @"NotInParallelConstraintKeys = \[\],").Count);
+            Assert.Equal(12, generatedFiles.Length);
+
+            foreach (var generatedFile in generatedFiles)
+            {
+                Assert.Contains("NotInParallelConstraintKeys = [],", generatedFile);
+            }
         });
 }
