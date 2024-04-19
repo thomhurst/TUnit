@@ -12,11 +12,11 @@ public class DataSourceDrivenTests
     
     [DataSourceDrivenTest]
     [ClassData(typeof(SomeClass))]
-    public void DataSource_Class(int value)
+    public void DataSource_Class(SomeClass value)
     {
     }
 
-    public int SomeMethod() => 1;
+    public static int SomeMethod() => 1;
 
     public class SomeClass
     {
