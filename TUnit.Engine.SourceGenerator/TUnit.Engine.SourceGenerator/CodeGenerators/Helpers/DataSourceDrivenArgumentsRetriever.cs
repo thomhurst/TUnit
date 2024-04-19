@@ -31,7 +31,7 @@ internal static class DataSourceDrivenArgumentsRetriever
             return [new Argument("var", $"{methodDataAttribute.ConstructorArguments.First().Value!}()")];
         }
 
-        var type = methodDataAttribute.ConstructorArguments[0].Type!;
+        var type = (INamedTypeSymbol) methodDataAttribute.ConstructorArguments[0].Value!;
         return [new Argument("var", $"{type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{methodDataAttribute.ConstructorArguments[1].Value!}()")];
     }
     
