@@ -20,7 +20,7 @@ public class TimeoutCancellationTokenTests : TestsBase
             Assert.That(generatedFiles[1], Does.Contain("classInstance.DataTest(methodArg0,methodArg1)"));
             
             Assert.That(generatedFiles[2], Does.Contain("TestName = \"DataSourceTest\""));
-            Assert.That(generatedFiles[2], Does.Contain("var methodArg0 = DataSource();"));
+            Assert.That(generatedFiles[2], Does.Contain("var methodArg0 = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();"));
             Assert.That(generatedFiles[2], Does.Contain("global::System.Threading.CancellationToken methodArg1 = global::TUnit.Engine.EngineCancellationToken.CreateToken(global::System.TimeSpan.FromMilliseconds(30000));"));
             Assert.That(generatedFiles[2], Does.Contain("classInstance.DataSourceTest(methodArg0,methodArg1)"));
             

@@ -10,7 +10,7 @@ public class DataSourceDrivenTests : TestsBase
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(2));
             
-            Assert.That(generatedFiles[0], Does.Contain("var methodArg0 = SomeMethod();"));
+            Assert.That(generatedFiles[0], Does.Contain("var methodArg0 = global::TUnit.TestProject.DataSourceDrivenTests.SomeMethod();"));
             Assert.That(generatedFiles[0], Does.Contain("classInstance.DataSource_Method(methodArg0)"));
             
             Assert.That(generatedFiles[1], Does.Contain("global::TUnit.TestProject.DataSourceDrivenTests.SomeClass methodArg0 = new global::TUnit.TestProject.DataSourceDrivenTests.SomeClass();"));
