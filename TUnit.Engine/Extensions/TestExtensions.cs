@@ -33,8 +33,8 @@ internal static class TestExtensions
                 new RetryCountProperty(testDetails.RetryCount),
                 new ClassInformationProperty
                 {
-                    SimpleName = testDetails.ClassType.Name, 
-                    FullyQualifiedName = testDetails.ClassType.FullName!, 
+                    SimpleName = testDetails.ClassType.Name,
+                    FullyQualifiedName = testDetails.ClassType.FullName!,
                     AssemblyQualifiedName = testDetails.ClassType.AssemblyQualifiedName!
                 },
                 new ClassParameterTypesProperty(testDetails.TestClassParameterTypes?.Select(x => x.FullName!).ToArray()),
@@ -45,9 +45,9 @@ internal static class TestExtensions
                 new OrderProperty(testDetails.Order),
                 new TestInformationProperty
                 {
-                    UniqueId = testDetails.TestId, 
-                    TestName = testDetails.TestName, 
-                    IsStatic = testDetails.MethodInfo.IsStatic, 
+                    UniqueId = testDetails.TestId,
+                    TestName = testDetails.TestName,
+                    IsStatic = testDetails.MethodInfo.IsStatic,
                     ClassExecutionCount = testDetails.ClassRepeatCount,
                     MethodExecutionCount = testDetails.MethodRepeatCount
                 },

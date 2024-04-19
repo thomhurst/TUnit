@@ -105,7 +105,7 @@ internal class SingleTestExecutor : IDataProducer
                 DisplayName = testNode.DisplayName,
                 Properties = new PropertyBag
                 (
-                    new PassedTestNodeStateProperty(),
+                    PassedTestNodeStateProperty.CachedInstance,
                     new TimingProperty(new TimingInfo(start, end, end - start))
                 )
             }));
