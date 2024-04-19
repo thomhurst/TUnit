@@ -68,7 +68,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             Uid = testNode.Uid,
             DisplayName = testNode.DisplayName,
-            Properties = new PropertyBag(new InProgressTestNodeStateProperty())
+            Properties = new PropertyBag(InProgressTestNodeStateProperty.CachedInstance)
         }));
 
         UnInvokedTest? unInvokedTest;

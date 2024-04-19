@@ -69,6 +69,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 {
                     foreach (var testNode in testNodes)
                     {
+                        testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
+                        
                         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
                             sessionUid: context.Request.Session.SessionUid,
                             testNode: testNode)

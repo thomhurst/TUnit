@@ -5,13 +5,23 @@ namespace TUnit.Core;
 public class TestContext : IDisposable
 {
     internal EventHandler? OnDispose;
-
-    internal CancellationTokenSource? CancellationTokenSource { get; set; }
+    private CancellationTokenSource? _cancellationTokenSource;
     
+    internal readonly StringWriter OutputWriter = new();
+
+    internal CancellationTokenSource? CancellationTokenSource
+    {
+        get => _cancellationTokenSource;
+        set
+        {
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = value;
+        }
+    }
+
     public CancellationToken CancellationToken => CancellationTokenSource?.Token ?? default;
 
-    internal readonly StringWriter OutputWriter = new();
-    
+
     public TestInformation TestInformation { get; }
 
     public Dictionary<string, object> ObjectBag { get; } = new();

@@ -25,7 +25,6 @@ internal class TUnitTestDiscoverer
             }
 
             var testNode = testDetails.ToTestNode();
-            testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
 
             if (_testFilterService.MatchesTest(discoverTestExecutionRequest?.Filter, testNode))
             {
