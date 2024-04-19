@@ -15,7 +15,7 @@ public class TimeoutCancellationTokenTests
     [Test]
     [Timeout(30_000)]
     [TestCategory("Blah")]
-    public async Task Test(CancellationToken cancellationToken)
+    public async Task BasicTest(CancellationToken cancellationToken)
     {
         await Assert.That(1).Is.EqualTo(1);
     }
@@ -30,6 +30,7 @@ public class TimeoutCancellationTokenTests
 
     [MethodData(nameof(DataSource))]
     [Timeout(30_000)]
+    [DataSourceDrivenTest]
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
         await Assert.That(value).Is.EqualTo(1);
@@ -39,10 +40,10 @@ public class TimeoutCancellationTokenTests
     [Timeout(30_000)]
     [TestCategory("Blah")]
     public async Task CombinativeTest(
-        [CombinativeValues(1, 1, 1)] int value, 
+        [CombinativeValues(1, 2, 3)] int value, 
         CancellationToken cancellationToken)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).Is.EqualTo(1).Or.Is.EqualTo(2).Or.Is.EqualTo(3);
     }
 
     public static int DataSource()

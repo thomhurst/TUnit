@@ -5,7 +5,6 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 

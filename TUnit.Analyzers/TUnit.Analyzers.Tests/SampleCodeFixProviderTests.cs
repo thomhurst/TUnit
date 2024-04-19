@@ -8,7 +8,7 @@
 //
 // public class SampleCodeFixProviderTests
 // {
-//     [Fact]
+//     [Test]
 //     public async Task ClassWithMyCompanyTitle_ReplaceWithCommonKeyword()
 //     {
 //         const string text = @"

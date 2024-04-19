@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Extensions;
@@ -8,9 +9,9 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataDrivenArgumentsRetriever
 {
-    public static IEnumerable<IEnumerable<Argument>> Parse(AttributeData[] testAndClassAttributes)
+    public static IEnumerable<IEnumerable<Argument>> Parse(ImmutableArray<AttributeData> methodAttributes, AttributeData[] testAndClassAttributes)
     {
-        return testAndClassAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
+        return methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                  == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
             .Select(argumentAttribute => ParseArguments(testAndClassAttributes, argumentAttribute));
     }

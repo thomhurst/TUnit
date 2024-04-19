@@ -1,5 +1,3 @@
-using TUnit.Engine.SourceGenerator.Enums;
-
 namespace TUnit.Engine.SourceGenerator.Models;
 
 public record GlobalTestHooksDataModel

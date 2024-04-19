@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Extensions;
@@ -8,15 +9,17 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataSourceDrivenArgumentsRetriever
 {
-    public static IEnumerable<IEnumerable<Argument>> Parse(AttributeData[] testAndClassAttributes)
+    public static IEnumerable<IEnumerable<Argument>> Parse(ImmutableArray<AttributeData> methodAttributes, AttributeData[] testAndClassAttributes)
     {
-        var methodData = testAndClassAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
+        var methodData = methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                  == WellKnownFullyQualifiedClassNames.MethodDataAttribute.WithGlobalPrefix)
-            .Select(ParseMethodData);
+            .Select(ParseMethodData)
+            .Select(x => x.WithTimeoutArgument(testAndClassAttributes));
         
-        var classData = testAndClassAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
+        var classData = methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                            == WellKnownFullyQualifiedClassNames.ClassDataAttribute.WithGlobalPrefix)
-            .Select(ParseClassData);
+            .Select(ParseClassData)
+            .Select(x => x.WithTimeoutArgument(testAndClassAttributes));
 
         return methodData.Concat(classData);
     }
@@ -25,17 +28,17 @@ internal static class DataSourceDrivenArgumentsRetriever
     {
         if (methodDataAttribute.ConstructorArguments.Length == 1)
         {
-            yield return new Argument("var", $"{methodDataAttribute.ConstructorArguments.First().Value!}()");
+            return [new Argument("var", $"{methodDataAttribute.ConstructorArguments.First().Value!}()")];
         }
 
-        var type = (INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!;
-        yield return new Argument("var", $"{type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{methodDataAttribute.ConstructorArguments[1].Value!}()");
+        var type = methodDataAttribute.ConstructorArguments[0].Type!;
+        return [new Argument("var", $"{type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}.{methodDataAttribute.ConstructorArguments[1].Value!}()")];
     }
     
     private static IEnumerable<Argument> ParseClassData(AttributeData classDataAttribute)
     {
         var type = (INamedTypeSymbol)classDataAttribute.ConstructorArguments[0].Value!;
         var fullyQualifiedType = type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-        yield return new Argument(fullyQualifiedType, $"new {fullyQualifiedType}()");
+        return [new Argument(fullyQualifiedType, $"new {fullyQualifiedType}()")];
     }
 }

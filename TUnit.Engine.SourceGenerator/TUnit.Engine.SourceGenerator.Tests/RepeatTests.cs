@@ -1,27 +1,23 @@
-using System.IO;
-using System.Threading.Tasks;
-using Xunit;
-
 namespace TUnit.Engine.SourceGenerator.Tests;
 
 public class RepeatTests : TestsBase
 {
-    [Fact]
+    [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "RepeatTests.cs"),
         generatedFiles =>
         {
-            Assert.Equal(9, generatedFiles.Length);
-
-            Assert.Contains("RepeatCount = 1,", generatedFiles[0]);
-            Assert.Contains("RepeatCount = 1,", generatedFiles[1]);
-            Assert.Contains("RepeatCount = 2,", generatedFiles[2]);
-            Assert.Contains("RepeatCount = 2,", generatedFiles[3]);
-            Assert.Contains("RepeatCount = 2,", generatedFiles[4]);
-            Assert.Contains("RepeatCount = 3,", generatedFiles[5]);
-            Assert.Contains("RepeatCount = 3,", generatedFiles[6]);
-            Assert.Contains("RepeatCount = 3,", generatedFiles[7]);
-            Assert.Contains("RepeatCount = 3,", generatedFiles[8]);
+            Assert.That(generatedFiles.Length, Is.EqualTo(9));
+            
+            Assert.That(generatedFiles[0], Does.Contain("RepeatCount = 1,"));
+            Assert.That(generatedFiles[1], Does.Contain("RepeatCount = 1,"));
+            Assert.That(generatedFiles[2], Does.Contain("RepeatCount = 2,"));
+            Assert.That(generatedFiles[3], Does.Contain("RepeatCount = 2,"));
+            Assert.That(generatedFiles[4], Does.Contain("RepeatCount = 2,"));
+            Assert.That(generatedFiles[5], Does.Contain("RepeatCount = 3,"));
+            Assert.That(generatedFiles[6], Does.Contain("RepeatCount = 3,"));
+            Assert.That(generatedFiles[7], Does.Contain("RepeatCount = 3,"));
+            Assert.That(generatedFiles[8], Does.Contain("RepeatCount = 3,"));
         });
 }

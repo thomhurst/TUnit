@@ -17,15 +17,18 @@ internal static class MethodArgumentsRetriever
         {
             return [];
         }
-        
-        var allAttributes = methodSymbol.GetAttributesIncludingClass(namedTypeSymbol);
+
+        var methodAttributes = methodSymbol.GetAttributes();
+        var classAttributes = namedTypeSymbol.GetAttributes();
+
+        AttributeData[] testAndClassAttributes = [..methodAttributes, ..classAttributes];
         
         return testType switch
         {
-            TestType.Basic => [BasicTestArgumentsRetriever.Parse(allAttributes)],
-            TestType.DataDriven => DataDrivenArgumentsRetriever.Parse(allAttributes),
-            TestType.DataSourceDriven => DataSourceDrivenArgumentsRetriever.Parse(allAttributes),
-            TestType.Combinative => CombinativeValuesRetriever.Parse(methodSymbol, allAttributes),
+            TestType.Basic => [BasicTestArgumentsRetriever.Parse(testAndClassAttributes)],
+            TestType.DataDriven => DataDrivenArgumentsRetriever.Parse(methodAttributes, testAndClassAttributes),
+            TestType.DataSourceDriven => DataSourceDrivenArgumentsRetriever.Parse(methodAttributes, testAndClassAttributes),
+            TestType.Combinative => CombinativeValuesRetriever.Parse(methodSymbol, testAndClassAttributes),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
