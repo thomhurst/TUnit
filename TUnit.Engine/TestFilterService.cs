@@ -17,11 +17,16 @@ public class TestFilterService
 
     public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, TestNode testNode)
     {
-        if (testExecutionFilter is BasicFilter basicFilter)
+        switch (testExecutionFilter)
         {
-            return basicFilter.MatchesFilter(testNode);
+            case null:
+                return true;
+            case TestNodeUidListFilter testNodeUidListFilter:
+                return testNodeUidListFilter.TestNodeUids.Contains(testNode.Uid);
+            case BasicFilter basicFilter:
+                return true;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(testExecutionFilter));
         }
-
-        return true;
     }
 }
