@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -39,35 +41,33 @@ internal static class ClassArgumentsRetriever
 
         foreach (var classDataAttribute in namedTypeSymbol.GetAttributes()
                      .Where(x => x.GetFullyQualifiedAttributeTypeName()
-                         is "global::TUnit.Core.InjectAttribute")) 
+                         is "global::TUnit.Core.InjectAttribute"))
         {
             var genericType = classDataAttribute.AttributeClass!.TypeArguments.First();
             var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
             var sharedArgument = classDataAttribute.NamedArguments.First(x => x.Key == "Shared").Value;
 
-            if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is "global::TUnit.Core.None")
+            var sharedArgumentType = sharedArgument.ToCSharpString();
+            
+            if (sharedArgumentType is "TUnit.Core.SharedType.None")
             {
                 yield return new Argument(fullyQualifiedGenericType, $"new {fullyQualifiedGenericType}()");
             }
             
-            if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is "global::TUnit.Core.Globally")
+            if (sharedArgumentType is "TUnit.Core.SharedType.Globally")
             {
-                yield return new Argument(fullyQualifiedGenericType, $"global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())");
+                yield return new Argument(fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())");
             }
             
-            if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is "global::TUnit.Core.ForClass")
+            if (sharedArgumentType is "TUnit.Core.SharedType.ForClass")
             {
-                yield return new Argument(fullyQualifiedGenericType, $"global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())");
+                yield return new Argument(fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())");
             }
             
-            if (sharedArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is "global::TUnit.Core.ForKey")
+            if (sharedArgumentType is "TUnit.Core.SharedType.Keyed")
             {
                 var key = sharedArgument.Value?.GetType().GetProperty("Key")?.GetValue(sharedArgument.Value);
-                yield return new Argument(fullyQualifiedGenericType, $"global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())");
+                yield return new Argument(fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())");
             }
         }
     }

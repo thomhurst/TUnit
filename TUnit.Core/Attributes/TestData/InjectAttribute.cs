@@ -4,17 +4,13 @@
 public class InjectAttribute<T> : TUnitAttribute where T : new()
 {
     public SharedType Shared { get; set; } = SharedType.None;
+    public string? Key { get; set; }
 }
 
-public record struct ForKey(string Key) : SharedType;
-public record struct Globally : SharedType;
-public record struct ForClass : SharedType;
-public record struct None : SharedType;
-
-public interface SharedType
+public enum SharedType
 {
-    public static SharedType None => new None();
-    public static SharedType ForClass => new ForClass();
-    public static SharedType Globally => new Globally();
-    public static SharedType ForKey(string key) => new ForKey(key);
+    None,
+    ForClass,
+    Globally,
+    Keyed,
 }
