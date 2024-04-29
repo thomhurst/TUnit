@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
@@ -15,21 +16,11 @@ internal class TUnitTestDiscoverer
         _testFilterService = testFilterService;
     }
     
-    public IEnumerable<TestNode> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest, CancellationToken cancellationToken)
+    public IEnumerable<TestInformation> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest, CancellationToken cancellationToken)
     {
-        foreach (var testDetails in _testsLoader.GetTests())
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                yield break;
-            }
-
-            var testNode = testDetails.ToTestNode();
-
-            if (_testFilterService.MatchesTest(discoverTestExecutionRequest?.Filter, testNode))
-            {
-                yield return testNode;
-            }
-        }
+        cancellationToken.ThrowIfCancellationRequested();
+        
+        return _testsLoader.GetTests()
+            .Where(testDetails => _testFilterService.MatchesTest(discoverTestExecutionRequest?.Filter, testDetails));
     }
 }

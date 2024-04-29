@@ -1,12 +1,13 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using TUnit.Core;
 
 namespace TUnit.Engine.Models;
 
 internal record NotInParallelTestCase
 {
-    public string Id => TestNode.Uid.Value;
+    public string Id => Test.TestId;
     public required ConstraintKeysCollection ConstraintKeys { get; init; }
-    public required TestNode TestNode { get; init; }
+    public required TestInformation Test { get; init; }
 
     public virtual bool Equals(NotInParallelTestCase? other)
     {

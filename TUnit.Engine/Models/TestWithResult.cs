@@ -3,4 +3,4 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Models;
 
-internal record TestWithResult(TestNode Test, Task<TUnitTestResult> ResultTask);
+internal record TestWithResult(TestInformation Test, Task<TUnitTestResult> ResultTask);

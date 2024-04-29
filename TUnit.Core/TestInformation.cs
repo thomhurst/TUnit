@@ -58,4 +58,5 @@ public abstract record TestInformation
     public required int Order { get; init; }
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
+    public required string DisplayName { get; set; }
 }

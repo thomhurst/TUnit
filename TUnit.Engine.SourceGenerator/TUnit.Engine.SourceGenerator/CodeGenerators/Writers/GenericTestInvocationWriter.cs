@@ -1,4 +1,5 @@
-﻿using TUnit.Engine.SourceGenerator.Models;
+﻿using System.Linq;
+using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
@@ -65,6 +66,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"RetryCount = {testSourceDataModel.RetryCount},");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
+        sourceBuilder.WriteLine($"DisplayName = \"{testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}\",");
 
         foreach (var customProperty in testSourceDataModel.CustomProperties)
         {
@@ -100,5 +102,19 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.AddTest(\"{testId}\", unInvokedTest);");
         sourceBuilder.WriteLine("}");
+    }
+
+    private static string GetMethodArgs(TestSourceDataModel testSourceDataModel)
+    {
+        if (!testSourceDataModel.MethodArguments.Any())
+        {
+            return string.Empty;
+        }
+
+        return $"({string.Join(", ",
+            testSourceDataModel.MethodArguments
+                .Select(x => x.Invocation)
+                .Select(x => x.Replace("\"", "\\\""))
+        )})";
     }
 }

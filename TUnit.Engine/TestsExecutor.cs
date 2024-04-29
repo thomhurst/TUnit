@@ -34,7 +34,7 @@ internal class TestsExecutor
         _logger = loggerFactory.CreateLogger<TestsExecutor>();
     }
 
-    public async Task ExecuteAsync(IEnumerable<TestNode> testNodes, TestSessionContext session)
+    public async Task ExecuteAsync(IEnumerable<TestInformation> testNodes, TestSessionContext session)
     {
         _consoleInterceptor.Initialize();
         
@@ -46,9 +46,9 @@ internal class TestsExecutor
         
             var tests = _testGrouper.OrganiseTests(testNodes);
             
-            foreach (var testNode in tests.AllTests)
+            foreach (var test in tests.AllTests)
             {
-                var matchingTest = TestDictionary.GetTest(testNode.Uid);
+                var matchingTest = TestDictionary.GetTest(test.TestId);
                 ClassHookOrchestrator.RegisterInstance(matchingTest.TestContext.TestInformation.ClassType);
             }
         
@@ -81,7 +81,7 @@ internal class TestsExecutor
 
                 testsToProcess.Remove(notInParallelTestCase);
 
-                var testWithResult = await ProcessTest(notInParallelTestCase.TestNode, true, session);
+                var testWithResult = await ProcessTest(notInParallelTestCase.Test, true, session);
                 
                 executing.Add(testWithResult.ResultTask);
             }
@@ -91,14 +91,14 @@ internal class TestsExecutor
             List<IGrouping<ConstraintKeysCollection, NotInParallelTestCase>> GetOrderedTests()
             {
                 return testsToProcess
-                    .OrderBy(x => x.TestNode.GetRequiredProperty<OrderProperty>().Order)
-                    .GroupBy(x => x.TestNode.GetRequiredProperty<NotInParallelConstraintKeysProperty>().ConstraintKeys!)
+                    .OrderBy(x => x.Test.Order)
+                    .GroupBy(x => new ConstraintKeysCollection(x.Test.NotInParallelConstraintKeys!))
                     .ToList();
             }
         }
     }
 
-    private async Task ProcessTests(Queue<TestNode> queue, bool runInParallel, TestSessionContext session)
+    private async Task ProcessTests(Queue<TestInformation> queue, bool runInParallel, TestSessionContext session)
     {
         var executing = new List<Task>();
         
@@ -110,7 +110,7 @@ internal class TestsExecutor
         await WhenAllSafely(executing);
     }
 
-    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestNode> queue, bool runInParallel,
+    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestInformation> queue, bool runInParallel,
         TestSessionContext session)
     {
         while (queue.Count > 0)
@@ -133,7 +133,7 @@ internal class TestsExecutor
         }
     }
 
-    private async Task<TestWithResult> ProcessTest(TestNode test, bool runInParallel, TestSessionContext session)
+    private async Task<TestWithResult> ProcessTest(TestInformation test, bool runInParallel, TestSessionContext session)
     {
         NotifyTestStart();
         

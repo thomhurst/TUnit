@@ -61,14 +61,15 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             try
             {
-                var testNodes = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
+                var testInformations = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
                     .DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken)
                     .ToList();
 
                 if (context.Request is DiscoverTestExecutionRequest)
                 {
-                    foreach (var testNode in testNodes)
+                    foreach (var testInformation in testInformations)
                     {
+                        var testNode = testInformation.ToTestNode();
                         testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
                         
                         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
@@ -82,7 +83,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     stopwatch.Start();
                     
                     await ServiceProviderServiceExtensions.GetRequiredService<TestsExecutor>(_myServiceProvider)
-                        .ExecuteAsync(testNodes, context.Request.Session);
+                        .ExecuteAsync(testInformations, context.Request.Session);
                 }
                 else
                 {

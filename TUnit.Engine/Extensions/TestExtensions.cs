@@ -67,4 +67,10 @@ internal static class TestExtensions
     {
         return testNode.Properties.SingleOrDefault<T>();
     }
+    
+    public static TestNode WithProperty(this TestNode testNode, IProperty property)
+    {
+        testNode.Properties.Add(property);
+        return testNode;
+    }
 }

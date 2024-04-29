@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
@@ -37,18 +38,13 @@ internal class SingleTestExecutor : IDataProducer
         _testInvoker = testInvoker;
     }
 
-    public async Task<TUnitTestResult> ExecuteTestAsync(TestNode testNode, TestSessionContext session)
+    public async Task<TUnitTestResult> ExecuteTestAsync(TestInformation test, TestSessionContext session)
     {
         if(_cancellationTokenSource.IsCancellationRequested)
         {
             var now = DateTimeOffset.Now;
             
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
-            {
-                Uid = testNode.Uid,
-                DisplayName = testNode.DisplayName,
-                Properties = new PropertyBag(new CancelledTestNodeStateProperty())
-            }));
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode().WithProperty(new CancelledTestNodeStateProperty())));
 
             return new TUnitTestResult
             {
@@ -63,18 +59,13 @@ internal class SingleTestExecutor : IDataProducer
         
         var start = DateTimeOffset.Now;
 
-        await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
-        {
-            Uid = testNode.Uid,
-            DisplayName = testNode.DisplayName,
-            Properties = new PropertyBag(InProgressTestNodeStateProperty.CachedInstance)
-        }));
+        await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
         UnInvokedTest? unInvokedTest;
         TestContext? testContext = null;
         try
         {
-            unInvokedTest = TestDictionary.GetTest(testNode.Uid);
+            unInvokedTest = TestDictionary.GetTest(test.TestId);
             testContext = unInvokedTest.TestContext;
 
             foreach (var applicableTestAttribute in unInvokedTest.ApplicableTestAttributes)
@@ -98,16 +89,10 @@ internal class SingleTestExecutor : IDataProducer
 
             var end = DateTimeOffset.Now;
 
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
-            {
-                Uid = testNode.Uid,
-                DisplayName = testNode.DisplayName,
-                Properties = new PropertyBag
-                (
-                    PassedTestNodeStateProperty.CachedInstance,
-                    new TimingProperty(new TimingInfo(start, end, end - start))
-                )
-            }));
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode()
+                    .WithProperty(PassedTestNodeStateProperty.CachedInstance)
+                    .WithProperty(new TimingProperty(new TimingInfo(start, end, end - start)))
+            ));
 
             return new TUnitTestResult
             {
@@ -123,17 +108,10 @@ internal class SingleTestExecutor : IDataProducer
         }
         catch (SkipTestException skipTestException)
         {
-            await _logger.LogInformationAsync($"Skipping {testNode.DisplayName}...");
+            await _logger.LogInformationAsync($"Skipping {test.DisplayName}...");
             
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
-            {
-                Uid = testNode.Uid,
-                DisplayName = testNode.DisplayName,
-                Properties = new PropertyBag
-                (
-                    new SkippedTestNodeStateProperty(skipTestException.Reason)
-                )
-            }));
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, 
+                test.ToTestNode().WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
             
             var unitTestResult = new TUnitTestResult
             {
@@ -156,16 +134,9 @@ internal class SingleTestExecutor : IDataProducer
         {
             var end = DateTimeOffset.Now;
 
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, new TestNode
-            {
-                Uid = testNode.Uid,
-                DisplayName = testNode.DisplayName,
-                Properties = new PropertyBag
-                (
-                    new FailedTestNodeStateProperty(e),
-                    new TimingProperty(new TimingInfo(start, end, end-start))
-                )
-            }));
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode()
+                .WithProperty(new FailedTestNodeStateProperty(e))
+                .WithProperty(new TimingProperty(new TimingInfo(start, end, end-start)))));
             
             var unitTestResult = new TUnitTestResult
             {
