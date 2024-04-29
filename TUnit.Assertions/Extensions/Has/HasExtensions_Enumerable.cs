@@ -16,7 +16,7 @@ public static partial class HasExtensions
     {
         return has.Wrap(new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(
             has.AssertionBuilder.AppendCallerMethod(null),
-            0)
+            1)
         );
     }
     

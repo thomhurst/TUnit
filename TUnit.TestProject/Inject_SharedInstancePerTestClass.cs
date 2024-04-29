@@ -32,6 +32,7 @@ public class Inject_SharedPerType1
         }
 
         SharedInjectedTypesContainer.TestClass1Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).Has.SingleItem();
     }
     
     [Test, Repeat(5)]
@@ -45,6 +46,7 @@ public class Inject_SharedPerType1
         }
 
         SharedInjectedTypesContainer.TestClass1Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).Has.SingleItem();
     }
     
     [Test, Repeat(5)]
@@ -58,6 +60,7 @@ public class Inject_SharedPerType1
         }
 
         SharedInjectedTypesContainer.TestClass1Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).Has.SingleItem();
     }
 }
 
@@ -82,6 +85,7 @@ public class Inject_SharedPerType2
         }
 
         SharedInjectedTypesContainer.TestClass2Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).Has.SingleItem();
     }
     
     [Test, Repeat(5)]
@@ -95,6 +99,7 @@ public class Inject_SharedPerType2
         }
 
         SharedInjectedTypesContainer.TestClass2Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).Has.SingleItem();
     }
     
     [Test, Repeat(5)]
@@ -108,6 +113,7 @@ public class Inject_SharedPerType2
         }
 
         SharedInjectedTypesContainer.TestClass2Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).Has.SingleItem();
     }
 }
 
@@ -132,6 +138,7 @@ public class Inject_SharedPerType3
         }
 
         SharedInjectedTypesContainer.TestClass3Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).Has.SingleItem();
     }
     
     [Test, Repeat(5)]
@@ -145,6 +152,7 @@ public class Inject_SharedPerType3
         }
 
         SharedInjectedTypesContainer.TestClass3Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).Has.SingleItem();
     }
     
     [Test, Repeat(5)]
@@ -158,5 +166,6 @@ public class Inject_SharedPerType3
         }
 
         SharedInjectedTypesContainer.TestClass3Instances.Add(_dummyReferenceTypeClass);
+        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).Has.SingleItem();
     }
 }
