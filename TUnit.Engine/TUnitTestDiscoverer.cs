@@ -20,7 +20,8 @@ internal class TUnitTestDiscoverer
     {
         cancellationToken.ThrowIfCancellationRequested();
         
-        return _testsLoader.GetTests()
-            .Where(testDetails => _testFilterService.MatchesTest(discoverTestExecutionRequest?.Filter, testDetails));
+        var tests = _testsLoader.GetTests();
+
+        return _testFilterService.FilterTests(discoverTestExecutionRequest?.Filter, tests);
     }
 }

@@ -14,7 +14,7 @@ public class TestFilterService
         _logger = loggerFactory.CreateLogger<TestFilterService>();
     }
     
-    public IEnumerable<TestInformation> FilterTests(ITestExecutionFilter? testExecutionFilter, List<TestInformation> testNodes)
+    public IEnumerable<TestInformation> FilterTests(ITestExecutionFilter? testExecutionFilter, IEnumerable<TestInformation> testNodes)
     {
         if (testExecutionFilter is null)
         {
