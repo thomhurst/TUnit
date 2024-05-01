@@ -13,7 +13,12 @@ namespace TUnit.TestProject;
 public class Base1
 {
     [BeforeAllTestsInClass]
-    public static async Task Setup1()
+    public static async Task BeforeAll1()
+    {
+    }
+    
+    [BeforeEachTest]
+    public async Task BeforeEach1()
     {
     }
 }
@@ -21,7 +26,12 @@ public class Base1
 public class Base2 : Base1
 {
     [BeforeAllTestsInClass]
-    public static async Task Setup2()
+    public static async Task BeforeAll2()
+    {
+    }
+    
+    [BeforeEachTest]
+    public async Task BeforeEach3()
     {
     }
 }
@@ -29,7 +39,12 @@ public class Base2 : Base1
 public class Base3 : Base2
 {
     [BeforeAllTestsInClass]
-    public static async Task Setup3()
+    public static async Task BeforeAll3()
+    {
+    }
+    
+    [BeforeEachTest]
+    public async Task BeforeEach3()
     {
     }
 }
