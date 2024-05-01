@@ -1,0 +1,215 @@
+﻿using System.Collections.Concurrent;
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Core;
+
+namespace TUnit.TestProject;
+
+public static class SharedInjectedKeyedContainer
+{
+    public static readonly ConcurrentDictionary<string, List<DummyReferenceTypeClass>> InstancesPerKey = new();
+}
+
+[Inject<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+public class Inject_SharedPerKey1
+{
+    private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
+    
+    public Inject_SharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass)
+    {
+        _dummyReferenceTypeClass = dummyReferenceTypeClass;
+    }
+
+    [Test, Repeat(5)]
+    public async Task Test1()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+    
+    [Test, Repeat(5)]
+    public async Task Test2()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+    
+    [Test, Repeat(5)]
+    public async Task Test3()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+}
+
+[Inject<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+public class Inject_SharedPerKey2
+{
+    private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
+    
+    public Inject_SharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass)
+    {
+        _dummyReferenceTypeClass = dummyReferenceTypeClass;
+    }
+
+    [Test, Repeat(5)]
+    public async Task Test1()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+    
+    [Test, Repeat(5)]
+    public async Task Test2()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+    
+    [Test, Repeat(5)]
+    public async Task Test3()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+}
+
+[Inject<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+public class Inject_SharedPerKey3
+{
+    private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
+    
+    public Inject_SharedPerKey3(DummyReferenceTypeClass dummyReferenceTypeClass)
+    {
+        _dummyReferenceTypeClass = dummyReferenceTypeClass;
+    }
+
+    [Test, Repeat(5)]
+    public async Task Test1()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+    
+    [Test, Repeat(5)]
+    public async Task Test2()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+    
+    [Test, Repeat(5)]
+    public async Task Test3()
+    {
+        if (SharedInjectedKeyedContainer.InstancesPerKey.TryGetValue(TestContext.Current!.TestInformation.TestName, out var list)
+            && list.Any())
+        {
+            await Assert.That(list).Does.Contain(_dummyReferenceTypeClass);
+        }
+        
+        foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestInformation.TestName))
+        {
+            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+        }
+
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list.Add(_dummyReferenceTypeClass);
+        await Assert.That(list.Distinct()).Has.SingleItem();
+    }
+}
