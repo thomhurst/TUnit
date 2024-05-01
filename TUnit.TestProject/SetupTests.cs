@@ -31,7 +31,7 @@ public class Base2 : Base1
     }
     
     [BeforeEachTest]
-    public async Task BeforeEach3()
+    public async Task BeforeEach2()
     {
     }
 }

@@ -13,7 +13,7 @@ public static class RunHelpers
         await action();
     }
     
-    public static async ValueTask RunAsync(Func<ValueTask> action)
+    public static async Task RunAsync(Func<ValueTask> action)
     {
         await action();
     }
@@ -43,7 +43,7 @@ public static class RunHelpers
         }
     }
     
-    public static async ValueTask RunSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
+    public static async Task RunSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
     {
         try
         {

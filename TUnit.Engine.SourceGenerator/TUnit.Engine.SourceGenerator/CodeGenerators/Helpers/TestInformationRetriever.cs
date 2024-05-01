@@ -60,11 +60,11 @@ internal static class TestInformationRetriever
 
     public static int GetOrder(AttributeData[] methodAndClassAttributes)
     {
-        var retryAttribute = methodAndClassAttributes
+        var notInParallelAttribute = methodAndClassAttributes
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == "global::TUnit.Core.OrderAttribute");
+                                 == "global::TUnit.Core.NotInParallelAttribute");
         
-        return retryAttribute?.ConstructorArguments.First().Value as int? ?? int.MaxValue;
+        return notInParallelAttribute?.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? int.MaxValue;
     }
 
     public static string GetTimeOut(AttributeData[] methodAndClassAttributes)
