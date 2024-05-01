@@ -1,6 +1,5 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
-using TUnit.Engine.Models.Properties;
 
 namespace TUnit.Engine.Extensions;
 
@@ -27,31 +26,6 @@ internal static class TestExtensions
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
                     ),
-                new TimeoutProperty(testDetails.Timeout ?? TimeSpan.FromMinutes(30)),
-                new CategoriesProperty(testDetails.Categories),
-                new RepeatCountProperty(testDetails.RepeatCount),
-                new RetryCountProperty(testDetails.RetryCount),
-                new ClassInformationProperty
-                {
-                    SimpleName = testDetails.ClassType.Name,
-                    FullyQualifiedName = testDetails.ClassType.FullName!,
-                    AssemblyQualifiedName = testDetails.ClassType.AssemblyQualifiedName!
-                },
-                new ClassParameterTypesProperty(testDetails.TestClassParameterTypes?.Select(x => x.FullName!).ToArray()),
-                new MethodParameterTypesProperty(testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray()),
-                new ClassArgumentsProperty(testDetails.TestClassArguments),
-                new MethodArgumentsProperty(testDetails.TestMethodArguments),
-                new NotInParallelConstraintKeysProperty(testDetails.NotInParallelConstraintKeys),
-                new OrderProperty(testDetails.Order),
-                new TestInformationProperty
-                {
-                    UniqueId = testDetails.TestId,
-                    TestName = testDetails.TestName,
-                    IsStatic = testDetails.MethodInfo.IsStatic,
-                    ClassExecutionCount = testDetails.ClassRepeatCount,
-                    MethodExecutionCount = testDetails.MethodRepeatCount
-                },
-                new AssemblyProperty(testDetails.ClassType.Assembly.FullName!)
             ])
         };
         

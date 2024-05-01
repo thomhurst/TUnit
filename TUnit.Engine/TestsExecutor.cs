@@ -1,10 +1,7 @@
-﻿using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Logging;
+﻿using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
-using TUnit.Engine.Models.Properties;
 
 namespace TUnit.Engine;
 
