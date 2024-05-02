@@ -1,6 +1,8 @@
+using TUnit.Engine.SourceGenerator.CodeGenerators;
+
 namespace TUnit.Engine.SourceGenerator.Tests;
 
-public class NotInParallelTests : TestsBase
+internal class NotInParallelTests : TestsBase<TestsGenerator>
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,

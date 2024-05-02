@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
-public class ReferencesHelper
+internal class ReferencesHelper
 {
     public static readonly List<PortableExecutableReference> References =
         AppDomain.CurrentDomain.GetAssemblies()

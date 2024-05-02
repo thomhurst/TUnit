@@ -2,7 +2,7 @@
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
 
-namespace TUnit.TestProject;
+namespace TUnit.TestProject.AbstractTests;
 
 public abstract class AbstractBaseClass
 {
@@ -15,20 +15,4 @@ public abstract class AbstractBaseClass
     }
 
     protected abstract string GetName();
-}
-
-public class ConcreteClass1 : AbstractBaseClass
-{
-    protected override string GetName()
-    {
-        return "Concrete1";
-    }
-}
-
-public class ConcreteClass2 : AbstractBaseClass
-{
-    protected override string GetName()
-    {
-        return "ConcreteClass2";
-    }
 }

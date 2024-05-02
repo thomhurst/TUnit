@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
-public class Git
+internal class Git
 {
     private static readonly Lazy<DirectoryInfo> LazyRootDirectory = new(() =>
     {

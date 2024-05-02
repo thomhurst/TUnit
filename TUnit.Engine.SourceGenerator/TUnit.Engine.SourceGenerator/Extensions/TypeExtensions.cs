@@ -23,8 +23,19 @@ internal static class TypeExtensions
 
         var symbol = namedTypeSymbol;
 
-        while (symbol is not null and not IErrorTypeSymbol)
+        while (symbol is not null)
         {
+            if (symbol is IErrorTypeSymbol)
+            {
+                throw new Exception("ErrorTypeSymbol - Have you added any missing file sources to the compilation?");
+            }
+
+            if (symbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
+                is "global::System.Object")
+            {
+                break;
+            }
+            
             list.AddRange(symbol.GetMembers());
             symbol = symbol.BaseType;
         }

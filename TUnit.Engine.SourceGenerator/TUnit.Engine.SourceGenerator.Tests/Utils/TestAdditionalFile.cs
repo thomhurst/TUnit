@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace TUnit.Engine.SourceGenerator.Tests.Utils;
 
-public class TestAdditionalFile : AdditionalText
+internal class TestAdditionalFile : AdditionalText
 {
     private readonly SourceText _text;
 
