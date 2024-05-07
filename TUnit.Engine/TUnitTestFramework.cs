@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
+using TUnit.Core;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
@@ -64,6 +65,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 var testInformations = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
                     .DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken)
                     .ToList();
+                
+                var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
 
                 if (context.Request is DiscoverTestExecutionRequest)
                 {
@@ -77,10 +80,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                             testNode: testNode)
                         );
                     }
+
+                    await NotifyFailedTests(context, failedToInitializeTests, true);
                 }
                 else if (context.Request is RunTestExecutionRequest)
                 {
                     stopwatch.Start();
+                    
+                    await NotifyFailedTests(context, failedToInitializeTests, false);
                     
                     await ServiceProviderServiceExtensions.GetRequiredService<TestsExecutor>(_myServiceProvider)
                         .ExecuteAsync(testInformations, context.Request.Session);
@@ -100,7 +107,32 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             }
         }
     }
-    
+
+    private async Task NotifyFailedTests(ExecuteRequestContext context,
+        IEnumerable<FailedInitializationTest> failedToInitializeTests, bool isDiscovered)
+    {
+        foreach (var failedToInitializeTest in failedToInitializeTests)
+        {
+            var failedNode = new TestNode
+            {
+                Uid = failedToInitializeTest.TestId,
+                DisplayName = failedToInitializeTest.DisplayName,
+                Properties = new PropertyBag(
+                    isDiscovered ? DiscoveredTestNodeStateProperty.CachedInstance : new FailedTestNodeStateProperty(failedToInitializeTest.Exception, "Test failed to initialize"),
+                    new TestFileLocationProperty(failedToInitializeTest.TestFilePath,
+                        new LinePositionSpan(new LinePosition(failedToInitializeTest.TestLineNumber, 0),
+                            new LinePosition(failedToInitializeTest.TestLineNumber, 0))
+                    )
+                )
+            };
+                        
+            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+                sessionUid: context.Request.Session.SessionUid,
+                testNode: failedNode)
+            );
+        }
+    }
+
     public Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {
         return Task.FromResult(new CloseTestSessionResult

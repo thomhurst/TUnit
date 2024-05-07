@@ -1,13 +1,17 @@
-﻿namespace TUnit.Engine.SourceGenerator.Models;
+﻿using TUnit.Engine.SourceGenerator.Enums;
+
+namespace TUnit.Engine.SourceGenerator.Models;
 
 internal record Argument
 {
-    public Argument(string type, string invocation)
+    public Argument(ArgumentSource argumentSource, string type, string invocation)
     {
+        ArgumentSource = argumentSource;
         Type = type;
         Invocation = MapValue(type, invocation);
     }
-    
+
+    public ArgumentSource ArgumentSource { get; }
     public string Type { get; }
     public string Invocation { get; }
 

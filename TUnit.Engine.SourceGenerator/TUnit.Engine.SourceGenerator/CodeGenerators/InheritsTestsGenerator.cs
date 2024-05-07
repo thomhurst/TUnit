@@ -87,8 +87,18 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
 
+            sourceBuilder.WriteLine("try");
+            sourceBuilder.WriteLine("{");
             GenericTestInvocationWriter.GenerateTestInvocationCode(sourceBuilder, modelTestSourceDataModel);
-
+            sourceBuilder.WriteLine("}");
+            sourceBuilder.WriteLine("catch (Exception exception)");
+            sourceBuilder.WriteLine("{");
+            sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.RegisterFailedTest(\"{modelTestSourceDataModel.TestId}\", new global::TUnit.Core.FailedInitializationTest");
+            sourceBuilder.WriteLine("{");
+            FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, modelTestSourceDataModel);
+            sourceBuilder.WriteLine("});");
+            sourceBuilder.WriteLine("}");
+            
             sourceBuilder.WriteLine("}");
             sourceBuilder.WriteLine("}");
 

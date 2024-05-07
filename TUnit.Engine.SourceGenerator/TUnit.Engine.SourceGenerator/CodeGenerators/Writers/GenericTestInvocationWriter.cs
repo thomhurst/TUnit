@@ -12,7 +12,22 @@ internal static class GenericTestInvocationWriter
 
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
 
+        var hasEnumerableClassData = testSourceDataModel.IsEnumerableClassArguments;
+        var hasEnumerableMethodData = testSourceDataModel.IsEnumerableMethodArguments;
+
         sourceBuilder.WriteLine("{");
+
+        if (hasEnumerableClassData)
+        {
+            sourceBuilder.WriteLine($"foreach (var classData in {testSourceDataModel.ClassArguments.First().Invocation})");
+            sourceBuilder.WriteLine("{");
+        }
+        
+        if (hasEnumerableMethodData)
+        {
+            sourceBuilder.WriteLine($"foreach (var methodData in {testSourceDataModel.MethodArguments.First().Invocation})");
+            sourceBuilder.WriteLine("{");
+        }
 
         var classArguments = testSourceDataModel.GetClassArgumentsInvocations();
         var wasArgument = false;
@@ -101,6 +116,18 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("};");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.AddTest(\"{testId}\", unInvokedTest);");
+        
+        if (hasEnumerableClassData)
+        {
+            sourceBuilder.WriteLine("}");
+        }
+        
+        if (hasEnumerableMethodData)
+        {
+            sourceBuilder.WriteLine("}");
+        }
+
+        
         sourceBuilder.WriteLine("}");
     }
 

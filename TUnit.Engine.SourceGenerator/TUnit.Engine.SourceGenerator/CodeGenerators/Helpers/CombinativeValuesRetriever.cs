@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -30,7 +31,7 @@ internal static class CombinativeValuesRetriever
     private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> x, AttributeData[] methodAndClassAttributes)
     {
         return x.Select(y =>
-            new Argument(y.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            new Argument(ArgumentSource.CombinativeDataAttribute, y.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 TypedConstantParser.GetTypedConstantValue(y)))
             .WithTimeoutArgument(methodAndClassAttributes);
     }

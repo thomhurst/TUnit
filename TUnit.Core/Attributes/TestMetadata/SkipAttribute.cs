@@ -13,14 +13,14 @@ public class SkipAttribute : TUnitAttribute, IApplicableTestAttribute
         Reason = reason;
     }
 
-    public async Task Apply(TestContext testContext)
+    public Task Apply(TestContext testContext)
     {
-        await Task.CompletedTask;
-     
         if (ShouldSkipPredicate(testContext))
         {
             throw new SkipTestException(Reason);
         }
+
+        return Task.CompletedTask;
     }
 
     public virtual Func<TestContext, bool> ShouldSkipPredicate { get; } = _ => true;

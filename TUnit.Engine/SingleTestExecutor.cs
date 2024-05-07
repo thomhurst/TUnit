@@ -61,11 +61,15 @@ internal class SingleTestExecutor : IDataProducer
 
         await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
-        UnInvokedTest? unInvokedTest;
         TestContext? testContext = null;
         try
         {
-            unInvokedTest = TestDictionary.GetTest(test.TestId);
+            if (!TestDictionary.TryGetTest(test.TestId, out var unInvokedTest))
+            {
+                var failedInitializationTest = TestDictionary.GetFailedInitializationTest(test.TestId);
+                throw new TestFailedInitializationException($"The test {test.DisplayName} at {test.TestFilePath}:{test.TestLineNumber} failed to initialize", failedInitializationTest.Exception);
+            }
+
             testContext = unInvokedTest.TestContext;
 
             foreach (var applicableTestAttribute in unInvokedTest.ApplicableTestAttributes)

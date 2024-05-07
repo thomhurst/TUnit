@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -21,7 +22,7 @@ internal static class DataDrivenArgumentsRetriever
         var objectArray = argumentAttribute.ConstructorArguments.First().Values;
 
         return objectArray.Select(x =>
-            new Argument(TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
+            new Argument(ArgumentSource.ArgumentAttribute, TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
                 TypedConstantParser.GetTypedConstantValue(x))
         ).WithTimeoutArgument(testAndClassAttributes);
     }

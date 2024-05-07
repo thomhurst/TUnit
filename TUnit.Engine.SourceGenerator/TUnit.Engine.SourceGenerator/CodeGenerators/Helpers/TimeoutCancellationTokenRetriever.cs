@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -17,7 +18,7 @@ internal class TimeoutCancellationTokenRetriever
         if (timeoutAttribute != null)
         {
             var timeoutInMillis = (int) timeoutAttribute.ConstructorArguments.First().Value!;
-            return new Argument("global::System.Threading.CancellationToken", $"global::TUnit.Engine.EngineCancellationToken.CreateToken(global::System.TimeSpan.FromMilliseconds({timeoutInMillis}))");
+            return new Argument(ArgumentSource.TimeoutAttribute, "global::System.Threading.CancellationToken", $"global::TUnit.Engine.EngineCancellationToken.CreateToken(global::System.TimeSpan.FromMilliseconds({timeoutInMillis}))");
         }
 
         return null;

@@ -11,6 +11,9 @@ internal record TestSourceDataModel
     public required Argument[] ClassArguments { get; init; }
     public required Argument[] MethodArguments { get; init; }
     
+    public required bool IsEnumerableClassArguments { get; init; }
+    public required bool IsEnumerableMethodArguments { get; init; }
+    
     public required string TestId { get; init; }
     public required int Order { get; init; }
     public required int RetryCount { get; init; }
@@ -31,11 +34,24 @@ internal record TestSourceDataModel
     public required string AfterEachTestInvocations { get; init; }
 
     public IEnumerable<string> GetClassArgumentVariableNames()
-        => Enumerable.Range(0, ClassArguments.Length)
+    {
+        if (IsEnumerableClassArguments)
+        {
+            return ["classArg0"];
+        }
+
+        return Enumerable.Range(0, ClassArguments.Length)
             .Select(i => $"classArg{i}");
-    
+    }
+
     public IEnumerable<string> GetClassArgumentsInvocations()
     {
+        if (IsEnumerableClassArguments)
+        {
+            yield return "var classArg0 = classData;";
+            yield break;
+        }
+        
         var variableNames = GetClassArgumentVariableNames().ToList();
         for (var i = 0; i < ClassArguments.Length; i++)
         {
@@ -49,11 +65,24 @@ internal record TestSourceDataModel
         => string.Join(",", GetClassArgumentVariableNames());
     
     public IEnumerable<string> GetMethodArgumentVariableNames()
-        => Enumerable.Range(0, MethodArguments.Length)
+    {
+        if (IsEnumerableMethodArguments)
+        {
+            return ["methodArg0"];
+        }
+        
+        return Enumerable.Range(0, MethodArguments.Length)
             .Select(i => $"methodArg{i}");
-    
+    }
+
     public IEnumerable<string> GetMethodArgumentsInvocations()
     {
+        if (IsEnumerableMethodArguments)
+        {
+            yield return "var methodArg0 = methodData;";
+            yield break;
+        }
+        
         var variableNames = GetMethodArgumentVariableNames().ToList();
         for (var i = 0; i < MethodArguments.Length; i++)
         {

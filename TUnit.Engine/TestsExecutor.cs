@@ -45,8 +45,10 @@ internal class TestsExecutor
             
             foreach (var test in tests.AllTests)
             {
-                var matchingTest = TestDictionary.GetTest(test.TestId);
-                ClassHookOrchestrator.RegisterInstance(matchingTest.TestContext.TestInformation.ClassType);
+                if (TestDictionary.TryGetTest(test.TestId, out var matchingTest))
+                {
+                    ClassHookOrchestrator.RegisterInstance(matchingTest.TestContext.TestInformation.ClassType);
+                }
             }
         
             // TODO: I don't love this - Late setting a property.

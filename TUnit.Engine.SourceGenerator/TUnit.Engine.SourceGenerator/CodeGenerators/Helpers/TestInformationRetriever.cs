@@ -8,6 +8,8 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class TestInformationRetriever
 {
+    private const int DefaultOrder = int.MaxValue / 2;
+
     public static string GetNotInParallelConstraintKeys(AttributeData[] methodAndClassAttributes)
     {
         var notInParallelAttributes = methodAndClassAttributes
@@ -64,7 +66,7 @@ internal static class TestInformationRetriever
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                  == "global::TUnit.Core.NotInParallelAttribute");
         
-        return notInParallelAttribute?.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? int.MaxValue;
+        return notInParallelAttribute?.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? DefaultOrder;
     }
 
     public static string GetTimeOut(AttributeData[] methodAndClassAttributes)
@@ -91,7 +93,8 @@ internal static class TestInformationRetriever
             .Select(x => $"\"{x.ConstructorArguments.First().Value}\"");
     }
 
-    public static string GetTestId(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, int classRepeatCount,
+    public static string GetTestId(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol,
+        AttributeData testAttribute, IEnumerable<Argument> testArguments, int classRepeatCount,
         int methodRepeatCount)
     {
         // Format must match TestDetails.GenerateUniqueId, but we can't share code
@@ -106,8 +109,20 @@ internal static class TestInformationRetriever
         var classParameterTypes = GetTypes(classParameters);
 
         var methodParameterTypes = GetTypes(methodSymbol.Parameters);
+
+        var argumentsSourcePrefix = GetArgumentSourcePrefix(testArguments);
         
-        return $"{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{classRepeatCount}.{methodParameterTypes}.{methodRepeatCount}";
+        return $"{argumentsSourcePrefix}{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{classRepeatCount}.{methodParameterTypes}.{methodRepeatCount}";
+    }
+
+    private static string GetArgumentSourcePrefix(IEnumerable<Argument> testArguments)
+    {
+        if (testArguments.FirstOrDefault()?.ArgumentSource is { } argumentSource)
+        {
+            return $"{argumentSource}:";
+        }
+        
+        return string.Empty;
     }
 
     public static string GetTypes(ImmutableArray<IParameterSymbol> parameters)

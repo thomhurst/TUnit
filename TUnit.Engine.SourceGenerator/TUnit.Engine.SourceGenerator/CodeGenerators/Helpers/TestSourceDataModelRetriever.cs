@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
@@ -38,21 +39,21 @@ internal static class TestSourceDataModelRetriever
 
     private static IEnumerable<TestSourceDataModel> GenerateSingleClassInstance(IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute,
-        IEnumerable<Argument>[] testArguments)
+        IEnumerable<Argument>[] testArgumentsCollection)
     {
         var methodCount = 0;
 
         for (var i = 1; i <= runCount; i++)
         {
-            if (!testArguments.Any())
+            if (!testArgumentsCollection.Any())
             {
                 yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, [], 1, ++methodCount);
                 continue;
             }
 
-            foreach (var testArgument in testArguments)
+            foreach (var testArguments in testArgumentsCollection)
             {
-                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, testArgument, 1,
+                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, [..testArguments], 1,
                     ++methodCount);
             }
         }
@@ -60,7 +61,7 @@ internal static class TestSourceDataModelRetriever
 
     private static IEnumerable<TestSourceDataModel> GenerateMultipleClassInstances(IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, Argument[] classArguments,
-        IEnumerable<Argument>[] testArguments)
+        IEnumerable<Argument>[] testArgumentsCollection)
     {
         var classCount = 0;
         foreach (var classArgument in classArguments)
@@ -70,17 +71,17 @@ internal static class TestSourceDataModelRetriever
 
             for (var i = 1; i <= runCount; i++)
             {
-                if (!testArguments.Any())
+                if (!testArgumentsCollection.Any())
                 {
                     yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, [],
                         classCount, ++methodCount);
                     continue;
                 }
                 
-                foreach (var testArgument in testArguments)
+                foreach (var testArguments in testArgumentsCollection)
                 {
                     yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument,
-                        testArgument, classCount, ++methodCount);
+                        [..testArguments], classCount, ++methodCount);
                 }
             }
         }
@@ -91,15 +92,15 @@ internal static class TestSourceDataModelRetriever
         INamedTypeSymbol namedTypeSymbol,
         AttributeData testAttribute,
         Argument? classArgument,
-        IEnumerable<Argument> testArguments,
+        Argument[] testArguments,
         int currentClassCount,
         int currentMethodCount)
     {
         var allAttributes = methodSymbol.GetAttributesIncludingClass(namedTypeSymbol);
-
+        
         return new TestSourceDataModel
         {
-            TestId = TestInformationRetriever.GetTestId(namedTypeSymbol, methodSymbol, currentClassCount,
+            TestId = TestInformationRetriever.GetTestId(namedTypeSymbol, methodSymbol, testAttribute, testArguments, currentClassCount,
                 currentMethodCount),
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName =
@@ -115,7 +116,9 @@ internal static class TestSourceDataModelRetriever
             Categories = string.Join(", ", TestInformationRetriever.GetCategories(allAttributes)),
             NotInParallelConstraintKeys = TestInformationRetriever.GetNotInParallelConstraintKeys(allAttributes),
             ClassArguments = classArgument == null ? [] : [classArgument], // TODO: Proper array at some point?
-            MethodArguments = testArguments.ToArray(),
+            IsEnumerableClassArguments = classArgument?.ArgumentSource == ArgumentSource.EnumerableMethodDataAttribute,
+            IsEnumerableMethodArguments = testArguments.FirstOrDefault()?.ArgumentSource == ArgumentSource.EnumerableMethodDataAttribute,
+            MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value!.ToString(),
             LineNumber = (int)testAttribute.ConstructorArguments[1].Value!,
             BeforeEachTestInvocations = BeforeEachTestRetriever.GenerateCode(namedTypeSymbol),
