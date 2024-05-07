@@ -93,12 +93,14 @@ internal static class TestInformationRetriever
             .Select(x => $"\"{x.ConstructorArguments.First().Value}\"");
     }
 
-    public static string GetTestId(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol,
-        AttributeData testAttribute, IEnumerable<Argument> testArguments, int classRepeatCount,
+    public static string GetTestId(
+        INamedTypeSymbol classSymbol, 
+        IMethodSymbol methodSymbol,
+        AttributeData testAttribute, 
+        IEnumerable<Argument> testArguments, 
+        int classRepeatCount,
         int methodRepeatCount)
     {
-        // Format must match TestDetails.GenerateUniqueId, but we can't share code
-        // as we're inside a source generator
         var fullyQualifiedClassName =
             classSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
