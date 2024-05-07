@@ -13,6 +13,7 @@ internal class EnumerableDataSourceDrivenTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
             
             Assert.That(generatedFiles[0], Does.Contain("foreach (var methodData in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())"));
-            Assert.That(generatedFiles[0], Does.Contain("foreach (var methodData in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())"));
+            Assert.That(generatedFiles[0], Does.Contain("var methodArg0 = methodData;"));
+            Assert.That(generatedFiles[0], Does.Contain("TestMethodArguments = [methodArg0],"));
         });
 }
