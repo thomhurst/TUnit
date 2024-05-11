@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
@@ -22,14 +21,14 @@ internal static class TestSourceDataModelRetriever
             testType = testAttribute.GetTestType();
         }
 
-        var classArguments = ClassArgumentsRetriever.GetClassArguments(namedTypeSymbol).ToArray();
+        var classArguments = ClassArgumentsRetriever.GetClassArguments(namedTypeSymbol);
         var testArguments = MethodArgumentsRetriever.GetMethodArguments(methodSymbol, namedTypeSymbol, testType).ToArray();
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
 
         var runCount = repeatCount + 1;
         
-        if (!classArguments.Any())
+        if (!classArguments.Arguments.Any())
         {
             return GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, runCount, testAttribute, testArguments);
         }
@@ -39,7 +38,7 @@ internal static class TestSourceDataModelRetriever
 
     private static IEnumerable<TestSourceDataModel> GenerateSingleClassInstance(IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute,
-        IEnumerable<Argument>[] testArgumentsCollection)
+        ArgumentsContainer[] testArgumentsCollection)
     {
         var methodCount = 0;
 
@@ -47,24 +46,47 @@ internal static class TestSourceDataModelRetriever
         {
             if (!testArgumentsCollection.Any())
             {
-                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, [], 1, ++methodCount);
+                yield return GetTestSourceDataModel(new TestGenerationContext()
+                {
+                    MethodSymbol = methodSymbol,
+                    ClassSymbol = namedTypeSymbol,
+                    ClassArguments = [],
+                    TestArguments = [],
+                    ClassDataAttribute = null,
+                    TestDataAttribute = null,
+                    RepeatCount = ++methodCount,
+                    TestAttribute = testAttribute,
+                    EnumerableTestMethodDataCurrentCount = 0,
+                    EnumerableClassMethodDataCurrentCount = null
+                });
                 continue;
             }
 
             foreach (var testArguments in testArgumentsCollection)
             {
-                yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, null, [..testArguments], 1,
-                    ++methodCount);
+                yield return GetTestSourceDataModel(new TestGenerationContext()
+                {
+                    MethodSymbol = methodSymbol,
+                    ClassSymbol = namedTypeSymbol,
+                    ClassArguments = [],
+                    TestArguments = testArguments.Arguments,
+                    ClassDataAttribute = null,
+                    TestDataAttribute = testArguments.DataAttribute,
+                    RepeatCount = ++methodCount,
+                    TestAttribute = testAttribute,
+                    EnumerableTestMethodDataCurrentCount = 0,
+                    EnumerableClassMethodDataCurrentCount = null
+                });
             }
         }
     }
 
     private static IEnumerable<TestSourceDataModel> GenerateMultipleClassInstances(IMethodSymbol methodSymbol,
-        INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, Argument[] classArguments,
-        IEnumerable<Argument>[] testArgumentsCollection)
+        INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, ArgumentsContainer classArguments,
+        ArgumentsContainer[] testArgumentsCollection)
     {
         var classCount = 0;
-        foreach (var classArgument in classArguments)
+        foreach (var classArgument in classArguments.Arguments)
         {
             classCount++;
             var methodCount = 0;
@@ -73,41 +95,63 @@ internal static class TestSourceDataModelRetriever
             {
                 if (!testArgumentsCollection.Any())
                 {
-                    yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument, [],
-                        classCount, ++methodCount);
+                    yield return GetTestSourceDataModel(new TestGenerationContext()
+                    {
+                        MethodSymbol = methodSymbol,
+                        ClassSymbol = namedTypeSymbol,
+                        ClassArguments = classArguments.Arguments,
+                        TestArguments = [],
+                        ClassDataAttribute = classArguments.DataAttribute,
+                        TestDataAttribute = null,
+                        RepeatCount = ++methodCount,
+                        TestAttribute = testAttribute,
+                        EnumerableTestMethodDataCurrentCount = 0,
+                        EnumerableClassMethodDataCurrentCount = classCount
+                    });
                     continue;
                 }
                 
                 foreach (var testArguments in testArgumentsCollection)
                 {
-                    yield return GetTestSourceDataModel(methodSymbol, namedTypeSymbol, testAttribute, classArgument,
-                        [..testArguments], classCount, ++methodCount);
+                    yield return GetTestSourceDataModel(new TestGenerationContext()
+                    {
+                        MethodSymbol = methodSymbol,
+                        ClassSymbol = namedTypeSymbol,
+                        ClassArguments = classArguments.Arguments,
+                        TestArguments = testArguments.Arguments,
+                        ClassDataAttribute = classArguments.DataAttribute,
+                        TestDataAttribute = testArguments.DataAttribute,
+                        RepeatCount = ++methodCount,
+                        TestAttribute = testAttribute,
+                        EnumerableTestMethodDataCurrentCount = 0,
+                        EnumerableClassMethodDataCurrentCount = null
+                    });
                 }
             }
         }
     }
 
-    private static TestSourceDataModel GetTestSourceDataModel(
-        IMethodSymbol methodSymbol,
-        INamedTypeSymbol namedTypeSymbol,
-        AttributeData testAttribute,
-        Argument? classArgument,
-        Argument[] testArguments,
-        int currentClassCount,
-        int currentMethodCount)
+    private static TestSourceDataModel GetTestSourceDataModel(TestGenerationContext testGenerationContext)
     {
+        var methodSymbol = testGenerationContext.MethodSymbol;
+        var namedTypeSymbol = testGenerationContext.ClassSymbol;
+        var classArgument = testGenerationContext.ClassArguments;
+        var testArguments = testGenerationContext.TestArguments;
+        var testAttribute = testGenerationContext.TestAttribute;
+        var currentClassCount = 0;
+        var currentMethodCount = testGenerationContext.EnumerableTestMethodDataCurrentCount;
+        
         var allAttributes = methodSymbol.GetAttributesIncludingClass(namedTypeSymbol);
         
         return new TestSourceDataModel
         {
-            TestId = TestInformationRetriever.GetTestId(namedTypeSymbol, methodSymbol, testAttribute, testArguments, currentClassCount,
-                currentMethodCount),
+            TestId = TestInformationRetriever.GetTestId(testGenerationContext),
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName =
                 namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             MinimalTypeName = namedTypeSymbol.Name,
             CurrentClassRepeatCount = currentClassCount,
-            CurrentMethodRepeatCount = currentMethodCount,
+            CurrentMethodRepeatCount = testGenerationContext.RepeatCount,
             Timeout = TestInformationRetriever.GetTimeOut(allAttributes),
             ReturnType = TestInformationRetriever.GetReturnType(methodSymbol),
             Order = TestInformationRetriever.GetOrder(allAttributes),
@@ -115,9 +159,9 @@ internal static class TestSourceDataModelRetriever
             RepeatCount = TestInformationRetriever.GetRepeatCount(allAttributes),
             Categories = string.Join(", ", TestInformationRetriever.GetCategories(allAttributes)),
             NotInParallelConstraintKeys = TestInformationRetriever.GetNotInParallelConstraintKeys(allAttributes),
-            ClassArguments = classArgument == null ? [] : [classArgument], // TODO: Proper array at some point?
-            IsEnumerableClassArguments = classArgument?.ArgumentSource == ArgumentSource.EnumerableMethodDataAttribute,
-            IsEnumerableMethodArguments = testArguments.FirstOrDefault()?.ArgumentSource == ArgumentSource.EnumerableMethodDataAttribute,
+            ClassArguments = classArgument,
+            IsEnumerableClassArguments = testGenerationContext.EnumerableClassMethodDataCurrentCount.HasValue,
+            IsEnumerableMethodArguments = testGenerationContext.EnumerableTestMethodDataCurrentCount.HasValue,
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value!.ToString(),
             LineNumber = (int)testAttribute.ConstructorArguments[1].Value!,

@@ -8,8 +8,12 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class BasicTestArgumentsRetriever
 {
-    public static IEnumerable<Argument> Parse(IEnumerable<AttributeData> testAndClassAttributes)
+    public static ArgumentsContainer Parse(IEnumerable<AttributeData> testAndClassAttributes)
     {
-        return Array.Empty<Argument>().WithTimeoutArgument(testAndClassAttributes);
+        return new ArgumentsContainer
+        {
+            DataAttribute = null,
+            Arguments = [..Array.Empty<Argument>().WithTimeoutArgument(testAndClassAttributes)]
+        };
     }
 }

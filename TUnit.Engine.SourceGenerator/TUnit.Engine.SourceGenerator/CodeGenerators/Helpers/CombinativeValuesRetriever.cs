@@ -11,7 +11,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 internal static class CombinativeValuesRetriever
 {
     // We return a List of a List. Inner List is for each test.
-    public static IEnumerable<IEnumerable<Argument>> Parse(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
+    public static IEnumerable<ArgumentsContainer> Parse(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
     {
         var combinativeValuesAttributes = methodSymbol.Parameters
             .Select(x => x.GetAttributes().FirstOrDefault(x => x.GetFullyQualifiedAttributeTypeName()
@@ -25,7 +25,11 @@ internal static class CombinativeValuesRetriever
         return GetCombinativeArgumentsList(mappedToConstructorArrays)
             .Select(x =>
                 MapToArgumentEnumerable(x, methodAndClassAttributes)
-            );
+            ).Select(x => new ArgumentsContainer
+            {
+                DataAttribute = null,
+                Arguments = [..x]
+            });
     }
 
     private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> x, AttributeData[] methodAndClassAttributes)

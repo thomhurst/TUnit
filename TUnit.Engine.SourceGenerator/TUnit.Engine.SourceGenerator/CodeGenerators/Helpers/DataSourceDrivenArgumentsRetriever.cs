@@ -10,7 +10,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataSourceDrivenArgumentsRetriever
 {
-    public static IEnumerable<IEnumerable<Argument>> Parse(
+    public static IEnumerable<ArgumentsContainer> Parse(
         INamedTypeSymbol namedTypeSymbol,
         ImmutableArray<AttributeData> methodAttributes, 
         AttributeData[] testAndClassAttributes)
@@ -30,11 +30,18 @@ internal static class DataSourceDrivenArgumentsRetriever
             .Select(ParseClassData)
             .Select(x => x.WithTimeoutArgument(testAndClassAttributes));
 
-        return [
+        IEnumerable<IEnumerable<Argument>> args =
+        [
             ..methodData,
             ..enumerableMethodData,
             ..classData
-            ];
+        ];
+        
+        return args.Select(x => new ArgumentsContainer
+        {
+            DataAttribute = null,
+            Arguments = [..x]
+        });
     }
 
     private static IEnumerable<Argument> ParseMethodData(INamedTypeSymbol namedTypeSymbol,

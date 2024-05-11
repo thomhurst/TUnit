@@ -8,7 +8,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class MethodArgumentsRetriever
 {
-    public static IEnumerable<IEnumerable<Argument>> GetMethodArguments(IMethodSymbol methodSymbol, 
+    public static IEnumerable<ArgumentsContainer> GetMethodArguments(IMethodSymbol methodSymbol, 
         INamedTypeSymbol namedTypeSymbol,
         TestType testType)
     {

@@ -10,14 +10,18 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class ClassArgumentsRetriever
 {
-    public static IEnumerable<Argument> GetClassArguments(INamedTypeSymbol namedTypeSymbol)
+    public static ArgumentsContainer GetClassArguments(INamedTypeSymbol namedTypeSymbol)
     {
         var className =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         
         if (namedTypeSymbol.InstanceConstructors.First().Parameters.IsDefaultOrEmpty)
         {
-            yield break;
+            return new ArgumentsContainer
+            {
+                Arguments = [],
+                DataAttribute = null
+            };
         }
 
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
@@ -28,7 +32,11 @@ internal static class ClassArgumentsRetriever
                 ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.First().Value}()"
                 : $"{TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(dataSourceDrivenTestAttribute.ConstructorArguments[0])}.{dataSourceDrivenTestAttribute.ConstructorArguments[1].Value}()";
 
-            yield return new Argument(ArgumentSource.MethodDataAttribute, "var", arg);
+            return new ArgumentsContainer
+            {
+                DataAttribute = dataSourceDrivenTestAttribute,
+                Arguments = [new Argument(ArgumentSource.MethodDataAttribute, "var", arg)]
+            };
         }
 
         foreach (var classDataAttribute in namedTypeSymbol.GetAttributes()
@@ -36,7 +44,12 @@ internal static class ClassArgumentsRetriever
                                  == WellKnownFullyQualifiedClassNames.ClassDataAttribute.WithGlobalPrefix)) 
         {
             var fullyQualifiedTypeNameFromTypedConstantValue = TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(classDataAttribute.ConstructorArguments.First());
-            yield return new Argument(ArgumentSource.ClassDataAttribute, fullyQualifiedTypeNameFromTypedConstantValue, $"new {fullyQualifiedTypeNameFromTypedConstantValue}()");
+           
+            return new ArgumentsContainer
+            {
+                DataAttribute = classDataAttribute,
+                Arguments = [new Argument(ArgumentSource.ClassDataAttribute, fullyQualifiedTypeNameFromTypedConstantValue, $"new {fullyQualifiedTypeNameFromTypedConstantValue}()")]
+            };
         }
 
         foreach (var classDataAttribute in namedTypeSymbol.GetAttributes()
@@ -51,24 +64,47 @@ internal static class ClassArgumentsRetriever
             
             if (sharedArgumentType is "TUnit.Core.SharedType.None")
             {
-                yield return new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"new {fullyQualifiedGenericType}()");
+                return new ArgumentsContainer
+                {
+                    DataAttribute = classDataAttribute,
+                    Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"new {fullyQualifiedGenericType}()")]
+                };
             }
             
             if (sharedArgumentType is "TUnit.Core.SharedType.Globally")
             {
-                yield return new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())");
+                return new ArgumentsContainer
+                {
+                    DataAttribute = classDataAttribute,
+                    Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())")]
+                };
             }
             
             if (sharedArgumentType is "TUnit.Core.SharedType.ForClass")
             {
-                yield return new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())");
+                return new ArgumentsContainer
+                {
+                    DataAttribute = classDataAttribute,
+                    Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")]
+                };
             }
             
             if (sharedArgumentType is "TUnit.Core.SharedType.Keyed")
             {
                 var key = sharedArgument.Value?.GetType().GetProperty("Key")?.GetValue(sharedArgument.Value);
-                yield return new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())");
+                
+                return new ArgumentsContainer
+                {
+                    DataAttribute = classDataAttribute,
+                    Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")]
+                };
             }
         }
+        
+        return new ArgumentsContainer
+        {
+            Arguments = [],
+            DataAttribute = null
+        };
     }
 }

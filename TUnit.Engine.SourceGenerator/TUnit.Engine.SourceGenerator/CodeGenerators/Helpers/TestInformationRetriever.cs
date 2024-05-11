@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -93,28 +94,61 @@ internal static class TestInformationRetriever
             .Select(x => $"\"{x.ConstructorArguments.First().Value}\"");
     }
 
-    public static string GetTestId(
-        INamedTypeSymbol classSymbol, 
-        IMethodSymbol methodSymbol,
-        AttributeData testAttribute, 
-        IEnumerable<Argument> testArguments, 
-        int classRepeatCount,
-        int methodRepeatCount)
+    public static string GetTestId(TestGenerationContext testGenerationContext)
     {
-        var fullyQualifiedClassName =
-            classSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
+        var stringBuilder = new StringBuilder();
+        if (testGenerationContext.ClassDataAttribute != null)
+        {
+            stringBuilder.Append(testGenerationContext.ClassDataAttribute.AttributeClass!.ToDisplayString());
+            
+            if (testGenerationContext.EnumerableClassMethodDataCurrentCount != null)
+            {
+                stringBuilder.Append($":{testGenerationContext.EnumerableClassMethodDataCurrentCount}");
+            }
 
-        var testName = methodSymbol.Name;
+            stringBuilder.Append('.');
+        }
         
-        var classParameters = methodSymbol.ContainingType.Constructors.First().Parameters;
+        if (testGenerationContext.TestDataAttribute != null)
+        {
+            stringBuilder.Append(testGenerationContext.TestDataAttribute.AttributeClass!.ToDisplayString());
+            
+            if (testGenerationContext.EnumerableTestMethodDataCurrentCount != null)
+            {
+                stringBuilder.Append($":{testGenerationContext.EnumerableTestMethodDataCurrentCount}");
+            }
+        }
+        else
+        {
+            stringBuilder.Append(testGenerationContext.TestAttribute.AttributeClass!.ToDisplayString());
+        }
+        
+        stringBuilder.Append('.');
+        
+        var fullyQualifiedClassName =
+            testGenerationContext.ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
+
+        stringBuilder.Append(fullyQualifiedClassName);
+        stringBuilder.Append('.');
+        
+        var testName = testGenerationContext.MethodSymbol.Name;
+        
+        stringBuilder.Append(testName);
+        stringBuilder.Append('.');
+        
+        var classParameters = testGenerationContext.ClassSymbol.Constructors.First().Parameters;
         
         var classParameterTypes = GetTypes(classParameters);
-
-        var methodParameterTypes = GetTypes(methodSymbol.Parameters);
-
-        var argumentsSourcePrefix = GetArgumentSourcePrefix(testArguments);
         
-        return $"{argumentsSourcePrefix}{fullyQualifiedClassName}.{testName}.{classParameterTypes}.{classRepeatCount}.{methodParameterTypes}.{methodRepeatCount}";
+        stringBuilder.Append(classParameterTypes);
+
+        var methodParameterTypes = GetTypes(testGenerationContext.MethodSymbol.Parameters);
+
+        stringBuilder.Append(methodParameterTypes);
+
+        stringBuilder.Append(testGenerationContext.RepeatCount);
+        
+        return stringBuilder.ToString();
     }
 
     private static string GetArgumentSourcePrefix(IEnumerable<Argument> testArguments)
@@ -137,7 +171,7 @@ internal static class TestInformationRetriever
         var parameterTypesFullyQualified = parameters.Select(x => x.Type)
             .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix));
         
-        return $"({string.Join(",", parameterTypesFullyQualified)})";
+        return $"({string.Join(",", parameterTypesFullyQualified)}).";
     }
 
     public static string GetReturnType(IMethodSymbol methodSymbol)
