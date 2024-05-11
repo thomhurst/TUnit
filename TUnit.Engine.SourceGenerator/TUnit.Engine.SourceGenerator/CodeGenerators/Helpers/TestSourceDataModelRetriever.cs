@@ -56,7 +56,7 @@ internal static class TestSourceDataModelRetriever
                     TestDataAttribute = null,
                     RepeatIndex = ++methodCount,
                     TestAttribute = testAttribute,
-                    EnumerableTestMethodDataCurrentCount = 0,
+                    EnumerableTestMethodDataCurrentCount = null,
                     EnumerableClassMethodDataCurrentCount = null,
                     ClassDataAttributeIndex = null,
                     TestDataAttributeIndex = null
@@ -130,7 +130,7 @@ internal static class TestSourceDataModelRetriever
                         RepeatIndex = runCount,
                         TestAttribute = testAttribute,
                         EnumerableTestMethodDataCurrentCount = ++methodCount,
-                        EnumerableClassMethodDataCurrentCount = null,
+                        EnumerableClassMethodDataCurrentCount = classCount,
                         TestDataAttributeIndex = testArguments.DataAttributeIndex,
                         ClassDataAttributeIndex = classArguments.DataAttributeIndex
                     });
