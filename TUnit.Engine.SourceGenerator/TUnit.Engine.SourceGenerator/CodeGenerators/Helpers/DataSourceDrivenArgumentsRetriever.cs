@@ -26,6 +26,7 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 DataAttribute = attributeData,
                 DataAttributeIndex = ++methodDataIndex,
+                IsEnumerableData = false,
                 Arguments = [..arguments]
             };
         }
@@ -40,6 +41,7 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 DataAttribute = attributeData,
                 DataAttributeIndex = ++methodDataIndex,
+                IsEnumerableData = true,
                 Arguments = [..arguments]
             };
         }
@@ -54,6 +56,7 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 DataAttribute = attributeData,
                 DataAttributeIndex = ++methodDataIndex,
+                IsEnumerableData = false,
                 Arguments = [..arguments]
             };
         }

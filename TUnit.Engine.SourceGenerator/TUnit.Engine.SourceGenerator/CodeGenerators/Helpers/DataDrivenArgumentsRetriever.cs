@@ -26,6 +26,7 @@ internal static class DataDrivenArgumentsRetriever
         {
             DataAttribute = argumentAttribute,
             DataAttributeIndex = dataAttributeIndex,
+            IsEnumerableData = false,
             Arguments = [..objectArray.Select(x =>
                 new Argument(ArgumentSource.ArgumentAttribute, TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
                     TypedConstantParser.GetTypedConstantValue(x))

@@ -31,6 +31,7 @@ internal static class CombinativeValuesRetriever
             {
                 DataAttribute = attr,
                 DataAttributeIndex = ++index,
+                IsEnumerableData = false,
                 Arguments = [..x]
             });
     }

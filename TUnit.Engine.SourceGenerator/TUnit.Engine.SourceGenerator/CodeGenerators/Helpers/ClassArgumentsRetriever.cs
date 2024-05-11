@@ -21,6 +21,7 @@ internal static class ClassArgumentsRetriever
             {
                 Arguments = [],
                 DataAttributeIndex = null,
+                IsEnumerableData = false,
                 DataAttribute = null
             };
         }
@@ -38,6 +39,7 @@ internal static class ClassArgumentsRetriever
             {
                 DataAttribute = dataSourceDrivenTestAttribute,
                 DataAttributeIndex = ++index,
+                IsEnumerableData = false,
                 Arguments = [new Argument(ArgumentSource.MethodDataAttribute, "var", arg)]
             };
         }
@@ -52,6 +54,7 @@ internal static class ClassArgumentsRetriever
             {
                 DataAttribute = classDataAttribute,
                 DataAttributeIndex = ++index,
+                IsEnumerableData = false,
                 Arguments = [new Argument(ArgumentSource.ClassDataAttribute, fullyQualifiedTypeNameFromTypedConstantValue, $"new {fullyQualifiedTypeNameFromTypedConstantValue}()")]
             };
         }
@@ -72,6 +75,7 @@ internal static class ClassArgumentsRetriever
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
+                    IsEnumerableData = false,
                     Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"new {fullyQualifiedGenericType}()")]
                 };
             }
@@ -82,6 +86,7 @@ internal static class ClassArgumentsRetriever
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
+                    IsEnumerableData = false,
                     Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())")]
                 };
             }
@@ -92,6 +97,7 @@ internal static class ClassArgumentsRetriever
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
+                    IsEnumerableData = false,
                     Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")]
                 };
             }
@@ -104,6 +110,7 @@ internal static class ClassArgumentsRetriever
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
+                    IsEnumerableData = false,
                     Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")]
                 };
             }
@@ -113,6 +120,7 @@ internal static class ClassArgumentsRetriever
         {
             Arguments = [],
             DataAttributeIndex = null,
+            IsEnumerableData = false,
             DataAttribute = null
         };
     }

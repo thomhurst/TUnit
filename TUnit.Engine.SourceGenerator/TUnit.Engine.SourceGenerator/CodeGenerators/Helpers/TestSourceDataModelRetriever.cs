@@ -71,7 +71,6 @@ internal static class TestSourceDataModelRetriever
                     ClassDataAttributeIndex = null,
                     TestDataAttributeIndex = testArguments.DataAttributeIndex
                 });
-            continue;
         }
     }
 
@@ -87,27 +86,7 @@ internal static class TestSourceDataModelRetriever
 
             for (var i = 1; i <= runCount; i++)
             {
-                if (!testArgumentsCollection.Arguments.Any())
-                {
-                    yield return GetTestSourceDataModel(new TestGenerationContext()
-                    {
-                        MethodSymbol = methodSymbol,
-                        ClassSymbol = namedTypeSymbol,
-                        ClassArguments = [classArgument],
-                        TestArguments = [],
-                        ClassDataAttribute = classArguments.DataAttribute,
-                        TestDataAttribute = null,
-                        RepeatIndex = runCount,
-                        TestAttribute = testAttribute,
-                        EnumerableTestMethodDataCurrentCount = ++methodCount,
-                        EnumerableClassMethodDataCurrentCount = classCount,
-                        TestDataAttributeIndex = null,
-                        ClassDataAttributeIndex = classArguments.DataAttributeIndex
-                    });
-                    continue;
-                }
-
-                yield return GetTestSourceDataModel(new TestGenerationContext()
+                yield return GetTestSourceDataModel(new TestGenerationContext
                 {
                     MethodSymbol = methodSymbol,
                     ClassSymbol = namedTypeSymbol,
@@ -115,10 +94,10 @@ internal static class TestSourceDataModelRetriever
                     TestArguments = testArgumentsCollection.Arguments,
                     ClassDataAttribute = classArguments.DataAttribute,
                     TestDataAttribute = testArgumentsCollection.DataAttribute,
-                    RepeatIndex = runCount,
+                    RepeatIndex = i,
                     TestAttribute = testAttribute,
-                    EnumerableTestMethodDataCurrentCount = ++methodCount,
-                    EnumerableClassMethodDataCurrentCount = classCount,
+                    EnumerableTestMethodDataCurrentCount = classArguments.IsEnumerableData ? ++methodCount : null,
+                    EnumerableClassMethodDataCurrentCount = classArguments.IsEnumerableData ? classCount : null,
                     TestDataAttributeIndex = testArgumentsCollection.DataAttributeIndex,
                     ClassDataAttributeIndex = classArguments.DataAttributeIndex
                 });
