@@ -158,7 +158,7 @@ internal static class TestInformationRetriever
 
         stringBuilder.Append(':');
         
-        stringBuilder.Append(testGenerationContext.RepeatCount);
+        stringBuilder.Append(testGenerationContext.RepeatIndex);
         
         return stringBuilder.ToString();
     }

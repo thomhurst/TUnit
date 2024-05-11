@@ -13,7 +13,7 @@ internal record TestGenerationContext
     public required IMethodSymbol MethodSymbol { get; init; }
     public required Argument[] TestArguments { get; init; }
     public required Argument[] ClassArguments { get; init; }
-    public required int RepeatCount { get; init; }
+    public required int RepeatIndex { get; init; }
     
     public required int? TestDataAttributeIndex { get; init; }
     public required int? ClassDataAttributeIndex { get; init; }
