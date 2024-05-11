@@ -77,7 +77,7 @@ internal static class GenericTestInvocationWriter
             "TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),");
         sourceBuilder.WriteLine(
             $"NotInParallelConstraintKeys = {testSourceDataModel.NotInParallelConstraintKeys},");
-        sourceBuilder.WriteLine($"RepeatIndex = {testSourceDataModel.RepeatCount},");
+        sourceBuilder.WriteLine($"RepeatIndex = {testSourceDataModel.RepeatIndex},");
         sourceBuilder.WriteLine($"RetryCount = {testSourceDataModel.RetryCount},");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");

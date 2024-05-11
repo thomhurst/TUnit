@@ -17,7 +17,7 @@ internal record TestSourceDataModel
     public required string TestId { get; init; }
     public required int Order { get; init; }
     public required int RetryCount { get; init; }
-    public required int RepeatCount { get; init; }
+    public required int RepeatIndex { get; init; }
     
     public required int CurrentMethodRepeatCount { get; init; }
     public required int CurrentClassRepeatCount { get; init; }
@@ -115,7 +115,7 @@ internal record TestSourceDataModel
                && TestId == other.TestId 
                && Order == other.Order 
                && RetryCount == other.RetryCount 
-               && RepeatCount == other.RepeatCount 
+               && RepeatIndex == other.RepeatIndex 
                && CurrentMethodRepeatCount == other.CurrentMethodRepeatCount 
                && CurrentClassRepeatCount == other.CurrentClassRepeatCount 
                && ReturnType == other.ReturnType 
@@ -142,7 +142,7 @@ internal record TestSourceDataModel
             hashCode = (hashCode * 397) ^ TestId.GetHashCode();
             hashCode = (hashCode * 397) ^ Order;
             hashCode = (hashCode * 397) ^ RetryCount;
-            hashCode = (hashCode * 397) ^ RepeatCount;
+            hashCode = (hashCode * 397) ^ RepeatIndex;
             hashCode = (hashCode * 397) ^ CurrentMethodRepeatCount;
             hashCode = (hashCode * 397) ^ CurrentClassRepeatCount;
             hashCode = (hashCode * 397) ^ ReturnType.GetHashCode();

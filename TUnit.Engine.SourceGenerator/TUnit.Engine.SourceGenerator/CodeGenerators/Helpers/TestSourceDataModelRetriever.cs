@@ -164,7 +164,7 @@ internal static class TestSourceDataModelRetriever
             ReturnType = TestInformationRetriever.GetReturnType(methodSymbol),
             Order = TestInformationRetriever.GetOrder(allAttributes),
             RetryCount = TestInformationRetriever.GetRetryCount(allAttributes),
-            RepeatCount = TestInformationRetriever.GetRepeatCount(allAttributes),
+            RepeatIndex = TestInformationRetriever.GetRepeatCount(allAttributes),
             Categories = string.Join(", ", TestInformationRetriever.GetCategories(allAttributes)),
             NotInParallelConstraintKeys = TestInformationRetriever.GetNotInParallelConstraintKeys(allAttributes),
             ClassArguments = classArgument,
