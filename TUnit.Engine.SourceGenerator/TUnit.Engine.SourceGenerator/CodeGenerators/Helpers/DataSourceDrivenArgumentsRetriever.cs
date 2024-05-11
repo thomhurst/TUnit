@@ -12,36 +12,51 @@ internal static class DataSourceDrivenArgumentsRetriever
 {
     public static IEnumerable<ArgumentsContainer> Parse(
         INamedTypeSymbol namedTypeSymbol,
-        ImmutableArray<AttributeData> methodAttributes, 
+        ImmutableArray<AttributeData> methodAttributes,
         AttributeData[] testAndClassAttributes)
     {
-        var methodData = methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                 == WellKnownFullyQualifiedClassNames.MethodDataAttribute.WithGlobalPrefix)
-            .Select(x => ParseMethodData(namedTypeSymbol, x))
-            .Select(x => x.WithTimeoutArgument(testAndClassAttributes));
-        
-        var enumerableMethodData = methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                     == WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix)
-            .Select(x => ParseEnumerableMethodData(namedTypeSymbol, x))
-            .Select(x => x.WithTimeoutArgument(testAndClassAttributes));
-        
-        var classData = methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                           == WellKnownFullyQualifiedClassNames.ClassDataAttribute.WithGlobalPrefix)
-            .Select(ParseClassData)
-            .Select(x => x.WithTimeoutArgument(testAndClassAttributes));
-
-        IEnumerable<IEnumerable<Argument>> args =
-        [
-            ..methodData,
-            ..enumerableMethodData,
-            ..classData
-        ];
-        
-        return args.Select(x => new ArgumentsContainer
+        var methodDataIndex = 0;
+        foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
+                                                                  == WellKnownFullyQualifiedClassNames
+                                                                      .MethodDataAttribute.WithGlobalPrefix))
         {
-            DataAttribute = null,
-            Arguments = [..x]
-        });
+            var methodData = ParseMethodData(namedTypeSymbol, attributeData);
+            var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
+            yield return new ArgumentsContainer
+            {
+                DataAttribute = attributeData,
+                DataAttributeIndex = ++methodDataIndex,
+                Arguments = [..arguments]
+            };
+        }
+
+        foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
+                                                                  == WellKnownFullyQualifiedClassNames
+                                                                      .EnumerableMethodDataAttribute.WithGlobalPrefix))
+        {
+            var methodData = ParseEnumerableMethodData(namedTypeSymbol, attributeData);
+            var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
+            yield return new ArgumentsContainer
+            {
+                DataAttribute = attributeData,
+                DataAttributeIndex = ++methodDataIndex,
+                Arguments = [..arguments]
+            };
+        }
+
+        foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
+                                                                  == WellKnownFullyQualifiedClassNames
+                                                                      .ClassDataAttribute.WithGlobalPrefix))
+        {
+            var classData = ParseClassData(attributeData);
+            var arguments = classData.WithTimeoutArgument(testAndClassAttributes);
+            yield return new ArgumentsContainer
+            {
+                DataAttribute = attributeData,
+                DataAttributeIndex = ++methodDataIndex,
+                Arguments = [..arguments]
+            };
+        }
     }
 
     private static IEnumerable<Argument> ParseMethodData(INamedTypeSymbol namedTypeSymbol,

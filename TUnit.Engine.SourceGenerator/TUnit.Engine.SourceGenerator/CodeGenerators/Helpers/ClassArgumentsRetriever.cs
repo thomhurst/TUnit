@@ -20,10 +20,12 @@ internal static class ClassArgumentsRetriever
             return new ArgumentsContainer
             {
                 Arguments = [],
+                DataAttributeIndex = null,
                 DataAttribute = null
             };
         }
 
+        var index = 0;
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
                      .Where(x => x.GetFullyQualifiedAttributeTypeName() 
                                  == WellKnownFullyQualifiedClassNames.MethodDataAttribute.WithGlobalPrefix))
@@ -35,6 +37,7 @@ internal static class ClassArgumentsRetriever
             return new ArgumentsContainer
             {
                 DataAttribute = dataSourceDrivenTestAttribute,
+                DataAttributeIndex = ++index,
                 Arguments = [new Argument(ArgumentSource.MethodDataAttribute, "var", arg)]
             };
         }
@@ -48,6 +51,7 @@ internal static class ClassArgumentsRetriever
             return new ArgumentsContainer
             {
                 DataAttribute = classDataAttribute,
+                DataAttributeIndex = ++index,
                 Arguments = [new Argument(ArgumentSource.ClassDataAttribute, fullyQualifiedTypeNameFromTypedConstantValue, $"new {fullyQualifiedTypeNameFromTypedConstantValue}()")]
             };
         }
@@ -67,6 +71,7 @@ internal static class ClassArgumentsRetriever
                 return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
+                    DataAttributeIndex = ++index,
                     Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"new {fullyQualifiedGenericType}()")]
                 };
             }
@@ -76,6 +81,7 @@ internal static class ClassArgumentsRetriever
                 return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
+                    DataAttributeIndex = ++index,
                     Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())")]
                 };
             }
@@ -85,6 +91,7 @@ internal static class ClassArgumentsRetriever
                 return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
+                    DataAttributeIndex = ++index,
                     Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")]
                 };
             }
@@ -96,6 +103,7 @@ internal static class ClassArgumentsRetriever
                 return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
+                    DataAttributeIndex = ++index,
                     Arguments = [new Argument(ArgumentSource.InjectAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")]
                 };
             }
@@ -104,6 +112,7 @@ internal static class ClassArgumentsRetriever
         return new ArgumentsContainer
         {
             Arguments = [],
+            DataAttributeIndex = null,
             DataAttribute = null
         };
     }

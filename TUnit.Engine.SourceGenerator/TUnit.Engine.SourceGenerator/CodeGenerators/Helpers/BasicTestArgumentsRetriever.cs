@@ -13,6 +13,7 @@ internal static class BasicTestArgumentsRetriever
         return new ArgumentsContainer
         {
             DataAttribute = null,
+            DataAttributeIndex = null,
             Arguments = [..Array.Empty<Argument>().WithTimeoutArgument(testAndClassAttributes)]
         };
     }

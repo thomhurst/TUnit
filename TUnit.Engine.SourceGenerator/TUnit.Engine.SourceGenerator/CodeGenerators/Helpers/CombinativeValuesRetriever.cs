@@ -22,12 +22,15 @@ internal static class CombinativeValuesRetriever
         var mappedToConstructorArrays = combinativeValuesAttributes
             .Select(x => x.ConstructorArguments.First().Values);
 
+        var attr = combinativeValuesAttributes.First();
+        var index = 0;
         return GetCombinativeArgumentsList(mappedToConstructorArrays)
             .Select(x =>
                 MapToArgumentEnumerable(x, methodAndClassAttributes)
             ).Select(x => new ArgumentsContainer
             {
-                DataAttribute = null,
+                DataAttribute = attr,
+                DataAttributeIndex = ++index,
                 Arguments = [..x]
             });
     }
