@@ -57,7 +57,9 @@ internal static class TestSourceDataModelRetriever
                     RepeatCount = ++methodCount,
                     TestAttribute = testAttribute,
                     EnumerableTestMethodDataCurrentCount = 0,
-                    EnumerableClassMethodDataCurrentCount = null
+                    EnumerableClassMethodDataCurrentCount = null,
+                    ClassDataAttributeIndex = null,
+                    TestDataAttributeIndex = null
                 });
                 continue;
             }
@@ -75,7 +77,9 @@ internal static class TestSourceDataModelRetriever
                     RepeatCount = ++methodCount,
                     TestAttribute = testAttribute,
                     EnumerableTestMethodDataCurrentCount = 0,
-                    EnumerableClassMethodDataCurrentCount = null
+                    EnumerableClassMethodDataCurrentCount = null,
+                    TestDataAttributeIndex = testArguments.DataAttributeIndex,
+                    ClassDataAttributeIndex = null
                 });
             }
         }
@@ -99,14 +103,16 @@ internal static class TestSourceDataModelRetriever
                     {
                         MethodSymbol = methodSymbol,
                         ClassSymbol = namedTypeSymbol,
-                        ClassArguments = classArguments.Arguments,
+                        ClassArguments = [classArgument],
                         TestArguments = [],
                         ClassDataAttribute = classArguments.DataAttribute,
                         TestDataAttribute = null,
-                        RepeatCount = ++methodCount,
+                        RepeatCount = runCount,
                         TestAttribute = testAttribute,
-                        EnumerableTestMethodDataCurrentCount = 0,
-                        EnumerableClassMethodDataCurrentCount = classCount
+                        EnumerableTestMethodDataCurrentCount = ++methodCount,
+                        EnumerableClassMethodDataCurrentCount = classCount,
+                        TestDataAttributeIndex = null,
+                        ClassDataAttributeIndex = classArguments.DataAttributeIndex
                     });
                     continue;
                 }
@@ -117,14 +123,16 @@ internal static class TestSourceDataModelRetriever
                     {
                         MethodSymbol = methodSymbol,
                         ClassSymbol = namedTypeSymbol,
-                        ClassArguments = classArguments.Arguments,
+                        ClassArguments = [classArgument],
                         TestArguments = testArguments.Arguments,
                         ClassDataAttribute = classArguments.DataAttribute,
                         TestDataAttribute = testArguments.DataAttribute,
-                        RepeatCount = ++methodCount,
+                        RepeatCount = runCount,
                         TestAttribute = testAttribute,
-                        EnumerableTestMethodDataCurrentCount = 0,
-                        EnumerableClassMethodDataCurrentCount = null
+                        EnumerableTestMethodDataCurrentCount = ++methodCount,
+                        EnumerableClassMethodDataCurrentCount = null,
+                        TestDataAttributeIndex = testArguments.DataAttributeIndex,
+                        ClassDataAttributeIndex = classArguments.DataAttributeIndex
                     });
                 }
             }

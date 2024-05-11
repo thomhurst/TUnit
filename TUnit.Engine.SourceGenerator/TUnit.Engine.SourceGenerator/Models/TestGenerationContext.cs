@@ -15,6 +15,9 @@ internal record TestGenerationContext
     public required Argument[] ClassArguments { get; init; }
     public required int RepeatCount { get; init; }
     
+    public required int? TestDataAttributeIndex { get; init; }
+    public required int? ClassDataAttributeIndex { get; init; }
+    
     public required int? EnumerableTestMethodDataCurrentCount { get; init; }
     public required int? EnumerableClassMethodDataCurrentCount { get; init; }
 }

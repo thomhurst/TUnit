@@ -101,6 +101,11 @@ internal static class TestInformationRetriever
         {
             stringBuilder.Append(testGenerationContext.ClassDataAttribute.AttributeClass!.ToDisplayString());
             
+            if (testGenerationContext.ClassDataAttributeIndex != null)
+            {
+                stringBuilder.Append($":{testGenerationContext.ClassDataAttributeIndex}");
+            }
+            
             if (testGenerationContext.EnumerableClassMethodDataCurrentCount != null)
             {
                 stringBuilder.Append($":{testGenerationContext.EnumerableClassMethodDataCurrentCount}");
@@ -112,6 +117,11 @@ internal static class TestInformationRetriever
         if (testGenerationContext.TestDataAttribute != null)
         {
             stringBuilder.Append(testGenerationContext.TestDataAttribute.AttributeClass!.ToDisplayString());
+            
+            if (testGenerationContext.TestDataAttributeIndex != null)
+            {
+                stringBuilder.Append($":{testGenerationContext.TestDataAttributeIndex}");
+            }
             
             if (testGenerationContext.EnumerableTestMethodDataCurrentCount != null)
             {
@@ -146,6 +156,8 @@ internal static class TestInformationRetriever
 
         stringBuilder.Append(methodParameterTypes);
 
+        stringBuilder.Append(':');
+        
         stringBuilder.Append(testGenerationContext.RepeatCount);
         
         return stringBuilder.ToString();
