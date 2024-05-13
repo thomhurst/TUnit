@@ -14,7 +14,13 @@ internal static class MethodArgumentsRetriever
     {
         if (methodSymbol.Parameters.IsDefaultOrEmpty)
         {
-            return [];
+            return [new ArgumentsContainer
+            {
+                Arguments = [],
+                DataAttribute = null,
+                DataAttributeIndex = null,
+                IsEnumerableData = false
+            }];
         }
 
         var methodAttributes = methodSymbol.GetAttributes();

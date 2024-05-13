@@ -100,7 +100,7 @@ internal static class TestInformationRetriever
         
         if (testGenerationContext.ClassDataAttribute != null)
         {
-            stringBuilder.Append(testGenerationContext.ClassDataAttribute.AttributeClass!.ToDisplayString());
+            stringBuilder.Append(testGenerationContext.ClassDataAttribute.AttributeClass!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
             
             if (testGenerationContext.ClassDataAttributeIndex != null)
             {
@@ -112,12 +112,12 @@ internal static class TestInformationRetriever
                 stringBuilder.Append($":{{{VariableNames.EnumerableClassDataIndex}}}");
             }
 
-            stringBuilder.Append('.');
+            stringBuilder.Append(':');
         }
         
         if (testGenerationContext.TestDataAttribute != null)
         {
-            stringBuilder.Append(testGenerationContext.TestDataAttribute.AttributeClass!.ToDisplayString());
+            stringBuilder.Append(testGenerationContext.TestDataAttribute.AttributeClass!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
             
             if (testGenerationContext.TestDataAttributeIndex != null)
             {
@@ -131,10 +131,10 @@ internal static class TestInformationRetriever
         }
         else
         {
-            stringBuilder.Append(testGenerationContext.TestAttribute.AttributeClass!.ToDisplayString());
+            stringBuilder.Append(testGenerationContext.TestAttribute.AttributeClass!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
         }
         
-        stringBuilder.Append('.');
+        stringBuilder.Append(':');
         
         var fullyQualifiedClassName =
             testGenerationContext.ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
@@ -145,19 +145,25 @@ internal static class TestInformationRetriever
         var testName = testGenerationContext.MethodSymbol.Name;
         
         stringBuilder.Append(testName);
-        stringBuilder.Append('.');
+        stringBuilder.Append(':');
         
         var classParameters = testGenerationContext.ClassSymbol.Constructors.First().Parameters;
         
         var classParameterTypes = GetTypes(classParameters);
-        
-        stringBuilder.Append(classParameterTypes);
+
+        if (!string.IsNullOrEmpty(classParameterTypes))
+        {
+            stringBuilder.Append(classParameterTypes);
+            stringBuilder.Append(':');
+        }
 
         var methodParameterTypes = GetTypes(testGenerationContext.MethodSymbol.Parameters);
 
-        stringBuilder.Append(methodParameterTypes);
-
-        stringBuilder.Append(':');
+        if (!string.IsNullOrEmpty(methodParameterTypes))
+        {
+            stringBuilder.Append(methodParameterTypes);
+            stringBuilder.Append(':');
+        }
         
         stringBuilder.Append(testGenerationContext.RepeatIndex);
         
@@ -184,7 +190,7 @@ internal static class TestInformationRetriever
         var parameterTypesFullyQualified = parameters.Select(x => x.Type)
             .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix));
         
-        return $"({string.Join(",", parameterTypesFullyQualified)}).";
+        return $"({string.Join(",", parameterTypesFullyQualified)})";
     }
 
     public static string GetReturnType(IMethodSymbol methodSymbol)
