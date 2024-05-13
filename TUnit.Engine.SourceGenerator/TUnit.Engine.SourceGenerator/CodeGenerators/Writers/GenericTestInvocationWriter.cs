@@ -21,12 +21,14 @@ internal static class GenericTestInvocationWriter
         {
             sourceBuilder.WriteLine($"foreach (var classData in {testSourceDataModel.ClassArguments.First().Invocation})");
             sourceBuilder.WriteLine("{");
+            sourceBuilder.WriteLine($"{VariableNames.EnumerableClassDataIndex}++;");
         }
         
         if (hasEnumerableMethodData)
         {
             sourceBuilder.WriteLine($"foreach (var methodData in {testSourceDataModel.MethodArguments.First().Invocation})");
             sourceBuilder.WriteLine("{");
+            sourceBuilder.WriteLine($"{VariableNames.EnumerableTestDataIndex}++;");
         }
 
         var classArguments = testSourceDataModel.GetClassArgumentsInvocations();
@@ -63,7 +65,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine(
             $"var testInformation = new global::TUnit.Core.TestInformation<{fullyQualifiedClassType}>()");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"TestId = \"{testId}\",");
+        sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine(
             $"Categories = [{testSourceDataModel.Categories}],");
         sourceBuilder.WriteLine("LazyClassInstance = resettableClassFactory,");
@@ -105,7 +107,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine(
             $"var unInvokedTest = new global::TUnit.Core.UnInvokedTest<{fullyQualifiedClassType}>(resettableClassFactory)");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"Id = \"{testId}\",");
+        sourceBuilder.WriteLine($"Id = $\"{testId}\",");
         sourceBuilder.WriteLine("TestContext = testContext,");
         sourceBuilder.WriteLine(
             $"ApplicableTestAttributes = [{testSourceDataModel.ApplicableTestAttributes}],");
@@ -115,7 +117,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{testSourceDataModel.AfterEachTestInvocations}],");
         sourceBuilder.WriteLine("};");
         sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.AddTest(\"{testId}\", unInvokedTest);");
+        sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.AddTest($\"{testId}\", unInvokedTest);");
         
         if (hasEnumerableClassData)
         {

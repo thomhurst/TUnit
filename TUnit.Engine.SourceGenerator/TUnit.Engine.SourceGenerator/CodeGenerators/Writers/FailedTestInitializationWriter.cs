@@ -10,7 +10,7 @@ internal static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
         
-        sourceBuilder.WriteLine($"TestId = \"{testId}\",");
+        sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
         sourceBuilder.WriteLine($"DisplayName = \"{testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");

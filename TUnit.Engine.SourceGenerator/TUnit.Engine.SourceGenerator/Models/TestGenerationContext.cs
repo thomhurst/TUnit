@@ -18,6 +18,6 @@ internal record TestGenerationContext
     public required int? TestDataAttributeIndex { get; init; }
     public required int? ClassDataAttributeIndex { get; init; }
     
-    public required int? EnumerableTestMethodDataCurrentCount { get; init; }
-    public required int? EnumerableClassMethodDataCurrentCount { get; init; }
+    public required bool HasEnumerableTestMethodData { get; init; }
+    public required bool HasEnumerableClassMethodData { get; init; }
 }

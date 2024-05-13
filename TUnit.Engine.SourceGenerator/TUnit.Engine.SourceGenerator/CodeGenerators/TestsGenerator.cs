@@ -101,6 +101,16 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("[ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
+            
+            if(model.IsEnumerableClassArguments)
+            {
+                sourceBuilder.WriteLine($"var {VariableNames.EnumerableClassDataIndex} = 0;");
+            }
+
+            if(model.IsEnumerableMethodArguments)
+            {
+                sourceBuilder.WriteLine($"var {VariableNames.EnumerableTestDataIndex} = 0;");
+            }
 
             sourceBuilder.WriteLine("try");
             sourceBuilder.WriteLine("{");

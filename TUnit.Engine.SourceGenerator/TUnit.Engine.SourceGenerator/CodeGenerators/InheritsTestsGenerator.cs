@@ -87,6 +87,16 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
 
+            if(modelTestSourceDataModel.IsEnumerableClassArguments)
+            {
+                sourceBuilder.WriteLine($"var {VariableNames.EnumerableClassDataIndex} = 0;");
+            }
+
+            if(modelTestSourceDataModel.IsEnumerableMethodArguments)
+            {
+                sourceBuilder.WriteLine($"var {VariableNames.EnumerableTestDataIndex} = 0;");
+            }
+
             sourceBuilder.WriteLine("try");
             sourceBuilder.WriteLine("{");
             GenericTestInvocationWriter.GenerateTestInvocationCode(sourceBuilder, modelTestSourceDataModel);

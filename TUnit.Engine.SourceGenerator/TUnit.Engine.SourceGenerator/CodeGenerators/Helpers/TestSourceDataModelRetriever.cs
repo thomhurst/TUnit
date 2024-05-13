@@ -52,8 +52,6 @@ internal static class TestSourceDataModelRetriever
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute,
         ArgumentsContainer testArguments)
     {
-        var methodCount = 0;
-
         for (var i = 1; i <= runCount; i++)
         {
             yield return GetTestSourceDataModel(new TestGenerationContext()
@@ -64,10 +62,10 @@ internal static class TestSourceDataModelRetriever
                     TestArguments = testArguments.Arguments,
                     ClassDataAttribute = null,
                     TestDataAttribute = testArguments.DataAttribute,
-                    RepeatIndex = ++methodCount,
+                    RepeatIndex = i,
                     TestAttribute = testAttribute,
-                    EnumerableTestMethodDataCurrentCount = testArguments.IsEnumerableData ? ++methodCount : null,
-                    EnumerableClassMethodDataCurrentCount = null,
+                    HasEnumerableTestMethodData = testArguments.IsEnumerableData,
+                    HasEnumerableClassMethodData = false,
                     ClassDataAttributeIndex = null,
                     TestDataAttributeIndex = testArguments.DataAttributeIndex
                 });
@@ -78,12 +76,8 @@ internal static class TestSourceDataModelRetriever
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, ArgumentsContainer classArguments,
         ArgumentsContainer testArgumentsCollection)
     {
-        var classCount = 0;
         foreach (var classArgument in classArguments.Arguments)
         {
-            classCount++;
-            var methodCount = 0;
-
             for (var i = 1; i <= runCount; i++)
             {
                 yield return GetTestSourceDataModel(new TestGenerationContext
@@ -96,8 +90,8 @@ internal static class TestSourceDataModelRetriever
                     TestDataAttribute = testArgumentsCollection.DataAttribute,
                     RepeatIndex = i,
                     TestAttribute = testAttribute,
-                    EnumerableTestMethodDataCurrentCount = testArgumentsCollection.IsEnumerableData ? ++methodCount : null,
-                    EnumerableClassMethodDataCurrentCount = classArguments.IsEnumerableData ? classCount : null,
+                    HasEnumerableTestMethodData = testArgumentsCollection.IsEnumerableData,
+                    HasEnumerableClassMethodData = classArguments.IsEnumerableData,
                     TestDataAttributeIndex = testArgumentsCollection.DataAttributeIndex,
                     ClassDataAttributeIndex = classArguments.DataAttributeIndex
                 });
@@ -113,7 +107,6 @@ internal static class TestSourceDataModelRetriever
         var testArguments = testGenerationContext.TestArguments;
         var testAttribute = testGenerationContext.TestAttribute;
         var currentClassCount = 0;
-        var currentMethodCount = testGenerationContext.EnumerableTestMethodDataCurrentCount;
         
         var allAttributes = methodSymbol.GetAttributesIncludingClass(namedTypeSymbol);
         
@@ -134,8 +127,8 @@ internal static class TestSourceDataModelRetriever
             Categories = string.Join(", ", TestInformationRetriever.GetCategories(allAttributes)),
             NotInParallelConstraintKeys = TestInformationRetriever.GetNotInParallelConstraintKeys(allAttributes),
             ClassArguments = classArgument,
-            IsEnumerableClassArguments = testGenerationContext.EnumerableClassMethodDataCurrentCount.HasValue,
-            IsEnumerableMethodArguments = testGenerationContext.EnumerableTestMethodDataCurrentCount.HasValue,
+            IsEnumerableClassArguments = testGenerationContext.HasEnumerableClassMethodData,
+            IsEnumerableMethodArguments = testGenerationContext.HasEnumerableTestMethodData,
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value!.ToString(),
             LineNumber = (int)testAttribute.ConstructorArguments[1].Value!,

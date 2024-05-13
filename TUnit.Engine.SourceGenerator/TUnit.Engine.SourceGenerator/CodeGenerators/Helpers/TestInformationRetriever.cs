@@ -97,6 +97,7 @@ internal static class TestInformationRetriever
     public static string GetTestId(TestGenerationContext testGenerationContext)
     {
         var stringBuilder = new StringBuilder();
+        
         if (testGenerationContext.ClassDataAttribute != null)
         {
             stringBuilder.Append(testGenerationContext.ClassDataAttribute.AttributeClass!.ToDisplayString());
@@ -106,9 +107,9 @@ internal static class TestInformationRetriever
                 stringBuilder.Append($":{testGenerationContext.ClassDataAttributeIndex}");
             }
             
-            if (testGenerationContext.EnumerableClassMethodDataCurrentCount != null)
+            if (testGenerationContext.HasEnumerableClassMethodData)
             {
-                stringBuilder.Append($":{testGenerationContext.EnumerableClassMethodDataCurrentCount}");
+                stringBuilder.Append($":{{{VariableNames.EnumerableClassDataIndex}}}");
             }
 
             stringBuilder.Append('.');
@@ -123,9 +124,9 @@ internal static class TestInformationRetriever
                 stringBuilder.Append($":{testGenerationContext.TestDataAttributeIndex}");
             }
             
-            if (testGenerationContext.EnumerableTestMethodDataCurrentCount != null)
+            if (testGenerationContext.HasEnumerableTestMethodData)
             {
-                stringBuilder.Append($":{testGenerationContext.EnumerableTestMethodDataCurrentCount}");
+                stringBuilder.Append($":{{{VariableNames.EnumerableTestDataIndex}}}");
             }
         }
         else
