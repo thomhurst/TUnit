@@ -18,7 +18,7 @@ public class DataSourceDrivenTests
 
     public static int SomeMethod() => 1;
 
-    public class SomeClass
+    public record SomeClass
     {
         public int Value => 1;
     }
