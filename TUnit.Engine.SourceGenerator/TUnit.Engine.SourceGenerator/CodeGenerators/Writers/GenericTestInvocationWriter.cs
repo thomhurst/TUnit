@@ -83,7 +83,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"RetryCount = {testSourceDataModel.RetryCount},");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
-        sourceBuilder.WriteLine($"DisplayName = \"{testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}\",");
+        sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
 
         foreach (var customProperty in testSourceDataModel.CustomProperties)
         {
@@ -133,6 +133,11 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("}");
     }
 
+    private static string GetDisplayName(TestSourceDataModel testSourceDataModel)
+    {
+        return $"{testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}";
+    }
+
     private static string GetMethodArgs(TestSourceDataModel testSourceDataModel)
     {
         if (!testSourceDataModel.MethodArguments.Any())
@@ -140,10 +145,11 @@ internal static class GenericTestInvocationWriter
             return string.Empty;
         }
 
-        return $"({string.Join(", ",
-            testSourceDataModel.MethodArguments
-                .Select(x => x.Invocation)
-                .Select(x => x.Replace("\"", "\\\""))
-        )})";
+        if (testSourceDataModel.IsEnumerableMethodArguments)
+        {
+            return $"({{{VariableNames.MethodData}}})";
+        }
+
+        return $"({string.Join(", ", testSourceDataModel.GetMethodArgumentVariableNames().Select(x => $"{{{x}}}"))})";
     }
 }
