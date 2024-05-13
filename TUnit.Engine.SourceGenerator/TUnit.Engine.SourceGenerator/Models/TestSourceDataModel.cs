@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Models;
 
@@ -48,7 +49,7 @@ internal record TestSourceDataModel
     {
         if (IsEnumerableClassArguments)
         {
-            yield return "var classArg0 = classData;";
+            yield return $"var classArg0 = {VariableNames.ClassData};";
             yield break;
         }
         
@@ -79,7 +80,7 @@ internal record TestSourceDataModel
     {
         if (IsEnumerableMethodArguments)
         {
-            yield return "var methodArg0 = methodData;";
+            yield return $"var methodArg0 = {VariableNames.MethodData};";
             yield break;
         }
         

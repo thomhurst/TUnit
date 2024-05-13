@@ -19,14 +19,14 @@ internal static class GenericTestInvocationWriter
 
         if (hasEnumerableClassData)
         {
-            sourceBuilder.WriteLine($"foreach (var classData in {testSourceDataModel.ClassArguments.First().Invocation})");
+            sourceBuilder.WriteLine($"foreach (var {VariableNames.ClassData} in {testSourceDataModel.ClassArguments.First().Invocation})");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine($"{VariableNames.EnumerableClassDataIndex}++;");
         }
         
         if (hasEnumerableMethodData)
         {
-            sourceBuilder.WriteLine($"foreach (var methodData in {testSourceDataModel.MethodArguments.First().Invocation})");
+            sourceBuilder.WriteLine($"foreach (var {VariableNames.MethodData} in {testSourceDataModel.MethodArguments.First().Invocation})");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine($"{VariableNames.EnumerableTestDataIndex}++;");
         }
