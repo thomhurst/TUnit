@@ -11,7 +11,7 @@ internal class TimeoutCancellationTokenRetriever
 {
     public static Argument? GetCancellationTokenArgument(IEnumerable<AttributeData> attributes)
     {
-        var timeoutAttribute = attributes.FirstOrDefault(x =>
+        var timeoutAttribute = attributes.SafeFirstOrDefault(x =>
             x.GetFullyQualifiedAttributeTypeName()
             == WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix);
         

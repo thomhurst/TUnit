@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -24,5 +25,25 @@ public static class ImmutableArrayExtensions
         }
 
         return immutableArray.First(predicate);
+    }
+    
+    public static T? SafeFirstOrDefault<T>(this IEnumerable<T> enumerable)
+    {
+        if (enumerable is ImmutableArray<T> immutableArray)
+        {
+            return immutableArray.SafeFirstOrDefault();
+        }
+
+        return enumerable.FirstOrDefault();
+    }
+
+    public static T? SafeFirstOrDefault<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate)
+    {
+        if (enumerable is ImmutableArray<T> immutableArray)
+        {
+            return immutableArray.SafeFirstOrDefault(predicate);
+        }
+
+        return enumerable.FirstOrDefault(predicate);
     }
 }

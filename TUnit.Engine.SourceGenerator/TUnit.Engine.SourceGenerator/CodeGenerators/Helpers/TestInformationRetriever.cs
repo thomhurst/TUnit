@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
@@ -25,7 +26,7 @@ internal static class TestInformationRetriever
         
         var notInConstraintKeys = notInParallelAttributes
             .SelectMany(x => x.ConstructorArguments)
-            .SelectMany(x => x.Value is null ? x.Values.Select(x => x.Value) : [x.Value])
+            .SelectMany(x => !x.Values.IsDefaultOrEmpty ? x.Values.Select(x => x.Value) : [x.Value])
             .Select(x => $"\"{x}\"");
         
         return $"[{string.Join(", ", notInConstraintKeys)}]";
@@ -34,16 +35,16 @@ internal static class TestInformationRetriever
     public static int GetRepeatCount(AttributeData[] methodAndClassAttributes)
     {
         return methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == "global::TUnit.Core.RepeatAttribute")
+            .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                                     == "global::TUnit.Core.RepeatAttribute")
             ?.ConstructorArguments.First().Value as int? ?? 0;
     }
     
     public static TestLocation GetTestLocation(AttributeData[] methodAndClassAttributes)
     {
         var testAttribute = methodAndClassAttributes
-            .First(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
+            .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                                     == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
 
         return new TestLocation
         {
@@ -55,26 +56,26 @@ internal static class TestInformationRetriever
     public static int GetRetryCount(AttributeData[] methodAndClassAttributes)
     {
         var retryAttribute = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+            .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                  == "global::TUnit.Core.RetryAttribute");
         
-        return retryAttribute?.ConstructorArguments.First().Value as int? ?? 0;
+        return retryAttribute?.ConstructorArguments.SafeFirstOrDefault().Value as int? ?? 0;
     }
 
     public static int GetOrder(AttributeData[] methodAndClassAttributes)
     {
         var notInParallelAttribute = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == "global::TUnit.Core.NotInParallelAttribute");
+            .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                                     == "global::TUnit.Core.NotInParallelAttribute");
         
-        return notInParallelAttribute?.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? DefaultOrder;
+        return notInParallelAttribute?.NamedArguments.SafeFirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? DefaultOrder;
     }
 
     public static string GetTimeOut(AttributeData[] methodAndClassAttributes)
     {
         var timeoutAttribute = methodAndClassAttributes
-            .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == "global::TUnit.Core.TimeoutAttribute");
+            .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                                     == "global::TUnit.Core.TimeoutAttribute");
 
         if (timeoutAttribute is null)
         {
@@ -172,7 +173,7 @@ internal static class TestInformationRetriever
 
     private static string GetArgumentSourcePrefix(IEnumerable<Argument> testArguments)
     {
-        if (testArguments.FirstOrDefault()?.ArgumentSource is { } argumentSource)
+        if (testArguments.SafeFirstOrDefault()?.ArgumentSource is { } argumentSource)
         {
             return $"{argumentSource}:";
         }

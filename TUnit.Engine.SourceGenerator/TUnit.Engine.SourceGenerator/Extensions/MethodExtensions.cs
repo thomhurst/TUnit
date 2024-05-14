@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Engine.SourceGenerator.Extensions;
@@ -8,15 +7,8 @@ public static class MethodExtensions
 {
     public static AttributeData? GetTestAttribute(this IMethodSymbol methodSymbol)
     {
-        var attributes = methodSymbol.GetAttributes();
-
-        if (attributes.IsDefaultOrEmpty)
-        {
-            return null;
-        }
-        
-        return attributes
-            .FirstOrDefault(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
+        return methodSymbol.GetAttributes()
+            .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
                                  == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
     }
 

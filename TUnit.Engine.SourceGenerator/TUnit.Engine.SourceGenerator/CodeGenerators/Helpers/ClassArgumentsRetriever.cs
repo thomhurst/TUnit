@@ -14,7 +14,7 @@ internal static class ClassArgumentsRetriever
         var className =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         
-        if (namedTypeSymbol.InstanceConstructors.First().Parameters.IsDefaultOrEmpty)
+        if (namedTypeSymbol.InstanceConstructors.SafeFirstOrDefault()?.Parameters.IsDefaultOrEmpty != false)
         {
             return new ArgumentsContainer
             {
