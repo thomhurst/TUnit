@@ -8,7 +8,6 @@
         <IsTestProject>true</IsTestProject>
         <LangVersion>latest</LangVersion>
         <OutputType>Exe</OutputType>
-        <IsTestProject>true</IsTestProject>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>

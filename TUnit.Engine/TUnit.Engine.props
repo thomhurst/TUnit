@@ -2,6 +2,7 @@
 <Project>
 
     <PropertyGroup>
+        <IsTestProject>true</IsTestProject>
         <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
