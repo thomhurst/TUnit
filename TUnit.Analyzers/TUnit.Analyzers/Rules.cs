@@ -66,14 +66,11 @@ internal static class Rules
     public static readonly DiagnosticDescriptor RequiredPair_Attributes_DataDrivenTest_Arguments =
         CreateDescriptor("TUnit0020", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor RequiredCombinations_Attributes_DataSourceDrivenTest_MethodInfo_ClassInfo =
+    public static readonly DiagnosticDescriptor RequiredCombinations_Attributes_DataSourceDrivenTest_MethodData_EnumerableMethodData_ClassData =
         CreateDescriptor("TUnit0021", UsageCategory, DiagnosticSeverity.Error);
-    
-    public static readonly DiagnosticDescriptor RequiredPair_Attributes_EnumerableDataSourceDrivenTest_EnumerableMethodInfo =
-        CreateDescriptor("TUnit0022", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor RequiredPair_Attributes_CombinativeTest_CombinativeValues =
-        CreateDescriptor("TUnit0023", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0022", UsageCategory, DiagnosticSeverity.Error);
     
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

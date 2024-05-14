@@ -190,39 +190,30 @@
         <value>Missing `DataDrivenTest` Attribute</value>
     </data>
     <data name="TUnit0020Description" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute.</value>
+        <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
     </data>
     <data name="TUnit0020MessageFormat" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
+        <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
     </data>
     <data name="TUnit0020Title" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
+        <value>`DataDrivenTest` must be paired with `Arguments` attributes.</value>
     </data>
     <data name="TUnit0021Description" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute.</value>
+        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
     </data>
     <data name="TUnit0021MessageFormat" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
+        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
     </data>
     <data name="TUnit0021Title" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
+        <value>`DataSourceDrivenTest` must be paired with either `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attributes.</value>
     </data>
     <data name="TUnit0022Description" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute.</value>
+        <value>`CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa.</value>
     </data>
     <data name="TUnit0022MessageFormat" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
+        <value>`CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa.</value>
     </data>
     <data name="TUnit0022Title" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
-    </data>
-    <data name="TUnit0023Description" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute.</value>
-    </data>
-    <data name="TUnit0023MessageFormat" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
-    </data>
-    <data name="TUnit0023Title" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
+        <value>`CombinativeTest` must be paired with `CombinativeValues` attributes.</value>
     </data>
 </root>

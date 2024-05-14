@@ -17,8 +17,7 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(
             Rules.RequiredPair_Attributes_CombinativeTest_CombinativeValues,
             Rules.RequiredPair_Attributes_DataDrivenTest_Arguments,
-            Rules.RequiredCombinations_Attributes_DataSourceDrivenTest_MethodInfo_ClassInfo,
-            Rules.RequiredPair_Attributes_EnumerableDataSourceDrivenTest_EnumerableMethodInfo
+            Rules.RequiredCombinations_Attributes_DataSourceDrivenTest_MethodData_EnumerableMethodData_ClassData
             );
 
     public override void InitializeInternal(AnalysisContext context)
@@ -40,12 +39,6 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var attributes = methodSymbol.GetAttributes();
-
-        Compare(context, attributes, 
-            WellKnown.AttributeFullyQualifiedClasses.CombinativeTest,
-            WellKnown.AttributeFullyQualifiedClasses.CombinativeValues,
-            Rules.RequiredPair_Attributes_CombinativeTest_CombinativeValues,
-            methodSymbol.Locations.FirstOrDefault());
         
         Compare(context, attributes, 
             WellKnown.AttributeFullyQualifiedClasses.DataDrivenTest,
@@ -54,16 +47,43 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
             methodSymbol.Locations.FirstOrDefault());
 
         Compare(context, attributes, 
-            WellKnown.AttributeFullyQualifiedClasses.EnumerableDataSourceDrivenTest,
-            WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource,
-            Rules.RequiredPair_Attributes_EnumerableDataSourceDrivenTest_EnumerableMethodInfo,
-            methodSymbol.Locations.FirstOrDefault());
-
-        Compare(context, attributes, 
             WellKnown.AttributeFullyQualifiedClasses.DataSourceDrivenTest,
-            [WellKnown.AttributeFullyQualifiedClasses.MethodDataSource, WellKnown.AttributeFullyQualifiedClasses.ClassDataSource],
-            Rules.RequiredCombinations_Attributes_DataSourceDrivenTest_MethodInfo_ClassInfo,
+            [WellKnown.AttributeFullyQualifiedClasses.MethodDataSource, WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource, WellKnown.AttributeFullyQualifiedClasses.ClassDataSource],
+            Rules.RequiredCombinations_Attributes_DataSourceDrivenTest_MethodData_EnumerableMethodData_ClassData,
             methodSymbol.Locations.FirstOrDefault());
+        
+        CompareCombinative(context, methodSymbol, attributes, methodSymbol.Locations.FirstOrDefault());
+    }
+
+    private void CompareCombinative(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol,
+        ImmutableArray<AttributeData> attributes, Location? location)
+    {
+        var combinativeTestAttribute = attributes.Get(WellKnown.AttributeFullyQualifiedClasses.CombinativeTest);
+        var combinativeParameters = methodSymbol.Parameters.Where(x =>
+            x.GetAttributes().Get(WellKnown.AttributeFullyQualifiedClasses.CombinativeValues) != null).ToList();
+
+        if (combinativeTestAttribute is null && !combinativeParameters.Any())
+        {
+            return;
+        }
+        
+        foreach (var combinativeParameter in combinativeParameters)
+        {
+            if (combinativeTestAttribute is null)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.RequiredPair_Attributes_CombinativeTest_CombinativeValues,
+                    combinativeParameter.Locations.FirstOrDefault() ?? location)
+                );
+            }
+        }
+
+        if (combinativeTestAttribute is not null
+            && !combinativeParameters.Any())
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.RequiredPair_Attributes_CombinativeTest_CombinativeValues,
+                combinativeTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? location)
+            );
+        }
     }
 
     private void Compare(SyntaxNodeAnalysisContext context, 

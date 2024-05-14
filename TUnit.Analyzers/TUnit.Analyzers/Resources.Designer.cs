@@ -573,7 +573,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        ///   Looks up a localized string similar to `DataDrivenTest` must have an `Arguments` attribute, or vice versa..
         /// </summary>
         internal static string TUnit0020Description {
             get {
@@ -582,7 +582,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        ///   Looks up a localized string similar to `DataDrivenTest` must have an `Arguments` attribute, or vice versa..
         /// </summary>
         internal static string TUnit0020MessageFormat {
             get {
@@ -591,7 +591,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        ///   Looks up a localized string similar to `DataDrivenTest` must be paired with `Arguments` attributes..
         /// </summary>
         internal static string TUnit0020Title {
             get {
@@ -600,7 +600,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa..
         /// </summary>
         internal static string TUnit0021Description {
             get {
@@ -609,7 +609,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa..
         /// </summary>
         internal static string TUnit0021MessageFormat {
             get {
@@ -618,7 +618,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must be paired with either `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attributes..
         /// </summary>
         internal static string TUnit0021Title {
             get {
@@ -627,7 +627,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        ///   Looks up a localized string similar to `CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa..
         /// </summary>
         internal static string TUnit0022Description {
             get {
@@ -636,7 +636,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        ///   Looks up a localized string similar to `CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa..
         /// </summary>
         internal static string TUnit0022MessageFormat {
             get {
@@ -645,38 +645,11 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        ///   Looks up a localized string similar to `CombinativeTest` must be paired with `CombinativeValues` attributes..
         /// </summary>
         internal static string TUnit0022Title {
             get {
                 return ResourceManager.GetString("TUnit0022Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
-        /// </summary>
-        internal static string TUnit0023Description {
-            get {
-                return ResourceManager.GetString("TUnit0023Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
-        /// </summary>
-        internal static string TUnit0023MessageFormat {
-            get {
-                return ResourceManager.GetString("TUnit0023MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
-        /// </summary>
-        internal static string TUnit0023Title {
-            get {
-                return ResourceManager.GetString("TUnit0023Title", resourceCulture);
             }
         }
     }
