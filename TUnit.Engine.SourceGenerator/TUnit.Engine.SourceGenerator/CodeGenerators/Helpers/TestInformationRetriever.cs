@@ -26,7 +26,7 @@ internal static class TestInformationRetriever
         
         var notInConstraintKeys = notInParallelAttributes
             .SelectMany(x => x.ConstructorArguments)
-            .SelectMany(x => !x.Values.IsDefaultOrEmpty ? x.Values.Select(x => x.Value) : [x.Value])
+            .SelectMany(x => x.Value == null ? x.Values.Select(x => x.Value) : [x.Value])
             .Select(x => $"\"{x}\"");
         
         return $"[{string.Join(", ", notInConstraintKeys)}]";
