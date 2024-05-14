@@ -9,10 +9,10 @@ using TUnit.Analyzers.Helpers;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class OneTimeMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
+public class InstanceTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic);
+        ImmutableArray.Create(Rules.MethodMustNotBeStatic, Rules.MethodMustBePublic, Rules.MethodMustBeParameterless);
 
     public override void InitializeInternal(AnalysisContext context)
     { 
@@ -36,10 +36,8 @@ public class OneTimeMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var onlyOnceAttributes = attributes.Where(x =>
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is WellKnown.AttributeFullyQualifiedClasses.OnceOnlySetUp
-                or WellKnown.AttributeFullyQualifiedClasses.OnceOnlyCleanUp
-                or WellKnown.AttributeFullyQualifiedClasses.AssemblySetUp
-                or WellKnown.AttributeFullyQualifiedClasses.AssemblyCleanUp
+                is WellKnown.AttributeFullyQualifiedClasses.BeforeEachTest
+                or WellKnown.AttributeFullyQualifiedClasses.AfterEachTest
             )
             .ToList();
 
@@ -48,16 +46,9 @@ public class OneTimeMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!methodSymbol.IsStatic)
+        if (methodSymbol.IsStatic)
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeStatic,
-                methodDeclarationSyntax.GetLocation())
-            );
-        }
-
-        if (methodSymbol.IsAbstract)
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustNotBeAbstract,
+            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustNotBeStatic,
                 methodDeclarationSyntax.GetLocation())
             );
         }

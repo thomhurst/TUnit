@@ -8,8 +8,13 @@ internal static class WellKnown
         public const string Explicit = "global::TUnit.Core.ExplicitAttribute";
         public const string CombinativeValues = "global::TUnit.Core.CombinativeValuesAttribute";
 
-        public const string OnceOnlySetUp = "global::TUnit.Core.BeforeAllTestsInClassAttribute";
-        public const string OnceOnlyCleanUp = "global::TUnit.Core.AfterAllTestsInClassAttribute";
+        public const string BeforeEachTest = "global::TUnit.Core.BeforeEachTestAttribute";
+        public const string AfterEachTest = "global::TUnit.Core.AfterEachTestAttribute";
+
+        public const string BeforeAllTestsInClassAttribute = "global::TUnit.Core.BeforeAllTestsInClassAttribute";
+        public const string AfterAllTestsInClassAttribute = "global::TUnit.Core.AfterAllTestsInClassAttribute";
+        public const string GlobalBeforeEachTestAttribute = "global::TUnit.Core.GlobalBeforeEachTestAttribute";
+        public const string GlobalAfterEachTest = "global::TUnit.Core.GlobalAfterEachTestAttribute";
         public const string AssemblySetUp = "global::TUnit.Core.AssemblySetUpAttribute";
         public const string AssemblyCleanUp = "global::TUnit.Core.AssemblyCleanUpAttribute";
         
