@@ -15,7 +15,7 @@ public static class WellKnownFullyQualifiedClassNames
     // Test Data Attributes
     public static readonly FullyQualifiedTypeName ArgumentsAttribute = "TUnit.Core.ArgumentsAttribute";
     public static readonly FullyQualifiedTypeName MethodDataSourceAttribute = "TUnit.Core.MethodDataSourceAttribute";
-    public static readonly FullyQualifiedTypeName EnumerableMethodDataAttribute = "TUnit.Core.EnumerableMethodDataAttribute";
+    public static readonly FullyQualifiedTypeName EnumerableMethodDataAttribute = "TUnit.Core.EnumerableMethodDataSourceAttribute";
     public static readonly FullyQualifiedTypeName ClassDataSourceAttribute = "TUnit.Core.ClassDataSourceAttribute";
     public static readonly FullyQualifiedTypeName InjectAttribute = "TUnit.Core.InjectAttribute";
     public static readonly FullyQualifiedTypeName CombinativeValuesAttribute = "TUnit.Core.CombinativeValuesAttribute";
