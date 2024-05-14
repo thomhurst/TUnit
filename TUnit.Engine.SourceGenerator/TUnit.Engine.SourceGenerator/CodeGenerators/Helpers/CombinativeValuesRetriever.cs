@@ -13,8 +13,13 @@ internal static class CombinativeValuesRetriever
     // We return a List of a List. Inner List is for each test.
     public static IEnumerable<ArgumentsContainer> Parse(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
     {
+        if (methodSymbol.Parameters.IsDefaultOrEmpty)
+        {
+            return [];
+        }
+        
         var combinativeValuesAttributes = methodSymbol.Parameters
-            .Select(x => x.GetAttributes().FirstOrDefault(x => x.GetFullyQualifiedAttributeTypeName()
+            .Select(x => x.GetAttributes().SafeFirstOrDefault(x => x.GetFullyQualifiedAttributeTypeName()
                                                                == WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute.WithGlobalPrefix))
             .OfType<AttributeData>()
             .ToList();

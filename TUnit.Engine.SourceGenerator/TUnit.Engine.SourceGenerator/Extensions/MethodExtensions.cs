@@ -8,7 +8,14 @@ public static class MethodExtensions
 {
     public static AttributeData? GetTestAttribute(this IMethodSymbol methodSymbol)
     {
-        return methodSymbol.GetAttributes()
+        var attributes = methodSymbol.GetAttributes();
+
+        if (attributes.IsDefaultOrEmpty)
+        {
+            return null;
+        }
+        
+        return attributes
             .FirstOrDefault(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
                                  == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
     }

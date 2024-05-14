@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.Enums;
@@ -65,11 +64,11 @@ internal static class ClassArgumentsRetriever
         {
             var genericType = classDataAttribute.AttributeClass!.TypeArguments.First();
             var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-            var sharedArgument = classDataAttribute.NamedArguments.First(x => x.Key == "Shared").Value;
+            var sharedArgument = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Shared").Value;
 
             var sharedArgumentType = sharedArgument.ToCSharpString();
             
-            if (sharedArgumentType is "TUnit.Core.SharedType.None")
+            if (sharedArgumentType is "TUnit.Core.SharedType.None" or "" or null)
             {
                 return new ArgumentsContainer
                 {

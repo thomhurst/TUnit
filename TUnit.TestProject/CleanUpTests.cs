@@ -1,12 +1,4 @@
-﻿using System.Net;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core;
+﻿using TUnit.Core;
 
 namespace TUnit.TestProject;
 
