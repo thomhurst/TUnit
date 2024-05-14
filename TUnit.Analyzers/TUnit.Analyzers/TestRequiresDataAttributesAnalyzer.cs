@@ -14,7 +14,12 @@ namespace TUnit.Analyzers;
 public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.ConflictingTestAttributes);
+        ImmutableArray.Create(
+            Rules.RequiredPair_Attributes_CombinativeTest_CombinativeValues,
+            Rules.RequiredPair_Attributes_DataDrivenTest_Arguments,
+            Rules.RequiredCombinations_Attributes_DataSourceDrivenTest_MethodInfo_ClassInfo,
+            Rules.RequiredPair_Attributes_EnumerableDataSourceDrivenTest_EnumerableMethodInfo
+            );
 
     public override void InitializeInternal(AnalysisContext context)
     { 
