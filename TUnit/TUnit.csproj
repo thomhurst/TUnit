@@ -20,9 +20,5 @@
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj" />
     </ItemGroup>
-    
-    <ItemGroup>
-        <ProjectCapability Remove="TestContainer" />
-    </ItemGroup>
 
 </Project>
