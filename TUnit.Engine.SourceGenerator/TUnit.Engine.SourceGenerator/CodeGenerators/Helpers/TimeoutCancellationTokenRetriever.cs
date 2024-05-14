@@ -17,7 +17,7 @@ internal class TimeoutCancellationTokenRetriever
         
         if (timeoutAttribute != null)
         {
-            var timeoutInMillis = (int) timeoutAttribute.ConstructorArguments.First().Value!;
+            var timeoutInMillis = (int) timeoutAttribute.ConstructorArguments.SafeFirstOrDefault().Value!;
             return new Argument(ArgumentSource.TimeoutAttribute, "global::System.Threading.CancellationToken", $"global::TUnit.Engine.EngineCancellationToken.CreateToken(global::System.TimeSpan.FromMilliseconds({timeoutInMillis}))");
         }
 

@@ -37,7 +37,7 @@ internal static class TestInformationRetriever
         return methodAndClassAttributes
             .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                      == "global::TUnit.Core.RepeatAttribute")
-            ?.ConstructorArguments.First().Value as int? ?? 0;
+            ?.ConstructorArguments.SafeFirstOrDefault().Value as int? ?? 0;
     }
     
     public static TestLocation GetTestLocation(AttributeData[] methodAndClassAttributes)
@@ -82,7 +82,7 @@ internal static class TestInformationRetriever
             return "null";
         }
 
-        var timeoutMillis = (int)timeoutAttribute.ConstructorArguments.First().Value!;
+        var timeoutMillis = (int)timeoutAttribute.ConstructorArguments.SafeFirstOrDefault().Value!;
         
         return $"global::System.TimeSpan.FromMilliseconds({timeoutMillis})";
     }
@@ -92,7 +92,7 @@ internal static class TestInformationRetriever
         return methodAndClassAttributes
             .Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                         == "global::TUnit.Core.TestCategoryAttribute")
-            .Select(x => $"\"{x.ConstructorArguments.First().Value}\"");
+            .Select(x => $"\"{x.ConstructorArguments.SafeFirstOrDefault().Value}\"");
     }
 
     public static string GetTestId(TestGenerationContext testGenerationContext)
@@ -148,7 +148,7 @@ internal static class TestInformationRetriever
         stringBuilder.Append(testName);
         stringBuilder.Append(':');
         
-        var classParameters = testGenerationContext.ClassSymbol.Constructors.First().Parameters;
+        var classParameters = testGenerationContext.ClassSymbol.Constructors.SafeFirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         
         var classParameterTypes = GetTypes(classParameters);
 

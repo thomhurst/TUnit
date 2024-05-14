@@ -69,7 +69,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         {
             var typeContainingMethod = namedTypeSymbol.ToDisplayString(DisplayFormats
                 .FullyQualifiedGenericWithGlobalPrefix);
-            return [new Argument(ArgumentSource.MethodDataSourceAttribute, "var", $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.First().Value!}()")];
+            return [new Argument(ArgumentSource.MethodDataSourceAttribute, "var", $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()")];
         }
 
         var type = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!)
@@ -84,7 +84,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         if (methodDataAttribute.ConstructorArguments.Length == 1)
         {
             var typeContainingMethod = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-            return [new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.First().Value!}()")];
+            return [new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()")];
         }
 
         var type = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!)

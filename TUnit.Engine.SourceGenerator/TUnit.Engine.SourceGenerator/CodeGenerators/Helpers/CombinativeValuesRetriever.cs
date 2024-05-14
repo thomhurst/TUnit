@@ -25,9 +25,9 @@ internal static class CombinativeValuesRetriever
             .ToList();
         
         var mappedToConstructorArrays = combinativeValuesAttributes
-            .Select(x => x.ConstructorArguments.First().Values);
+            .Select(x => x.ConstructorArguments.SafeFirstOrDefault().Values);
 
-        var attr = combinativeValuesAttributes.First();
+        var attr = combinativeValuesAttributes.SafeFirstOrDefault();
         var index = 0;
         return GetCombinativeArgumentsList(mappedToConstructorArrays)
             .Select(x =>

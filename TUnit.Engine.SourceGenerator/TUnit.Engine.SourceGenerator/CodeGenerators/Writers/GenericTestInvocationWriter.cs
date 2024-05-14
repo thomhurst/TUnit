@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
@@ -19,14 +20,14 @@ internal static class GenericTestInvocationWriter
 
         if (hasEnumerableClassData)
         {
-            sourceBuilder.WriteLine($"foreach (var {VariableNames.ClassData} in {testSourceDataModel.ClassArguments.First().Invocation})");
+            sourceBuilder.WriteLine($"foreach (var {VariableNames.ClassData} in {testSourceDataModel.ClassArguments.SafeFirstOrDefault()?.Invocation})");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine($"{VariableNames.EnumerableClassDataIndex}++;");
         }
         
         if (hasEnumerableMethodData)
         {
-            sourceBuilder.WriteLine($"foreach (var {VariableNames.MethodData} in {testSourceDataModel.MethodArguments.First().Invocation})");
+            sourceBuilder.WriteLine($"foreach (var {VariableNames.MethodData} in {testSourceDataModel.MethodArguments.SafeFirstOrDefault()?.Invocation})");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine($"{VariableNames.EnumerableTestDataIndex}++;");
         }

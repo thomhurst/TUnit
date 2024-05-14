@@ -31,7 +31,7 @@ internal static class ClassArgumentsRetriever
                                  == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix))
         {
             var arg = dataSourceDrivenTestAttribute.ConstructorArguments.Length == 1
-                ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.First().Value}()"
+                ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.SafeFirstOrDefault().Value}()"
                 : $"{TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(dataSourceDrivenTestAttribute.ConstructorArguments[0])}.{dataSourceDrivenTestAttribute.ConstructorArguments[1].Value}()";
 
             return new ArgumentsContainer
@@ -47,7 +47,7 @@ internal static class ClassArgumentsRetriever
                      .Where(x => x.GetFullyQualifiedAttributeTypeName()
                                  == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix)) 
         {
-            var fullyQualifiedTypeNameFromTypedConstantValue = TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(classDataAttribute.ConstructorArguments.First());
+            var fullyQualifiedTypeNameFromTypedConstantValue = TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(classDataAttribute.ConstructorArguments.SafeFirstOrDefault());
            
             return new ArgumentsContainer
             {
@@ -62,7 +62,7 @@ internal static class ClassArgumentsRetriever
                      .Where(x => x.GetFullyQualifiedAttributeTypeName()
                          is "global::TUnit.Core.InjectAttribute"))
         {
-            var genericType = classDataAttribute.AttributeClass!.TypeArguments.First();
+            var genericType = classDataAttribute.AttributeClass!.TypeArguments.SafeFirstOrDefault();
             var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
             var sharedArgument = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Shared").Value;
 
