@@ -20,7 +20,7 @@ internal static class DataDrivenArgumentsRetriever
 
     private static ArgumentsContainer ParseArguments(AttributeData[] testAndClassAttributes, AttributeData argumentAttribute, int dataAttributeIndex)
     {
-        var objectArray = argumentAttribute.ConstructorArguments.First().Values;
+        var objectArray = argumentAttribute.ConstructorArguments.SafeFirstOrDefault().Values;
 
         return new ArgumentsContainer
         {
