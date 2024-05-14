@@ -9,7 +9,7 @@ using TUnit.Analyzers.Helpers;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class StaticTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
+public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic);
@@ -36,8 +36,8 @@ public class StaticTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var onlyOnceAttributes = attributes.Where(x =>
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is WellKnown.AttributeFullyQualifiedClasses.BeforeAllTestsInClassAttribute
-                or WellKnown.AttributeFullyQualifiedClasses.AfterAllTestsInClassAttribute
+                is WellKnown.AttributeFullyQualifiedClasses.AssemblySetUp
+                or WellKnown.AttributeFullyQualifiedClasses.AssemblyCleanUp
             )
             .ToList();
 

@@ -9,7 +9,7 @@ using TUnit.Analyzers.Helpers;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class StaticTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
+public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic);
@@ -36,8 +36,8 @@ public class StaticTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var onlyOnceAttributes = attributes.Where(x =>
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is WellKnown.AttributeFullyQualifiedClasses.BeforeAllTestsInClassAttribute
-                or WellKnown.AttributeFullyQualifiedClasses.AfterAllTestsInClassAttribute
+                is WellKnown.AttributeFullyQualifiedClasses.GlobalBeforeEachTestAttribute
+                or WellKnown.AttributeFullyQualifiedClasses.GlobalAfterEachTest
             )
             .ToList();
 
@@ -56,13 +56,6 @@ public class StaticTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         if (methodSymbol.IsAbstract)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustNotBeAbstract,
-                methodDeclarationSyntax.GetLocation())
-            );
-        }
-
-        if (!methodSymbol.Parameters.IsDefaultOrEmpty)
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeParameterless,
                 methodDeclarationSyntax.GetLocation())
             );
         }
