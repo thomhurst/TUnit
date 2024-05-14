@@ -571,5 +571,113 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0019Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        /// </summary>
+        internal static string TUnit0020Description {
+            get {
+                return ResourceManager.GetString("TUnit0020Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0020MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0020MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0020Title {
+            get {
+                return ResourceManager.GetString("TUnit0020Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        /// </summary>
+        internal static string TUnit0021Description {
+            get {
+                return ResourceManager.GetString("TUnit0021Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0021MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0021MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0021Title {
+            get {
+                return ResourceManager.GetString("TUnit0021Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        /// </summary>
+        internal static string TUnit0022Description {
+            get {
+                return ResourceManager.GetString("TUnit0022Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0022MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0022MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0022Title {
+            get {
+                return ResourceManager.GetString("TUnit0022Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        /// </summary>
+        internal static string TUnit0023Description {
+            get {
+                return ResourceManager.GetString("TUnit0023Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0023MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0023MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0023Title {
+            get {
+                return ResourceManager.GetString("TUnit0023Title", resourceCulture);
+            }
+        }
     }
 }

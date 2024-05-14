@@ -7,7 +7,7 @@ internal record TestGenerationContext
 {
     public required AttributeData TestAttribute { get; init; }
     
-    public required AttributeData? ClassDataAttribute { get; init; }
+    public required AttributeData? ClassDataSourceAttribute { get; init; }
     public required AttributeData? TestDataAttribute { get; init; }
     public required INamedTypeSymbol ClassSymbol { get; init; }
     public required IMethodSymbol MethodSymbol { get; init; }

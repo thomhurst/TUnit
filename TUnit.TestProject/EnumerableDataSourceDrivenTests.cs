@@ -7,7 +7,7 @@ namespace TUnit.TestProject;
 public class EnumerableDataSourceDrivenTests
 {
     [DataSourceDrivenTest]
-    [EnumerableMethodData(nameof(SomeMethod))]
+    [EnumerableMethodDataSource(nameof(SomeMethod))]
     public async Task DataSource_Method(int value)
     {
         await Assert.That(value).Is.EqualTo(1);

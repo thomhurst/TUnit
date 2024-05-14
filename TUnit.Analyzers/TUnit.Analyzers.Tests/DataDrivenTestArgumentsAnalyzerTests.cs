@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.ArgumentsArgumentsAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.DataDrivenTestArgumentsAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
-public class ArgumentsArgumentsAnalyzerTests
+public class DataDrivenTestArgumentsAnalyzerTests
 {
     [Test]
     public async Task DataDriven_Argument_Is_Flagged_When_No_Parameters_Passed()

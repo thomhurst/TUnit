@@ -29,7 +29,7 @@ internal static class ClassArgumentsRetriever
         var index = 0;
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
                      .Where(x => x.GetFullyQualifiedAttributeTypeName() 
-                                 == WellKnownFullyQualifiedClassNames.MethodDataAttribute.WithGlobalPrefix))
+                                 == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix))
         {
             var arg = dataSourceDrivenTestAttribute.ConstructorArguments.Length == 1
                 ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.First().Value}()"
@@ -40,13 +40,13 @@ internal static class ClassArgumentsRetriever
                 DataAttribute = dataSourceDrivenTestAttribute,
                 DataAttributeIndex = ++index,
                 IsEnumerableData = false,
-                Arguments = [new Argument(ArgumentSource.MethodDataAttribute, "var", arg)]
+                Arguments = [new Argument(ArgumentSource.MethodDataSourceAttribute, "var", arg)]
             };
         }
 
         foreach (var classDataAttribute in namedTypeSymbol.GetAttributes()
                      .Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                 == WellKnownFullyQualifiedClassNames.ClassDataAttribute.WithGlobalPrefix)) 
+                                 == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix)) 
         {
             var fullyQualifiedTypeNameFromTypedConstantValue = TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(classDataAttribute.ConstructorArguments.First());
            
@@ -55,7 +55,7 @@ internal static class ClassArgumentsRetriever
                 DataAttribute = classDataAttribute,
                 DataAttributeIndex = ++index,
                 IsEnumerableData = false,
-                Arguments = [new Argument(ArgumentSource.ClassDataAttribute, fullyQualifiedTypeNameFromTypedConstantValue, $"new {fullyQualifiedTypeNameFromTypedConstantValue}()")]
+                Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedTypeNameFromTypedConstantValue, $"new {fullyQualifiedTypeNameFromTypedConstantValue}()")]
             };
         }
 

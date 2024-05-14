@@ -1,11 +1,11 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class ClassDataAttribute : TUnitAttribute
+public class ClassDataSourceAttribute : TUnitAttribute
 {
     public Type Type { get; }
 
-    public ClassDataAttribute(Type type)
+    public ClassDataSourceAttribute(Type type)
     {
         if (type.GetConstructors().First().GetParameters().Any())
         {

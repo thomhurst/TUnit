@@ -64,7 +64,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         var attributes = methodSymbol.GetAttributes();
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                                        == WellKnown.AttributeFullyQualifiedClasses.MethodData))
+                                                                        == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
         {
             CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType);
         }
@@ -86,7 +86,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         var attributes = namedTypeSymbol.GetAttributes();
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                                        == WellKnown.AttributeFullyQualifiedClasses.MethodData))
+                                                                        == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
         {
             CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol);
         }

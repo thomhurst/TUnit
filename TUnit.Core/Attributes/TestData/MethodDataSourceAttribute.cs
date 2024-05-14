@@ -1,18 +1,18 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class MethodDataAttribute : TUnitAttribute
+public class MethodDataSourceAttribute : TUnitAttribute
 {
     public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }
 
-    public MethodDataAttribute(string methodNameProvidingDataSource)
+    public MethodDataSourceAttribute(string methodNameProvidingDataSource)
     {
         ArgumentException.ThrowIfNullOrEmpty(methodNameProvidingDataSource);
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
     
-    public MethodDataAttribute(Type classProvidingDataSource, 
+    public MethodDataSourceAttribute(Type classProvidingDataSource, 
         string methodNameProvidingDataSource)
     {
         ArgumentNullException.ThrowIfNull(classProvidingDataSource);

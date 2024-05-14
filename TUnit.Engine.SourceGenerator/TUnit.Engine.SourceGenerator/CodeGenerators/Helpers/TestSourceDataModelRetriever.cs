@@ -52,7 +52,7 @@ internal static class TestSourceDataModelRetriever
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute,
         ArgumentsContainer testArguments)
     {
-        for (var i = 1; i <= runCount; i++)
+        for (var i = 0; i < runCount; i++)
         {
             yield return GetTestSourceDataModel(new TestGenerationContext()
                 {
@@ -60,7 +60,7 @@ internal static class TestSourceDataModelRetriever
                     ClassSymbol = namedTypeSymbol,
                     ClassArguments = [],
                     TestArguments = testArguments.Arguments,
-                    ClassDataAttribute = null,
+                    ClassDataSourceAttribute = null,
                     TestDataAttribute = testArguments.DataAttribute,
                     RepeatIndex = i,
                     TestAttribute = testAttribute,
@@ -78,7 +78,7 @@ internal static class TestSourceDataModelRetriever
     {
         foreach (var classArgument in classArguments.Arguments)
         {
-            for (var i = 1; i <= runCount; i++)
+            for (var i = 0; i < runCount; i++)
             {
                 yield return GetTestSourceDataModel(new TestGenerationContext
                 {
@@ -86,7 +86,7 @@ internal static class TestSourceDataModelRetriever
                     ClassSymbol = namedTypeSymbol,
                     ClassArguments = [classArgument],
                     TestArguments = testArgumentsCollection.Arguments,
-                    ClassDataAttribute = classArguments.DataAttribute,
+                    ClassDataSourceAttribute = classArguments.DataAttribute,
                     TestDataAttribute = testArgumentsCollection.DataAttribute,
                     RepeatIndex = i,
                     TestAttribute = testAttribute,

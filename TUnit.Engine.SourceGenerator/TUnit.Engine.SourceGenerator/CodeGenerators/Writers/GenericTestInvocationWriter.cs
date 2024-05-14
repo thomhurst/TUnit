@@ -46,9 +46,7 @@ internal static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine(
             $"var resettableClassFactory = new global::TUnit.Core.ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
-        sourceBuilder.WriteLine(
-            $"var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(() => resettableClassFactory.Value.{testSourceDataModel.MethodName});");
-
+        
         wasArgument = false;
         var methodArguments = testSourceDataModel.GetMethodArgumentsInvocations();
         foreach (var methodArgument in methodArguments)
@@ -61,6 +59,11 @@ internal static class GenericTestInvocationWriter
         {
             sourceBuilder.WriteLine();
         }
+        
+        sourceBuilder.WriteLine(
+            $"var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(() => resettableClassFactory.Value.{testSourceDataModel.MethodName}({string.Join(", ", testSourceDataModel.GetMethodArgumentVariableNames())}));");
+
+        sourceBuilder.WriteLine();
 
         sourceBuilder.WriteLine(
             $"var testInformation = new global::TUnit.Core.TestInformation<{fullyQualifiedClassType}>()");

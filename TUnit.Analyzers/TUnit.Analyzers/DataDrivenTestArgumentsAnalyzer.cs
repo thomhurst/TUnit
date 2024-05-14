@@ -11,7 +11,7 @@ using TUnit.Analyzers.Helpers;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class ArgumentsArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
+public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability, Rules.MissingDataDrivenTestAttribute);
@@ -60,7 +60,7 @@ public class ArgumentsArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.MissingDataDrivenTestAttribute,
-                    argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? methodSymbol.Locations.FirstOrDefault())
             );
         }
         
@@ -68,7 +68,7 @@ public class ArgumentsArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.NoTestDataProvided,
-                    argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? methodSymbol.Locations.FirstOrDefault())
             );
             return;
         }
@@ -122,7 +122,7 @@ public class ArgumentsArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
-                        argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                        argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? methodSymbol.Locations.FirstOrDefault(),
                         attributeArgumentType.ToDisplayString(),
                         methodParameterType.ToDisplayString())
                 );

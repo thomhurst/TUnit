@@ -5,13 +5,13 @@ namespace TUnit.TestProject;
 public class DataSourceDrivenTests
 {
     [DataSourceDrivenTest]
-    [MethodData(nameof(SomeMethod))]
+    [MethodDataSource(nameof(SomeMethod))]
     public void DataSource_Method(int value)
     {
     }
     
     [DataSourceDrivenTest]
-    [ClassData(typeof(SomeClass))]
+    [ClassDataSource(typeof(SomeClass))]
     public void DataSource_Class(SomeClass value)
     {
     }

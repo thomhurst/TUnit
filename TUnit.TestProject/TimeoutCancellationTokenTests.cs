@@ -4,7 +4,7 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-[MethodData(nameof(DataSource))]
+[MethodDataSource(nameof(DataSource))]
 [TestCategory("Timeout Cancellation Token Tests")]
 public class TimeoutCancellationTokenTests
 {
@@ -28,7 +28,7 @@ public class TimeoutCancellationTokenTests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [MethodData(nameof(DataSource))]
+    [MethodDataSource(nameof(DataSource))]
     [Timeout(30_000)]
     [DataSourceDrivenTest]
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)

@@ -18,7 +18,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         var methodDataIndex = 0;
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                                   == WellKnownFullyQualifiedClassNames
-                                                                      .MethodDataAttribute.WithGlobalPrefix))
+                                                                      .MethodDataSourceAttribute.WithGlobalPrefix))
         {
             var methodData = ParseMethodData(namedTypeSymbol, attributeData);
             var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
@@ -48,7 +48,7 @@ internal static class DataSourceDrivenArgumentsRetriever
 
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                                   == WellKnownFullyQualifiedClassNames
-                                                                      .ClassDataAttribute.WithGlobalPrefix))
+                                                                      .ClassDataSourceAttribute.WithGlobalPrefix))
         {
             var classData = ParseClassData(attributeData);
             var arguments = classData.WithTimeoutArgument(testAndClassAttributes);
@@ -69,13 +69,13 @@ internal static class DataSourceDrivenArgumentsRetriever
         {
             var typeContainingMethod = namedTypeSymbol.ToDisplayString(DisplayFormats
                 .FullyQualifiedGenericWithGlobalPrefix);
-            return [new Argument(ArgumentSource.MethodDataAttribute, "var", $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.First().Value!}()")];
+            return [new Argument(ArgumentSource.MethodDataSourceAttribute, "var", $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.First().Value!}()")];
         }
 
         var type = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!)
             .ToDisplayString(DisplayFormats
             .FullyQualifiedGenericWithGlobalPrefix);
-        return [new Argument(ArgumentSource.MethodDataAttribute, "var", $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()")];
+        return [new Argument(ArgumentSource.MethodDataSourceAttribute, "var", $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()")];
     }
     
     private static IEnumerable<Argument> ParseEnumerableMethodData(INamedTypeSymbol namedTypeSymbol,
@@ -89,13 +89,13 @@ internal static class DataSourceDrivenArgumentsRetriever
 
         var type = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!)
             .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-        return [new Argument(ArgumentSource.MethodDataAttribute, "var", $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()")];
+        return [new Argument(ArgumentSource.MethodDataSourceAttribute, "var", $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()")];
     }
     
     private static IEnumerable<Argument> ParseClassData(AttributeData classDataAttribute)
     {
         var type = (INamedTypeSymbol)classDataAttribute.ConstructorArguments[0].Value!;
         var fullyQualifiedType = type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-        return [new Argument(ArgumentSource.ClassDataAttribute, fullyQualifiedType, $"new {fullyQualifiedType}()")];
+        return [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedType, $"new {fullyQualifiedType}()")];
     }
 }

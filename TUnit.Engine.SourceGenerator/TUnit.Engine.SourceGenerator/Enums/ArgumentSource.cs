@@ -2,8 +2,8 @@ namespace TUnit.Engine.SourceGenerator.Enums;
 
 internal enum ArgumentSource
 {
-    ClassDataAttribute,
-    MethodDataAttribute,
+    ClassDataSourceAttribute,
+    MethodDataSourceAttribute,
     CombinativeDataAttribute,
     ArgumentAttribute,
     TimeoutAttribute,

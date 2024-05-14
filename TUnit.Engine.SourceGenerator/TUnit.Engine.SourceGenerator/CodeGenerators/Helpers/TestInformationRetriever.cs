@@ -98,9 +98,9 @@ internal static class TestInformationRetriever
     {
         var stringBuilder = new StringBuilder();
         
-        if (testGenerationContext.ClassDataAttribute != null)
+        if (testGenerationContext.ClassDataSourceAttribute != null)
         {
-            stringBuilder.Append(testGenerationContext.ClassDataAttribute.AttributeClass!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+            stringBuilder.Append(testGenerationContext.ClassDataSourceAttribute.AttributeClass!.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
             
             if (testGenerationContext.ClassDataAttributeIndex != null)
             {
