@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Analyzers.Helpers;
 
@@ -15,10 +16,31 @@ public static class MethodExtensions
     
     public static AttributeData? GetTimeoutAttribute(this IMethodSymbol methodSymbol)
     {
-        return methodSymbol.GetAttributes()
-            .Concat(methodSymbol.ContainingType.GetAttributes())
-            .FirstOrDefault(x =>
+        return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.TimeoutAttribute, true);
+            
+    }
+    
+    public static AttributeData? GetDataDrivenTestAttribute(this IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.DataDrivenTest, false);
+    }
+    
+    public static AttributeData? GetArgumentsAttribute(this IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.Arguments, false);
+    }
+
+    private static AttributeData? GetAttribute(this IMethodSymbol methodSymbol, string fullyQualifiedNameWithGlobalPrefix, bool searchClass = true)
+    {
+        IEnumerable<AttributeData> attributes = methodSymbol.GetAttributes();
+
+        if (searchClass)
+        {
+            attributes = attributes.Concat(methodSymbol.ContainingType.GetAttributes());
+
+        }
+        return attributes.FirstOrDefault(x =>
                 x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == WellKnown.AttributeFullyQualifiedClasses.TimeoutAttribute);
+                == fullyQualifiedNameWithGlobalPrefix);
     }
 }

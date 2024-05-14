@@ -2,15 +2,17 @@
 
 namespace TUnit.TestProject;
 
-[DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.One))]
-[DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.Two))]
-[DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.Three))]
+[DataSourceDrivenTest]
+[MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.One))]
+[MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Two))]
+[MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Three))]
 public class DataSourceClassCombinedWithDataSourceMethod(int i)
 {
-    [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.One))]
-    [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.Two))]
-    [DataSourceDrivenTest(typeof(CommonTestData), nameof(CommonTestData.Three))]
-    public void Test(int i)
+    [DataSourceDrivenTest]
+    [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.One))]
+    [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Two))]
+    [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Three))]
+    public void DataSourceClassCombinedWithDataSourceMethodTest(int i)
     {
     }
 }

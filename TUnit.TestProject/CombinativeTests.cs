@@ -15,9 +15,9 @@ public class CombinativeTests
     
     [CombinativeTest]
     public async Task CombinativeTest_Two(
-        [CombinativeValues(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)] int i, 
-        [CombinativeValues(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)] int i2, 
-        [CombinativeValues(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)] int i3, 
+        [CombinativeValues(1, 2)] int i, 
+        [CombinativeValues(1, 2, 3)] int i2, 
+        [CombinativeValues(1, 2, 3, 4)] int i3, 
         [CombinativeValues(true, false)] bool boolean)
     {
         await Task.CompletedTask;

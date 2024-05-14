@@ -1,6 +1,5 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using TUnit.Core;
+﻿using TUnit.Core;
 
 namespace TUnit.Engine.Models;
 
-internal record TestWithResult(TestCase Test, Task<TUnitTestResult> ResultTask);
+internal record TestWithResult(TestInformation Test, Task<TUnitTestResult> ResultTask);

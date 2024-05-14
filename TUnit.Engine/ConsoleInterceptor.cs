@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using Microsoft.Testing.Platform.Logging;
 using TUnit.Core;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
@@ -9,7 +9,9 @@ namespace TUnit.Engine;
 
 internal class ConsoleInterceptor : TextWriter
 {
-    private readonly IMessageLogger? _messageLogger;
+    public static ConsoleInterceptor Instance { get; private set; } = null!;
+
+    private readonly ILogger<ConsoleInterceptor>? _logger;
     public override Encoding Encoding => InnerWriter?.Encoding ?? Encoding.UTF8;
 
     public static TextWriter DefaultOut { get; }
@@ -21,11 +23,12 @@ internal class ConsoleInterceptor : TextWriter
         DefaultOut = Console.Out;
     }
 
-    public ConsoleInterceptor(IMessageLogger messageLogger)
+    public ConsoleInterceptor(ILoggerFactory loggerFactory)
     {
-        _messageLogger = messageLogger;
+        _logger = loggerFactory.CreateLogger<ConsoleInterceptor>();
+        Instance = this;
     }
-
+    
     public void Initialize()
     {
         Console.SetOut(this);
@@ -37,8 +40,7 @@ internal class ConsoleInterceptor : TextWriter
         {
             try
             {
-
-                _messageLogger?.SendMessage(TestMessageLevel.Informational, testContext.GetConsoleOutput());
+                _logger?.LogInformation(testContext.GetConsoleOutput());
             }
             catch (Exception e)
             {

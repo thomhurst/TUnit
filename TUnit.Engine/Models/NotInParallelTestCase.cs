@@ -1,12 +1,12 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using TUnit.Core;
 
 namespace TUnit.Engine.Models;
 
 internal record NotInParallelTestCase
 {
-    public string Id => TestCase.Id.ToString();
+    public string Id => Test.TestId;
     public required ConstraintKeysCollection ConstraintKeys { get; init; }
-    public required TestCase TestCase { get; init; }
+    public required TestInformation Test { get; init; }
 
     public virtual bool Equals(NotInParallelTestCase? other)
     {

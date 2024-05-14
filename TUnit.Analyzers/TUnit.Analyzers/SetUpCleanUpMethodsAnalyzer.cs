@@ -39,8 +39,8 @@ public class SetUpCleanUpMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var onlyOnceAttributes = attributes.Where(x =>
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is "global::TUnit.Core.SetUpAttribute"
-                or "global::TUnit.Core.CleanUpAttribute")
+                is "global::TUnit.Core.BeforeEachTestAttribute"
+                or "global::TUnit.Core.AfterEachTestAttribute")
             .ToList();
 
         if (!onlyOnceAttributes.Any())

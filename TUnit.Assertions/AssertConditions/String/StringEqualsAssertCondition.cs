@@ -55,9 +55,9 @@ public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, st
                 
                 Difference at index {errorIndex}:
                    {ActualValue?.Substring(startIndex, Math.Min(ActualValue!.Length - startIndex, 20))}
-                   {new string(' ', spacesPrecedingArrow)}↑
+                   {new string(' ', spacesPrecedingArrow)}^
                    {ExpectedValue?.Substring(startIndex, Math.Min(ExpectedValue!.Length - startIndex, 20))}
-                   {new string(' ', spacesPrecedingArrow)}↑
+                   {new string(' ', spacesPrecedingArrow)}^
                 """;
     }
 }

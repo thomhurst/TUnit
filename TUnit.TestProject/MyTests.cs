@@ -1,4 +1,4 @@
-﻿namespace MyTestProject;
+﻿namespace TUnit.TestProject;
 
 public class MyTests
 {

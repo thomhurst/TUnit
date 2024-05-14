@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using TUnit.Engine.Json;
 
@@ -11,6 +12,27 @@ internal static class SerializationExtensions
         Converters = { new ObjectArrayConverter() },
         ReferenceHandler = ReferenceHandler.Preserve,
     };
+    
+    [return: NotNullIfNotNull("t")]
+    public static string? ToJson<T>(this T? t)
+    {
+        if (t is null)
+        {
+            return null;
+        }
+
+        return JsonSerializer.Serialize(t, Options);
+    }
+    
+    public static T? FromJson<T>(this string? value)
+    {
+        if (value is null)
+        {
+            return default;
+        }
+
+        return JsonSerializer.Deserialize<T>(value, Options);
+    }
     
     public static string? SerializeArgumentsSafely(this object?[]? arguments)
     {

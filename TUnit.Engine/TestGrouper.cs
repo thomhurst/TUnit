@@ -1,31 +1,31 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using TUnit.Core;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine;
 
 internal class TestGrouper
 {
-    public GroupedTests OrganiseTests(IEnumerable<TestCase> testCases)
+    public GroupedTests OrganiseTests(IEnumerable<TestInformation> testCases)
     {
         var allTestsOrderedByClass = testCases
-            .GroupBy(x => x.GetPropertyValue(TUnitTestProperties.AssemblyQualifiedClassName, ""))
+            .GroupBy(x => x.ClassType)
             .SelectMany(x => x)
-            .OrderByDescending(x => x.GetPropertyValue(TUnitTestProperties.Order, int.MaxValue))
+            .OrderByDescending(x => x.Order)
             .ToList();
 
-        var notInParallel = new Queue<TestCase>();
+        var notInParallel = new Queue<TestInformation>();
         var keyedNotInParallel = new List<NotInParallelTestCase>();
-        var parallel = new Queue<TestCase>();
+        var parallel = new Queue<TestInformation>();
 
         foreach (var test in allTestsOrderedByClass)
         {
-            var notInParallelConstraintKey = test.GetPropertyValue(TUnitTestProperties.NotInParallelConstraintKeys, null as string[]);
+            var notInParallelConstraintKey = test.NotInParallelConstraintKeys;
             
             if (notInParallelConstraintKey == null)
             {
                 parallel.Enqueue(test);
             }
-            else if (notInParallelConstraintKey.Length == 0)
+            else if (notInParallelConstraintKey.Count == 0)
             {
                 notInParallel.Enqueue(test);
             }
@@ -33,7 +33,7 @@ internal class TestGrouper
             {
                 keyedNotInParallel.Add(new NotInParallelTestCase
                 {
-                    TestCase = test,
+                    Test = test,
                     ConstraintKeys = new ConstraintKeysCollection(notInParallelConstraintKey)
                 });
             }

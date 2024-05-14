@@ -15,7 +15,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                             
-                                [{|#0:DataSourceDrivenTest(nameof(Data))|}]
+                                [{|#0:MethodData(nameof(Data))|}]
                                 public void MyTest(string value)
                                 {
                                 }
@@ -41,7 +41,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
 
                             public class MyClass
                             {
-                                [DataSourceDrivenTest(nameof(Data))]
+                                [MethodData(nameof(Data))]
                                 public void MyTest(int value)
                                 {
                                 }
@@ -64,7 +64,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
 
                             public class MyClass
                             {
-                                [DataSourceDrivenTest(nameof(Data))]
+                                [MethodData(nameof(Data))]
                                 public void MyTest(int value)
                                 {
                                 }
@@ -95,7 +95,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
 
                             public class MyClass
                             {
-                                [DataSourceDrivenTest(typeof(MyData), nameof(MyData.One))]
+                                [MethodData(typeof(MyData), nameof(MyData.One))]
                                 public void MyTest(int value)
                                 {
                                 }
@@ -123,7 +123,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                                 [Timeout(30_000)]
-                                [DataSourceDrivenTest(typeof(MyData), nameof(MyData.One))]
+                                [MethodData(typeof(MyData), nameof(MyData.One))]
                                 public void MyTest(int value, CancellationToken token)
                                 {
                                 }

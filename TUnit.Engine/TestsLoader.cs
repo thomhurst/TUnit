@@ -1,70 +1,11 @@
-﻿using System.Reflection;
-using TUnit.Core;
-using TUnit.Engine.Models;
-using TUnit.Engine.TestParsers;
+﻿using TUnit.Core;
 
 namespace TUnit.Engine;
 
-internal class TestsLoader(SourceLocationRetriever sourceLocationRetriever, 
-    IEnumerable<ITestParser> testParsers)
+internal class TestsLoader
 {
-    private static readonly Type[] TestAttributes = [typeof(TestAttribute), typeof(DataDrivenTestAttribute), typeof(DataSourceDrivenTestAttribute), typeof(CombinativeTestAttribute)];
-
-    public IEnumerable<TestDetails> GetTests(CachedAssemblyInformation cachedAssemblyInformation)
+    public IEnumerable<TestInformation> GetTests()
     {
-        var nonAbstractClasses = cachedAssemblyInformation.Types.Where(x => !x.IsAbstract);
-
-        foreach (var testMethod in GetTestMethods(nonAbstractClasses))
-        {
-            var sourceLocation = sourceLocationRetriever
-                .GetSourceLocation(cachedAssemblyInformation.Assembly.Location, testMethod.MethodInfo.DeclaringType!.FullName!, testMethod.MethodInfo.Name);
-
-            var repeatCount = testMethod.MethodInfo.GetCustomAttributes<RepeatAttribute>()
-                .Concat(testMethod.TestClass.GetCustomAttributes<RepeatAttribute>())
-                .FirstOrDefault()
-                ?.Times ?? 0;
-
-            var runCount = repeatCount + 1;
-            
-            var testDetailsEnumerable = testParsers.SelectMany(testParser =>
-                testParser.GetTestCases(testMethod.MethodInfo,
-                    testMethod.TestClass,
-                    runCount,
-                    sourceLocation)
-            );
-            
-            foreach (var testDetails in testDetailsEnumerable)
-            {
-                yield return testDetails;
-            }
-        }
-    }
-
-    private static IEnumerable<TestMethod> GetTestMethods(IEnumerable<Type> nonAbstractClasses)
-    {
-        foreach (var nonAbstractClass in nonAbstractClasses)
-        {
-            var methods = nonAbstractClass.GetMethods();
-
-            foreach (var methodInfo in methods)
-            {
-                if (!HasTestAttributes(methodInfo))
-                {
-                    continue;
-                }
-
-                yield return new TestMethod
-                {
-                    MethodInfo = methodInfo,
-                    TestClass = nonAbstractClass
-                };
-            }
-        }
-    }
-
-    private static bool HasTestAttributes(MethodInfo methodInfo)
-    {
-        return methodInfo.CustomAttributes
-            .Any(x => TestAttributes.Contains(x.AttributeType));
+        return TestDictionary.GetAllTestDetails();
     }
 }

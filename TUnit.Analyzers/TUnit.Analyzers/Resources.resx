@@ -180,4 +180,40 @@
     <data name="TUnit0018Title" xml:space="preserve">
         <value>Test methods should not assign instance data</value>
     </data>
+    <data name="TUnit0019Description" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute.</value>
+    </data>
+    <data name="TUnit0019MessageFormat" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute</value>
+    </data>
+    <data name="TUnit0019Title" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute</value>
+    </data>
+    <data name="TUnit0020Description" xml:space="preserve">
+        <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
+    </data>
+    <data name="TUnit0020MessageFormat" xml:space="preserve">
+        <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
+    </data>
+    <data name="TUnit0020Title" xml:space="preserve">
+        <value>`DataDrivenTest` must be paired with `Arguments` attributes.</value>
+    </data>
+    <data name="TUnit0021Description" xml:space="preserve">
+        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
+    </data>
+    <data name="TUnit0021MessageFormat" xml:space="preserve">
+        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
+    </data>
+    <data name="TUnit0021Title" xml:space="preserve">
+        <value>`DataSourceDrivenTest` must be paired with either `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attributes.</value>
+    </data>
+    <data name="TUnit0022Description" xml:space="preserve">
+        <value>`CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa.</value>
+    </data>
+    <data name="TUnit0022MessageFormat" xml:space="preserve">
+        <value>`CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa.</value>
+    </data>
+    <data name="TUnit0022Title" xml:space="preserve">
+        <value>`CombinativeTest` must be paired with `CombinativeValues` attributes.</value>
+    </data>
 </root>

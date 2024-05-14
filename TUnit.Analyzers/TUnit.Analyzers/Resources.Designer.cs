@@ -544,5 +544,113 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0018Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        /// </summary>
+        internal static string TUnit0019Description {
+            get {
+                return ResourceManager.GetString("TUnit0019Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0019MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0019MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        /// </summary>
+        internal static string TUnit0019Title {
+            get {
+                return ResourceManager.GetString("TUnit0019Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `DataDrivenTest` must have an `Arguments` attribute, or vice versa..
+        /// </summary>
+        internal static string TUnit0020Description {
+            get {
+                return ResourceManager.GetString("TUnit0020Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `DataDrivenTest` must have an `Arguments` attribute, or vice versa..
+        /// </summary>
+        internal static string TUnit0020MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0020MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `DataDrivenTest` must be paired with `Arguments` attributes..
+        /// </summary>
+        internal static string TUnit0020Title {
+            get {
+                return ResourceManager.GetString("TUnit0020Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa..
+        /// </summary>
+        internal static string TUnit0021Description {
+            get {
+                return ResourceManager.GetString("TUnit0021Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa..
+        /// </summary>
+        internal static string TUnit0021MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0021MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must be paired with either `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attributes..
+        /// </summary>
+        internal static string TUnit0021Title {
+            get {
+                return ResourceManager.GetString("TUnit0021Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa..
+        /// </summary>
+        internal static string TUnit0022Description {
+            get {
+                return ResourceManager.GetString("TUnit0022Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa..
+        /// </summary>
+        internal static string TUnit0022MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0022MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `CombinativeTest` must be paired with `CombinativeValues` attributes..
+        /// </summary>
+        internal static string TUnit0022Title {
+            get {
+                return ResourceManager.GetString("TUnit0022Title", resourceCulture);
+            }
+        }
     }
 }

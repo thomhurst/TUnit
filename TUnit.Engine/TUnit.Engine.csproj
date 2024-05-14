@@ -5,18 +5,33 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     </PropertyGroup>
-
+    
     <ItemGroup>
         <PackageReference Include="Hardware.Info" Version="100.1.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
         <PackageReference Include="Microsoft.Testing.Platform" Version="1.1.0" />
-        <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0" />
-        <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="17.9.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="TUnit.Engine.props">
+            <Pack>true</Pack>
+            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
+        <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" />
     </ItemGroup>
 
 </Project>

@@ -12,7 +12,7 @@ public class Tests
     {
         Console.WriteLine("Blah!");
 
-        await Assert.That(TestContext.Current.GetConsoleOutput()).Is.EqualTo("Blah!", StringComparison.Ordinal);
+        await Assert.That(TestContext.Current?.GetConsoleOutput()).Is.EqualTo("Blah!", StringComparison.Ordinal);
     }
     
     [Test]
@@ -57,22 +57,24 @@ public class Tests
         await Assert.That(value).Is.EqualTo("1");
     }
 
-    [DataDrivenTest("1")]
-    [DataDrivenTest("2")]
-    [DataDrivenTest("3")]
-    [DataDrivenTest("4")]
-    [DataDrivenTest("5")]
+    [DataDrivenTest]
+    [Arguments("1")]
+    [Arguments("2")]
+    [Arguments("3")]
+    [Arguments("4")]
+    [Arguments("5")]
     [TestCategory("Fail")]
     public async Task ParameterisedTests1(string value)
     {
         await Assert.That(value).Is.EqualTo("1").And.Has.Length().EqualTo(1);
     }
 
-    [DataDrivenTest("1")]
-    [DataDrivenTest("2")]
-    [DataDrivenTest("3")]
-    [DataDrivenTest("4")]
-    [DataDrivenTest("5")]
+    [DataDrivenTest]
+    [Arguments("1")]
+    [Arguments("2")]
+    [Arguments("3")]
+    [Arguments("4")]
+    [Arguments("5")]
     [TestCategory("Fail")]
     public async Task ParameterisedTests2(string value)
     {
@@ -106,14 +108,16 @@ public class Tests
         await Assert.That(value).Is.EqualTo("1");
     }
 
-    [DataSourceDrivenTest(nameof(One))]
+    [DataSourceDrivenTest]
+    [MethodDataSource(nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource1(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(nameof(One))]
+    [DataSourceDrivenTest]
+    [MethodDataSource(nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource2(int value)
     {
@@ -121,14 +125,16 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(nameof(Two))]
+    [DataSourceDrivenTest]
+    [MethodDataSource(nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource3(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(nameof(Two))]
+    [DataSourceDrivenTest]
+    [MethodDataSource(nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource4(int value)
     {
@@ -136,14 +142,16 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(typeof(TestDataSources), nameof(One))]
+    [DataSourceDrivenTest]
+    [MethodDataSource(typeof(TestDataSources), nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource5(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(typeof(TestDataSources), nameof(One))]
+    [DataSourceDrivenTest]
+    [MethodDataSource(typeof(TestDataSources), nameof(One))]
     [TestCategory("Pass")]
     public async Task TestDataSource6(int value)
     {
@@ -151,22 +159,24 @@ public class Tests
         await Assert.That(value).Is.EqualTo(1);
     }
     
-    [DataSourceDrivenTest(typeof(TestDataSources), "Two")]
+    [DataSourceDrivenTest]
+    [MethodDataSource(typeof(TestDataSources), "Two")]
     [TestCategory("Pass")]
     public async Task TestDataSource_Wrong(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
-
-
-    [DataSourceDrivenTest(typeof(TestDataSources), nameof(Two))]
+    
+    [DataSourceDrivenTest]
+    [MethodDataSource(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource7(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
 
-    [DataSourceDrivenTest(typeof(TestDataSources), nameof(Two))]
+    [DataSourceDrivenTest]
+    [MethodDataSource(typeof(TestDataSources), nameof(Two))]
     [TestCategory("Fail")]
     public async Task TestDataSource8(int value)
     {
@@ -178,14 +188,14 @@ public class Tests
     [TestCategory("Pass")]
     public async Task TestContext1()
     {
-        await Assert.That(TestContext.Current.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current?.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]
     [TestCategory("Fail")]
     public async Task TestContext2()
     {
-        await Assert.That(TestContext.Current.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current?.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]
@@ -371,30 +381,30 @@ public class Tests
             .Is.EqualTo("ABCDE", StringComparison.Ordinal);
     }
 
-    // [DataSourceDrivenTest(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]
+    // [MethodData(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]
     // public async Task TestDataSourceEnumerable(int value)
     // {
     //     await Assert.That(value).Is.EqualTo(1);
     // }
     
-    // [DataSourceDrivenTest(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
+    // [MethodData(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
     // [TestCategory("Fail")]
     // public async Task TestDataSourceFailingEnumerable(int value)
     // {
     //     await Assert.That(value).Is.EqualTo(1);
     // }
 
-    // [DataDrivenTest]
+    // [Arguments]
     // public void No_Arg()
     // {
     // }
     
-    // [DataDrivenTest()]
+    // [Arguments()]
     // public void No_Arg2()
     // {
     // }
     
-    // [DataDrivenTest("")]
+    // [Arguments("")]
     // public void WrongType(int i)
     // {
     // }
