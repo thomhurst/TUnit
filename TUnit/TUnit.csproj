@@ -25,11 +25,4 @@
         <ProjectCapability Remove="TestContainer" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Content Include="TUnit.props">
-            <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-        </Content>
-    </ItemGroup>
-
 </Project>
