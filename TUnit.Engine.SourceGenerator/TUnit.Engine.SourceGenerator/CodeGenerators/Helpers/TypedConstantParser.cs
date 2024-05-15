@@ -6,11 +6,11 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class TypedConstantParser
 {
-    public static string GetTypedConstantValue(TypedConstant constructorArgument)
+    public static string? GetTypedConstantValue(TypedConstant constructorArgument)
     {
         if (constructorArgument.Kind == TypedConstantKind.Error)
         {
-            return "null";
+            return null;
         }
 
         if (constructorArgument.Kind is TypedConstantKind.Primitive)
@@ -34,6 +34,23 @@ internal static class TypedConstantParser
         }
 
         throw new ArgumentOutOfRangeException();
+    }
+
+    private static object? ParsePrimitive(TypedConstant constructorArgument)
+    {
+        var type = constructorArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+
+        if (type == "global::System.Boolean")
+        {
+            return constructorArgument.Value?.ToString()?.ToLowerInvariant();
+        }
+        
+        if (type == "global::System.String")
+        {
+            return $"\"{constructorArgument.Value}\"";
+        }
+        
+        return constructorArgument.Value;
     }
 
     public static string GetFullyQualifiedTypeNameFromTypedConstantValue(TypedConstant typedConstant)

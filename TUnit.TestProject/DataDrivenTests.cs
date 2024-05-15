@@ -32,4 +32,23 @@ public class DataDrivenTests
     public void NullValue(string? value)
     {
     }
+    
+    [DataDrivenTest]
+    [Arguments("")]
+    public void EmptyString(string? value)
+    {
+    }
+    
+    [DataDrivenTest]
+    [Arguments("Foo bar!")]
+    public void NonEmptyString(string? value)
+    {
+    }
+    
+    [DataDrivenTest]
+    [Arguments(false)]
+    [Arguments(true)]
+    public void BooleanString(bool value)
+    {
+    }
 }

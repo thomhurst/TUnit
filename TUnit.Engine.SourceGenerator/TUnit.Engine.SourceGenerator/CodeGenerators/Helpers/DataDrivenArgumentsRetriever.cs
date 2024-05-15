@@ -21,7 +21,7 @@ internal static class DataDrivenArgumentsRetriever
     }
 
     private static ArgumentsContainer ParseArguments(AttributeData[] testAndClassAttributes,
-        AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> methodSymbolParameters,
+        AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> parameterSymbols,
         int dataAttributeIndex)
     {
         var constructorArgument = argumentAttribute.ConstructorArguments.SafeFirstOrDefault();
@@ -37,9 +37,9 @@ internal static class DataDrivenArgumentsRetriever
                 [
                     new Argument(
                         argumentSource: ArgumentSource.ArgumentAttribute,
-                        type: methodSymbolParameters.SafeFirstOrDefault()?.Type
+                        type: parameterSymbols.SafeFirstOrDefault()?.Type
                             .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
-                        invocation: "null"
+                        invocation: null
                     ),
                     ..Array.Empty<Argument>().WithTimeoutArgument(testAndClassAttributes)
                 ]
@@ -48,7 +48,7 @@ internal static class DataDrivenArgumentsRetriever
         
         var objectArray = constructorArgument.Values;
 
-        var args = GetArguments(objectArray, methodSymbolParameters);
+        var args = GetArguments(objectArray, parameterSymbols);
 
         return new ArgumentsContainer
         {
@@ -67,7 +67,7 @@ internal static class DataDrivenArgumentsRetriever
             var type = methodSymbolParameters.SafeFirstOrDefault()?.Type
                 ?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var";
             
-            return [new Argument(ArgumentSource.ArgumentAttribute, type, "null")];
+            return [new Argument(ArgumentSource.ArgumentAttribute, type, null)];
         }
 
         return objectArray.Select((x, i) =>

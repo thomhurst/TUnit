@@ -4,7 +4,7 @@ namespace TUnit.Engine.SourceGenerator.Models;
 
 internal record Argument
 {
-    public Argument(ArgumentSource argumentSource, string type, string invocation)
+    public Argument(ArgumentSource argumentSource, string type, string? invocation)
     {
         ArgumentSource = argumentSource;
         Type = type;
@@ -15,8 +15,13 @@ internal record Argument
     public string Type { get; }
     public string Invocation { get; }
 
-    private static string MapValue(string type, string value)
+    private static string MapValue(string type, string? value)
     {
+        if (value is null)
+        {
+            return "null";
+        }
+        
         if (type == "global::System.Char")
         {
             return $"'{value}'";
