@@ -13,7 +13,9 @@ public class DisplayFormats
         SymbolDisplayExtensionMethodStyle.Default,
         SymbolDisplayParameterOptions.IncludeType,
         SymbolDisplayPropertyStyle.NameOnly,
-        SymbolDisplayLocalOptions.IncludeType
+        SymbolDisplayLocalOptions.IncludeType, 
+        SymbolDisplayKindOptions.None, 
+        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
     );
     
     public static SymbolDisplayFormat FullyQualifiedNonGeneric => new(
@@ -25,6 +27,8 @@ public class DisplayFormats
         SymbolDisplayExtensionMethodStyle.Default,
         SymbolDisplayParameterOptions.IncludeType,
         SymbolDisplayPropertyStyle.NameOnly,
-        SymbolDisplayLocalOptions.IncludeType
+        SymbolDisplayLocalOptions.IncludeType,
+        SymbolDisplayKindOptions.None, 
+        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
     );
 }

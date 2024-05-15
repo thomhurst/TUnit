@@ -19,4 +19,17 @@ public class DataDrivenTests
     public void DataSource_Method(int value, string value2)
     {
     }
+    
+    [DataDrivenTest]
+    [Arguments(TestEnum.One)]
+    [Arguments(TestEnum.Two)]
+    public void EnumValue(TestEnum testEnum)
+    {
+    }
+    
+    [DataDrivenTest]
+    [Arguments(null)]
+    public void NullValue(string? value)
+    {
+    }
 }

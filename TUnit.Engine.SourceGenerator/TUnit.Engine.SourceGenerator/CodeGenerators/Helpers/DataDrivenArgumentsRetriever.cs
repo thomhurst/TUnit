@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -23,7 +24,29 @@ internal static class DataDrivenArgumentsRetriever
         AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> methodSymbolParameters,
         int dataAttributeIndex)
     {
-        var objectArray = argumentAttribute.ConstructorArguments.SafeFirstOrDefault().Values;
+        var constructorArgument = argumentAttribute.ConstructorArguments.SafeFirstOrDefault();
+
+        if (constructorArgument.IsNull)
+        {
+            return new ArgumentsContainer
+            {
+                DataAttribute = argumentAttribute,
+                DataAttributeIndex = dataAttributeIndex,
+                IsEnumerableData = false,
+                Arguments =
+                [
+                    new Argument(
+                        argumentSource: ArgumentSource.ArgumentAttribute,
+                        type: methodSymbolParameters.SafeFirstOrDefault()?.Type
+                            .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
+                        invocation: "null"
+                    ),
+                    ..Array.Empty<Argument>().WithTimeoutArgument(testAndClassAttributes)
+                ]
+            };
+        }
+        
+        var objectArray = constructorArgument.Values;
 
         var args = GetArguments(objectArray, methodSymbolParameters);
 
@@ -46,11 +69,22 @@ internal static class DataDrivenArgumentsRetriever
             
             return [new Argument(ArgumentSource.ArgumentAttribute, type, "null")];
         }
-        
+
         return objectArray.Select((x, i) =>
-                new Argument(ArgumentSource.ArgumentAttribute,
-                    TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
+            new Argument(ArgumentSource.ArgumentAttribute,
+                GetTypeFromParameters(methodSymbolParameters, i) ?? TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
                     TypedConstantParser.GetTypedConstantValue(x))
             );
+    }
+
+    private static string? GetTypeFromParameters(ImmutableArray<IParameterSymbol> parameterSymbols, int index)
+    {
+        if (parameterSymbols.IsDefaultOrEmpty)
+        {
+            return null;
+        }
+
+        return parameterSymbols.ElementAtOrDefault(index)
+            ?.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     }
 }
