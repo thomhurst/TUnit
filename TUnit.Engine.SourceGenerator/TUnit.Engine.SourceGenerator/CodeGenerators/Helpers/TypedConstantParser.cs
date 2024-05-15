@@ -6,23 +6,23 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class TypedConstantParser
 {
-    public static string? GetTypedConstantValue(TypedConstant constructorArgument)
+    public static string? GetTypedConstantValue(TypedConstant constructorArgument, ITypeSymbol? type = null)
     {
         if (constructorArgument.Kind == TypedConstantKind.Error)
         {
             return null;
         }
 
+        if (constructorArgument.Kind is TypedConstantKind.Enum || type?.TypeKind == TypeKind.Enum)
+        {
+            return $"({(type ?? constructorArgument.Type)!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}) {constructorArgument.Value}";
+        }
+        
         if (constructorArgument.Kind is TypedConstantKind.Primitive)
         {
             return $"{constructorArgument.Value}";
         }
         
-        if (constructorArgument.Kind is TypedConstantKind.Enum)
-        {
-            return $"({constructorArgument.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}) {constructorArgument.Value}";
-        }
-
         if (constructorArgument.Kind is TypedConstantKind.Type)
         {
             return $"typeof({GetFullyQualifiedTypeNameFromTypedConstantValue(constructorArgument)})";
@@ -30,7 +30,7 @@ internal static class TypedConstantParser
 
         if (constructorArgument.Kind == TypedConstantKind.Array)
         {
-            return $"[{string.Join(",", constructorArgument.Values.Select(GetTypedConstantValue))}]";
+            return $"[{string.Join(",", constructorArgument.Values.Select(constructorArgument1 => GetTypedConstantValue(constructorArgument1)))}]";
         }
 
         throw new ArgumentOutOfRangeException();

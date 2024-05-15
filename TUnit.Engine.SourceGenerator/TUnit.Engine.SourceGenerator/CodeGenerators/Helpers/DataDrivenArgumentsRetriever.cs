@@ -60,31 +60,34 @@ internal static class DataDrivenArgumentsRetriever
     }
 
     private static IEnumerable<Argument> GetArguments(ImmutableArray<TypedConstant> objectArray,
-        ImmutableArray<IParameterSymbol> methodSymbolParameters)
+        ImmutableArray<IParameterSymbol> parameterSymbols)
     {
         if (objectArray.IsDefaultOrEmpty)
         {
-            var type = methodSymbolParameters.SafeFirstOrDefault()?.Type
+            var type = parameterSymbols.SafeFirstOrDefault()?.Type
                 ?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var";
             
             return [new Argument(ArgumentSource.ArgumentAttribute, type, null)];
         }
 
         return objectArray.Select((x, i) =>
-            new Argument(ArgumentSource.ArgumentAttribute,
-                GetTypeFromParameters(methodSymbolParameters, i) ?? TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
-                    TypedConstantParser.GetTypedConstantValue(x))
-            );
+        {
+            var type = GetTypeFromParameters(parameterSymbols, i);
+            
+            return new Argument(ArgumentSource.ArgumentAttribute,
+                type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
+                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
+                TypedConstantParser.GetTypedConstantValue(x, type));
+        });
     }
 
-    private static string? GetTypeFromParameters(ImmutableArray<IParameterSymbol> parameterSymbols, int index)
+    private static ITypeSymbol? GetTypeFromParameters(ImmutableArray<IParameterSymbol> parameterSymbols, int index)
     {
         if (parameterSymbols.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        return parameterSymbols.ElementAtOrDefault(index)
-            ?.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        return parameterSymbols.ElementAtOrDefault(index)?.Type;
     }
 }

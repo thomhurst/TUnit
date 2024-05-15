@@ -23,6 +23,7 @@ public class DataDrivenTests
     [DataDrivenTest]
     [Arguments(TestEnum.One)]
     [Arguments(TestEnum.Two)]
+    [Arguments(-1)]
     public void EnumValue(TestEnum testEnum)
     {
     }
