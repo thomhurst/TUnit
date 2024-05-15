@@ -46,8 +46,7 @@ internal static class TypedConstantParser
         
         if (typedConstant.Kind == TypedConstantKind.Enum)
         {
-            var type = (INamedTypeSymbol) typedConstant.Value!;
-            return type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            return typedConstant.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         }
 
         if (typedConstant.Kind is not TypedConstantKind.Error and not TypedConstantKind.Array)
