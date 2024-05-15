@@ -3,7 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 
-public class SomethingElseAttribute : Attribute, IApplicableTestAttribute
+public class SomethingElseAttribute : TUnitAttribute, IApplicableTestAttribute
 {
     public Task Apply(TestContext testContext)
     {

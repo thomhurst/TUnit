@@ -135,7 +135,7 @@ internal static class TestSourceDataModelRetriever
             BeforeEachTestInvocations = BeforeEachTestRetriever.GenerateCode(namedTypeSymbol),
             AfterEachTestInvocations = AfterEachTestRetriever.GenerateCode(namedTypeSymbol),
             CustomProperties = CustomPropertiesRetriever.GetCustomProperties(allAttributes),
-            ApplicableTestAttributes = CustomTestAttributeRetriever.GetCustomAttributes(namedTypeSymbol, methodSymbol),
+            ApplicableTestAttributes = CustomTestAttributeRetriever.GetCustomAttributes(allAttributes, namedTypeSymbol),
         };
     }
 }

@@ -6,14 +6,8 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 public static class CustomTestAttributeRetriever
 {
-    public static string GetCustomAttributes(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol)
+    public static string GetCustomAttributes(AttributeData[] attributes, INamedTypeSymbol namedTypeSymbol)
     {
-        IEnumerable<AttributeData> attributes =
-        [
-            ..methodSymbol.GetAttributes(),
-            ..namedTypeSymbol.GetAttributes()
-        ];
-
         var fullyQualifiedClassName =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
 
