@@ -36,23 +36,6 @@ internal static class TypedConstantParser
         throw new ArgumentOutOfRangeException();
     }
 
-    private static object? ParsePrimitive(TypedConstant constructorArgument)
-    {
-        var type = constructorArgument.Type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-
-        if (type == "global::System.Boolean")
-        {
-            return constructorArgument.Value?.ToString()?.ToLowerInvariant();
-        }
-        
-        if (type == "global::System.String")
-        {
-            return $"\"{constructorArgument.Value}\"";
-        }
-        
-        return constructorArgument.Value;
-    }
-
     public static string GetFullyQualifiedTypeNameFromTypedConstantValue(TypedConstant typedConstant)
     {
         if (typedConstant.Kind == TypedConstantKind.Type)
