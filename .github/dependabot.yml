@@ -28,3 +28,5 @@ updates:
     ignore:
       - dependency-name: "Microsoft.Extensions.*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.CodeAnalysis.*"
+      - dependency-name: "Microsoft.Bcl.*"
