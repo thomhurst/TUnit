@@ -62,7 +62,7 @@ internal static class GenericTestInvocationWriter
         }
         
         sourceBuilder.WriteLine(
-            $"var methodInfo = global::TUnit.Core.Helpers.MethodHelpers.GetMethodInfo(() => resettableClassFactory.Value.{testSourceDataModel.MethodName}({string.Join(", ", testSourceDataModel.GetMethodArgumentVariableNames())}));");
+            $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"))}]);");
 
         sourceBuilder.WriteLine();
 
