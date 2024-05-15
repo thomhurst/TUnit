@@ -15,9 +15,7 @@ internal static class GenericTestInvocationWriter
 
         var hasEnumerableClassData = testSourceDataModel.IsEnumerableClassArguments;
         var hasEnumerableMethodData = testSourceDataModel.IsEnumerableMethodArguments;
-
-        sourceBuilder.WriteLine("{");
-
+        
         if (hasEnumerableClassData)
         {
             sourceBuilder.WriteLine($"foreach (var {VariableNames.ClassData} in {testSourceDataModel.ClassArguments.SafeFirstOrDefault()?.Invocation})");
@@ -134,9 +132,6 @@ internal static class GenericTestInvocationWriter
         {
             sourceBuilder.WriteLine("}");
         }
-
-        
-        sourceBuilder.WriteLine("}");
     }
 
     private static string GetDisplayName(TestSourceDataModel testSourceDataModel)
