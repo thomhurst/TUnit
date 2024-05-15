@@ -6,11 +6,13 @@ internal class ReferencesHelper
 {
     public static readonly List<PortableExecutableReference> References =
         AppDomain.CurrentDomain.GetAssemblies()
-            .Where(_ => !_.IsDynamic && !string.IsNullOrWhiteSpace(_.Location))
-            .Select(_ => MetadataReference.CreateFromFile(_.Location))
+            .Where(x => !x.IsDynamic && !string.IsNullOrWhiteSpace(x.Location))
+            .Select(x => MetadataReference.CreateFromFile(x.Location))
             .Concat(new[]
             {
-                // add your app/lib specifics, e.g.:                      
+                // add your app/lib specifics, e.g.:
+                MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Assertions.Assert).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Core.TestAttribute).Assembly.Location),
             })
             .ToList();

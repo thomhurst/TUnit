@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing.NUnit" Version="1.1.1"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.2" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
         <PackageReference Include="NUnit" Version="4.1.0" />
         <PackageReference Include="NUnit.Analyzers" Version="4.2.0">
@@ -23,6 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\TUnit.Assertions\TUnit.Assertions.csproj" />
         <ProjectReference Include="..\..\TUnit.Core\TUnit.Core.csproj" />
         <ProjectReference Include="..\..\TUnit.Engine\TUnit.Engine.csproj" />
         <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"/>

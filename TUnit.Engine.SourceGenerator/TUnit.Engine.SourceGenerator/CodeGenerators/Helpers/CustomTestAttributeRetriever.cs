@@ -17,9 +17,10 @@ public static class CustomTestAttributeRetriever
         var fullyQualifiedClassName =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
 
-        var applyToTestAttributes = attributes.Where(x => x.AttributeClass?.AllInterfaces.Any(i =>
+        var applyToTestAttributes = attributes
+            .Where(x => x.AttributeClass?.AllInterfaces.Any(i =>
             i.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            == WellKnownFullyQualifiedClassNames.IApplicableTestAttribute) == true);
+            == WellKnownFullyQualifiedClassNames.IApplicableTestAttribute.WithGlobalPrefix) == true);
 
         var fullyQualifiedAttributes = applyToTestAttributes.Select(x => x.AttributeClass!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix));
         
