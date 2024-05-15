@@ -33,9 +33,9 @@ internal class DataDrivenTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles[5], Does.Contain("global::System.Int32 methodArg0 = 3;"));
             Assert.That(generatedFiles[5], Does.Contain("global::System.String methodArg1 = \"String3\";"));
 
-            Assert.That(generatedFiles[6], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum) 0;"));
-            Assert.That(generatedFiles[7], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum) 1;"));
-            Assert.That(generatedFiles[8], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum) -1;"));
+            Assert.That(generatedFiles[6], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum)(0);"));
+            Assert.That(generatedFiles[7], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum)(1);"));
+            Assert.That(generatedFiles[8], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum)(-1);"));
             
             Assert.That(generatedFiles[9], Does.Contain("global::System.String methodArg0 = null;"));
             

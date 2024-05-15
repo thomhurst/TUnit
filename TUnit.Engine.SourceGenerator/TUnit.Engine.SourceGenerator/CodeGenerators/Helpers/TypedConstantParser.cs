@@ -15,7 +15,7 @@ internal static class TypedConstantParser
 
         if (constructorArgument.Kind is TypedConstantKind.Enum || type?.TypeKind == TypeKind.Enum)
         {
-            return $"({(type ?? constructorArgument.Type)!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}) {constructorArgument.Value}";
+            return $"({(type ?? constructorArgument.Type)!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({constructorArgument.Value})";
         }
         
         if (constructorArgument.Kind is TypedConstantKind.Primitive)
