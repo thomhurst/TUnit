@@ -46,9 +46,10 @@ public class DataDrivenTests
     }
     
     [DataDrivenTest]
+    [Arguments(null)]
     [Arguments(false)]
     [Arguments(true)]
-    public void BooleanString(bool value)
+    public void BooleanString(bool? value)
     {
     }
 }

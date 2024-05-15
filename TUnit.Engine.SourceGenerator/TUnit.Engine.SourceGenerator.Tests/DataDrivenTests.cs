@@ -20,7 +20,7 @@ internal class DataDrivenTests : TestsBase<TestsGenerator>
         },
         generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(13));
+            Assert.That(generatedFiles.Length, Is.EqualTo(14));
 
             Assert.That(generatedFiles[0], Does.Contain("global::System.Int32 methodArg0 = 1;"));
             Assert.That(generatedFiles[1], Does.Contain("global::System.Int32 methodArg0 = 2;"));
@@ -42,8 +42,9 @@ internal class DataDrivenTests : TestsBase<TestsGenerator>
             
             Assert.That(generatedFiles[10], Does.Contain("global::System.String methodArg0 = \"Foo bar!\";"));
             
-            Assert.That(generatedFiles[11], Does.Contain("global::System.Boolean methodArg0 = false;"));
-            Assert.That(generatedFiles[12], Does.Contain("global::System.Boolean methodArg0 = true;"));
+            Assert.That(generatedFiles[11], Does.Contain("global::System.Boolean? methodArg0 = null;"));
+            Assert.That(generatedFiles[12], Does.Contain("global::System.Boolean? methodArg0 = false;"));
+            Assert.That(generatedFiles[13], Does.Contain("global::System.Boolean? methodArg0 = true;"));
 
         });
 }

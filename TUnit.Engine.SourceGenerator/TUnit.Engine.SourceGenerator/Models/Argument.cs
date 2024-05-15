@@ -17,6 +17,8 @@ internal record Argument
 
     private static string MapValue(string type, string? value)
     {
+        type = type.TrimEnd('?');
+        
         if (value is null)
         {
             return "null";
