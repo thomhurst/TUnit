@@ -10,6 +10,8 @@ internal record TestSourceDataModel
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
     public required Argument[] ClassArguments { get; init; }
+    public required string[] ClassParameterTypes { get; init; }
+
     public required Argument[] MethodArguments { get; init; }
     
     public required string[] MethodParameterTypes { get; init; }

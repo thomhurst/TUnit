@@ -60,9 +60,11 @@ internal static class GenericTestInvocationWriter
         {
             sourceBuilder.WriteLine();
         }
-        
+
+        var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"));
+        var classParameterTypesList = string.Join(", ", testSourceDataModel.ClassParameterTypes.Select(x => $"typeof({x})"));
         sourceBuilder.WriteLine(
-            $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"))}]);");
+            $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
 
         sourceBuilder.WriteLine();
 
@@ -78,9 +80,9 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.GetClassArgumentVariableNamesAsList()}],");
         sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.GetMethodArgumentVariableNamesAsList()}],");
         sourceBuilder.WriteLine(
-            $"TestClassParameterTypes = typeof({fullyQualifiedClassType}).GetConstructors().First().GetParameters().Select(x => x.ParameterType).ToArray(),");
+            $"TestClassParameterTypes = [{classParameterTypesList}],");
         sourceBuilder.WriteLine(
-            "TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),");
+            $"TestMethodParameterTypes = [{methodParameterTypesList}],");
         sourceBuilder.WriteLine(
             $"NotInParallelConstraintKeys = {testSourceDataModel.NotInParallelConstraintKeys},");
         sourceBuilder.WriteLine($"RepeatIndex = {testSourceDataModel.RepeatIndex},");
