@@ -41,8 +41,8 @@ internal static class DataDrivenArgumentsRetriever
     {
         if (objectArray.IsDefaultOrEmpty)
         {
-            var type = methodSymbolParameters.SafeFirstOrDefault()
-                ?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "global::System.Object";
+            var type = methodSymbolParameters.SafeFirstOrDefault()?.Type
+                ?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var";
             
             return [new Argument(ArgumentSource.ArgumentAttribute, type, "null")];
         }
