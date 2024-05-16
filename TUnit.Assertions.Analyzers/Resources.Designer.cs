@@ -132,33 +132,6 @@ namespace TUnit.Assertions.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Use a string comparer..
-        /// </summary>
-        internal static string TUnitAnalyzers0003Description {
-            get {
-                return ResourceManager.GetString("TUnitAnalyzers0003Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Use a string comparer.
-        /// </summary>
-        internal static string TUnitAnalyzers0003MessageFormat {
-            get {
-                return ResourceManager.GetString("TUnitAnalyzers0003MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Use a string comparer.
-        /// </summary>
-        internal static string TUnitAnalyzers0003Title {
-            get {
-                return ResourceManager.GetString("TUnitAnalyzers0003Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Do not populate this argument. The compiler will do this..
         /// </summary>
         internal static string TUnitAnalyzers0004Description {

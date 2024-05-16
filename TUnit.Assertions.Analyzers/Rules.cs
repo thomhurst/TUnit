@@ -12,9 +12,6 @@ internal static class Rules
     public static readonly DiagnosticDescriptor AwaitAssertion =
         CreateDescriptor("TUnitAnalyzers0002", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor StringEqualsUseComparer =
-        CreateDescriptor("TUnitAnalyzers0003", UsageCategory, DiagnosticSeverity.Warning);
-
     public static readonly DiagnosticDescriptor CompilerArgumentsPopulated =
         CreateDescriptor("TUnitAnalyzers0004", UsageCategory, DiagnosticSeverity.Error);
 
