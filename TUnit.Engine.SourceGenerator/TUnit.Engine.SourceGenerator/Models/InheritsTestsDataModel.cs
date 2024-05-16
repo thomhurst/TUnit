@@ -3,34 +3,12 @@ using System.Linq;
 
 namespace TUnit.Engine.SourceGenerator.Models;
 
-internal record InheritsTestsDataModel
+internal record InheritsTestsDataModel : TestCollectionDataModel
 {
     public string MinimalTypeName { get; }
-    public IEnumerable<TestSourceDataModel> TestSourceDataModels { get; }
 
-    public InheritsTestsDataModel(string minimalTypeName, IEnumerable<TestSourceDataModel> testSourceDataModels)
+    public InheritsTestsDataModel(string minimalTypeName, IEnumerable<TestSourceDataModel> testSourceDataModels) : base(testSourceDataModels)
     {
         MinimalTypeName = minimalTypeName;
-        TestSourceDataModels = testSourceDataModels;
-    }
-
-    public virtual bool Equals(InheritsTestsDataModel? other)
-    {
-        if (ReferenceEquals(null, other))
-        {
-            return false;
-        }
-
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        return TestSourceDataModels.SequenceEqual(other.TestSourceDataModels);
-    }
-
-    public override int GetHashCode()
-    {
-        return TestSourceDataModels.GetHashCode();
     }
 }
