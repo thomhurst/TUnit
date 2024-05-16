@@ -116,7 +116,9 @@ internal record TestSourceDataModel
         return FullyQualifiedTypeName == other.FullyQualifiedTypeName
                && MinimalTypeName == other.MinimalTypeName
                && MethodName == other.MethodName 
+               && ClassParameterTypes.SequenceEqual(other.ClassParameterTypes) 
                && ClassArguments.SequenceEqual(other.ClassArguments) 
+               && MethodParameterTypes.SequenceEqual(other.MethodParameterTypes) 
                && MethodArguments.SequenceEqual(other.MethodArguments) 
                && TestId == other.TestId 
                && Order == other.Order 
@@ -143,7 +145,9 @@ internal record TestSourceDataModel
             var hashCode = FullyQualifiedTypeName.GetHashCode();
             hashCode = (hashCode * 397) ^ MinimalTypeName.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodName.GetHashCode();
+            hashCode = (hashCode * 397) ^ ClassParameterTypes.GetHashCode();
             hashCode = (hashCode * 397) ^ ClassArguments.GetHashCode();
+            hashCode = (hashCode * 397) ^ MethodParameterTypes.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodArguments.GetHashCode();
             hashCode = (hashCode * 397) ^ TestId.GetHashCode();
             hashCode = (hashCode * 397) ^ Order;
