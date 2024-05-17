@@ -25,7 +25,7 @@
 <!--    </Target>-->
     
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.0" />
+        <PackageReference Include="coverlet.collector" Version="6.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.19" />
         <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.2.0" />
         <PackageReference Include="System.Text.Json" Version="8.0.2" />
