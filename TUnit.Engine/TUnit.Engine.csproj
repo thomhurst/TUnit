@@ -11,7 +11,7 @@
     <ItemGroup>
         <PackageReference Include="Hardware.Info" Version="100.1.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Testing.Platform" Version="1.1.0" />
+        <PackageReference Include="Microsoft.Testing.Platform" Version="1.2.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -32,7 +32,7 @@
 
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
         <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" />
-        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.1.0" />
+        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.2.0" />
     </ItemGroup>
 
 </Project>
