@@ -117,7 +117,7 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
         if (!IsWrapped)
         {
             throw new ArgumentException(
-                $"{GetType().Name} isn't configured properly. It won't work with 'And' / 'Or' conditions. Call `Wrap(AssertCondition)` to properly configure it.");
+                $"{GetType().Name} isn't configured properly. It won't work with 'And' / 'Or' conditions. Call `AssertConditionCombiner.Combine(...)` to properly configure it.");
         }
         
         ActualValue = actualValue;
