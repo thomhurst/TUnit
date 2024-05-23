@@ -27,26 +27,9 @@ public abstract class Connector<TActual, TAnd, TOr>
     /// <param name="assertCondition"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public BaseAssertCondition<TActual, TAnd, TOr> Wrap(BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
+    protected BaseAssertCondition<TActual, TAnd, TOr> Combine(BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
     {
-        if (ConnectorType == ConnectorType.None)
-        {
-            assertCondition.IsWrapped = true;
-            return assertCondition;
-        }
-
-        if (ConnectorType == ConnectorType.And)
-        {
-            return new AssertConditionAnd<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition);
-        }
-
-        if (ConnectorType == ConnectorType.Or)
-        {
-            return new AssertConditionOr<TActual, TAnd, TOr>(OtherAssertCondition!, assertCondition);
-        }
-
-        throw new ArgumentOutOfRangeException(nameof(ConnectorType), ConnectorType, "Unknown connector type");
+        return AssertionConditionCombiner.Combine(OtherAssertCondition, ConnectorType, assertCondition);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]

@@ -21,7 +21,7 @@ public class Throws<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     
     public ThrowsException<TActual, TAnd, TOr> Exception() => new(AssertionBuilder, ConnectorType, OtherAssertCondition, exception => exception);
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Nothing() => Wrap(new ThrowsNothingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
+    public BaseAssertCondition<TActual, TAnd, TOr> Nothing() => Combine(new ThrowsNothingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
 
 
 }
