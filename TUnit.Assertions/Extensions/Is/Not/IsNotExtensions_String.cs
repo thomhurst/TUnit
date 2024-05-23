@@ -20,6 +20,6 @@ public static partial class IsNotExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return isNot.Wrap(new StringNotEqualsAssertCondition<TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
+        return AssertionConditionCombiner.Combine(isNot, new StringNotEqualsAssertCondition<TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
     }
 }

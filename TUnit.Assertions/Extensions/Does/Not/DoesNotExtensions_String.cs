@@ -20,7 +20,7 @@ public static partial class DoesNotExtensions_Generic
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return doesNot.Wrap(new StringNotContainsAssertCondition<TAnd, TOr>(doesNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
+        return AssertionConditionCombiner.Combine(doesNot, new StringNotContainsAssertCondition<TAnd, TOr>(doesNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> StartWith<TAnd, TOr>(this DoesNot<string, TAnd, TOr> doesNot, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -34,7 +34,7 @@ public static partial class DoesNotExtensions_Generic
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return doesNot.Wrap(new DelegateAssertCondition<string, string, TAnd, TOr>(
+        return AssertionConditionCombiner.Combine(doesNot, new DelegateAssertCondition<string, string, TAnd, TOr>(
             doesNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
             (actual, _, _, self) =>
@@ -57,7 +57,7 @@ public static partial class DoesNotExtensions_Generic
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return doesNot.Wrap(new DelegateAssertCondition<string, string, TAnd, TOr>(
+        return AssertionConditionCombiner.Combine(doesNot, new DelegateAssertCondition<string, string, TAnd, TOr>(
             doesNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
             (actual, _, _, self) =>

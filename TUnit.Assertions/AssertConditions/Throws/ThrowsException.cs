@@ -22,15 +22,15 @@ public class ThrowsException<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     public ExceptionWith<TActual, TAnd, TOr> With => new(AssertionBuilder, ConnectorType, OtherAssertCondition, _exceptionSelector);
 
     public BaseAssertCondition<TActual, TAnd, TOr> OfAnyType() =>
-        Wrap(new ThrowsAnythingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), _exceptionSelector));
+        Combine(new ThrowsAnythingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), _exceptionSelector));
 
-    public BaseAssertCondition<TActual, TAnd, TOr> OfType<TExpected>() => Wrap(new ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector));
+    public BaseAssertCondition<TActual, TAnd, TOr> OfType<TExpected>() => Combine(new ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector));
 
     public BaseAssertCondition<TActual, TAnd, TOr> SubClassOf<TExpected>() =>
-        Wrap(new ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector));
+        Combine(new ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector));
     
     public BaseAssertCondition<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        Wrap(new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression),
+        Combine(new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression),
             default,
             (_, exception, _, self) => action(_exceptionSelector(exception)),
             (_, exception) => messageFactory(_exceptionSelector(exception))

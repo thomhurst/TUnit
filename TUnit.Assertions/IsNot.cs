@@ -20,19 +20,19 @@ public class IsNot<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     
     public BaseAssertCondition<TActual, TAnd, TOr> Null()
     {
-        return Wrap(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
+        return Combine(new NotNullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
     }
     
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") => Wrap(new NotEqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected));
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") => Combine(new NotEqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected));
     
-    public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Wrap(new NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName)));
+    public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>() => Combine(new NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName)));
     
-    public BaseAssertCondition<TActual, TAnd, TOr> AssignableTo<TExpected>() => Wrap(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
+    public BaseAssertCondition<TActual, TAnd, TOr> AssignableTo<TExpected>() => Combine(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
         default,
         (value, _, _, self) => !value!.GetType().IsAssignableTo(typeof(TExpected)),
         (actual, _) => $"{actual?.GetType()} is assignable to {typeof(TExpected).Name}"));
 
-    public BaseAssertCondition<TActual, TAnd, TOr> AssignableFrom<TExpected>() => Wrap(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
+    public BaseAssertCondition<TActual, TAnd, TOr> AssignableFrom<TExpected>() => Combine(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
         default,
         (value, _, _, self) => !value!.GetType().IsAssignableFrom(typeof(TExpected)),
         (actual, _) => $"{actual?.GetType()} is assignable from {typeof(TExpected).Name}"));

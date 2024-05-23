@@ -23,17 +23,17 @@ public class Is<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual, TAnd, TOr> SameReference(TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Wrap(new SameReferenceAssertCondition<TActual, TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected));
+        return Combine(new SameReferenceAssertCondition<TActual, TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected));
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Null() => Wrap(new NullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
+    public BaseAssertCondition<TActual, TAnd, TOr> Null() => Combine(new NullAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(string.Empty)));
 
     public BaseAssertCondition<TActual, TAnd, TOr> TypeOf<TExpected>()
-        where TExpected : TActual => Wrap(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName)));
+        where TExpected : TActual => Combine(new TypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName)));
 
     public BaseAssertCondition<TActual, TAnd, TOr> AssignableTo<TExpected>() 
     {
-        return Wrap(new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(
+        return Combine(new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(
             AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
             default,
             (value, _, _, self) => value!.GetType().IsAssignableTo(typeof(TExpected)),
@@ -41,7 +41,7 @@ public class Is<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     }
 
     public BaseAssertCondition<TActual, TAnd, TOr> AssignableFrom<TExpected>() 
-        where TExpected : TActual => Wrap(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
+        where TExpected : TActual => Combine(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
         default,
         (value, _, _, self) => value!.GetType().IsAssignableFrom(typeof(TExpected)),
         (actual, _) => $"{actual?.GetType()} is not assignable from {typeof(TExpected).Name}"));

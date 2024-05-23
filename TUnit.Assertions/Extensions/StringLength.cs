@@ -19,7 +19,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (actual, _, _, self) =>
+        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (actual, _, _, self) =>
             {
                 if (actual is null)
                 {
@@ -35,7 +35,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
     }
 
     public BaseAssertCondition<string, TAnd, TOr> Zero =>
-        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (@string, _, _, self) =>
+        Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -50,7 +50,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         );
 
     public BaseAssertCondition<string, TAnd, TOr> Positive =>
-        Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), default, (@string, _, _, self) =>
+        Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), default, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -67,7 +67,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(
+        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(
             AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
             expected,
             (@string, _, _, self) =>
@@ -87,7 +87,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -104,7 +104,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -121,7 +121,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 
     public BaseAssertCondition<string, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Wrap(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {

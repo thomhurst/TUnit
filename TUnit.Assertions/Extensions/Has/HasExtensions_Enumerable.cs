@@ -14,7 +14,7 @@ public static partial class HasExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return has.Wrap(new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(
+        return AssertionConditionCombiner.Combine(has, new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(
             has.AssertionBuilder.AppendCallerMethod(null),
             1)
         );
@@ -25,7 +25,7 @@ public static partial class HasExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return has.Wrap(new EnumerableDistinctItemsAssertCondition<TActual, object, TAnd, TOr>(
+        return AssertionConditionCombiner.Combine(has, new EnumerableDistinctItemsAssertCondition<TActual, object, TAnd, TOr>(
             has.AssertionBuilder.AppendCallerMethod(null),
             default,
             null)
@@ -37,7 +37,7 @@ public static partial class HasExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return has.Wrap(new EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr>(
+        return AssertionConditionCombiner.Combine(has, new EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr>(
             has.AssertionBuilder.AppendCallerMethod(null),
             default,
             equalityComparer)

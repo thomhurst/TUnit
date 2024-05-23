@@ -21,7 +21,7 @@ public static partial class DoesExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return does.Wrap(new StringContainsAssertCondition<TAnd, TOr>(does.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
+        return AssertionConditionCombiner.Combine(does, new StringContainsAssertCondition<TAnd, TOr>(does.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> StartWith<TAnd, TOr>(this Does<string, TAnd, TOr> does, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -35,7 +35,7 @@ public static partial class DoesExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return does.Wrap(new DelegateAssertCondition<string, string, TAnd, TOr>(
+        return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<string, string, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
             (actual, _, _, self) =>
@@ -63,7 +63,7 @@ public static partial class DoesExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return does.Wrap(new DelegateAssertCondition<string, string, TAnd, TOr>(
+        return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<string, string, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
             (actual, _, _, self) =>
@@ -85,7 +85,7 @@ public static partial class DoesExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return does.Wrap(new DelegateAssertCondition<string, Regex, TAnd, TOr>(
+        return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<string, Regex, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethod(expression), 
             regex,
             (actual, _, _, self) =>

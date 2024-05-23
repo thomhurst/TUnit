@@ -13,7 +13,7 @@ public static partial class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, self) =>
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, self) =>
             {
                 return value >= lowerBound && value <= upperBound;
             },
@@ -24,7 +24,7 @@ public static partial class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan,TimeSpan,TAnd,TOr>(
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TimeSpan,TimeSpan,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
             (actual, _, _, self) =>
@@ -38,14 +38,14 @@ public static partial class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new EqualsAssertCondition<TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), TimeSpan.Zero));
+        return AssertionConditionCombiner.Combine(@is, new EqualsAssertCondition<TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(null), TimeSpan.Zero));
     }
     
     public static BaseAssertCondition<TimeSpan, TAnd, TOr> GreaterThan<TAnd, TOr>(this Is<TimeSpan, TAnd, TOr> @is, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
             {
                 return value > expected;
             },
@@ -56,7 +56,7 @@ public static partial class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
             {
                 return value >= expected;
             },
@@ -67,7 +67,7 @@ public static partial class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
             {
                 return value < expected;
             },
@@ -78,7 +78,7 @@ public static partial class IsExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TAnd, TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TOr, TimeSpan, TAnd, TOr>
     {
-        return @is.Wrap(new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
             {
                 return value <= expected;
             },

@@ -27,7 +27,7 @@ public abstract class Connector<TActual, TAnd, TOr>
     /// <param name="assertCondition"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    protected BaseAssertCondition<TActual, TAnd, TOr> Wrap(BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
+    protected BaseAssertCondition<TActual, TAnd, TOr> Combine(BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
     {
         return AssertionConditionCombiner.Combine(OtherAssertCondition, ConnectorType, assertCondition);
     }

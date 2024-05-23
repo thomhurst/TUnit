@@ -13,6 +13,6 @@ public static partial class IsNotExtensions
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        return isNot.Wrap(new NotEqualsAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue1), expected));
+        return AssertionConditionCombiner.Combine(isNot, new NotEqualsAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue1), expected));
     }
 }
