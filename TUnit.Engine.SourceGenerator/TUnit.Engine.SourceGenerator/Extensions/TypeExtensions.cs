@@ -17,6 +17,13 @@ internal static class TypeExtensions
                || displayString == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute.WithGlobalPrefix;
     }
     
+    public static bool IsTuple(this INamedTypeSymbol namedTypeSymbol)
+    {
+        var displayString = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+
+        return displayString is "global::System.Tuple" or "global::System.ValueTuple";
+    }
+    
     public static IEnumerable<ISymbol> GetMembersIncludingBase(this INamedTypeSymbol namedTypeSymbol)
     {
         var list = new List<ISymbol>();

@@ -103,7 +103,7 @@ internal static class TestSourceDataModelRetriever
     {
         var methodSymbol = testGenerationContext.MethodSymbol;
         var namedTypeSymbol = testGenerationContext.ClassSymbol;
-        var classArgument = testGenerationContext.ClassArguments;
+        var classArguments = testGenerationContext.ClassArguments;
         var testArguments = testGenerationContext.TestArguments;
         var testAttribute = testGenerationContext.TestAttribute;
         var currentClassCount = 0;
@@ -126,7 +126,7 @@ internal static class TestSourceDataModelRetriever
             RepeatIndex = TestInformationRetriever.GetRepeatCount(allAttributes),
             Categories = string.Join(", ", TestInformationRetriever.GetCategories(allAttributes)),
             NotInParallelConstraintKeys = TestInformationRetriever.GetNotInParallelConstraintKeys(allAttributes),
-            ClassArguments = classArgument,
+            ClassArguments = classArguments,
             IsEnumerableClassArguments = testGenerationContext.HasEnumerableClassMethodData,
             IsEnumerableMethodArguments = testGenerationContext.HasEnumerableTestMethodData,
             MethodArguments = testArguments,
