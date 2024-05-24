@@ -68,7 +68,7 @@ internal record TestSourceDataModel
     }
 
     public string GetClassArgumentVariableNamesAsList()
-        => string.Join(",", GetClassArgumentVariableNames().Skip(IsClassTupleArguments ? 1 : 0));
+        => string.Join(", ", GetClassArgumentVariableNames().Skip(IsClassTupleArguments ? 1 : 0));
     
     public IEnumerable<string> GetMethodArgumentVariableNames()
     {
@@ -94,7 +94,7 @@ internal record TestSourceDataModel
     }
     
     public string GetMethodArgumentVariableNamesAsList()
-        => string.Join(",", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0));
+        => string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0));
 
     public virtual bool Equals(TestSourceDataModel? other)
     {
