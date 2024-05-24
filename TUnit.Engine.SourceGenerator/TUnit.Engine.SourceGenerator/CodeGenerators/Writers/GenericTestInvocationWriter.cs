@@ -152,8 +152,7 @@ internal static class GenericTestInvocationWriter
         }
 
         var isMethodTupleArguments = testSourceDataModel.IsMethodTupleArguments;
-        var args = testSourceDataModel.MethodArguments
-            .Select(x => x.Invocation)
+        var args = testSourceDataModel.GetMethodArgumentVariableNames()
             .Select(x => $"{{{x}}}")
             .Skip(isMethodTupleArguments ? 1 : 0);
         
