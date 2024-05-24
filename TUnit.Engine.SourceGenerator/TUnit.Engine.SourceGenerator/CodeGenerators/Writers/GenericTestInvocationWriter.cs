@@ -151,6 +151,6 @@ internal static class GenericTestInvocationWriter
             return $"({{{VariableNames.MethodData}}})";
         }
 
-        return $"({testSourceDataModel.GetClassArgumentVariableNamesAsList()})";
+        return $"({testSourceDataModel.GetMethodArgumentVariableNamesAsList()})";
     }
 }
