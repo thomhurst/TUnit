@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
@@ -38,23 +39,22 @@ internal record TestSourceDataModel
     public required string ApplicableTestAttributes { get; init; }
     public required string BeforeEachTestInvocations { get; init; }
     public required string AfterEachTestInvocations { get; init; }
+    
+    public bool IsClassTupleArguments => ClassArguments.Any(x => x.IsTuple);
+
+    public bool IsMethodTupleArguments => MethodArguments.Any(x => x.IsTuple);
 
     public IEnumerable<string> GetClassArgumentVariableNames()
     {
-        if (IsEnumerableClassArguments)
-        {
-            return ["classArg0"];
-        }
-
         return Enumerable.Range(0, ClassArguments.Length)
-            .Select(i => $"classArg{i}");
+            .Select(i => $"{VariableNames.ClassArg}{i}");
     }
 
     public IEnumerable<string> GetClassArgumentsInvocations()
     {
         if (IsEnumerableClassArguments)
         {
-            yield return $"var classArg0 = {VariableNames.ClassData};";
+            yield return $"var {VariableNames.ClassArg}0 = {VariableNames.ClassData};";
             yield break;
         }
         
@@ -68,24 +68,19 @@ internal record TestSourceDataModel
     }
 
     public string GetClassArgumentVariableNamesAsList()
-        => string.Join(",", GetClassArgumentVariableNames());
+        => string.Join(", ", GetClassArgumentVariableNames().Skip(IsClassTupleArguments ? 1 : 0));
     
     public IEnumerable<string> GetMethodArgumentVariableNames()
     {
-        if (IsEnumerableMethodArguments)
-        {
-            return ["methodArg0"];
-        }
-        
         return Enumerable.Range(0, MethodArguments.Length)
-            .Select(i => $"methodArg{i}");
+            .Select(i => $"{VariableNames.MethodArg}{i}");
     }
 
     public IEnumerable<string> GetMethodArgumentsInvocations()
     {
         if (IsEnumerableMethodArguments)
         {
-            yield return $"var methodArg0 = {VariableNames.MethodData};";
+            yield return $"var {VariableNames.MethodArg}0 = {VariableNames.MethodData};";
             yield break;
         }
         
@@ -99,7 +94,7 @@ internal record TestSourceDataModel
     }
     
     public string GetMethodArgumentVariableNamesAsList()
-        => string.Join(",", GetMethodArgumentVariableNames());
+        => string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0));
 
     public virtual bool Equals(TestSourceDataModel? other)
     {

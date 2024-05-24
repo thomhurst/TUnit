@@ -4,24 +4,31 @@ namespace TUnit.Engine.SourceGenerator.Models;
 
 internal record Argument
 {
-    public Argument(ArgumentSource argumentSource, string type, string? invocation)
+    public Argument(ArgumentSource argumentSource, string type, string? invocation, bool isTuple = false)
     {
         ArgumentSource = argumentSource;
         Type = type;
-        Invocation = MapValue(type, invocation);
+        IsTuple = isTuple;
+        Invocation = MapValue(type, invocation, isTuple);
     }
 
     public ArgumentSource ArgumentSource { get; }
     public string Type { get; }
+    public bool IsTuple { get; }
     public string Invocation { get; }
 
-    private static string MapValue(string type, string? value)
+    private static string MapValue(string type, string? value, bool isTuple)
     {
         type = type.TrimEnd('?');
         
         if (value is null)
         {
             return "null";
+        }
+
+        if (isTuple)
+        {
+            return value;
         }
         
         if (type == "global::System.Char")

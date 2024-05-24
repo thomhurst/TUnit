@@ -32,7 +32,7 @@ internal static class MethodArgumentsRetriever
         {
             TestType.Basic => [BasicTestArgumentsRetriever.Parse(testAndClassAttributes)],
             TestType.DataDriven => DataDrivenArgumentsRetriever.Parse(methodAttributes, testAndClassAttributes, methodSymbol.Parameters),
-            TestType.DataSourceDriven => DataSourceDrivenArgumentsRetriever.Parse(namedTypeSymbol, methodAttributes, testAndClassAttributes),
+            TestType.DataSourceDriven => DataSourceDrivenArgumentsRetriever.Parse(namedTypeSymbol, methodSymbol, methodAttributes, testAndClassAttributes),
             TestType.Combinative => CombinativeValuesRetriever.Parse(methodSymbol, testAndClassAttributes),
             _ => throw new ArgumentOutOfRangeException()
         };

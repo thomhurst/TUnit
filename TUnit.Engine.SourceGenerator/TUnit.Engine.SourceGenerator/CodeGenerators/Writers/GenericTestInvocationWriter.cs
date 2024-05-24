@@ -151,6 +151,11 @@ internal static class GenericTestInvocationWriter
             return $"({{{VariableNames.MethodData}}})";
         }
 
-        return $"({string.Join(", ", testSourceDataModel.GetMethodArgumentVariableNames().Select(x => $"{{{x}}}"))})";
+        var isMethodTupleArguments = testSourceDataModel.IsMethodTupleArguments;
+        var args = testSourceDataModel.GetMethodArgumentVariableNames()
+            .Select(x => $"{{{x}}}")
+            .Skip(isMethodTupleArguments ? 1 : 0);
+        
+        return $"({string.Join(", ", args)})";
     }
 }

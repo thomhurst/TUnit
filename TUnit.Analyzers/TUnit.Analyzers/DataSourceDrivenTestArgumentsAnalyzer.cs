@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -106,8 +107,13 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             );
             return;
         }
+
+        var shouldUnfoldTuple = dataSourceDrivenAttribute.NamedArguments
+            .FirstOrDefault(x => x.Key == "UnfoldTuple")
+            .Value
+            .Value as bool? ?? false;
         
-        if (parameters.Length > 1)
+        if (parameters.Length > 1 && !shouldUnfoldTuple)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
@@ -178,6 +184,12 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         if (context.Compilation.HasImplicitConversion(argumentType, methodParameterType)
             || context.Compilation.HasImplicitConversion(argumentType, enumerableOfMethodType))
         {
+            return;
+        }
+
+        if (argumentType.IsTupleType)
+        {
+            // TODO
             return;
         }
         
