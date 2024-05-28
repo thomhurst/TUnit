@@ -13,12 +13,14 @@ internal static class CombinativeValuesRetriever
     // We return a List of a List. Inner List is for each test.
     public static IEnumerable<ArgumentsContainer> Parse(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
     {
-        if (methodSymbol.Parameters.IsDefaultOrEmpty)
+        var methodSymbolParameters = methodSymbol.Parameters;
+        
+        if (methodSymbolParameters.IsDefaultOrEmpty)
         {
             return [];
         }
         
-        var combinativeValuesAttributes = methodSymbol.Parameters
+        var combinativeValuesAttributes = methodSymbolParameters
             .Select(x => x.GetAttributes().SafeFirstOrDefault(x => x.GetFullyQualifiedAttributeTypeName()
                                                                == WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute.WithGlobalPrefix))
             .OfType<AttributeData>()
@@ -28,10 +30,11 @@ internal static class CombinativeValuesRetriever
             .Select(x => x.ConstructorArguments.SafeFirstOrDefault().Values);
 
         var attr = combinativeValuesAttributes.SafeFirstOrDefault();
+        
         var index = 0;
         return GetCombinativeArgumentsList(mappedToConstructorArrays)
             .Select(x =>
-                MapToArgumentEnumerable(x, methodAndClassAttributes)
+                MapToArgumentEnumerable(x, methodAndClassAttributes, methodSymbolParameters)
             ).Select(x => new ArgumentsContainer
             {
                 DataAttribute = attr,
@@ -41,11 +44,16 @@ internal static class CombinativeValuesRetriever
             });
     }
 
-    private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> x, AttributeData[] methodAndClassAttributes)
+    private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> typedConstants, AttributeData[] methodAndClassAttributes, ImmutableArray<IParameterSymbol> parameterSymbols)
     {
-        return x.Select(y =>
-            new Argument(ArgumentSource.CombinativeDataAttribute, y.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-                TypedConstantParser.GetTypedConstantValue(y)))
+        return typedConstants.Select((typedConstant, index) =>
+            {
+                var parameterSymbolType = parameterSymbols.ElementAt(index).Type;
+                
+                return new Argument(ArgumentSource.CombinativeDataAttribute,
+                    parameterSymbolType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                    TypedConstantParser.GetTypedConstantValue(typedConstant, parameterSymbolType));
+            })
             .WithTimeoutArgument(methodAndClassAttributes);
     }
 

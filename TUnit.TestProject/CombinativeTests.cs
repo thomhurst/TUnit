@@ -22,4 +22,12 @@ public class CombinativeTests
     {
         await Task.CompletedTask;
     }
+    
+    [CombinativeTest]
+    public async Task CombinativeTest_Enum(
+        [CombinativeValues(1, 2)] int i, 
+        [CombinativeValues(-1, TestEnum.One)] TestEnum testEnum)
+    {
+        await Task.CompletedTask;
+    }
 }
