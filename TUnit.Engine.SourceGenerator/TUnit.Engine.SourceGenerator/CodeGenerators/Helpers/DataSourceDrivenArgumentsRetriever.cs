@@ -89,21 +89,14 @@ internal static class DataSourceDrivenArgumentsRetriever
         {
             yield return new Argument(ArgumentSource.MethodDataSourceAttribute, "var", methodInvocation);
 
-            for (var index = 1; index <= methodSymbol.Parameters.Length; index++)
+            var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{VariableNames.MethodArg}{i+1}").ToList();
+            
+            yield return new Argument(ArgumentSource.MethodDataSourceAttribute,
+                "var",
+                $"{VariableNames.MethodArg}0", isTuple: true)
             {
-                var methodSymbolParameter = methodSymbol.Parameters[index - 1];
-
-                if (index == methodSymbol.Parameters.Length &&
-                    methodSymbolParameter.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
-                    WellKnownFullyQualifiedClassNames.CancellationToken)
-                {
-                    break;
-                }
-
-                yield return new Argument(ArgumentSource.MethodDataSourceAttribute,
-                    methodSymbolParameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-                    $"{VariableNames.MethodArg}0.Item{index}", isTuple: true);
-            }
+                TupleVariableNames = $"({string.Join(", ", variableNames)})"
+            };
 
             yield break;
         }

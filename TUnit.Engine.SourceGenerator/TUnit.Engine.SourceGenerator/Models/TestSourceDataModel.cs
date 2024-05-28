@@ -47,7 +47,7 @@ internal record TestSourceDataModel
     public IEnumerable<string> GetClassArgumentVariableNames()
     {
         return Enumerable.Range(0, ClassArguments.Length)
-            .Select(i => $"{VariableNames.ClassArg}{i}");
+            .Select(i => ClassArguments[i].TupleVariableNames ?? $"{VariableNames.ClassArg}{i}");
     }
 
     public IEnumerable<string> GetClassArgumentsInvocations()
@@ -68,12 +68,12 @@ internal record TestSourceDataModel
     }
 
     public string GetClassArgumentVariableNamesAsList()
-        => string.Join(", ", GetClassArgumentVariableNames().Skip(IsClassTupleArguments ? 1 : 0));
+        => string.Join(", ", GetClassArgumentVariableNames().Skip(IsClassTupleArguments ? 1 : 0)).TrimStart('(').TrimEnd(')');
     
     public IEnumerable<string> GetMethodArgumentVariableNames()
     {
         return Enumerable.Range(0, MethodArguments.Length)
-            .Select(i => $"{VariableNames.MethodArg}{i}");
+            .Select(i => MethodArguments[i].TupleVariableNames ?? $"{VariableNames.MethodArg}{i}");
     }
 
     public IEnumerable<string> GetMethodArgumentsInvocations()
@@ -94,7 +94,7 @@ internal record TestSourceDataModel
     }
     
     public string GetMethodArgumentVariableNamesAsList()
-        => string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0));
+        => string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0)).TrimStart('(').TrimEnd(')');
 
     public virtual bool Equals(TestSourceDataModel? other)
     {

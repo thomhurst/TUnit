@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -155,6 +156,16 @@ internal static class GenericTestInvocationWriter
         var args = testSourceDataModel.GetMethodArgumentVariableNames()
             .Select(x => $"{{{x}}}")
             .Skip(isMethodTupleArguments ? 1 : 0);
+
+        if (isMethodTupleArguments)
+        {
+            args = args.First()
+                .TrimStart('{', '(')
+                .TrimEnd('}', ')')
+                .Split([','], StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Select(x => $"{{{x}}}");
+        }
         
         return $"({string.Join(", ", args)})";
     }

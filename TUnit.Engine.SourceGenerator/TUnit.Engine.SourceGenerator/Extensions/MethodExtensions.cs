@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Engine.SourceGenerator.Extensions;
@@ -30,5 +32,23 @@ public static class MethodExtensions
             ..methodSymbol.GetAttributes(),
             ..namedTypeSymbol.GetAttributes()
         ];
+    }
+
+    public static IEnumerable<IParameterSymbol> ParametersWithoutTimeoutCancellationToken(
+        this IMethodSymbol methodSymbol)
+    {
+        if (methodSymbol.Parameters.IsDefaultOrEmpty)
+        {
+            return [];
+        }
+
+        if (methodSymbol.Parameters.Last().Type
+                .ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+            WellKnownFullyQualifiedClassNames.CancellationToken)
+        {
+            return methodSymbol.Parameters.Take(methodSymbol.Parameters.Length - 1);
+        }
+
+        return methodSymbol.Parameters;
     }
 }
