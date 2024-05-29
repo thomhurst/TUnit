@@ -652,5 +652,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0022Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Member should be disposed within a clean up method.
+        /// </summary>
+        internal static string TUnit0023Description {
+            get {
+                return ResourceManager.GetString("TUnit0023Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Member should be disposed within a clean up method.
+        /// </summary>
+        internal static string TUnit0023MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0023MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Member should be disposed within a clean up method.
+        /// </summary>
+        internal static string TUnit0023Title {
+            get {
+                return ResourceManager.GetString("TUnit0023Title", resourceCulture);
+            }
+        }
     }
 }

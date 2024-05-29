@@ -216,4 +216,13 @@
     <data name="TUnit0022Title" xml:space="preserve">
         <value>`CombinativeTest` must be paired with `CombinativeValues` attributes.</value>
     </data>
+    <data name="TUnit0023Description" xml:space="preserve">
+        <value>Member should be disposed within a clean up method</value>
+    </data>
+    <data name="TUnit0023MessageFormat" xml:space="preserve">
+        <value>Member should be disposed within a clean up method</value>
+    </data>
+    <data name="TUnit0023Title" xml:space="preserve">
+        <value>Member should be disposed within a clean up method</value>
+    </data>
 </root>

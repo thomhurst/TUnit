@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
 
 namespace TUnit.Analyzers.Tests.Verifiers;
@@ -12,6 +13,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
     {
         public Test()
         {
+            ReferenceAssemblies.AddAssemblies(ReferenceAssemblies.Net.Net60.Assemblies);
             SolutionTransforms.Add((solution, projectId) =>
             {
                 var project = solution.GetProject(projectId);

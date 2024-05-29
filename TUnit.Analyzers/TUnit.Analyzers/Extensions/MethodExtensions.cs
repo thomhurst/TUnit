@@ -7,6 +7,15 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class MethodExtensions
 {
+    public static bool IsTestMethod(this IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.GetAttributes().Any(x =>
+            WellKnown.AttributeFullyQualifiedClasses.TestAttributes.Contains(
+                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+            )
+        );
+    }
+    
     public static bool HasTimeoutAttribute(this IMethodSymbol methodSymbol, out AttributeData? timeoutAttribute)
     {
         timeoutAttribute = GetTimeoutAttribute(methodSymbol);
@@ -17,7 +26,6 @@ public static class MethodExtensions
     public static AttributeData? GetTimeoutAttribute(this IMethodSymbol methodSymbol)
     {
         return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.TimeoutAttribute, true);
-            
     }
     
     public static AttributeData? GetDataDrivenTestAttribute(this IMethodSymbol methodSymbol)

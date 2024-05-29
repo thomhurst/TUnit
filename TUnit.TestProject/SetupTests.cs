@@ -103,6 +103,12 @@ public class SetupTests : Base3
         _response = await new HttpClient().GetAsync($"{_serverAddress}/ping/?testName={TestContext.Current?.TestInformation.TestName}");
     }
 
+    [AfterEachTest]
+    public void Dispose()
+    {
+        _response?.Dispose();
+    }
+
     [Test]
     public async Task TestServerResponse1()
     {

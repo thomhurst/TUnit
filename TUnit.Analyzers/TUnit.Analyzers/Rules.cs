@@ -72,6 +72,9 @@ internal static class Rules
     public static readonly DiagnosticDescriptor RequiredPair_Attributes_CombinativeTest_CombinativeValues =
         CreateDescriptor("TUnit0022", UsageCategory, DiagnosticSeverity.Error);
     
+    public static readonly DiagnosticDescriptor Dispose_Member_In_Cleanup =
+        CreateDescriptor("TUnit0023", UsageCategory, DiagnosticSeverity.Error);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(
