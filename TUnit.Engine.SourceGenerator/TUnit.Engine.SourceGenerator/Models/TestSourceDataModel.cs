@@ -51,9 +51,16 @@ internal record TestSourceDataModel
 
     public IEnumerable<string> GetClassArgumentsInvocations()
     {
-        if (IsEnumerableClassArguments)
+        if (IsEnumerableClassArguments && !IsClassTupleArguments)
         {
             yield return $"var {VariableNames.ClassArg}0 = {VariableNames.ClassData};";
+            yield break;
+        }
+        
+        if (IsEnumerableClassArguments && IsClassTupleArguments)
+        {
+            yield return $"var {VariableNames.ClassArg}0 = {VariableNames.ClassData};";
+            yield return $"var {ClassArguments[1].TupleVariableNames} = {VariableNames.ClassArg}0;";
             yield break;
         }
         
@@ -77,9 +84,17 @@ internal record TestSourceDataModel
 
     public IEnumerable<string> GetMethodArgumentsInvocations()
     {
-        if (IsEnumerableMethodArguments)
+        if (IsEnumerableMethodArguments && !IsMethodTupleArguments)
         {
             yield return $"var {VariableNames.MethodArg}0 = {VariableNames.MethodData};";
+            yield break;
+        }
+        
+        
+        if (IsEnumerableMethodArguments && IsMethodTupleArguments)
+        {
+            yield return $"var {VariableNames.MethodArg}0 = {VariableNames.MethodData};";
+            yield return $"var {MethodArguments[1].TupleVariableNames} = {VariableNames.MethodArg}0;";
             yield break;
         }
         

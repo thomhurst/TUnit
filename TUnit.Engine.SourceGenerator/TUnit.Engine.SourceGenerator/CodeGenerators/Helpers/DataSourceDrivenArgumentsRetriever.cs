@@ -36,7 +36,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                                                                   == WellKnownFullyQualifiedClassNames
                                                                       .EnumerableMethodDataAttribute.WithGlobalPrefix))
         {
-            var methodData = ParseEnumerableMethodData(namedTypeSymbol, attributeData);
+            var methodData = ParseEnumerableMethodData(namedTypeSymbol, methodSymbol, attributeData);
             var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
             yield return new ArgumentsContainer
             {
@@ -105,17 +105,45 @@ internal static class DataSourceDrivenArgumentsRetriever
     }
     
     private static IEnumerable<Argument> ParseEnumerableMethodData(INamedTypeSymbol namedTypeSymbol,
+        IMethodSymbol methodSymbol,
         AttributeData methodDataAttribute)
     {
+        string methodInvocation;
+        
         if (methodDataAttribute.ConstructorArguments.Length == 1)
         {
             var typeContainingMethod = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-            return [new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()")];
+            
+            methodInvocation = $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
+        }
+        else
+        {
+            var type = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!)
+                .ToDisplayString(DisplayFormats
+                    .FullyQualifiedGenericWithGlobalPrefix);
+            
+            methodInvocation = $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()";
         }
 
-        var type = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!)
-            .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-        return [new Argument(ArgumentSource.MethodDataSourceAttribute, "var", $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()")];
+        var unfoldTupleArgument = methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "UnfoldTuple");
+        
+        if (unfoldTupleArgument.Value.Value is true)
+        {
+            yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", methodInvocation);
+
+            var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{VariableNames.MethodArg}{i+1}").ToList();
+            
+            yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute,
+                "var",
+                $"{VariableNames.MethodArg}0", isTuple: true)
+            {
+                TupleVariableNames = $"({string.Join(", ", variableNames)})"
+            };
+
+            yield break;
+        }
+        
+        yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", methodInvocation);
     }
     
     private static IEnumerable<Argument> ParseClassData(AttributeData classDataAttribute)

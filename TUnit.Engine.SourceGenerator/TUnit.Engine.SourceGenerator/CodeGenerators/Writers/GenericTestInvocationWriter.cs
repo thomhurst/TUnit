@@ -147,7 +147,7 @@ internal static class GenericTestInvocationWriter
             return string.Empty;
         }
 
-        if (testSourceDataModel.IsEnumerableMethodArguments)
+        if (testSourceDataModel is { IsEnumerableMethodArguments: true, IsMethodTupleArguments: false })
         {
             return $"({{{VariableNames.MethodData}}})";
         }
