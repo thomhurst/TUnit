@@ -12,7 +12,11 @@ Tests are run in parallel by design. If you have operations you can't do in para
 
 ## Test Classes and Instance Data
 
-Classes are `new`ed up for each test within their class. This is because tests should be stateless and side effect free. This enables parallelisation (for speed and throughput), and reduces bugs and side effects when there is stale data left over from previous tests. This is something I've experienced with NUnit before. I've seen test suites that were all green, and they were actually broken, because they were asserting against instance data that had been left over from previous tests.
+Classes are `new`ed up for each test within their class. 
+
+This is by design because tests should be stateless and side effect free. 
+
+By doing this it enables parallelisation (for speed and throughput), and reduces bugs and side effects when there is stale data left over from previous tests. This is something I've experienced with NUnit before. I've seen test suites that were all green, and they were actually broken, because they were asserting against instance data that had been left over from previous tests.
 
 So if you have:
 
@@ -48,9 +52,9 @@ public class MyTests
 
 The above will compile fine and run, but it will result in a failing test.
 
-Because `MyTests` in `MyTest2` is different from `MyTests` in `MyTest1`, the `_value` field is also a different reference.
+Because `MyTests` in `MyTest2` is different from `MyTests` in `MyTest1`, therefore the `_value` field is a different reference.
 
-If you really want to perform a test like the above, you can make your field static, and then that field will persist across any instance.
+If you really want to perform a test like the above, you can make your field static, and then that field will persist across any instance. The `static` keyword makes it clear to the user that data persists outside of instances.
 
 ```csharp
 public class MyTests
