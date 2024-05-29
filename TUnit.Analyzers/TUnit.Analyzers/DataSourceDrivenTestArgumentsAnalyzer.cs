@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -51,7 +52,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             return;
         }
 
-        var methodParameterTypes = methodSymbol.Parameters.IsDefault 
+        var methodParameterTypes = methodSymbol.Parameters.IsDefaultOrEmpty
             ? []
             : methodSymbol.Parameters.ToList();
         
@@ -123,7 +124,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             return;
         }
         
-        var methodParameterType = parameters.Select(x => x.Type).FirstOrDefault();
+        var methodParameterTypes = parameters.Select(x => x.Type).ToList();
         
         var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, fallbackClassToSearchForDataSourceIn);
         
@@ -179,17 +180,54 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
 
         var argumentType = methodContainingTestData.ReturnType;
 
-        var enumerableOfMethodType = CreateEnumerableOfType(context, methodParameterType!);
-
-        if (context.Compilation.HasImplicitConversion(argumentType, methodParameterType)
-            || context.Compilation.HasImplicitConversion(argumentType, enumerableOfMethodType))
-        {
-            return;
-        }
-
         if (argumentType.IsTupleType)
         {
-            // TODO
+            var actualMethodParameterTypes = parameters.Select(x => x.Type).ToList();
+            
+            var tupleTypes = argumentType.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                .TrimStart('(')
+                .TrimEnd(')')
+                .Split([','], StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .ToList();
+
+            if (actualMethodParameterTypes.Count != tupleTypes.Count)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestDataSource,
+                        dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                        argumentType,
+                        FormatParametersToString(methodParameterTypes))
+                );
+                return;
+            }
+
+            for (var index = 0; index < tupleTypes.Count; index++)
+            {
+                var tupleParameterType = tupleTypes[index];
+                var actualParameterType = actualMethodParameterTypes[index];
+
+                if (tupleParameterType !=
+                    actualParameterType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            Rules.WrongArgumentTypeTestDataSource,
+                            dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                            argumentType,
+                            FormatParametersToString(methodParameterTypes))
+                    );
+                }
+            }
+            return;
+        }
+        
+        var enumerableOfMethodType = CreateEnumerableOfType(context, methodParameterTypes.ElementAt(0));
+
+        if (context.Compilation.HasImplicitConversion(argumentType, methodParameterTypes.ElementAt(0))
+            || context.Compilation.HasImplicitConversion(argumentType, enumerableOfMethodType))
+        {
             return;
         }
         
@@ -198,8 +236,24 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                     Rules.WrongArgumentTypeTestDataSource,
                     dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
                     argumentType,
-                    methodParameterType)
+                    FormatParametersToString(methodParameterTypes))
             );
+    }
+
+    private string FormatParametersToString(List<ITypeSymbol> methodParameterTypes)
+    {
+        if (!methodParameterTypes.Any())
+        {
+            return "()";
+        }
+
+        if (methodParameterTypes.Count == 1)
+        {
+            return methodParameterTypes[0].ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        }
+
+        return
+            $"({string.Join(", ", methodParameterTypes.Select(x => x.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)))})";
     }
 
     private static ITypeSymbol CreateEnumerableOfType(SyntaxNodeAnalysisContext context, ITypeSymbol typeSymbol)

@@ -18,6 +18,20 @@ public class DisplayFormats
         SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
     );
     
+    public static SymbolDisplayFormat FullyQualifiedGenericWithGlobalPrefix => new(
+        SymbolDisplayGlobalNamespaceStyle.Included,
+        SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        SymbolDisplayMemberOptions.IncludeContainingType,
+        SymbolDisplayDelegateStyle.NameAndSignature,
+        SymbolDisplayExtensionMethodStyle.Default,
+        SymbolDisplayParameterOptions.IncludeType,
+        SymbolDisplayPropertyStyle.NameOnly,
+        SymbolDisplayLocalOptions.IncludeType, 
+        SymbolDisplayKindOptions.None, 
+        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
+    );
+    
     public static SymbolDisplayFormat FullyQualifiedNonGeneric => new(
         SymbolDisplayGlobalNamespaceStyle.Omitted,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,

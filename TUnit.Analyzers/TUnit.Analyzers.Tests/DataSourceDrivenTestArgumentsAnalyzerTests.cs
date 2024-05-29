@@ -4,7 +4,7 @@ using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.An
 
 namespace TUnit.Analyzers.Tests;
 
-public class DataSourceDrivenTestArgumentsAnalyzerTests
+public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
     public async Task DataSourceDriven_Argument_Is_Flagged_When_Does_Not_Match_Parameter_Type()
@@ -15,7 +15,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                             
-                                [{|#0:MethodData(nameof(Data))|}]
+                                [{|#0:MethodDataSource(nameof(Data))|}]
                                 public void MyTest(string value)
                                 {
                                 }
@@ -41,7 +41,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
 
                             public class MyClass
                             {
-                                [MethodData(nameof(Data))]
+                                [MethodDataSource(nameof(Data))]
                                 public void MyTest(int value)
                                 {
                                 }
@@ -64,7 +64,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
 
                             public class MyClass
                             {
-                                [MethodData(nameof(Data))]
+                                [MethodDataSource(nameof(Data))]
                                 public void MyTest(int value)
                                 {
                                 }
@@ -95,7 +95,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
 
                             public class MyClass
                             {
-                                [MethodData(typeof(MyData), nameof(MyData.One))]
+                                [MethodDataSource(typeof(MyData), nameof(MyData.One))]
                                 public void MyTest(int value)
                                 {
                                 }
@@ -123,7 +123,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                                 [Timeout(30_000)]
-                                [MethodData(typeof(MyData), nameof(MyData.One))]
+                                [MethodDataSource(typeof(MyData), nameof(MyData.One))]
                                 public void MyTest(int value, CancellationToken token)
                                 {
                                 }
@@ -131,5 +131,91 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests
                             """;
         
         await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task DataDriven_Argument_Is_Not_Flagged_When_Matching_Tuple(bool includeTimeoutToken)
+    {
+        var text = $$"""
+                              using System.Threading;
+                              using TUnit.Core;
+
+                              public class MyClass
+                              {
+                                  public static (int, string, bool) Tuple()
+                                  {
+                                      return (1, "Hello", true);
+                                  }
+                                  
+                                  {{GetTimeoutAttribute(includeTimeoutToken)}}
+                                  [MethodDataSource(nameof(Tuple), UnfoldTuple = true)]
+                                  public void MyTest(int value, string value2, bool value3{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
+                                  {
+                                  }
+                              }
+                              """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task DataDriven_Argument_Is_Flagged_When_Tuple_Count_Mismatch(bool includeTimeoutToken)
+    {
+        var text = $$"""
+                     using System.Threading;
+                     using TUnit.Core;
+
+                     public class MyClass
+                     {
+                         public static (int, string, bool) Tuple()
+                         {
+                             return (1, "Hello", true);
+                         }
+                         
+                         {{GetTimeoutAttribute(includeTimeoutToken)}}
+                         [{|#0:MethodDataSource(nameof(Tuple), UnfoldTuple = true)|}]
+                         public void MyTest(int value, string value2{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
+                         {
+                         }
+                     }
+                     """;
+        
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+            .WithLocation(0)
+            .WithArguments("(int, string, bool)", "(int, string)");
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected);
+    }
+    
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task DataDriven_Argument_Is_Flagged_When_Non_Matching_Tuple(bool includeTimeoutToken)
+    {
+        var text = $$"""
+                            using System.Threading;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                public static (int, string, bool) Tuple()
+                                {
+                                    return (1, "Hello", true);
+                                }
+                                
+                                {{GetTimeoutAttribute(includeTimeoutToken)}}
+                                [{|#0:MethodDataSource(nameof(Tuple), UnfoldTuple = true)|}]
+                                public void MyTest(int value, string value2, string value3{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
+                                {
+                                }
+                            }
+                            """;
+        
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+            .WithLocation(0)
+            .WithArguments("(int, string, bool)", "(int, string, string)");
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected);
     }
 }

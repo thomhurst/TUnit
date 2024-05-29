@@ -381,13 +381,13 @@ public class Tests
             .Is.EqualTo("ABCDE", StringComparison.Ordinal);
     }
 
-    // [MethodData(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]
+    // [MethodDataSource(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]
     // public async Task TestDataSourceEnumerable(int value)
     // {
     //     await Assert.That(value).Is.EqualTo(1);
     // }
     
-    // [MethodData(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
+    // [MethodDataSource(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
     // [TestCategory("Fail")]
     // public async Task TestDataSourceFailingEnumerable(int value)
     // {
