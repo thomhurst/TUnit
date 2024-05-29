@@ -7,6 +7,5 @@ internal enum ArgumentSource
     CombinativeDataAttribute,
     ArgumentAttribute,
     TimeoutAttribute,
-    InjectAttribute,
     EnumerableMethodDataAttribute
 }

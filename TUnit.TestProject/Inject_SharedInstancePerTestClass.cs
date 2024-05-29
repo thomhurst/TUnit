@@ -11,7 +11,7 @@ public static class SharedInjectedTypesContainer
     public static readonly List<DummyReferenceTypeClass> TestClass3Instances = new();
 }
 
-[Inject<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
 public class Inject_SharedPerType1
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
@@ -64,7 +64,7 @@ public class Inject_SharedPerType1
     }
 }
 
-[Inject<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
 public class Inject_SharedPerType2
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
@@ -117,7 +117,7 @@ public class Inject_SharedPerType2
     }
 }
 
-[Inject<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
 public class Inject_SharedPerType3
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;

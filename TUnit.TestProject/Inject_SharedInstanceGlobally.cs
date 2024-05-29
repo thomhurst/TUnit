@@ -9,7 +9,7 @@ public static class SharedInjectedGloballyContainer
     public static readonly List<DummyReferenceTypeClass> Instances = new();
 }
 
-[Inject<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
 public class Inject_SharedGlobally1
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
@@ -56,7 +56,7 @@ public class Inject_SharedGlobally1
     }
 }
 
-[Inject<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
 public class Inject_SharedGlobally2
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
@@ -103,7 +103,7 @@ public class Inject_SharedGlobally2
     }
 }
 
-[Inject<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
 public class Inject_SharedGlobally3
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;

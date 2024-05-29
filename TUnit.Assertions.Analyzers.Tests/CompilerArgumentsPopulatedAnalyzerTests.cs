@@ -11,7 +11,7 @@ public class CompilerArgumentsPopulatedAnalyzerTests
         const string text = """
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
-                            using TUnit.Assertions.Extensions.Is;
+                            using TUnit.Assertions.Extensions;
                             using TUnit.Core;
                             
                             public class MyClass
@@ -19,7 +19,7 @@ public class CompilerArgumentsPopulatedAnalyzerTests
 
                                 public async Task MyTest()
                                 {
-                                    Assert.That(1, {|#0:"expression"|}).Is.EqualTo(1);
+                                    await Assert.That(1, {|#0:"expression"|}).Is.EqualTo(1);
                                 }
 
                             }

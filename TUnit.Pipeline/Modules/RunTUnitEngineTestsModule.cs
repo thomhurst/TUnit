@@ -1,4 +1,5 @@
-﻿using ModularPipelines.Context;
+﻿using ModularPipelines.Attributes;
+using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
@@ -9,6 +10,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
+[NotInParallel("DotNetTests")]
 public class RunTUnitEngineTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
