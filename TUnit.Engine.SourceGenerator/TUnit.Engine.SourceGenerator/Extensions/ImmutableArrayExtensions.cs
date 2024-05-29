@@ -24,7 +24,7 @@ public static class ImmutableArrayExtensions
             return default;
         }
 
-        return immutableArray.First(predicate);
+        return immutableArray.FirstOrDefault(predicate);
     }
     
     public static T? SafeFirstOrDefault<T>(this IEnumerable<T> enumerable)
