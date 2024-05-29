@@ -14,14 +14,15 @@ internal static class DataSourceDrivenArgumentsRetriever
         INamedTypeSymbol namedTypeSymbol,
         IMethodSymbol methodSymbol,
         ImmutableArray<AttributeData> methodAttributes,
-        AttributeData[] testAndClassAttributes)
+        AttributeData[] testAndClassAttributes,
+        string argPrefix)
     {
         var methodDataIndex = 0;
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                                   == WellKnownFullyQualifiedClassNames
                                                                       .MethodDataSourceAttribute.WithGlobalPrefix))
         {
-            var methodData = ParseMethodData(namedTypeSymbol, methodSymbol, attributeData);
+            var methodData = ParseMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
             var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
             yield return new ArgumentsContainer
             {
@@ -36,7 +37,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                                                                   == WellKnownFullyQualifiedClassNames
                                                                       .EnumerableMethodDataAttribute.WithGlobalPrefix))
         {
-            var methodData = ParseEnumerableMethodData(namedTypeSymbol, methodSymbol, attributeData);
+            var methodData = ParseEnumerableMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
             var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
             yield return new ArgumentsContainer
             {
@@ -63,7 +64,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         }
     }
 
-    private static IEnumerable<Argument> ParseMethodData(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol, AttributeData methodDataAttribute)
+    public static IEnumerable<Argument> ParseMethodData(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol, AttributeData methodDataAttribute, string argPrefix)
     {
         string methodInvocation;
         
@@ -89,11 +90,11 @@ internal static class DataSourceDrivenArgumentsRetriever
         {
             yield return new Argument(ArgumentSource.MethodDataSourceAttribute, "var", methodInvocation);
 
-            var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{VariableNames.MethodArg}{i+1}").ToList();
+            var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{argPrefix}{i+1}").ToList();
             
             yield return new Argument(ArgumentSource.MethodDataSourceAttribute,
                 "var",
-                $"{VariableNames.MethodArg}0", isTuple: true)
+                $"{argPrefix}0", isTuple: true)
             {
                 TupleVariableNames = $"({string.Join(", ", variableNames)})"
             };
@@ -104,9 +105,10 @@ internal static class DataSourceDrivenArgumentsRetriever
         yield return new Argument(ArgumentSource.MethodDataSourceAttribute, "var", methodInvocation);
     }
     
-    private static IEnumerable<Argument> ParseEnumerableMethodData(INamedTypeSymbol namedTypeSymbol,
+    public static IEnumerable<Argument> ParseEnumerableMethodData(INamedTypeSymbol namedTypeSymbol,
         IMethodSymbol methodSymbol,
-        AttributeData methodDataAttribute)
+        AttributeData methodDataAttribute, 
+        string argPrefix)
     {
         string methodInvocation;
         
@@ -131,11 +133,11 @@ internal static class DataSourceDrivenArgumentsRetriever
         {
             yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", methodInvocation);
 
-            var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{VariableNames.MethodArg}{i+1}").ToList();
+            var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{argPrefix}{i+1}").ToList();
             
             yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute,
                 "var",
-                $"{VariableNames.MethodArg}0", isTuple: true)
+                $"{argPrefix}0", isTuple: true)
             {
                 TupleVariableNames = $"({string.Join(", ", variableNames)})"
             };

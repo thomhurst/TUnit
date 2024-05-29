@@ -90,7 +90,6 @@ internal record TestSourceDataModel
             yield break;
         }
         
-        
         if (IsEnumerableMethodArguments && IsMethodTupleArguments)
         {
             yield return $"var {VariableNames.MethodArg}0 = {VariableNames.MethodData};";

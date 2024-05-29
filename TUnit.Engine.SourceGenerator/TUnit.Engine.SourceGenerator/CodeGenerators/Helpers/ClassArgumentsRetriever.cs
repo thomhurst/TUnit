@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.Enums;
@@ -30,16 +32,29 @@ internal static class ClassArgumentsRetriever
                      .Where(x => x.GetFullyQualifiedAttributeTypeName() 
                                  == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix))
         {
-            var arg = dataSourceDrivenTestAttribute.ConstructorArguments.Length == 1
-                ? $"{className}.{dataSourceDrivenTestAttribute.ConstructorArguments.SafeFirstOrDefault().Value}()"
-                : $"{TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(dataSourceDrivenTestAttribute.ConstructorArguments[0])}.{dataSourceDrivenTestAttribute.ConstructorArguments[1].Value}()";
-
+            var args = DataSourceDrivenArgumentsRetriever.ParseMethodData(namedTypeSymbol, namedTypeSymbol.Constructors.First(), dataSourceDrivenTestAttribute, VariableNames.ClassArg);
+            
             return new ArgumentsContainer
             {
                 DataAttribute = dataSourceDrivenTestAttribute,
                 DataAttributeIndex = ++index,
                 IsEnumerableData = false,
-                Arguments = [new Argument(ArgumentSource.MethodDataSourceAttribute, "var", arg)]
+                Arguments = [..args]
+            };
+        }
+        
+        foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
+                     .Where(x => x.GetFullyQualifiedAttributeTypeName() 
+                                 == WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix))
+        {
+            var args = DataSourceDrivenArgumentsRetriever.ParseEnumerableMethodData(namedTypeSymbol, namedTypeSymbol.Constructors.First(), dataSourceDrivenTestAttribute, VariableNames.ClassArg);
+            
+            return new ArgumentsContainer
+            {
+                DataAttribute = dataSourceDrivenTestAttribute,
+                DataAttributeIndex = ++index,
+                IsEnumerableData = true,
+                Arguments = [..args]
             };
         }
 

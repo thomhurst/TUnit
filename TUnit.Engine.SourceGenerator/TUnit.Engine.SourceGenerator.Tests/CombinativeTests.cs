@@ -9,7 +9,7 @@ internal class CombinativeTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "CombinativeTests.cs"),
-        new RunTestOptions()
+        new RunTestOptions
         {
             AdditionalFiles =
             [

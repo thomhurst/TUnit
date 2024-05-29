@@ -31,20 +31,31 @@ internal static class TestSourceDataModelRetriever
 
         foreach (var testArguments in testArgumentsContainer)
         {
-            if (!classArguments.Arguments.Any())
+            foreach (var testSourceDataModel in GenerateTestSourceDataModels(methodSymbol, namedTypeSymbol, classArguments, runCount, testAttribute, testArguments))
             {
-                foreach (var testSourceDataModel in GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, runCount, testAttribute,
-                             testArguments))
-                {
-                    yield return testSourceDataModel;
-                }
+                yield return testSourceDataModel;
+            }
+        }
+    }
+
+    private static IEnumerable<TestSourceDataModel> GenerateTestSourceDataModels(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol,
+        ArgumentsContainer classArguments, int runCount, AttributeData testAttribute, ArgumentsContainer testArguments)
+    {
+        if (!classArguments.Arguments.Any())
+        {
+            foreach (var testSourceDataModel in GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, runCount, testAttribute,
+                         testArguments))
+            {
+                yield return testSourceDataModel;
             }
 
-            foreach (var generateMultipleClassInstance in GenerateMultipleClassInstances(methodSymbol, namedTypeSymbol, runCount, testAttribute,
-                         classArguments, testArguments))
-            {
-                yield return generateMultipleClassInstance;
-            }
+            yield break;
+        }
+
+        foreach (var generateMultipleClassInstance in GenerateMultipleClassInstances(methodSymbol, namedTypeSymbol, runCount, testAttribute,
+                     classArguments, testArguments))
+        {
+            yield return generateMultipleClassInstance;
         }
     }
 
@@ -54,8 +65,8 @@ internal static class TestSourceDataModelRetriever
     {
         for (var i = 0; i < runCount; i++)
         {
-            yield return GetTestSourceDataModel(new TestGenerationContext()
-                {
+            yield return GetTestSourceDataModel(new TestGenerationContext
+            {
                     MethodSymbol = methodSymbol,
                     ClassSymbol = namedTypeSymbol,
                     ClassArguments = [],
@@ -76,26 +87,23 @@ internal static class TestSourceDataModelRetriever
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, ArgumentsContainer classArguments,
         ArgumentsContainer testArgumentsCollection)
     {
-        foreach (var classArgument in classArguments.Arguments)
+        for (var i = 0; i < runCount; i++)
         {
-            for (var i = 0; i < runCount; i++)
+            yield return GetTestSourceDataModel(new TestGenerationContext
             {
-                yield return GetTestSourceDataModel(new TestGenerationContext
-                {
-                    MethodSymbol = methodSymbol,
-                    ClassSymbol = namedTypeSymbol,
-                    ClassArguments = [classArgument],
-                    TestArguments = testArgumentsCollection.Arguments,
-                    ClassDataSourceAttribute = classArguments.DataAttribute,
-                    TestDataAttribute = testArgumentsCollection.DataAttribute,
-                    RepeatIndex = i,
-                    TestAttribute = testAttribute,
-                    HasEnumerableTestMethodData = testArgumentsCollection.IsEnumerableData,
-                    HasEnumerableClassMethodData = classArguments.IsEnumerableData,
-                    TestDataAttributeIndex = testArgumentsCollection.DataAttributeIndex,
-                    ClassDataAttributeIndex = classArguments.DataAttributeIndex
-                });
-            }
+                MethodSymbol = methodSymbol,
+                ClassSymbol = namedTypeSymbol,
+                ClassArguments = classArguments.Arguments,
+                TestArguments = testArgumentsCollection.Arguments,
+                ClassDataSourceAttribute = classArguments.DataAttribute,
+                TestDataAttribute = testArgumentsCollection.DataAttribute,
+                RepeatIndex = i,
+                TestAttribute = testAttribute,
+                HasEnumerableTestMethodData = testArgumentsCollection.IsEnumerableData,
+                HasEnumerableClassMethodData = classArguments.IsEnumerableData,
+                TestDataAttributeIndex = testArgumentsCollection.DataAttributeIndex,
+                ClassDataAttributeIndex = classArguments.DataAttributeIndex
+            });
         }
     }
 
