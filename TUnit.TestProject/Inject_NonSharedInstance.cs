@@ -4,7 +4,7 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-[Inject<DummyReferenceTypeClass>(Shared = SharedType.None), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.None), NotInParallel]
 public class Inject_NonSharedInstance
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;

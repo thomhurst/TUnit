@@ -1,22 +1,20 @@
-﻿using TUnit.Core;
+using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-public class DataSourceDrivenTests
+public class ClassDataSourceDrivenTests
 {
-    [DataSourceDrivenTest]
-    [MethodDataSource(nameof(SomeMethod))]
-    public void DataSource_Method(int value)
-    {
-    }
-    
     [DataSourceDrivenTest]
     [ClassDataSource(typeof(SomeClass))]
     public void DataSource_Class(SomeClass value)
     {
     }
 
-    public static int SomeMethod() => 1;
+    [DataSourceDrivenTest]
+    [ClassDataSource<SomeClass>]
+    public void DataSource_Class_Generic(SomeClass value)
+    {
+    }
 
     public record SomeClass
     {

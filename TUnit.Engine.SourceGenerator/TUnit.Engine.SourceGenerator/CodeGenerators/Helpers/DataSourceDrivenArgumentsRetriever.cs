@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
@@ -48,20 +49,63 @@ internal static class DataSourceDrivenArgumentsRetriever
             };
         }
 
-        foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                                  == WellKnownFullyQualifiedClassNames
-                                                                      .ClassDataSourceAttribute.WithGlobalPrefix))
+        foreach (var classDataAttribute in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
+                                                                       == WellKnownFullyQualifiedClassNames
+                                                                           .ClassDataSourceAttribute.WithGlobalPrefix))
         {
-            var classData = ParseClassData(attributeData);
-            var arguments = classData.WithTimeoutArgument(testAndClassAttributes);
+            var genericType = classDataAttribute.AttributeClass!.TypeArguments.FirstOrDefault() ?? (INamedTypeSymbol)classDataAttribute.ConstructorArguments[0].Value!;
+            var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            var sharedArgument = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Shared").Value;
+
+            var sharedArgumentType = sharedArgument.ToCSharpString();
+
+            var key = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Key").Value.Value as string;
+            var arguments = GetClassDataArguments(sharedArgumentType, key ?? string.Empty, namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), fullyQualifiedGenericType);
+            
             yield return new ArgumentsContainer
             {
-                DataAttribute = attributeData,
+                DataAttribute = classDataAttribute,
                 DataAttributeIndex = ++methodDataIndex,
                 IsEnumerableData = false,
-                Arguments = [..arguments]
+                Arguments = [..arguments.WithTimeoutArgument(testAndClassAttributes)]
             };
         }
+    }
+
+    private static IEnumerable<Argument> GetClassDataArguments(string sharedArgumentType, string? key, string className, string fullyQualifiedGenericType)
+    {
+            if (sharedArgumentType is "TUnit.Core.SharedType.Globally")
+            {
+                return
+                [
+                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                        $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())")
+                ];
+            }
+            
+            if (sharedArgumentType is "TUnit.Core.SharedType.ForClass")
+            {
+                return
+                [
+                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                        $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")
+                ];
+            }
+            
+            if (sharedArgumentType is "TUnit.Core.SharedType.Keyed")
+            {
+                return
+                [
+                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                        $"({fullyQualifiedGenericType})global::TUnit.Engine.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")
+                ];
+            }
+
+            return
+            [
+                new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                    $"new {fullyQualifiedGenericType}()")
+            ];
     }
 
     public static IEnumerable<Argument> ParseMethodData(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol, AttributeData methodDataAttribute, string argPrefix)
@@ -146,12 +190,5 @@ internal static class DataSourceDrivenArgumentsRetriever
         }
         
         yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", methodInvocation);
-    }
-    
-    private static IEnumerable<Argument> ParseClassData(AttributeData classDataAttribute)
-    {
-        var type = (INamedTypeSymbol)classDataAttribute.ConstructorArguments[0].Value!;
-        var fullyQualifiedType = type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-        return [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedType, $"new {fullyQualifiedType}()")];
     }
 }
