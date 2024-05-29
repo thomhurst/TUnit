@@ -1,6 +1,25 @@
 # TUnit
 T(est)Unit!
 
+## Documentation
+See here: [https://thomhurst.github.io/TUnit/](https://thomhurst.github.io/TUnit/)
+
+## Features
+- Source generated tests
+- Full async support
+- Easy to read assertions
+- Flexible test data mechanisms
+- Flexible setup and cleanup mechanisms
+- Out of the box concurrency
+- Designed to avoid common pitfalls (leaky test states, shared instances, etc.)
+- Global test hooks
+- Test context interrogation providing test details and test state
+
+## Installation
+`dotnet add package TUnit --prerelease`
+
+## Example test
+
 ```csharp
     [Test]
     public async Task Test1()

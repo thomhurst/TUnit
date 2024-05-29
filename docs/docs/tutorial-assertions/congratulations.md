@@ -4,7 +4,7 @@ sidebar_position: 7
 
 # Congratulations
 
-That's all you need to know about exceptions.
+That's all you need to know about assertions.
 
 There are many out-of-the-box methods for checking things on common object types:
 `DateTime`, `TimeSpan`, `IEnumerable`, `string`, `INumber`

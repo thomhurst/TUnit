@@ -6,10 +6,10 @@ sidebar_position: 2
 
 TUnit supports having your test class implement `IDisposable` or `IAsyncDisposable`. These will be called after your test has finished executing.
 
-You can also  declare a method with a `[CleanUp]` or an `[OnlyOnceCleanUp]` attribute.
+You can also declare a method with a `[AfterEachTest]` or an `[AfterAllTestsInClass]` attribute.
 
-- `[CleanUp]` methods should NOT be static, and they will be executed repeatedly after each test in their class ends.
-- `[OnlyOnceCleanUp]` methods SHOULD be static, and they will be executed only once, after all tests in their class end.
+- `[AfterEachTest]` methods should NOT be static, and they will be executed repeatedly after each test in their class ends.
+- `[AfterAllTestsInClass]` methods SHOULD be static, and they will be executed only once, after all tests in their class end.
 
 Methods will be executed top-down, so the current class clean ups will execute first, then the base classes.
 
@@ -23,7 +23,7 @@ public class MyTestClass
     private int _value;
     private static HttpResponseMessage? _pingResponse;
 
-    [OnlyOnceCleanUp]
+    [AfterAllTestsInClass]
     public static async Task KillChromedrivers()
     {
         await Task.CompletedTask;
@@ -34,8 +34,8 @@ public class MyTestClass
         }
     }
     
-    [CleanUp]
-    public async Task CleanUp()
+    [AfterEachTest]
+    public async Task AfterEachTest()
     {
         await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.TestInformation.TestName}");
     }
