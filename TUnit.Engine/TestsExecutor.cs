@@ -98,6 +98,13 @@ internal class TestsExecutor
                 {
                     await _logger.LogErrorAsync(e);
                 }
+                finally
+                {
+                    foreach (var semaphore in locks)
+                    {
+                        semaphore.Release();
+                    }
+                }
             }));
 
         await Task.WhenAll(tasks);
