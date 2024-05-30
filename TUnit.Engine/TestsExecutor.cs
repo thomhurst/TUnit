@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.Logging;
+﻿using System.Collections.Concurrent;
+using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Models;
@@ -15,6 +16,9 @@ internal class TestsExecutor
     private readonly SystemResourceMonitor _systemResourceMonitor;
     private readonly ConsoleInterceptor _consoleInterceptor;
     private readonly ILogger<TestsExecutor> _logger;
+    
+    private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
+    private readonly object _notInParallelDictionaryLock = new();
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
         CancellationTokenSource cancellationTokenSource,
@@ -53,11 +57,14 @@ internal class TestsExecutor
         
             // TODO: I don't love this - Late setting a property.
             _singleTestExecutor.SetAllTests(tests);
-        
-            await ProcessTests(tests.Parallel, true, session);
 
-            await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, session);
+            // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint
+            await Task.WhenAll(
+                ProcessTests(tests.Parallel, true, session),
+                ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, session)
+            );
         
+            // These have to run on their own
             await ProcessTests(tests.NotInParallel, false, session);
         }
         finally
@@ -70,31 +77,30 @@ internal class TestsExecutor
 
     private async Task ProcessKeyedNotInParallelTests(List<NotInParallelTestCase> testsToProcess, TestSessionContext session)
     {
-        while (testsToProcess.Count > 0)
-        {
-            var executing = new List<Task>();
-
-            foreach (var notInParallelTestCases in GetOrderedTests())
+        var tasks = testsToProcess
+            .OrderBy(x => x.Test.Order)
+            .Select(notInParallelTestCase => Task.Run(async () =>
             {
-                var notInParallelTestCase = notInParallelTestCases.First();
-
-                testsToProcess.Remove(notInParallelTestCase);
-
-                var testWithResult = await ProcessTest(notInParallelTestCase.Test, true, session);
+                var keys = notInParallelTestCase.ConstraintKeys;
                 
-                executing.Add(testWithResult.ResultTask);
-            }
+                var locks = keys.Select(GetLockForKey).ToArray();
+                
+                while (!WaitHandle.WaitAll(locks, TimeSpan.FromMilliseconds(100), false))
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(500));
+                }
 
-            await WhenAllSafely(executing);
+                try
+                {
+                    await ProcessTest(notInParallelTestCase.Test, true, session);
+                }
+                catch (Exception e)
+                {
+                    await _logger.LogErrorAsync(e);
+                }
+            }));
 
-            List<IGrouping<ConstraintKeysCollection, NotInParallelTestCase>> GetOrderedTests()
-            {
-                return testsToProcess
-                    .OrderBy(x => x.Test.Order)
-                    .GroupBy(x => new ConstraintKeysCollection(x.Test.NotInParallelConstraintKeys!))
-                    .ToList();
-            }
-        }
+        await Task.WhenAll(tasks);
     }
 
     private async Task ProcessTests(Queue<TestInformation> queue, bool runInParallel, TestSessionContext session)
@@ -149,6 +155,14 @@ internal class TestsExecutor
         }
         
         return new TestWithResult(test, executionTask);
+    }
+    
+    private Semaphore GetLockForKey(string key)
+    {
+        lock (_notInParallelDictionaryLock)
+        {
+            return _notInParallelKeyedLocks.GetOrAdd(key, _ => new Semaphore(1, 1));
+        }
     }
 
     private void NotifyTestEnd()
