@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestInvoker>()
             .AddSingleton<SystemResourceMonitor>()
             .AddSingleton<TUnitTestDiscoverer>()
-            .AddSingleton<TestFilterService>();
+            .AddSingleton<TestFilterService>()
+            .AddSingleton<ExplicitFilterService>();
     }
 }
