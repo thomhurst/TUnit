@@ -83,14 +83,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     await NotifyFailedTests(context, failedToInitializeTests, true);
                 }
-                else if (context.Request is RunTestExecutionRequest)
+                else if (context.Request is RunTestExecutionRequest runTestExecutionRequest)
                 {
                     stopwatch.Start();
                     
                     await NotifyFailedTests(context, failedToInitializeTests, false);
                     
                     await ServiceProviderServiceExtensions.GetRequiredService<TestsExecutor>(_myServiceProvider)
-                        .ExecuteAsync(testInformations, context.Request.Session);
+                        .ExecuteAsync(testInformations, runTestExecutionRequest.Filter, context.Request.Session);
                 }
                 else
                 {

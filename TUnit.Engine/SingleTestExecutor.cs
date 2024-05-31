@@ -2,6 +2,7 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
@@ -19,16 +20,16 @@ internal class SingleTestExecutor : IDataProducer
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly IMessageBus _messageBus;
     private readonly TestInvoker _testInvoker;
-
-    public GroupedTests GroupedTests { get; private set; } = null!;
-
+    private readonly ExplicitFilterService _explicitFilterService;
+    
     public SingleTestExecutor(
         IExtension extension,
         Disposer disposer,
         ILoggerFactory loggerFactory,
         CancellationTokenSource cancellationTokenSource,
         IMessageBus messageBus,
-        TestInvoker testInvoker)
+        TestInvoker testInvoker,
+        ExplicitFilterService explicitFilterService)
     {
         _extension = extension;
         _disposer = disposer;
@@ -36,9 +37,11 @@ internal class SingleTestExecutor : IDataProducer
         _cancellationTokenSource = cancellationTokenSource;
         _messageBus = messageBus;
         _testInvoker = testInvoker;
+        _explicitFilterService = explicitFilterService;
     }
 
-    public async Task<TUnitTestResult> ExecuteTestAsync(TestInformation test, TestSessionContext session)
+    public async Task<TUnitTestResult> ExecuteTestAsync(TestInformation test, ITestExecutionFilter? filter,
+        TestSessionContext session)
     {
         if(_cancellationTokenSource.IsCancellationRequested)
         {
@@ -64,6 +67,11 @@ internal class SingleTestExecutor : IDataProducer
         TestContext? testContext = null;
         try
         {
+            if (!_explicitFilterService.CanRun(test, filter))
+            {
+                throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
+            }
+            
             if (!TestDictionary.TryGetTest(test.TestId, out var unInvokedTest))
             {
                 var failedInitializationTest = TestDictionary.GetFailedInitializationTest(test.TestId);
@@ -180,35 +188,7 @@ internal class SingleTestExecutor : IDataProducer
         });
     }
 
-    internal void SetAllTests(GroupedTests tests)
-    {
-        GroupedTests = tests;
-    }
-
     private readonly object _consoleStandardOutLock = new();
-
-    private bool IsExplicitlyRun(TestNode testNode)
-    {
-        // TODO: Re-implement
-        // if (_testFilterProvider.IsFilteredTestRun)
-        // {
-        //     return true;
-        // }
-
-        return false;
-
-        // TODO:
-        // var explicitFor = testNode.GetProperty<ExplicitForProperty>()?.ExplicitFor;
-        //
-        // if (string.IsNullOrEmpty(explicitFor))
-        // {
-        //     // Isn't required to be 'Explicitly' run
-        //     return true;
-        // }
-        //
-        // // If all tests being run are from the same "Explicit" attribute, e.g. same class or same method, then yes these have been run explicitly.
-        // return GroupedTests.AllTests.All(x => x.GetProperty<ExplicitForProperty>()?.ExplicitFor == explicitFor);
-    }
 
     private async Task ExecuteWithRetries(UnInvokedTest unInvokedTest)
     {
