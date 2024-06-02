@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
+using TUnit.Engine.Properties;
 
 namespace TUnit.Engine.Extensions;
 
@@ -26,6 +27,8 @@ internal static class TestExtensions
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
                     ),
+                ..testDetails.Categories.Select(x => new CategoryProperty(x)),
+                ..testDetails.CustomProperties.Select(x => new CustomProperty(x.Key, x.Value))
             ])
         };
         
