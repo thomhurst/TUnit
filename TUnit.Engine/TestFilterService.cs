@@ -29,6 +29,9 @@ public class TestFilterService
         return testExecutionFilter switch
         {
             null => true,
+#pragma warning disable TPEXP
+            NopFilter => true,
+#pragma warning restore TPEXP
             TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(testInformation.TestId)),
             _ => UnhandledFilter(testExecutionFilter)
         };
