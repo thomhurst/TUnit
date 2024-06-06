@@ -21,7 +21,7 @@ internal class PriorityFilteringTests : TestsBase<TestsGenerator>
         },
         generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(9));
+            Assert.That(generatedFiles.Length, Is.EqualTo(6));
             
             Assert.That(generatedFiles[0], Does.Contain("RepeatIndex = 1,"));
             Assert.That(generatedFiles[1], Does.Contain("RepeatIndex = 1,"));
