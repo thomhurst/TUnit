@@ -54,8 +54,8 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
             {
                 var hasSpecifiedClass = attributeData.ConstructorArguments.Length > 1;
 
-                var methodClass = hasSpecifiedClass ? (INamedTypeSymbol)attributeData.ConstructorArguments[0].Value! : namedTypeSymbol;
-                var methodName = (string)attributeData.ConstructorArguments[hasSpecifiedClass ? 1 : 0].Value!;
+                var methodClass = hasSpecifiedClass ? attributeData.ConstructorArguments[0].Value as INamedTypeSymbol ?? namedTypeSymbol : namedTypeSymbol;
+                var methodName = attributeData.ConstructorArguments[hasSpecifiedClass ? 1 : 0].Value as string ?? string.Empty;
 
                 var dataSourceMethod = methodClass
                     .GetMembers()
