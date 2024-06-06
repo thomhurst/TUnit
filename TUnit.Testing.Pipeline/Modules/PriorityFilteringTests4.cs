@@ -11,13 +11,12 @@ public class PriorityFilteringTests4 : TestModule
     {
         return await RunTestsWithFilter(context, 
             "/*/*/PriorityFilteringTests/*[Priority=other]",
-            new List<Action<DotNetTestResult>>
-            {
+            [
                 result => result.Successful.Should().BeTrue(),
                 result => result.UnitTestResults.Should().HaveCount(0),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Passed).Should().HaveCount(0),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Failed).Should().HaveCount(0),
-                result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.NotExecuted).Should().HaveCount(0),
-            });
+                result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.NotExecuted).Should().HaveCount(0)
+            ], cancellationToken);
     }
 }

@@ -11,13 +11,12 @@ public class ConcreteBasedOnAbstractClassTests : TestModule
     {
         return await RunTestsWithFilter(context, 
             "/*/*/(ConcreteClass1|ConcreteClass2)/*",
-            new List<Action<DotNetTestResult>>
-            {
+            [
                 result => result.Successful.Should().BeFalse(),
                 result => result.UnitTestResults.Should().HaveCount(3),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Passed).Should().HaveCount(2),
                 result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.Failed).Should().HaveCount(1),
-                result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.NotExecuted).Should().HaveCount(0),
-            });
+                result => result.UnitTestResults.Where(x => x.Outcome == TestOutcome.NotExecuted).Should().HaveCount(0)
+            ], cancellationToken);
     }
 }

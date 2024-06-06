@@ -51,7 +51,18 @@ internal static class TypeExtensions
 
         return list;
     }
-    
+
+    public static IEnumerable<ISymbol> GetSelfAndBaseTypes(this INamedTypeSymbol namedTypeSymbol)
+    {
+        var type = namedTypeSymbol;
+        
+        while (type != null)
+        {
+            yield return type;
+            type = type.BaseType;
+        }
+    }
+
     public static bool IsDisposable(this INamedTypeSymbol namedTypeSymbol)
     {
         return namedTypeSymbol.AllInterfaces.Any(x =>
@@ -64,5 +75,12 @@ internal static class TypeExtensions
         return namedTypeSymbol.AllInterfaces.Any(x =>
             x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
             == $"global::System.IAsyncDisposable");
+    }
+
+    public static bool IsOrInherits(this INamedTypeSymbol namedTypeSymbol, string typeName)
+    {
+        return namedTypeSymbol
+            .GetSelfAndBaseTypes()
+            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == typeName);
     }
 }

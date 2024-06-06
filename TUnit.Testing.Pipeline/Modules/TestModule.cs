@@ -7,16 +7,15 @@ using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using Polly;
 
 namespace TUnit.Testing.Pipeline.Modules;
 
-
-[NotInParallel("Unit Test")]
 public abstract class TestModule : Module<DotNetTestResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
 
-    protected async Task<DotNetTestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<DotNetTestResult>> assertions)
+    protected async Task<DotNetTestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<DotNetTestResult>> assertions, CancellationToken cancellationToken = default)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
 
@@ -28,14 +27,22 @@ public abstract class TestModule : Module<DotNetTestResult>
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
             Arguments = [ "--treenode-filter", filter, "--report-trx", "--report-trx-filename", trxFileName ]
-        });
+        }, cancellationToken);
 
-        var foundTrxFile = context.Git().RootDirectory.FindFile(x => x.Name.EndsWith(trxFileName)).AssertExists();
-        
-        var parsedResults = await context.Trx().ParseTrxFile(foundTrxFile);
+        // TRX Results seem to be written asynchronously - So retry to avoid race condition failures
+        return await Policy.Handle<Exception>()
+            .WaitAndRetryAsync(5, i => TimeSpan.FromSeconds(i))
+            .ExecuteAsync(async () =>
+            {
+                var foundTrxFile = context.Git().RootDirectory
+                    .FindFile(x => x.Name.EndsWith(trxFileName))
+                    .AssertExists();
 
-        assertions.ForEach(x => x.Invoke(parsedResults));
+                var parsedResults = await context.Trx().ParseTrxFile(foundTrxFile);
 
-        return parsedResults;
+                assertions.ForEach(x => x.Invoke(parsedResults));
+
+                return parsedResults;
+            });
     }
 }
