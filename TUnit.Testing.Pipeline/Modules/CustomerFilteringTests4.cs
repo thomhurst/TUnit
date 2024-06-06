@@ -10,7 +10,7 @@ public class CustomerFilteringTests4 : TestModule
     protected override async Task<DotNetTestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "TestClass~CustomFilteringTests&one=other",
+            "/*/*/CustomFilteringTests/*[one=other]",
             new List<Action<DotNetTestResult>>
             {
                 result => result.Successful.Should().BeTrue(),

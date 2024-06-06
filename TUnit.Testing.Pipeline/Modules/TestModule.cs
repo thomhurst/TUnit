@@ -21,12 +21,13 @@ public abstract class TestModule : Module<DotNetTestResult>
 
         var trxFile = File.GetNewTemporaryFilePath();
         
-        await context.DotNet().Test(new DotNetTestOptions(project)
+        await context.DotNet().Run(new DotNetRunOptions
         {
+            Project = project,
             NoBuild = true,
-            Filter = filter,
             ThrowOnNonZeroExitCode = false,
-            Logger = new[] { $"trx;LogFileName={trxFile}" },
+            //Logger = new[] { $"trx;LogFileName={trxFile}" },
+            Arguments = [ "--treenode-filter", filter ]
         });
 
         var parsedResults = await context.Trx().ParseTrxFile(trxFile);

@@ -10,7 +10,7 @@ public class PriorityFilteringTests1 : TestModule
     protected override async Task<DotNetTestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "TestClass~PriorityFilteringTests&Priority=High",
+            "/*/*/PriorityFilteringTests/*[Priority=High]",
             new List<Action<DotNetTestResult>>
             {
                 result => result.Successful.Should().BeTrue(),

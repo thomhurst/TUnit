@@ -10,7 +10,7 @@ public class ConcreteBasedOnAbstractClassTests : TestModule
     protected override async Task<DotNetTestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "TestClass~ConcreteClass1|TestClass~ConcreteClass2",
+            "/*/*/(ConcreteClass1|ConcreteClass2)/*",
             new List<Action<DotNetTestResult>>
             {
                 result => result.Successful.Should().BeFalse(),

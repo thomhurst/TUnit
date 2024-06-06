@@ -10,7 +10,7 @@ public class DataSourceClassCombinedWithDataSourceMethodTests : TestModule
     protected override async Task<DotNetTestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "TestClass~DataSourceClassCombinedWithDataSourceMethod",
+            "/*/*/DataSourceClassCombinedWithDataSourceMethod/*",
             new List<Action<DotNetTestResult>>
             {
                 result => result.Successful.Should().BeTrue(),

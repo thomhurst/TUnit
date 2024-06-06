@@ -15,8 +15,6 @@ public class RunTUnitEngineTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        // TODO: Remove
-        return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("dotnet", "--version"), cancellationToken);
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Testing.Pipeline.csproj").AssertExists();
 
         return await context.DotNet().Run(new DotNetRunOptions
