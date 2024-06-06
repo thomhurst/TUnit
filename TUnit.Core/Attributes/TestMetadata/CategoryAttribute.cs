@@ -1,11 +1,11 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class TestCategoryAttribute : TUnitAttribute
+public class CategoryAttribute : TUnitAttribute
 {
     public string Category { get; }
 
-    public TestCategoryAttribute(string category)
+    public CategoryAttribute(string category)
     {
         Category = category;
     }

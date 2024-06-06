@@ -75,6 +75,15 @@ internal static class Rules
     public static readonly DiagnosticDescriptor Dispose_Member_In_Cleanup =
         CreateDescriptor("TUnit0023", UsageCategory, DiagnosticSeverity.Error);
     
+    public static readonly DiagnosticDescriptor Wrong_Category_Attribute =
+        CreateDescriptor("TUnit0024", UsageCategory, DiagnosticSeverity.Error);
+        
+    public static readonly DiagnosticDescriptor Argument_Count_Not_Matching_Parameter_Count =
+        CreateDescriptor("TUnit0025", UsageCategory, DiagnosticSeverity.Error);
+
+    public static readonly DiagnosticDescriptor NotIEnumerable =
+        CreateDescriptor("TUnit0026", UsageCategory, DiagnosticSeverity.Error);
+
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

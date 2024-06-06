@@ -19,6 +19,11 @@
             <Pack>true</Pack>
             <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
         </Content>
+    
+        <Content Include="TUnit.Engine.targets">
+            <Pack>true</Pack>
+            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>

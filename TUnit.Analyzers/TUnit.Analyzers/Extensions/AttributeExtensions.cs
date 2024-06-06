@@ -17,4 +17,9 @@ public static class AttributeExtensions
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
             == fullyQualifiedName);
     }
+    
+    public static Location? GetLocation(this AttributeData attributeData)
+    {
+        return attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation();
+    } 
 }
