@@ -25,26 +25,26 @@ internal class DataSourceClassCombinedWithDataSourceMethodTests : TestsBase<Test
             Assert.That(generatedFiles[0], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.One();"));
             Assert.That(generatedFiles[0], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.One();"));
             
-            Assert.That(generatedFiles[1], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.One();"));
-            Assert.That(generatedFiles[1], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
+            Assert.That(generatedFiles[1], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
+            Assert.That(generatedFiles[1], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.One();"));
             
-            Assert.That(generatedFiles[2], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.One();"));
-            Assert.That(generatedFiles[2], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
+            Assert.That(generatedFiles[2], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
+            Assert.That(generatedFiles[2], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.One();"));
             
-            Assert.That(generatedFiles[3], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
-            Assert.That(generatedFiles[3], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.One();"));
+            Assert.That(generatedFiles[3], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.One();"));
+            Assert.That(generatedFiles[3], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
             
             Assert.That(generatedFiles[4], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
             Assert.That(generatedFiles[4], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
             
-            Assert.That(generatedFiles[5], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
-            Assert.That(generatedFiles[5], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
+            Assert.That(generatedFiles[5], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
+            Assert.That(generatedFiles[5], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
             
-            Assert.That(generatedFiles[6], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
-            Assert.That(generatedFiles[6], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.One();"));
+            Assert.That(generatedFiles[6], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.One();"));
+            Assert.That(generatedFiles[6], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
             
-            Assert.That(generatedFiles[7], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
-            Assert.That(generatedFiles[7], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
+            Assert.That(generatedFiles[7], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Two();"));
+            Assert.That(generatedFiles[7], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
             
             Assert.That(generatedFiles[8], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
             Assert.That(generatedFiles[8], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.Three();"));
