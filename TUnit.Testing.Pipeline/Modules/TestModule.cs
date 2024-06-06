@@ -26,8 +26,7 @@ public abstract class TestModule : Module<DotNetTestResult>
             Project = project,
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
-            //Logger = new[] { $"trx;LogFileName={trxFile}" },
-            Arguments = [ "--treenode-filter", filter ]
+            Arguments = [ "--treenode-filter", filter, "--report-trx", "--report-trx-filename", trxFile ]
         });
 
         var parsedResults = await context.Trx().ParseTrxFile(trxFile);
