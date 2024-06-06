@@ -16,17 +16,15 @@
 </ItemGroup>
 
 <ItemGroup>
-    <ItemGroup>
-        <Content Include="TUnit.Assertions.props">
-            <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-        </Content>
-        
-        <Content Include="TUnit.Assertions.targets">
-            <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-        </Content>
-    </ItemGroup>
+    <Content Include="TUnit.Assertions.props">
+        <Pack>true</Pack>
+        <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+    </Content>
+    
+    <Content Include="TUnit.Assertions.targets">
+        <Pack>true</Pack>
+        <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+    </Content>
 </ItemGroup>
 
 </Project>
