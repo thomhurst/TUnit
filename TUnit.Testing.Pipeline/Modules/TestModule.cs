@@ -1,27 +1,25 @@
-﻿using ModularPipelines.Attributes;
+﻿using System.Text.RegularExpressions;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
-using Polly;
 
 namespace TUnit.Testing.Pipeline.Modules;
 
-public abstract class TestModule : Module<DotNetTestResult>
+public abstract partial class TestModule : Module<TestResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
 
-    protected async Task<DotNetTestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<DotNetTestResult>> assertions, CancellationToken cancellationToken = default)
+    protected async Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<TestResult>> assertions, CancellationToken cancellationToken = default)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
 
         var trxFileName = $"{Guid.NewGuid():N}.trx";
         
-        await context.DotNet().Run(new DotNetRunOptions
+        var result = await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project,
             NoBuild = true,
@@ -29,20 +27,42 @@ public abstract class TestModule : Module<DotNetTestResult>
             Arguments = [ "--treenode-filter", filter, "--report-trx", "--report-trx-filename", trxFileName ]
         }, cancellationToken);
 
-        // TRX Results seem to be written asynchronously - So retry to avoid race condition failures
-        return await Policy.Handle<Exception>()
-            .WaitAndRetryAsync(5, i => TimeSpan.FromSeconds(i))
-            .ExecuteAsync(async () =>
-            {
-                var foundTrxFile = context.Git().RootDirectory
-                    .FindFile(x => x.Name.EndsWith(trxFileName))
-                    .AssertExists();
+        var parsedResult = ParseOutput(result.StandardOutput);
+        
+        assertions.ForEach(x => x.Invoke(parsedResult));
 
-                var parsedResults = await context.Trx().ParseTrxFile(foundTrxFile);
-
-                assertions.ForEach(x => x.Invoke(parsedResults));
-
-                return parsedResults;
-            });
+        return parsedResult;
     }
+
+    private TestResult ParseOutput(string resultStandardOutput)
+    {
+        var values = resultStandardOutput
+            .Trim()
+            .Split('\n')
+            .Last()
+            .Split('-')[1].Trim();
+
+        var parsed = TestCount().Matches(values);
+
+        return new TestResult
+        {
+            Failed = Convert.ToInt32(parsed[0].Groups[1].Value),
+            Passed = Convert.ToInt32(parsed[1].Groups[1].Value),
+            Skipped = Convert.ToInt32(parsed[2].Groups[1].Value),
+            Total = Convert.ToInt32(parsed[3].Groups[1].Value)
+        };
+    }
+
+    [GeneratedRegex(@": (\d+)")]
+    private partial Regex TestCount();
+}
+
+public record TestResult
+{
+    public required int Failed { get; init; }
+    public required int Passed { get; init; }
+    public required int Skipped { get; init; }
+    public required int Total { get; init; }
+
+    public bool Successful => Failed == 0;
 }
