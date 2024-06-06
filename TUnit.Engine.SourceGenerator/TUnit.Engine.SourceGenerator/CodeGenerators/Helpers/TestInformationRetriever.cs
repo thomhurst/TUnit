@@ -91,7 +91,7 @@ internal static class TestInformationRetriever
     {
         return methodAndClassAttributes
             .Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                        == "global::TUnit.Core.TestCategoryAttribute")
+                        == "global::TUnit.Core.CategoryAttribute")
             .Select(x => $"\"{x.ConstructorArguments.SafeFirstOrDefault().Value}\"");
     }
 

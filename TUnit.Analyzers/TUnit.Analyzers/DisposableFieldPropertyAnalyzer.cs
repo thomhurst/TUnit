@@ -14,7 +14,8 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.Dispose_Member_In_Cleanup);
-    public override void InitializeInternal(AnalysisContext context)
+
+    protected override void InitializeInternal(AnalysisContext context)
     {
         context.RegisterSyntaxNodeAction(AnalyzeProperty, SyntaxKind.PropertyDeclaration);
         context.RegisterSyntaxNodeAction(AnalyzeField, SyntaxKind.FieldDeclaration);

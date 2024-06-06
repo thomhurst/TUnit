@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Diagnostics;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace TUnit.Analyzers;
 
@@ -12,5 +13,5 @@ public abstract class ConcurrentDiagnosticAnalyzer : DiagnosticAnalyzer
         InitializeInternal(context);
     }
 
-    public abstract void InitializeInternal(AnalysisContext context);
+    protected abstract void InitializeInternal(AnalysisContext context);
 }

@@ -67,7 +67,7 @@
         <value>Data source doesn't match method argument type.</value>
     </data>
     <data name="TUnit0006MessageFormat" xml:space="preserve">
-        <value>The data source type {0} doesn't match the parameter type {1}</value>
+        <value>The data source type `{0}` doesn't match the parameter type `{1}`</value>
     </data>
     <data name="TUnit0006Title" xml:space="preserve">
         <value>Data source doesn't match method argument type</value>
@@ -224,5 +224,32 @@
     </data>
     <data name="TUnit0023Title" xml:space="preserve">
         <value>Member should be disposed within a clean up method</value>
+    </data>
+    <data name="TUnit0024Description" xml:space="preserve">
+        <value>Test methods should use `TUnit.Core.CategoryAttribute` instead of `System.ComponentModel.CategoryAttribute`</value>
+    </data>
+    <data name="TUnit0024MessageFormat" xml:space="preserve">
+        <value>Test methods should use `TUnit.Core.CategoryAttribute` instead of `System.ComponentModel.CategoryAttribute`</value>
+    </data>
+    <data name="TUnit0024Title" xml:space="preserve">
+        <value>Wrong `Category` attribute</value>
+    </data>
+    <data name="TUnit0025Description" xml:space="preserve">
+        <value>The number of arguments doesn't match the number of parameters</value>
+    </data>
+    <data name="TUnit0025MessageFormat" xml:space="preserve">
+        <value>The number of arguments `{0}` doesn't match the number of parameters `{1}`</value>
+    </data>
+    <data name="TUnit0025Title" xml:space="preserve">
+        <value>Invalid arguments count</value>
+    </data>
+    <data name="TUnit0026Description" xml:space="preserve">
+        <value>Not an IEnumerable</value>
+    </data>
+    <data name="TUnit0026MessageFormat" xml:space="preserve">
+        <value>`{0}` should be an IEnumerable</value>
+    </data>
+    <data name="TUnit0026Title" xml:space="preserve">
+        <value>Not an IEnumerable</value>
     </data>
 </root>

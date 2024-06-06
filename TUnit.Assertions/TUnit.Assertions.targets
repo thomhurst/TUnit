@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+    <ItemGroup Condition="'$(TUnitAssertionsImplicitUsings)' == 'true'">
+        <Using Include="TUnit.Assertions" />
+        <Using Include="TUnit.Assertions.Extensions" />
+    </ItemGroup>
+
+</Project>

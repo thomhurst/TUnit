@@ -7,7 +7,7 @@ namespace TUnit.TestProject;
 public class Tests
 {
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task ConsoleOutput()
     {
         Console.WriteLine("Blah!");
@@ -16,7 +16,7 @@ public class Tests
     }
     
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task Test1()
     {
         var value = "1";
@@ -24,7 +24,7 @@ public class Tests
     }
     
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task LessThan()
     {
         int value = 1;
@@ -32,7 +32,7 @@ public class Tests
     }
 
     [Test]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task Test2()
     {
         var value = "2";
@@ -40,7 +40,7 @@ public class Tests
     }
 
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task Test3()
     {
         await Task.Yield();
@@ -49,7 +49,7 @@ public class Tests
     }
 
     [Test]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task Test4()
     {
         await Task.Yield();
@@ -63,7 +63,7 @@ public class Tests
     [Arguments("3")]
     [Arguments("4")]
     [Arguments("5")]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task ParameterisedTests1(string value)
     {
         await Assert.That(value).Is.EqualTo("1").And.Has.Length().EqualTo(1);
@@ -75,7 +75,7 @@ public class Tests
     [Arguments("3")]
     [Arguments("4")]
     [Arguments("5")]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task ParameterisedTests2(string value)
     {
         await Task.Yield();
@@ -83,7 +83,7 @@ public class Tests
     }
 
     [Test, Skip("Reason1")]
-    [TestCategory("Skip")]
+    [Category("Skip")]
     public async Task Skip1()
     {
         var value = "1";
@@ -91,7 +91,7 @@ public class Tests
     }
 
     [Test, Skip("Reason2")]
-    [TestCategory("Skip")]
+    [Category("Skip")]
     public async Task Skip2()
     {
         await Task.Yield();
@@ -100,7 +100,7 @@ public class Tests
     }
     
     [Test, CustomSkip]
-    [TestCategory("Skip")]
+    [Category("Skip")]
     public async Task CustomSkip1()
     {
         await Task.Yield();
@@ -110,7 +110,7 @@ public class Tests
 
     [DataSourceDrivenTest]
     [MethodDataSource(nameof(One))]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task TestDataSource1(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
@@ -118,7 +118,7 @@ public class Tests
 
     [DataSourceDrivenTest]
     [MethodDataSource(nameof(One))]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task TestDataSource2(int value)
     {
         await Task.Yield();
@@ -127,7 +127,7 @@ public class Tests
 
     [DataSourceDrivenTest]
     [MethodDataSource(nameof(Two))]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task TestDataSource3(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
@@ -135,7 +135,7 @@ public class Tests
 
     [DataSourceDrivenTest]
     [MethodDataSource(nameof(Two))]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task TestDataSource4(int value)
     {
         await Task.Yield();
@@ -144,7 +144,7 @@ public class Tests
 
     [DataSourceDrivenTest]
     [MethodDataSource(typeof(TestDataSources), nameof(One))]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task TestDataSource5(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
@@ -152,7 +152,7 @@ public class Tests
 
     [DataSourceDrivenTest]
     [MethodDataSource(typeof(TestDataSources), nameof(One))]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task TestDataSource6(int value)
     {
         await Task.Yield();
@@ -161,7 +161,7 @@ public class Tests
     
     [DataSourceDrivenTest]
     [MethodDataSource(typeof(TestDataSources), "Two")]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task TestDataSource_Wrong(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
@@ -169,7 +169,7 @@ public class Tests
     
     [DataSourceDrivenTest]
     [MethodDataSource(typeof(TestDataSources), nameof(Two))]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task TestDataSource7(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
@@ -177,7 +177,7 @@ public class Tests
 
     [DataSourceDrivenTest]
     [MethodDataSource(typeof(TestDataSources), nameof(Two))]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task TestDataSource8(int value)
     {
         await Task.Yield();
@@ -185,28 +185,28 @@ public class Tests
     }
 
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task TestContext1()
     {
         await Assert.That(TestContext.Current?.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task TestContext2()
     {
         await Assert.That(TestContext.Current?.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task Throws1()
     {
         await Assert.That(() => new string([])).Throws.Exception().OfAnyType();
     }
 
     [Test]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task Throws2()
     {
         await Assert.That(async () =>
@@ -216,14 +216,14 @@ public class Tests
     }
 
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task Throws3()
     {
         await Assert.That(() => throw new ApplicationException()).Throws.Exception().OfAnyType();
     }
 
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task Throws4()
     {
         await Assert.That(async () =>
@@ -234,28 +234,28 @@ public class Tests
     }
 
     [Test, Timeout(500)]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task Timeout1(CancellationToken cancellationToken)
     {
         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task String_And_Condition()
     {
         await Assert.That("1").Is.EqualTo("1").And.Has.Length().EqualTo(1);
     }
 
     [Test]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task String_And_Condition2()
     {
         await Assert.That("1").Is.EqualTo("2").And.Has.Length().EqualTo(2);
     }
 
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task Count1()
     {
         var list = new List<int> { 1, 2, 3 };
@@ -263,7 +263,7 @@ public class Tests
     }
     
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task Single()
     {
         var list = new List<int> { 1 };
@@ -271,7 +271,7 @@ public class Tests
     }
     
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task DistinctItems()
     {
         var list = new List<int> { 1, 2, 3, 4, 5 };
@@ -279,7 +279,7 @@ public class Tests
     }
     
     [Test]
-    [TestCategory("Pass")]
+    [Category("Pass")]
     public async Task Enumerable_NotEmpty()
     {
         var list = new List<int> { 1, 2, 3 };
@@ -287,7 +287,7 @@ public class Tests
     }
 
     [Test]
-    [TestCategory("Fail")]
+    [Category("Fail")]
     public async Task Count2()
     {
         var list = new List<int> { 1, 2, 3 };
@@ -388,7 +388,7 @@ public class Tests
     // }
     
     // [MethodDataSource(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
-    // [TestCategory("Fail")]
+    // [Category("Fail")]
     // public async Task TestDataSourceFailingEnumerable(int value)
     // {
     //     await Assert.That(value).Is.EqualTo(1);

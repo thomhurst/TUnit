@@ -1,9 +1,11 @@
 ﻿using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
@@ -12,9 +14,9 @@ namespace TUnit.Analyzers;
 public class ConflictingTestAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.ConflictingTestAttributes);
+        ImmutableArray.Create(Rules.ConflictingTestAttributes, Rules.Wrong_Category_Attribute);
 
-    public override void InitializeInternal(AnalysisContext context)
+    protected override void InitializeInternal(AnalysisContext context)
     { 
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
     }
@@ -32,18 +34,29 @@ public class ConflictingTestAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var attributes = methodSymbol.GetAttributes();
+        var attributeDatas = methodSymbol.GetAttributes();
+        var testAttributesCount = attributeDatas.Count(x => WellKnown.AttributeFullyQualifiedClasses.TestAttributes.Contains(x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)));
 
-        if (attributes
-                .Where(x => WellKnown.AttributeFullyQualifiedClasses.TestAttributes.Contains(x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)))
-                .GroupBy(x =>
-                    x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                    )
-                .Count() > 1)
+        if (testAttributesCount == 0)
+        {
+            return;
+        }
+
+        if (testAttributesCount > 1)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.ConflictingTestAttributes,
                     methodDeclarationSyntax.GetLocation())
+            );
+        }
+
+        foreach (var invalidCategoryAttribute in attributeDatas.Where(x =>
+                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+                     $"global::{typeof(CategoryAttribute).FullName}"))
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(Rules.Wrong_Category_Attribute,
+                    invalidCategoryAttribute.GetLocation() ?? methodDeclarationSyntax.GetLocation())
             );
         }
     }

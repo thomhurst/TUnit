@@ -5,7 +5,7 @@ using TUnit.Core;
 namespace TUnit.TestProject;
 
 [MethodDataSource(nameof(DataSource))]
-[TestCategory("Timeout Cancellation Token Tests")]
+[Category("Timeout Cancellation Token Tests")]
 public class TimeoutCancellationTokenTests
 {
     public TimeoutCancellationTokenTests(int value)
@@ -14,7 +14,7 @@ public class TimeoutCancellationTokenTests
     
     [Test]
     [Timeout(30_000)]
-    [TestCategory("Blah")]
+    [Category("Blah")]
     public async Task BasicTest(CancellationToken cancellationToken)
     {
         await Assert.That(1).Is.EqualTo(1);
@@ -38,7 +38,7 @@ public class TimeoutCancellationTokenTests
     
     [CombinativeTest]
     [Timeout(30_000)]
-    [TestCategory("Blah")]
+    [Category("Blah")]
     public async Task CombinativeTest(
         [CombinativeValues(1, 2, 3)] int value, 
         CancellationToken cancellationToken)

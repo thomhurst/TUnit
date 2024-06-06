@@ -204,7 +204,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The data source type {0} doesn&apos;t match the parameter type {1}.
+        ///   Looks up a localized string similar to The data source type `{0}` doesn&apos;t match the parameter type `{1}`.
         /// </summary>
         internal static string TUnit0006MessageFormat {
             get {
@@ -677,6 +677,87 @@ namespace TUnit.Analyzers {
         internal static string TUnit0023Title {
             get {
                 return ResourceManager.GetString("TUnit0023Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test methods should use `TUnit.Core.CategoryAttribute` instead of `System.ComponentModel.CategoryAttribute`.
+        /// </summary>
+        internal static string TUnit0024Description {
+            get {
+                return ResourceManager.GetString("TUnit0024Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test methods should use `TUnit.Core.CategoryAttribute` instead of `System.ComponentModel.CategoryAttribute`.
+        /// </summary>
+        internal static string TUnit0024MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0024MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong `Category` attribute.
+        /// </summary>
+        internal static string TUnit0024Title {
+            get {
+                return ResourceManager.GetString("TUnit0024Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of arguments doesn&apos;t match the number of parameters.
+        /// </summary>
+        internal static string TUnit0025Description {
+            get {
+                return ResourceManager.GetString("TUnit0025Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of arguments `{0}` doesn&apos;t match the number of parameters `{1}`.
+        /// </summary>
+        internal static string TUnit0025MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0025MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid arguments count.
+        /// </summary>
+        internal static string TUnit0025Title {
+            get {
+                return ResourceManager.GetString("TUnit0025Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not an IEnumerable.
+        /// </summary>
+        internal static string TUnit0026Description {
+            get {
+                return ResourceManager.GetString("TUnit0026Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `{0}` should be an IEnumerable.
+        /// </summary>
+        internal static string TUnit0026MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0026MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not an IEnumerable.
+        /// </summary>
+        internal static string TUnit0026Title {
+            get {
+                return ResourceManager.GetString("TUnit0026Title", resourceCulture);
             }
         }
     }

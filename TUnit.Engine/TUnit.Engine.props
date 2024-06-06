@@ -9,6 +9,10 @@
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <TUnitImplicitUsings>true</TUnitImplicitUsings>
+    </PropertyGroup>
 
     <ItemGroup>
         <!--

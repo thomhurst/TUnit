@@ -16,7 +16,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability, Rules.MissingDataDrivenTestAttribute);
 
-    public override void InitializeInternal(AnalysisContext context)
+    protected override void InitializeInternal(AnalysisContext context)
     { 
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
     }
@@ -60,7 +60,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.MissingDataDrivenTestAttribute,
-                    argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? methodSymbol.Locations.FirstOrDefault())
+                    argumentsAttribute.GetLocation() ?? methodSymbol.Locations.FirstOrDefault())
             );
         }
         
@@ -68,7 +68,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.NoTestDataProvided,
-                    argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? methodSymbol.Locations.FirstOrDefault())
+                    argumentsAttribute.GetLocation() ?? methodSymbol.Locations.FirstOrDefault())
             );
             return;
         }
@@ -90,7 +90,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.WrongArgumentTypeTestData,
-                    argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                    argumentsAttribute.GetLocation(),
                     string.Join(", ", attributeTypesPassedIn.Select(x => x?.ToDisplayString()) ?? ImmutableArray<string>.Empty),
                     string.Join(", ", methodParameterTypes.Select(x => x?.ToDisplayString())))
             );
@@ -122,7 +122,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
-                        argumentsAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? methodSymbol.Locations.FirstOrDefault(),
+                        argumentsAttribute.GetLocation() ?? methodSymbol.Locations.FirstOrDefault(),
                         attributeArgumentType.ToDisplayString(),
                         methodParameterType.ToDisplayString())
                 );
