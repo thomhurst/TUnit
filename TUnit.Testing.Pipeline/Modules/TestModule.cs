@@ -18,15 +18,13 @@ public abstract partial class TestModule : Module<TestResult>
     protected async Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<TestResult>> assertions, CancellationToken cancellationToken = default)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
-
-        var trxFileName = $"{Guid.NewGuid():N}.trx";
         
         var result = await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project,
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
-            Arguments = [ "--treenode-filter", filter, "--report-trx", "--report-trx-filename", trxFileName ]
+            Arguments = [ "--treenode-filter", filter ]
         }, cancellationToken);
 
         var parsedResult = ParseOutput(result.StandardOutput);
