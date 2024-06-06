@@ -21,19 +21,22 @@ internal static class TestSourceDataModelRetriever
             testType = testAttribute.GetTestType();
         }
 
-        var classArguments = ClassArgumentsRetriever.GetClassArguments(namedTypeSymbol);
-        var testArgumentsContainer =
+        var classArgumentsContainers = ClassArgumentsRetriever.GetClassArguments(namedTypeSymbol).ToList();
+        var testArgumentsContainers =
             MethodArgumentsRetriever.GetMethodArguments(methodSymbol, namedTypeSymbol, testType);
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
 
         var runCount = repeatCount + 1;
 
-        foreach (var testArguments in testArgumentsContainer)
+        foreach (var testArguments in testArgumentsContainers)
         {
-            foreach (var testSourceDataModel in GenerateTestSourceDataModels(methodSymbol, namedTypeSymbol, classArguments, runCount, testAttribute, testArguments))
+            foreach (var classArguments in classArgumentsContainers)
             {
-                yield return testSourceDataModel;
+                foreach (var testSourceDataModel in GenerateTestSourceDataModels(methodSymbol, namedTypeSymbol, classArguments, runCount, testAttribute, testArguments))
+                {
+                    yield return testSourceDataModel;
+                }
             }
         }
     }

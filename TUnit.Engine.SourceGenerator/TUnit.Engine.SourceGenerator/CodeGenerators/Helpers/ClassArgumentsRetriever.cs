@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.Enums;
@@ -9,20 +10,22 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class ClassArgumentsRetriever
 {
-    public static ArgumentsContainer GetClassArguments(INamedTypeSymbol namedTypeSymbol)
+    public static IEnumerable<ArgumentsContainer> GetClassArguments(INamedTypeSymbol namedTypeSymbol)
     {
         var className =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         
         if (namedTypeSymbol.InstanceConstructors.SafeFirstOrDefault()?.Parameters.IsDefaultOrEmpty != false)
         {
-            return new ArgumentsContainer
+            yield return new ArgumentsContainer
             {
                 Arguments = [],
                 DataAttributeIndex = null,
                 IsEnumerableData = false,
                 DataAttribute = null
             };
+            
+            yield break;
         }
 
         var index = 0;
@@ -32,7 +35,7 @@ internal static class ClassArgumentsRetriever
         {
             var args = DataSourceDrivenArgumentsRetriever.ParseMethodData(namedTypeSymbol, namedTypeSymbol.Constructors.First(), dataSourceDrivenTestAttribute, VariableNames.ClassArg);
             
-            return new ArgumentsContainer
+            yield return new ArgumentsContainer
             {
                 DataAttribute = dataSourceDrivenTestAttribute,
                 DataAttributeIndex = ++index,
@@ -47,7 +50,7 @@ internal static class ClassArgumentsRetriever
         {
             var args = DataSourceDrivenArgumentsRetriever.ParseEnumerableMethodData(namedTypeSymbol, namedTypeSymbol.Constructors.First(), dataSourceDrivenTestAttribute, VariableNames.ClassArg);
             
-            return new ArgumentsContainer
+            yield return new ArgumentsContainer
             {
                 DataAttribute = dataSourceDrivenTestAttribute,
                 DataAttributeIndex = ++index,
@@ -68,7 +71,7 @@ internal static class ClassArgumentsRetriever
             
             if (sharedArgumentType is "TUnit.Core.SharedType.None" or "" or null)
             {
-                return new ArgumentsContainer
+                yield return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
@@ -79,7 +82,7 @@ internal static class ClassArgumentsRetriever
             
             if (sharedArgumentType is "TUnit.Core.SharedType.Globally")
             {
-                return new ArgumentsContainer
+                yield return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
@@ -90,7 +93,7 @@ internal static class ClassArgumentsRetriever
             
             if (sharedArgumentType is "TUnit.Core.SharedType.ForClass")
             {
-                return new ArgumentsContainer
+                yield return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
@@ -103,7 +106,7 @@ internal static class ClassArgumentsRetriever
             {
                 var key = sharedArgument.Value?.GetType().GetProperty("Key")?.GetValue(sharedArgument.Value);
                 
-                return new ArgumentsContainer
+                yield return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
@@ -112,13 +115,5 @@ internal static class ClassArgumentsRetriever
                 };
             }
         }
-        
-        return new ArgumentsContainer
-        {
-            Arguments = [],
-            DataAttributeIndex = null,
-            IsEnumerableData = false,
-            DataAttribute = null
-        };
     }
 }

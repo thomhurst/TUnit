@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class DataSourceDrivenTestAttribute : BaseTestAttribute
 {
     public DataSourceDrivenTestAttribute(

@@ -2,7 +2,6 @@
 
 namespace TUnit.TestProject;
 
-[DataSourceDrivenTest]
 [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.One))]
 [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Two))]
 [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Three))]
