@@ -28,7 +28,7 @@ internal static class TestExtensions
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
                     ),
                 ..testDetails.Categories.Select(x => new CategoryProperty(x)),
-                ..testDetails.CustomProperties.Select(x => new CustomProperty(x.Key, x.Value))
+                ..testDetails.CustomProperties.Select(x => new KeyValuePairStringProperty(x.Key, x.Value))
             ])
         };
         
