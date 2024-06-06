@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -9,6 +10,7 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Testing.Pipeline.Modules;
 
+[NotInParallel("Unit Tests")]
 public abstract partial class TestModule : Module<TestResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
