@@ -30,8 +30,7 @@ internal static class ClassArgumentsRetriever
 
         var index = 0;
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
-                     .Where(x => x.GetFullyQualifiedAttributeTypeName() 
-                                 == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix))
+                     .Where(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix) == true))
         {
             var args = DataSourceDrivenArgumentsRetriever.ParseMethodData(namedTypeSymbol, namedTypeSymbol.Constructors.First(), dataSourceDrivenTestAttribute, VariableNames.ClassArg);
             
@@ -45,8 +44,7 @@ internal static class ClassArgumentsRetriever
         }
         
         foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
-                     .Where(x => x.GetFullyQualifiedAttributeTypeName() 
-                                 == WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix))
+                     .Where(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix) == true))
         {
             var args = DataSourceDrivenArgumentsRetriever.ParseEnumerableMethodData(namedTypeSymbol, namedTypeSymbol.Constructors.First(), dataSourceDrivenTestAttribute, VariableNames.ClassArg);
             
@@ -60,8 +58,7 @@ internal static class ClassArgumentsRetriever
         }
 
         foreach (var classDataAttribute in namedTypeSymbol.GetAttributes()
-                     .Where(x => x.GetFullyQualifiedAttributeTypeName()
-                         == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix))
+                     .Where(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix) == true))
         {
             var genericType = classDataAttribute.AttributeClass!.TypeArguments.SafeFirstOrDefault();
             var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
