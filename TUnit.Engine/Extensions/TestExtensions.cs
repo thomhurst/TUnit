@@ -27,8 +27,14 @@ internal static class TestExtensions
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
                     ),
+                
+                // Custom TUnit Properties
                 ..testDetails.Categories.Select(x => new CategoryProperty(x)),
-                ..testDetails.CustomProperties.Select(x => new KeyValuePairStringProperty(x.Key, x.Value))
+                ..testDetails.CustomProperties.Select(x => new KeyValuePairStringProperty(x.Key, x.Value)),
+                
+                // TRX Report Properties
+                new KeyValuePairStringProperty("trxreport.classname", testDetails.ClassType.Name),
+                ..testDetails.Categories.Select(x => new KeyValuePairStringProperty("trxreport.testcategory", x)),
             ])
         };
         
