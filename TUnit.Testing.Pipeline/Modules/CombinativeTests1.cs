@@ -11,10 +11,10 @@ public class CombinativeTests1 : TestModule
             "/*/*/CombinativeTests/CombinativeTest_One",
             [
                 result => result.Successful.Should().BeTrue(),
-                result => result.Total.Should().Be(24),
-                result => result.Passed.Should().Be(24),
-                result => result.Failed.Should().Be(0),
-                result => result.Skipped.Should().Be(0)
+                result => result.Total.Should().Be(24, "Total"),
+                result => result.Passed.Should().Be(24, "Passed"),
+                result => result.Failed.Should().Be(0, "Failed"),
+                result => result.Skipped.Should().Be(0, "Skipped")
             ], cancellationToken);
     }
 }
