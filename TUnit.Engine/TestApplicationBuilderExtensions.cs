@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
+using Microsoft.Testing.Platform.Helpers;
 
 namespace TUnit.Engine;
 
@@ -14,5 +15,7 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.RegisterTestFramework(
             _ => new TestFrameworkCapabilities(),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
+            
+        testApplicationBuilder.AddTreeNodeFilterService(extension);
     }
 }
