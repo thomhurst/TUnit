@@ -17,7 +17,7 @@ public class SetUpCleanUpMethodsAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MethodMustNotBeStatic,
             Rules.MethodMustBePublic);
 
-    public override void InitializeInternal(AnalysisContext context)
+    protected override void InitializeInternal(AnalysisContext context)
     { 
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
     }

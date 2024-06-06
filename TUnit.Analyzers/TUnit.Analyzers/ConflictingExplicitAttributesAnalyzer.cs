@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
@@ -14,7 +15,7 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.ConflictingExplicitAttributes);
 
-    public override void InitializeInternal(AnalysisContext context)
+    protected override void InitializeInternal(AnalysisContext context)
     { 
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
     }
@@ -52,7 +53,7 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
         
         context.ReportDiagnostic(
                 Diagnostic.Create(Rules.ConflictingExplicitAttributes,
-                    methodExplicitAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+                    methodExplicitAttribute.GetLocation()
                     ?? methodDeclarationSyntax.GetLocation())
             );
     }

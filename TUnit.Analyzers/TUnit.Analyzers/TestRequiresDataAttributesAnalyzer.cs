@@ -20,7 +20,7 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.RequiredCombinations_Attributes_DataSourceDrivenTest_MethodData_EnumerableMethodData_ClassData
             );
 
-    public override void InitializeInternal(AnalysisContext context)
+    protected override void InitializeInternal(AnalysisContext context)
     { 
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
     }
@@ -81,7 +81,7 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
             && !combinativeParameters.Any())
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.RequiredPair_Attributes_CombinativeTest_CombinativeValues,
-                combinativeTestAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? location)
+                combinativeTestAttribute.GetLocation() ?? location)
             );
         }
     }
@@ -127,7 +127,7 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
             if (testAttribute is null)
             {
                 context.ReportDiagnostic(Diagnostic.Create(diagnosticDescriptor,
-                    dataAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? location)
+                    dataAttribute.GetLocation() ?? location)
                 );
             }
         }
@@ -136,7 +136,7 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
             && dataAttributes.All(x => x is null))
         {
             context.ReportDiagnostic(Diagnostic.Create(diagnosticDescriptor,
-                testAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? location)
+                testAttribute.GetLocation() ?? location)
             );
         }
     }

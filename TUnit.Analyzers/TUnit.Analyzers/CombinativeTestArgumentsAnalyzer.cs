@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
@@ -14,7 +15,7 @@ public class CombinativeTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability);
 
-    public override void InitializeInternal(AnalysisContext context)
+    protected override void InitializeInternal(AnalysisContext context)
     { 
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.Parameter);
     }
@@ -47,7 +48,7 @@ public class CombinativeTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.NoTestDataProvided,
-                    combinativeValuesAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    combinativeValuesAttribute.GetLocation())
             );
             return;
         }
@@ -59,7 +60,7 @@ public class CombinativeTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
-                        combinativeValuesAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                        combinativeValuesAttribute.GetLocation(),
                         typedConstant.Type?.ToDisplayString(),
                         parameterSymbol.ToDisplayString())
                 );

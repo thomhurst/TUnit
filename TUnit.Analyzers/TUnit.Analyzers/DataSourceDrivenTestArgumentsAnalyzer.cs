@@ -29,7 +29,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             Rules.TooManyArgumentsInTestMethod
         );
 
-    public override void InitializeInternal(AnalysisContext context)
+    protected override void InitializeInternal(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
@@ -104,7 +104,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.NoArgumentInTestMethod,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    dataSourceDrivenAttribute.GetLocation())
             );
             return;
         }
@@ -119,7 +119,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.TooManyArgumentsInTestMethod,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    dataSourceDrivenAttribute.GetLocation())
             );
             return;
         }
@@ -133,7 +133,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.NoDataSourceMethodFound,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    dataSourceDrivenAttribute.GetLocation())
             );
             return;
         }
@@ -143,7 +143,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.MethodMustReturnData,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    dataSourceDrivenAttribute.GetLocation())
             );
             return;
         }
@@ -153,7 +153,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.MethodMustBeStatic,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    dataSourceDrivenAttribute.GetLocation())
             );
             return;
         }
@@ -163,7 +163,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.MethodMustBePublic,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    dataSourceDrivenAttribute.GetLocation())
             );
             return;
         }
@@ -173,7 +173,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.MethodMustBeParameterless,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation())
+                    dataSourceDrivenAttribute.GetLocation())
             );
             return;
         }
@@ -196,7 +196,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                 context.ReportDiagnostic(
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestDataSource,
-                        dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                        dataSourceDrivenAttribute.GetLocation(),
                         argumentType,
                         FormatParametersToString(methodParameterTypes))
                 );
@@ -214,7 +214,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                     context.ReportDiagnostic(
                         Diagnostic.Create(
                             Rules.WrongArgumentTypeTestDataSource,
-                            dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                            dataSourceDrivenAttribute.GetLocation(),
                             argumentType,
                             FormatParametersToString(methodParameterTypes))
                     );
@@ -234,7 +234,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.WrongArgumentTypeTestDataSource,
-                    dataSourceDrivenAttribute.ApplicationSyntaxReference?.GetSyntax().GetLocation(),
+                    dataSourceDrivenAttribute.GetLocation(),
                     argumentType,
                     FormatParametersToString(methodParameterTypes))
             );
