@@ -1,4 +1,5 @@
-﻿using ModularPipelines.Context;
+﻿using ModularPipelines.Attributes;
+using ModularPipelines.Context;
 using ModularPipelines.DotNet;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -6,11 +7,11 @@ using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
-using File = ModularPipelines.FileSystem.File;
 
 namespace TUnit.Testing.Pipeline.Modules;
 
 
+[NotInParallel("Unit Test")]
 public abstract class TestModule : Module<DotNetTestResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;

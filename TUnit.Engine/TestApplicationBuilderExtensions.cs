@@ -1,9 +1,6 @@
-﻿using Microsoft.Testing.Extensions;
-using Microsoft.Testing.Extensions.TrxReport.Abstractions;
-using Microsoft.Testing.Platform.Builder;
+﻿using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Helpers;
-using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.Properties;
 
 namespace TUnit.Engine;
