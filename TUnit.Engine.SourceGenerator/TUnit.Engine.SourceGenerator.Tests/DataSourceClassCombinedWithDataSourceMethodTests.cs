@@ -20,7 +20,7 @@ internal class DataSourceClassCombinedWithDataSourceMethodTests : TestsBase<Test
         },
         generatedFiles =>
         {
-            // Assert.That(generatedFiles.Length, Is.EqualTo(9));
+            Assert.That(generatedFiles.Length, Is.EqualTo(9));
             
             Assert.That(generatedFiles[0], Does.Contain("var classArg0 = global::TUnit.TestProject.CommonTestData.One();"));
             Assert.That(generatedFiles[0], Does.Contain("var methodArg0 = global::TUnit.TestProject.CommonTestData.One();"));
