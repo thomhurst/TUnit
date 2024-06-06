@@ -1,3 +1,4 @@
+using TUnit.Assertions;
 using TUnit.Core;
 
 namespace TUnit.TestProject.AbstractTests;

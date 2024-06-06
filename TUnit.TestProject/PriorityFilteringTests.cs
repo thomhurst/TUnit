@@ -1,5 +1,5 @@
 ﻿using TUnit.Core;
-using TUnit.Core.Enums;
+using TUnit.TestProject.Enums;
 
 namespace TUnit.TestProject;
 
