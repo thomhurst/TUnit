@@ -19,17 +19,19 @@ public abstract class TestModule : Module<DotNetTestResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
 
-        var trxFile = File.GetNewTemporaryFilePath();
+        var trxFileName = $"{Guid.NewGuid():N}.trx";
         
         await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project,
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
-            Arguments = [ "--treenode-filter", filter, "--report-trx", "--report-trx-filename", trxFile ]
+            Arguments = [ "--treenode-filter", filter, "--report-trx", "--report-trx-filename", trxFileName ]
         });
 
-        var parsedResults = await context.Trx().ParseTrxFile(trxFile);
+        var foundTrxFile = context.Git().RootDirectory.FindFile(x => x.Name.EndsWith(trxFileName)).AssertExists();
+        
+        var parsedResults = await context.Trx().ParseTrxFile(foundTrxFile);
 
         assertions.ForEach(x => x.Invoke(parsedResults));
 

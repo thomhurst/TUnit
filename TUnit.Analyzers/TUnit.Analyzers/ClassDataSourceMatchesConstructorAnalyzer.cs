@@ -34,17 +34,16 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
             return;
         }
 
-        var constructor = namedTypeSymbol.InstanceConstructors.First();
-        var parameters = constructor.Parameters;
+        var constructor = namedTypeSymbol.InstanceConstructors.FirstOrDefault();
+        var parameters = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         
         foreach (var attributeData in namedTypeSymbol.GetAttributes())
         {
-            Check(context, namedTypeSymbol, attributeData, constructor, parameters);
+            Check(context, namedTypeSymbol, attributeData, parameters);
         }
     }
 
     private void Check(SyntaxNodeAnalysisContext context, INamedTypeSymbol namedTypeSymbol, AttributeData attributeData,
-        IMethodSymbol constructor,
         ImmutableArray<IParameterSymbol> parameters)
     {
         var attributeClass = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
@@ -109,7 +108,7 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
             {
                 var type = attributeData.AttributeClass?.TypeArguments.ElementAtOrDefault(0) ?? (INamedTypeSymbol)attributeData.ConstructorArguments.First().Value!;
 
-                if (parameters.Length != 1 || !SymbolEqualityComparer.Default.Equals(type, parameters.First().Type))
+                if (parameters.Length != 1 || !SymbolEqualityComparer.Default.Equals(type, parameters.FirstOrDefault()?.Type))
                 {
                     context.ReportDiagnostic(
                         Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
