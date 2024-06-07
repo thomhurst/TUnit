@@ -6,7 +6,7 @@ using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Requirements;
 
-namespace TUnit.Testing.Pipeline;
+namespace TUnit.Pipeline;
 
 public class BuiltTestProjectRequirement : IPipelineRequirement
 {

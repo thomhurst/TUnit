@@ -8,7 +8,7 @@ using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
-namespace TUnit.Testing.Pipeline.Modules;
+namespace TUnit.Pipeline.Modules.Tests;
 
 [NotInParallel("Unit Tests")]
 public abstract partial class TestModule : Module<TestResult>

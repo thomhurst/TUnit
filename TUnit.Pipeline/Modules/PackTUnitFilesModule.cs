@@ -4,18 +4,10 @@ using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Git.Extensions;
-using ModularPipelines.Git.Models;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
-public class GenerateVersionModule : Module<GitVersionInformation>
-{
-    protected override async Task<GitVersionInformation?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
-    {
-        return await context.Git().Versioning.GetGitVersioningInformation();
-    }
-}
 
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<RunTUnitEngineTestsModule>]

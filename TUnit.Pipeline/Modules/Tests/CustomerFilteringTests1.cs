@@ -1,18 +1,18 @@
 ﻿using FluentAssertions;
 using ModularPipelines.Context;
 
-namespace TUnit.Testing.Pipeline.Modules;
+namespace TUnit.Pipeline.Modules.Tests;
 
-public class PriorityFilteringTests4 : TestModule
+public class CustomerFilteringTests1 : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "/*/*/PriorityFilteringTests/*[Priority=other]",
+            "/*/*/CustomFilteringTests/*[one=yes]",
             [
                 result => result.Successful.Should().BeTrue(),
-                result => result.Total.Should().Be(0),
-                result => result.Passed.Should().Be(0),
+                result => result.Total.Should().Be(1),
+                result => result.Passed.Should().Be(1),
                 result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0)
             ], cancellationToken);

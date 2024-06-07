@@ -30,8 +30,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{D706CB1E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.Analyzers.Tests", "TUnit.Assertions.Analyzers.Tests\TUnit.Assertions.Analyzers.Tests.csproj", "{230A0FFC-0EE8-475C-BED7-A4508C510EA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Testing.Pipeline", "TUnit.Testing.Pipeline\TUnit.Testing.Pipeline.csproj", "{F1E62380-6840-46E5-A90E-56F090322FAF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Engine.SourceGenerator", "TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj", "{BECB04A9-C731-4AC0-B76B-36382BFE77AA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Engine.SourceGenerator.Tests", "TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.Tests\TUnit.Engine.SourceGenerator.Tests.csproj", "{2DE2A1F9-2A87-4FA8-8D62-0B60093DA604}"
@@ -86,10 +84,6 @@ Global
 		{230A0FFC-0EE8-475C-BED7-A4508C510EA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{230A0FFC-0EE8-475C-BED7-A4508C510EA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{230A0FFC-0EE8-475C-BED7-A4508C510EA7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F1E62380-6840-46E5-A90E-56F090322FAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1E62380-6840-46E5-A90E-56F090322FAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1E62380-6840-46E5-A90E-56F090322FAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1E62380-6840-46E5-A90E-56F090322FAF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BECB04A9-C731-4AC0-B76B-36382BFE77AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BECB04A9-C731-4AC0-B76B-36382BFE77AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BECB04A9-C731-4AC0-B76B-36382BFE77AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -107,6 +101,5 @@ Global
 		{527337F5-0F78-4141-901C-72EA81222AB1} = {D706CB1E-8E7E-4621-B036-4360D9D054C6}
 		{2F9038D3-96AD-4D86-B06B-9E59C2B941A8} = {0BA988BF-ADCE-4343-9098-B4EF65C43709}
 		{230A0FFC-0EE8-475C-BED7-A4508C510EA7} = {62AD1EAF-43C4-4AC0-B9FA-CD59739B3850}
-		{F1E62380-6840-46E5-A90E-56F090322FAF} = {D706CB1E-8E7E-4621-B036-4360D9D054C6}
 	EndGlobalSection
 EndGlobal

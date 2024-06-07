@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using ModularPipelines.Context;
 
-namespace TUnit.Testing.Pipeline.Modules;
+namespace TUnit.Pipeline.Modules.Tests;
 
 public class CombinativeTests1 : TestModule
 {
