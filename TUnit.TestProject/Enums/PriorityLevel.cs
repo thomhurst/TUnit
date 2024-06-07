@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.Enums;
+﻿namespace TUnit.TestProject.Enums;
 
 public enum PriorityLevel
 {

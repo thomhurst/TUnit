@@ -7,7 +7,6 @@ using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
-using TUnit.Engine.Models;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
@@ -148,7 +147,9 @@ internal class SingleTestExecutor : IDataProducer
 
             await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode()
                 .WithProperty(new FailedTestNodeStateProperty(e))
-                .WithProperty(new TimingProperty(new TimingInfo(start, end, end-start)))));
+                .WithProperty(new TimingProperty(new TimingInfo(start, end, end-start)))
+                .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionmessage", e.Message))
+                .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionstacktrace", e.StackTrace!))));
             
             var unitTestResult = new TUnitTestResult
             {

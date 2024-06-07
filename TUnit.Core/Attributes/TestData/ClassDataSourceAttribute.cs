@@ -1,6 +1,4 @@
-﻿using BindingFlags = System.Reflection.BindingFlags;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public class ClassDataSourceAttribute<T>() : ClassDataSourceAttribute(typeof(T)) where T : new(); 

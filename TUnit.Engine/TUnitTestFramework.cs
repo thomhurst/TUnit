@@ -122,7 +122,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     new TestFileLocationProperty(failedToInitializeTest.TestFilePath,
                         new LinePositionSpan(new LinePosition(failedToInitializeTest.TestLineNumber, 0),
                             new LinePosition(failedToInitializeTest.TestLineNumber, 0))
-                    )
+                    ),
+                    
+                    // TRX Reports
+                    new KeyValuePairStringProperty("trxreport.exceptionmessage", failedToInitializeTest.Exception.Message),
+                    new KeyValuePairStringProperty("trxreport.exceptionstacktrace", failedToInitializeTest.Exception.StackTrace!)
                 )
             };
                         

@@ -6,22 +6,20 @@ using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
-using ModularPipelines.Options;
 
-namespace TUnit.Pipeline.Modules;
+namespace TUnit.Pipeline.Modules.Tests;
 
-[NotInParallel("DotNetTests")]
-public class RunTUnitEngineTestsModule : Module<CommandResult>
+[DependsOn<BuildTestProjectModule>]
+public class ListTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        // TODO: Remove
-        return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("dotnet", "--version"), cancellationToken);
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Testing.Pipeline.csproj").AssertExists();
-
+        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
+        
         return await context.DotNet().Run(new DotNetRunOptions
         {
-            Project = project
+            WorkingDirectory = project.Folder!,
+            Arguments = [ "--list-tests" ]
         }, cancellationToken);
     }
 }

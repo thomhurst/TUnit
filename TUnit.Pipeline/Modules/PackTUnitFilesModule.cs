@@ -4,22 +4,15 @@ using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Git.Extensions;
-using ModularPipelines.Git.Models;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Modules.Tests;
 
 namespace TUnit.Pipeline.Modules;
-public class GenerateVersionModule : Module<GitVersionInformation>
-{
-    protected override async Task<GitVersionInformation?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
-    {
-        return await context.Git().Versioning.GetGitVersioningInformation();
-    }
-}
 
 [DependsOn<GetPackageProjectsModule>]
-[DependsOn<RunTUnitEngineTestsModule>]
 [DependsOn<GenerateVersionModule>]
+[DependsOnAllModulesInheritingFrom<TestModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
     protected override async Task<List<PackedProject>?> ExecuteAsync(IPipelineContext context,

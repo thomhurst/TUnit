@@ -43,13 +43,13 @@ internal static class TestInformationRetriever
     public static TestLocation GetTestLocation(AttributeData[] methodAndClassAttributes)
     {
         var testAttribute = methodAndClassAttributes
-            .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+            .First(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                      == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
 
         return new TestLocation
         {
-            FilePath = TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[0]),
-            LineNumber = int.Parse(TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[1]))
+            FilePath = TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[0])!,
+            LineNumber = int.Parse(TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[1])!)
         };
     }
 

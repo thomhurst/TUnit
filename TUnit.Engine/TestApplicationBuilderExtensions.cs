@@ -1,6 +1,7 @@
 ﻿using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Helpers;
+using TUnit.Engine.Properties;
 
 namespace TUnit.Engine;
 
@@ -13,7 +14,7 @@ public static class TestApplicationBuilderExtensions
         // testApplicationBuilder.CommandLine.AddProvider(() => new FilterCommandProvider(extension));
         
         testApplicationBuilder.RegisterTestFramework(
-            _ => new TestFrameworkCapabilities(),
+            serviceProvider => new TestFrameworkCapabilities(new TrxReportProperty()),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
             
         testApplicationBuilder.AddTreeNodeFilterService(extension);
