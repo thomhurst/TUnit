@@ -23,7 +23,7 @@ public abstract partial class TestModule : Module<TestResult>
         var result = await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project,
-            NoBuild = true,
+            // NoBuild = true,
             ThrowOnNonZeroExitCode = false,
             Arguments = [ "--treenode-filter", filter ]
         }, cancellationToken);
