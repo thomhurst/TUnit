@@ -25,7 +25,7 @@ public abstract partial class TestModule : Module<TestResult>
             Project = project,
             // NoBuild = true,
             ThrowOnNonZeroExitCode = false,
-            Arguments = [ "--treenode-filter", filter ]
+            Arguments = [ "--treenode-filter", filter, "--diagnostic" ]
         }, cancellationToken);
 
         var parsedResult = ParseOutput(result.StandardOutput);
