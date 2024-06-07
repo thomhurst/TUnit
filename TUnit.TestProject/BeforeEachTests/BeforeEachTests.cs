@@ -46,25 +46,30 @@ public class SetupTests : Base3
     [BeforeAllTestsInClass]
     public static async Task BeforeAllSetUp()
     {
+        await Task.CompletedTask;
     }
 
     [AfterAllTestsInClass]
     public static async Task AfterAllTearDown()
     {
+        await Task.CompletedTask;
     }
     
     [BeforeEachTest]
     public async Task Setup()
     {
+        await Task.CompletedTask;
     }
 
     [Test]
     public async Task Test1()
     {
+        await Task.CompletedTask;
     }
     
     [Test]
     public async Task Test2()
     {
+        await Task.CompletedTask;
     }
 }

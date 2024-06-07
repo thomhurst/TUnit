@@ -194,6 +194,5 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
         }
         
         return ((INamedTypeSymbol)methodReturnType).TupleUnderlyingType!.TypeArguments;
-        
     }
 }

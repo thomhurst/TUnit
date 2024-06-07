@@ -342,6 +342,7 @@ public class Tests
     [Test]
     public async Task Throws5()
     {
+        await Task.CompletedTask;
         Console.WriteLine(_retryCount);
         throw new Exception();
     }
