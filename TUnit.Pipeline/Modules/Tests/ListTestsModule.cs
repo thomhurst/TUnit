@@ -21,6 +21,5 @@ public class ListTestsModule : Module<CommandResult>
             WorkingDirectory = project.Folder!,
             Arguments = [ "--list-tests" ]
         }, cancellationToken);
-
     }
 }
