@@ -14,5 +14,4 @@ await PipelineHostBuilder.Create()
         collection.Configure<NuGetOptions>(context.Configuration.GetSection("NuGet"));
         collection.AddModulesFromAssembly(typeof(Program).Assembly);
     })
-    .AddRequirement<BuiltTestProjectRequirement>()
     .ExecutePipelineAsync();
