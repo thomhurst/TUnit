@@ -14,9 +14,6 @@ public class BuildTestProjectModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
 
-        return await context.DotNet().Run(new DotNetRunOptions
-        {
-            Project = project
-        }, cancellationToken);
+        return await context.DotNet().Build(new DotNetBuildOptions(project), cancellationToken);
     }
 }
