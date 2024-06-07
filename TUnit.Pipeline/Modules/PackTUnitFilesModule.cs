@@ -6,12 +6,13 @@ using ModularPipelines.DotNet.Options;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Modules.Tests;
 
 namespace TUnit.Pipeline.Modules;
 
 [DependsOn<GetPackageProjectsModule>]
-[DependsOn<RunTUnitEngineTestsModule>]
 [DependsOn<GenerateVersionModule>]
+[DependsOnAllModulesInheritingFrom<TestModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
     protected override async Task<List<PackedProject>?> ExecuteAsync(IPipelineContext context,
