@@ -18,7 +18,7 @@ public class ListTestsModule : Module<CommandResult>
         
         return await context.DotNet().Run(new DotNetRunOptions
         {
-            Project = project,
+            WorkingDirectory = project.Folder!,
             NoBuild = true,
             Arguments = [ "--list-tests" ]
         }, cancellationToken);
