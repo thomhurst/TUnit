@@ -7,11 +7,13 @@ public class Base1
     [BeforeAllTestsInClass]
     public static async Task BeforeAll1()
     {
+        await Task.CompletedTask;
     }
     
     [BeforeEachTest]
     public async Task BeforeEach1()
     {
+        await Task.CompletedTask;
     }
 }
 
@@ -20,11 +22,13 @@ public class Base2 : Base1
     [BeforeAllTestsInClass]
     public static async Task BeforeAll2()
     {
+        await Task.CompletedTask;
     }
     
     [BeforeEachTest]
     public async Task BeforeEach2()
     {
+        await Task.CompletedTask;
     }
 }
 
@@ -33,11 +37,13 @@ public class Base3 : Base2
     [BeforeAllTestsInClass]
     public static async Task BeforeAll3()
     {
+        await Task.CompletedTask;
     }
     
     [BeforeEachTest]
     public async Task BeforeEach3()
     {
+        await Task.CompletedTask;
     }
 }
 

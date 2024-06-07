@@ -192,7 +192,10 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
         {
             return ImmutableArray.Create(methodReturnType);
         }
+
+        var namedTypeSymbol = ((INamedTypeSymbol)methodReturnType);
         
-        return ((INamedTypeSymbol)methodReturnType).TupleUnderlyingType!.TypeArguments;
+        return namedTypeSymbol.TupleUnderlyingType?.TypeArguments
+               ?? namedTypeSymbol.TypeArguments;
     }
 }
