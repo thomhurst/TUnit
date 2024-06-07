@@ -11,7 +11,7 @@ using ModularPipelines.Modules;
 namespace TUnit.Pipeline.Modules.Tests;
 
 [NotInParallel("Unit Tests")]
-[DependsOn<BuildTestProjectModule>]
+[DependsOn<ListTestsModule>]
 public abstract partial class TestModule : Module<TestResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
