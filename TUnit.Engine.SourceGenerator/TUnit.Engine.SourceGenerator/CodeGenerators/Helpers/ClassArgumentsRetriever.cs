@@ -17,23 +17,32 @@ internal static class ClassArgumentsRetriever
         
         if (namedTypeSymbol.InstanceConstructors.SafeFirstOrDefault()?.Parameters.IsDefaultOrEmpty != false)
         {
-            yield return new ArgumentsContainer
-            {
-                Arguments = [],
-                DataAttributeIndex = null,
-                IsEnumerableData = false,
-                DataAttribute = null
-            };
-            
-            yield break;
+            return
+            [
+                new ArgumentsContainer
+                {
+                    Arguments = [],
+                    DataAttributeIndex = null,
+                    IsEnumerableData = false,
+                    DataAttribute = null
+                }
+            ];
         }
 
+        return ParseArguments(namedTypeSymbol, className);
+    }
+
+    private static IEnumerable<ArgumentsContainer> ParseArguments(INamedTypeSymbol namedTypeSymbol, string className)
+    {
         var index = 0;
-        foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
+        
+        var classAttributes = namedTypeSymbol.GetAttributes();
+        
+        foreach (var dataSourceDrivenTestAttribute in classAttributes
                      .Where(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix) == true))
         {
             var args = DataSourceDrivenArgumentsRetriever.ParseMethodData(namedTypeSymbol, namedTypeSymbol.Constructors.First(), dataSourceDrivenTestAttribute, VariableNames.ClassArg);
-            
+
             yield return new ArgumentsContainer
             {
                 DataAttribute = dataSourceDrivenTestAttribute,
@@ -43,11 +52,11 @@ internal static class ClassArgumentsRetriever
             };
         }
         
-        foreach (var dataSourceDrivenTestAttribute in namedTypeSymbol.GetAttributes()
+        foreach (var dataSourceDrivenTestAttribute in classAttributes
                      .Where(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix) == true))
         {
             var args = DataSourceDrivenArgumentsRetriever.ParseEnumerableMethodData(namedTypeSymbol, namedTypeSymbol.Constructors.First(), dataSourceDrivenTestAttribute, VariableNames.ClassArg);
-            
+
             yield return new ArgumentsContainer
             {
                 DataAttribute = dataSourceDrivenTestAttribute,
@@ -57,10 +66,10 @@ internal static class ClassArgumentsRetriever
             };
         }
 
-        foreach (var classDataAttribute in namedTypeSymbol.GetAttributes()
+        foreach (var classDataAttribute in classAttributes
                      .Where(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix) == true))
         {
-            var genericType = classDataAttribute.AttributeClass!.TypeArguments.SafeFirstOrDefault();
+            var genericType = classDataAttribute.AttributeClass?.TypeArguments.SafeFirstOrDefault() ?? (ITypeSymbol) classDataAttribute.ConstructorArguments.First().Value!;
             var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
             var sharedArgument = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Shared").Value;
 
@@ -102,7 +111,7 @@ internal static class ClassArgumentsRetriever
             if (sharedArgumentType is "TUnit.Core.SharedType.Keyed")
             {
                 var key = sharedArgument.Value?.GetType().GetProperty("Key")?.GetValue(sharedArgument.Value);
-                
+
                 yield return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
