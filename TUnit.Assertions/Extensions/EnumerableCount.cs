@@ -124,8 +124,8 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     
     public BaseAssertCondition<TActual, TAnd, TOr> Negative() => LessThan(0);
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Zero() => EqualTo(0);
-    public BaseAssertCondition<TActual, TAnd, TOr> One() => EqualTo(1);
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualToZero() => EqualTo(0);
+    public BaseAssertCondition<TActual, TAnd, TOr> EqualToOne() => EqualTo(1);
     
     public BaseAssertCondition<TActual, TAnd, TOr> Positive() => GreaterThan(0);
 
