@@ -30,8 +30,62 @@ public class PassFailTests
     [EnumerableMethodDataSource(nameof(EnumerableData1))]
     [EnumerableMethodDataSource(nameof(EnumerableData2))]
     [EnumerableMethodDataSource(nameof(EnumerableData3))]
+    [Category("Pass")]
     public void Pass3(int value)
     {
+    }
+    
+    [CombinativeTest]
+    [Category("Pass")]
+    public void Pass4(
+        [CombinativeValues(1, 2, 3, 4, 5)] int value,
+        [CombinativeValues(1, 2, 3, 4)] int value2,
+        [CombinativeValues(1, 2, 3)] int value3)
+    {
+    }
+    
+    [Test]
+    [Category("Fail")]
+    public void Fail1()
+    {
+        throw new Exception();
+    }
+    
+    [DataDrivenTest]
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    [Arguments(4)]
+    [Arguments(5)]
+    [Category("Fail")]
+    public void Fail2(int value)
+    {
+        throw new Exception();
+    }
+
+    [DataSourceDrivenTest]
+    [MethodDataSource(nameof(Data1))]
+    [MethodDataSource(nameof(Data2))]
+    [MethodDataSource(nameof(Data3))]
+    [MethodDataSource(nameof(Data4))]
+    [MethodDataSource(nameof(Data5))]
+    [EnumerableMethodDataSource(nameof(EnumerableData1))]
+    [EnumerableMethodDataSource(nameof(EnumerableData2))]
+    [EnumerableMethodDataSource(nameof(EnumerableData3))]
+    [Category("Fail")]
+    public void Fail3(int value)
+    {
+        throw new Exception();
+    }
+    
+    [CombinativeTest]
+    [Category("Fail")]
+    public void Fail4(
+        [CombinativeValues(1, 2, 3, 4, 5)] int value,
+        [CombinativeValues(1, 2, 3, 4)] int value2,
+        [CombinativeValues(1, 2, 3)] int value3)
+    {
+        throw new Exception();
     }
     
     public static int Data1() => 1;
