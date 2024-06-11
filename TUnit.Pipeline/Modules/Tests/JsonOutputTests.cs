@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using ModularPipelines.Context;
+using ModularPipelines.Enums;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
@@ -21,7 +22,8 @@ public class JsonOutputTests : TestModule
             ],
             new RunOptions
             {
-                AdditionalArguments = [ "--output-json", "--output-json-prefix", prefix, "--output-json-filename", filename ]
+                AdditionalArguments = [ "--output-json", "--output-json-prefix", prefix, "--output-json-filename", filename ],
+                CommandLogging = CommandLogging.Input | CommandLogging.Duration | CommandLogging.ExitCode
             },
             cancellationToken);
 

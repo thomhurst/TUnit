@@ -3,6 +3,7 @@ using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
@@ -43,6 +44,7 @@ public abstract partial class TestModule : Module<TestResult>
             Project = project,
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
+            CommandLogging = runOptions.CommandLogging,
             Arguments = [ "--treenode-filter", filter, "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", ..runOptions.AdditionalArguments ]
         }, cancellationToken);
 
@@ -96,4 +98,5 @@ public record TestResult
 public record RunOptions()
 {
     public List<string> AdditionalArguments { get; init; } = [];
+    public CommandLogging CommandLogging { get; set; } = CommandLogging.Default;
 }
