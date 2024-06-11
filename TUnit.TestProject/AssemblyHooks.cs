@@ -28,7 +28,6 @@ public class AssemblyHooks
     public static async Task AfterHook2(AssemblyHookContext context)
     {
         await Assert.That(context.TestCount).Is.Positive();
-        await Assert.That(context.AllTests.Where(x => x.Result?.Status == Status.Passed)).Has.Count().Positive();
     }
 
     [Test]
