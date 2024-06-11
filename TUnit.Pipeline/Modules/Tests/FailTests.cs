@@ -16,6 +16,6 @@ public class FailTests : TestModule
                 result => result.Passed.Should().Be(0),
                 result => result.Failed.Should().Be(86),
                 result => result.Skipped.Should().Be(0)
-            ], new RunOptions { CommandLogging = CommandLogging.Input | CommandLogging.Duration | CommandLogging.ExitCode | CommandLogging.Error }, cancellationToken);
+            ], new RunOptions { CommandLogging = CommandLogging.Input | CommandLogging.Duration | CommandLogging.ExitCode | CommandLogging.Output }, cancellationToken);
     }
 }
