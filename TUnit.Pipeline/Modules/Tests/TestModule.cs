@@ -7,6 +7,8 @@ using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using Polly;
+using Polly.Retry;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
@@ -15,6 +17,8 @@ namespace TUnit.Pipeline.Modules.Tests;
 public abstract partial class TestModule : Module<TestResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
+
+    protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
 
     protected async Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<TestResult>> assertions, CancellationToken cancellationToken = default)
     {
