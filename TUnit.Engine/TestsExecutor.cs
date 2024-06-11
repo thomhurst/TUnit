@@ -68,8 +68,6 @@ internal class TestsExecutor
         finally
         {
             await AssemblyHookOrchestrators.ExecuteCleanups();
-            await _logger.LogInformationAsync(
-                $"Tests finished after {(start - DateTimeOffset.Now).TotalSeconds} seconds");
         }
     }
 
