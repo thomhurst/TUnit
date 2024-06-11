@@ -1,6 +1,7 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine;
 
@@ -11,21 +12,18 @@ public class ExplicitFilterService
         if (!testInformation.LazyTestAndClassAttributes
                 .Value.Any(x => x is ExplicitAttribute))
         {
+            // These tests don't have any ExplicitAttributes
             return true;
         }
 
-        if (filter is null)
+        if (filter is null or NopFilter)
         {
             return false;
         }
 
-        if (filter is TestNodeUidListFilter testNodeUidListFilter
-            && testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(testInformation.TestId)))
-        {
-            return true;
-        }
-
-        return false;
+        // Filters have already done matching - And the filter is not null due to the above check
+        // So we've explicitly filtered these tests!
+        return true;
     }
     
     
