@@ -12,8 +12,8 @@ public class FailTests : TestModule
             [
                 result => result.Successful.Should().BeFalse(),
                 result => result.Total.Should().Be(86),
-                result => result.Passed.Should().Be(86),
-                result => result.Failed.Should().Be(0),
+                result => result.Passed.Should().Be(0),
+                result => result.Failed.Should().Be(86),
                 result => result.Skipped.Should().Be(0)
             ], cancellationToken);
     }
