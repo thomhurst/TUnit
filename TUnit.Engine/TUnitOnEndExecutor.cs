@@ -49,7 +49,7 @@ internal class TUnitOnEndExecutor : IOutputDeviceDataProducer
                 ? prefixes.First()
                 : "tunit_jsonoutput_";
         
-        var filename = _commandLineOptions.TryGetOptionArgumentList(JsonOutputCommandProvider.OutputJsonFilenamePrefix,
+        var filename = _commandLineOptions.TryGetOptionArgumentList(JsonOutputCommandProvider.OutputJsonFilename,
             out var filenames)
             ? filenames.First()
             : Guid.NewGuid().ToString("N");
