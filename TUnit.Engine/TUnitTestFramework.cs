@@ -18,7 +18,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly IExtension _extension;
     private readonly ITestFrameworkCapabilities _capabilities;
     private readonly ServiceProvider _myServiceProvider;
-    private readonly ILogger<TUnitTestFramework> _logger;
+    private readonly TUnitLogger _logger;
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider serviceProvider,
@@ -26,14 +26,13 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         _extension = extension;
         _capabilities = capabilities;
-
-        _logger = serviceProvider.GetLoggerFactory()
-            .CreateLogger<TUnitTestFramework>();
         
         _myServiceProvider = new ServiceCollection()
             .AddTestEngineServices()
             .AddFromFrameworkServiceProvider(serviceProvider, extension)
             .BuildServiceProvider();
+
+        _logger = ServiceProviderServiceExtensions.GetRequiredService<TUnitLogger>(_myServiceProvider);
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();

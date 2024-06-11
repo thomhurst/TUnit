@@ -36,6 +36,6 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestFilterService>()
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<TUnitOnEndExecutor>()
-            .AddSingleton<ConsoleWriter>();
+            .AddSingleton<TUnitLogger>();
     }
 }

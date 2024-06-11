@@ -10,12 +10,12 @@ namespace TUnit.Engine;
 internal class TUnitOnEndExecutor : IOutputDeviceDataProducer
 {
     private readonly ICommandLineOptions _commandLineOptions;
-    private readonly ConsoleWriter _consoleWriter;
+    private readonly TUnitLogger _logger;
 
-    public TUnitOnEndExecutor(ICommandLineOptions commandLineOptions, ConsoleWriter consoleWriter)
+    public TUnitOnEndExecutor(ICommandLineOptions commandLineOptions, TUnitLogger logger)
     {
         _commandLineOptions = commandLineOptions;
-        _consoleWriter = consoleWriter;
+        _logger = logger;
     }
 
     public async Task ExecuteAsync()
@@ -38,7 +38,7 @@ internal class TUnitOnEndExecutor : IOutputDeviceDataProducer
         
         await JsonSerializer.SerializeAsync(file, jsonOutputs, CachedJsonOptions.Instance);
 
-        await _consoleWriter.Write($"TUnit JSON output saved to: {path}");
+        await _logger.LogInformationAsync($"TUnit JSON output saved to: {path}");
     }
 
     private string GetFilename()
