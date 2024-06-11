@@ -3,7 +3,7 @@ using ModularPipelines.Context;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
-public class CustomerFilteringTests2 : TestModule
+public class CustomFilteringTests2 : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
