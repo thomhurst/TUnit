@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using ModularPipelines.Context;
 using ModularPipelines.Enums;
+using ModularPipelines.Extensions;
+using ModularPipelines.Git.Extensions;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
@@ -27,9 +29,14 @@ public class JsonOutputTests : TestModule
             },
             cancellationToken);
 
-        (await File.ReadAllLinesAsync(Path.Combine(Environment.CurrentDirectory, $"{prefix}{filename}.json"), cancellationToken))
-            .Should()
-            .NotBeEmpty();
+        var file = await context
+            .Git()
+            .RootDirectory
+            .FindFile(x => x.Name == $"{prefix}{filename}.json")
+            .AssertExists()
+            .ReadAsync(cancellationToken);
+        
+        file.Should().NotBeEmpty();
         
         return testResult;
     }
