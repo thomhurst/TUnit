@@ -19,6 +19,13 @@ public abstract partial class TestModule : Module<TestResult>
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
 
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
+    private readonly List<Exception> _exceptions = [];
+
+    protected override Task<bool> ShouldIgnoreFailures(IPipelineContext context, Exception exception)
+    {
+        _exceptions.Add(exception);
+        return base.ShouldIgnoreFailures(context, exception);
+    }
 
     protected async Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<TestResult>> assertions, CancellationToken cancellationToken = default)
     {
@@ -36,6 +43,13 @@ public abstract partial class TestModule : Module<TestResult>
         
         assertions.ForEach(x => x.Invoke(parsedResult));
 
+        if (_exceptions.Any())
+        {
+            // Temporary - If we've retried and succeeded on the next retry, throw anyway
+            // To get info on the --treenode-filter issue
+            throw new AggregateException(_exceptions);
+        }
+        
         return parsedResult;
     }
 
