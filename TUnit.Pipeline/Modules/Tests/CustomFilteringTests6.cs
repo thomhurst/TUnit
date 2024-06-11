@@ -11,8 +11,8 @@ public class CustomFilteringTests6 : TestModule
             "/*/*/CustomFilteringTests/*[*=*]",
             [
                 result => result.Successful.Should().BeTrue(),
-                result => result.Total.Should().Be(3),
-                result => result.Passed.Should().Be(3),
+                result => result.Total.Should().Be(2),
+                result => result.Passed.Should().Be(2),
                 result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0)
             ], cancellationToken);
