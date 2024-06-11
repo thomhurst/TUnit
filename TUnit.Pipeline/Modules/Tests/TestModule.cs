@@ -67,7 +67,8 @@ public abstract partial class TestModule : Module<TestResult>
         var values = resultStandardOutput
             .Trim()
             .Split('\n')
-            .Last()
+            .Select(x => x.Trim())
+            .First(x => x.EndsWith("- TUnit.TestProject.dll"))
             .Split('-')[1].Trim();
 
         var parsed = TestCount().Matches(values);
