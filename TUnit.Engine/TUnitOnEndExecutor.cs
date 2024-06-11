@@ -1,19 +1,21 @@
 ﻿using System.Text.Json;
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.OutputDevice;
 using TUnit.Engine.Json;
 
 namespace TUnit.Engine;
 
-internal class TUnitOnEndExecutor
+internal class TUnitOnEndExecutor : IOutputDeviceDataProducer
 {
     private readonly ICommandLineOptions _commandLineOptions;
-    private readonly ILogger<TUnitOnEndExecutor> _logger;
+    private readonly ConsoleWriter _consoleWriter;
 
-    public TUnitOnEndExecutor(ICommandLineOptions commandLineOptions, ILoggerFactory loggerFactory)
+    public TUnitOnEndExecutor(ICommandLineOptions commandLineOptions, ConsoleWriter consoleWriter)
     {
         _commandLineOptions = commandLineOptions;
-        _logger = loggerFactory.CreateLogger<TUnitOnEndExecutor>();
+        _consoleWriter = consoleWriter;
     }
 
     public async Task ExecuteAsync()
@@ -36,7 +38,7 @@ internal class TUnitOnEndExecutor
         
         await JsonSerializer.SerializeAsync(file, jsonOutputs, CachedJsonOptions.Instance);
 
-        await _logger.LogInformationAsync($"TUnit JSON output saved to: {path}");
+        await _consoleWriter.Write($"TUnit JSON output saved to: {path}");
     }
 
     private string GetFilename()
@@ -83,4 +85,14 @@ internal class TUnitOnEndExecutor
                 ObjectBag = x.ObjectBag,
             });
     }
+
+    public Task<bool> IsEnabledAsync()
+    {
+        return Task.FromResult(true);
+    }
+
+    public string Uid { get; }
+    public string Version { get; }
+    public string DisplayName { get; }
+    public string Description { get; }
 }

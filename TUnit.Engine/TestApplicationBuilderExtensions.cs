@@ -15,6 +15,7 @@ public static class TestApplicationBuilderExtensions
             serviceProvider => new TestFrameworkCapabilities(new TrxReportCapability()),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
 
+        
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
     }
