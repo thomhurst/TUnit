@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Logging;
 using TUnit.Engine.Json;
 
 namespace TUnit.Engine;
@@ -7,10 +8,12 @@ namespace TUnit.Engine;
 internal class TUnitOnEndExecutor
 {
     private readonly ICommandLineOptions _commandLineOptions;
+    private readonly ILogger<TUnitOnEndExecutor> _logger;
 
-    public TUnitOnEndExecutor(ICommandLineOptions commandLineOptions)
+    public TUnitOnEndExecutor(ICommandLineOptions commandLineOptions, ILoggerFactory loggerFactory)
     {
         _commandLineOptions = commandLineOptions;
+        _logger = loggerFactory.CreateLogger<TUnitOnEndExecutor>();
     }
 
     public async Task ExecuteAsync()
@@ -24,12 +27,16 @@ internal class TUnitOnEndExecutor
         {
             return;
         }
-
-        await using var file = File.Create(Path.Combine(Environment.CurrentDirectory, GetFilename()));
+        
+        var path = Path.Combine(Environment.CurrentDirectory, GetFilename());
+        
+        await using var file = File.Create(path);
 
         var jsonOutputs = GetJsonOutputs();
         
         await JsonSerializer.SerializeAsync(file, jsonOutputs, CachedJsonOptions.Instance);
+
+        await _logger.LogInformationAsync($"TUnit JSON output saved to: {path}");
     }
 
     private string GetFilename()
