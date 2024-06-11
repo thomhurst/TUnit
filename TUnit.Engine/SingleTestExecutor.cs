@@ -15,28 +15,28 @@ internal class SingleTestExecutor : IDataProducer
 {
     private readonly IExtension _extension;
     private readonly Disposer _disposer;
-    private readonly ILogger<SingleTestExecutor> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly IMessageBus _messageBus;
     private readonly TestInvoker _testInvoker;
     private readonly ExplicitFilterService _explicitFilterService;
-    
+    private readonly TUnitLogger _logger;
+
     public SingleTestExecutor(
         IExtension extension,
         Disposer disposer,
-        ILoggerFactory loggerFactory,
         CancellationTokenSource cancellationTokenSource,
         IMessageBus messageBus,
         TestInvoker testInvoker,
-        ExplicitFilterService explicitFilterService)
+        ExplicitFilterService explicitFilterService,
+        TUnitLogger logger)
     {
         _extension = extension;
         _disposer = disposer;
-        _logger = loggerFactory.CreateLogger<SingleTestExecutor>();
         _cancellationTokenSource = cancellationTokenSource;
         _messageBus = messageBus;
         _testInvoker = testInvoker;
         _explicitFilterService = explicitFilterService;
+        _logger = logger;
     }
 
     public async Task<TUnitTestResult> ExecuteTestAsync(TestInformation test, ITestExecutionFilter? filter,
@@ -105,7 +105,7 @@ internal class SingleTestExecutor : IDataProducer
                     .WithProperty(new TimingProperty(new TimingInfo(start, end, end - start)))
             ));
 
-            return new TUnitTestResult
+            return testContext.Result = new TUnitTestResult
             {
                 TestContext = testContext,
                 Duration = end - start,

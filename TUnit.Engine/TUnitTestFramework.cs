@@ -9,6 +9,7 @@ using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
+using ServiceProviderServiceExtensions = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions;
 
 namespace TUnit.Engine;
 
@@ -17,7 +18,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly IExtension _extension;
     private readonly ITestFrameworkCapabilities _capabilities;
     private readonly ServiceProvider _myServiceProvider;
-    private readonly ILogger<TUnitTestFramework> _logger;
+    private readonly TUnitLogger _logger;
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider serviceProvider,
@@ -25,14 +26,13 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         _extension = extension;
         _capabilities = capabilities;
-
-        _logger = serviceProvider.GetLoggerFactory()
-            .CreateLogger<TUnitTestFramework>();
         
         _myServiceProvider = new ServiceCollection()
             .AddTestEngineServices()
             .AddFromFrameworkServiceProvider(serviceProvider, extension)
             .BuildServiceProvider();
+
+        _logger = ServiceProviderServiceExtensions.GetRequiredService<TUnitLogger>(_myServiceProvider);
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -102,6 +102,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 var time = stopwatch.Elapsed;
 
                 await _logger.LogInformationAsync($"Time elapsed: {time}");
+
+                await ServiceProviderServiceExtensions
+                    .GetRequiredService<TUnitOnEndExecutor>(_myServiceProvider)
+                    .ExecuteAsync();
                 
                 context.Complete();
             }

@@ -4,13 +4,13 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine;
 
-public class FilterCommandProvider : ICommandLineOptionsProvider
+public class DisplayTestOutputCommandProvider : ICommandLineOptionsProvider
 {
-    public const string Filter = "filter";
+    public const string DisplayTestOutput = "display-test-output";
     
     private readonly IExtension _extension;
 
-    public FilterCommandProvider(IExtension extension)
+    public DisplayTestOutputCommandProvider(IExtension extension)
     {
         _extension = extension;
     }
@@ -32,18 +32,12 @@ public class FilterCommandProvider : ICommandLineOptionsProvider
     {
         return new[]
         {
-            new CommandLineOption(Filter, "Basic filter", ArgumentArity.ZeroOrOne, false)
+            new CommandLineOption(DisplayTestOutput, "Display Test Output", ArgumentArity.Zero, false),
         };
     }
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
     {
-        if (commandOption.Name == Filter && arguments.Length != 1)
-        {
-            return ValidationResult.InvalidTask($"Invalid arguments count of {arguments.Length}");
-        }
-
-        // No problem found
         return ValidationResult.ValidTask;
     }
 

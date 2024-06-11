@@ -16,7 +16,7 @@ internal class TestsExecutor
     private readonly TestGrouper _testGrouper;
     private readonly SystemResourceMonitor _systemResourceMonitor;
     private readonly ConsoleInterceptor _consoleInterceptor;
-    private readonly ILogger<TestsExecutor> _logger;
+    private readonly TUnitLogger _logger;
     
     private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
     private readonly object _notInParallelDictionaryLock = new();
@@ -26,14 +26,14 @@ internal class TestsExecutor
         TestGrouper testGrouper,
         SystemResourceMonitor systemResourceMonitor,
         ConsoleInterceptor consoleInterceptor,
-        ILoggerFactory loggerFactory)
+        TUnitLogger logger)
     {
         _singleTestExecutor = singleTestExecutor;
         _cancellationTokenSource = cancellationTokenSource;
         _testGrouper = testGrouper;
         _systemResourceMonitor = systemResourceMonitor;
         _consoleInterceptor = consoleInterceptor;
-        _logger = loggerFactory.CreateLogger<TestsExecutor>();
+        _logger = logger;
     }
 
     public async Task ExecuteAsync(IEnumerable<TestInformation> testNodes, ITestExecutionFilter? filter,  TestSessionContext session)
@@ -68,8 +68,6 @@ internal class TestsExecutor
         finally
         {
             await AssemblyHookOrchestrators.ExecuteCleanups();
-            await _logger.LogInformationAsync(
-                $"Tests finished after {(start - DateTimeOffset.Now).TotalSeconds} seconds");
         }
     }
 

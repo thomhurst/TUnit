@@ -34,6 +34,8 @@ public static class ServiceCollectionExtensions
             .AddSingleton<SystemResourceMonitor>()
             .AddSingleton<TUnitTestDiscoverer>()
             .AddSingleton<TestFilterService>()
-            .AddSingleton<ExplicitFilterService>();
+            .AddSingleton<ExplicitFilterService>()
+            .AddSingleton<TUnitOnEndExecutor>()
+            .AddSingleton<TUnitLogger>();
     }
 }

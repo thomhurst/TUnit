@@ -3,6 +3,7 @@ using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
@@ -27,7 +28,14 @@ public abstract partial class TestModule : Module<TestResult>
         return base.ShouldIgnoreFailures(context, exception);
     }
 
-    protected async Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<TestResult>> assertions, CancellationToken cancellationToken = default)
+    protected Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter,
+        List<Action<TestResult>> assertions,
+        CancellationToken cancellationToken = default)
+    {
+        return RunTestsWithFilter(context, filter, assertions, new RunOptions(), cancellationToken);
+    }
+
+    protected async Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions, CancellationToken cancellationToken = default)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
         
@@ -36,7 +44,8 @@ public abstract partial class TestModule : Module<TestResult>
             Project = project,
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
-            Arguments = [ "--treenode-filter", filter, "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}" ]
+            CommandLogging = runOptions.CommandLogging,
+            Arguments = [ "--treenode-filter", filter, "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", ..runOptions.AdditionalArguments ]
         }, cancellationToken);
 
         var parsedResult = ParseOutput(result.StandardOutput);
@@ -84,4 +93,10 @@ public record TestResult
     public required int Total { get; init; }
 
     public bool Successful => Failed == 0;
+}
+
+public record RunOptions()
+{
+    public List<string> AdditionalArguments { get; init; } = [];
+    public CommandLogging CommandLogging { get; set; } = CommandLogging.Default;
 }
