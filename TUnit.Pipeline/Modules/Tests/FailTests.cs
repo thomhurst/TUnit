@@ -10,7 +10,7 @@ public class FailTests : TestModule
         return await RunTestsWithFilter(context, 
             "/*/*/PassFailTests/*[Category=Fail]",
             [
-                result => result.Successful.Should().BeTrue(),
+                result => result.Successful.Should().BeFalse(),
                 result => result.Total.Should().Be(86),
                 result => result.Passed.Should().Be(86),
                 result => result.Failed.Should().Be(0),
