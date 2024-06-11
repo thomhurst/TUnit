@@ -14,7 +14,7 @@ public class JsonOutputTests : TestModule
         var testResult = await RunTestsWithFilter(context, 
             "/*/*/PassFailTests/*",
             [
-                result => result.Successful.Should().BeTrue(),
+                result => result.Successful.Should().BeFalse(),
                 result => result.Total.Should().Be(172),
                 result => result.Passed.Should().Be(86),
                 result => result.Failed.Should().Be(86),
