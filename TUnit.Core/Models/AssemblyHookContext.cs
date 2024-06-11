@@ -2,7 +2,11 @@ namespace TUnit.Core.Models;
 
 public class AssemblyHookContext
 {
-    public List<ClassHookContext> TestClasses { get; } = [];
+    internal AssemblyHookContext()
+    {
+    }
+    
+    public HashSet<ClassHookContext> TestClasses { get; } = [];
     
     public IEnumerable<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests);
 
