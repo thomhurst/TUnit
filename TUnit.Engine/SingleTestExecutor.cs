@@ -105,7 +105,7 @@ internal class SingleTestExecutor : IDataProducer
                     .WithProperty(new TimingProperty(new TimingInfo(start, end, end - start)))
             ));
 
-            return new TUnitTestResult
+            return testContext.Result = new TUnitTestResult
             {
                 TestContext = testContext,
                 Duration = end - start,

@@ -28,9 +28,9 @@ internal class MethodInfoJsonConverter : JsonConverter<MethodInfo>
 
     internal record SerializeableMethodInfo
     {
-        public Type? Type { get; set; }
-        public string MethodName { get; set; }
-        public int GenericCount { get; set; }
-        public Type[] MethodParameterTypes { get; set; }
+        public Type? Type { get; init; }
+        public required string MethodName { get; init; }
+        public required int GenericCount { get; init; }
+        public required Type[] MethodParameterTypes { get; init; }
     }
 }

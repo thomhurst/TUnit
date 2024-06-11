@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using System.Text.Json.Serialization;
+
+namespace TUnit.Core;
 
 public record TUnitTestResult
 {
@@ -9,5 +11,7 @@ public record TUnitTestResult
     public required Exception? Exception { get; init; }
     public required string ComputerName { get; init; }
     public string? Output { get; internal set; }
+    
+    [JsonIgnore]
     internal TestContext? TestContext { get; init; }
 }

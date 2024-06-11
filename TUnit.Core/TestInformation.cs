@@ -1,9 +1,11 @@
 ﻿using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace TUnit.Core;
 
 public record TestInformation<TClassType> : TestInformation
 {
+    [JsonIgnore]
     public required ResettableLazy<TClassType?> LazyClassInstance { get; init; }
 
     public override object? ClassInstance => LazyClassInstance.Value;
@@ -43,14 +45,16 @@ public abstract record TestInformation
     public int CurrentExecutionCount { get; internal set; }
     
     public required int MethodRepeatCount { get; init; }
-    public  required int ClassRepeatCount { get; init; }
+    public required int ClassRepeatCount { get; init; }
 
     public required TimeSpan? Timeout { get; init; }
     public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
     public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
 
+    [JsonIgnore]
     internal Lazy<IEnumerable<Attribute>> LazyTestAndClassAttributes { get; }
     
+    [JsonIgnore]
     internal Lazy<RetryAttribute?> LazyRetryAttribute { get; }
     
     public required Type ReturnType { get; init; }
