@@ -12,7 +12,7 @@ namespace TUnit.Analyzers;
 public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic);
+        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic, Rules.UnknownParameters);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -59,13 +59,6 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 methodDeclarationSyntax.GetLocation())
             );
         }
-
-        if (!methodSymbol.Parameters.IsDefaultOrEmpty)
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeParameterless,
-                methodDeclarationSyntax.GetLocation())
-            );
-        }
         
         if(methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
@@ -73,5 +66,19 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 methodDeclarationSyntax.GetLocation())
             );
         }
+        
+        if (!methodSymbol.Parameters.IsDefaultOrEmpty && !IsAssemblyHookContextParameter(methodSymbol))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.UnknownParameters,
+                methodDeclarationSyntax.GetLocation(),
+                "empty or only contain `AssemblyHookContext`")
+            );
+        }
+    }
+
+    private static bool IsAssemblyHookContextParameter(IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.Parameters.Length == 1
+               && methodSymbol.Parameters[0].Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext;
     }
 }

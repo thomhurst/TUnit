@@ -83,6 +83,9 @@ internal static class Rules
 
     public static readonly DiagnosticDescriptor NotIEnumerable =
         CreateDescriptor("TUnit0026", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor UnknownParameters =
+        CreateDescriptor("TUnit0027", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

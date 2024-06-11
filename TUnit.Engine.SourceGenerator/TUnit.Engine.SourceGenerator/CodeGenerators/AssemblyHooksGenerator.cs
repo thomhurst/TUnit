@@ -52,7 +52,8 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         {
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            MinimalTypeName = methodSymbol.ContainingType.Name
+            MinimalTypeName = methodSymbol.ContainingType.Name,
+            HasParameters = !methodSymbol.Parameters.IsDefaultOrEmpty
         };
     }
 
@@ -83,17 +84,27 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterSetUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}()));");
+                $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterSetUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterCleanUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}()));");
+                $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterCleanUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
 
         sourceBuilder.WriteLine("}");
         sourceBuilder.WriteLine("}");
 
         context.AddSource($"{className}.g.cs", sourceBuilder.ToString());
+    }
+    
+    private string GenerateContextObject(AssemblyHooksDataModel model)
+    {
+        if (!model.HasParameters)
+        {
+            return string.Empty;
+        }
+
+        return "TUnit.Engine.ClassHookOrchestrator.GetAssemblyHookContext()";
     }
 }

@@ -50,7 +50,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             (enumerable, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {0}")
         );
-
+    
     public BaseAssertCondition<TActual, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(
@@ -121,6 +121,14 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than or equal to {expected}")
         );
     }
+    
+    public BaseAssertCondition<TActual, TAnd, TOr> Negative() => LessThan(0);
+
+    public BaseAssertCondition<TActual, TAnd, TOr> Zero() => EqualTo(0);
+    public BaseAssertCondition<TActual, TAnd, TOr> One() => EqualTo(1);
+    
+    public BaseAssertCondition<TActual, TAnd, TOr> Positive() => GreaterThan(0);
+
 
     private int GetCount(TActual? actualValue)
     {
