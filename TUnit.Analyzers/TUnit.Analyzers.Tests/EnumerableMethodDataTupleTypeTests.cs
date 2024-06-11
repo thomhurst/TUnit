@@ -37,4 +37,31 @@ public class EnumerableMethodDataTupleTypeTests
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
+    
+    [Test]
+    public async Task Valid_Enumerable_Tuple_Raises_No_Error()
+    {
+        const string text = """
+                            using System.Collections.Generic;
+                            using TUnit.Core;
+
+                            public class EnumerableTupleDataSourceDrivenTests
+                            {
+                                [DataSourceDrivenTest]
+                                [{|#0:EnumerableMethodDataSource(nameof(TupleMethod), UnfoldTuple = true)|}]
+                                public void DataSource_TupleMethod(int value, string value2, bool value3)
+                                {
+                                }
+                                
+                                public static IEnumerable<(int, string, bool)> TupleMethod()
+                                {
+                                    yield return (1, "String", true);
+                                    yield return (2, "String2", false);
+                                    yield return (3, "String3", true);
+                                }
+                            }
+                            """;
+
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+    }
 }
