@@ -29,7 +29,7 @@ public abstract partial class TestModule : Module<TestResult>
             Project = project,
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
-            Arguments = [ "--treenode-filter", filter, "--diagnostic" ]
+            Arguments = [ "--treenode-filter", filter, "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}" ]
         }, cancellationToken);
 
         var parsedResult = ParseOutput(result.StandardOutput);
