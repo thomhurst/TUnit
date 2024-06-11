@@ -11,10 +11,10 @@ public static class TestApplicationBuilderExtensions
     {
         TUnitExtension extension = new();
         
-        // testApplicationBuilder.CommandLine.AddProvider(() => new FilterCommandProvider(extension));
+       // testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
         
         testApplicationBuilder.RegisterTestFramework(
-            serviceProvider => new TestFrameworkCapabilities(new TrxReportProperty()),
+            serviceProvider => new TestFrameworkCapabilities(new TrxReportCapability()),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
             
         testApplicationBuilder.AddTreeNodeFilterService(extension);
