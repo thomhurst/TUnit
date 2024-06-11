@@ -4,13 +4,13 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine;
 
-public class FilterCommandProvider : ICommandLineOptionsProvider
+public class JsonOutputCommandProvider : ICommandLineOptionsProvider
 {
-    public const string Filter = "filter";
+    public const string OutputJson = "output-json";
     
     private readonly IExtension _extension;
 
-    public FilterCommandProvider(IExtension extension)
+    public JsonOutputCommandProvider(IExtension extension)
     {
         _extension = extension;
     }
@@ -32,18 +32,12 @@ public class FilterCommandProvider : ICommandLineOptionsProvider
     {
         return new[]
         {
-            new CommandLineOption(Filter, "Basic filter", ArgumentArity.ZeroOrOne, false)
+            new CommandLineOption(OutputJson, "Output JSON", ArgumentArity.Zero, false)
         };
     }
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
     {
-        if (commandOption.Name == Filter && arguments.Length != 1)
-        {
-            return ValidationResult.InvalidTask($"Invalid arguments count of {arguments.Length}");
-        }
-
-        // No problem found
         return ValidationResult.ValidTask;
     }
 

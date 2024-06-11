@@ -9,6 +9,7 @@ using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
+using ServiceProviderServiceExtensions = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions;
 
 namespace TUnit.Engine;
 
@@ -102,6 +103,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 var time = stopwatch.Elapsed;
 
                 await _logger.LogInformationAsync($"Time elapsed: {time}");
+
+                await ServiceProviderServiceExtensions
+                    .GetRequiredService<TUnitOnEndExecutor>(_myServiceProvider)
+                    .ExecuteAsync();
                 
                 context.Complete();
             }
