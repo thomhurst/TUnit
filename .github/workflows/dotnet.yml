@@ -25,10 +25,12 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+          
       - name: Run Pipeline
         run: dotnet run -c Release
         working-directory: "TUnit.Pipeline"
@@ -37,3 +39,9 @@ jobs:
           NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
           PULL_REQUEST_BRANCH: ${{ github.event.pull_request.head.ref }}
           PUBLISH_PACKAGES: ${{ github.event.inputs.publish-packages }}
+      
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: TestingPlatformDiagnosticLogs
+          path: '**/log_*.diag'
