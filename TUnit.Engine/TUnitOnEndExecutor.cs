@@ -1,13 +1,10 @@
 ﻿using System.Text.Json;
 using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions.OutputDevice;
-using Microsoft.Testing.Platform.Logging;
-using Microsoft.Testing.Platform.OutputDevice;
 using TUnit.Engine.Json;
 
 namespace TUnit.Engine;
 
-internal class TUnitOnEndExecutor : IOutputDeviceDataProducer
+internal class TUnitOnEndExecutor
 {
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitLogger _logger;
@@ -85,14 +82,4 @@ internal class TUnitOnEndExecutor : IOutputDeviceDataProducer
                 ObjectBag = x.ObjectBag,
             });
     }
-
-    public Task<bool> IsEnabledAsync()
-    {
-        return Task.FromResult(true);
-    }
-
-    public string Uid { get; }
-    public string Version { get; }
-    public string DisplayName { get; }
-    public string Description { get; }
 }
