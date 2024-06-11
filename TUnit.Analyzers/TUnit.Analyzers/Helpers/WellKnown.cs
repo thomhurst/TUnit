@@ -26,7 +26,10 @@ internal static class WellKnown
         public const string MethodDataSource = "global::TUnit.Core.MethodDataSourceAttribute";
         public const string ClassDataSource = "global::TUnit.Core.ClassDataSourceAttribute";
         public const string EnumerableMethodDataSource = "global::TUnit.Core.EnumerableMethodDataSourceAttribute";
-        
+
+        public const string ClassHookContext = "global::TUnit.Core.Models.ClassHookContext";
+        public const string AssemblyHookContext = "global::TUnit.Core.Models.AssemblyHookContext";
+
         public static readonly string[] TestAttributes =
         [
             Test, DataDrivenTest, DataSourceDrivenTest, CombinativeTest

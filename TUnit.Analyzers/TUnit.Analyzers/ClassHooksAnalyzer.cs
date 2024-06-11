@@ -9,10 +9,10 @@ using TUnit.Analyzers.Helpers;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class StaticTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
+public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic);
+        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic, Rules.UnknownParameters);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -59,13 +59,6 @@ public class StaticTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 methodDeclarationSyntax.GetLocation())
             );
         }
-
-        if (!methodSymbol.Parameters.IsDefaultOrEmpty)
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeParameterless,
-                methodDeclarationSyntax.GetLocation())
-            );
-        }
         
         if(methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
@@ -73,5 +66,19 @@ public class StaticTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 methodDeclarationSyntax.GetLocation())
             );
         }
+            
+        if (!methodSymbol.Parameters.IsDefaultOrEmpty && !IsClassHookContextParameter(methodSymbol))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.UnknownParameters,
+                methodDeclarationSyntax.GetLocation(),
+                "empty or only contain `ClassHookContext`")
+            );
+        }
+    }
+
+    private static bool IsClassHookContextParameter(IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.Parameters.Length == 1
+               && methodSymbol.Parameters[0].Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.ClassHookContext;
     }
 }

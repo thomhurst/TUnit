@@ -760,5 +760,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0026Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified parameters aren&apos;t allowed for this method..
+        /// </summary>
+        internal static string TUnit0027Description {
+            get {
+                return ResourceManager.GetString("TUnit0027Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method parameters should be {0}.
+        /// </summary>
+        internal static string TUnit0027MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0027MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown Parameters.
+        /// </summary>
+        internal static string TUnit0027Title {
+            get {
+                return ResourceManager.GetString("TUnit0027Title", resourceCulture);
+            }
+        }
     }
 }

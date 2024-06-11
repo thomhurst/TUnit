@@ -109,6 +109,8 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("var testContext = new global::TUnit.Core.TestContext(testInformation);");
         sourceBuilder.WriteLine();
+        sourceBuilder.WriteLine($"global::TUnit.Engine.ClassHookOrchestrator.RegisterTestContext(typeof({fullyQualifiedClassType}), testContext);");
+        sourceBuilder.WriteLine();
         sourceBuilder.WriteLine(
             $"var unInvokedTest = new global::TUnit.Core.UnInvokedTest<{fullyQualifiedClassType}>(resettableClassFactory)");
         sourceBuilder.WriteLine("{");

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Core.Models;
 
 namespace TUnit.Engine;
 
@@ -8,6 +10,9 @@ public static class ClassHookOrchestrator
 {
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
     private static readonly ConcurrentDictionary<Type, List<Func<Task>>> CleanUps = new();
+    
+    private static readonly AssemblyHookContext AssemblyHookContext = new();
+    private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
 
     private static readonly ConcurrentDictionary<Type, int> InstanceTrackers = new();
 
@@ -36,6 +41,30 @@ public static class ClassHookOrchestrator
         
         taskFunctions.Add(taskFactory);
     }
+    
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public static void RegisterTestContext(Type type, TestContext testContext)
+    {
+        var classHookContext = ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
+        {
+            ClassType = type
+        });
+        
+        classHookContext.Tests.Add(testContext);
+        
+        AssemblyHookContext.TestClasses.Add(classHookContext);
+    }
+    
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public static ClassHookContext GetClassHookContext(Type type)
+    {
+        return ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
+        {
+            ClassType = type
+        });
+    }
+
+    public static AssemblyHookContext GetAssemblyHookContext() => AssemblyHookContext;
     
     public static async Task ExecuteSetups(Type testClassType)
     {

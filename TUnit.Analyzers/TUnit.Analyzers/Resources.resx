@@ -252,4 +252,13 @@
     <data name="TUnit0026Title" xml:space="preserve">
         <value>Not an IEnumerable</value>
     </data>
+    <data name="TUnit0027Description" xml:space="preserve">
+        <value>The specified parameters aren't allowed for this method.</value>
+    </data>
+    <data name="TUnit0027MessageFormat" xml:space="preserve">
+        <value>Method parameters should be {0}</value>
+    </data>
+    <data name="TUnit0027Title" xml:space="preserve">
+        <value>Unknown Parameters</value>
+    </data>
 </root>

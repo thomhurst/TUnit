@@ -52,7 +52,8 @@ internal class ClassHooksGenerator : IIncrementalGenerator
         {
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            MinimalTypeName = methodSymbol.ContainingType.Name
+            MinimalTypeName = methodSymbol.ContainingType.Name,
+            HasParameters = !methodSymbol.Parameters.IsDefaultOrEmpty
         };
     }
 
@@ -83,17 +84,27 @@ internal class ClassHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}()));");
+                $"global::TUnit.Engine.ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.ClassHookOrchestrator.RegisterCleanUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}()));");
+                $"global::TUnit.Engine.ClassHookOrchestrator.RegisterCleanUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
 
         sourceBuilder.WriteLine("}");
         sourceBuilder.WriteLine("}");
 
         context.AddSource($"{className}.g.cs", sourceBuilder.ToString());
+    }
+
+    private string GenerateContextObject(ClassHooksDataModel model)
+    {
+        if (!model.HasParameters)
+        {
+            return string.Empty;
+        }
+
+        return $"TUnit.Engine.ClassHookOrchestrator.GetClassHookContext(typeof({model.FullyQualifiedTypeName}))";
     }
 }
