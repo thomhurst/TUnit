@@ -7,6 +7,8 @@ namespace TUnit.Engine;
 public class JsonOutputCommandProvider : ICommandLineOptionsProvider
 {
     public const string OutputJson = "output-json";
+    public const string OutputJsonFilename = "output-json-filename";
+    public const string OutputJsonFilenamePrefix = "output-json-prefix";
     
     private readonly IExtension _extension;
 
@@ -32,12 +34,24 @@ public class JsonOutputCommandProvider : ICommandLineOptionsProvider
     {
         return new[]
         {
-            new CommandLineOption(OutputJson, "Output JSON", ArgumentArity.Zero, false)
+            new CommandLineOption(OutputJson, "Output JSON", ArgumentArity.Zero, false),
+            new CommandLineOption(OutputJsonFilename, "Output JSON filename", ArgumentArity.ExactlyOne, false),
+            new CommandLineOption(OutputJsonFilenamePrefix, "Output JSON filename prefix", ArgumentArity.ExactlyOne, false),
         };
     }
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
     {
+        if (commandOption.Name == OutputJsonFilenamePrefix && arguments.Length != 1)
+        {
+            return ValidationResult.InvalidTask("Invalid number of output json filename specified");
+        }
+        
+        if (commandOption.Name == OutputJsonFilename && arguments.Length != 1)
+        {
+            return ValidationResult.InvalidTask("Invalid number of output json filename specified");
+        }
+        
         return ValidationResult.ValidTask;
     }
 
