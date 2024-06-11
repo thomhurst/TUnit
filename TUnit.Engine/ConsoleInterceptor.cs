@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 using System.Text;
-using Microsoft.Testing.Platform.Logging;
+using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
@@ -9,9 +9,10 @@ namespace TUnit.Engine;
 
 internal class ConsoleInterceptor : TextWriter
 {
+    private readonly ICommandLineOptions _commandLineOptions;
     public static ConsoleInterceptor Instance { get; private set; } = null!;
 
-    private readonly ILogger<ConsoleInterceptor>? _logger;
+    private readonly TUnitLogger _logger;
     public override Encoding Encoding => InnerWriter?.Encoding ?? Encoding.UTF8;
 
     public static TextWriter DefaultOut { get; }
@@ -23,9 +24,10 @@ internal class ConsoleInterceptor : TextWriter
         DefaultOut = Console.Out;
     }
 
-    public ConsoleInterceptor(ILoggerFactory loggerFactory)
+    public ConsoleInterceptor(TUnitLogger logger, ICommandLineOptions commandLineOptions)
     {
-        _logger = loggerFactory.CreateLogger<ConsoleInterceptor>();
+        _commandLineOptions = commandLineOptions;
+        _logger = logger;
         Instance = this;
     }
     
@@ -36,11 +38,14 @@ internal class ConsoleInterceptor : TextWriter
 
     public void SetModule(TestContext testContext)
     {
-        testContext.OnDispose = (_, _) =>
+        testContext.OnDispose = async (_, _) =>
         {
             try
             {
-                _logger?.LogInformation(testContext.GetConsoleOutput());
+                if (_commandLineOptions.IsOptionSet(DisplayTestOutputCommandProvider.DisplayTestOutput))
+                {
+                    await _logger.LogInformationAsync(testContext.GetConsoleOutput());
+                }
             }
             catch (Exception e)
             {

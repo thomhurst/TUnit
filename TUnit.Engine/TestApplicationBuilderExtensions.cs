@@ -18,5 +18,6 @@ public static class TestApplicationBuilderExtensions
         
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new DisplayTestOutputCommandProvider(extension));
     }
 }
