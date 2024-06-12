@@ -10,32 +10,29 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Flexible',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        TUnit was designed for flexibility. With various ways to write, inject data into, and control tests.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Easy',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        TUnit uses an attribute-based syntax that is easy to read and write. Simply create methods and add attributes to them to control how your test suite works.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Fast',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        TUnit is source generated and built on top of the new Microsoft Testing Platform. This means that it is fast and efficient.
       </>
     ),
   },
