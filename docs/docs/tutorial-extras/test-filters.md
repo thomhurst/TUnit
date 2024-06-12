@@ -4,18 +4,33 @@ sidebar_position: 8
 
 # Test Filters
 
-TBC
+Running TUnit via `dotnet run` supports test filters.
 
-<!-- Running TUnit via `dotnet test` supports test filters. Information on how to use them is available [Here](https://learn.microsoft.com/en-us/dotnet/core/testing/selective-unit-tests)
+TUnit can select tests by:
 
-TUnit supports the following properties for filtering:
+- Assembly
+- Namespace
+- Class name
+- Test name
 
-- TestName
-- TestClass
-- Category
+You must use the `--treenode-filter` flag on the command line.
+
+The syntax for the filter value is (without the angled brackets) `/<Assembly>/<Namespace>/<Class name>/<Test name>`
+
+Will cards are also supported with `*`
+
+As well as `and`, `or`, `starts with`, `ends with`, `equals` and other operators. For full information on the treenode filters, see [here](https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md)
+
+So an example could be:
+
+`dotnet run --treenode-filter /*/*/LoginTests/*` - To run all tests in the class `LoginTests`
+
+or
+
+`dotnet run --treenode-filter /*/*/*/AcceptCookiesTest` - To run all tests with the name `AcceptCookiesTest`
 
 TUnit also supports filtering by your own [properties](properties). So you could do:
 
-`dotnet test --filter "MyFilterName~SomeValue"`
+`dotnet run --treenode-filter /*/*/*/*[MyFilterName=*SomeValue*]`
 
-And if your test had a property with the name "MyFilterName" and its value contained "SomeValue", then your test would be executed. -->
+And if your test had a property with the name "MyFilterName" and its value contained "SomeValue", then your test would be executed.
