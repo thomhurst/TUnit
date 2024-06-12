@@ -4,7 +4,7 @@ sidebar_position: 8
 
 # Test Filters
 
-Running TUnit via `dotnet run` supports test filters. Information on how to use them is available [Here](https://learn.microsoft.com/en-us/dotnet/core/testing/selective-unit-tests)
+Running TUnit via `dotnet run` supports test filters.
 
 TUnit can select tests by:
 
@@ -17,13 +17,15 @@ The syntax is (without the angled brackets) `/<Assembly>/<Namespace>/<Class name
 
 Will cards are also supported with `*`
 
+As well as and, or, equals and other operators. For full information on the treenode filters, see [here](https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md)
+
 So an example could be:
 
-`dotnet run /*/*/LoginTests/*` - To run all tests in the class `LoginTests`
+`dotnet run --treenode-filter /*/*/LoginTests/*` - To run all tests in the class `LoginTests`
 
 or
 
-`dotnet run /*/*/*/AcceptCookiesTest` - To run all tests with the name `AcceptCookiesTest`
+`dotnet run --treenode-filter /*/*/*/AcceptCookiesTest` - To run all tests with the name `AcceptCookiesTest`
 
 TUnit also supports filtering by your own [properties](properties). So you could do:
 
