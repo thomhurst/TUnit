@@ -4,18 +4,29 @@ sidebar_position: 8
 
 # Test Filters
 
-TBC
+Running TUnit via `dotnet run` supports test filters. Information on how to use them is available [Here](https://learn.microsoft.com/en-us/dotnet/core/testing/selective-unit-tests)
 
-<!-- Running TUnit via `dotnet test` supports test filters. Information on how to use them is available [Here](https://learn.microsoft.com/en-us/dotnet/core/testing/selective-unit-tests)
+TUnit can select tests by:
 
-TUnit supports the following properties for filtering:
+- Assembly
+- Namespace
+- Class name
+- Test name
 
-- TestName
-- TestClass
-- Category
+The syntax is (without the angled brackets) `/<Assembly>/<Namespace>/<Class name>/<Test name>`
+
+Will cards are also supported with `*`
+
+So an example could be:
+
+`dotnet run /*/*/LoginTests/*` - To run all tests in the class `LoginTests`
+
+or
+
+`dotnet run /*/*/*/AcceptCookiesTest` - To run all tests with the name `AcceptCookiesTest`
 
 TUnit also supports filtering by your own [properties](properties). So you could do:
 
-`dotnet test --filter "MyFilterName~SomeValue"`
+`dotnet run --treenode-filter /*/*/*/*[MyFilterName=*SomeValue*]`
 
-And if your test had a property with the name "MyFilterName" and its value contained "SomeValue", then your test would be executed. -->
+And if your test had a property with the name "MyFilterName" and its value contained "SomeValue", then your test would be executed.
