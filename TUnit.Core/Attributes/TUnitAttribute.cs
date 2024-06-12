@@ -1,3 +1,8 @@
 ﻿namespace TUnit.Core;
 
-public class TUnitAttribute : Attribute;
+public class TUnitAttribute : Attribute
+{
+    internal TUnitAttribute()
+    {
+    }
+}

@@ -56,8 +56,8 @@ internal class TUnitOnEndExecutor
 
     private static IEnumerable<JsonOutput> GetJsonOutputs()
     {
-        return ClassHookOrchestrator.GetAssemblyHookContext()
-            .AllTests
+        return ClassHookOrchestrator.GetAllAssemblyHookContexts()
+            .SelectMany(x => x.AllTests)
             .Where(x => x.Result != null)
             .Select(x => new JsonOutput
             {
