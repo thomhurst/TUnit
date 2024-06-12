@@ -19,7 +19,7 @@ The syntax for the filter value is (without the angled brackets) `/<Assembly>/<N
 
 Will cards are also supported with `*`
 
-As well as and, or, equals and other operators. For full information on the treenode filters, see [here](https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md)
+As well as `and`, `or`, `starts with`, `ends with`, `equals` and other operators. For full information on the treenode filters, see [here](https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md)
 
 So an example could be:
 
