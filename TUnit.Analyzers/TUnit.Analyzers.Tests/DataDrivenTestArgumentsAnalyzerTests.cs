@@ -26,7 +26,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
 
         var expected = Verifier.Diagnostic(Rules.NoTestDataProvided).WithLocation(0)
             .WithArguments("int", "string");
-        
+
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
     

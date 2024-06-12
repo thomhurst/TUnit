@@ -7,7 +7,7 @@ using TUnit.Assertions.AssertConditions.String;
 
 namespace TUnit.Assertions.Extensions;
 
-public static partial class DoesNotExtensions_Generic
+public static partial class DoesNotExtensions
 {
     public static BaseAssertCondition<string, TAnd, TOr> Contain<TAnd, TOr>(this DoesNot<string, TAnd, TOr> doesNot, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>

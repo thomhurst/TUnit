@@ -5,7 +5,7 @@ using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.Extensions;
 
-public static partial class DoesNotExtensions_Generic
+public static partial class DoesNotExtensions
 {
     public static BaseAssertCondition<TActual, TAnd, TOr> Contain<TActual, TInner, TAnd, TOr>(this DoesNot<TActual, TAnd, TOr> doesNot, TInner expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : IEnumerable<TInner>

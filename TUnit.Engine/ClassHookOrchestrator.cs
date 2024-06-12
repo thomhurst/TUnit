@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Helpers;
@@ -11,7 +12,7 @@ public static class ClassHookOrchestrator
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
     private static readonly ConcurrentDictionary<Type, List<Func<Task>>> CleanUps = new();
     
-    private static readonly AssemblyHookContext AssemblyHookContext = new();
+    private static readonly ConcurrentDictionary<Assembly, AssemblyHookContext> AssemblyHookContexts = new();
     private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
 
     private static readonly ConcurrentDictionary<Type, int> InstanceTrackers = new();
@@ -52,7 +53,12 @@ public static class ClassHookOrchestrator
         
         classHookContext.Tests.Add(testContext);
         
-        AssemblyHookContext.TestClasses.Add(classHookContext);
+        var assemblyHookContext = AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
+        {
+            Assembly = type.Assembly
+        });
+        
+        assemblyHookContext.TestClasses.Add(classHookContext);
     }
     
     [MethodImpl(MethodImplOptions.Synchronized)]
@@ -64,7 +70,12 @@ public static class ClassHookOrchestrator
         });
     }
 
-    public static AssemblyHookContext GetAssemblyHookContext() => AssemblyHookContext;
+    public static AssemblyHookContext GetAssemblyHookContext(Type type) => AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
+    {
+        Assembly = type.Assembly
+    });
+    
+    public static IEnumerable<AssemblyHookContext> GetAllAssemblyHookContexts() => AssemblyHookContexts.Values;
     
     public static async Task ExecuteSetups(Type testClassType)
     {
