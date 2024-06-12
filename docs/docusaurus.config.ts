@@ -59,7 +59,7 @@ const config: Config = {
       title: 'TUnit',
       logo: {
         alt: 'TUnit Logo',
-        src: 'img/logo.svg',
+        src: 'img/lab.svg',
       },
       items: [
         {

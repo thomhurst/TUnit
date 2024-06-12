@@ -11,7 +11,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Flexible',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('@site/static/img/flexible.svg').default,
     description: (
       <>
         TUnit was designed for flexibility. With various ways to write, inject data into, and control tests.
@@ -20,7 +20,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Easy',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('@site/static/img/easy.svg').default,
     description: (
       <>
         TUnit uses an attribute-based syntax that is easy to read and write. Simply create methods and add attributes to them to control how your test suite works.
@@ -29,7 +29,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Fast',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('@site/static/img/fast.svg').default,
     description: (
       <>
         TUnit is source generated and built on top of the new Microsoft Testing Platform. This means that it is fast and efficient.
