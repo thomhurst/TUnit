@@ -13,7 +13,9 @@ TUnit can select tests by:
 - Class name
 - Test name
 
-The syntax is (without the angled brackets) `/<Assembly>/<Namespace>/<Class name>/<Test name>`
+You must use the `--treenode-filter` flag on the command line.
+
+The syntax for the filter value is (without the angled brackets) `/<Assembly>/<Namespace>/<Class name>/<Test name>`
 
 Will cards are also supported with `*`
 
