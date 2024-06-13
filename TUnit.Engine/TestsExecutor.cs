@@ -130,7 +130,7 @@ internal class TestsExecutor
                 break;
             }
             
-            if (_currentlyExecutingTests < 1 || !_systemResourceMonitor.IsSystemStrained())
+            if (Thread.VolatileRead(ref _currentlyExecutingTests) < 1 || !_systemResourceMonitor.IsSystemStrained())
             {
                 var test = queue.Dequeue();
 
