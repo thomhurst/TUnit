@@ -57,16 +57,24 @@ internal class TestsExecutor
 
             // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint
             await Task.WhenAll(
-                ProcessTests(tests.Parallel, true, filter, session),
+                ProcessParallelTests(tests.Parallel, filter, session),
                 ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, session)
             );
         
             // These have to run on their own
-            await ProcessTests(tests.NotInParallel, false, filter, session);
+            await ProcessNotInParallelTests(tests.NotInParallel, filter, session);
         }
         finally
         {
             await AssemblyHookOrchestrators.ExecuteCleanups();
+        }
+    }
+
+    private async Task ProcessNotInParallelTests(Queue<TestInformation> testsNotInParallel, ITestExecutionFilter? filter, TestSessionContext session)
+    {
+        foreach (var testInformation in testsNotInParallel)
+        {
+            await ProcessTest(testInformation, filter, session);
         }
     }
 
@@ -88,7 +96,7 @@ internal class TestsExecutor
 
                 try
                 {
-                    await ProcessTest(notInParallelTestCase.Test, true, filter, session);
+                    await ProcessTest(notInParallelTestCase.Test, filter, session);
                 }
                 catch (Exception e)
                 {
@@ -106,20 +114,20 @@ internal class TestsExecutor
         await Task.WhenAll(tasks);
     }
 
-    private async Task ProcessTests(Queue<TestInformation> queue, bool runInParallel, ITestExecutionFilter? filter,
+    private async Task ProcessParallelTests(Queue<TestInformation> queue, ITestExecutionFilter? filter,
         TestSessionContext session)
     {
         var executing = new List<Task>();
         
-        await foreach (var testWithResult in ProcessQueue(queue, runInParallel, filter, session))
+        await foreach (var testResult in ProcessQueue(queue, filter, session))
         {
-            executing.Add(testWithResult.ResultTask);
+            executing.Add(testResult);
         }
 
         await WhenAllSafely(executing);
     }
 
-    private async IAsyncEnumerable<TestWithResult> ProcessQueue(Queue<TestInformation> queue, bool runInParallel,
+    private async IAsyncEnumerable<Task<TUnitTestResult>> ProcessQueue(Queue<TestInformation> queue,
         ITestExecutionFilter? filter,
         TestSessionContext session)
     {
@@ -130,11 +138,12 @@ internal class TestsExecutor
                 break;
             }
             
-            if (Thread.VolatileRead(ref _currentlyExecutingTests) < 1 || !_systemResourceMonitor.IsSystemStrained())
+            if (Thread.VolatileRead(ref _currentlyExecutingTests) < Environment.ProcessorCount 
+                || !_systemResourceMonitor.IsSystemStrained())
             {
                 var test = queue.Dequeue();
 
-                yield return await ProcessTest(test, runInParallel, filter, session);
+                yield return ProcessTest(test, filter, session);
             }
             else
             {
@@ -143,24 +152,19 @@ internal class TestsExecutor
         }
     }
 
-    private async Task<TestWithResult> ProcessTest(TestInformation test, bool runInParallel,
+    private async Task<TUnitTestResult> ProcessTest(TestInformation test,
         ITestExecutionFilter? filter, TestSessionContext session)
     {
         NotifyTestStart();
-        
-        var executionTask = _singleTestExecutor.ExecuteTestAsync(test, filter, session);
 
-        _ = executionTask.ContinueWith(_ =>
+        try
+        {
+            return await _singleTestExecutor.ExecuteTestAsync(test, filter, session);
+        }
+        finally
         {
             NotifyTestEnd();
-        });
-
-        if (!runInParallel)
-        {
-            await executionTask;
         }
-        
-        return new TestWithResult(test, executionTask);
     }
     
     private Semaphore GetLockForKey(string key)
