@@ -19,15 +19,9 @@ internal class SystemResourceMonitor : IDisposable
     {
         Task.Run(Refresh);
         
-        // According to Hardware.Info, there might be a 21 second delay on getting CPU stats
-        // So let's just run this 50 times (as it contains a 500ms delay in it) which means it'll stop
-        // after around 25 seconds
         Task.Run(async () =>
         {
-            for (var i = 0; i < 50; i++)
-            {
-                _fallbackCpuPercentage = await GetCpuUsagePercentageForProcess();
-            }
+            _fallbackCpuPercentage = await GetCpuUsagePercentageForProcess();
         });
     }
 
