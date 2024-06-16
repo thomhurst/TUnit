@@ -1,5 +1,4 @@
-﻿using TUnit.Core;
-using TUnit.Engine.Models;
+﻿using TUnit.Engine.Models;
 
 namespace TUnit.Engine;
 

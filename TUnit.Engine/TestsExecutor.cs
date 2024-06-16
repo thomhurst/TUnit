@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
-using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Models;
 

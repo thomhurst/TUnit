@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.Engine.Models;
+﻿namespace TUnit.Engine.Models;
 
 internal record NotInParallelTestCase
 {
