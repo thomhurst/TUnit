@@ -125,7 +125,7 @@ internal class TestsExecutor
         await WhenAllSafely(executing);
     }
 
-    private async IAsyncEnumerable<Task<TUnitTestResult>> ProcessQueue(Queue<DiscoveredTest> queue,
+    private async IAsyncEnumerable<Task> ProcessQueue(Queue<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
         TestSessionContext session)
     {
@@ -150,14 +150,18 @@ internal class TestsExecutor
         }
     }
 
-    private async Task<TUnitTestResult> ProcessTest(DiscoveredTest test,
+    private async Task ProcessTest(DiscoveredTest test,
         ITestExecutionFilter? filter, TestSessionContext session)
     {
         NotifyTestStart();
 
         try
         {
-            return await _singleTestExecutor.ExecuteTestAsync(test, filter, session);
+            await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, session));
+        }
+        catch
+        {
+            // Ignored
         }
         finally
         {

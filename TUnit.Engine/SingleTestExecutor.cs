@@ -39,24 +39,14 @@ internal class SingleTestExecutor : IDataProducer
         _logger = logger;
     }
 
-    public async Task<TUnitTestResult> ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
+    public async Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         TestSessionContext session)
     {
-        if(_cancellationTokenSource.IsCancellationRequested)
+        if (_cancellationTokenSource.IsCancellationRequested)
         {
-            var now = DateTimeOffset.Now;
-            
             await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode.WithProperty(new CancelledTestNodeStateProperty())));
 
-            return new TUnitTestResult
-            {
-                Duration = TimeSpan.Zero,
-                Start = now,
-                End = now,
-                ComputerName = Environment.MachineName,
-                Exception = null,
-                Status = Status.None,
-            };
+            return;
         }
         
         var start = DateTimeOffset.Now;
@@ -91,7 +81,7 @@ internal class SingleTestExecutor : IDataProducer
                 await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext);
                 await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
 
-                await Task.Run(async () => { await ExecuteWithRetries(unInvokedTest); });
+                await ExecuteWithRetries(unInvokedTest);
             }
             finally
             {
@@ -111,7 +101,7 @@ internal class SingleTestExecutor : IDataProducer
                     .WithProperty(new TimingProperty(new TimingInfo(start, end, end - start)))
             ));
 
-            return testContext.Result = new TUnitTestResult
+            testContext.Result = new TUnitTestResult
             {
                 TestContext = testContext,
                 Duration = end - start,
@@ -130,22 +120,18 @@ internal class SingleTestExecutor : IDataProducer
             await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, 
                 test.TestNode.WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
             
-            var unitTestResult = new TUnitTestResult
-            {
-                Duration = TimeSpan.Zero,
-                Start = start,
-                End = start,
-                ComputerName = Environment.MachineName,
-                Exception = null,
-                Status = Status.Skipped,
-            };
-            
             if (testContext != null)
             {
-                testContext.Result = unitTestResult;
+                testContext.Result = new TUnitTestResult
+                {
+                    Duration = TimeSpan.Zero,
+                    Start = start,
+                    End = start,
+                    ComputerName = Environment.MachineName,
+                    Exception = null,
+                    Status = Status.Skipped,
+                };
             }
-            
-            return unitTestResult;
         }
         catch (Exception e)
         {
@@ -157,23 +143,19 @@ internal class SingleTestExecutor : IDataProducer
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionmessage", e.Message))
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionstacktrace", e.StackTrace!))));
             
-            var unitTestResult = new TUnitTestResult
-            {
-                Duration = end - start,
-                Start = start,
-                End = end,
-                ComputerName = Environment.MachineName,
-                Exception = e,
-                Status = Status.Failed,
-                Output = testContext?.GetConsoleOutput()
-            };
-
             if (testContext != null)
             {
-                testContext.Result = unitTestResult;
+                testContext.Result = new TUnitTestResult
+                {
+                    Duration = end - start,
+                    Start = start,
+                    End = end,
+                    ComputerName = Environment.MachineName,
+                    Exception = e,
+                    Status = Status.Failed,
+                    Output = testContext?.GetConsoleOutput()
+                };
             }
-            
-            return unitTestResult;
         }
         finally
         {
