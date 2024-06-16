@@ -40,14 +40,12 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     public string DisplayName => _extension.DisplayName;
     public string Description => _extension.Description;
     
-    public async Task<CreateTestSessionResult> CreateTestSessionAsync(CreateTestSessionContext context)
+    public Task<CreateTestSessionResult> CreateTestSessionAsync(CreateTestSessionContext context)
     {
-        await Task.CompletedTask;
-
-        return new CreateTestSessionResult
+        return Task.FromResult(new CreateTestSessionResult
         {
             IsSuccess = true
-        };
+        });
     }
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
@@ -147,5 +145,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         });
     }
 
-    public Type[] DataTypesProduced { get; } = [typeof(TestNodeUpdateMessage)];
+    public Type[] DataTypesProduced { get; } =
+    [
+        typeof(TestNodeUpdateMessage)
+    ];
 }

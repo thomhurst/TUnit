@@ -22,6 +22,8 @@ public abstract partial class TestModule : Module<TestResult>
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
     private readonly List<Exception> _exceptions = [];
 
+    private static readonly SemaphoreSlim _semaphoreSlim = new(Environment.ProcessorCount, Environment.ProcessorCount);
+
     protected override Task<bool> ShouldIgnoreFailures(IPipelineContext context, Exception exception)
     {
         _exceptions.Add(exception);
@@ -37,29 +39,43 @@ public abstract partial class TestModule : Module<TestResult>
 
     protected async Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions, CancellationToken cancellationToken = default)
     {
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
-        
-        var result = await context.DotNet().Run(new DotNetRunOptions
-        {
-            Project = project,
-            NoBuild = true,
-            ThrowOnNonZeroExitCode = false,
-            CommandLogging = runOptions.CommandLogging,
-            Arguments = [ "--treenode-filter", filter, "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", ..runOptions.AdditionalArguments ]
-        }, cancellationToken);
+        await _semaphoreSlim.WaitAsync(cancellationToken);
 
-        var parsedResult = ParseOutput(result.StandardOutput);
-        
-        assertions.ForEach(x => x.Invoke(parsedResult));
-
-        if (_exceptions.Any())
+        try
         {
-            // Temporary - If we've retried and succeeded on the next retry, throw anyway
-            // To get info on the --treenode-filter issue
-            throw new AggregateException(_exceptions);
+            var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj")
+                .AssertExists();
+
+            var result = await context.DotNet().Run(new DotNetRunOptions
+            {
+                Project = project,
+                NoBuild = true,
+                ThrowOnNonZeroExitCode = false,
+                CommandLogging = runOptions.CommandLogging,
+                Arguments =
+                [
+                    "--treenode-filter", filter, "--diagnostic", "--diagnostic-output-fileprefix",
+                    $"log_{GetType().Name}", ..runOptions.AdditionalArguments
+                ]
+            }, cancellationToken);
+
+            var parsedResult = ParseOutput(result.StandardOutput);
+
+            assertions.ForEach(x => x.Invoke(parsedResult));
+
+            if (_exceptions.Any())
+            {
+                // Temporary - If we've retried and succeeded on the next retry, throw anyway
+                // To get info on the --treenode-filter issue
+                throw new AggregateException(_exceptions);
+            }
+
+            return parsedResult;
         }
-        
-        return parsedResult;
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 
     private TestResult ParseOutput(string resultStandardOutput)

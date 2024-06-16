@@ -39,8 +39,6 @@ internal class TestsExecutor
     {
         _consoleInterceptor.Initialize();
         
-        var start = DateTimeOffset.Now;
-
         try
         {
             await AssemblyHookOrchestrators.ExecuteSetups();
