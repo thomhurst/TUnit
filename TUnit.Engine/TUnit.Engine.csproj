@@ -9,7 +9,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="AsyncSemaphore" Version="1.0.3" />
+        <PackageReference Include="AsyncSemaphore" Version="1.0.4" />
         <PackageReference Include="Hardware.Info" Version="100.1.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.3.0-preview.24316.4" />

@@ -23,7 +23,7 @@ public abstract partial class TestModule : Module<TestResult>
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
     private readonly List<Exception> _exceptions = [];
 
-    private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount, Environment.ProcessorCount);
+    private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount);
 
     protected override Task<bool> ShouldIgnoreFailures(IPipelineContext context, Exception exception)
     {

@@ -169,7 +169,7 @@ internal class SingleTestExecutor : IDataProducer
         await _testInvoker.Invoke(unInvokedTest);
     }
 
-    private readonly AsyncSemaphore _consoleStandardOutLock = new(1, 1);
+    private readonly AsyncSemaphore _consoleStandardOutLock = new(1);
 
     private async Task ExecuteWithRetries(UnInvokedTest unInvokedTest)
     {
