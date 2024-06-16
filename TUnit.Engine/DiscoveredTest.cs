@@ -9,10 +9,9 @@ internal record DiscoveredTest
     public DiscoveredTest(TestInformation testInformation)
     {
         TestInformation = testInformation;
-        TestNode = testInformation.ToTestNode();
     }
 
     public TestInformation TestInformation { get; }
 
-    public TestNode TestNode { get; }
+    public TestNode TestNode => TestInformation.ToTestNode();
 }
