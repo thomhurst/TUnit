@@ -30,7 +30,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             .AddFromFrameworkServiceProvider(serviceProvider, extension)
             .BuildServiceProvider();
 
-        _logger = ServiceProviderServiceExtensions.GetRequiredService<TUnitLogger>(_myServiceProvider);
+        _logger = _myServiceProvider.GetRequiredService<TUnitLogger>();
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -87,7 +87,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     await NotifyFailedTests(context, failedToInitializeTests, false);
 
                     await _myServiceProvider.GetRequiredService<TestsExecutor>()
-                        .ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context.Request.Session);
+                        .ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
                 }
                 else
                 {

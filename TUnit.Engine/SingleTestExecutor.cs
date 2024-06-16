@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
@@ -16,7 +17,6 @@ internal class SingleTestExecutor : IDataProducer
     private readonly IExtension _extension;
     private readonly Disposer _disposer;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly IMessageBus _messageBus;
     private readonly TestInvoker _testInvoker;
     private readonly ExplicitFilterService _explicitFilterService;
     private readonly TUnitLogger _logger;
@@ -25,7 +25,6 @@ internal class SingleTestExecutor : IDataProducer
         IExtension extension,
         Disposer disposer,
         CancellationTokenSource cancellationTokenSource,
-        IMessageBus messageBus,
         TestInvoker testInvoker,
         ExplicitFilterService explicitFilterService,
         TUnitLogger logger)
@@ -33,25 +32,24 @@ internal class SingleTestExecutor : IDataProducer
         _extension = extension;
         _disposer = disposer;
         _cancellationTokenSource = cancellationTokenSource;
-        _messageBus = messageBus;
         _testInvoker = testInvoker;
         _explicitFilterService = explicitFilterService;
         _logger = logger;
     }
 
     public async Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
-        TestSessionContext session)
+        ExecuteRequestContext context)
     {
         if (_cancellationTokenSource.IsCancellationRequested)
         {
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode.WithProperty(new CancelledTestNodeStateProperty())));
+            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode.WithProperty(new CancelledTestNodeStateProperty())));
 
             return;
         }
         
         var start = DateTimeOffset.Now;
 
-        await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode.WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
+        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode.WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
         TestContext? testContext = null;
         try
@@ -96,7 +94,7 @@ internal class SingleTestExecutor : IDataProducer
 
             var end = DateTimeOffset.Now;
 
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode
+            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
                     .WithProperty(PassedTestNodeStateProperty.CachedInstance)
                     .WithProperty(new TimingProperty(new TimingInfo(start, end, end - start)))
             ));
@@ -117,7 +115,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             await _logger.LogInformationAsync($"Skipping {test.TestInformation.DisplayName}...");
             
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, 
+            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, 
                 test.TestNode.WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
             
             if (testContext != null)
@@ -137,7 +135,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             var end = DateTimeOffset.Now;
 
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode
+            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
                 .WithProperty(new FailedTestNodeStateProperty(e))
                 .WithProperty(new TimingProperty(new TimingInfo(start, end, end-start)))
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionmessage", e.Message))
