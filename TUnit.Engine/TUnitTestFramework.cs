@@ -58,7 +58,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             try
             {
-                var testInformations = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
+                var discoveredTests = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
                     .DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken)
                     .ToList();
                 
@@ -66,9 +66,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                 if (context.Request is DiscoverTestExecutionRequest)
                 {
-                    foreach (var testInformation in testInformations)
+                    foreach (var testInformation in discoveredTests)
                     {
-                        var testNode = testInformation.ToTestNode();
+                        var testNode = testInformation.TestNode;
                         testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
                         
                         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
@@ -86,7 +86,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     await NotifyFailedTests(context, failedToInitializeTests, false);
                     
                     await ServiceProviderServiceExtensions.GetRequiredService<TestsExecutor>(_myServiceProvider)
-                        .ExecuteAsync(testInformations, runTestExecutionRequest.Filter, context.Request.Session);
+                        .ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context.Request.Session);
                 }
                 else
                 {

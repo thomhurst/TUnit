@@ -5,21 +5,21 @@ namespace TUnit.Engine;
 
 internal class TestGrouper
 {
-    public GroupedTests OrganiseTests(IEnumerable<TestInformation> testCases)
+    public GroupedTests OrganiseTests(List<DiscoveredTest> testCases)
     {
         var allTestsOrderedByClass = testCases
-            .GroupBy(x => x.ClassType)
+            .GroupBy(x => x.TestInformation.ClassType)
             .SelectMany(x => x)
-            .OrderByDescending(x => x.Order)
+            .OrderByDescending(x => x.TestInformation.Order)
             .ToList();
 
-        var notInParallel = new Queue<TestInformation>();
+        var notInParallel = new Queue<DiscoveredTest>();
         var keyedNotInParallel = new List<NotInParallelTestCase>();
-        var parallel = new Queue<TestInformation>();
+        var parallel = new Queue<DiscoveredTest>();
 
         foreach (var test in allTestsOrderedByClass)
         {
-            var notInParallelConstraintKey = test.NotInParallelConstraintKeys;
+            var notInParallelConstraintKey = test.TestInformation.NotInParallelConstraintKeys;
             
             if (notInParallelConstraintKey == null)
             {

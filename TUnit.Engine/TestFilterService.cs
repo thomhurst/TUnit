@@ -6,7 +6,7 @@ using TUnit.Engine.Properties;
 
 namespace TUnit.Engine;
 
-public class TestFilterService
+internal class TestFilterService
 {
     private readonly ILogger<TestFilterService> _logger;
 
@@ -15,14 +15,14 @@ public class TestFilterService
         _logger = loggerFactory.CreateLogger<TestFilterService>();
     }
     
-    public IEnumerable<TestInformation> FilterTests(ITestExecutionFilter? testExecutionFilter, IEnumerable<TestInformation> testNodes)
+    public IEnumerable<DiscoveredTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IEnumerable<DiscoveredTest> testNodes)
     {
         if (testExecutionFilter is null)
         {
             return testNodes;
         }
 
-        return testNodes.Where(x => MatchesTest(testExecutionFilter, x));
+        return testNodes.Where(x => MatchesTest(testExecutionFilter, x.TestInformation));
     }
 
     public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, TestInformation testInformation)

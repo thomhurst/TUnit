@@ -4,8 +4,8 @@ namespace TUnit.Engine;
 
 internal class TestsLoader
 {
-    public IEnumerable<TestInformation> GetTests()
+    public IEnumerable<DiscoveredTest> GetTests()
     {
-        return TestDictionary.GetAllTestDetails();
+        return TestDictionary.GetAllTestDetails().Select(x => new DiscoveredTest(x));
     }
 }

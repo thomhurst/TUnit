@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
+using Semaphores;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
@@ -38,14 +39,14 @@ internal class SingleTestExecutor : IDataProducer
         _logger = logger;
     }
 
-    public async Task<TUnitTestResult> ExecuteTestAsync(TestInformation test, ITestExecutionFilter? filter,
+    public async Task<TUnitTestResult> ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         TestSessionContext session)
     {
         if(_cancellationTokenSource.IsCancellationRequested)
         {
             var now = DateTimeOffset.Now;
             
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode().WithProperty(new CancelledTestNodeStateProperty())));
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode.WithProperty(new CancelledTestNodeStateProperty())));
 
             return new TUnitTestResult
             {
@@ -60,20 +61,20 @@ internal class SingleTestExecutor : IDataProducer
         
         var start = DateTimeOffset.Now;
 
-        await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
+        await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode.WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
         TestContext? testContext = null;
         try
         {
-            if (!_explicitFilterService.CanRun(test, filter))
+            if (!_explicitFilterService.CanRun(test.TestInformation, filter))
             {
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
             }
             
-            if (!TestDictionary.TryGetTest(test.TestId, out var unInvokedTest))
+            if (!TestDictionary.TryGetTest(test.TestInformation.TestId, out var unInvokedTest))
             {
-                var failedInitializationTest = TestDictionary.GetFailedInitializationTest(test.TestId);
-                throw new TestFailedInitializationException($"The test {test.DisplayName} at {test.TestFilePath}:{test.TestLineNumber} failed to initialize", failedInitializationTest.Exception);
+                var failedInitializationTest = TestDictionary.GetFailedInitializationTest(test.TestInformation.TestId);
+                throw new TestFailedInitializationException($"The test {test.TestInformation.DisplayName} at {test.TestInformation.TestFilePath}:{test.TestInformation.TestLineNumber} failed to initialize", failedInitializationTest.Exception);
             }
 
             testContext = unInvokedTest.TestContext;
@@ -84,12 +85,12 @@ internal class SingleTestExecutor : IDataProducer
             }
             
             var cleanUpExceptions = new List<Exception>();
-            
+
             try
             {
                 await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext);
                 await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
-                
+
                 await Task.Run(async () => { await ExecuteWithRetries(unInvokedTest); });
             }
             finally
@@ -105,7 +106,7 @@ internal class SingleTestExecutor : IDataProducer
 
             var end = DateTimeOffset.Now;
 
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode()
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode
                     .WithProperty(PassedTestNodeStateProperty.CachedInstance)
                     .WithProperty(new TimingProperty(new TimingInfo(start, end, end - start)))
             ));
@@ -124,10 +125,10 @@ internal class SingleTestExecutor : IDataProducer
         }
         catch (SkipTestException skipTestException)
         {
-            await _logger.LogInformationAsync($"Skipping {test.DisplayName}...");
+            await _logger.LogInformationAsync($"Skipping {test.TestInformation.DisplayName}...");
             
             await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, 
-                test.ToTestNode().WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
+                test.TestNode.WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
             
             var unitTestResult = new TUnitTestResult
             {
@@ -150,7 +151,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             var end = DateTimeOffset.Now;
 
-            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.ToTestNode()
+            await _messageBus.PublishAsync(this, new TestNodeUpdateMessage(session.SessionUid, test.TestNode
                 .WithProperty(new FailedTestNodeStateProperty(e))
                 .WithProperty(new TimingProperty(new TimingInfo(start, end, end-start)))
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionmessage", e.Message))
@@ -178,10 +179,9 @@ internal class SingleTestExecutor : IDataProducer
         {
             await _disposer.DisposeAsync(testContext?.TestInformation.ClassInstance);
 
-            lock (_consoleStandardOutLock)
-            {
-                testContext?.Dispose();
-            }
+            using var lockHandle = await _consoleStandardOutLock.WaitAsync();
+            
+            await _disposer.DisposeAsync(testContext);
         }
     }
 
@@ -194,7 +194,7 @@ internal class SingleTestExecutor : IDataProducer
         });
     }
 
-    private readonly object _consoleStandardOutLock = new();
+    private readonly AsyncSemaphore _consoleStandardOutLock = new(1, 1);
 
     private async Task ExecuteWithRetries(UnInvokedTest unInvokedTest)
     {
@@ -325,6 +325,9 @@ internal class SingleTestExecutor : IDataProducer
     public string DisplayName => _extension.DisplayName;
 
     public string Description => _extension.Description;
-    
-    public Type[] DataTypesProduced { get; } = [typeof(TestNodeUpdateMessage)];
+
+    public Type[] DataTypesProduced { get; } =
+    [
+        typeof(TestNodeUpdateMessage)
+    ];
 }

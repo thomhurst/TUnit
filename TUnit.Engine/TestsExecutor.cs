@@ -35,7 +35,7 @@ internal class TestsExecutor
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(IEnumerable<TestInformation> testNodes, ITestExecutionFilter? filter,  TestSessionContext session)
+    public async Task ExecuteAsync(List<DiscoveredTest> testNodes, ITestExecutionFilter? filter,  TestSessionContext session)
     {
         _consoleInterceptor.Initialize();
         
@@ -47,7 +47,7 @@ internal class TestsExecutor
             
             foreach (var test in tests.AllTests)
             {
-                if (TestDictionary.TryGetTest(test.TestId, out var matchingTest))
+                if (TestDictionary.TryGetTest(test.TestInformation.TestId, out var matchingTest))
                 {
                     ClassHookOrchestrator.RegisterInstance(matchingTest.TestContext.TestInformation.ClassType);
                 }
@@ -68,7 +68,7 @@ internal class TestsExecutor
         }
     }
 
-    private async Task ProcessNotInParallelTests(Queue<TestInformation> testsNotInParallel, ITestExecutionFilter? filter, TestSessionContext session)
+    private async Task ProcessNotInParallelTests(Queue<DiscoveredTest> testsNotInParallel, ITestExecutionFilter? filter, TestSessionContext session)
     {
         foreach (var testInformation in testsNotInParallel)
         {
@@ -80,7 +80,7 @@ internal class TestsExecutor
         ITestExecutionFilter? filter, TestSessionContext session)
     {
         var tasks = testsToProcess
-            .OrderBy(x => x.Test.Order)
+            .OrderBy(x => x.Test.TestInformation.Order)
             .Select(notInParallelTestCase => Task.Run(async () =>
             {
                 var keys = notInParallelTestCase.ConstraintKeys;
@@ -112,7 +112,7 @@ internal class TestsExecutor
         await Task.WhenAll(tasks);
     }
 
-    private async Task ProcessParallelTests(Queue<TestInformation> queue, ITestExecutionFilter? filter,
+    private async Task ProcessParallelTests(Queue<DiscoveredTest> queue, ITestExecutionFilter? filter,
         TestSessionContext session)
     {
         var executing = new List<Task>();
@@ -125,7 +125,7 @@ internal class TestsExecutor
         await WhenAllSafely(executing);
     }
 
-    private async IAsyncEnumerable<Task<TUnitTestResult>> ProcessQueue(Queue<TestInformation> queue,
+    private async IAsyncEnumerable<Task<TUnitTestResult>> ProcessQueue(Queue<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
         TestSessionContext session)
     {
@@ -150,7 +150,7 @@ internal class TestsExecutor
         }
     }
 
-    private async Task<TUnitTestResult> ProcessTest(TestInformation test,
+    private async Task<TUnitTestResult> ProcessTest(DiscoveredTest test,
         ITestExecutionFilter? filter, TestSessionContext session)
     {
         NotifyTestStart();

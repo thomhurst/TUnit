@@ -14,7 +14,7 @@ internal class TUnitTestDiscoverer
         _testFilterService = testFilterService;
     }
     
-    public IEnumerable<TestInformation> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest, CancellationToken cancellationToken)
+    public IEnumerable<DiscoveredTest> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         
