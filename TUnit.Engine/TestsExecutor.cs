@@ -38,13 +38,13 @@ internal class TestsExecutor
     public async Task ExecuteAsync(List<DiscoveredTest> testNodes, ITestExecutionFilter? filter,  TestSessionContext session)
     {
         _consoleInterceptor.Initialize();
-        
+
         try
         {
             await AssemblyHookOrchestrators.ExecuteSetups();
-        
+
             var tests = _testGrouper.OrganiseTests(testNodes);
-            
+
             foreach (var test in tests.AllTests)
             {
                 if (TestDictionary.TryGetTest(test.TestInformation.TestId, out var matchingTest))
@@ -58,7 +58,7 @@ internal class TestsExecutor
                 ProcessParallelTests(tests.Parallel, filter, session),
                 ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, session)
             );
-        
+
             // These have to run on their own
             await ProcessNotInParallelTests(tests.NotInParallel, filter, session);
         }
@@ -122,7 +122,7 @@ internal class TestsExecutor
             executing.Add(testTask);
         }
 
-        await WhenAllSafely(executing);
+        await Task.WhenAll(executing);
     }
 
     private async IAsyncEnumerable<Task> ProcessQueue(Queue<DiscoveredTest> queue,
@@ -136,7 +136,7 @@ internal class TestsExecutor
                 break;
             }
             
-            if (Thread.VolatileRead(ref _currentlyExecutingTests) < Environment.ProcessorCount 
+            if (_currentlyExecutingTests < Environment.ProcessorCount 
                 || !_systemResourceMonitor.IsSystemStrained())
             {
                 var test = queue.Dequeue();

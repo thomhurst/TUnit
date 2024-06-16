@@ -43,7 +43,7 @@ internal class SystemResourceMonitor : IDisposable
 
     private bool IsCpuStrained()
     {
-        if (!HardwareInfo.CpuList.Any())
+        if (HardwareInfo.CpuList.Count == 0)
         {
             return _fallbackCpuPercentage > 90;
         }

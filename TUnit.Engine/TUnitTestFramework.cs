@@ -58,10 +58,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             try
             {
-                var discoveredTests = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
+                var discoveredTests = _myServiceProvider
+                    .GetRequiredService<TUnitTestDiscoverer>()
                     .DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken)
                     .ToList();
-                
+
                 var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
 
                 if (context.Request is DiscoverTestExecutionRequest)
@@ -70,7 +71,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     {
                         var testNode = testInformation.TestNode;
                         testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
-                        
+
                         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
                             sessionUid: context.Request.Session.SessionUid,
                             testNode: testNode)
@@ -82,16 +83,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 else if (context.Request is RunTestExecutionRequest runTestExecutionRequest)
                 {
                     stopwatch.Start();
-                    
+
                     await NotifyFailedTests(context, failedToInitializeTests, false);
-                    
-                    await ServiceProviderServiceExtensions.GetRequiredService<TestsExecutor>(_myServiceProvider)
+
+                    await _myServiceProvider.GetRequiredService<TestsExecutor>()
                         .ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context.Request.Session);
                 }
                 else
                 {
                     throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
                 }
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Tests aren't safe! - We shouldn't be throwing exceptions here", e);
             }
             finally
             {
