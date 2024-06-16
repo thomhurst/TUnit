@@ -1,5 +1,4 @@
-﻿using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Requests;
+﻿using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 #pragma warning disable TPEXP
 

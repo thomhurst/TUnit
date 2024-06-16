@@ -30,7 +30,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             .AddFromFrameworkServiceProvider(serviceProvider, extension)
             .BuildServiceProvider();
 
-        _logger = ServiceProviderServiceExtensions.GetRequiredService<TUnitLogger>(_myServiceProvider);
+        _logger = _myServiceProvider.GetRequiredService<TUnitLogger>();
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -58,19 +58,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             try
             {
-                var testInformations = ServiceProviderServiceExtensions.GetRequiredService<TUnitTestDiscoverer>(_myServiceProvider)
+                var discoveredTests = _myServiceProvider
+                    .GetRequiredService<TUnitTestDiscoverer>()
                     .DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken)
                     .ToList();
-                
+
                 var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
 
                 if (context.Request is DiscoverTestExecutionRequest)
                 {
-                    foreach (var testInformation in testInformations)
+                    foreach (var testInformation in discoveredTests)
                     {
-                        var testNode = testInformation.ToTestNode();
+                        var testNode = testInformation.TestNode;
                         testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
-                        
+
                         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
                             sessionUid: context.Request.Session.SessionUid,
                             testNode: testNode)
@@ -82,16 +83,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 else if (context.Request is RunTestExecutionRequest runTestExecutionRequest)
                 {
                     stopwatch.Start();
-                    
+
                     await NotifyFailedTests(context, failedToInitializeTests, false);
-                    
-                    await ServiceProviderServiceExtensions.GetRequiredService<TestsExecutor>(_myServiceProvider)
-                        .ExecuteAsync(testInformations, runTestExecutionRequest.Filter, context.Request.Session);
+
+                    await _myServiceProvider.GetRequiredService<TestsExecutor>()
+                        .ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
                 }
                 else
                 {
                     throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
                 }
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Tests aren't safe! - We shouldn't be throwing exceptions here", e);
             }
             finally
             {

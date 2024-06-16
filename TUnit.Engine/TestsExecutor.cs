@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
-using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Models;
 
@@ -35,19 +35,19 @@ internal class TestsExecutor
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(IEnumerable<TestInformation> testNodes, ITestExecutionFilter? filter,  TestSessionContext session)
+    public async Task ExecuteAsync(List<DiscoveredTest> testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
     {
         _consoleInterceptor.Initialize();
-        
+
         try
         {
             await AssemblyHookOrchestrators.ExecuteSetups();
-        
+
             var tests = _testGrouper.OrganiseTests(testNodes);
-            
+
             foreach (var test in tests.AllTests)
             {
-                if (TestDictionary.TryGetTest(test.TestId, out var matchingTest))
+                if (TestDictionary.TryGetTest(test.TestInformation.TestId, out var matchingTest))
                 {
                     ClassHookOrchestrator.RegisterInstance(matchingTest.TestContext.TestInformation.ClassType);
                 }
@@ -55,12 +55,12 @@ internal class TestsExecutor
 
             // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint
             await Task.WhenAll(
-                ProcessParallelTests(tests.Parallel, filter, session),
-                ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, session)
+                ProcessParallelTests(tests.Parallel, filter, context),
+                ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context)
             );
-        
+
             // These have to run on their own
-            await ProcessNotInParallelTests(tests.NotInParallel, filter, session);
+            await ProcessNotInParallelTests(tests.NotInParallel, filter, context);
         }
         finally
         {
@@ -68,19 +68,19 @@ internal class TestsExecutor
         }
     }
 
-    private async Task ProcessNotInParallelTests(Queue<TestInformation> testsNotInParallel, ITestExecutionFilter? filter, TestSessionContext session)
+    private async Task ProcessNotInParallelTests(Queue<DiscoveredTest> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
         foreach (var testInformation in testsNotInParallel)
         {
-            await ProcessTest(testInformation, filter, session);
+            await ProcessTest(testInformation, filter, context);
         }
     }
 
     private async Task ProcessKeyedNotInParallelTests(List<NotInParallelTestCase> testsToProcess,
-        ITestExecutionFilter? filter, TestSessionContext session)
+        ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
         var tasks = testsToProcess
-            .OrderBy(x => x.Test.Order)
+            .OrderBy(x => x.Test.TestInformation.Order)
             .Select(notInParallelTestCase => Task.Run(async () =>
             {
                 var keys = notInParallelTestCase.ConstraintKeys;
@@ -94,7 +94,7 @@ internal class TestsExecutor
 
                 try
                 {
-                    await ProcessTest(notInParallelTestCase.Test, filter, session);
+                    await ProcessTest(notInParallelTestCase.Test, filter, context);
                 }
                 catch (Exception e)
                 {
@@ -112,22 +112,22 @@ internal class TestsExecutor
         await Task.WhenAll(tasks);
     }
 
-    private async Task ProcessParallelTests(Queue<TestInformation> queue, ITestExecutionFilter? filter,
-        TestSessionContext session)
+    private async Task ProcessParallelTests(Queue<DiscoveredTest> queue, ITestExecutionFilter? filter,
+        ExecuteRequestContext context)
     {
         var executing = new List<Task>();
         
-        await foreach (var testResult in ProcessQueue(queue, filter, session))
+        await foreach (var testTask in ProcessQueue(queue, filter, context))
         {
-            executing.Add(testResult);
+            executing.Add(testTask);
         }
 
-        await WhenAllSafely(executing);
+        await Task.WhenAll(executing);
     }
 
-    private async IAsyncEnumerable<Task<TUnitTestResult>> ProcessQueue(Queue<TestInformation> queue,
+    private async IAsyncEnumerable<Task> ProcessQueue(Queue<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
-        TestSessionContext session)
+        ExecuteRequestContext context)
     {
         while (queue.Count > 0)
         {
@@ -136,12 +136,12 @@ internal class TestsExecutor
                 break;
             }
             
-            if (Thread.VolatileRead(ref _currentlyExecutingTests) < Environment.ProcessorCount 
+            if (_currentlyExecutingTests < Environment.ProcessorCount 
                 || !_systemResourceMonitor.IsSystemStrained())
             {
                 var test = queue.Dequeue();
 
-                yield return ProcessTest(test, filter, session);
+                yield return ProcessTest(test, filter, context);
             }
             else
             {
@@ -150,14 +150,18 @@ internal class TestsExecutor
         }
     }
 
-    private async Task<TUnitTestResult> ProcessTest(TestInformation test,
-        ITestExecutionFilter? filter, TestSessionContext session)
+    private async Task ProcessTest(DiscoveredTest test,
+        ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
         NotifyTestStart();
 
         try
         {
-            return await _singleTestExecutor.ExecuteTestAsync(test, filter, session);
+            await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context));
+        }
+        catch
+        {
+            // Ignored
         }
         finally
         {

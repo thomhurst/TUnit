@@ -1,12 +1,10 @@
-﻿using TUnit.Core;
-
-namespace TUnit.Engine.Models;
+﻿namespace TUnit.Engine.Models;
 
 internal record NotInParallelTestCase
 {
-    public string Id => Test.TestId;
+    public string Id => Test.TestInformation.TestId;
     public required ConstraintKeysCollection ConstraintKeys { get; init; }
-    public required TestInformation Test { get; init; }
+    public required DiscoveredTest Test { get; init; }
 
     public virtual bool Equals(NotInParallelTestCase? other)
     {

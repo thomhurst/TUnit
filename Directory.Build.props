@@ -19,6 +19,15 @@
         </AssemblyAttribute>
     </ItemGroup>
 
+    <PropertyGroup>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Authors>Tom Longhurst</Authors>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
     </ItemGroup>
@@ -30,6 +39,10 @@
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(TargetFramework)' != 'netstandard2.0'">
         <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     
     <PropertyGroup>
