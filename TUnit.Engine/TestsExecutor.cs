@@ -117,9 +117,9 @@ internal class TestsExecutor
     {
         var executing = new List<Task>();
         
-        await foreach (var testResult in ProcessQueue(queue, filter, session))
+        await foreach (var testTask in ProcessQueue(queue, filter, session))
         {
-            executing.Add(testResult);
+            executing.Add(testTask);
         }
 
         await WhenAllSafely(executing);

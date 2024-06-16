@@ -153,7 +153,7 @@ internal class SingleTestExecutor : IDataProducer
                     ComputerName = Environment.MachineName,
                     Exception = e,
                     Status = Status.Failed,
-                    Output = testContext?.GetConsoleOutput()
+                    Output = testContext.GetConsoleOutput()
                 };
             }
         }
@@ -169,11 +169,8 @@ internal class SingleTestExecutor : IDataProducer
 
     private async Task RunTest(UnInvokedTest unInvokedTest)
     {
-        await Task.Run(async () =>
-        {
-            ConsoleInterceptor.Instance.SetModule(unInvokedTest.TestContext);
-            await _testInvoker.Invoke(unInvokedTest);
-        });
+        ConsoleInterceptor.Instance.SetModule(unInvokedTest.TestContext);
+        await _testInvoker.Invoke(unInvokedTest);
     }
 
     private readonly AsyncSemaphore _consoleStandardOutLock = new(1, 1);
@@ -200,6 +197,7 @@ internal class SingleTestExecutor : IDataProducer
                 }
                 
                 await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying...");
+                unInvokedTest.ResetTestInstance();
             }
         }
     }
@@ -233,9 +231,9 @@ internal class SingleTestExecutor : IDataProducer
 
         var testContext = unInvokedTest.TestContext;
         var testInformation = testContext.TestInformation;
-        
+
         testInformation.CurrentExecutionCount++;
-        
+
         using var testLevelCancellationTokenSource =
             CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
 
@@ -246,18 +244,11 @@ internal class SingleTestExecutor : IDataProducer
 
         testContext.CancellationTokenSource = testLevelCancellationTokenSource;
 
-        try
-        {
-            await ExecuteTestMethodWithTimeout(
-                testInformation,
-                () => RunTest(unInvokedTest),
-                testLevelCancellationTokenSource
-            );
-        }
-        finally
-        {
-            unInvokedTest.ResetTestInstance();
-        }
+        await ExecuteTestMethodWithTimeout(
+            testInformation,
+            () => RunTest(unInvokedTest),
+            testLevelCancellationTokenSource
+        );
     }
 
     private async Task ExecuteTestMethodWithTimeout(TestInformation testInformation, Func<Task> testDelegate,
@@ -272,7 +263,7 @@ internal class SingleTestExecutor : IDataProducer
         }
         
         var timeoutTask = Task.Delay(testInformation.Timeout.Value, cancellationTokenSource.Token)
-            .ContinueWith(t =>
+            .ContinueWith(_ =>
             {
                 if (methodResult.IsCompleted)
                 {
