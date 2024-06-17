@@ -70,26 +70,8 @@ internal class SingleTestExecutor : IDataProducer
                 await applicableTestAttribute.Apply(testContext);
             }
             
-            var cleanUpExceptions = new List<Exception>();
-
-            try
-            {
-                await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext);
-                await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
-
-                await ExecuteWithRetries(unInvokedTest);
-            }
-            finally
-            {
-                await GlobalTestHookOrchestrator.ExecuteCleanUps(unInvokedTest.TestContext, cleanUpExceptions);
-                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassInstance, unInvokedTest.TestContext.TestInformation.ClassType, cleanUpExceptions);
-            }
-
-            if (cleanUpExceptions.Any())
-            {
-                throw new AggregateException(cleanUpExceptions);
-            }
-
+            await ExecuteWithRetries(unInvokedTest);
+            
             var end = DateTimeOffset.Now;
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
