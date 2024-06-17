@@ -6,12 +6,13 @@ internal class TestInvoker
 {
     public async Task Invoke(UnInvokedTest unInvokedTest)
     {
-        var teardownExceptions = new List<Exception>();
+        var cleanUpExceptions = new List<Exception>();
         
         try
         {
             TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
 
+            await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext);
             await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
 
             await unInvokedTest.RunBeforeEachTestSetUps();
@@ -20,19 +21,20 @@ internal class TestInvoker
         }
         finally
         {
-            await unInvokedTest.RunAfterEachTestCleanUps(teardownExceptions);
+            await unInvokedTest.RunAfterEachTestCleanUps(cleanUpExceptions);
             
-            await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassInstance, unInvokedTest.TestContext.TestInformation.ClassType, teardownExceptions);
+            await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassInstance, unInvokedTest.TestContext.TestInformation.ClassType, cleanUpExceptions);
+            await GlobalTestHookOrchestrator.ExecuteCleanUps(unInvokedTest.TestContext, cleanUpExceptions);
         }
 
-        if (teardownExceptions.Any())
+        if (cleanUpExceptions.Any())
         {
-            if (teardownExceptions.Count == 1)
+            if (cleanUpExceptions.Count == 1)
             {
-                throw teardownExceptions.First();
+                throw cleanUpExceptions.First();
             }
 
-            throw new AggregateException(teardownExceptions);
+            throw new AggregateException(cleanUpExceptions);
         }
     }
 }
