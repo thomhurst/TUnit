@@ -130,13 +130,10 @@ internal static class TestSourceDataModelRetriever
             MinimalTypeName = namedTypeSymbol.Name,
             CurrentClassRepeatCount = currentClassCount,
             CurrentMethodRepeatCount = testGenerationContext.RepeatIndex,
-            Timeout = TestInformationRetriever.GetTimeOut(allAttributes),
             ReturnType = TestInformationRetriever.GetReturnType(methodSymbol),
-            Order = TestInformationRetriever.GetOrder(allAttributes),
-            RetryCount = TestInformationRetriever.GetRetryCount(allAttributes),
-            RepeatIndex = TestInformationRetriever.GetRepeatCount(allAttributes),
+            RepeatCount = TestInformationRetriever.GetRepeatCount(allAttributes),
+            RepeatIndex = testGenerationContext.RepeatIndex,
             Categories = string.Join(", ", TestInformationRetriever.GetCategories(allAttributes)),
-            NotInParallelConstraintKeys = TestInformationRetriever.GetNotInParallelConstraintKeys(allAttributes),
             ClassArguments = classArguments,
             IsEnumerableClassArguments = testGenerationContext.HasEnumerableClassMethodData,
             IsEnumerableMethodArguments = testGenerationContext.HasEnumerableTestMethodData,
@@ -145,11 +142,11 @@ internal static class TestSourceDataModelRetriever
             LineNumber = (int)testAttribute.ConstructorArguments[1].Value!,
             BeforeEachTestInvocations = BeforeEachTestRetriever.GenerateCode(namedTypeSymbol),
             AfterEachTestInvocations = AfterEachTestRetriever.GenerateCode(namedTypeSymbol),
-            CustomProperties = CustomPropertiesRetriever.GetCustomProperties(allAttributes),
             ApplicableTestAttributes = CustomTestAttributeRetriever.GetCustomAttributes(allAttributes, namedTypeSymbol),
             MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             ClassParameterTypes = [..namedTypeSymbol.Constructors.First().Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
-            MethodGenericTypeCount = methodSymbol.TypeParameters.Length
+            MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
+            CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string
         };
     }
 }

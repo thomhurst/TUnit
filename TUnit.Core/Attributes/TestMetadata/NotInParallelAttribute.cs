@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class NotInParallelAttribute : Attribute
+public class NotInParallelAttribute : TUnitAttribute
 {
     public string[] ConstraintKeys { get; } = Array.Empty<string>();
 

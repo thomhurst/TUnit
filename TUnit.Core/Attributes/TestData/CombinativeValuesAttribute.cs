@@ -1,7 +1,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Parameter)]
-public class CombinativeValuesAttribute : TUnitAttribute
+public sealed class CombinativeValuesAttribute : TUnitAttribute
 {
     public object?[] Objects { get; }
 

@@ -27,7 +27,9 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName RetryAttribute = "TUnit.Core.RetryAttribute";
     public static readonly FullyQualifiedTypeName TimeoutAttribute = "TUnit.Core.TimeoutAttribute";
     public static readonly FullyQualifiedTypeName CustomPropertyAttribute = "TUnit.Core.PropertyAttribute";
-    
+    public static readonly FullyQualifiedTypeName DisplayNameAttribute = "TUnit.Core.DisplayNameAttribute";
+    public static readonly FullyQualifiedTypeName NotInParallelAttribute = "TUnit.Core.NotInParallelAttribute";
+
     // Test Hooks Attributes
     public static readonly FullyQualifiedTypeName AssemblySetUpAttribute = "TUnit.Core.AssemblySetUpAttribute";
     public static readonly FullyQualifiedTypeName AssemblyCleanUpAttribute = "TUnit.Core.AssemblyCleanUpAttribute";

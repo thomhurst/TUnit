@@ -41,6 +41,7 @@ public abstract record TestInformation
     public required Type ClassType { get; init; }
     public abstract object? ClassInstance { get; }
     public required int RepeatIndex { get; init; }
+    public required int RepeatCount { get; init; }
     public required int RetryCount { get; init; }
     public int CurrentExecutionCount { get; internal set; }
     

@@ -12,8 +12,8 @@ internal class RetryTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(3));
             
-            Assert.That(generatedFiles[0], Does.Contain("RetryCount = 1,"));
-            Assert.That(generatedFiles[1], Does.Contain("RetryCount = 2,"));
-            Assert.That(generatedFiles[2], Does.Contain("RetryCount = 3,"));
+            Assert.That(generatedFiles[0], Does.Contain("RetryCount = global::TUnit.Engine.Helpers.AttributeHelper.GetAttribute<global::TUnit.Core.RetryAttribute>(typeof(global::TUnit.TestProject.RetryTests), methodInfo)?.Times ?? 0,"));
+            Assert.That(generatedFiles[1], Does.Contain("RetryCount = global::TUnit.Engine.Helpers.AttributeHelper.GetAttribute<global::TUnit.Core.RetryAttribute>(typeof(global::TUnit.TestProject.RetryTests), methodInfo)?.Times ?? 0,"));
+            Assert.That(generatedFiles[2], Does.Contain("RetryCount = global::TUnit.Engine.Helpers.AttributeHelper.GetAttribute<global::TUnit.Core.RetryAttribute>(typeof(global::TUnit.TestProject.RetryTests), methodInfo)?.Times ?? 0,"));
         });
 }

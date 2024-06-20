@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class ClassDataSourceAttribute<T>() : ClassDataSourceAttribute(typeof(T)) where T : new(); 
+public sealed class ClassDataSourceAttribute<T>() : ClassDataSourceAttribute(typeof(T)) where T : new(); 
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public class ClassDataSourceAttribute : TUnitAttribute
