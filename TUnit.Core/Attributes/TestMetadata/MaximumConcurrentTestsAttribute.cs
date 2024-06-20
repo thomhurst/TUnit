@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Assembly)]
-public class MaximumConcurrentTestsAttribute : Attribute
+public class MaximumConcurrentTestsAttribute : TUnitAttribute
 {
     public int MaximumConcurrentTests { get; }
 

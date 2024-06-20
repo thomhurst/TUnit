@@ -3,7 +3,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class ExplicitAttribute : Attribute
+public class ExplicitAttribute : TUnitAttribute
 {
     public string For { get; }
 

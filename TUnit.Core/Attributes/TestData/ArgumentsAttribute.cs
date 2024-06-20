@@ -1,7 +1,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public class ArgumentsAttribute : TUnitAttribute
+public sealed class ArgumentsAttribute : TUnitAttribute
 {
     public object?[] Values { get; }
 

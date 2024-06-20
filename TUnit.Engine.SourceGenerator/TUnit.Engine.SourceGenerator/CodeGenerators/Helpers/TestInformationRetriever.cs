@@ -10,28 +10,6 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class TestInformationRetriever
 {
-    private const int DefaultOrder = int.MaxValue / 2;
-
-    public static string GetNotInParallelConstraintKeys(AttributeData[] methodAndClassAttributes)
-    {
-        var notInParallelAttributes = methodAndClassAttributes
-            .Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                        == "global::TUnit.Core.NotInParallelAttribute")
-            .ToList();
-
-        if (!notInParallelAttributes.Any())
-        {
-            return "null";
-        }
-        
-        var notInConstraintKeys = notInParallelAttributes
-            .SelectMany(x => x.ConstructorArguments)
-            .SelectMany(x => x.Value == null ? x.Values.Select(x => x.Value) : [x.Value])
-            .Select(x => $"\"{x}\"");
-        
-        return $"[{string.Join(", ", notInConstraintKeys)}]";
-    }
-
     public static int GetRepeatCount(AttributeData[] methodAndClassAttributes)
     {
         return methodAndClassAttributes
@@ -43,48 +21,13 @@ internal static class TestInformationRetriever
     public static TestLocation GetTestLocation(AttributeData[] methodAndClassAttributes)
     {
         var testAttribute = methodAndClassAttributes
-            .First(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                     == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
+            .First(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix) == true);
 
         return new TestLocation
         {
             FilePath = TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[0])!,
             LineNumber = int.Parse(TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[1])!)
         };
-    }
-
-    public static int GetRetryCount(AttributeData[] methodAndClassAttributes)
-    {
-        var retryAttribute = methodAndClassAttributes
-            .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == "global::TUnit.Core.RetryAttribute");
-        
-        return retryAttribute?.ConstructorArguments.SafeFirstOrDefault().Value as int? ?? 0;
-    }
-
-    public static int GetOrder(AttributeData[] methodAndClassAttributes)
-    {
-        var notInParallelAttribute = methodAndClassAttributes
-            .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                     == "global::TUnit.Core.NotInParallelAttribute");
-        
-        return notInParallelAttribute?.NamedArguments.SafeFirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? DefaultOrder;
-    }
-
-    public static string GetTimeOut(AttributeData[] methodAndClassAttributes)
-    {
-        var timeoutAttribute = methodAndClassAttributes
-            .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                     == "global::TUnit.Core.TimeoutAttribute");
-
-        if (timeoutAttribute is null)
-        {
-            return "null";
-        }
-
-        var timeoutMillis = (int)timeoutAttribute.ConstructorArguments.SafeFirstOrDefault().Value!;
-        
-        return $"global::System.TimeSpan.FromMilliseconds({timeoutMillis})";
     }
 
     public static IEnumerable<string> GetCategories(AttributeData[] methodAndClassAttributes)

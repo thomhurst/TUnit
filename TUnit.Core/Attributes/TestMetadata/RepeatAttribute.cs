@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class RepeatAttribute : TUnitAttribute
+public sealed class RepeatAttribute : TUnitAttribute
 {
     public int Times { get; }
 
