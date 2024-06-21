@@ -52,8 +52,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         EngineCancellationToken.Initialise(context.CancellationToken);
         
-        var stopwatch = new Stopwatch();
-        
         await using (_myServiceProvider)
         {
             try
@@ -82,8 +80,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 }
                 else if (context.Request is RunTestExecutionRequest runTestExecutionRequest)
                 {
-                    stopwatch.Start();
-
                     await NotifyFailedTests(context, failedToInitializeTests, false);
 
                     await _myServiceProvider.GetRequiredService<TestsExecutor>()
@@ -100,10 +96,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             }
             finally
             {
-                var time = stopwatch.Elapsed;
-
-                await _logger.LogInformationAsync($"Time elapsed: {time}");
-
                 await ServiceProviderServiceExtensions
                     .GetRequiredService<TUnitOnEndExecutor>(_myServiceProvider)
                     .ExecuteAsync();
