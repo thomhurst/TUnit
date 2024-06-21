@@ -12,9 +12,9 @@ public class TimeoutTests5 : TestModule
             "/*/*/TimeoutCancellationTokenTests/CombinativeTest",
             [
                 result => result.Successful.Should().BeFalse(),
-                result => result.Total.Should().Be(1),
+                result => result.Total.Should().Be(3),
                 result => result.Passed.Should().Be(0),
-                result => result.Failed.Should().Be(1),
+                result => result.Failed.Should().Be(3),
                 result => result.Skipped.Should().Be(0),
                 _ => (DateTime.UtcNow - start).Should().BeLessThan(TimeSpan.FromMinutes(1)),
                 _ => (DateTime.UtcNow - start).Should().BeGreaterThan(TimeSpan.FromSeconds(30)),
