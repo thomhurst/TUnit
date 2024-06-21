@@ -14,7 +14,7 @@ internal class NotInParallelTests : TestsBase<TestsGenerator>
 
             foreach (var generatedFile in generatedFiles)
             {
-                Assert.That(generatedFile, Does.Contain("NotInParallelConstraintKeys = global::TUnit.Engine.Helpers.AttributeHelper.GetAttribute<global::TUnit.Core.NotInParallelAttribute>(typeof(global::TUnit.TestProject.NotInParallelTests), methodInfo)?.ConstraintKeys,"));
+                Assert.That(generatedFile, Does.Contain("NotInParallelConstraintKeys = global::TUnit.Engine.Helpers.AttributeHelper.GetAttribute<global::TUnit.Core.NotInParallelAttribute>(attributes)?.ConstraintKeys,"));
             }
         });
 }

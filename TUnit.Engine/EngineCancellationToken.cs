@@ -3,11 +3,9 @@
 public static class EngineCancellationToken
 {
     internal static CancellationTokenSource CancellationTokenSource { get; private set; } = new();
-    public static CancellationToken CreateToken(TimeSpan timeout)
+    public static TimedCancellationToken CreateToken(TimeSpan timeout)
     {
-        var newCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationTokenSource.Token);
-        newCancellationTokenSource.CancelAfter(timeout);
-        return newCancellationTokenSource.Token;
+        return new TimedCancellationToken(timeout);
     }
 
     internal static void Initialise(CancellationToken cancellationToken)

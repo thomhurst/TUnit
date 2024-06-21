@@ -10,4 +10,11 @@ public static class AttributeHelper
             .Concat(type.GetCustomAttributes<TAttribute>())
             .FirstOrDefault();
     }
+    
+    public static TAttribute? GetAttribute<TAttribute>(IEnumerable<Attribute> attributes) where TAttribute : Attribute
+    {
+        return attributes
+            .OfType<TAttribute>()
+            .FirstOrDefault();
+    }
 }
