@@ -11,7 +11,7 @@ public class TimeoutTests2 : TestModule
         return await RunTestsWithFilter(context, 
             "/*/*/TimeoutCancellationTokenTests/InheritedTimeoutAttribute",
             [
-                result => result.Successful.Should().BeTrue(),
+                result => result.Successful.Should().BeFalse(),
                 result => result.Total.Should().Be(1),
                 result => result.Passed.Should().Be(0),
                 result => result.Failed.Should().Be(1),
