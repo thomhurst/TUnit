@@ -30,14 +30,6 @@ internal static class TestInformationRetriever
         };
     }
 
-    public static IEnumerable<string> GetCategories(AttributeData[] methodAndClassAttributes)
-    {
-        return methodAndClassAttributes
-            .Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                        == "global::TUnit.Core.CategoryAttribute")
-            .Select(x => $"\"{x.ConstructorArguments.SafeFirstOrDefault().Value}\"");
-    }
-
     public static string GetTestId(TestGenerationContext testGenerationContext)
     {
         var stringBuilder = new StringBuilder();
