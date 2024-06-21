@@ -1,5 +1,6 @@
 ﻿namespace TUnit.Core;
 
+// Don't think there's a way to enable inheritance on this because the source generator needs to access the constructor argument
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public sealed class RepeatAttribute : TUnitAttribute
 {
