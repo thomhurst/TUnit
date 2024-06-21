@@ -27,7 +27,6 @@ internal record TestSourceDataModel
     public required int CurrentClassRepeatCount { get; init; }
     
     public required string ReturnType { get; init; }
-    public required string Categories { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
     public required string ApplicableTestAttributes { get; init; }

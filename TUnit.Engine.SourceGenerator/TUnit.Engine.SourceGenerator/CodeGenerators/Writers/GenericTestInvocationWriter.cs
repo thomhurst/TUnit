@@ -74,8 +74,7 @@ internal static class GenericTestInvocationWriter
             $"var testInformation = new global::TUnit.Core.TestInformation<{fullyQualifiedClassType}>()");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine(
-            $"Categories = [{testSourceDataModel.Categories}],");
+        sourceBuilder.WriteLine("Categories = attributes.OfType<global::TUnit.Core.CategoryAttribute>().Select(x => x.Category).ToArray(),");
         sourceBuilder.WriteLine("LazyClassInstance = resettableClassFactory,");
         sourceBuilder.WriteLine($"ClassType = typeof({fullyQualifiedClassType}),");
         sourceBuilder.WriteLine($"Timeout = {GetAttribute(WellKnownFullyQualifiedClassNames.TimeoutAttribute)}?.Timeout,");

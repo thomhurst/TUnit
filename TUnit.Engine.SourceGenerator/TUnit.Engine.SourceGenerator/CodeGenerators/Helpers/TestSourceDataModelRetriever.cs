@@ -133,7 +133,6 @@ internal static class TestSourceDataModelRetriever
             ReturnType = TestInformationRetriever.GetReturnType(methodSymbol),
             RepeatCount = TestInformationRetriever.GetRepeatCount(allAttributes),
             RepeatIndex = testGenerationContext.RepeatIndex,
-            Categories = string.Join(", ", TestInformationRetriever.GetCategories(allAttributes)),
             ClassArguments = classArguments,
             IsEnumerableClassArguments = testGenerationContext.HasEnumerableClassMethodData,
             IsEnumerableMethodArguments = testGenerationContext.HasEnumerableTestMethodData,
