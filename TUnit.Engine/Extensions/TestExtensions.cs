@@ -22,7 +22,7 @@ internal static class TestExtensions
                 new TestMethodIdentifierProperty(
                     Namespace: testDetails.ClassType.Namespace!,
                     AssemblyFullName: testDetails.ClassType.Assembly.FullName!,
-                    TypeName: testDetails.ClassType.FullName!,
+                    TypeName: testDetails.ClassType.Name,
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [],
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
