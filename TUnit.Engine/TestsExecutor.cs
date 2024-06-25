@@ -80,36 +80,42 @@ internal class TestsExecutor
         ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
         var tasks = testsToProcess
-            .OrderBy(x => x.Test.TestInformation.Order)
-            .Select(notInParallelTestCase => Task.Run(async () =>
-            {
-                var keys = notInParallelTestCase.ConstraintKeys;
-                
-                var locks = keys.Select(GetLockForKey).ToArray();
-                
-                while (!WaitHandle.WaitAll(locks, TimeSpan.FromMilliseconds(100), false))
-                {
-                    await Task.Delay(TimeSpan.FromMilliseconds(500));
-                }
-
-                try
-                {
-                    await ProcessTest(notInParallelTestCase.Test, filter, context);
-                }
-                catch (Exception e)
-                {
-                    await _logger.LogErrorAsync(e);
-                }
-                finally
-                {
-                    foreach (var semaphore in locks)
-                    {
-                        semaphore.Release();
-                    }
-                }
-            }));
+            .GroupBy(x => x.ConstraintKeys)
+            .Select(group => Task.Run(() => ProcessGroup(filter, context, group)));
 
         await Task.WhenAll(tasks);
+    }
+
+    private async Task ProcessGroup(ITestExecutionFilter? filter, ExecuteRequestContext context,
+        IEnumerable<NotInParallelTestCase> tests)
+    {
+        foreach (var test in tests.OrderBy(x => x.Test.TestInformation.Order))
+        {
+            var keys = test.ConstraintKeys;
+
+            var locks = keys.Select(GetLockForKey).ToArray();
+
+            while (!WaitHandle.WaitAll(locks, TimeSpan.FromMilliseconds(100), false))
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
+            }
+
+            try
+            {
+                await ProcessTest(test.Test, filter, context);
+            }
+            catch (Exception e)
+            {
+                await _logger.LogErrorAsync(e);
+            }
+            finally
+            {
+                foreach (var semaphore in locks)
+                {
+                    semaphore.Release();
+                }
+            }
+        }
     }
 
     private async Task ProcessParallelTests(Queue<DiscoveredTest> queue, ITestExecutionFilter? filter,

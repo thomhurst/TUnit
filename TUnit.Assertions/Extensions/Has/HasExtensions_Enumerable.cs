@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static BaseAssertCondition<TActual, TAnd, TOr> SingleItem<TActual, TAnd, TOr>(this Has<TActual, TAnd, TOr> has) 
+    public static BaseAssertCondition<TActual, TAnd, TOr> SingleItem<TActual, TAnd, TOr>(this Has<TActual, TAnd, TOr> has, IEqualityComparer equalityComparer = null) 
         where TActual : IEnumerable
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>

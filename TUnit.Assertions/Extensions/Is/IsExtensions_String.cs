@@ -22,4 +22,43 @@ public static partial class IsExtensions
     {
         return AssertionConditionCombiner.Combine(@is, new StringEqualsAssertCondition<TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
     }
+    
+    public static BaseAssertCondition<string, TAnd, TOr> Empty<TAnd, TOr>(this Is<string, TAnd, TOr> @is)
+        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    {
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<string, int,TAnd,TOr>(
+            @is.AssertionBuilder.AppendCallerMethod(null), 0,
+            (value, _, _, self) =>
+            {
+                if (value is null)
+                {
+                    self.WithMessage((_, _) => "Actual string is null");
+                    return false;
+                }
+                
+                return value == string.Empty;
+            },
+            (s, _) => $"'{s}' was not empty"));
+    }
+    
+    public static BaseAssertCondition<string, TAnd, TOr> NullOrEmpty<TAnd, TOr>(this Is<string, TAnd, TOr> @is)
+        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    {
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<string, int,TAnd,TOr>(
+            @is.AssertionBuilder.AppendCallerMethod(null), 0,
+            (value, _, _, self) => string.IsNullOrEmpty(value),
+            (s, _) => $"'{s}' is not null or empty"));
+    }
+    
+    public static BaseAssertCondition<string, TAnd, TOr> NullOrWhitespace<TAnd, TOr>(this Is<string, TAnd, TOr> @is)
+        where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
+        where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    {
+        return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<string, int,TAnd,TOr>(
+            @is.AssertionBuilder.AppendCallerMethod(null), 0,
+            (value, _, _, self) => string.IsNullOrWhiteSpace(value),
+            (s, _) => $"'{s}' is not null or whitespace"));
+    }
 }

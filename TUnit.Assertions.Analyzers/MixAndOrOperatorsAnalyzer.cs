@@ -31,7 +31,9 @@ public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
         // The Roslyn architecture is based on inheritance.
         // To get the required metadata, we should match the 'Node' object to the particular type: 'ClassDeclarationSyntax'.
         if (context.Node is not MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+        {
             return;
+        }
 
         if (memberAccessExpressionSyntax.Name.Identifier.Value is not "And" and not "Or")
         {

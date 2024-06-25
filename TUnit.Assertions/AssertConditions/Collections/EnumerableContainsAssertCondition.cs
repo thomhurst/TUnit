@@ -8,8 +8,11 @@ public class EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr> : Ass
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    public EnumerableContainsAssertCondition(AssertionBuilder<TActual> assertionBuilder, TInner expected) : base(assertionBuilder, expected)
+    private readonly IEqualityComparer<TInner?>? _equalityComparer;
+
+    public EnumerableContainsAssertCondition(AssertionBuilder<TActual> assertionBuilder, TInner expected, IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
     {
+        _equalityComparer = equalityComparer;
     }
 
     protected override string DefaultMessage => $"{ExpectedValue} was not found in the collection";
@@ -22,6 +25,6 @@ public class EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr> : Ass
             return false;
         }
         
-        return actualValue.Contains(ExpectedValue);
+        return actualValue.Contains(ExpectedValue, _equalityComparer);
     }
 }
