@@ -39,7 +39,9 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
 
         // To get the required metadata, we should match the Node to the specific type: 'ClassDeclarationSyntax'.
         if (diagnosticNode is not ExpressionStatementSyntax expressionStatementSyntax)
+        {
             return;
+        }
 
         // Register a code action that will invoke the fix.
         context.RegisterCodeFix(
