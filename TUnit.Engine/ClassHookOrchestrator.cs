@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Models;
@@ -16,8 +15,7 @@ public static class ClassHookOrchestrator
     private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
 
     private static readonly ConcurrentDictionary<Type, int> InstanceTrackers = new();
-
-    [MethodImpl(MethodImplOptions.Synchronized)]
+    
     public static void RegisterInstance(Type classType)
     {
         foreach (var type in GetTypesIncludingBase(classType))
@@ -27,54 +25,59 @@ public static class ClassHookOrchestrator
         }
     }
     
-    [MethodImpl(MethodImplOptions.Synchronized)]
     public static void RegisterSetUp(Type type, Func<Task> taskFactory)
     {
         var taskFunctions = SetUps.GetOrAdd(type, _ => []);
-        
+
         taskFunctions.Add(new Lazy<Task>(taskFactory));
     }
     
-    [MethodImpl(MethodImplOptions.Synchronized)]
     public static void RegisterCleanUp(Type type, Func<Task> taskFactory)
     {
         var taskFunctions = CleanUps.GetOrAdd(type, _ => []);
-        
+
         taskFunctions.Add(taskFactory);
     }
     
-    [MethodImpl(MethodImplOptions.Synchronized)]
     public static void RegisterTestContext(Type type, TestContext testContext)
     {
         var classHookContext = ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
-        {
-            ClassType = type
-        });
-        
+            {
+                ClassType = type
+            });
+
         classHookContext.Tests.Add(testContext);
-        
+
         var assemblyHookContext = AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
         {
             Assembly = type.Assembly
         });
-        
+
         assemblyHookContext.TestClasses.Add(classHookContext);
     }
     
-    [MethodImpl(MethodImplOptions.Synchronized)]
     public static ClassHookContext GetClassHookContext(Type type)
     {
-        return ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
+        lock (type)
         {
-            ClassType = type
-        });
+            return ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
+            {
+                ClassType = type
+            });
+        }
     }
 
-    public static AssemblyHookContext GetAssemblyHookContext(Type type) => AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
+    public static AssemblyHookContext GetAssemblyHookContext(Type type)
     {
-        Assembly = type.Assembly
-    });
-    
+        lock (type)
+        {
+            return AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
+            {
+                Assembly = type.Assembly
+            });
+        }
+    }
+
     public static IEnumerable<AssemblyHookContext> GetAllAssemblyHookContexts() => AssemblyHookContexts.Values;
     
     public static async Task ExecuteSetups(Type testClassType)
@@ -100,7 +103,7 @@ public static class ClassHookOrchestrator
         }
     }
     
-    public static async Task ExecuteCleanUpsIfLastInstance(object? classInstance, Type testClassType,
+    public static async Task ExecuteCleanUpsIfLastInstance(Type testClassType,
         List<Exception> cleanUpExceptions)
     {
         var typesIncludingBase = GetTypesIncludingBase(testClassType);
@@ -125,8 +128,6 @@ public static class ClassHookOrchestrator
                 await RunHelpers.RunSafelyAsync(cleanUp, cleanUpExceptions);
             }
         }
-
-        await RunHelpers.RunSafelyAsync(() => RunHelpers.Dispose(classInstance), cleanUpExceptions);
     }
 
     private static IEnumerable<Type> GetTypesIncludingBase(Type testClassType)
@@ -139,16 +140,13 @@ public static class ClassHookOrchestrator
             type = type.BaseType;
         }
     }
-
-    [MethodImpl(MethodImplOptions.Synchronized)]
+    
     private static int DecreaseCount(Type type)
     {
-        var count = InstanceTrackers[type];
-        
-        var newCount = count - 1;
-        
-        InstanceTrackers[type] = newCount;
-
-        return newCount;
+        lock (type)
+        {
+            var count = InstanceTrackers[type];
+            return InstanceTrackers[type] = count - 1;
+        }
     }
 }

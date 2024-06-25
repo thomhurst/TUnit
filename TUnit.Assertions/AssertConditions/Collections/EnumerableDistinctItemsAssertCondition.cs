@@ -9,10 +9,10 @@ public class EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr> 
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    private readonly IEqualityComparer<TInner>? _equalityComparer;
+    private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
     public EnumerableDistinctItemsAssertCondition(AssertionBuilder<TActual> assertionBuilder, TInner expected,
-        IEqualityComparer<TInner>? equalityComparer) : base(assertionBuilder, expected)
+        IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
     {
         _equalityComparer = equalityComparer;
     }
@@ -29,9 +29,7 @@ public class EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr> 
 
         var list = actualValue.Cast<TInner>().ToList();
 
-        var distinct = _equalityComparer == null
-            ? list.Distinct()
-            : list.Distinct(_equalityComparer);
+        var distinct = list.Distinct(_equalityComparer);
         
         return list.Count == distinct.Count();
     }

@@ -8,8 +8,11 @@ public class EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr> :
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
     where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
 {
-    public EnumerableEquivalentToAssertCondition(AssertionBuilder<TActual> assertionBuilder, IEnumerable<TInner> expected) : base(assertionBuilder, expected)
+    private readonly IEqualityComparer<TInner?>? _equalityComparer;
+
+    public EnumerableEquivalentToAssertCondition(AssertionBuilder<TActual> assertionBuilder, IEnumerable<TInner> expected, IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
     {
+        _equalityComparer = equalityComparer;
     }
 
     protected override string DefaultMessage => $"""
@@ -24,7 +27,12 @@ public class EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr> :
         {
             return true;
         }
+
+        if (actualValue is null || ExpectedValue is null)
+        {
+            return false;
+        }
         
-        return actualValue?.SequenceEqual(ExpectedValue!) ?? false;
+        return actualValue?.SequenceEqual(ExpectedValue, _equalityComparer) ?? false;
     }
 }

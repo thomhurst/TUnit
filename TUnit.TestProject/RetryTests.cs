@@ -1,24 +1,45 @@
-﻿using TUnit.Core;
+﻿using System.Diagnostics;
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-[Retry(3)]
+[Retry(3), NotInParallel(nameof(RetryTests), Order = 1)]
 public class RetryTests
 {
+    public static int RetryCount1 { get; private set; }
+    public static int RetryCount2 { get; private set; }
+    public static int RetryCount3 { get; private set; }
+    
     [Test]
     [Retry(1)]
     public void One()
     {
+        RetryCount1++;
+        throw new Exception();
     }
     
     [Test]
     [Retry(2)]
     public void Two()
     {
+        RetryCount2++;
+        throw new Exception();
     }
     
     [Test]
     public void Three()
     {
+        RetryCount3++;
+        throw new Exception();
+    }
+
+    [Test, NotInParallel(nameof(RetryTests), Order = 2)]
+    public async Task AssertCounts()
+    {
+        await Assert.That(RetryCount1).Is.EqualTo(2);
+        await Assert.That(RetryCount2).Is.EqualTo(3);
+        await Assert.That(RetryCount3).Is.EqualTo(4);
     }
 }

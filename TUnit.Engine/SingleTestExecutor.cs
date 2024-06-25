@@ -69,8 +69,16 @@ internal class SingleTestExecutor : IDataProducer
             {
                 await applicableTestAttribute.Apply(testContext);
             }
-            
-            await ExecuteWithRetries(unInvokedTest);
+
+            try
+            {
+                await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
+                await ExecuteWithRetries(unInvokedTest);
+            }
+            finally
+            {
+                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, new List<Exception>());
+            }
             
             var end = DateTimeOffset.Now;
 
@@ -173,7 +181,7 @@ internal class SingleTestExecutor : IDataProducer
                 {
                     throw;
                 }
-                
+
                 await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying...");
                 unInvokedTest.ResetTestInstance();
             }
