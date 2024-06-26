@@ -17,7 +17,7 @@ public class RetryAttribute : TUnitAttribute
         Times = times;
     }
 
-    public virtual Task<bool> ShouldRetry(TestInformation testInformation, Exception exception)
+    public virtual Task<bool> ShouldRetry(TestInformation testInformation, Exception exception, int currentRetryCount)
     {
         return Task.FromResult(true);
     }
@@ -29,7 +29,7 @@ public class RetryTransientHttpAttribute : RetryAttribute
     {
     }
 
-    public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception)
+    public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception, int currentRetryCount)
     {
         if (exception is HttpRequestException requestException)
         {

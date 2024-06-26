@@ -57,7 +57,7 @@ public class CustomRetryTests
         {
         }
 
-        public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception)
+        public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception, int currentRetryCount)
         {
             return Task.FromResult(exception is OperationCanceledException);
         }
@@ -69,7 +69,7 @@ public class CustomRetryTests
         {
         }
 
-        public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception)
+        public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception, int currentRetryCount)
         {
             return Task.FromResult(exception is NullReferenceException);
         }
