@@ -2,6 +2,4 @@
 
 namespace TUnit.TestProject;
 
-public class CustomSkipAttribute() : SkipAttribute("Some reason")
-{
-}
+public class CustomSkipAttribute() : SkipAttribute("Some reason");
