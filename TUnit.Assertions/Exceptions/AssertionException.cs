@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.Exceptions;
 
-public class AssertionException : TUnitException
+public class AssertionException : BaseAssertionException
 {
     public AssertionException(string? message) : base(message)
     {
