@@ -3,7 +3,6 @@ using TUnit.TestProject.Enums;
 
 namespace TUnit.TestProject;
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class PriorityAttribute : PropertyAttribute
 {
     public PriorityLevel PriorityLevel { get; }

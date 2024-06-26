@@ -49,7 +49,7 @@ internal class ConsoleInterceptor : TextWriter
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                await _logger.LogErrorAsync(e);
             }
         };
     }
@@ -62,7 +62,7 @@ internal class ConsoleInterceptor : TextWriter
 
     public override async ValueTask DisposeAsync()
     {
-        if(InnerWriter is not null)
+        if (InnerWriter is not null)
         {
             await InnerWriter.DisposeAsync();
         }

@@ -13,7 +13,7 @@ internal class SystemResourceMonitor : IDisposable
     private static double _fallbackCpuPercentage;
 
 #pragma warning disable CA2255
-    [ModuleInitializer]
+    //[ModuleInitializer]
 #pragma warning restore CA2255
     public static void Initialize()
     {

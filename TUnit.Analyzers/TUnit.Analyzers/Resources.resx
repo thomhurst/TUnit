@@ -261,4 +261,22 @@
     <data name="TUnit0027Title" xml:space="preserve">
         <value>Unknown Parameters</value>
     </data>
+    <data name="TUnit0028Description" xml:space="preserve">
+        <value>Do not override TUnit's AttributeUsage settings.</value>
+    </data>
+    <data name="TUnit0028MessageFormat" xml:space="preserve">
+        <value>Do not override TUnit's AttributeUsage settings</value>
+    </data>
+    <data name="TUnit0028Title" xml:space="preserve">
+        <value>AttributeUsage Overridden</value>
+    </data>
+    <data name="TUnit0029Description" xml:space="preserve">
+        <value>Duplicate Attribute when only 1 is allowed.</value>
+    </data>
+    <data name="TUnit0029MessageFormat" xml:space="preserve">
+        <value>Duplicate {0} when only 1 is allowed</value>
+    </data>
+    <data name="TUnit0029Title" xml:space="preserve">
+        <value>Duplicate Attribute when only 1 is allowed</value>
+    </data>
 </root>

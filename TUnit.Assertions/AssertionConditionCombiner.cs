@@ -1,7 +1,6 @@
 ﻿using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions;
 
@@ -32,7 +31,7 @@ public class AssertionConditionCombiner
             assertConditionToAppend.IsWrapped = true;
             return assertConditionToAppend;
         }
-
+        
         if (connectorType == ConnectorType.And)
         {
             return new AssertConditionAnd<TActual, TAnd, TOr>(initialAssertCondition!, assertConditionToAppend);

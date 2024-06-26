@@ -12,17 +12,13 @@ namespace TUnit.Assertions.Analyzers;
 /// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MixAndOrOperatorsAnalyzer : DiagnosticAnalyzer
+public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.MixAndOrConditionsAssertion);
 
-    public override void Initialize(AnalysisContext context)
+    public override void InitializeInternal(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-
-        context.EnableConcurrentExecution();
-
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.SimpleMemberAccessExpression);
     }
     

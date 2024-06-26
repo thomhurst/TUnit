@@ -9,10 +9,10 @@ public class AsyncValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TAct
 {
     private readonly Func<Task<TActual>> _function;
     
-    public Does<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Does => new(this, ConnectorType.None, null);
-    public Is<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Is => new(this, ConnectorType.None, null);
-    public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
-    public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
+    public Does<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> Does => new(this, ConnectorType.None, null);
+    public Is<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> Is => new(this, ConnectorType.None, null);
+    public Has<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
+    public Throws<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
 
     internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(expressionBuilder)
     {

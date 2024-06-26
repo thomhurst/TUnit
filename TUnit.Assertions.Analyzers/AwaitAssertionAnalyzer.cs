@@ -13,28 +13,18 @@ namespace TUnit.Assertions.Analyzers;
 /// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
+public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.AwaitAssertion);
+        ImmutableArray.Create(Rules.AwaitAssertion, Rules.DisposableUsingMultiple);
 
-    public override void Initialize(AnalysisContext context)
+    public override void InitializeInternal(AnalysisContext context)
     {
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-
-        context.EnableConcurrentExecution();
-
         context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.SimpleMemberAccessExpression);
     }
-
-    /// <summary>
-    /// Executed for each Syntax Node with 'SyntaxKind' is 'ClassDeclaration'.
-    /// </summary>
-    /// <param name="context">Operation context.</param>
+    
     private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
     {
-        // The Roslyn architecture is based on inheritance.
-        // To get the required metadata, we should match the 'Node' object to the particular type: 'ClassDeclarationSyntax'.
         if (context.Node is not MemberAccessExpressionSyntax memberAccessExpressionSyntax)
         {
             return;
@@ -62,23 +52,18 @@ public class AwaitAssertionAnalyzer : DiagnosticAnalyzer
             return;
         }
         
-        if (expressionStatementParent.DescendantNodes().Any(x => x is AwaitExpressionSyntax))
+        if(fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple"
+            && !expressionStatementParent.DescendantNodes().Any(x => x is UsingStatementSyntax))
         {
+            context.ReportDiagnostic(
+                Diagnostic.Create(Rules.DisposableUsingMultiple, expressionStatementParent.GetLocation())
+            );
             return;
         }
         
-        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That")
+        if (expressionStatementParent.DescendantNodes().Any(x => x is AwaitExpressionSyntax))
         {
-            var symbols =  memberAccessExpressionSyntax.GetAllAncestorSyntaxesOfType<InvocationExpressionSyntax>()
-                .Select(x => context.SemanticModel.GetSymbolInfo(x))
-                .Select(x => x.CandidateSymbols.FirstOrDefault() ?? x.Symbol)
-                .Select(x => x?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
-                .OfType<string>();
-
-            if (symbols.Any(x => x == "global::TUnit.Assertions.Assert.Multiple"))
-            {
-                return;
-            }
+            return;
         }
         
         context.ReportDiagnostic(

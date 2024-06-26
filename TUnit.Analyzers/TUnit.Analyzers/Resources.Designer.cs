@@ -787,5 +787,59 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0027Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not override TUnit&apos;s AttributeUsage settings..
+        /// </summary>
+        internal static string TUnit0028Description {
+            get {
+                return ResourceManager.GetString("TUnit0028Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not override TUnit&apos;s AttributeUsage settings.
+        /// </summary>
+        internal static string TUnit0028MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0028MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AttributeUsage Overridden.
+        /// </summary>
+        internal static string TUnit0028Title {
+            get {
+                return ResourceManager.GetString("TUnit0028Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate Attribute when only 1 is allowed..
+        /// </summary>
+        internal static string TUnit0029Description {
+            get {
+                return ResourceManager.GetString("TUnit0029Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate {0} when only 1 is allowed.
+        /// </summary>
+        internal static string TUnit0029MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0029MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate Attribute when only 1 is allowed.
+        /// </summary>
+        internal static string TUnit0029Title {
+            get {
+                return ResourceManager.GetString("TUnit0029Title", resourceCulture);
+            }
+        }
     }
 }

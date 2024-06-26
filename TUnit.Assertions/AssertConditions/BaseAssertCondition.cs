@@ -7,11 +7,6 @@ namespace TUnit.Assertions.AssertConditions;
 
 public abstract class BaseAssertCondition
 {
-    public BaseAssertCondition()
-    {
-        AssertionsTracker.Current.Add(this);
-    }
-    
     protected internal virtual string? Message { get; }
     internal abstract Task<bool> AssertAsync();
 
@@ -54,6 +49,14 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     
     public TaskAwaiter GetAwaiter()
     {
+        var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
+        
+        if (currentAssertionScope != null)
+        {
+            currentAssertionScope.Add(this);
+            return Task.CompletedTask.GetAwaiter();
+        }
+        
         return AssertAndThrowAsync().GetAwaiter();
     }
 

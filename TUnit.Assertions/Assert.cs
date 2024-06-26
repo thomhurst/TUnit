@@ -32,10 +32,30 @@ public static class Assert
     {
         return new AsyncValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
-
-    public static AssertMultipleHandler Multiple(Action action)
+    
+    public static AsyncDelegateAssertionBuilder That(Task value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
     {
-        return new AssertMultipleHandler(action);
+        return new AsyncDelegateAssertionBuilder(async () => await value, doNotPopulateThisValue);
+    }
+    
+    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(Task<TActual> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    {
+        return new AsyncValueDelegateAssertionBuilder<TActual>(async () => await value, doNotPopulateThisValue);
+    }
+    
+    public static AsyncDelegateAssertionBuilder That(ValueTask value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    {
+        return new AsyncDelegateAssertionBuilder(async () => await value, doNotPopulateThisValue);
+    }
+    
+    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(ValueTask<TActual> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    {
+        return new AsyncValueDelegateAssertionBuilder<TActual>(async () => await value, doNotPopulateThisValue);
+    }
+
+    public static IAsyncDisposable Multiple()
+    {
+        return new AssertionScope();
     }
 
     [DoesNotReturn]
@@ -47,6 +67,14 @@ public static class Assert
     public static Task<Exception> ThrowsAsync(Func<Task> @delegate,
         [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
         => ThrowsAsync<Exception>(@delegate, doNotPopulateThisValue);
+
+    public static Task<Exception> ThrowsAsync(Task @delegate,
+        [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        => ThrowsAsync(async () => await @delegate, doNotPopulateThisValue);
+    
+    public static Task<Exception> ThrowsAsync(ValueTask @delegate,
+        [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        => ThrowsAsync(async () => await @delegate, doNotPopulateThisValue);
     
     public static async Task<TException> ThrowsAsync<TException>(Func<Task> @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
     {
@@ -67,6 +95,14 @@ public static class Assert
 
         return null!;
     }
+
+    public static Task<TException> ThrowsAsync<TException>(Task @delegate,
+        [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
+        => ThrowsAsync<TException>(async () => await @delegate, doNotPopulateThisValue);
+    
+    public static Task<TException> ThrowsAsync<TException>(ValueTask @delegate,
+        [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
+        => ThrowsAsync<TException>(async () => await @delegate, doNotPopulateThisValue);
 
     public static Exception ThrowsAsync(Action @delegate,
         [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)

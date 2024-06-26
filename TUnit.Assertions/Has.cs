@@ -3,7 +3,6 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions;
 

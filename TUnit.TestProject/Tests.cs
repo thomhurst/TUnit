@@ -299,11 +299,11 @@ public class Tests
     {
         var list = new List<int> { 1, 2, 3 };
         
-        await Assert.Multiple(() =>
+        await using (Assert.Multiple())
         {
-            Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
-            Assert.That(list).Has.Count().EqualTo(5);
-        });
+            await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
+            await Assert.That(list).Has.Count().EqualTo(5);
+        }
     }
     
     [Test]
@@ -330,11 +330,11 @@ public class Tests
         var one = "";
         var two = "Foo bar!";
         
-        await Assert.Multiple(() =>
+        await using (Assert.Multiple())
         {
-            Assert.That(one).Is.Null().Or.Is.Empty();
-            Assert.That(two).Is.EqualTo("Foo bar").Or.Is.Null();
-        });
+            await Assert.That(one).Is.Null().Or.Is.Empty();
+            await Assert.That(two).Is.EqualTo("Foo bar").Or.Is.Null();
+        }
     }
 
     private int _retryCount = 0;
