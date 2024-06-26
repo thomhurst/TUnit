@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<CombinativeSolver>()
             .AddSingleton<SingleTestExecutor>()
             .AddSingleton<TestInvoker>()
-            .AddSingleton<SystemResourceMonitor>()
+            //.AddSingleton<SystemResourceMonitor>()
             .AddSingleton<TUnitTestDiscoverer>()
             .AddSingleton<TestFilterService>()
             .AddSingleton<ExplicitFilterService>()

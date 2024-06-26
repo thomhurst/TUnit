@@ -74,11 +74,11 @@ public static partial class DoesExtensions
             (actual, _) => $"\"{actual}\" does not end with \"{expected}\""));
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Match<TAnd, TOr>(this Does<string, TAnd, TOr> does, string regex)
+    public static BaseAssertCondition<string, TAnd, TOr> Match<TAnd, TOr>(this Does<string, TAnd, TOr> does, string regex, [CallerArgumentExpression("regex")] string expression = "")
         where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
     {
-        return Match(does, new Regex(regex));
+        return Match(does, new Regex(regex), expression);
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> Match<TAnd, TOr>(this Does<string, TAnd, TOr> does, Regex regex, [CallerArgumentExpression("regex")] string expression = "")

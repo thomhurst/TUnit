@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using EnumerableAsyncProcessor.Extensions;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -11,28 +13,32 @@ internal class TestsExecutor
     private int _currentlyExecutingTests;
 
     private readonly SingleTestExecutor _singleTestExecutor;
-    private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly TestGrouper _testGrouper;
-    private readonly SystemResourceMonitor _systemResourceMonitor;
+    //private readonly SystemResourceMonitor _systemResourceMonitor;
     private readonly ConsoleInterceptor _consoleInterceptor;
     private readonly TUnitLogger _logger;
-    
+    private readonly ICommandLineOptions _commandLineOptions;
+
     private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
     private readonly object _notInParallelDictionaryLock = new();
+    
+    private readonly int _maximumParallelTests;
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
-        CancellationTokenSource cancellationTokenSource,
         TestGrouper testGrouper,
-        SystemResourceMonitor systemResourceMonitor,
+        //SystemResourceMonitor systemResourceMonitor,
         ConsoleInterceptor consoleInterceptor,
-        TUnitLogger logger)
+        TUnitLogger logger,
+        ICommandLineOptions commandLineOptions)
     {
         _singleTestExecutor = singleTestExecutor;
-        _cancellationTokenSource = cancellationTokenSource;
         _testGrouper = testGrouper;
-        _systemResourceMonitor = systemResourceMonitor;
+        //_systemResourceMonitor = systemResourceMonitor;
         _consoleInterceptor = consoleInterceptor;
         _logger = logger;
+        _commandLineOptions = commandLineOptions;
+
+        _maximumParallelTests = GetMaximumParallelTests();
     }
 
     public async Task ExecuteAsync(List<DiscoveredTest> testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
@@ -72,18 +78,17 @@ internal class TestsExecutor
     {
         foreach (var testInformation in testsNotInParallel)
         {
-            await ProcessTest(testInformation, filter, context);
+            await ProcessTest(testInformation, filter, context, context.CancellationToken);
         }
     }
 
     private async Task ProcessKeyedNotInParallelTests(List<NotInParallelTestCase> testsToProcess,
         ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
-        var tasks = testsToProcess
+        await testsToProcess
             .GroupBy(x => x.ConstraintKeys)
-            .Select(group => Task.Run(() => ProcessGroup(filter, context, group)));
-
-        await Task.WhenAll(tasks);
+            .ForEachAsync(async group => await Task.Run(() => ProcessGroup(filter, context, group)))
+            .ProcessInParallel(_maximumParallelTests);
     }
 
     private async Task ProcessGroup(ITestExecutionFilter? filter, ExecuteRequestContext context,
@@ -102,7 +107,7 @@ internal class TestsExecutor
 
             try
             {
-                await ProcessTest(test.Test, filter, context);
+                await ProcessTest(test.Test, filter, context, context.CancellationToken);
             }
             catch (Exception e)
             {
@@ -121,49 +126,50 @@ internal class TestsExecutor
     private async Task ProcessParallelTests(Queue<DiscoveredTest> queue, ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
-        var executing = new List<Task>();
-        
-        await foreach (var testTask in ProcessQueue(queue, filter, context))
-        {
-            executing.Add(testTask);
-        }
-
-        await Task.WhenAll(executing);
+        await ProcessQueue(queue, filter, context);
     }
 
-    private async IAsyncEnumerable<Task> ProcessQueue(Queue<DiscoveredTest> queue,
+    private async Task ProcessQueue(Queue<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
-        while (queue.Count > 0)
+        await Parallel.ForEachAsync(queue, new ParallelOptions
         {
-            if (_cancellationTokenSource.IsCancellationRequested)
-            {
-                break;
-            }
-            
-            if (_currentlyExecutingTests < Environment.ProcessorCount 
-                || !_systemResourceMonitor.IsSystemStrained())
-            {
-                var test = queue.Dequeue();
-
-                yield return ProcessTest(test, filter, context);
-            }
-            else
-            {
-                await Task.Delay(500);
-            }
-        }
+            MaxDegreeOfParallelism = GetMaximumParallelTests(),
+            CancellationToken = context.CancellationToken
+        }, async (test, token) =>
+        {
+            await ProcessTest(test, filter, context, token);
+        });
+        
+        // while (queue.Count > 0)
+        // {
+        //     if (_cancellationTokenSource.IsCancellationRequested)
+        //     {
+        //         break;
+        //     }
+        //     
+        //     if (_currentlyExecutingTests < _maximumParallelTests && !_systemResourceMonitor.IsSystemStrained())
+        //     {
+        //         var test = queue.Dequeue();
+        //
+        //         yield return ProcessTest(test, filter, context);
+        //     }
+        //     else
+        //     {
+        //         await Task.Delay(500);
+        //     }
+        // }
     }
 
     private async Task ProcessTest(DiscoveredTest test,
-        ITestExecutionFilter? filter, ExecuteRequestContext context)
+        ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
     {
         NotifyTestStart();
 
         try
         {
-            await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context));
+            await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context), cancellationToken);
         }
         catch
         {
@@ -193,15 +199,14 @@ internal class TestsExecutor
         Interlocked.Increment(ref _currentlyExecutingTests);
     }
 
-    private async Task WhenAllSafely(IEnumerable<Task> tasks)
+    private int GetMaximumParallelTests()
     {
-        try
+        if (_commandLineOptions.TryGetOptionArgumentList(MaximumParallelTestsCommandProvider.MaximumParallelTests,
+                out var values))
         {
-            await Task.WhenAll(tasks);
+            return int.Parse(values[0]);
         }
-        catch (Exception e)
-        {
-            await _logger.LogErrorAsync(e);
-        }
+
+        return int.MaxValue;
     }
 }

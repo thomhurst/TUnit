@@ -11,17 +11,17 @@ internal class GlobalDisposer : IAsyncDisposable
     
     public async ValueTask DisposeAsync()
     {
-        foreach (var (_, value) in TestDataContainer.InjectedSharedPerClassType)
+        foreach (var (_, value) in TestDataContainer.InjectedSharedPerClassType.InnerDictionary)
         {
             await _disposer.DisposeAsync(value);
         }
         
-        foreach (var (_, value) in TestDataContainer.InjectedSharedGlobally)
+        foreach (var (_, value) in TestDataContainer.InjectedSharedGlobally.InnerDictionary)
         {
             await _disposer.DisposeAsync(value);
         }
         
-        foreach (var (_, value) in TestDataContainer.InjectedSharedPerKey)
+        foreach (var (_, value) in TestDataContainer.InjectedSharedPerKey.InnerDictionary)
         {
             await _disposer.DisposeAsync(value);
         }

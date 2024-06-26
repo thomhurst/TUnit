@@ -14,6 +14,9 @@ internal static class Rules
 
     public static readonly DiagnosticDescriptor CompilerArgumentsPopulated =
         CreateDescriptor("TUnitAnalyzers0004", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor DisposableUsingMultiple =
+        CreateDescriptor("TUnitAnalyzers0004", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

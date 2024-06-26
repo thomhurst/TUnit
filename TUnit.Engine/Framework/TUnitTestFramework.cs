@@ -90,6 +90,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
                 }
             }
+            catch (TaskCanceledException) when (context.CancellationToken.IsCancellationRequested)
+            {
+                await _logger.LogErrorAsync("The test run was cancelled.");
+            }
             catch (Exception e)
             {
                 throw new ArgumentException("Tests aren't safe! - We shouldn't be throwing exceptions here", e);

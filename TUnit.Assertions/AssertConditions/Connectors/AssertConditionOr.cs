@@ -20,15 +20,9 @@ internal class AssertConditionOr<TActual, TAnd, TOr> : BaseAssertCondition<TActu
         
         _condition1 = condition1;
         _condition2 = condition2;
-        
-        // We store assert conditions in the test context for use with Assert.Multiple
-        // However, we won't be asserting them individually if we've combined them with and/or statements
-        // As this handler will be registered and will control invoking them
-        AssertionsTracker.Current.Remove(condition1);
-        AssertionsTracker.Current.Remove(condition2);
     }
 
-    protected internal override string Message => $"{_condition1.Message} & {_condition2.Message}";
+    protected internal override string Message => $"{_condition1.Message} &{_condition2.Message.Replace(_condition2.AssertionBuilder.ExpressionBuilder?.ToString() ?? string.Empty, string.Empty)}";
     protected override string DefaultMessage => string.Empty;
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception)

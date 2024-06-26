@@ -33,9 +33,9 @@ internal static class Warn
         return new AsyncValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
 
-    public static AssertMultipleHandler Multiple(Action action)
+    public static IAsyncDisposable Multiple()
     {
-        return new AssertMultipleHandler(action);
+        return new AssertionScope();
     }
 
     [DoesNotReturn]

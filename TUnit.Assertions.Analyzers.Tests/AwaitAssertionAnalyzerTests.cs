@@ -26,7 +26,7 @@ public class AwaitAssertionAnalyzerTests
                             }
                             """;
 
-        var expected = Verifier.Diagnostic().WithLocation(0);
+        var expected = Verifier.Diagnostic(Rules.AwaitAssertion).WithLocation(0);
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
@@ -52,13 +52,39 @@ public class AwaitAssertionAnalyzerTests
                             }
                             """;
 
-        var expected = Verifier.Diagnostic().WithLocation(0);
+        var expected = Verifier.Diagnostic(Rules.AwaitAssertion).WithLocation(0);
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
     
     [Test]
-    public async Task Assert_That_Is_Not_Flagged_When_Not_Awaited_But_Inside_Assert_Multiple()
+    public async Task Assert_Multiple_Is_Flagged_When_Not_Await_Using()
+    {
+        const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Assertions;
+                            using TUnit.Assertions.Extensions;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                            
+                                public async Task MyTest()
+                                {
+                                    var one = 1;
+                                    {|#0:Assert.Multiple();|}
+                                }
+
+                            }
+                            """;
+
+        var expected = Verifier.Diagnostic(Rules.DisposableUsingMultiple).WithLocation(0);
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Assert_Multiple_Is_Not_Flagged_When_Await_Using()
     {
         const string text = """
                             using System;
@@ -75,11 +101,11 @@ public class AwaitAssertionAnalyzerTests
                                 {
                                     var list = new List<int> { 1, 2, 3 };
                             
-                                    await Assert.Multiple(() =>
+                                    await using (Assert.Multiple())
                                     {
-                                        Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
-                                        Assert.That(list).Has.Count().EqualTo(5);
-                                    });
+                                        await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                        await Assert.That(list).Has.Count().EqualTo(5);
+                                    }
                                 }
                                 
                             }

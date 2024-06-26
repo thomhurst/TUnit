@@ -1,6 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Builder;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Framework;
 
 public static class TestingPlatformBuilderHook
 {

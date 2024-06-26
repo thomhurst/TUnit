@@ -1,4 +1,5 @@
 ﻿using Microsoft.Testing.Platform.Builder;
+using TUnit.Engine.Framework;
 
 namespace TUnit.Engine;
 

@@ -2,7 +2,7 @@
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions;
 
 public abstract class Connector<TActual, TAnd, TOr>
     where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>

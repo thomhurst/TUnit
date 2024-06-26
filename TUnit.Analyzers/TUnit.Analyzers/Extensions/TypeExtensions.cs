@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 
 namespace TUnit.Analyzers.Extensions;
 
@@ -11,5 +13,16 @@ public static class TypeExtensions
         var index = name.IndexOf('`');
         
         return index == -1 ? name : name.Substring(0, index);
+    }
+    
+    public static IEnumerable<INamedTypeSymbol> GetSelfAndBaseTypes(this INamedTypeSymbol namedTypeSymbol)
+    {
+        var type = namedTypeSymbol;
+
+        while (type != null)
+        {
+            yield return type;
+            type = type.BaseType;
+        }
     }
 }

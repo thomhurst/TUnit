@@ -2,7 +2,6 @@
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions;
 
