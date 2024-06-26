@@ -10,6 +10,7 @@ public class DataDrivenTests
     [Arguments(3)]
     public void DataSource_Method(int value)
     {
+        // Dummy method
     }
     
     [DataDrivenTest]
@@ -18,6 +19,7 @@ public class DataDrivenTests
     [Arguments(3, "String3")]
     public void DataSource_Method(int value, string value2)
     {
+        // Dummy method
     }
     
     [DataDrivenTest]
@@ -26,24 +28,28 @@ public class DataDrivenTests
     [Arguments(-1)]
     public void EnumValue(TestEnum testEnum)
     {
+        // Dummy method
     }
     
     [DataDrivenTest]
     [Arguments(null)]
     public void NullValue(string? value)
     {
+        // Dummy method
     }
     
     [DataDrivenTest]
     [Arguments("")]
     public void EmptyString(string? value)
     {
+        // Dummy method
     }
     
     [DataDrivenTest]
     [Arguments("Foo bar!")]
     public void NonEmptyString(string? value)
     {
+        // Dummy method
     }
     
     [DataDrivenTest]
@@ -52,5 +58,6 @@ public class DataDrivenTests
     [Arguments(true)]
     public void BooleanString(bool? value)
     {
+        // Dummy method
     }
 }

@@ -21,5 +21,6 @@ public class AsyncDisposablePropertyTests
     [Test]
     public void Test1()
     {
+        // Dummy method
     }
 }

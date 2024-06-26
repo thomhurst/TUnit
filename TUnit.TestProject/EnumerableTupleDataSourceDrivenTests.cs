@@ -8,6 +8,7 @@ public class EnumerableTupleDataSourceDrivenTests
     [EnumerableMethodDataSource(nameof(TupleMethod), UnfoldTuple = true)]
     public void DataSource_TupleMethod(int value, string value2, bool value3)
     {
+        // Dummy method
     }
     
     public static IEnumerable<(int, string, bool)> TupleMethod()

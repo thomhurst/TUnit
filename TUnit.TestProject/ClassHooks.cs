@@ -10,6 +10,7 @@ public class ClassHooks
     [BeforeAllTestsInClass]
     public static void BeforeHook1()
     {
+        // Dummy method
     }
     
     [BeforeAllTestsInClass]
@@ -21,6 +22,7 @@ public class ClassHooks
     [AfterAllTestsInClass]
     public static void AfterHook1()
     {
+        // Dummy method
     }
     
     [AfterAllTestsInClass]
@@ -33,5 +35,6 @@ public class ClassHooks
     [Test]
     public void Test1()
     {
+        // Dummy method
     }
 }

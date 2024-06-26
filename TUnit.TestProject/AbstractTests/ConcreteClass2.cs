@@ -13,5 +13,6 @@ public class ConcreteClass2 : ConcreteClass1
     [Test]
     public void SecondTest()
     {
+        // Dummy method
     }
 }

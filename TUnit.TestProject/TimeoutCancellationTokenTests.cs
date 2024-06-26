@@ -10,6 +10,7 @@ public class TimeoutCancellationTokenTests
 {
     public TimeoutCancellationTokenTests(int value)
     {
+        // Dummy method
     }
     
     [Test]

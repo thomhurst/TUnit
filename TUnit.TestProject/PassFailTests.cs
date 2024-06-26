@@ -8,6 +8,7 @@ public class PassFailTests
     [Category("Pass")]
     public void Pass1()
     {
+        // Dummy method
     }
     
     [DataDrivenTest]
@@ -19,6 +20,7 @@ public class PassFailTests
     [Category("Pass")]
     public void Pass2(int value)
     {
+        // Dummy method
     }
 
     [DataSourceDrivenTest]
@@ -33,6 +35,7 @@ public class PassFailTests
     [Category("Pass")]
     public void Pass3(int value)
     {
+        // Dummy method
     }
     
     [CombinativeTest]
@@ -42,6 +45,7 @@ public class PassFailTests
         [CombinativeValues(1, 2, 3, 4)] int value2,
         [CombinativeValues(1, 2, 3)] int value3)
     {
+        // Dummy method
     }
     
     [Test]

@@ -8,6 +8,7 @@ public class MethodDataSourceDrivenTests
     [MethodDataSource(nameof(SomeMethod))]
     public void DataSource_Method(int value)
     {
+        // Dummy method
     }
 
     public static int SomeMethod() => 1;
