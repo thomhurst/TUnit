@@ -75,5 +75,6 @@ public class CleanUpTests : CleanUpBase3, IDisposable
 
     public void Dispose()
     {
+        // Dummy method
     }
 }

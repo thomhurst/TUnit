@@ -21,5 +21,6 @@ public class AsyncDisposableFieldTests
     [Test]
     public void Test1()
     {
+        // Dummy method
     }
 }

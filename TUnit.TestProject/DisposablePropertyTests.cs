@@ -21,5 +21,6 @@ public class DisposablePropertyTests
     [Test]
     public void Test1()
     {
+        // Dummy method
     }
 }

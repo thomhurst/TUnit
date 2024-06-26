@@ -19,5 +19,6 @@ public class NonBase : Base1
     [Test]
     public void Test()
     {
+        // Dummy method
     }
 }

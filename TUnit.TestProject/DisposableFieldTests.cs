@@ -21,5 +21,6 @@ public class DisposableFieldTests
     [Test]
     public void Test1()
     {
+        // Dummy method
     }
 }

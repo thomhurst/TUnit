@@ -8,6 +8,7 @@ public class TupleDataSourceDrivenTests
     [MethodDataSource(nameof(TupleMethod), UnfoldTuple = true)]
     public void DataSource_TupleMethod(int value, string value2, bool value3)
     {
+        // Dummy method
     }
     
     public static (int, string, bool) TupleMethod() => (1, "String", true);

@@ -8,6 +8,7 @@ public class CustomDisplayNameTests
     [DisplayName("A super important test!")]
     public void Test()
     {
+        // Dummy method
     }
     
     [Test]

@@ -7,6 +7,7 @@ public class ReturnTypeTests
     [Test]
     public void Test1()
     {
+        // Dummy method
     }
     
     [Test]

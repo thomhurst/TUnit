@@ -1,6 +1,3 @@
 ﻿namespace TUnit.TestProject;
 
-public class MyTests
-{
-    
-}
+public class MyTests;

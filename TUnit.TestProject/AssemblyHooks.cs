@@ -10,6 +10,7 @@ public class AssemblyHooks
     [AssemblySetUp]
     public static void BeforeHook1()
     {
+        // Dummy method
     }
     
     [AssemblySetUp]
@@ -21,6 +22,7 @@ public class AssemblyHooks
     [AssemblyCleanUp]
     public static void AfterHook1()
     {
+        // Dummy method
     }
     
     [AssemblyCleanUp]
@@ -32,5 +34,6 @@ public class AssemblyHooks
     [Test]
     public void Test1()
     {
+        // Dummy method
     }
 }

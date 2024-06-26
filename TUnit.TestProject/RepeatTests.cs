@@ -9,16 +9,19 @@ public class RepeatTests
     [Repeat(1)]
     public void One()
     {
+        // Dummy method
     }
     
     [Test]
     [Repeat(2)]
     public void Two()
     {
+        // Dummy method
     }
     
     [Test]
     public void Three()
     {
+        // Dummy method
     }
 }
