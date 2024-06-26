@@ -1,6 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Logging;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Helpers;
 
 internal class Disposer
 {

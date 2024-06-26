@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Engine.Models;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Data;
 
 public static class TestDataContainer
 {

@@ -1,4 +1,4 @@
-﻿namespace TUnit.Engine;
+﻿namespace TUnit.Engine.Hooks;
 
 public static class AssemblyHookOrchestrators
 {

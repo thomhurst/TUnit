@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Models;
 
 internal class ConstraintKeysCollection : IReadOnlyList<string>, IEquatable<ConstraintKeysCollection>
 {

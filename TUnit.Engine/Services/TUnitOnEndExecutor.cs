@@ -1,8 +1,11 @@
 ﻿using System.Text.Json;
 using Microsoft.Testing.Platform.CommandLine;
+using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Hooks;
 using TUnit.Engine.Json;
+using TUnit.Engine.Logging;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 internal class TUnitOnEndExecutor
 {

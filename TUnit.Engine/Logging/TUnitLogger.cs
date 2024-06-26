@@ -3,7 +3,7 @@ using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Logging;
 
 internal class TUnitLogger : IOutputDeviceDataProducer
 {

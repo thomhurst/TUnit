@@ -1,9 +1,11 @@
 ﻿using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Helpers;
+using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Framework;
 using TUnit.Engine.Properties;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Extensions;
 
 public static class TestApplicationBuilderExtensions
 {

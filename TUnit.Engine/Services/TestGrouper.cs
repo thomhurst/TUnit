@@ -1,6 +1,6 @@
 ﻿using TUnit.Engine.Models;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 internal class TestGrouper
 {

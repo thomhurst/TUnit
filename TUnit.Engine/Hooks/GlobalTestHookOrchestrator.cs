@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Core;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Hooks;
 
 public static class GlobalTestHookOrchestrator
 {

@@ -2,9 +2,10 @@
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Engine.Models;
 using TUnit.Engine.Properties;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 internal class TestFilterService
 {
