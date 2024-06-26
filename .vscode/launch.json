@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/TUnit.TestProject/bin/Debug/net7.0/TUnit.TestProject.dll",
+            "program": "${workspaceFolder}/TUnit.TestProject/bin/Debug/net8.0/TUnit.TestProject.dll",
             "args": [],
             "cwd": "${workspaceFolder}/TUnit.TestProject",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
