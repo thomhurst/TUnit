@@ -181,7 +181,7 @@ internal class SingleTestExecutor : IDataProducer
             catch (Exception e)
             {
                 if (i == retryCount 
-                    || !await ShouldRetry(testInformation, e))
+                    || !await ShouldRetry(testInformation, e, i + 1))
                 {
                     throw;
                 }
@@ -192,7 +192,7 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task<bool> ShouldRetry(TestInformation testInformation, Exception e)
+    private async Task<bool> ShouldRetry(TestInformation testInformation, Exception e, int currentRetryCount)
     {
         try
         {
@@ -203,7 +203,7 @@ internal class SingleTestExecutor : IDataProducer
                 return false;
             }
 
-            return await retryAttribute.ShouldRetry(testInformation, e);
+            return await retryAttribute.ShouldRetry(testInformation, e, currentRetryCount);
         }
         catch (Exception exception)
         {
