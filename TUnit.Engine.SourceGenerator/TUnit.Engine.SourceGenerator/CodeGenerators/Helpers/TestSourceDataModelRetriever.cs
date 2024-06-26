@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;

@@ -1,5 +1,5 @@
 ﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Numbers;
 using TUnit.Core;
 using TUnit.Core.Models;
 

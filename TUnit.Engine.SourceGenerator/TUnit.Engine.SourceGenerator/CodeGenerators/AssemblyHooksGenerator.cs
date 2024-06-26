@@ -105,6 +105,6 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
             return string.Empty;
         }
 
-        return $"TUnit.Engine.ClassHookOrchestrator.GetAssemblyHookContext(typeof({model.FullyQualifiedTypeName}))";
+        return $"TUnit.Engine.Hooks.ClassHookOrchestrator.GetAssemblyHookContext(typeof({model.FullyQualifiedTypeName}))";
     }
 }
