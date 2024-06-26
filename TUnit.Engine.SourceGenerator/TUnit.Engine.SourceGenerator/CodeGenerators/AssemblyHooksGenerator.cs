@@ -84,12 +84,12 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterSetUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"global::TUnit.Engine.Hooks.AssemblyHookOrchestrators.RegisterSetUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.AssemblyHookOrchestrators.RegisterCleanUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"global::TUnit.Engine.Hooks.AssemblyHookOrchestrators.RegisterCleanUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
 
         sourceBuilder.WriteLine("}");
