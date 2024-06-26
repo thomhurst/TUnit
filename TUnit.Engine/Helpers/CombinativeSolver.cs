@@ -1,4 +1,4 @@
-﻿namespace TUnit.Engine;
+﻿namespace TUnit.Engine.Helpers;
 
 public class CombinativeSolver
 {

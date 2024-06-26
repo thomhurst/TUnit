@@ -4,7 +4,7 @@ using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Models;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Hooks;
 
 public static class ClassHookOrchestrator
 {

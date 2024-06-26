@@ -6,9 +6,13 @@ using Semaphores;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Hooks;
+using TUnit.Engine.Logging;
+using TUnit.Engine.Models;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 internal class SingleTestExecutor : IDataProducer
 {

@@ -1,8 +1,9 @@
 ﻿using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+
 #pragma warning disable TPEXP
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 public class ExplicitFilterService
 {

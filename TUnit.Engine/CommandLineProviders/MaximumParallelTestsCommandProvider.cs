@@ -2,7 +2,7 @@
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.CommandLineProviders;
 
 public class MaximumParallelTestsCommandProvider : ICommandLineOptionsProvider
 {

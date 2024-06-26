@@ -1,4 +1,7 @@
-﻿namespace TUnit.Engine.Extensions;
+﻿using TUnit.Engine.Data;
+using TUnit.Engine.Helpers;
+
+namespace TUnit.Engine.Services;
 
 internal class GlobalDisposer : IAsyncDisposable
 {

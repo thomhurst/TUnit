@@ -1,7 +1,7 @@
 ﻿using Microsoft.Testing.Platform.Builder;
 using TUnit.Engine.Framework;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 public static class TUnitRunner
 {

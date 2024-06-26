@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Hardware.Info;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 internal class SystemResourceMonitor : IDisposable
 {

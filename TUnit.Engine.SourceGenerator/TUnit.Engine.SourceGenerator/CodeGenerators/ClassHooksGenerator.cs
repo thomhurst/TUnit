@@ -84,12 +84,12 @@ internal class ClassHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"global::TUnit.Engine.Hooks.ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.ClassHookOrchestrator.RegisterCleanUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"global::TUnit.Engine.Hooks.ClassHookOrchestrator.RegisterCleanUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
 
         sourceBuilder.WriteLine("}");
@@ -105,6 +105,6 @@ internal class ClassHooksGenerator : IIncrementalGenerator
             return string.Empty;
         }
 
-        return $"TUnit.Engine.ClassHookOrchestrator.GetClassHookContext(typeof({model.FullyQualifiedTypeName}))";
+        return $"TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof({model.FullyQualifiedTypeName}))";
     }
 }

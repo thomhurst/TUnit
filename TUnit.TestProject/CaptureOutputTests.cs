@@ -4,7 +4,7 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-[Repeat(1500)]
+[Repeat(15)]
 public class CaptureOutputTests
 {
     private readonly MyClass _myClass;

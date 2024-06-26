@@ -2,7 +2,7 @@
 using TUnit.Core;
 using TUnit.Engine.Extensions;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Models;
 
 internal record DiscoveredTest
 {

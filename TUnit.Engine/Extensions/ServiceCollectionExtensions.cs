@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Services;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Logging;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Extensions;
 

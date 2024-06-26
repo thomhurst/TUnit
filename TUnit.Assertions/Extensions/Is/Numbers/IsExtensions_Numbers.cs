@@ -6,7 +6,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 
-namespace TUnit.Assertions.Extensions.Is;
+namespace TUnit.Assertions.Extensions.Numbers;
 
 public static partial class IsExtensions
 {
