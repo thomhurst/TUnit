@@ -1,10 +1,13 @@
 # TUnit
+
 T(est)Unit!
 
 ## Documentation
-See here: [https://thomhurst.github.io/TUnit/](https://thomhurst.github.io/TUnit/)
+
+See here: <https://thomhurst.github.io/TUnit/>
 
 ## Features
+
 - Source generated tests
 - Full async support
 - Easy to read assertions
@@ -16,16 +19,17 @@ See here: [https://thomhurst.github.io/TUnit/](https://thomhurst.github.io/TUnit
 - Test context interrogation providing test details and test state
 
 ## Installation
+
 `dotnet add package TUnit --prerelease`
 
 ## Example test
 
 ```csharp
-    [Test]
+[Test]
     public async Task Test1()
     {
         var value = "Hello world!";
-        
+
         await Assert.That(value)
             .Is.Not.Null
             .And.Does.StartWith("H")
@@ -35,21 +39,21 @@ See here: [https://thomhurst.github.io/TUnit/](https://thomhurst.github.io/TUnit
 ```
 
 ## Motivations
-There are only three main testing frameworks in the .NET world - xUnit, NUnit and MSTest.
-More frameworks means more options, and more options motivates more features or improvements.
+
+There are only three main testing frameworks in the .NET world - xUnit, NUnit and MSTest. More frameworks means more options, and more options motivates more features or improvements.
 
 These testing frameworks are amazing, but I've had some issues with them. You might not have had any of these, but these are my experiences:
 
 ### xUnit
-There is no way to tap into information about a test in a generic way. 
-For example, I've had some Playwright tests run before, and I want them to save a screenshot or video ONLY when the test fails.
-If the test passes, I don't have anything to investigate, and it'll use up unnecessary storage, and it'll probably slow my test suite down if I had hundreds or thousands of tests all trying to save screenshots.
+
+There is no way to tap into information about a test in a generic way. For example, I've had some Playwright tests run before, and I want them to save a screenshot or video ONLY when the test fails. If the test passes, I don't have anything to investigate, and it'll use up unnecessary storage, and it'll probably slow my test suite down if I had hundreds or thousands of tests all trying to save screenshots.
 
 However, if I'm in a Dispose method which is called when the test ends, then there's no way for me to know if my test succeeded or failed. I'd have to do some really clunky workaround involving try catch and setting a boolean or exception to a class field and checking that. And to do that for every test was just not ideal.
 
 #### Assertions
-I have stumbled across assertions so many times where the arguments are the wrong way round.
-This can result in really confusing error messages.
+
+I have stumbled across assertions so many times where the arguments are the wrong way round. This can result in really confusing error messages.
+
 ```csharp
 var one = 2;
 Assert.Equal(1, one)
@@ -59,6 +63,7 @@ Assert.Equal(one, 1)
 ### NUnit
 
 #### Assertions
+
 I absolutely love the newer assertion syntax in NUnit. The `Assert.That(something, Is.Something)`. I think it's really clear to read, it's clear what is being asserted, and it's clear what you're trying to achieve.
 
 However, there is a lack of type checking on assertions. (Yes, there are analyzer packages to help with this, but this still isn't strict type checking.)
@@ -67,13 +72,11 @@ However, there is a lack of type checking on assertions. (Yes, there are analyze
 
 This assertion makes no sense, because we're passing in a string. This can never throw an exception because it isn't a delegate that can be executed. But it's still perfectly valid code that will compile.
 
-As does this:
-`Assert.That(1, Does.Contain("Foo!"));`
+As does this: `Assert.That(1, Does.Contain("Foo!"));`
 
 An integer can not contain a string. Of course these will fail at runtime, but we could move these errors up to compile time for faster feedback. This is very useful for long pipelines or build times.
 
-Some methods also just read a little bit weird:
-`Assert.That(() => Something(), Throws.Exception.Message.Contain(someMessage));`
+Some methods also just read a little bit weird: `Assert.That(() => Something(), Throws.Exception.Message.Contain(someMessage));`
 
 "Throws Exception Message Contain someMessage" - It's not terrible, but it could read a little better.
 
