@@ -268,7 +268,7 @@ internal class SingleTestExecutor : IDataProducer
             while (!methodResult.IsCompleted && !timeoutTask.IsCompleted)
             {
                 cancellationTokenSource.Token.ThrowIfCancellationRequested();
-                await Task.Delay(TimeSpan.FromSeconds(5));
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
             }
         });
 
