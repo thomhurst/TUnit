@@ -279,4 +279,13 @@
     <data name="TUnit0029Title" xml:space="preserve">
         <value>Duplicate Attribute when only 1 is allowed</value>
     </data>
+    <data name="TUnit0030Description" xml:space="preserve">
+        <value>Use an [InheritsTests] attribute to pick up tests from the base class.</value>
+    </data>
+    <data name="TUnit0030MessageFormat" xml:space="preserve">
+        <value>Use an [InheritsTests] attribute to pick up tests from the base class</value>
+    </data>
+    <data name="TUnit0030Title" xml:space="preserve">
+        <value>Class doesn't pick up tests from the base class</value>
+    </data>
 </root>

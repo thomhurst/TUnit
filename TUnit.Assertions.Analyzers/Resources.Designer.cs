@@ -134,6 +134,33 @@ namespace TUnit.Assertions.Analyzers {
         /// <summary>
         ///   Looks up a localized string similar to Do not populate this argument. The compiler will do this..
         /// </summary>
+        internal static string TUnitAnalyzers0003Description {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0003Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not populate this argument. The compiler will do this.
+        /// </summary>
+        internal static string TUnitAnalyzers0003MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0003MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compiler argument populated.
+        /// </summary>
+        internal static string TUnitAnalyzers0003Title {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0003Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it..
+        /// </summary>
         internal static string TUnitAnalyzers0004Description {
             get {
                 return ResourceManager.GetString("TUnitAnalyzers0004Description", resourceCulture);
@@ -141,7 +168,7 @@ namespace TUnit.Assertions.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do not populate this argument. The compiler will do this.
+        ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it.
         /// </summary>
         internal static string TUnitAnalyzers0004MessageFormat {
             get {
@@ -150,11 +177,38 @@ namespace TUnit.Assertions.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Compiler argument populated.
+        ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it.
         /// </summary>
         internal static string TUnitAnalyzers0004Title {
             get {
                 return ResourceManager.GetString("TUnitAnalyzers0004Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assert.That(...) should not be used with a constant value..
+        /// </summary>
+        internal static string TUnitAnalyzers0005Description {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0005Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assert.That(...) should not be used with a constant value.
+        /// </summary>
+        internal static string TUnitAnalyzers0005MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0005MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assert.That(...) should not be used with a constant value.
+        /// </summary>
+        internal static string TUnitAnalyzers0005Title {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0005Title", resourceCulture);
             }
         }
     }

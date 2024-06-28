@@ -1,4 +1,7 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Messages;
 

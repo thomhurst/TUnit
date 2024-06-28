@@ -29,10 +29,14 @@ internal static class WellKnown
 
         public const string ClassHookContext = "global::TUnit.Core.Models.ClassHookContext";
         public const string AssemblyHookContext = "global::TUnit.Core.Models.AssemblyHookContext";
+        
+        public const string InheritsTestsAttribute = "global::TUnit.Core.InheritsTestsAttribute";
 
         public static readonly string[] TestAttributes =
         [
             Test, DataDrivenTest, DataSourceDrivenTest, CombinativeTest
         ];
+
+        
     }
 }

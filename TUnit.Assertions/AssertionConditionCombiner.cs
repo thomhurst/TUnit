@@ -22,11 +22,11 @@ public class AssertionConditionCombiner
         return Combine(connector.OtherAssertCondition, connector.ConnectorType, assertCondition);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Combine<TActual, TAnd, TOr>(BaseAssertCondition<TActual, TAnd, TOr>? initialAssertCondition, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr> assertConditionToAppend)
+    public static BaseAssertCondition<TActual, TAnd, TOr> Combine<TActual, TAnd, TOr>(BaseAssertCondition<TActual, TAnd, TOr>? initialAssertCondition, ConnectorType? connectorType, BaseAssertCondition<TActual, TAnd, TOr> assertConditionToAppend)
         where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
         where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
     {
-        if (connectorType == ConnectorType.None)
+        if (connectorType is null or ConnectorType.None)
         {
             assertConditionToAppend.IsWrapped = true;
             return assertConditionToAppend;

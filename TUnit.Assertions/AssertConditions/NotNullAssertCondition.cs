@@ -11,7 +11,7 @@ public class NotNullAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActua
     {
     }
 
-    protected override string DefaultMessage => $"Value for {AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} was null";
+    protected override string DefaultMessage => $"Member for {AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} was null";
     protected internal override bool Passes(TActual? actualValue, Exception? exception)
     {
         return actualValue is not null;
