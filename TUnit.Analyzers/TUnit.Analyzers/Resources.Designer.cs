@@ -841,5 +841,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0029Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use an [InheritsTests] attribute to pick up tests from the base class..
+        /// </summary>
+        internal static string TUnit0030Description {
+            get {
+                return ResourceManager.GetString("TUnit0030Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use an [InheritsTests] attribute to pick up tests from the base class.
+        /// </summary>
+        internal static string TUnit0030MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0030MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Class doesn&apos;t pick up tests from the base class.
+        /// </summary>
+        internal static string TUnit0030Title {
+            get {
+                return ResourceManager.GetString("TUnit0030Title", resourceCulture);
+            }
+        }
     }
 }

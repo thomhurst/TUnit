@@ -1,25 +1,24 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Generic;
+using TUnit.Assertions.AssertConditions.ClassMember;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions;
 
-public class Has<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+public class Has<TRootObject, TAnd, TOr> : Connector<TRootObject, TAnd, TOr>
+    where TAnd : And<TRootObject, TAnd, TOr>, IAnd<TAnd, TRootObject, TAnd, TOr>
+    where TOr : Or<TRootObject, TAnd, TOr>, IOr<TOr, TRootObject, TAnd, TOr>
 {
-    protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
+    protected internal AssertionBuilder<TRootObject> AssertionBuilder { get; }
 
-    public Has(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+    public Has(AssertionBuilder<TRootObject> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TRootObject, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder
             .AppendConnector(connectorType)
             .AppendExpression("Has");
     }
-    
-    public Property<TActual, TAnd, TOr> Property(string name, [CallerArgumentExpression("name")] string expression = "") => new(AssertionBuilder.AppendCallerMethod(expression), name);
 
-    public Property<TActual, TPropertyType, TAnd, TOr> Property<TPropertyType>(string name, [CallerArgumentExpression("name")] string expression = "") => new(AssertionBuilder.AppendCallerMethod(expression), name);
+    public Member<TRootObject, TPropertyType, TAnd, TOr> Member<TPropertyType>(Expression<Func<TRootObject, TPropertyType>> selector, [CallerArgumentExpression("selector")] string expression = "") => new(this, AssertionBuilder.AppendCallerMethod(expression), selector);
 }

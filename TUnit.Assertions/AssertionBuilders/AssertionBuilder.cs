@@ -43,9 +43,9 @@ public abstract class AssertionBuilder<TActual>
         return AppendExpression(connectorType.ToString());
     }
     
-    internal AssertionBuilder<TActual> AppendCallerMethod(string? doNotPopulateThisValue, [CallerMemberName] string methodName = "")
+    internal AssertionBuilder<TActual> AppendCallerMethod(string? expression, [CallerMemberName] string methodName = "")
     {
-        return AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue], methodName);
+        return AppendCallerMethodWithMultipleExpressions([expression], methodName);
     }
     
     internal AssertionBuilder<TActual> AppendCallerMethodWithMultipleExpressions(string?[] expressions, [CallerMemberName] string methodName = "")

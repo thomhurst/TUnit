@@ -92,6 +92,9 @@ internal static class Rules
         
     public static readonly DiagnosticDescriptor DuplicateSingleAttribute =
         CreateDescriptor("TUnit0029", UsageCategory, DiagnosticSeverity.Error);
+            
+    public static readonly DiagnosticDescriptor DoesNotInheritTestsWarning =
+        CreateDescriptor("TUnit0030", UsageCategory, DiagnosticSeverity.Warning);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

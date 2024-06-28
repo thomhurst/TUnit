@@ -1,0 +1,85 @@
+namespace TUnit.Assertions.UnitTests;
+
+
+public class MemberTests
+{
+    [Test]
+    public async Task Number_Truthy()
+    {
+        var myClass = new MyClass()
+        {
+            Number = 123,
+            Text = "Blah",
+            Flag = false
+        };
+
+        await TUnitAssert.That(myClass).Has.Member(x => x.Number).EqualTo(123);
+    }
+    
+    [Test]
+    public void Number_Falsey()
+    {
+        var myClass = new MyClass
+        {
+            Number = 123,
+            Text = "Blah",
+            Flag = false
+        };
+
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).Has.Member(x => x.Number).EqualTo(1));
+        NUnitAssert.That(exception, Has.Message.EqualTo(
+            """
+            Assert.That(myClass).Has.Member(x => x.Number).EqualTo(1)
+            MyClass.Number:
+                Expected: 1
+                Received: 123
+            """
+            ));
+    }
+    
+    [Test]
+    public void Number_Nested_Falsey()
+    {
+        var myClass = new MyClass
+        {
+            Number = 123,
+            Text = "Blah",
+            Flag = false
+        };
+
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).Has.Member(x => x.Nested.Nested.Nested.Number).EqualTo(1));
+        NUnitAssert.That(exception, Has.Message.EqualTo(
+            """
+            Assert.That(myClass).Has.Member(x => x.Nested.Nested.Nested.Number).EqualTo(1)
+            MyClass.Number:
+                Expected: 1
+                Received: 123
+            """
+        ));
+    }
+    
+    [Test]
+    public void Number_Null()
+    {
+        MyClass myClass = null!;
+
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).Has.Member(x => x.Number).EqualTo(1));
+        NUnitAssert.That(exception, Has.Message.EqualTo(
+            """
+            Assert.That(myClass).Has.Member(x => x.Number).EqualTo(1)
+            MyClass.Number:
+                Expected: 1
+                Received: Object `MyClass` was null
+            """
+        ));
+    }
+
+    private class MyClass
+    {
+        public required int Number { get; init; }
+        public required string Text { get; init; }
+        public required bool Flag { get; init; }
+
+        public MyClass Nested => this;
+    }
+}
