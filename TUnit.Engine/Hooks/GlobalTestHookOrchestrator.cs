@@ -1,8 +1,12 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 
 namespace TUnit.Engine.Hooks;
 
+#if !DEBUG
+[EditorBrowsable(EditorBrowsableState.Never)]
+#endif
 public static class GlobalTestHookOrchestrator
 {
     private static readonly List<Func<TestContext, Task>> SetUps = new();

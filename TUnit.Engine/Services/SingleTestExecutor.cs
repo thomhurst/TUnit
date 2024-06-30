@@ -45,7 +45,7 @@ internal class SingleTestExecutor : IDataProducer
         if (_cancellationTokenSource.IsCancellationRequested)
         {
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode.WithProperty(new CancelledTestNodeStateProperty())));
-
+            test.TestContext._taskCompletionSource.SetCanceled();
             return;
         }
         
@@ -102,6 +102,8 @@ internal class SingleTestExecutor : IDataProducer
                 Status = Status.Passed,
                 Output = testContext.GetConsoleOutput()
             };
+            
+            testContext._taskCompletionSource.SetResult();
         }
         catch (SkipTestException skipTestException)
         {
@@ -121,6 +123,8 @@ internal class SingleTestExecutor : IDataProducer
                     Exception = null,
                     Status = Status.Skipped,
                 };
+                
+                testContext._taskCompletionSource.SetException(skipTestException);
             }
         }
         catch (Exception e)
@@ -145,6 +149,8 @@ internal class SingleTestExecutor : IDataProducer
                     Status = Status.Failed,
                     Output = testContext.GetConsoleOutput()
                 };
+                
+                testContext._taskCompletionSource.SetException(e);
             }
         }
         finally
@@ -196,6 +202,11 @@ internal class SingleTestExecutor : IDataProducer
     {
         try
         {
+            if (e is TestNotExecutedException)
+            {
+                return false;
+            }
+            
             var retryAttribute = testInformation.LazyRetryAttribute.Value;
 
             if (retryAttribute == null)
@@ -219,6 +230,8 @@ internal class SingleTestExecutor : IDataProducer
             return;
         }
 
+        await WaitForDependsOnTests(unInvokedTest.TestContext);
+
         var testContext = unInvokedTest.TestContext;
         var testInformation = testContext.TestInformation;
 
@@ -239,6 +252,21 @@ internal class SingleTestExecutor : IDataProducer
             () => RunTest(unInvokedTest),
             testLevelCancellationTokenSource
         );
+    }
+
+    private async Task WaitForDependsOnTests(TestContext testContext)
+    {
+        foreach (var dependsOnAttribute in testContext.TestInformation.LazyTestAndClassAttributes.Value.OfType<DependsOnAttribute>())
+        {
+            var dependencies = TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
+                dependsOnAttribute.ParameterTypes, testContext.TestInformation.ClassType,
+                testContext.TestInformation.TestClassParameterTypes);
+
+            foreach (var dependency in dependencies)
+            {
+                await dependency.TestTask;
+            }
+        }
     }
 
     private async Task ExecuteTestMethodWithTimeout(TestInformation testInformation, Func<Task> testDelegate,

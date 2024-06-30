@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Helpers;
@@ -6,6 +7,9 @@ using TUnit.Core.Models;
 
 namespace TUnit.Engine.Hooks;
 
+#if !DEBUG
+[EditorBrowsable(EditorBrowsableState.Never)]
+#endif
 public static class ClassHookOrchestrator
 {
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
@@ -128,6 +132,16 @@ public static class ClassHookOrchestrator
                 await RunHelpers.RunSafelyAsync(cleanUp, cleanUpExceptions);
             }
         }
+    }
+
+    public static IEnumerable<TestContext> GetTestsForType(Type type)
+    {
+        var context = ClassHookContexts.GetOrAdd(type, new ClassHookContext
+        {
+            ClassType = type
+        });
+
+        return context.Tests;
     }
 
     private static IEnumerable<Type> GetTypesIncludingBase(Type testClassType)

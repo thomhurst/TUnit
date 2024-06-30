@@ -6,12 +6,14 @@ namespace TUnit.Engine.Models;
 
 internal record DiscoveredTest
 {
-    public DiscoveredTest(TestInformation testInformation)
+    public TestContext TestContext { get; }
+
+    public DiscoveredTest(TestContext testContext)
     {
-        TestInformation = testInformation;
+        TestContext = testContext;
     }
 
-    public TestInformation TestInformation { get; }
+    public TestInformation TestInformation => TestContext.TestInformation;
 
     public TestNode TestNode => TestInformation.ToTestNode();
 }

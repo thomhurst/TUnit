@@ -17,6 +17,7 @@ public abstract class GenericTests<T>
     public abstract T GetData();
 }
 
+[InheritsTests]
 public class GenericInt : GenericTests<int>
 {
     public override int GetData()
@@ -25,6 +26,7 @@ public class GenericInt : GenericTests<int>
     }
 }
 
+[InheritsTests]
 public class GenericDouble : GenericTests<double>
 {
     public override double GetData()

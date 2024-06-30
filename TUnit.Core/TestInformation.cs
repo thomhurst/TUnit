@@ -29,11 +29,11 @@ public abstract record TestInformation
     
     public required string TestName { get; init; }
     
-    public required Type[]? TestMethodParameterTypes { get; init; }
-    public required object?[]? TestMethodArguments { get; init; }
+    public required Type[] TestMethodParameterTypes { get; init; }
+    public required object?[] TestMethodArguments { get; init; }
     
-    public required Type[]? TestClassParameterTypes { get; init; }
-    public required object?[]? TestClassArguments { get; init; }
+    public required Type[] TestClassParameterTypes { get; init; }
+    public required object?[] TestClassArguments { get; init; }
     
     public required IReadOnlyList<string> Categories { get; init; }
     
@@ -64,4 +64,8 @@ public abstract record TestInformation
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
     public required string DisplayName { get; set; }
+
+    internal bool IsSameTest(TestInformation testInformation) => TestName == testInformation.TestName &&
+                                                                 ClassType == testInformation.ClassType &&
+                                                                 TestMethodParameterTypes.SequenceEqual(testInformation.TestMethodParameterTypes);
 }

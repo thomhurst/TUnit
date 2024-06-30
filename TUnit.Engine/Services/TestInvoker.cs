@@ -11,7 +11,7 @@ internal class TestInvoker
         
         try
         {
-            TestDictionary.TestContexts.Value = unInvokedTest.TestContext;
+            TestContext.TestContexts.Value = unInvokedTest.TestContext;
 
             await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext);
 

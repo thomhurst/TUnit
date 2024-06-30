@@ -4,7 +4,8 @@ namespace TUnit.Core;
 
 public partial class TestContext
 {
-    public static TestContext? Current => TestDictionary.TestContexts.Value;
+    internal static readonly AsyncLocal<TestContext> TestContexts = new();
+    public static TestContext? Current => TestContexts.Value;
     
     public static string OutputDirectory
         => Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
