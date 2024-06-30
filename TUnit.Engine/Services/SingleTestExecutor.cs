@@ -51,7 +51,7 @@ internal class SingleTestExecutor : IDataProducer
         
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode.WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
-        var start = DateTimeOffset.MinValue;
+        DateTimeOffset? start = null;
         TestContext? testContext = null;
         try
         {
@@ -91,14 +91,14 @@ internal class SingleTestExecutor : IDataProducer
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
                     .WithProperty(PassedTestNodeStateProperty.CachedInstance)
-                    .WithProperty(new TimingProperty(new TimingInfo(start, end, end - start)))
+                    .WithProperty(new TimingProperty(new TimingInfo(start.Value, end, end - start.Value)))
             ));
 
             testContext.Result = new TUnitTestResult
             {
                 TestContext = testContext,
-                Duration = end - start,
-                Start = start,
+                Duration = start.HasValue ? end - start.Value : TimeSpan.Zero,
+                Start = start ?? end,
                 End = end,
                 ComputerName = Environment.MachineName,
                 Exception = null,
@@ -117,11 +117,13 @@ internal class SingleTestExecutor : IDataProducer
             
             if (testContext != null)
             {
+                var now = DateTimeOffset.Now;
+                
                 testContext.Result = new TUnitTestResult
                 {
                     Duration = TimeSpan.Zero,
-                    Start = start,
-                    End = start,
+                    Start = start ?? now,
+                    End = start ?? now,
                     ComputerName = Environment.MachineName,
                     Exception = null,
                     Status = Status.Skipped,
@@ -136,7 +138,7 @@ internal class SingleTestExecutor : IDataProducer
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
                 .WithProperty(new FailedTestNodeStateProperty(e))
-                .WithProperty(new TimingProperty(new TimingInfo(start, end, end-start)))
+                .WithProperty(new TimingProperty(new TimingInfo(start ?? end, end, start.HasValue ? end-start.Value : TimeSpan.Zero)))
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionmessage", e.Message))
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionstacktrace", e.StackTrace!))));
             
@@ -144,8 +146,8 @@ internal class SingleTestExecutor : IDataProducer
             {
                 testContext.Result = new TUnitTestResult
                 {
-                    Duration = end - start,
-                    Start = start,
+                    Duration = start.HasValue ? end - start.Value : TimeSpan.Zero,
+                    Start = start ?? end,
                     End = end,
                     ComputerName = Environment.MachineName,
                     Exception = e,
