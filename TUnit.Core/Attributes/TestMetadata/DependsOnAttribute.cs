@@ -1,5 +1,6 @@
 ﻿namespace TUnit.Core;
 
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class DependsOnAttribute : TUnitAttribute
 {
     public string TestName { get; }
