@@ -67,9 +67,13 @@ or with more complex test orchestration needs
     [EnumerableMethodData(nameof(GetAuthDetails))]
     public async Task DeleteAccount(string username, string password) { ... }
 
+    [Category("Downloads")]
+    [Timeout(300_000)]
     [Test, NotInParallel(Order = 1)]
     public async Task DownloadFile1() { ... }
 
+    [Category("Downloads")]
+    [Timeout(300_000)]
     [Test, NotInParallel(Order = 2)]
     public async Task DownloadFile2() { ... }
 
@@ -79,6 +83,14 @@ or with more complex test orchestration needs
     [Arguments(2)]
     [Arguments(3)]
     public async Task GoToPage(int page) { ... }
+
+    [Category("Cookies")]
+    [Test, Skip("Not yet built!")]
+    public async Task CheckCookies() { ... }
+
+    [Test, Explicit]
+    [Property("Some Key", "Some Value")]
+    public async Task Ping() { ... }
 
     public static IEnumerable<(string Username, string Password)> GetAuthDetails()
     {
