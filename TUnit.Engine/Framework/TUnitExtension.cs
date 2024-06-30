@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Framework;
 
-public class TUnitExtension : IExtension
+internal class TUnitExtension : IExtension
 {
     public string Uid => nameof(TUnitExtension);
 

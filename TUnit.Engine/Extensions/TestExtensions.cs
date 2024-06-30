@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.Extensions.Messages;
+﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Engine.Properties;
 
@@ -33,8 +34,8 @@ internal static class TestExtensions
                 ..testDetails.CustomProperties.Select(x => new KeyValuePairStringProperty(x.Key, x.Value)),
                 
                 // TRX Report Properties
-                new KeyValuePairStringProperty("trxreport.classname", testDetails.ClassType.Name),
-                ..testDetails.Categories.Select(x => new KeyValuePairStringProperty("trxreport.testcategory", x)),
+                new TrxFullyQualifiedTypeNameProperty(testDetails.ClassType.FullName!),
+                new TrxCategoriesProperty([..testDetails.Categories]),
             ])
         };
         

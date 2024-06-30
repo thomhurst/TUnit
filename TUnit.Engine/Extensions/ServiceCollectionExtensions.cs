@@ -7,7 +7,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Extensions;
 
-public static class ServiceCollectionExtensions
+internal static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddFromFrameworkServiceProvider(this IServiceCollection services,
         IServiceProvider serviceProvider, IExtension extension)
@@ -31,7 +31,6 @@ public static class ServiceCollectionExtensions
             .AddSingleton<TestsLoader>()
             .AddSingleton<TestsExecutor>()
             .AddSingleton<TestGrouper>()
-            .AddSingleton<CombinativeSolver>()
             .AddSingleton<SingleTestExecutor>()
             .AddSingleton<TestInvoker>()
             //.AddSingleton<SystemResourceMonitor>()

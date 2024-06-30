@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.Extensions;
+﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
@@ -131,8 +132,7 @@ internal class SingleTestExecutor : IDataProducer
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
                 .WithProperty(new FailedTestNodeStateProperty(e))
                 .WithProperty(new TimingProperty(new TimingInfo(start ?? end, end, start.HasValue ? end-start.Value : TimeSpan.Zero)))
-                .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionmessage", e.Message))
-                .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionstacktrace", e.StackTrace!))));
+                .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
 
             testContext._taskCompletionSource.SetException(e);
             

@@ -5,7 +5,7 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Services;
 
-public class ExplicitFilterService
+internal class ExplicitFilterService
 {
     public bool CanRun(TestInformation testInformation, ITestExecutionFilter? filter)
     {

@@ -4,7 +4,7 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-public class MaximumParallelTestsCommandProvider : ICommandLineOptionsProvider
+internal class MaximumParallelTestsCommandProvider : ICommandLineOptionsProvider
 {
     public const string MaximumParallelTests = "maximum-parallel-tests";
     

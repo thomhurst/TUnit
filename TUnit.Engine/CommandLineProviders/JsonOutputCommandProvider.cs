@@ -4,7 +4,7 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-public class JsonOutputCommandProvider : ICommandLineOptionsProvider
+internal class JsonOutputCommandProvider : ICommandLineOptionsProvider
 {
     public const string OutputJson = "output-json";
     public const string OutputJsonFilename = "output-json-filename";

@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Properties;
 
-public record CategoryProperty : KeyValuePairStringProperty
+internal record CategoryProperty : KeyValuePairStringProperty
 {
     public CategoryProperty(string category) : base("Category", category)
     {

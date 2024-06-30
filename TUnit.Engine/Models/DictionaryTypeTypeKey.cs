@@ -1,5 +1,9 @@
 ﻿namespace TUnit.Engine.Models;
 
+#if !DEBUG
+using System.ComponentModel;
+[EditorBrowsable(EditorBrowsableState.Never)]
+#endif
 public record DictionaryTypeTypeKey(Type Type1, Type Type2)
 {
     public virtual bool Equals(DictionaryTypeTypeKey? other)

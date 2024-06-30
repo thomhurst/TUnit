@@ -1,5 +1,9 @@
 ﻿namespace TUnit.Engine;
 
+#if !DEBUG
+using System.ComponentModel;
+[EditorBrowsable(EditorBrowsableState.Never)]
+#endif
 public class TimedCancellationToken
 {
     private readonly TimeSpan _timeout;
