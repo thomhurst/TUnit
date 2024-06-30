@@ -128,7 +128,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     ),
                     
                     // TRX Reports
-                    new TrxExceptionProperty($"{failedToInitializeTest.Exception.GetType().Name}{Environment.MachineName}{failedToInitializeTest.Exception.Message}", failedToInitializeTest.Exception.StackTrace)
+                    new TrxExceptionProperty(failedToInitializeTest.Exception.Message, failedToInitializeTest.Exception.StackTrace)
                 )
             };
                         

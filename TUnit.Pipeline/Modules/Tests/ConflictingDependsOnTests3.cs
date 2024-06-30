@@ -18,11 +18,11 @@ public class ConflictingDependsOnTests3 : TestModule
                 result => result.Passed.Should().Be(0),
                 result => result.Failed.Should().Be(5),
                 result => result.Skipped.Should().Be(0),
-                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test1").Output?.ErrorInfo?.Message.Should().Contain("DependencyConflictException"),
-                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test2").Output?.ErrorInfo?.Message.Should().Contain("DependencyConflictException"),
-                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test3").Output?.ErrorInfo?.Message.Should().Contain("DependencyConflictException"),
-                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test4").Output?.ErrorInfo?.Message.Should().Contain("DependencyConflictException"),
-                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test5").Output?.ErrorInfo?.Message.Should().Contain("DependencyConflictException"),
+                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test1").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test1 &gt; Test5 &gt; Test4 &gt; Test3 &gt; Test2 &gt; Test1"),
+                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test2").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test2 &gt; Test1 &gt; Test5 &gt; Test4 &gt; Test3 &gt; Test2"),
+                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test3").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test3 &gt; Test2 &gt; Test1 &gt; Test5 &gt; Test4 &gt; Test3"),
+                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test4").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test4 &gt; Test3 &gt; Test2 &gt; Test1 &gt; Test5 &gt; Test1"),
+                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test5").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test5 &gt; Test4 &gt; Test3 &gt; Test2 &gt; Test1 &gt; Test5"),
 
             ]);
     }

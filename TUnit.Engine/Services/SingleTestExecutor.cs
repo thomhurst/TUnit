@@ -132,7 +132,7 @@ internal class SingleTestExecutor : IDataProducer
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
                 .WithProperty(new FailedTestNodeStateProperty(e))
                 .WithProperty(new TimingProperty(new TimingInfo(start ?? end, end, start.HasValue ? end-start.Value : TimeSpan.Zero)))
-                .WithProperty(new TrxExceptionProperty($"{e.GetType().Name}{Environment.MachineName}{e.Message}", e.StackTrace))));
+                .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
 
             testContext._taskCompletionSource.SetException(e);
             
