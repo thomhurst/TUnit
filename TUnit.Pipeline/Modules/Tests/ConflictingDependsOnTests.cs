@@ -20,8 +20,8 @@ public class ConflictingDependsOnTests : TestModule
                 result => result.Passed.Should().Be(0),
                 result => result.Failed.Should().Be(2),
                 result => result.Skipped.Should().Be(0),
-                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test1").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test1 &gt; Test2 &gt; Test1"),
-                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test2").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test2 &gt; Test1 &gt; Test2"),
+                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test1").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test1 > Test2 > Test1"),
+                result => result.TrxReport.UnitTestResults.First(x => x.TestName == "Test2").Output?.ErrorInfo?.Message.Should().Contain("DependsOn Conflict: Test2 > Test1 > Test2"),
 
             ], cancellationToken);
     }
