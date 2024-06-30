@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet;
@@ -81,7 +82,12 @@ public abstract partial class TestModule : Module<TestResult>
         }
         catch (Exception e)
         {
-            throw new Exception($"Error asserting results - Trx file: {JsonSerializer.Serialize(parsedResult, JsonSerializerOptions)}", e);
+            throw new Exception($"""
+                                 Error asserting results
+                                 
+                                 Trx file: {JsonSerializer.Serialize(parsedResult, JsonSerializerOptions)}
+                                 Raw Trx file: {JsonSerializer.Serialize(JsonNode.Parse(trxFileContents), JsonSerializerOptions)}
+                                 """, e);
         }
 
         return parsedResult;
