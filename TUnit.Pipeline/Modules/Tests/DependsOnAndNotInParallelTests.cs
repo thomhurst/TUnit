@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using FluentAssertions;
+﻿using FluentAssertions;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Parsers.NUnitTrx;
 using ModularPipelines.Extensions;
@@ -17,7 +16,7 @@ public class DependsOnAndNotInParallelTests : TestModule
             "/*/*/DependsOnAndNotInParallelTests/*",
             [
                 result => result.Successful.Should().BeFalse(),
-                result => result.Total.Should().Be(1),
+                result => result.Total.Should().Be(2),
                 result => result.Passed.Should().Be(1),
                 result => result.Failed.Should().Be(1),
                 result => result.Skipped.Should().Be(0),
