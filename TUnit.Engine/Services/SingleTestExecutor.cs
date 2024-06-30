@@ -88,6 +88,8 @@ internal class SingleTestExecutor : IDataProducer
                     .WithProperty(PassedTestNodeStateProperty.CachedInstance)
                     .WithProperty(new TimingProperty(new TimingInfo(start.Value, end, end - start.Value)))
             ));
+            
+            testContext._taskCompletionSource.SetResult();
 
             testContext.Result = new TUnitTestResult
             {
@@ -100,8 +102,6 @@ internal class SingleTestExecutor : IDataProducer
                 Status = Status.Passed,
                 Output = testContext.GetConsoleOutput()
             };
-            
-            testContext._taskCompletionSource.SetResult();
         }
         catch (SkipTestException skipTestException)
         {
@@ -111,6 +111,8 @@ internal class SingleTestExecutor : IDataProducer
                 test.TestNode.WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
 
             var now = DateTimeOffset.Now;
+            
+            testContext._taskCompletionSource.SetException(skipTestException);
                 
             testContext.Result = new TUnitTestResult
             {
@@ -121,8 +123,6 @@ internal class SingleTestExecutor : IDataProducer
                 Exception = null,
                 Status = Status.Skipped,
             };
-                
-            testContext._taskCompletionSource.SetException(skipTestException);
         }
         catch (Exception e)
         {
@@ -134,6 +134,8 @@ internal class SingleTestExecutor : IDataProducer
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionmessage", e.Message))
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionstacktrace", e.StackTrace!))));
 
+            testContext._taskCompletionSource.SetException(e);
+            
             testContext.Result = new TUnitTestResult
             {
                 Duration = start.HasValue ? end - start.Value : TimeSpan.Zero,
@@ -144,11 +146,11 @@ internal class SingleTestExecutor : IDataProducer
                 Status = Status.Failed,
                 Output = testContext.GetConsoleOutput()
             };
-                
-            testContext._taskCompletionSource.SetException(e);
         }
         finally
         {
+            testContext._taskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
+            
             await _disposer.DisposeAsync(testContext?.TestInformation.ClassInstance);
 
             using var lockHandle = await _consoleStandardOutLock.WaitAsync();
