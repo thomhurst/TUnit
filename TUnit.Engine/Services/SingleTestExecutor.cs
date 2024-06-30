@@ -283,7 +283,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             if (dependencyOfDependency.TestInformation.IsSameTest(testContext.TestInformation))
             {
-                throw new DependencyConflictException(testContext.TestInformation, dependencyOfDependency.TestInformation);
+                throw new DependencyConflictException(testContext.TestInformation, dependency.TestInformation);
             }
         }
     }
