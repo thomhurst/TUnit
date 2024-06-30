@@ -64,12 +64,8 @@ internal class SingleTestExecutor : IDataProducer
             {
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
             }
-            
-            if (!TestDictionary.TryGetTest(test.TestInformation.TestId, out var unInvokedTest))
-            {
-                var failedInitializationTest = TestDictionary.GetFailedInitializationTest(test.TestInformation.TestId);
-                throw new TestFailedInitializationException($"The test {test.TestInformation.DisplayName} at {test.TestInformation.TestFilePath}:{test.TestInformation.TestLineNumber} failed to initialize", failedInitializationTest.Exception);
-            }
+
+            var unInvokedTest = test.UnInvokedTest;
             
             foreach (var applicableTestAttribute in unInvokedTest.ApplicableTestAttributes)
             {

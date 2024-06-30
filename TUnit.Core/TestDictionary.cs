@@ -20,21 +20,15 @@ public static class TestDictionary
     {
         FailedInitializationTests[testId] = failedInitializationTest;
     }
-
-    internal static bool TryGetTest(string id, [NotNullWhen(true)] out UnInvokedTest? unInvokedTest)
-    {
-        return Tests.TryGetValue(id, out unInvokedTest);
-    }
     
     internal static FailedInitializationTest GetFailedInitializationTest(string id)
     {
         return FailedInitializationTests[id] ?? throw new Exception($"Test with ID {id} was not found");
     }
     
-    internal static IEnumerable<TestContext> GetAllTestDetails()
+    internal static IEnumerable<UnInvokedTest> GetAllTests()
     {
-        return Tests.Values
-            .Select(x => x.TestContext);
+        return Tests.Values;
     }
 
     internal static IEnumerable<TestContext> GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes, Type classType, IEnumerable<Type> classParameterTypes)

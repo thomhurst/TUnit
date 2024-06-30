@@ -7,6 +7,6 @@ internal class TestsLoader
 {
     public IEnumerable<DiscoveredTest> GetTests()
     {
-        return TestDictionary.GetAllTestDetails().Select(x => new DiscoveredTest(x));
+        return TestDictionary.GetAllTests().Select(x => new DiscoveredTest(x));
     }
 }
