@@ -2,12 +2,13 @@
 
 public class DependencyConflictException : TUnitException
 {
-    internal DependencyConflictException(TestInformation test1, TestInformation test2) : base(GetMessage(test1, test2))
+    internal DependencyConflictException(TestInformation test1, IEnumerable<TestInformation> testChain) : base(GetMessage(test1, testChain.ToList()))
     {
     }
 
-    private static string GetMessage(TestInformation test1, TestInformation test2)
+    private static string GetMessage(TestInformation test1, List<TestInformation> testChain)
     {
-        return $"{test1.TestName} and {test2.TestName} cannot depend on each other.";
+        var indexOfConflict = testChain.FindIndex(x => x.IsSameTest(test1));
+        return $"DependsOn Conflict: {test1.TestName} > {string.Join(" > ", testChain.Take(indexOfConflict).Select(x => x.TestName))} > {test1.TestName}";
     }
 }

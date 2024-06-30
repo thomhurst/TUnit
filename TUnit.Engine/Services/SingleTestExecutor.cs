@@ -254,17 +254,32 @@ internal class SingleTestExecutor : IDataProducer
 
     private IEnumerable<TestContext> GetDependencies(TestInformation testInformation)
     {
-        foreach (var testContext in testInformation.TestAndClassAttributes
+        return GetDependencies(testInformation, testInformation);
+    }
+
+    private IEnumerable<TestContext> GetDependencies(TestInformation original, TestInformation testInformation)
+    {
+        foreach (var dependency in testInformation.TestAndClassAttributes
                      .OfType<DependsOnAttribute>()
                      .SelectMany(dependsOnAttribute => TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
                          dependsOnAttribute.ParameterTypes, testInformation.ClassType,
                          testInformation.TestClassParameterTypes)))
         {
-            yield return testContext;
-            
-            foreach (var dependency in GetDependencies(testContext.TestInformation))
+            yield return dependency;
+
+            if (dependency.TestInformation.IsSameTest(original))
             {
-                yield return dependency;
+                yield break;
+            }
+            
+            foreach (var nestedDependency in GetDependencies(original, dependency.TestInformation))
+            {
+                yield return nestedDependency;
+                
+                if (nestedDependency.TestInformation.IsSameTest(original))
+                {
+                    yield break;
+                }
             }
         }
     }
@@ -273,14 +288,16 @@ internal class SingleTestExecutor : IDataProducer
     {
         if (testContext.TestInformation.IsSameTest(dependency.TestInformation))
         {
-            throw new DependencyConflictException(testContext.TestInformation, dependency.TestInformation);
+            throw new DependencyConflictException(testContext.TestInformation, [dependency.TestInformation]);
         }
+
+        var nestedDependencies = GetDependencies(dependency.TestInformation).ToArray();
         
-        foreach (var dependencyOfDependency in GetDependencies(dependency.TestInformation))
+        foreach (var dependencyOfDependency in nestedDependencies)
         {
             if (dependencyOfDependency.TestInformation.IsSameTest(testContext.TestInformation))
             {
-                throw new DependencyConflictException(testContext.TestInformation, dependency.TestInformation);
+                throw new DependencyConflictException(testContext.TestInformation, [dependency.TestInformation, ..nestedDependencies.Select(x => x.TestInformation)]);
             }
         }
     }
