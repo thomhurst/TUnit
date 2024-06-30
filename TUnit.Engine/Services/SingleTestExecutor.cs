@@ -256,15 +256,35 @@ internal class SingleTestExecutor : IDataProducer
 
     private async Task WaitForDependsOnTests(TestContext testContext)
     {
-        foreach (var dependsOnAttribute in testContext.TestInformation.LazyTestAndClassAttributes.Value.OfType<DependsOnAttribute>())
+        foreach (var dependency in GetDependencies(testContext.TestInformation))
         {
-            var dependencies = TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
-                dependsOnAttribute.ParameterTypes, testContext.TestInformation.ClassType,
-                testContext.TestInformation.TestClassParameterTypes);
+            AssertDoNotDependOnEachOther(testContext, dependency);
+            await dependency.TestTask;
+        }
+    }
 
-            foreach (var dependency in dependencies)
+    private IEnumerable<TestContext> GetDependencies(TestInformation testInformation)
+    {
+        return testInformation.LazyTestAndClassAttributes
+            .Value
+            .OfType<DependsOnAttribute>()
+            .SelectMany(dependsOnAttribute => TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
+                dependsOnAttribute.ParameterTypes, testInformation.ClassType,
+                testInformation.TestClassParameterTypes));
+    }
+
+    private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
+    {
+        if (testContext.TestInformation.IsSameTest(dependency.TestInformation))
+        {
+            throw new DependencyConflictException(testContext.TestInformation, dependency.TestInformation);
+        }
+        
+        foreach (var dependencyOfDependency in GetDependencies(dependency.TestInformation))
+        {
+            if (dependencyOfDependency.TestInformation.IsSameTest(testContext.TestInformation))
             {
-                await dependency.TestTask;
+                throw new DependencyConflictException(testContext.TestInformation, dependencyOfDependency.TestInformation);
             }
         }
     }
