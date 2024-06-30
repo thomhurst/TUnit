@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Parsers.NUnitTrx;
+using ModularPipelines.Extensions;
+using ModularPipelines.Git.Extensions;
 using File = ModularPipelines.FileSystem.File;
 
 namespace TUnit.Pipeline.Modules.Tests;
@@ -11,7 +13,7 @@ public class DependsOnTests : TestModule
     {
         var start = DateTime.UtcNow;
 
-        File file = (File.GetNewTemporaryFilePath() + ".trx")!;
+        var file = Guid.NewGuid().ToString("N") + ".trx";
         
         await RunTestsWithFilter(context, 
             "/*/*/DependsOnTests/*",
@@ -29,7 +31,7 @@ public class DependsOnTests : TestModule
                 AdditionalArguments = ["--report-trx", "--report-trx-filename", file],
             },  cancellationToken);
 
-        var trxReport = new TrxParser().ParseTrxContents(await file.ReadAsync(cancellationToken));
+        var trxReport = new TrxParser().ParseTrxContents(await context.Git().RootDirectory.AssertExists().FindFile(x => x.Name == file).AssertExists().ReadAsync(cancellationToken));
 
         var test1Start = trxReport.UnitTestResults.First(x => x.TestName == "Test1").StartTime!.Value;
         var test2Start = trxReport.UnitTestResults.First(x => x.TestName == "Test2").StartTime!.Value;
