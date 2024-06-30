@@ -10,13 +10,14 @@ See here: <https://thomhurst.github.io/TUnit/>
 
 - Source generated tests
 - Full async support
+- Parallel by default, with mechanisms to switch it off for certain tests
+- Test ordering (if running not in parallel)
+- Tests can depend on other tests to form chains
 - Easy to read assertions
-- Flexible test data mechanisms
-- Flexible setup and cleanup mechanisms
-- Out of the box concurrency
-- Designed to avoid common pitfalls (leaky test states, shared instances, etc.)
-- Global test hooks
-- Test context interrogation providing test details and test state
+- Injectable test data functionality
+- Hooks before and after: Assembly, Class, Test
+- Designed to avoid common pitfalls such as leaky test states
+- Ability to view metadata and results (if in a cleanup method) for a test from a `TestContext` object
 
 ## Installation
 
@@ -25,7 +26,7 @@ See here: <https://thomhurst.github.io/TUnit/>
 ## Example test
 
 ```csharp
-[Test]
+    [Test]
     public async Task Test1()
     {
         var value = "Hello world!";
@@ -35,6 +36,67 @@ See here: <https://thomhurst.github.io/TUnit/>
             .And.Does.StartWith("H")
             .And.Has.Count().EqualTo(12)
             .And.Is.EqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
+    }
+```
+
+or with more complex test orchestration needs
+
+```csharp
+    [BeforeAllTestsInClass]
+    public static async Task ClearDatabase() { ... }
+
+    [AfterAllTestsInClass]
+    public static async Task AssertDatabaseIsAsExpected() { ... }
+
+    [BeforeEachTest]
+    public async Task CreatePlaywrightBrowser() { ... }
+
+    [AfterEachTest]
+    public async Task DisposePlaywrightBrowser() { ... }
+
+    [Retry(3)]
+    [Test, DisplayName("Register an account")]
+    [EnumerableMethodData(nameof(GetAuthDetails))]
+    public async Task Register(string username, string password) { ... }
+
+    [DataSourceDrivenTest, DependsOn(nameof(Register))]
+    [EnumerableMethodData(nameof(GetAuthDetails))]
+    public async Task Login(string username, string password) { ... }
+
+    [DataSourceDrivenTest, DependsOn(nameof(Login))]
+    [EnumerableMethodData(nameof(GetAuthDetails))]
+    public async Task DeleteAccount(string username, string password) { ... }
+
+    [Category("Downloads")]
+    [Timeout(300_000)]
+    [Test, NotInParallel(Order = 1)]
+    public async Task DownloadFile1() { ... }
+
+    [Category("Downloads")]
+    [Timeout(300_000)]
+    [Test, NotInParallel(Order = 2)]
+    public async Task DownloadFile2() { ... }
+
+    [Repeat(10)]
+    [DataDrivenTest]
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    public async Task GoToPage(int page) { ... }
+
+    [Category("Cookies")]
+    [Test, Skip("Not yet built!")]
+    public async Task CheckCookies() { ... }
+
+    [Test, Explicit]
+    [Property("Some Key", "Some Value")]
+    public async Task Ping() { ... }
+
+    public static IEnumerable<(string Username, string Password)> GetAuthDetails()
+    {
+        yield return ("user1", "password1");
+        yield return ("user2", "password2");
+        yield return ("user3", "password3");
     }
 ```
 
