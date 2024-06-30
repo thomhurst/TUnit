@@ -286,18 +286,18 @@ internal class SingleTestExecutor : IDataProducer
 
     private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
     {
-        if (testContext.TestInformation.IsSameTest(dependency.TestInformation))
-        {
-            throw new DependencyConflictException(testContext.TestInformation, [dependency.TestInformation]);
-        }
-
-        var nestedDependencies = GetDependencies(dependency.TestInformation).ToArray();
+        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestInformation)];
         
-        foreach (var dependencyOfDependency in nestedDependencies)
+        foreach (var dependencyOfDependency in dependencies)
         {
             if (dependencyOfDependency.TestInformation.IsSameTest(testContext.TestInformation))
             {
-                throw new DependencyConflictException(testContext.TestInformation, [dependency.TestInformation, ..nestedDependencies.Select(x => x.TestInformation)]);
+                throw new DependencyConflictException(testContext.TestInformation, dependencies.Select(x => x.TestInformation));
+            }
+
+            if (dependencyOfDependency.TestInformation.NotInParallelConstraintKeys != null)
+            {
+                throw new DependsOnNotInParallelException(testContext.TestInformation.TestName);
             }
         }
     }
