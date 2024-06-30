@@ -29,8 +29,8 @@ public class DependsOnTests : TestModule
 
         var trxReport = new TrxParser().ParseTrxContents(await context.Git().RootDirectory.AssertExists().FindFile(x => x.Name == file).AssertExists().ReadAsync(cancellationToken));
 
-        var test1Start = trxReport.UnitTestResults.FirstOrDefault(x => x.TestName == "Test1")?.StartTime!.Value ?? throw new Exception($"Test1 not found: {JsonSerializer.Serialize(trxReport)}");
-        var test2Start = trxReport.UnitTestResults.FirstOrDefault(x => x.TestName == "Test2")?.StartTime!.Value ?? throw new Exception($"Test1 not found: {JsonSerializer.Serialize(trxReport)}");
+        var test1Start = trxReport.UnitTestResults.FirstOrDefault(x => x.TestName!.StartsWith("Test1"))?.StartTime!.Value ?? throw new Exception($"Test1 not found: {JsonSerializer.Serialize(trxReport)}");
+        var test2Start = trxReport.UnitTestResults.FirstOrDefault(x => x.TestName!.StartsWith("Test2"))?.StartTime!.Value ?? throw new Exception($"Test1 not found: {JsonSerializer.Serialize(trxReport)}");
 
         test2Start.Should().BeOnOrAfter(test1Start.AddSeconds(5));
         
