@@ -207,7 +207,7 @@ internal class SingleTestExecutor : IDataProducer
                 return false;
             }
             
-            var retryAttribute = testInformation.LazyRetryAttribute.Value;
+            var retryAttribute = testInformation.RetryAttribute;
 
             if (retryAttribute == null)
             {
@@ -265,8 +265,7 @@ internal class SingleTestExecutor : IDataProducer
 
     private IEnumerable<TestContext> GetDependencies(TestInformation testInformation)
     {
-        return testInformation.LazyTestAndClassAttributes
-            .Value
+        return testInformation.TestAndClassAttributes
             .OfType<DependsOnAttribute>()
             .SelectMany(dependsOnAttribute => TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
                 dependsOnAttribute.ParameterTypes, testInformation.ClassType,

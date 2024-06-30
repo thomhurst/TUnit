@@ -9,8 +9,7 @@ public class ExplicitFilterService
 {
     public bool CanRun(TestInformation testInformation, ITestExecutionFilter? filter)
     {
-        if (!testInformation.LazyTestAndClassAttributes
-                .Value.Any(x => x is ExplicitAttribute))
+        if (!testInformation.TestAndClassAttributes.Any(x => x is ExplicitAttribute))
         {
             // These tests don't have any ExplicitAttributes
             return true;
