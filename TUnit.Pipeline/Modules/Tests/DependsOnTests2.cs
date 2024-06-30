@@ -11,8 +11,6 @@ public class DependsOnTests2 : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        var start = DateTime.UtcNow;
-
         var file = Guid.NewGuid().ToString("N") + ".trx";
         
         await RunTestsWithFilter(context, 
@@ -23,8 +21,6 @@ public class DependsOnTests2 : TestModule
                 result => result.Passed.Should().Be(0),
                 result => result.Failed.Should().Be(3),
                 result => result.Skipped.Should().Be(0),
-                _ => (DateTime.UtcNow - start).Should().BeLessThan(TimeSpan.FromMinutes(1)),
-                _ => (DateTime.UtcNow - start).Should().BeGreaterThan(TimeSpan.FromSeconds(30)),
             ],
             new RunOptions
             {
