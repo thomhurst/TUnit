@@ -86,7 +86,7 @@ public abstract partial class TestModule : Module<TestResult>
                                  Error asserting results
                                  
                                  Trx file: {JsonSerializer.Serialize(parsedResult, JsonSerializerOptions)}
-                                 Raw Trx file: {JsonSerializer.Serialize(JsonNode.Parse(trxFileContents), JsonSerializerOptions)}
+                                 Raw Trx file: {trxFileContents}
                                  """, e);
         }
 
