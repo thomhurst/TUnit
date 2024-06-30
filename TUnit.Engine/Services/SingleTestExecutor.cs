@@ -49,13 +49,16 @@ internal class SingleTestExecutor : IDataProducer
             return;
         }
         
-        var start = DateTimeOffset.Now;
-
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode.WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
+        var start = DateTimeOffset.MinValue;
         TestContext? testContext = null;
         try
         {
+            await WaitForDependsOnTests(test.TestContext);
+            
+            start = DateTimeOffset.Now;
+
             if (!_explicitFilterService.CanRun(test.TestInformation, filter))
             {
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
@@ -202,11 +205,6 @@ internal class SingleTestExecutor : IDataProducer
     {
         try
         {
-            if (e is TestNotExecutedException)
-            {
-                return false;
-            }
-            
             var retryAttribute = testInformation.RetryAttribute;
 
             if (retryAttribute == null)
@@ -229,9 +227,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             return;
         }
-
-        await WaitForDependsOnTests(unInvokedTest.TestContext);
-
+        
         var testContext = unInvokedTest.TestContext;
         var testInformation = testContext.TestInformation;
 
