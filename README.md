@@ -25,7 +25,7 @@ See here: <https://thomhurst.github.io/TUnit/>
 ## Example test
 
 ```csharp
-[Test]
+    [Test]
     public async Task Test1()
     {
         var value = "Hello world!";
@@ -35,6 +35,55 @@ See here: <https://thomhurst.github.io/TUnit/>
             .And.Does.StartWith("H")
             .And.Has.Count().EqualTo(12)
             .And.Is.EqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
+    }
+```
+
+or with more complex test orchestration needs
+
+```csharp
+    [BeforeAllTestsInClass]
+    public static async Task ClearDatabase() { ... }
+
+    [AfterAllTestsInClass]
+    public static async Task AssertDatabaseIsAsExpected() { ... }
+
+    [BeforeEachTest]
+    public async Task CreatePlaywrightBrowser() { ... }
+
+    [AfterEachTest]
+    public async Task DisposePlaywrightBrowser() { ... }
+
+    [Retry(3)]
+    [Test, DisplayName("Register an account")]
+    [EnumerableMethodData(nameof(GetAuthDetails))]
+    public async Task Register(string username, string password) { ... }
+
+    [DataSourceDrivenTest, DependsOn(nameof(Register))]
+    [EnumerableMethodData(nameof(GetAuthDetails))]
+    public async Task Login(string username, string password) { ... }
+
+    [DataSourceDrivenTest, DependsOn(nameof(Login))]
+    [EnumerableMethodData(nameof(GetAuthDetails))]
+    public async Task DeleteAccount(string username, string password) { ... }
+
+    [Test, NotInParallel(Order = 1)]
+    public async Task DownloadFile1() { ... }
+
+    [Test, NotInParallel(Order = 2)]
+    public async Task DownloadFile2() { ... }
+
+    [Repeat(10)]
+    [DataDrivenTest]
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    public async Task GoToPage(int page) { ... }
+
+    public static IEnumerable<(string Username, string Password)> GetAuthDetails()
+    {
+        yield return ("user1", "password1");
+        yield return ("user2", "password2");
+        yield return ("user3", "password3");
     }
 ```
 
