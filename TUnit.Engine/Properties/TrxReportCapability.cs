@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Properties;
 
-public class TrxReportCapability : ITrxReportCapability
+internal class TrxReportCapability : ITrxReportCapability
 {
     public void Enable()
     {

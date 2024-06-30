@@ -4,7 +4,7 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-public class DisplayTestOutputCommandProvider : ICommandLineOptionsProvider
+internal class DisplayTestOutputCommandProvider : ICommandLineOptionsProvider
 {
     public const string DisplayTestOutput = "display-test-output";
     

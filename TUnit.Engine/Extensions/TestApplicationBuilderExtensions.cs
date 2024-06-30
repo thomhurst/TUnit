@@ -7,7 +7,7 @@ using TUnit.Engine.Properties;
 
 namespace TUnit.Engine.Extensions;
 
-public static class TestApplicationBuilderExtensions
+internal static class TestApplicationBuilderExtensions
 {
     public static void AddTUnit(this ITestApplicationBuilder testApplicationBuilder)
     {

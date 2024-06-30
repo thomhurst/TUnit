@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace TUnit.Engine.Json;
 
-public class TypeJsonConverter : JsonConverter<Type>
+internal class TypeJsonConverter : JsonConverter<Type>
 {
     public override Type? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
