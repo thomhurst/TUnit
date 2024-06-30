@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
 #if !DEBUG
+using System.ComponentModel;
 [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
 public static class TestDictionary

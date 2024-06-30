@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Helpers;
@@ -8,6 +7,7 @@ using TUnit.Core.Models;
 namespace TUnit.Engine.Hooks;
 
 #if !DEBUG
+using System.ComponentModel;
 [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
 public static class ClassHookOrchestrator

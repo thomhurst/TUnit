@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using TUnit.Core;
 
 namespace TUnit.Engine.Hooks;
 
 #if !DEBUG
+using System.ComponentModel;
 [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
 public static class GlobalTestHookOrchestrator
