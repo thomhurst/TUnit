@@ -42,17 +42,18 @@ internal class SingleTestExecutor : IDataProducer
     public async Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
+        var testContext = test.TestContext;
+
         if (_cancellationTokenSource.IsCancellationRequested)
         {
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode.WithProperty(new CancelledTestNodeStateProperty())));
-            test.TestContext._taskCompletionSource.SetCanceled();
+            testContext._taskCompletionSource.SetCanceled();
             return;
         }
         
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode.WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
         DateTimeOffset? start = null;
-        TestContext? testContext = null;
         try
         {
             await WaitForDependsOnTests(test.TestContext);
@@ -69,9 +70,7 @@ internal class SingleTestExecutor : IDataProducer
                 var failedInitializationTest = TestDictionary.GetFailedInitializationTest(test.TestInformation.TestId);
                 throw new TestFailedInitializationException($"The test {test.TestInformation.DisplayName} at {test.TestInformation.TestFilePath}:{test.TestInformation.TestLineNumber} failed to initialize", failedInitializationTest.Exception);
             }
-
-            testContext = unInvokedTest.TestContext;
-
+            
             foreach (var applicableTestAttribute in unInvokedTest.ApplicableTestAttributes)
             {
                 await applicableTestAttribute.Apply(testContext);
@@ -97,8 +96,8 @@ internal class SingleTestExecutor : IDataProducer
             testContext.Result = new TUnitTestResult
             {
                 TestContext = testContext,
-                Duration = start.HasValue ? end - start.Value : TimeSpan.Zero,
-                Start = start ?? end,
+                Duration = end - start.Value,
+                Start = start.Value,
                 End = end,
                 ComputerName = Environment.MachineName,
                 Exception = null,
@@ -114,23 +113,20 @@ internal class SingleTestExecutor : IDataProducer
             
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, 
                 test.TestNode.WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
-            
-            if (testContext != null)
+
+            var now = DateTimeOffset.Now;
+                
+            testContext.Result = new TUnitTestResult
             {
-                var now = DateTimeOffset.Now;
+                Duration = TimeSpan.Zero,
+                Start = start ?? now,
+                End = start ?? now,
+                ComputerName = Environment.MachineName,
+                Exception = null,
+                Status = Status.Skipped,
+            };
                 
-                testContext.Result = new TUnitTestResult
-                {
-                    Duration = TimeSpan.Zero,
-                    Start = start ?? now,
-                    End = start ?? now,
-                    ComputerName = Environment.MachineName,
-                    Exception = null,
-                    Status = Status.Skipped,
-                };
-                
-                testContext._taskCompletionSource.SetException(skipTestException);
-            }
+            testContext._taskCompletionSource.SetException(skipTestException);
         }
         catch (Exception e)
         {
@@ -141,22 +137,19 @@ internal class SingleTestExecutor : IDataProducer
                 .WithProperty(new TimingProperty(new TimingInfo(start ?? end, end, start.HasValue ? end-start.Value : TimeSpan.Zero)))
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionmessage", e.Message))
                 .WithProperty(new KeyValuePairStringProperty("trxreport.exceptionstacktrace", e.StackTrace!))));
-            
-            if (testContext != null)
+
+            testContext.Result = new TUnitTestResult
             {
-                testContext.Result = new TUnitTestResult
-                {
-                    Duration = start.HasValue ? end - start.Value : TimeSpan.Zero,
-                    Start = start ?? end,
-                    End = end,
-                    ComputerName = Environment.MachineName,
-                    Exception = e,
-                    Status = Status.Failed,
-                    Output = testContext.GetConsoleOutput()
-                };
+                Duration = start.HasValue ? end - start.Value : TimeSpan.Zero,
+                Start = start ?? end,
+                End = end,
+                ComputerName = Environment.MachineName,
+                Exception = e,
+                Status = Status.Failed,
+                Output = testContext.GetConsoleOutput()
+            };
                 
-                testContext._taskCompletionSource.SetException(e);
-            }
+            testContext._taskCompletionSource.SetException(e);
         }
         finally
         {
