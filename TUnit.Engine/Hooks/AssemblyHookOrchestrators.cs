@@ -1,5 +1,9 @@
 ﻿namespace TUnit.Engine.Hooks;
 
+#if !DEBUG
+using System.ComponentModel;
+[EditorBrowsable(EditorBrowsableState.Never)]
+#endif
 public static class AssemblyHookOrchestrators
 {
     private static readonly List<Lazy<Task>> SetUps = new();

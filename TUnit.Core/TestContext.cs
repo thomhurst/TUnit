@@ -5,6 +5,7 @@ public partial class TestContext : IDisposable
     internal EventHandler? OnDispose;
     private CancellationTokenSource? _cancellationTokenSource;
     
+    internal readonly TaskCompletionSource _taskCompletionSource = new();
     internal readonly StringWriter OutputWriter = new();
 
     internal CancellationTokenSource? CancellationTokenSource
@@ -19,6 +20,7 @@ public partial class TestContext : IDisposable
 
     public CancellationToken CancellationToken => CancellationTokenSource?.Token ?? default;
 
+    public Task TestTask => _taskCompletionSource.Task;
 
     public TestInformation TestInformation { get; }
 

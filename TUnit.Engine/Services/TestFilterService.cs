@@ -2,6 +2,7 @@
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Engine.Models;
 using TUnit.Engine.Properties;
 
@@ -23,20 +24,27 @@ internal class TestFilterService
             return testNodes;
         }
 
-        return testNodes.Where(x => MatchesTest(testExecutionFilter, x.TestInformation));
+        return testNodes.Where(x => MatchesTest(testExecutionFilter, x));
     }
 
-    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, TestInformation testInformation)
+    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, DiscoveredTest discoveredTest)
     {
 #pragma warning disable TPEXP
-        return testExecutionFilter switch
+        var shouldRunTest = testExecutionFilter switch
         {
             null => true,
             NopFilter => true,
-            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(testInformation.TestId)),
-            TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(testInformation), BuildPropertyBag(testInformation)),
+            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(discoveredTest.TestInformation.TestId)),
+            TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(discoveredTest.TestInformation), BuildPropertyBag(discoveredTest.TestInformation)),
             _ => UnhandledFilter(testExecutionFilter)
         };
+
+        if (!shouldRunTest)
+        {
+            discoveredTest.TestContext._taskCompletionSource.SetException(new TestNotExecutedException(discoveredTest.TestInformation));
+        }
+
+        return shouldRunTest;
 #pragma warning restore TPEXP
     }
 

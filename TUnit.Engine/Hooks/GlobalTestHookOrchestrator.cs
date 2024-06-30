@@ -3,6 +3,10 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Hooks;
 
+#if !DEBUG
+using System.ComponentModel;
+[EditorBrowsable(EditorBrowsableState.Never)]
+#endif
 public static class GlobalTestHookOrchestrator
 {
     private static readonly List<Func<TestContext, Task>> SetUps = new();

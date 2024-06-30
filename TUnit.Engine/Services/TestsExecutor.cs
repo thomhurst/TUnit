@@ -56,10 +56,7 @@ internal class TestsExecutor
 
             foreach (var test in tests.AllTests)
             {
-                if (TestDictionary.TryGetTest(test.TestInformation.TestId, out var matchingTest))
-                {
-                    ClassHookOrchestrator.RegisterInstance(matchingTest.TestContext.TestInformation.ClassType);
-                }
+                ClassHookOrchestrator.RegisterInstance(test.TestContext.TestInformation.ClassType);
             }
 
             // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint

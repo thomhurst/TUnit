@@ -21,15 +21,8 @@ public abstract partial class TestModule : Module<TestResult>
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
 
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
-    private readonly List<Exception> _exceptions = [];
 
     private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount * 4);
-
-    protected override Task<bool> ShouldIgnoreFailures(IPipelineContext context, Exception exception)
-    {
-        _exceptions.Add(exception);
-        return base.ShouldIgnoreFailures(context, exception);
-    }
 
     protected Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter,
         List<Action<TestResult>> assertions,
@@ -54,21 +47,15 @@ public abstract partial class TestModule : Module<TestResult>
             CommandLogging = runOptions.CommandLogging,
             Arguments =
             [
-                "--treenode-filter", filter, "--diagnostic", "--diagnostic-output-fileprefix",
-                $"log_{GetType().Name}", ..runOptions.AdditionalArguments
+                "--treenode-filter", filter, 
+                // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
+                ..runOptions.AdditionalArguments
             ]
         }, cancellationToken);
 
         var parsedResult = ParseOutput(result.StandardOutput);
 
         assertions.ForEach(x => x.Invoke(parsedResult));
-
-        if (_exceptions.Any())
-        {
-            // Temporary - If we've retried and succeeded on the next retry, throw anyway
-            // To get info on the --treenode-filter issue
-            throw new AggregateException(_exceptions);
-        }
 
         return parsedResult;
     }
