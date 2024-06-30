@@ -17,10 +17,19 @@ public class UploadToNuGetModule : Module<CommandResult[]>
 {
     private readonly IOptions<NuGetOptions> _options;
 
-    protected override async Task<SkipDecision> ShouldSkip(IPipelineContext context)
+    protected override Task<SkipDecision> ShouldSkip(IPipelineContext context)
     {
-        await Task.CompletedTask;
-        return string.IsNullOrEmpty(_options.Value.ApiKey);
+        if (!_options.Value.ShouldPublish)
+        {
+            return Task.FromResult<SkipDecision>("Should Publish is false");
+        }
+
+        if (string.IsNullOrEmpty(_options.Value.ApiKey))
+        {
+            return Task.FromResult<SkipDecision>("No API key found");
+        }
+
+        return Task.FromResult<SkipDecision>(false);
     }
 
     public UploadToNuGetModule(IOptions<NuGetOptions> options)

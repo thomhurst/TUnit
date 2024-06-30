@@ -37,8 +37,7 @@ jobs:
         env:
           DOTNET_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
           NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
-          PULL_REQUEST_BRANCH: ${{ github.event.pull_request.head.ref }}
-          PUBLISH_PACKAGES: ${{ github.event.inputs.publish-packages }}
+          NuGet__ShouldPublish: ${{ github.event.inputs.publish-packages || false }}
       
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4.3.3
