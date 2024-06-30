@@ -81,7 +81,7 @@ public abstract partial class TestModule : Module<TestResult>
         }
         catch (Exception e)
         {
-            throw new Exception($"Error asserting results - Trx file: {JsonSerializer.Serialize(parsedResult, JsonSerializerOptions)}");
+            throw new Exception($"Error asserting results - Trx file: {JsonSerializer.Serialize(parsedResult, JsonSerializerOptions)}", e);
         }
 
         return parsedResult;
