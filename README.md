@@ -10,13 +10,14 @@ See here: <https://thomhurst.github.io/TUnit/>
 
 - Source generated tests
 - Full async support
+- Parallel by default, with mechanisms to switch it off for certain tests
+- Test ordering (if running not in parallel)
+- Tests can depend on other tests to form chains
 - Easy to read assertions
-- Flexible test data mechanisms
-- Flexible setup and cleanup mechanisms
-- Out of the box concurrency
-- Designed to avoid common pitfalls (leaky test states, shared instances, etc.)
-- Global test hooks
-- Test context interrogation providing test details and test state
+- Injectable test data functionality
+- Hooks before and after: Assembly, Class, Test
+- Designed to avoid common pitfalls such as leaky test states
+- Ability to view metadata and results (if in a cleanup method) for a test from a `TestContext` object
 
 ## Installation
 
