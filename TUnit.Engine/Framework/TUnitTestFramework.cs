@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -127,8 +128,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     ),
                     
                     // TRX Reports
-                    new KeyValuePairStringProperty("trxreport.exceptionmessage", failedToInitializeTest.Exception.Message),
-                    new KeyValuePairStringProperty("trxreport.exceptionstacktrace", failedToInitializeTest.Exception.StackTrace!)
+                    new TrxExceptionProperty(failedToInitializeTest.Exception.Message, failedToInitializeTest.Exception.StackTrace)
                 )
             };
                         
