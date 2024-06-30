@@ -78,6 +78,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("LazyClassInstance = resettableClassFactory,");
         sourceBuilder.WriteLine($"ClassType = typeof({fullyQualifiedClassType}),");
         sourceBuilder.WriteLine($"Timeout = {GetAttribute(WellKnownFullyQualifiedClassNames.TimeoutAttribute)}?.Timeout,");
+        sourceBuilder.WriteLine("TestAndClassAttributes = attributes,");
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.GetClassArgumentVariableNamesAsList()}],");
         sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.GetMethodArgumentVariableNamesAsList()}],");
         sourceBuilder.WriteLine(

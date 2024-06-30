@@ -13,18 +13,6 @@ public record TestInformation<TClassType> : TestInformation
 
 public abstract record TestInformation
 {
-    public TestInformation()
-    {
-        LazyTestAndClassAttributes = new(
-            () => MethodInfo!.GetCustomAttributes()
-                .Concat(ClassType!.GetCustomAttributes())
-        );
-
-        LazyRetryAttribute = new(
-            () => LazyTestAndClassAttributes.Value.OfType<RetryAttribute>().FirstOrDefault()
-        );
-    }
-    
     public required string TestId { get; init; }
     
     public required string TestName { get; init; }
@@ -53,10 +41,10 @@ public abstract record TestInformation
     public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
 
     [JsonIgnore]
-    internal Lazy<IEnumerable<Attribute>> LazyTestAndClassAttributes { get; }
-    
+    public required Attribute[] TestAndClassAttributes { get; init; }
+
     [JsonIgnore]
-    internal Lazy<RetryAttribute?> LazyRetryAttribute { get; }
+    internal RetryAttribute? RetryAttribute => TestAndClassAttributes.OfType<RetryAttribute>().FirstOrDefault();
     
     public required Type ReturnType { get; init; }
     
