@@ -254,11 +254,19 @@ internal class SingleTestExecutor : IDataProducer
 
     private IEnumerable<TestContext> GetDependencies(TestInformation testInformation)
     {
-        return testInformation.TestAndClassAttributes
-            .OfType<DependsOnAttribute>()
-            .SelectMany(dependsOnAttribute => TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
-                dependsOnAttribute.ParameterTypes, testInformation.ClassType,
-                testInformation.TestClassParameterTypes));
+        foreach (var testContext in testInformation.TestAndClassAttributes
+                     .OfType<DependsOnAttribute>()
+                     .SelectMany(dependsOnAttribute => TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
+                         dependsOnAttribute.ParameterTypes, testInformation.ClassType,
+                         testInformation.TestClassParameterTypes)))
+        {
+            yield return testContext;
+            
+            foreach (var dependency in GetDependencies(testContext.TestInformation))
+            {
+                yield return dependency;
+            }
+        }
     }
 
     private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
