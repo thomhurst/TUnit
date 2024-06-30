@@ -5,7 +5,7 @@ using File = ModularPipelines.FileSystem.File;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
-public class DependsOnTests : TestModule
+public class DependsOnTests2 : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
@@ -14,7 +14,7 @@ public class DependsOnTests : TestModule
         File file = (File.GetNewTemporaryFilePath() + ".trx")!;
         
         await RunTestsWithFilter(context, 
-            "/*/*/DependsOnTests/*",
+            "/*/*/DependsOnTests2/*",
             [
                 result => result.Successful.Should().BeFalse(),
                 result => result.Total.Should().Be(2),
