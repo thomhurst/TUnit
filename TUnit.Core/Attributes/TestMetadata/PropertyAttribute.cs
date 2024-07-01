@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
 public class PropertyAttribute : TUnitAttribute
 {
     public string Name { get; }

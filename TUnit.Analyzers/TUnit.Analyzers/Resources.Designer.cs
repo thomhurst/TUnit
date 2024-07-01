@@ -868,5 +868,59 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0030Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Async void methods are not allowed..
+        /// </summary>
+        internal static string TUnit0031Description {
+            get {
+                return ResourceManager.GetString("TUnit0031Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Async void methods are not allowed.
+        /// </summary>
+        internal static string TUnit0031MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0031MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Async void methods are not allowed.
+        /// </summary>
+        internal static string TUnit0031Title {
+            get {
+                return ResourceManager.GetString("TUnit0031Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting DependsOn and NotInParallel attributes..
+        /// </summary>
+        internal static string TUnit0032Description {
+            get {
+                return ResourceManager.GetString("TUnit0032Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting DependsOn and NotInParallel attributes.
+        /// </summary>
+        internal static string TUnit0032MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0032MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting DependsOn and NotInParallel attributes.
+        /// </summary>
+        internal static string TUnit0032Title {
+            get {
+                return ResourceManager.GetString("TUnit0032Title", resourceCulture);
+            }
+        }
     }
 }

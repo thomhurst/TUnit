@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
 public class TimeoutAttribute : TUnitAttribute
 {
     public TimeSpan Timeout { get; }

@@ -95,6 +95,12 @@ internal static class Rules
             
     public static readonly DiagnosticDescriptor DoesNotInheritTestsWarning =
         CreateDescriptor("TUnit0030", UsageCategory, DiagnosticSeverity.Warning);
+                
+    public static readonly DiagnosticDescriptor AsyncVoidMethod =
+        CreateDescriptor("TUnit0031", UsageCategory, DiagnosticSeverity.Error);
+
+    public static readonly DiagnosticDescriptor DependsOnNotInParallelConflict =
+        CreateDescriptor("TUnit0032", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

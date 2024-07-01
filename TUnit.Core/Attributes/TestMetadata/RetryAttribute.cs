@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
 public class RetryAttribute : TUnitAttribute
 {
     public int Times { get; }
