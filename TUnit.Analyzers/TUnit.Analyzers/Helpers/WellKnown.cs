@@ -37,6 +37,8 @@ internal static class WellKnown
             Test, DataDrivenTest, DataSourceDrivenTest, CombinativeTest
         ];
 
-        
+
+        public const string NotInParallelAttribute = "global::TUnit.Core.NotInParallelAttribute";
+        public const string DependsOnAttribute = "global::TUnit.Core.DependsOnAttribute";
     }
 }

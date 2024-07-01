@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Analyzers.Extensions;
@@ -24,5 +25,12 @@ public static class TypeExtensions
             yield return type;
             type = type.BaseType;
         }
+    }
+    
+    public static bool IsOrInherits(this INamedTypeSymbol namedTypeSymbol, string typeName)
+    {
+        return namedTypeSymbol
+            .GetSelfAndBaseTypes()
+            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == typeName);
     }
 }
