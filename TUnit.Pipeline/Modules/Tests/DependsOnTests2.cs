@@ -1,9 +1,5 @@
-﻿using System.Text.Json;
-using FluentAssertions;
+﻿using FluentAssertions;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Parsers.NUnitTrx;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
 
 namespace TUnit.Pipeline.Modules.Tests;
 

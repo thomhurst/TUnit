@@ -28,23 +28,29 @@ public abstract record TestInformation
     public required MethodInfo MethodInfo { get; init; }
     public required Type ClassType { get; init; }
     public abstract object? ClassInstance { get; }
-    public required int RepeatIndex { get; init; }
-    public required int RepeatCount { get; init; }
-    public required int RetryCount { get; init; }
-    public int CurrentExecutionCount { get; internal set; }
-    
-    public required int MethodRepeatCount { get; init; }
-    public required int ClassRepeatCount { get; init; }
+    public required int CurrentRepeatAttempt { get; init; }
+    public required int RepeatLimit { get; init; }
+    public required int RetryLimit { get; init; }
+    public int CurrentRetryAttempt { get; internal set; }
 
     public required TimeSpan? Timeout { get; init; }
     public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
     public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
 
     [JsonIgnore]
-    public required Attribute[] TestAndClassAttributes { get; init; }
+    public required Attribute[] AssemblyAttributes { get; init; }
+    
+    [JsonIgnore]
+    public required Attribute[] ClassAttributes { get; init; }
+    
+    [JsonIgnore]
+    public required Attribute[] TestAttributes { get; init; }
+    
+    [JsonIgnore]
+    public required Attribute[] Attributes { get; init; }
 
     [JsonIgnore]
-    internal RetryAttribute? RetryAttribute => TestAndClassAttributes.OfType<RetryAttribute>().FirstOrDefault();
+    internal RetryAttribute? RetryAttribute => Attributes.OfType<RetryAttribute>().FirstOrDefault();
     
     public required Type ReturnType { get; init; }
     

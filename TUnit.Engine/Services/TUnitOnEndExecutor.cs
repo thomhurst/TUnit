@@ -72,7 +72,7 @@ internal class TUnitOnEndExecutor
                 Order = x.TestInformation.Order,
                 Timeout = x.TestInformation.Timeout,
                 CustomProperties = x.TestInformation.CustomProperties,
-                RetryCount = x.TestInformation.RetryCount,
+                RetryLimit = x.TestInformation.RetryLimit,
                 ReturnType = x.TestInformation.ReturnType,
                 TestClassArguments = x.TestInformation.TestClassArguments?.Select(y => y?.ToString()).ToArray(),
                 TestFilePath = x.TestInformation.TestFilePath,

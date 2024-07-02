@@ -4,7 +4,7 @@ namespace TUnit.Analyzers;
 
 public class DisplayFormats
 {
-    public static SymbolDisplayFormat FullyQualifiedNonGenericWithGlobalPrefix => new(
+    public static readonly SymbolDisplayFormat FullyQualifiedNonGenericWithGlobalPrefix = new(
         SymbolDisplayGlobalNamespaceStyle.Included,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
         SymbolDisplayGenericsOptions.None,
@@ -18,7 +18,7 @@ public class DisplayFormats
         SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
     );
     
-    public static SymbolDisplayFormat FullyQualifiedGenericWithGlobalPrefix => new(
+    public static readonly SymbolDisplayFormat FullyQualifiedGenericWithGlobalPrefix = new(
         SymbolDisplayGlobalNamespaceStyle.Included,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
         SymbolDisplayGenericsOptions.IncludeTypeParameters,
@@ -32,7 +32,7 @@ public class DisplayFormats
         SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
     );
     
-    public static SymbolDisplayFormat FullyQualifiedNonGeneric => new(
+    public static readonly SymbolDisplayFormat FullyQualifiedNonGeneric = new(
         SymbolDisplayGlobalNamespaceStyle.Omitted,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
         SymbolDisplayGenericsOptions.None,

@@ -75,7 +75,7 @@ internal static class TestSourceDataModelRetriever
                     TestArguments = testArguments.Arguments,
                     ClassDataSourceAttribute = null,
                     TestDataAttribute = testArguments.DataAttribute,
-                    RepeatIndex = i,
+                    CurrentRepeatAttempt = i,
                     TestAttribute = testAttribute,
                     HasEnumerableTestMethodData = testArguments.IsEnumerableData,
                     HasEnumerableClassMethodData = false,
@@ -99,7 +99,7 @@ internal static class TestSourceDataModelRetriever
                 TestArguments = testArgumentsCollection.Arguments,
                 ClassDataSourceAttribute = classArguments.DataAttribute,
                 TestDataAttribute = testArgumentsCollection.DataAttribute,
-                RepeatIndex = i,
+                CurrentRepeatAttempt = i,
                 TestAttribute = testAttribute,
                 HasEnumerableTestMethodData = testArgumentsCollection.IsEnumerableData,
                 HasEnumerableClassMethodData = classArguments.IsEnumerableData,
@@ -116,7 +116,6 @@ internal static class TestSourceDataModelRetriever
         var classArguments = testGenerationContext.ClassArguments;
         var testArguments = testGenerationContext.TestArguments;
         var testAttribute = testGenerationContext.TestAttribute;
-        var currentClassCount = 0;
         
         var allAttributes = methodSymbol.GetAttributesIncludingClass(namedTypeSymbol);
         
@@ -124,23 +123,20 @@ internal static class TestSourceDataModelRetriever
         {
             TestId = TestInformationRetriever.GetTestId(testGenerationContext),
             MethodName = methodSymbol.Name,
-            FullyQualifiedTypeName =
-                namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            FullyQualifiedTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             MinimalTypeName = namedTypeSymbol.Name,
-            CurrentClassRepeatCount = currentClassCount,
-            CurrentMethodRepeatCount = testGenerationContext.RepeatIndex,
             ReturnType = TestInformationRetriever.GetReturnType(methodSymbol),
-            RepeatCount = TestInformationRetriever.GetRepeatCount(allAttributes),
-            RepeatIndex = testGenerationContext.RepeatIndex,
+            RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
+            CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
             IsEnumerableClassArguments = testGenerationContext.HasEnumerableClassMethodData,
             IsEnumerableMethodArguments = testGenerationContext.HasEnumerableTestMethodData,
             MethodArguments = testArguments,
-            FilePath = testAttribute.ConstructorArguments[0].Value!.ToString(),
-            LineNumber = (int)testAttribute.ConstructorArguments[1].Value!,
+            FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
+            LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
             BeforeEachTestInvocations = BeforeEachTestRetriever.GenerateCode(namedTypeSymbol),
             AfterEachTestInvocations = AfterEachTestRetriever.GenerateCode(namedTypeSymbol),
-            ApplicableTestAttributes = CustomTestAttributeRetriever.GetCustomAttributes(allAttributes, namedTypeSymbol),
+            ApplicableTestAttributes = CustomTestAttributeRetriever.GetCustomAttributes(allAttributes),
             MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             ClassParameterTypes = [..namedTypeSymbol.Constructors.First().Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,

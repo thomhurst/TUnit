@@ -9,7 +9,7 @@ internal class ExplicitFilterService
 {
     public bool CanRun(TestInformation testInformation, ITestExecutionFilter? filter)
     {
-        if (!testInformation.TestAndClassAttributes.Any(x => x is ExplicitAttribute))
+        if (!testInformation.Attributes.Any(x => x is ExplicitAttribute))
         {
             // These tests don't have any ExplicitAttributes
             return true;

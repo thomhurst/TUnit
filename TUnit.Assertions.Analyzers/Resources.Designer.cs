@@ -211,5 +211,32 @@ namespace TUnit.Assertions.Analyzers {
                 return ResourceManager.GetString("TUnitAnalyzers0005Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object `Equals` base method should not be called. Use `.Is.EqualTo(...)..
+        /// </summary>
+        internal static string TUnitAnalyzers0006Description {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0006Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object `Equals` base method should not be called. Use `.Is.EqualTo(...).
+        /// </summary>
+        internal static string TUnitAnalyzers0006MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0006MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object `Equals` base method should not be called.
+        /// </summary>
+        internal static string TUnitAnalyzers0006Title {
+            get {
+                return ResourceManager.GetString("TUnitAnalyzers0006Title", resourceCulture);
+            }
+        }
     }
 }

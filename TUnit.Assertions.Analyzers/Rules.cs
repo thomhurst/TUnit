@@ -20,6 +20,10 @@ internal static class Rules
         
     public static readonly DiagnosticDescriptor ConstantValueInAssertThat =
         CreateDescriptor("TUnitAnalyzers0005", UsageCategory, DiagnosticSeverity.Warning);
+        
+    public static readonly DiagnosticDescriptor ObjectEqualsBaseMethod =
+        CreateDescriptor("TUnitAnalyzers0006", UsageCategory, DiagnosticSeverity.Error);
+
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

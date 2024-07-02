@@ -101,6 +101,9 @@ internal static class Rules
 
     public static readonly DiagnosticDescriptor DependsOnNotInParallelConflict =
         CreateDescriptor("TUnit0032", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor DependsOnConflicts =
+        CreateDescriptor("TUnit0033", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

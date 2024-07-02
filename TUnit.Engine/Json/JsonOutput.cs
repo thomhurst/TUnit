@@ -19,7 +19,7 @@ internal record JsonOutput
     //
     public required IReadOnlyList<string> Categories { get; init; }
     
-    public required int RetryCount { get; init; }
+    public required int RetryLimit { get; init; }
 
     public required TimeSpan? Timeout { get; init; }
     
