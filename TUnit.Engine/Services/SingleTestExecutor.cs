@@ -170,7 +170,7 @@ internal class SingleTestExecutor : IDataProducer
     private async Task ExecuteWithRetries(UnInvokedTest unInvokedTest)
     {
         var testInformation = unInvokedTest.TestContext.TestInformation;
-        var retryCount = testInformation.RetryCount;
+        var retryCount = testInformation.RetryLimit;
         
         // +1 for the original non-retry
         for (var i = 0; i < retryCount + 1; i++)
@@ -190,6 +190,7 @@ internal class SingleTestExecutor : IDataProducer
 
                 await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying...");
                 unInvokedTest.ResetTestInstance();
+                testInformation.CurrentRetryAttempt++;
             }
         }
     }
@@ -223,9 +224,7 @@ internal class SingleTestExecutor : IDataProducer
         
         var testContext = unInvokedTest.TestContext;
         var testInformation = testContext.TestInformation;
-
-        testInformation.CurrentExecutionCount++;
-
+        
         using var testLevelCancellationTokenSource =
             CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
 
@@ -259,7 +258,7 @@ internal class SingleTestExecutor : IDataProducer
 
     private IEnumerable<TestContext> GetDependencies(TestInformation original, TestInformation testInformation)
     {
-        foreach (var dependency in testInformation.TestAndClassAttributes
+        foreach (var dependency in testInformation.Attributes
                      .OfType<DependsOnAttribute>()
                      .SelectMany(dependsOnAttribute => TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
                          dependsOnAttribute.ParameterTypes, testInformation.ClassType,

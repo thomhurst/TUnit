@@ -306,4 +306,13 @@
     <data name="TUnit0032Title" xml:space="preserve">
         <value>Conflicting DependsOn and NotInParallel attributes</value>
     </data>
+    <data name="TUnit0033Description" xml:space="preserve">
+        <value>Conflicting DependsOn attributes.</value>
+    </data>
+    <data name="TUnit0033MessageFormat" xml:space="preserve">
+        <value>DependsOn Conflicts: {0}</value>
+    </data>
+    <data name="TUnit0033Title" xml:space="preserve">
+        <value>Conflicting DependsOn attributes</value>
+    </data>
 </root>

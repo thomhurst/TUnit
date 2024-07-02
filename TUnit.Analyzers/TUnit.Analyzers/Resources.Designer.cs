@@ -922,5 +922,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0032Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting DependsOn attributes..
+        /// </summary>
+        internal static string TUnit0033Description {
+            get {
+                return ResourceManager.GetString("TUnit0033Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DependsOn Conflicts: {0}.
+        /// </summary>
+        internal static string TUnit0033MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0033MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting DependsOn attributes.
+        /// </summary>
+        internal static string TUnit0033Title {
+            get {
+                return ResourceManager.GetString("TUnit0033Title", resourceCulture);
+            }
+        }
     }
 }

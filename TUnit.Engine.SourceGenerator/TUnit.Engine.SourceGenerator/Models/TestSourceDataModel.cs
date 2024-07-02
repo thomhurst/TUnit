@@ -21,10 +21,7 @@ internal record TestSourceDataModel
     public required bool IsEnumerableMethodArguments { get; init; }
     
     public required string TestId { get; init; }
-    public required int RepeatIndex { get; init; }
-    
-    public required int CurrentMethodRepeatCount { get; init; }
-    public required int CurrentClassRepeatCount { get; init; }
+    public required int CurrentRepeatAttempt { get; init; }
     
     public required string ReturnType { get; init; }
     public required string FilePath { get; init; }
@@ -38,7 +35,7 @@ internal record TestSourceDataModel
     public bool IsMethodTupleArguments => MethodArguments.Any(x => x.IsTuple);
     
     public required string? CustomDisplayName { get; init; }
-    public required int RepeatCount { get; init; }
+    public required int RepeatLimit { get; init; }
 
     public IEnumerable<string> GetClassArgumentVariableNames()
     {
@@ -127,8 +124,8 @@ internal record TestSourceDataModel
     //            && MethodArguments.SequenceEqual(other.MethodArguments) 
     //            && TestId == other.TestId 
     //            && Order == other.Order 
-    //            && RetryCount == other.RetryCount 
-    //            && RepeatIndex == other.RepeatIndex 
+    //            && RetryLimit == other.RetryLimit 
+    //            && CurrentRepeatAttempt == other.CurrentRepeatAttempt 
     //            && CurrentMethodRepeatCount == other.CurrentMethodRepeatCount 
     //            && CurrentClassRepeatCount == other.CurrentClassRepeatCount 
     //            && ReturnType == other.ReturnType 
@@ -156,8 +153,8 @@ internal record TestSourceDataModel
     //         hashCode = (hashCode * 397) ^ MethodArguments.GetHashCode();
     //         hashCode = (hashCode * 397) ^ TestId.GetHashCode();
     //         hashCode = (hashCode * 397) ^ Order;
-    //         hashCode = (hashCode * 397) ^ RetryCount;
-    //         hashCode = (hashCode * 397) ^ RepeatIndex;
+    //         hashCode = (hashCode * 397) ^ RetryLimit;
+    //         hashCode = (hashCode * 397) ^ CurrentRepeatAttempt;
     //         hashCode = (hashCode * 397) ^ CurrentMethodRepeatCount;
     //         hashCode = (hashCode * 397) ^ CurrentClassRepeatCount;
     //         hashCode = (hashCode * 397) ^ ReturnType.GetHashCode();

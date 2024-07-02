@@ -5,11 +5,8 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 public static class CustomTestAttributeRetriever
 {
-    public static string GetCustomAttributes(AttributeData[] attributes, INamedTypeSymbol namedTypeSymbol)
+    public static string GetCustomAttributes(AttributeData[] attributes)
     {
-        var fullyQualifiedClassName =
-            namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-
         var applyToTestAttributes = attributes
             .Where(x => x.AttributeClass?.AllInterfaces.Any(i =>
             i.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
@@ -20,7 +17,7 @@ public static class CustomTestAttributeRetriever
         var getAttributesCalls =
             fullyQualifiedAttributes
                 .Select(x =>
-                    $"..methodInfo.GetCustomAttributes<{x}>(), ..typeof({fullyQualifiedClassName}).GetCustomAttributes<{x}>()"
+                    $"..methodInfo.GetCustomAttributes<{x}>(), ..classType.GetCustomAttributes<{x}>()"
                 );
         
         return string.Join(", ", getAttributesCalls);

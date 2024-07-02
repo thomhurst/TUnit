@@ -1,7 +1,9 @@
-﻿using TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core;
 
 namespace TUnit.TestProject;
 
+[SuppressMessage("Usage", "TUnit0033:Conflicting DependsOn attributes")]
 public class ConflictingDependsOnTests
 {
     [Test, DependsOn(nameof(Test2))]
