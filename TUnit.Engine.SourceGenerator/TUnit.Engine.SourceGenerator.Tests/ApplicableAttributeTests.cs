@@ -25,6 +25,6 @@ internal class ApplicableAttributeTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
 
-            Assert.That(generatedFiles[0], Does.Contain("ApplicableTestAttributes = [..methodInfo.GetCustomAttributes<global::TUnit.TestProject.CustomSkipAttribute>(), ..classType.GetCustomAttributes<global::TUnit.TestProject.CustomSkipAttribute>(), ..methodInfo.GetCustomAttributes<global::TUnit.TestProject.SomethingElseAttribute>(), ..typeof(global::TUnit.TestProject.ApplicableAttributeTests).GetCustomAttributes<global::TUnit.TestProject.SomethingElseAttribute>()],"));
+            Assert.That(generatedFiles[0], Does.Contain("ApplicableTestAttributes = [..methodInfo.GetCustomAttributes<global::TUnit.TestProject.CustomSkipAttribute>(), ..classType.GetCustomAttributes<global::TUnit.TestProject.CustomSkipAttribute>(), ..methodInfo.GetCustomAttributes<global::TUnit.TestProject.SomethingElseAttribute>(), ..classType.GetCustomAttributes<global::TUnit.TestProject.SomethingElseAttribute>()],"));
         });
 }
