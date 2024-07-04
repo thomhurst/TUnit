@@ -60,13 +60,14 @@ internal static class DataSourceDrivenArgumentsRetriever
             var sharedArgumentType = sharedArgument.ToCSharpString();
 
             var key = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Key").Value.Value as string;
-            var arguments = GetClassDataArguments(sharedArgumentType, key ?? string.Empty, namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), fullyQualifiedGenericType);
+            var arguments = GetClassDataArguments(sharedArgumentType, key ?? string.Empty, namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), fullyQualifiedGenericType).ToArray();
             
             yield return new ArgumentsContainer
             {
                 DataAttribute = classDataAttribute,
                 DataAttributeIndex = ++methodDataIndex,
                 IsEnumerableData = false,
+                SharedInstanceKey = key == null ? null : new SharedInstanceKey(key, arguments.FirstOrDefault()?.Type!),
                 Arguments = [..arguments.WithTimeoutArgument(testAndClassAttributes)]
             };
         }
@@ -79,7 +80,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"({fullyQualifiedGenericType})global::TUnit.Engine.Data.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())")
+                        $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")
                 ];
             }
             
@@ -88,7 +89,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"({fullyQualifiedGenericType})global::TUnit.Engine.Data.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")
+                        $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
                 ];
             }
             
@@ -97,7 +98,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"({fullyQualifiedGenericType})global::TUnit.Engine.Data.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")
+                        $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
                 ];
             }
 

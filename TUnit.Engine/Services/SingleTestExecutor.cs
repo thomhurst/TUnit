@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Requests;
 using Semaphores;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Engine.Data;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
@@ -80,6 +81,7 @@ internal class SingleTestExecutor : IDataProducer
             }
             finally
             {
+                await DecrementKeyedSharedData(unInvokedTest);
                 await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, new List<Exception>());
             }
             
@@ -156,6 +158,14 @@ internal class SingleTestExecutor : IDataProducer
             using var lockHandle = await _consoleStandardOutLock.WaitAsync();
             
             await _disposer.DisposeAsync(testContext);
+        }
+    }
+
+    private static async Task DecrementKeyedSharedData(UnInvokedTest unInvokedTest)
+    {
+        foreach (var sharedDataKey in unInvokedTest.TestContext.TestInformation.SharedClassDataSourceKeys)
+        {
+            await TestDataContainer.ConsumeKey(sharedDataKey.Key, sharedDataKey.Type);
         }
     }
 

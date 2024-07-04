@@ -19,4 +19,5 @@ internal record TestGenerationContext
     
     public required bool HasEnumerableTestMethodData { get; init; }
     public required bool HasEnumerableClassMethodData { get; init; }
+    public required SharedInstanceKey[] SharedClassDataSourceKeys { get; set; }
 }

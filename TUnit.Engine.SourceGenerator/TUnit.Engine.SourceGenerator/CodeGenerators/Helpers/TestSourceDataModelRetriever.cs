@@ -80,14 +80,15 @@ internal static class TestSourceDataModelRetriever
                     HasEnumerableTestMethodData = testArguments.IsEnumerableData,
                     HasEnumerableClassMethodData = false,
                     ClassDataAttributeIndex = null,
-                    TestDataAttributeIndex = testArguments.DataAttributeIndex
+                    TestDataAttributeIndex = testArguments.DataAttributeIndex,
+                    SharedClassDataSourceKeys = testArguments.SharedInstanceKey == null ? [] : [testArguments.SharedInstanceKey]
                 });
         }
     }
 
     private static IEnumerable<TestSourceDataModel> GenerateMultipleClassInstances(IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, ArgumentsContainer classArguments,
-        ArgumentsContainer testArgumentsCollection)
+        ArgumentsContainer testArguments)
     {
         for (var i = 0; i < runCount; i++)
         {
@@ -96,16 +97,30 @@ internal static class TestSourceDataModelRetriever
                 MethodSymbol = methodSymbol,
                 ClassSymbol = namedTypeSymbol,
                 ClassArguments = classArguments.Arguments,
-                TestArguments = testArgumentsCollection.Arguments,
+                TestArguments = testArguments.Arguments,
                 ClassDataSourceAttribute = classArguments.DataAttribute,
-                TestDataAttribute = testArgumentsCollection.DataAttribute,
+                TestDataAttribute = testArguments.DataAttribute,
                 CurrentRepeatAttempt = i,
                 TestAttribute = testAttribute,
-                HasEnumerableTestMethodData = testArgumentsCollection.IsEnumerableData,
+                HasEnumerableTestMethodData = testArguments.IsEnumerableData,
                 HasEnumerableClassMethodData = classArguments.IsEnumerableData,
-                TestDataAttributeIndex = testArgumentsCollection.DataAttributeIndex,
-                ClassDataAttributeIndex = classArguments.DataAttributeIndex
+                TestDataAttributeIndex = testArguments.DataAttributeIndex,
+                ClassDataAttributeIndex = classArguments.DataAttributeIndex,
+                SharedClassDataSourceKeys = GetSharedDataKeys(classArguments.SharedInstanceKey, testArguments.SharedInstanceKey).ToArray()
             });
+        }
+    }
+
+    private static IEnumerable<SharedInstanceKey> GetSharedDataKeys(SharedInstanceKey? classArgumentsSharedInstanceKey, SharedInstanceKey? testArgumentsSharedInstanceKey)
+    {
+        if (classArgumentsSharedInstanceKey != null)
+        {
+            yield return classArgumentsSharedInstanceKey;
+        }
+        
+        if (testArgumentsSharedInstanceKey != null)
+        {
+            yield return testArgumentsSharedInstanceKey;
         }
     }
 
@@ -140,7 +155,8 @@ internal static class TestSourceDataModelRetriever
             MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             ClassParameterTypes = [..namedTypeSymbol.Constructors.First().Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string
+            CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string,
+            SharedClassDataSourceKeys = testGenerationContext.SharedClassDataSourceKeys,
         };
     }
 }

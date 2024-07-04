@@ -18,8 +18,16 @@ public class ClassDataSourceDrivenTests
         // Dummy method
     }
 
-    public record SomeClass
+    public record SomeClass : IAsyncDisposable
     {
+        public bool IsDisposed { get; private set; }
+        
         public int Value => 1;
+
+        public ValueTask DisposeAsync()
+        {
+            IsDisposed = true;
+            return ValueTask.CompletedTask;
+        }
     }
 }
