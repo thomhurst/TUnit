@@ -3,6 +3,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Models;
+using TUnit.Engine.Data;
 
 namespace TUnit.Engine.Hooks;
 
@@ -121,6 +122,8 @@ public static class ClassHookOrchestrator
                 // Only run one time clean down's when no instances are left!
                 continue;
             }
+
+            await TestDataContainer.OnLastInstance(testClassType);
             
             if (!CleanUps.TryGetValue(type, out var cleanUpsForType))
             {

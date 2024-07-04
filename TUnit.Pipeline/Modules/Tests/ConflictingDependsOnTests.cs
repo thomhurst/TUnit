@@ -7,8 +7,6 @@ public class ConflictingDependsOnTests : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        var file = Guid.NewGuid().ToString("N") + ".trx";
-        
         return await RunTestsWithFilter(context, 
             "/*/*/ConflictingDependsOnTests/*",
             [

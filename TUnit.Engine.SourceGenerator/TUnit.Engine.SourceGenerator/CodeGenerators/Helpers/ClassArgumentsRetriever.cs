@@ -93,7 +93,8 @@ internal static class ClassArgumentsRetriever
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
                     IsEnumerableData = false,
-                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.Data.TestDataContainer.InjectedSharedGlobally.GetOrAdd(typeof({fullyQualifiedGenericType}), x => new {fullyQualifiedGenericType}())")]
+                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")],
+                    IsGlobalClassDataSource = true,
                 };
             }
             
@@ -104,20 +105,21 @@ internal static class ClassArgumentsRetriever
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
                     IsEnumerableData = false,
-                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.Data.TestDataContainer.InjectedSharedPerClassType.GetOrAdd(new global::TUnit.Engine.Models.DictionaryTypeTypeKey(typeof({className}), typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")]
+                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")]
                 };
             }
             
             if (sharedArgumentType is "TUnit.Core.SharedType.Keyed")
             {
-                var key = sharedArgument.Value?.GetType().GetProperty("Key")?.GetValue(sharedArgument.Value);
+                var key = classDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Key").Value.Value?.ToString() ?? string.Empty;
 
                 yield return new ArgumentsContainer
                 {
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
                     IsEnumerableData = false,
-                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"({fullyQualifiedGenericType})global::TUnit.Engine.Data.TestDataContainer.InjectedSharedPerKey.GetOrAdd(new global::TUnit.Engine.Models.DictionaryStringTypeKey(\"{key}\", typeof({fullyQualifiedGenericType})), x => new {fullyQualifiedGenericType}())")]
+                    SharedInstanceKey = new SharedInstanceKey(key, fullyQualifiedGenericType),
+                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")]
                 };
             }
         }

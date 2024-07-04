@@ -11,11 +11,15 @@ internal class TUnitLogger : IOutputDeviceDataProducer
     private readonly IOutputDevice _outputDevice;
     private readonly ILogger<TUnitLogger> _logger;
 
+    public static TUnitLogger? Instance { get; private set; }
+
     public TUnitLogger(IExtension extension, IOutputDevice outputDevice, ILoggerFactory loggerFactory)
     {
         _extension = extension;
         _outputDevice = outputDevice;
         _logger = loggerFactory.CreateLogger<TUnitLogger>();
+
+        Instance = this;
     }
 
     public async Task LogInformationAsync(string text)

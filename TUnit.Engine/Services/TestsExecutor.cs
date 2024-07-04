@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Data;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
@@ -16,7 +17,6 @@ internal class TestsExecutor
 
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly TestGrouper _testGrouper;
-    //private readonly SystemResourceMonitor _systemResourceMonitor;
     private readonly ConsoleInterceptor _consoleInterceptor;
     private readonly TUnitLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
@@ -28,14 +28,12 @@ internal class TestsExecutor
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
         TestGrouper testGrouper,
-        //SystemResourceMonitor systemResourceMonitor,
         ConsoleInterceptor consoleInterceptor,
         TUnitLogger logger,
         ICommandLineOptions commandLineOptions)
     {
         _singleTestExecutor = singleTestExecutor;
         _testGrouper = testGrouper;
-        //_systemResourceMonitor = systemResourceMonitor;
         _consoleInterceptor = consoleInterceptor;
         _logger = logger;
         _commandLineOptions = commandLineOptions;

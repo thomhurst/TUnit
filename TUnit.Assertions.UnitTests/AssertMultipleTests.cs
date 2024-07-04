@@ -1,7 +1,9 @@
-﻿using TUnit.Assertions.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 
+[SuppressMessage("Usage", "TUnitAnalyzers0005:Assert.That(...) should not be used with a constant value")]
 public class AssertMultipleTests
 {
     [Test]

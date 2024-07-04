@@ -34,6 +34,7 @@ public abstract record TestInformation
     public int CurrentRetryAttempt { get; internal set; }
 
     public required TimeSpan? Timeout { get; init; }
+    
     public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
     public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
 
@@ -58,6 +59,10 @@ public abstract record TestInformation
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
     public required string DisplayName { get; set; }
+    
+    public required SharedDataKey[] SharedClassDataSourceKeys { get; init; }
+    public required Type[] InjectedGlobalClassDataSourceTypes { get; init; }
+
 
     internal bool IsSameTest(TestInformation testInformation) => TestName == testInformation.TestName &&
                                                                  ClassType == testInformation.ClassType &&

@@ -75,6 +75,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("namespace TUnit.Engine;");
         sourceBuilder.WriteLine();
+        sourceBuilder.WriteLine("[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
         sourceBuilder.WriteLine($"file class {className}");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine("[ModuleInitializer]");
@@ -95,7 +96,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("}");
         sourceBuilder.WriteLine("}");
 
-        context.AddSource($"{className}.g.cs", sourceBuilder.ToString());
+        context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
     }
     
     private string GenerateContextObject(AssemblyHooksDataModel model)

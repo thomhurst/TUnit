@@ -109,6 +109,9 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
 
+        sourceBuilder.WriteLine($"SharedClassDataSourceKeys = [{string.Join(", ", testSourceDataModel.SharedClassDataSourceKeys.Select(x => $"new(\"{x.Key}\", typeof({x.FullyQualifiedTypeName}))"))}],");
+        sourceBuilder.WriteLine($"InjectedGlobalClassDataSourceTypes = [{string.Join(", ", testSourceDataModel.InjectedGlobalClassDataSourceTypes.Select(x => $"typeof({x})"))}],");
+        
         sourceBuilder.WriteLine("};");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("var testContext = new global::TUnit.Core.TestContext(testInformation);");
