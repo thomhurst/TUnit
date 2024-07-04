@@ -17,6 +17,7 @@ public static class TestDataContainer
 
     private static readonly object Lock = new();
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
+    private static readonly ConcurrentDictionary<Type, int> CountsPerGlobalType = new();
     
     private static Disposer Disposer => new(TUnitLogger.Instance);
     
@@ -28,6 +29,10 @@ public static class TestDataContainer
     
     public static T GetGlobalInstance<T>(Func<T> func)
     {
+        var count = CountsPerGlobalType.GetOrAdd(typeof(T), _ => 0);
+
+        CountsPerGlobalType[typeof(T)] = count + 1;
+        
         return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => func()!);
     }
 
@@ -80,21 +85,27 @@ public static class TestDataContainer
         await Disposer.DisposeAsync(instancesForType.Remove(key));
     }
 
-    internal static async Task Dispose()
+    public static async Task ConsumeGlobalCount(Type? type)
     {
-        foreach (var value in InjectedSharedGlobally.Values)
+        if (type is null)
         {
-            await Disposer.DisposeAsync(value);
+            return;
+        }
+
+        lock (Lock)
+        {
+            var count = CountsPerGlobalType.GetOrAdd(type, _ => 0);
+
+            var newCount = count - 1;
+            
+            CountsPerGlobalType[type] = newCount;
+            
+            if (newCount > 0)
+            {
+                return;
+            }
         }
         
-        foreach (var value in InjectedSharedPerKey.Values)
-        {
-            await Disposer.DisposeAsync(value);
-        }
-        
-        foreach (var value in InjectedSharedPerClassType.Values)
-        {
-            await Disposer.DisposeAsync(value);
-        }
+        await Disposer.DisposeAsync(InjectedSharedGlobally.Remove(type));
     }
 }

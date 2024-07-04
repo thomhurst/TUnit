@@ -67,7 +67,6 @@ internal class TestsExecutor
         }
         finally
         {
-            await TestDataContainer.Dispose();
             await AssemblyHookOrchestrators.ExecuteCleanups();
         }
     }

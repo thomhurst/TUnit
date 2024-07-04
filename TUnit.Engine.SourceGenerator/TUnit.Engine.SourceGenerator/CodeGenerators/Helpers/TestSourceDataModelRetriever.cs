@@ -81,7 +81,8 @@ internal static class TestSourceDataModelRetriever
                     HasEnumerableClassMethodData = false,
                     ClassDataAttributeIndex = null,
                     TestDataAttributeIndex = testArguments.DataAttributeIndex,
-                    SharedClassDataSourceKeys = testArguments.SharedInstanceKey == null ? [] : [testArguments.SharedInstanceKey]
+                    SharedClassDataSourceKeys = testArguments.SharedInstanceKey == null ? [] : [testArguments.SharedInstanceKey],
+                    InjectedGlobalClassDataSourceTypes = testArguments.IsGlobalClassDataSource ? [testArguments.Arguments.First().Type] : [],
                 });
         }
     }
@@ -106,8 +107,22 @@ internal static class TestSourceDataModelRetriever
                 HasEnumerableClassMethodData = classArguments.IsEnumerableData,
                 TestDataAttributeIndex = testArguments.DataAttributeIndex,
                 ClassDataAttributeIndex = classArguments.DataAttributeIndex,
-                SharedClassDataSourceKeys = GetSharedDataKeys(classArguments.SharedInstanceKey, testArguments.SharedInstanceKey).ToArray()
+                SharedClassDataSourceKeys = GetSharedDataKeys(classArguments.SharedInstanceKey, testArguments.SharedInstanceKey).ToArray(),
+                InjectedGlobalClassDataSourceTypes = GetGlobalClassDataSourceTypes(classArguments, testArguments).ToArray(),
             });
+        }
+    }
+
+    private static IEnumerable<string> GetGlobalClassDataSourceTypes(ArgumentsContainer classArguments, ArgumentsContainer testArguments)
+    {
+        if (classArguments.IsGlobalClassDataSource)
+        {
+            yield return classArguments.Arguments[0].Type;
+        }
+        
+        if (testArguments.IsGlobalClassDataSource)
+        {
+            yield return testArguments.Arguments[0].Type;
         }
     }
 
@@ -157,6 +172,7 @@ internal static class TestSourceDataModelRetriever
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
             CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string,
             SharedClassDataSourceKeys = testGenerationContext.SharedClassDataSourceKeys,
+            InjectedGlobalClassDataSourceTypes = testGenerationContext.InjectedGlobalClassDataSourceTypes,
         };
     }
 }

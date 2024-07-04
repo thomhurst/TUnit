@@ -93,7 +93,8 @@ internal static class ClassArgumentsRetriever
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
                     IsEnumerableData = false,
-                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")]
+                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")],
+                    IsGlobalClassDataSource = true,
                 };
             }
             

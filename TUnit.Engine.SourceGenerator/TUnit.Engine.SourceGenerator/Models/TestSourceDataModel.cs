@@ -37,6 +37,7 @@ internal record TestSourceDataModel
     public required string? CustomDisplayName { get; init; }
     public required int RepeatLimit { get; init; }
     public required SharedInstanceKey[] SharedClassDataSourceKeys { get; init; }
+    public required string[] InjectedGlobalClassDataSourceTypes { get; init; }
 
     public IEnumerable<string> GetClassArgumentVariableNames()
     {
