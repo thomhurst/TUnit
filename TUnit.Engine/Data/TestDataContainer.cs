@@ -85,7 +85,7 @@ public static class TestDataContainer
         await Disposer.DisposeAsync(instancesForType.Remove(key));
     }
 
-    public static async Task ConsumeGlobalCount(Type? type)
+    internal static async Task ConsumeGlobalCount(Type? type)
     {
         if (type is null)
         {
