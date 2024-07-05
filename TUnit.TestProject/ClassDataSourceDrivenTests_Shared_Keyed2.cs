@@ -10,26 +10,31 @@ namespace TUnit.TestProject;
 [SuppressMessage("Usage", "TUnit0018:Test methods should not assign instance data")]
 public class ClassDataSourceDrivenTestsSharedKeyed2
 {
+    private readonly SomeAsyncDisposableClass _someAsyncDisposableClass;
     private static readonly List<SomeAsyncDisposableClass> MethodLevels = [];
     private static readonly List<SomeAsyncDisposableClass> ClassLevels = [];
 
     public ClassDataSourceDrivenTestsSharedKeyed2(SomeAsyncDisposableClass someAsyncDisposableClass)
     {
+        _someAsyncDisposableClass = someAsyncDisposableClass;
         ClassLevels.Add(someAsyncDisposableClass);
     }
     
     [DataSourceDrivenTest]
     [ClassDataSource(typeof(SomeAsyncDisposableClass), Shared = SharedType.Keyed, Key = "🔑")]
-    public void DataSource_Class(SomeAsyncDisposableClass value)
+    public async Task DataSource_Class(SomeAsyncDisposableClass value)
     {
-        if (value == null) throw new ArgumentNullException(nameof(value));
+        await Assert.That(_someAsyncDisposableClass.IsDisposed).Is.False();
+        await Assert.That(value.IsDisposed).Is.False();
         MethodLevels.Add(value);
     }
 
     [DataSourceDrivenTest]
     [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
-    public void DataSource_Class_Generic(SomeAsyncDisposableClass value)
+    public async Task DataSource_Class_Generic(SomeAsyncDisposableClass value)
     {
+        await Assert.That(_someAsyncDisposableClass.IsDisposed).Is.False();
+        await Assert.That(value.IsDisposed).Is.False();
         MethodLevels.Add(value);
     }
 
