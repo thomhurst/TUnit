@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
-using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
@@ -93,8 +93,7 @@ internal static class ClassArgumentsRetriever
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
                     IsEnumerableData = false,
-                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")],
-                    IsGlobalClassDataSource = true,
+                    Arguments = [new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")],
                 };
             }
             
@@ -105,7 +104,15 @@ internal static class ClassArgumentsRetriever
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
                     IsEnumerableData = false,
-                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")]
+                    Arguments =
+                    [
+                        new TestClassTypeSharedArgument(ArgumentSource.ClassDataSourceAttribute,
+                            fullyQualifiedGenericType,
+                            $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
+                        {
+                            TestClassType = className
+                        }
+                    ]
                 };
             }
             
@@ -118,8 +125,14 @@ internal static class ClassArgumentsRetriever
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
                     IsEnumerableData = false,
-                    SharedInstanceKey = new SharedInstanceKey(key, fullyQualifiedGenericType),
-                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")]
+                    Arguments =
+                    [
+                        new KeyedSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                            $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
+                        {
+                            Key = key
+                        }
+                    ]
                 };
             }
         }

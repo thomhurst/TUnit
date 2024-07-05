@@ -1,5 +1,4 @@
-﻿using Microsoft.Testing.Platform.Logging;
-using TUnit.Engine.Logging;
+﻿using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Helpers;
 

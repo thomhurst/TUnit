@@ -152,41 +152,71 @@ internal class SingleTestExecutor : IDataProducer
         finally
         {
             testContext._taskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
-            
-            await _disposer.DisposeAsync(testContext?.TestInformation.ClassInstance);
+
 
             using var lockHandle = await _consoleStandardOutLock.WaitAsync();
             
-            await _disposer.DisposeAsync(testContext);
+            await Dispose(testContext);
         }
+    }
+
+    private async Task Dispose(TestContext testContext)
+    {
+        var testInformation = testContext.TestInformation;
+
+        foreach (var methodArgument in testInformation.InternalTestMethodArguments)
+        {
+            await DisposeInjectedData(methodArgument.Argument, methodArgument.InjectedDataType);
+        }
+        
+        foreach (var classArgument in testInformation.InternalTestClassArguments)
+        {
+            await DisposeInjectedData(classArgument.Argument, classArgument.InjectedDataType);
+        }
+
+        await _disposer.DisposeAsync(testContext);
+    }
+
+    private async Task DisposeInjectedData(object? obj, InjectedDataType injectedDataType)
+    {
+        if (injectedDataType 
+            is InjectedDataType.SharedGlobally 
+            or InjectedDataType.SharedByKey
+            or InjectedDataType.SharedByTestClassType)
+        {
+            // Handled later - Might be shared with other tests too so we can't just dispose it without checking
+            return;
+        }
+
+        await _disposer.DisposeAsync(obj);
     }
     
     private static async Task DecrementSharedData(UnInvokedTest unInvokedTest)
     {
-        if (unInvokedTest.TestContext.TestInformation.SharedClassDataSourceKeys.Any())
+        foreach (var methodArgument in unInvokedTest.TestContext.TestInformation.InternalTestMethodArguments)
         {
-            await DecrementKeyedSharedData(unInvokedTest);
+            if (methodArgument.InjectedDataType == InjectedDataType.SharedByKey)
+            {
+                await TestDataContainer.ConsumeKey(methodArgument.StringKey!, methodArgument.Type);
+            }
+            
+            if (methodArgument.InjectedDataType == InjectedDataType.SharedGlobally)
+            {
+                await TestDataContainer.ConsumeGlobalCount(methodArgument.Type);
+            }
         }
-
-        if (unInvokedTest.TestContext.TestInformation.InjectedGlobalClassDataSourceTypes.Any())
+        
+        foreach (var classArgument in unInvokedTest.TestContext.TestInformation.InternalTestClassArguments)
         {
-            await DecrementGlobalData(unInvokedTest);
-        }
-    }
-
-    private static async Task DecrementKeyedSharedData(UnInvokedTest unInvokedTest)
-    {
-        foreach (var sharedDataKey in unInvokedTest.TestContext.TestInformation.SharedClassDataSourceKeys)
-        {
-            await TestDataContainer.ConsumeKey(sharedDataKey.Key, sharedDataKey.Type);
-        }
-    }
-    
-    private static async Task DecrementGlobalData(UnInvokedTest unInvokedTest)
-    {
-        foreach (var type in unInvokedTest.TestContext.TestInformation.InjectedGlobalClassDataSourceTypes)
-        {
-            await TestDataContainer.ConsumeGlobalCount(type);
+            if (classArgument.InjectedDataType == InjectedDataType.SharedByKey)
+            {
+                await TestDataContainer.ConsumeKey(classArgument.StringKey!, classArgument.Type);
+            }
+            
+            if (classArgument.InjectedDataType == InjectedDataType.SharedGlobally)
+            {
+                await TestDataContainer.ConsumeGlobalCount(classArgument.Type);
+            }
         }
     }
 

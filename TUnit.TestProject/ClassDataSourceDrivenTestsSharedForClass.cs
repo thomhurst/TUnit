@@ -3,17 +3,17 @@ using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;
 
-public class ClassDataSourceDrivenTests
+public class ClassDataSourceDrivenTestsSharedForClass
 {
     [DataSourceDrivenTest]
-    [ClassDataSource(typeof(SomeAsyncDisposableClass))]
+    [ClassDataSource(typeof(SomeAsyncDisposableClass), Shared = SharedType.ForClass)]
     public void DataSource_Class(SomeAsyncDisposableClass value)
     {
         // Dummy method
     }
 
     [DataSourceDrivenTest]
-    [ClassDataSource<SomeAsyncDisposableClass>]
+    [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.ForClass)]
     public void DataSource_Class_Generic(SomeAsyncDisposableClass value)
     {
         // Dummy method

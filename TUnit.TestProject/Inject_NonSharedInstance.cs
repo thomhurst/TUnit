@@ -5,13 +5,13 @@ using TUnit.Core;
 namespace TUnit.TestProject;
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.None), NotInParallel]
-public class Inject_NonSharedInstance
+public class InjectNonSharedInstance
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
     
     private static readonly List<DummyReferenceTypeClass> Instances = new();
     
-    public Inject_NonSharedInstance(DummyReferenceTypeClass dummyReferenceTypeClass)
+    public InjectNonSharedInstance(DummyReferenceTypeClass dummyReferenceTypeClass)
     {
         _dummyReferenceTypeClass = dummyReferenceTypeClass;
     }

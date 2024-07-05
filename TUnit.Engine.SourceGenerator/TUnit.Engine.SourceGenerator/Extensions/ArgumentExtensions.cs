@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
-using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.Extensions;
 

@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
@@ -81,8 +82,6 @@ internal static class TestSourceDataModelRetriever
                     HasEnumerableClassMethodData = false,
                     ClassDataAttributeIndex = null,
                     TestDataAttributeIndex = testArguments.DataAttributeIndex,
-                    SharedClassDataSourceKeys = testArguments.SharedInstanceKey == null ? [] : [testArguments.SharedInstanceKey],
-                    InjectedGlobalClassDataSourceTypes = testArguments.IsGlobalClassDataSource ? [testArguments.Arguments.First().Type] : [],
                 });
         }
     }
@@ -106,36 +105,8 @@ internal static class TestSourceDataModelRetriever
                 HasEnumerableTestMethodData = testArguments.IsEnumerableData,
                 HasEnumerableClassMethodData = classArguments.IsEnumerableData,
                 TestDataAttributeIndex = testArguments.DataAttributeIndex,
-                ClassDataAttributeIndex = classArguments.DataAttributeIndex,
-                SharedClassDataSourceKeys = GetSharedDataKeys(classArguments.SharedInstanceKey, testArguments.SharedInstanceKey).ToArray(),
-                InjectedGlobalClassDataSourceTypes = GetGlobalClassDataSourceTypes(classArguments, testArguments).ToArray(),
+                ClassDataAttributeIndex = classArguments.DataAttributeIndex, 
             });
-        }
-    }
-
-    private static IEnumerable<string> GetGlobalClassDataSourceTypes(ArgumentsContainer classArguments, ArgumentsContainer testArguments)
-    {
-        if (classArguments.IsGlobalClassDataSource)
-        {
-            yield return classArguments.Arguments[0].Type;
-        }
-        
-        if (testArguments.IsGlobalClassDataSource)
-        {
-            yield return testArguments.Arguments[0].Type;
-        }
-    }
-
-    private static IEnumerable<SharedInstanceKey> GetSharedDataKeys(SharedInstanceKey? classArgumentsSharedInstanceKey, SharedInstanceKey? testArgumentsSharedInstanceKey)
-    {
-        if (classArgumentsSharedInstanceKey != null)
-        {
-            yield return classArgumentsSharedInstanceKey;
-        }
-        
-        if (testArgumentsSharedInstanceKey != null)
-        {
-            yield return testArgumentsSharedInstanceKey;
         }
     }
 
@@ -171,8 +142,6 @@ internal static class TestSourceDataModelRetriever
             ClassParameterTypes = [..namedTypeSymbol.Constructors.First().Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
             CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string,
-            SharedClassDataSourceKeys = testGenerationContext.SharedClassDataSourceKeys,
-            InjectedGlobalClassDataSourceTypes = testGenerationContext.InjectedGlobalClassDataSourceTypes,
         };
     }
 }

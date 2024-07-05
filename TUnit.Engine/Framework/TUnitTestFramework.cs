@@ -52,6 +52,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
+#if LAUNCH_DEBUGGER
+        Debugger.Launch();
+#endif
+        
         EngineCancellationToken.Initialise(context.CancellationToken);
         
         await using (_myServiceProvider)

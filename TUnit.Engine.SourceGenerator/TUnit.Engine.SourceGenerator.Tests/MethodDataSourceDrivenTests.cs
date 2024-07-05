@@ -12,7 +12,7 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
             
-            Assert.That(generatedFiles[0], Does.Contain("var methodArg0 = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();"));
+            Assert.That(generatedFiles[0], Does.Contain("global::System.Int32 methodArg0 = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();"));
             Assert.That(generatedFiles[0], Does.Contain("classInstance.DataSource_Method(methodArg0)"));
         });
 }

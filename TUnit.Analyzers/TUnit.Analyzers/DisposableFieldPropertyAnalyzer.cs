@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
@@ -37,6 +38,20 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         var isDisposable = IsDisposable(field.Type);
 
         if (!isAsyncDisposable && !isDisposable)
+        {
+            return;
+        }
+
+        if (!field.IsStatic && field.ContainingType.GetMembers().OfType<IMethodSymbol>()
+                .Where(x => x.MethodKind == MethodKind.Constructor)
+                .SelectMany(x => x.DeclaringSyntaxReferences)
+                .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf())
+                .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression))
+                .Select(x => context.SemanticModel.GetOperation(x))
+                .OfType<IAssignmentOperation>()
+                .Select(x => x.Target)
+                .OfType<IFieldReferenceOperation>()
+                .Any(x => x.Field.Name == field.Name))
         {
             return;
         }
@@ -79,13 +94,26 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-
         
         var isAsyncDisposable = IsAsyncDisposable(property.Type); 
         
         var isDisposable = IsDisposable(property.Type);
 
         if (!isAsyncDisposable && !isDisposable)
+        {
+            return;
+        }
+        
+        if (!property.IsStatic && property.ContainingType.GetMembers().OfType<IMethodSymbol>()
+                .Where(x => x.MethodKind == MethodKind.Constructor)
+                .SelectMany(x => x.DeclaringSyntaxReferences)
+                .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf())
+                .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression))
+                .Select(x => context.SemanticModel.GetOperation(x))
+                .OfType<IAssignmentOperation>()
+                .Select(x => x.Target)
+                .OfType<IPropertyReferenceOperation>()
+                .Any(x => x.Property.Name == property.Name))
         {
             return;
         }

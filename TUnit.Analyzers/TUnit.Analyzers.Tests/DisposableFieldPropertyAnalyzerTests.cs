@@ -34,4 +34,31 @@ public class DisposableFieldPropertyAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
+    
+    [Test]
+    public async Task Not_Flagged_When_InjectedClassData()
+    {
+        const string text = """
+                            using System.Net.Http;
+                            using TUnit.Core;
+
+                            [ClassDataSource(typeof(HttpClient), Shared = SharedType.Keyed, Key = "🌲")]
+                            public class DisposableFieldTests
+                            {
+                                private HttpClient _httpClient;
+                            
+                                public DisposableFieldTests(HttpClient httpClient)
+                                {
+                                    _httpClient = httpClient;
+                                }
+                            
+                                [Test]
+                                public void Test1()
+                                {
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+    }
 }

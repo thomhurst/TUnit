@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace TUnit.Engine.SourceGenerator.Models;
+namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record ArgumentsContainer
 {
@@ -8,6 +8,4 @@ internal record ArgumentsContainer
     public required AttributeData? DataAttribute { get; init; }
     public required bool IsEnumerableData { get; init; }
     public required int? DataAttributeIndex { get; init; }
-    public SharedInstanceKey? SharedInstanceKey { get; init; }
-    public bool IsGlobalClassDataSource { get; init; }
 }

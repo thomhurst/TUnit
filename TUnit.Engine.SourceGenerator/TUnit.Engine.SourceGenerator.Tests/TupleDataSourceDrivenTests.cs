@@ -12,7 +12,7 @@ internal class TupleDataSourceDrivenTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
             
-            Assert.That(generatedFiles[0], Does.Contain("var methodArg0 = global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod();"));
+            Assert.That(generatedFiles[0], Does.Contain("(global::System.Int32, global::System.String, global::System.Boolean) methodArg0 = global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod();"));
             Assert.That(generatedFiles[0], Does.Contain("var (methodArg1, methodArg2, methodArg3) = methodArg0;"));
             Assert.That(generatedFiles[0], Does.Contain("TestMethodArguments = [methodArg1, methodArg2, methodArg3],"));
             Assert.That(generatedFiles[0], Does.Contain("DisplayName = $\"DataSource_TupleMethod({methodArg1}, {methodArg2}, {methodArg3})\","));

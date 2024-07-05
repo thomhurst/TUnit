@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.Models;
 
@@ -19,6 +20,4 @@ internal record TestGenerationContext
     
     public required bool HasEnumerableTestMethodData { get; init; }
     public required bool HasEnumerableClassMethodData { get; init; }
-    public required SharedInstanceKey[] SharedClassDataSourceKeys { get; init; }
-    public required string[] InjectedGlobalClassDataSourceTypes { get; init; }
 }

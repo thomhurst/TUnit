@@ -6,21 +6,21 @@ namespace TUnit.TestProject;
 
 public class DependsOnTests3
 {
-    private static DateTime test1Start;
-    private static DateTime test2Start;
-    private static DateTime test3Start;
+    private static DateTime _test1Start;
+    private static DateTime _test2Start;
+    private static DateTime _test3Start;
 
     [Test]
     public async Task Test1()
     {
-        test1Start = DateTime.Now;
+        _test1Start = DateTime.Now;
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
     
     [Test]
     public async Task Test2()
     {
-        test2Start = DateTime.Now;
+        _test2Start = DateTime.Now;
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
     
@@ -29,14 +29,14 @@ public class DependsOnTests3
     [DependsOn(nameof(Test2))]
     public async Task Test3()
     {
-        test3Start = DateTime.Now;
+        _test3Start = DateTime.Now;
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
 
     [AfterAllTestsInClass]
     public static async Task AssertStartTimes()
     {
-        await Assert.That(test3Start).Is.GreaterThanOrEqualTo(test1Start.AddSeconds(1));
-        await Assert.That(test3Start).Is.GreaterThanOrEqualTo(test2Start.AddSeconds(1));
+        await Assert.That(_test3Start).Is.GreaterThanOrEqualTo(_test1Start.AddSeconds(1));
+        await Assert.That(_test3Start).Is.GreaterThanOrEqualTo(_test2Start.AddSeconds(1));
     }
 }

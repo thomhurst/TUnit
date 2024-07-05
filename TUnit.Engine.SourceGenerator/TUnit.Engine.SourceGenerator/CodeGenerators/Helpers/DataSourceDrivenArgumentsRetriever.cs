@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
-using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
@@ -67,7 +67,6 @@ internal static class DataSourceDrivenArgumentsRetriever
                 DataAttribute = classDataAttribute,
                 DataAttributeIndex = ++methodDataIndex,
                 IsEnumerableData = false,
-                SharedInstanceKey = key == null ? null : new SharedInstanceKey(key, arguments.FirstOrDefault()?.Type!),
                 Arguments = [..arguments.WithTimeoutArgument(testAndClassAttributes)]
             };
         }
@@ -79,7 +78,7 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 return
                 [
-                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                    new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
                         $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")
                 ];
             }
@@ -88,8 +87,11 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 return
                 [
-                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                    new TestClassTypeSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
                         $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
+                    {
+                        TestClassType = className
+                    }
                 ];
             }
             
@@ -97,8 +99,11 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 return
                 [
-                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                    new KeyedSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
                         $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
+                    {
+                        Key = key!
+                    }
                 ];
             }
 
@@ -112,6 +117,8 @@ internal static class DataSourceDrivenArgumentsRetriever
     public static IEnumerable<Argument> ParseMethodData(INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol, AttributeData methodDataAttribute, string argPrefix)
     {
         string methodInvocation;
+
+        IMethodSymbol? dataSourceMethod;
         
         if (methodDataAttribute.ConstructorArguments.Length == 1)
         {
@@ -119,26 +126,31 @@ internal static class DataSourceDrivenArgumentsRetriever
                 .FullyQualifiedGenericWithGlobalPrefix);
 
             methodInvocation = $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments[0].Value!}()";
+            dataSourceMethod = namedTypeSymbol.GetMembers(methodDataAttribute.ConstructorArguments[0].Value!.ToString())
+                .OfType<IMethodSymbol>().First();
         }
         else
         {
-            var type = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!)
-                .ToDisplayString(DisplayFormats
+            var typeContainingDataSourceMethod = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!);
+            var type = typeContainingDataSourceMethod.ToDisplayString(DisplayFormats
                     .FullyQualifiedGenericWithGlobalPrefix);
             
             methodInvocation = $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()";
+            
+            dataSourceMethod = typeContainingDataSourceMethod.GetMembers(methodDataAttribute.ConstructorArguments[1].Value!.ToString())
+                .OfType<IMethodSymbol>().First();
         }
 
         var unfoldTupleArgument = methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "UnfoldTuple");
         
         if (unfoldTupleArgument.Value.Value is true)
         {
-            yield return new Argument(ArgumentSource.MethodDataSourceAttribute, "var", methodInvocation);
+            yield return new Argument(ArgumentSource.MethodDataSourceAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation);
 
             var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{argPrefix}{i+1}").ToList();
             
             yield return new Argument(ArgumentSource.MethodDataSourceAttribute,
-                "var",
+                dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 $"{argPrefix}0", isTuple: true)
             {
                 TupleVariableNames = $"({string.Join(", ", variableNames)})"
@@ -147,7 +159,7 @@ internal static class DataSourceDrivenArgumentsRetriever
             yield break;
         }
         
-        yield return new Argument(ArgumentSource.MethodDataSourceAttribute, "var", methodInvocation);
+        yield return new Argument(ArgumentSource.MethodDataSourceAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation);
     }
     
     public static IEnumerable<Argument> ParseEnumerableMethodData(INamedTypeSymbol namedTypeSymbol,
@@ -157,31 +169,40 @@ internal static class DataSourceDrivenArgumentsRetriever
     {
         string methodInvocation;
         
+        IMethodSymbol? dataSourceMethod;
+        
         if (methodDataAttribute.ConstructorArguments.Length == 1)
         {
             var typeContainingMethod = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
             
             methodInvocation = $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
+            
+            dataSourceMethod = namedTypeSymbol.GetMembers(methodDataAttribute.ConstructorArguments[0].Value!.ToString())
+                .OfType<IMethodSymbol>().First();
         }
         else
         {
-            var type = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!)
+            var typeContainingDataSourceMethod = ((INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!);
+            var type = typeContainingDataSourceMethod
                 .ToDisplayString(DisplayFormats
                     .FullyQualifiedGenericWithGlobalPrefix);
             
             methodInvocation = $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()";
+            
+            dataSourceMethod = typeContainingDataSourceMethod.GetMembers(methodDataAttribute.ConstructorArguments[1].Value!.ToString())
+                .OfType<IMethodSymbol>().First();
         }
 
         var unfoldTupleArgument = methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "UnfoldTuple");
         
         if (unfoldTupleArgument.Value.Value is true)
         {
-            yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", methodInvocation);
+            yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation);
 
             var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{argPrefix}{i+1}").ToList();
             
             yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute,
-                "var",
+                dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 $"{argPrefix}0", isTuple: true)
             {
                 TupleVariableNames = $"({string.Join(", ", variableNames)})"
@@ -190,6 +211,6 @@ internal static class DataSourceDrivenArgumentsRetriever
             yield break;
         }
         
-        yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, "var", methodInvocation);
+        yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation);
     }
 }

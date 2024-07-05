@@ -10,11 +10,11 @@ public static class SharedInjectedGloballyContainer
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
-public class Inject_SharedGlobally1
+public class InjectSharedGlobally1
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
     
-    public Inject_SharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeClass)
+    public InjectSharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeClass)
     {
         _dummyReferenceTypeClass = dummyReferenceTypeClass;
     }
@@ -57,11 +57,11 @@ public class Inject_SharedGlobally1
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
-public class Inject_SharedGlobally2
+public class InjectSharedGlobally2
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
     
-    public Inject_SharedGlobally2(DummyReferenceTypeClass dummyReferenceTypeClass)
+    public InjectSharedGlobally2(DummyReferenceTypeClass dummyReferenceTypeClass)
     {
         _dummyReferenceTypeClass = dummyReferenceTypeClass;
     }
@@ -104,11 +104,11 @@ public class Inject_SharedGlobally2
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
-public class Inject_SharedGlobally3
+public class InjectSharedGlobally3
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
     
-    public Inject_SharedGlobally3(DummyReferenceTypeClass dummyReferenceTypeClass)
+    public InjectSharedGlobally3(DummyReferenceTypeClass dummyReferenceTypeClass)
     {
         _dummyReferenceTypeClass = dummyReferenceTypeClass;
     }
