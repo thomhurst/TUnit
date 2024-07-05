@@ -15,8 +15,6 @@
         <AssemblyName>TUnit.Assertions.Analyzers</AssemblyName>
 
         <NoWarn>RS2003</NoWarn>
-
-        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
     </PropertyGroup>
 
     <ItemGroup>
@@ -35,14 +33,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="tools\*.ps1" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="" />
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
-
-    <Target Name="_AddAnalyzersToOutput" BeforeTargets="BeforeCompile">
-        <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.Assertions.Analyzers.dll" PackagePath="analyzers/dotnet/cs" />
-        </ItemGroup>
-    </Target>
 
     <ItemGroup>
         <EmbeddedResource Update="Resources.resx">
