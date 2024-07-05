@@ -47,8 +47,4 @@
         <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="1.3.0-preview.24325.7" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Cancellation\" />
-    </ItemGroup>
-
 </Project>

@@ -3,7 +3,8 @@
         <TargetFrameworkMonikerAssemblyAttributesPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)','$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
     </PropertyGroup>
     <ItemGroup>
-        <!-- https://github.com/dotnet/sourcelink/issues/572 -->
         <EmbeddedFiles Include="$(GeneratedAssemblyInfoFile)"/>
+        <EmbeddedFiles Include="$(GeneratedGlobalUsingsFile)"/>
+        <EmbeddedFiles Include="$(TargetFrameworkMonikerAssemblyAttributesPath)"/>
     </ItemGroup>
 </Project>
