@@ -169,7 +169,7 @@ internal static class GenericTestInvocationWriter
             return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({testClassTypeSharedArgument.Type}), global::TUnit.Core.InjectedDataType.SharedByTestClassType)";
         }
 
-        return $"new global::TUnit.Core.TestData({variablePrefix}{index}, {variablePrefix}{index}.GetType(), global::TUnit.Core.InjectedDataType.None)";
+        return $"new global::TUnit.Core.TestData({variablePrefix}{index}, {variablePrefix}{index}?.GetType(), global::TUnit.Core.InjectedDataType.None)";
     }
 
     private static string GetAttribute(FullyQualifiedTypeName attributeFullyQualifiedName)
