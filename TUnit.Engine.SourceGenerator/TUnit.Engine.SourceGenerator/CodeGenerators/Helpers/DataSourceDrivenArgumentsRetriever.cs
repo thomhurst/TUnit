@@ -125,9 +125,17 @@ internal static class DataSourceDrivenArgumentsRetriever
             var typeContainingMethod = namedTypeSymbol.ToDisplayString(DisplayFormats
                 .FullyQualifiedGenericWithGlobalPrefix);
 
-            methodInvocation = $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments[0].Value!}()";
             dataSourceMethod = namedTypeSymbol.GetMembers(methodDataAttribute.ConstructorArguments[0].Value!.ToString())
                 .OfType<IMethodSymbol>().First();
+            
+            if (dataSourceMethod.IsStatic)
+            {
+                methodInvocation = $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
+            }
+            else
+            {
+                methodInvocation = $"resettableClassFactory.Value.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
+            }
         }
         else
         {
@@ -175,10 +183,18 @@ internal static class DataSourceDrivenArgumentsRetriever
         {
             var typeContainingMethod = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
             
-            methodInvocation = $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
-            
             dataSourceMethod = namedTypeSymbol.GetMembers(methodDataAttribute.ConstructorArguments[0].Value!.ToString())
                 .OfType<IMethodSymbol>().First();
+            
+
+            if (dataSourceMethod.IsStatic)
+            {
+                methodInvocation = $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
+            }
+            else
+            {
+                methodInvocation = $"resettableClassFactory.Value.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
+            }
         }
         else
         {
@@ -187,10 +203,10 @@ internal static class DataSourceDrivenArgumentsRetriever
                 .ToDisplayString(DisplayFormats
                     .FullyQualifiedGenericWithGlobalPrefix);
             
-            methodInvocation = $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()";
-            
             dataSourceMethod = typeContainingDataSourceMethod.GetMembers(methodDataAttribute.ConstructorArguments[1].Value!.ToString())
                 .OfType<IMethodSymbol>().First();
+            
+            methodInvocation = $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()";
         }
 
         var unfoldTupleArgument = methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "UnfoldTuple");

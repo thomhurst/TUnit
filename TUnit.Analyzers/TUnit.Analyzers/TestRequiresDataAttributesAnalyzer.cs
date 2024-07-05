@@ -38,6 +38,11 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        if (methodSymbol.IsAbstract)
+        {
+            return;
+        }
+
         var attributes = methodSymbol.GetAttributes();
         
         Compare(context, attributes, 
