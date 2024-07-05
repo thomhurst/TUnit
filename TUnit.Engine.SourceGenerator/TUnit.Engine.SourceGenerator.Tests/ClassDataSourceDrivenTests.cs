@@ -54,12 +54,12 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
 
             Assert.That(generatedFiles[0],
                 Does.Contain(
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedNone.SomeAsyncDisposableClass methodArg0 = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();"));
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();"));
             Assert.That(generatedFiles[0], Does.Contain("classInstance.DataSource_Class(methodArg0)"));
 
             Assert.That(generatedFiles[1],
                 Does.Contain(
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedNone.SomeAsyncDisposableClass methodArg0 = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();"));
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();"));
             Assert.That(generatedFiles[1], Does.Contain("classInstance.DataSource_Class_Generic(methodArg0)"));
         });
 
