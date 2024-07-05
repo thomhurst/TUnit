@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="TUnit0001Description" xml:space="preserve">
+        <value>The arguments for this test don't match the method argument types.</value>
+    </data>
+    <data name="TUnit0001MessageFormat" xml:space="preserve">
+        <value>Attribute argument types '{0}' don't match method parameter types '{1}'</value>
+    </data>
+    <data name="TUnit0001Title" xml:space="preserve">
+        <value>Invalid Data for Tests</value>
+    </data>
+    <data name="TUnit0002Description" xml:space="preserve">
+        <value>No data provided for test.</value>
+    </data>
+    <data name="TUnit0002MessageFormat" xml:space="preserve">
+        <value>No data provided for test</value>
+    </data>
+    <data name="TUnit0002Title" xml:space="preserve">
+        <value>No data provided for test</value>
+    </data>
+    <data name="TUnit0003Description" xml:space="preserve">
+        <value>No data provided for test.</value>
+    </data>
+    <data name="TUnit0003MessageFormat" xml:space="preserve">
+        <value>No data provided for test</value>
+    </data>
+    <data name="TUnit0003Title" xml:space="preserve">
+        <value>No data provided for test</value>
+    </data>
+    <data name="TUnit0004Description" xml:space="preserve">
+        <value>No data source method found.</value>
+    </data>
+    <data name="TUnit0004MessageFormat" xml:space="preserve">
+        <value>No data source method found</value>
+    </data>
+    <data name="TUnit0004Title" xml:space="preserve">
+        <value>No data source method found</value>
+    </data>
+    <data name="TUnit0005Description" xml:space="preserve">
+        <value>The parameter is not defined as nullable.</value>
+    </data>
+    <data name="TUnit0005MessageFormat" xml:space="preserve">
+        <value>The parameter '{0}' is not defined as nullable</value>
+    </data>
+    <data name="TUnit0005Title" xml:space="preserve">
+        <value>The parameter is not defined as nullable</value>
+    </data>
+    <data name="TUnit0006Description" xml:space="preserve">
+        <value>Data source doesn't match method argument type.</value>
+    </data>
+    <data name="TUnit0006MessageFormat" xml:space="preserve">
+        <value>The data source type `{0}` doesn't match the parameter type `{1}`</value>
+    </data>
+    <data name="TUnit0006Title" xml:space="preserve">
+        <value>Data source doesn't match method argument type</value>
+    </data>
+    <data name="TUnit0007Description" xml:space="preserve">
+        <value>Method must be static.</value>
+    </data>
+    <data name="TUnit0007MessageFormat" xml:space="preserve">
+        <value>Method must be static</value>
+    </data>
+    <data name="TUnit0007Title" xml:space="preserve">
+        <value>Method must be static</value>
+    </data>
+    <data name="TUnit0008Description" xml:space="preserve">
+        <value>Method must be public.</value>
+    </data>
+    <data name="TUnit0008MessageFormat" xml:space="preserve">
+        <value>Method must be public</value>
+    </data>
+    <data name="TUnit0008Title" xml:space="preserve">
+        <value>Method must be public</value>
+    </data>
+    <data name="TUnit0009Description" xml:space="preserve">
+        <value>Method cannot be abstract.</value>
+    </data>
+    <data name="TUnit0009MessageFormat" xml:space="preserve">
+        <value>Method cannot be abstract</value>
+    </data>
+    <data name="TUnit0009Title" xml:space="preserve">
+        <value>Method cannot be abstract</value>
+    </data>
+    <data name="TUnit0010Description" xml:space="preserve">
+        <value>Method should be parameterless.</value>
+    </data>
+    <data name="TUnit0010MessageFormat" xml:space="preserve">
+        <value>Method should be parameterless</value>
+    </data>
+    <data name="TUnit0010Title" xml:space="preserve">
+        <value>Method should be parameterless</value>
+    </data>
+    <data name="TUnit0011Description" xml:space="preserve">
+        <value>Method returns void.</value>
+    </data>
+    <data name="TUnit0011MessageFormat" xml:space="preserve">
+        <value>Method returns void</value>
+    </data>
+    <data name="TUnit0011Title" xml:space="preserve">
+        <value>Method returns void</value>
+    </data>
+    <data name="TUnit0012Description" xml:space="preserve">
+        <value>There is no argument for the data source.</value>
+    </data>
+    <data name="TUnit0012MessageFormat" xml:space="preserve">
+        <value>There is no argument for the data source</value>
+    </data>
+    <data name="TUnit0012Title" xml:space="preserve">
+        <value>There is no argument for the data source</value>
+    </data>
+    <data name="TUnit0013Description" xml:space="preserve">
+        <value>A data source method must only have 1 matching parameter.</value>
+    </data>
+    <data name="TUnit0013MessageFormat" xml:space="preserve">
+        <value>A data source method must only have 1 matching parameter</value>
+    </data>
+    <data name="TUnit0013Title" xml:space="preserve">
+        <value>A data source method must only have 1 matching parameter</value>
+    </data>
+    <data name="TUnit0014Description" xml:space="preserve">
+        <value>There are conflicting test attributes.</value>
+    </data>
+    <data name="TUnit0014MessageFormat" xml:space="preserve">
+        <value>There are conflicting test attributes</value>
+    </data>
+    <data name="TUnit0014Title" xml:space="preserve">
+        <value>There are conflicting test attributes</value>
+    </data>
+    <data name="TUnit0015Description" xml:space="preserve">
+        <value>Missing TimeoutAttribute cancellation token parameter.</value>
+    </data>
+    <data name="TUnit0015MessageFormat" xml:space="preserve">
+        <value>Missing TimeoutAttribute cancellation token parameter</value>
+    </data>
+    <data name="TUnit0015Title" xml:space="preserve">
+        <value>Missing TimeoutAttribute cancellation token parameter</value>
+    </data>
+    <data name="TUnit0016Description" xml:space="preserve">
+        <value>Method must not be static.</value>
+    </data>
+    <data name="TUnit0016MessageFormat" xml:space="preserve">
+        <value>Method must not be static</value>
+    </data>
+    <data name="TUnit0016Title" xml:space="preserve">
+        <value>Method must not be static</value>
+    </data>
+    <data name="TUnit0017Description" xml:space="preserve">
+        <value>Explicit attribute cannot be on both method and class.</value>
+    </data>
+    <data name="TUnit0017MessageFormat" xml:space="preserve">
+        <value>Explicit attribute cannot be on both method and class</value>
+    </data>
+    <data name="TUnit0017Title" xml:space="preserve">
+        <value>Explicit attribute cannot be on both method and class</value>
+    </data>
+    <data name="TUnit0018Description" xml:space="preserve">
+        <value>Test methods should not assign instance data. Consider making this static if you need to store it. And beware of race conditions if you haven't marked tests with [NotInParallel].</value>
+    </data>
+    <data name="TUnit0018MessageFormat" xml:space="preserve">
+        <value>Test methods should not assign instance data</value>
+    </data>
+    <data name="TUnit0018Title" xml:space="preserve">
+        <value>Test methods should not assign instance data</value>
+    </data>
+    <data name="TUnit0019Description" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute.</value>
+    </data>
+    <data name="TUnit0019MessageFormat" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute</value>
+    </data>
+    <data name="TUnit0019Title" xml:space="preserve">
+        <value>Missing `DataDrivenTest` Attribute</value>
+    </data>
+    <data name="TUnit0020Description" xml:space="preserve">
+        <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
+    </data>
+    <data name="TUnit0020MessageFormat" xml:space="preserve">
+        <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
+    </data>
+    <data name="TUnit0020Title" xml:space="preserve">
+        <value>`DataDrivenTest` must be paired with `Arguments` attributes.</value>
+    </data>
+    <data name="TUnit0021Description" xml:space="preserve">
+        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
+    </data>
+    <data name="TUnit0021MessageFormat" xml:space="preserve">
+        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
+    </data>
+    <data name="TUnit0021Title" xml:space="preserve">
+        <value>`DataSourceDrivenTest` must be paired with either `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attributes.</value>
+    </data>
+    <data name="TUnit0022Description" xml:space="preserve">
+        <value>`CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa.</value>
+    </data>
+    <data name="TUnit0022MessageFormat" xml:space="preserve">
+        <value>`CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa.</value>
+    </data>
+    <data name="TUnit0022Title" xml:space="preserve">
+        <value>`CombinativeTest` must be paired with `CombinativeValues` attributes.</value>
+    </data>
+    <data name="TUnit0023Description" xml:space="preserve">
+        <value>Member should be disposed within a clean up method</value>
+    </data>
+    <data name="TUnit0023MessageFormat" xml:space="preserve">
+        <value>Member should be disposed within a clean up method</value>
+    </data>
+    <data name="TUnit0023Title" xml:space="preserve">
+        <value>Member should be disposed within a clean up method</value>
+    </data>
+    <data name="TUnit0024Description" xml:space="preserve">
+        <value>Test methods should use `TUnit.Core.CategoryAttribute` instead of `System.ComponentModel.CategoryAttribute`</value>
+    </data>
+    <data name="TUnit0024MessageFormat" xml:space="preserve">
+        <value>Test methods should use `TUnit.Core.CategoryAttribute` instead of `System.ComponentModel.CategoryAttribute`</value>
+    </data>
+    <data name="TUnit0024Title" xml:space="preserve">
+        <value>Wrong `Category` attribute</value>
+    </data>
+    <data name="TUnit0025Description" xml:space="preserve">
+        <value>The number of arguments doesn't match the number of parameters</value>
+    </data>
+    <data name="TUnit0025MessageFormat" xml:space="preserve">
+        <value>The number of arguments `{0}` doesn't match the number of parameters `{1}`</value>
+    </data>
+    <data name="TUnit0025Title" xml:space="preserve">
+        <value>Invalid arguments count</value>
+    </data>
+    <data name="TUnit0026Description" xml:space="preserve">
+        <value>Not an IEnumerable</value>
+    </data>
+    <data name="TUnit0026MessageFormat" xml:space="preserve">
+        <value>`{0}` should be an IEnumerable</value>
+    </data>
+    <data name="TUnit0026Title" xml:space="preserve">
+        <value>Not an IEnumerable</value>
+    </data>
+    <data name="TUnit0027Description" xml:space="preserve">
+        <value>The specified parameters aren't allowed for this method.</value>
+    </data>
+    <data name="TUnit0027MessageFormat" xml:space="preserve">
+        <value>Method parameters should be {0}</value>
+    </data>
+    <data name="TUnit0027Title" xml:space="preserve">
+        <value>Unknown Parameters</value>
+    </data>
+    <data name="TUnit0028Description" xml:space="preserve">
+        <value>Do not override TUnit's AttributeUsage settings.</value>
+    </data>
+    <data name="TUnit0028MessageFormat" xml:space="preserve">
+        <value>Do not override TUnit's AttributeUsage settings</value>
+    </data>
+    <data name="TUnit0028Title" xml:space="preserve">
+        <value>AttributeUsage Overridden</value>
+    </data>
+    <data name="TUnit0029Description" xml:space="preserve">
+        <value>Duplicate Attribute when only 1 is allowed.</value>
+    </data>
+    <data name="TUnit0029MessageFormat" xml:space="preserve">
+        <value>Duplicate {0} when only 1 is allowed</value>
+    </data>
+    <data name="TUnit0029Title" xml:space="preserve">
+        <value>Duplicate Attribute when only 1 is allowed</value>
+    </data>
+    <data name="TUnit0030Description" xml:space="preserve">
+        <value>Use an [InheritsTests] attribute to pick up tests from the base class.</value>
+    </data>
+    <data name="TUnit0030MessageFormat" xml:space="preserve">
+        <value>Use an [InheritsTests] attribute to pick up tests from the base class</value>
+    </data>
+    <data name="TUnit0030Title" xml:space="preserve">
+        <value>Class doesn't pick up tests from the base class</value>
+    </data>
+    <data name="TUnit0031Description" xml:space="preserve">
+        <value>Async void methods are not allowed.</value>
+    </data>
+    <data name="TUnit0031MessageFormat" xml:space="preserve">
+        <value>Async void methods are not allowed</value>
+    </data>
+    <data name="TUnit0031Title" xml:space="preserve">
+        <value>Async void methods are not allowed</value>
+    </data>
+    <data name="TUnit0032Description" xml:space="preserve">
+        <value>Conflicting DependsOn and NotInParallel attributes.</value>
+    </data>
+    <data name="TUnit0032MessageFormat" xml:space="preserve">
+        <value>Conflicting DependsOn and NotInParallel attributes</value>
+    </data>
+    <data name="TUnit0032Title" xml:space="preserve">
+        <value>Conflicting DependsOn and NotInParallel attributes</value>
+    </data>
+    <data name="TUnit0033Description" xml:space="preserve">
+        <value>Conflicting DependsOn attributes.</value>
+    </data>
+    <data name="TUnit0033MessageFormat" xml:space="preserve">
+        <value>DependsOn Conflicts: {0}</value>
+    </data>
+    <data name="TUnit0033Title" xml:space="preserve">
+        <value>Conflicting DependsOn attributes</value>
+    </data>
+</root>

@@ -14,9 +14,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.UnitTests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Engine", "TUnit.Engine\TUnit.Engine.csproj", "{6C960AFF-E533-4B61-A559-107CA9AA5E76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Analyzers", "TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj", "{68EE0A31-F949-445D-80D7-CD7160510655}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Analyzers", "TUnit.Analyzers\TUnit.Analyzers.csproj", "{68EE0A31-F949-445D-80D7-CD7160510655}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Analyzers.Tests", "TUnit.Analyzers\TUnit.Analyzers.Tests\TUnit.Analyzers.Tests.csproj", "{EE52CB5D-86DF-47E6-B105-F453A0B6FE66}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Analyzers.Tests", "TUnit.Analyzers.Tests\TUnit.Analyzers.Tests.csproj", "{EE52CB5D-86DF-47E6-B105-F453A0B6FE66}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.Analyzers", "TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj", "{DBE82E71-AFC9-4289-B381-14AF86DBE72E}"
 EndProject
@@ -30,9 +30,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{D706CB1E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.Analyzers.Tests", "TUnit.Assertions.Analyzers.Tests\TUnit.Assertions.Analyzers.Tests.csproj", "{230A0FFC-0EE8-475C-BED7-A4508C510EA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Engine.SourceGenerator", "TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj", "{BECB04A9-C731-4AC0-B76B-36382BFE77AA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Engine.SourceGenerator", "TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj", "{BECB04A9-C731-4AC0-B76B-36382BFE77AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Engine.SourceGenerator.Tests", "TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.Tests\TUnit.Engine.SourceGenerator.Tests.csproj", "{2DE2A1F9-2A87-4FA8-8D62-0B60093DA604}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Engine.SourceGenerator.Tests", "TUnit.Engine.SourceGenerator.Tests\TUnit.Engine.SourceGenerator.Tests.csproj", "{2DE2A1F9-2A87-4FA8-8D62-0B60093DA604}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
