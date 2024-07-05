@@ -34,7 +34,7 @@
         <None Update="tools\*.ps1" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="" />
     </ItemGroup>
 
-    <Target Name="_AddSourceGeneratorsToOutput">
+    <Target Name="_AddSourceGeneratorsToOutput" BeforeTargets="BeforeCompile">
         <ItemGroup>
             <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.Engine.SourceGenerator.dll" PackagePath="analyzers/dotnet/cs" />
         </ItemGroup>
