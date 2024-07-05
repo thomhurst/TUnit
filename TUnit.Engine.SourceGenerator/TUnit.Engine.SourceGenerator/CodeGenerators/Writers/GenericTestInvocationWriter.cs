@@ -152,24 +152,24 @@ internal static class GenericTestInvocationWriter
         if (arg is KeyedSharedArgument keyedSharedArgument)
         {
             return $$"""
-                   new global::TUnit.Core.TestData({{variablePrefix}}{{index}}, typeof({{keyedSharedArgument.Type}}), global::TUnit.Core.InjectedDataType.SharedByKey)
+                   new global::TUnit.Core.TestData({{variablePrefix}}{{index}}, typeof({{arg.Type}}), global::TUnit.Core.InjectedDataType.SharedByKey)
                    {
                         StringKey = "{{keyedSharedArgument.Key}}"
                    }
                    """;
         }
 
-        if (arg is GloballySharedArgument globallySharedArgument)
+        if (arg is GloballySharedArgument)
         {
-            return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({globallySharedArgument.Type}), global::TUnit.Core.InjectedDataType.SharedGlobally)";
+            return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({arg.Type}), global::TUnit.Core.InjectedDataType.SharedGlobally)";
         }
 
-        if (arg is TestClassTypeSharedArgument testClassTypeSharedArgument)
+        if (arg is TestClassTypeSharedArgument)
         {
-            return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({testClassTypeSharedArgument.Type}), global::TUnit.Core.InjectedDataType.SharedByTestClassType)";
+            return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({arg.Type}), global::TUnit.Core.InjectedDataType.SharedByTestClassType)";
         }
 
-        return $"new global::TUnit.Core.TestData({variablePrefix}{index}, {variablePrefix}{index}?.GetType(), global::TUnit.Core.InjectedDataType.None)";
+        return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({arg.Type}), global::TUnit.Core.InjectedDataType.None)";
     }
 
     private static string GetAttribute(FullyQualifiedTypeName attributeFullyQualifiedName)

@@ -66,7 +66,7 @@ internal record TestSourceDataModel
         {
             var argument = ClassArguments[i];
             var variable = variableNames[i];
-            yield return $"{argument.Type} {variable} = {argument.Invocation};";
+            yield return $"{SpecifyTypeOrVar(argument)} {variable} = {argument.Invocation};";
         }
     }
 
@@ -99,13 +99,23 @@ internal record TestSourceDataModel
         {
             var argument = MethodArguments[i];
             var variable = variableNames[i];
-            yield return $"{argument.Type} {variable} = {argument.Invocation};";
+            yield return $"{SpecifyTypeOrVar(argument)} {variable} = {argument.Invocation};";
         }
     }
     
     public string GetMethodArgumentVariableNamesAsList()
         => string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0)).TrimStart('(').TrimEnd(')');
 
+    private string SpecifyTypeOrVar(Argument argument)
+    {
+        if (argument.TupleVariableNames != null)
+        {
+            return "var";
+        }
+            
+        return argument.Type;
+    }
+    
     // public virtual bool Equals(TestSourceDataModel? other)
     // {
     //     if (ReferenceEquals(null, other))
