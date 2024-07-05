@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>TUnit.Core</_Parameter1>
@@ -26,16 +33,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     </ItemGroup>
-    
+
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(TargetFramework)' != 'netstandard2.0'">
-        <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"
-                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    <ItemGroup
+        Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(TargetFramework)' != 'netstandard2.0'">
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,14 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <Nullable>enable</Nullable>
-
         <IsPackable>false</IsPackable>
 
         <RootNamespace>TUnit.Engine.SourceGenerator.Tests</RootNamespace>
-        <ImplicitUsings>true</ImplicitUsings>
-        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
