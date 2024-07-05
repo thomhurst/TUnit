@@ -10,8 +10,6 @@
 
         <RootNamespace>TUnit.Engine.SourceGenerator</RootNamespace>
         <PackageId>TUnit.Engine.SourceGenerator</PackageId>
-
-        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddSourceGeneratorsToOutput</TargetsForTfmSpecificContentInPackage>
     </PropertyGroup>
 
     <ItemGroup>
@@ -31,13 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="tools\*.ps1" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="" />
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
-
-    <Target Name="_AddSourceGeneratorsToOutput" BeforeTargets="BeforeCompile">
-        <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.Engine.SourceGenerator.dll" PackagePath="analyzers/dotnet/cs" />
-        </ItemGroup>
-    </Target>
     
 </Project>
