@@ -3,7 +3,7 @@
 public enum InjectedDataType
 {
     None,
-    SharedGloballly,
+    SharedGlobally,
     SharedByKey,
     SharedByTestClassType
 }
