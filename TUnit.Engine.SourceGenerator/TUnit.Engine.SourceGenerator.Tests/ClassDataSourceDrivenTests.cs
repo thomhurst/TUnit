@@ -37,7 +37,7 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
     [Test]
     public Task Shared_Argument_Is_None() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
-            "ClassDataSourceDrivenTests_Shared_None.cs"),
+            "ClassDataSourceDrivenTestsSharedNone.cs"),
         new RunTestOptions
         {
             AdditionalFiles =
@@ -54,19 +54,19 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
 
             Assert.That(generatedFiles[0],
                 Does.Contain(
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests_Shared_None.SomeAsyncDisposableClass methodArg0 = new global::TUnit.TestProject.ClassDataSourceDrivenTests_Shared_None.SomeAsyncDisposableClass();"));
+                    "global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedNone.SomeAsyncDisposableClass methodArg0 = new global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedNone.SomeAsyncDisposableClass();"));
             Assert.That(generatedFiles[0], Does.Contain("classInstance.DataSource_Class(methodArg0)"));
 
             Assert.That(generatedFiles[1],
                 Does.Contain(
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests_Shared_None.SomeAsyncDisposableClass methodArg0 = new global::TUnit.TestProject.ClassDataSourceDrivenTests_Shared_None.SomeAsyncDisposableClass();"));
+                    "global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedNone.SomeAsyncDisposableClass methodArg0 = new global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedNone.SomeAsyncDisposableClass();"));
             Assert.That(generatedFiles[1], Does.Contain("classInstance.DataSource_Class_Generic(methodArg0)"));
         });
 
     [Test]
     public Task Shared_Argument_Is_ForClass() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
-            "ClassDataSourceDrivenTests_Shared_ForClass.cs"),
+            "ClassDataSourceDrivenTestsSharedForClass.cs"),
         new RunTestOptions
         {
             AdditionalFiles =
@@ -83,12 +83,12 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
 
             Assert.That(generatedFiles[0],
                 Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests_Shared_ForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
             Assert.That(generatedFiles[0], Does.Contain("classInstance.DataSource_Class(methodArg0)"));
 
             Assert.That(generatedFiles[1],
                 Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests_Shared_ForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
             Assert.That(generatedFiles[1], Does.Contain("classInstance.DataSource_Class_Generic(methodArg0)"));
         });
 
