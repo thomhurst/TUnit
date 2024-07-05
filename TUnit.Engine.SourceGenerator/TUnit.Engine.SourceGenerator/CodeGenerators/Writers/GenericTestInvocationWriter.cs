@@ -31,19 +31,12 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("var assemblyAttributes = global::TUnit.Engine.Data.AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => classType.Assembly.GetCustomAttributes().ToArray());");
         sourceBuilder.WriteLine("Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];");
         sourceBuilder.WriteLine();
-
+        
         if (hasEnumerableClassData)
         {
             sourceBuilder.WriteLine($"foreach (var {VariableNames.ClassData} in {testSourceDataModel.ClassArguments.SafeFirstOrDefault()?.Invocation})");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine($"{VariableNames.EnumerableClassDataIndex}++;");
-        }
-        
-        if (hasEnumerableMethodData)
-        {
-            sourceBuilder.WriteLine($"foreach (var {VariableNames.MethodData} in {testSourceDataModel.MethodArguments.SafeFirstOrDefault()?.Invocation})");
-            sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"{VariableNames.EnumerableTestDataIndex}++;");
         }
 
         var classArguments = testSourceDataModel.GetClassArgumentsInvocations();
@@ -58,9 +51,18 @@ internal static class GenericTestInvocationWriter
         {
             sourceBuilder.WriteLine();
         }
-
+        
         sourceBuilder.WriteLine(
             $"var resettableClassFactory = new global::TUnit.Core.ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
+
+        sourceBuilder.WriteLine();
+        
+        if (hasEnumerableMethodData)
+        {
+            sourceBuilder.WriteLine($"foreach (var {VariableNames.MethodData} in {testSourceDataModel.MethodArguments.SafeFirstOrDefault()?.Invocation})");
+            sourceBuilder.WriteLine("{");
+            sourceBuilder.WriteLine($"{VariableNames.EnumerableTestDataIndex}++;");
+        }
         
         wasArgument = false;
         var methodArguments = testSourceDataModel.GetMethodArgumentsInvocations();
@@ -140,6 +142,9 @@ internal static class GenericTestInvocationWriter
         
         if (hasEnumerableMethodData)
         {
+            sourceBuilder.WriteLine(
+                $"resettableClassFactory = new global::TUnit.Core.ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
+
             sourceBuilder.WriteLine("}");
         }
     }

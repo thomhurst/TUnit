@@ -34,6 +34,11 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        if (methodSymbol.IsAbstract)
+        {
+            return;
+        }
+
         if (methodSymbol.GetDataDrivenTestAttribute() != null
             && methodSymbol.GetArgumentsAttribute() == null)
         {

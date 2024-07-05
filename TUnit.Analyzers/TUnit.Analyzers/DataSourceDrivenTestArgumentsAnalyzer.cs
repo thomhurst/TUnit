@@ -65,14 +65,14 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
                          is WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
         {
-            CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, false);
+            CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, false, true);
         }
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => 
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
                          is WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource))
         {
-            CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, true);
+            CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, true, true);
         }
     }
     
@@ -94,21 +94,22 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                                                         == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
         {
-            CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol, false);
+            CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol, false, false);
         }
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                                                         == WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource))
         {
-            CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol, true);
+            CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol, true, false);
         }
     }
 
     private void CheckAttributeAgainstMethod(SyntaxNodeAnalysisContext context,
         ImmutableArray<IParameterSymbol> parameters,
         AttributeData dataSourceDrivenAttribute,
-        INamedTypeSymbol fallbackClassToSearchForDataSourceIn, 
-        bool isExpectedEnumerable)
+        INamedTypeSymbol fallbackClassToSearchForDataSourceIn,
+        bool isExpectedEnumerable, 
+        bool canBeInstanceMethod)
     {
         if (parameters.Length == 0)
         {
@@ -159,7 +160,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             return;
         }
         
-        if (!methodContainingTestData.IsStatic)
+        if (!canBeInstanceMethod && !methodContainingTestData.IsStatic && dataSourceDrivenAttribute.ConstructorArguments.Length != 1) 
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
