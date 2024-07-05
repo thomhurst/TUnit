@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\TUnit.Core\TUnit.Core.csproj" />
+        <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj"/>
     </ItemGroup>
 

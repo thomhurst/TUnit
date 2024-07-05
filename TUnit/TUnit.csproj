@@ -13,12 +13,12 @@
     </ItemGroup>
     
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
-        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj"
+        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj"
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers\TUnit.Analyzers.csproj" />
+        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" />
     </ItemGroup>
 
 </Project>
