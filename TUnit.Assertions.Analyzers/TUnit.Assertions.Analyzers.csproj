@@ -38,7 +38,7 @@
         <None Update="tools\*.ps1" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="" />
     </ItemGroup>
 
-    <Target Name="_AddAnalyzersToOutput">
+    <Target Name="_AddAnalyzersToOutput" BeforeTargets="BeforeCompile">
         <ItemGroup>
             <TfmSpecificPackageFile Include="$(OutputPath)\TUnit.Assertions.Analyzers.dll" PackagePath="analyzers/dotnet/cs" />
         </ItemGroup>
