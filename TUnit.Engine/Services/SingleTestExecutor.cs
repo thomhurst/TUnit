@@ -180,7 +180,7 @@ internal class SingleTestExecutor : IDataProducer
     private async Task DisposeInjectedData(object? obj, InjectedDataType injectedDataType)
     {
         if (injectedDataType 
-            is InjectedDataType.SharedGloballly 
+            is InjectedDataType.SharedGlobally 
             or InjectedDataType.SharedByKey
             or InjectedDataType.SharedByTestClassType)
         {
