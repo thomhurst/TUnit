@@ -61,15 +61,15 @@ public class SetupTests : Base3
     private static string _serverAddress = null!;
     private HttpResponseMessage? _response;
     
-    private static int BeforeAllTestsInClassExecutionCount = 0;
-    private static int AfterAllTestsInClassExecutionCount = 0;
+    private static int _beforeAllTestsInClassExecutionCount = 0;
+    private static int _afterAllTestsInClassExecutionCount = 0;
 
     [BeforeAllTestsInClass]
     public static async Task SetUpLocalWebServer()
     {
         try
         {
-            Interlocked.Increment(ref BeforeAllTestsInClassExecutionCount);
+            Interlocked.Increment(ref _beforeAllTestsInClassExecutionCount);
             var builder = WebApplication.CreateBuilder();
             _app = builder.Build();
 
@@ -87,8 +87,8 @@ public class SetupTests : Base3
         {
             Console.WriteLine(e);
             throw new Exception($$"""
-                                  BeforeAllTestsInClass Count: {{BeforeAllTestsInClassExecutionCount}}
-                                  AfterAllTestsInClass Count: {{AfterAllTestsInClassExecutionCount}}
+                                  BeforeAllTestsInClass Count: {{_beforeAllTestsInClassExecutionCount}}
+                                  AfterAllTestsInClass Count: {{_afterAllTestsInClassExecutionCount}}
                                   """, e);
         }
     }
@@ -96,7 +96,7 @@ public class SetupTests : Base3
     [AfterAllTestsInClass]
     public static async Task StopServer()
     {
-        Interlocked.Increment(ref AfterAllTestsInClassExecutionCount);
+        Interlocked.Increment(ref _afterAllTestsInClassExecutionCount);
 
         await _app.StopAsync();
         await _app.DisposeAsync();

@@ -2,7 +2,7 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-public class ClassDataSourceDrivenTests_Shared_None
+public class ClassDataSourceDrivenTestsSharedNone
 {
     [DataSourceDrivenTest]
     [ClassDataSource(typeof(SomeClass), Shared = SharedType.None)]

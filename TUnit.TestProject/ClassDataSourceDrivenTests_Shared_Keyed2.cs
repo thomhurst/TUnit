@@ -8,14 +8,14 @@ namespace TUnit.TestProject;
 
 [ClassDataSource(typeof(SomeAsyncDisposableClass), Shared = SharedType.Keyed, Key = "🌲")]
 [SuppressMessage("Usage", "TUnit0018:Test methods should not assign instance data")]
-public class ClassDataSourceDrivenTests_Shared_Keyed2
+public class ClassDataSourceDrivenTestsSharedKeyed2
 {
     private static readonly List<SomeAsyncDisposableClass> MethodLevels = [];
     private static readonly List<SomeAsyncDisposableClass> ClassLevels = [];
 
-    public ClassDataSourceDrivenTests_Shared_Keyed2(SomeAsyncDisposableClass SomeAsyncDisposableClass)
+    public ClassDataSourceDrivenTestsSharedKeyed2(SomeAsyncDisposableClass someAsyncDisposableClass)
     {
-        ClassLevels.Add(SomeAsyncDisposableClass);
+        ClassLevels.Add(someAsyncDisposableClass);
     }
     
     [DataSourceDrivenTest]

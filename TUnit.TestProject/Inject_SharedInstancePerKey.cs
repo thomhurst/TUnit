@@ -11,11 +11,11 @@ public static class SharedInjectedKeyedContainer
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
-public class Inject_SharedPerKey1
+public class InjectSharedPerKey1
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
     
-    public Inject_SharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass)
+    public InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass)
     {
         _dummyReferenceTypeClass = dummyReferenceTypeClass;
     }
@@ -79,11 +79,11 @@ public class Inject_SharedPerKey1
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
-public class Inject_SharedPerKey2
+public class InjectSharedPerKey2
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
     
-    public Inject_SharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass)
+    public InjectSharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass)
     {
         _dummyReferenceTypeClass = dummyReferenceTypeClass;
     }
@@ -147,11 +147,11 @@ public class Inject_SharedPerKey2
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
-public class Inject_SharedPerKey3
+public class InjectSharedPerKey3
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
     
-    public Inject_SharedPerKey3(DummyReferenceTypeClass dummyReferenceTypeClass)
+    public InjectSharedPerKey3(DummyReferenceTypeClass dummyReferenceTypeClass)
     {
         _dummyReferenceTypeClass = dummyReferenceTypeClass;
     }

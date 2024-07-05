@@ -2,7 +2,7 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-public class ClassDataSourceDrivenTests_Shared_Keyed
+public class ClassDataSourceDrivenTestsSharedKeyed
 {
     [DataSourceDrivenTest]
     [ClassDataSource(typeof(SomeClass), Shared = SharedType.Keyed, Key = "🔑")]

@@ -2,7 +2,7 @@
 
 namespace TUnit.TestProject;
 
-public class IDisposableTests : IDisposable
+public class DisposableTests : IDisposable
 {
     [Test]
     public void One()
