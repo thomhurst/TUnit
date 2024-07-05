@@ -62,6 +62,10 @@ public abstract record TestInformation
     
     public required SharedDataKey[] SharedClassDataSourceKeys { get; init; }
     public required Type[] InjectedGlobalClassDataSourceTypes { get; init; }
+    
+    public required InjectedDataType InjectedClassDataType { get; init; }
+    
+    public required InjectedDataType InjectedMethodDataType { get; init; }
 
 
     internal bool IsSameTest(TestInformation testInformation) => TestName == testInformation.TestName &&

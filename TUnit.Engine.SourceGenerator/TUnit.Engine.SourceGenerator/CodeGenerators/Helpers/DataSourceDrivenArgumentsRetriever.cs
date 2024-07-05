@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
@@ -67,7 +68,6 @@ internal static class DataSourceDrivenArgumentsRetriever
                 DataAttribute = classDataAttribute,
                 DataAttributeIndex = ++methodDataIndex,
                 IsEnumerableData = false,
-                SharedInstanceKey = key == null ? null : new SharedInstanceKey(key, arguments.FirstOrDefault()?.Type!),
                 Arguments = [..arguments.WithTimeoutArgument(testAndClassAttributes)]
             };
         }
@@ -79,7 +79,7 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 return
                 [
-                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                    new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
                         $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")
                 ];
             }
@@ -88,8 +88,11 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 return
                 [
-                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                    new TestClassTypeSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
                         $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
+                    {
+                        TestClassType = className
+                    }
                 ];
             }
             
@@ -97,8 +100,11 @@ internal static class DataSourceDrivenArgumentsRetriever
             {
                 return
                 [
-                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                    new KeyedSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
                         $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
+                    {
+                        Key = key!
+                    }
                 ];
             }
 

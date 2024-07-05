@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.Models;
 
@@ -38,6 +39,8 @@ internal record TestSourceDataModel
     public required int RepeatLimit { get; init; }
     public required SharedInstanceKey[] SharedClassDataSourceKeys { get; init; }
     public required string[] InjectedGlobalClassDataSourceTypes { get; init; }
+    public required string InjectedClassDataType { get; init; }
+    public required string InjectedMethodDataType { get; init; }
 
     public IEnumerable<string> GetClassArgumentVariableNames()
     {

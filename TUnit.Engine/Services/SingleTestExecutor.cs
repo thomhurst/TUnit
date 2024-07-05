@@ -153,12 +153,28 @@ internal class SingleTestExecutor : IDataProducer
         {
             testContext._taskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
             
-            await _disposer.DisposeAsync(testContext?.TestInformation.ClassInstance);
+            if(!testContext.TestInformation.SharedClassDataSourceKeys.Any() && !testContext.TestInformation.InjectedGlobalClassDataSourceTypes.Any())
+            {
+                //await _disposer.DisposeAsync(testContext.TestInformation.ClassInstance);
+            }
 
             using var lockHandle = await _consoleStandardOutLock.WaitAsync();
             
             await _disposer.DisposeAsync(testContext);
         }
+    }
+
+    private async Task Dispose(object? obj, InjectedDataType injectedDataType)
+    {
+        if (injectedDataType 
+            is InjectedDataType.SharedGloballly 
+            or InjectedDataType.SharedByKey
+            or InjectedDataType.SharedByTestClassType)
+        {
+            return;
+        }
+
+        await _disposer.DisposeAsync(obj);
     }
     
     private static async Task DecrementSharedData(UnInvokedTest unInvokedTest)

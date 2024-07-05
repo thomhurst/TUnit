@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
@@ -81,8 +82,10 @@ internal static class TestSourceDataModelRetriever
                     HasEnumerableClassMethodData = false,
                     ClassDataAttributeIndex = null,
                     TestDataAttributeIndex = testArguments.DataAttributeIndex,
-                    SharedClassDataSourceKeys = testArguments.SharedInstanceKey == null ? [] : [testArguments.SharedInstanceKey],
-                    InjectedGlobalClassDataSourceTypes = testArguments.IsGlobalClassDataSource ? [testArguments.Arguments.First().Type] : [],
+                    SharedClassDataSourceKeys = testArguments.Arguments.OfType<KeyedSharedArgument>().Select(x => new SharedInstanceKey(x.Key, x.Type)).ToArray(),
+                    InjectedGlobalClassDataSourceTypes = testArguments.Arguments.OfType<GloballySharedArgument>().Select(x => x.Type).ToArray(),
+                    InjectedClassDataType = GetInjectedClassDataType([]),
+                    InjectedMethodDataType = GetInjectedClassDataType(testArguments.Arguments)
                 });
         }
     }
@@ -107,36 +110,32 @@ internal static class TestSourceDataModelRetriever
                 HasEnumerableClassMethodData = classArguments.IsEnumerableData,
                 TestDataAttributeIndex = testArguments.DataAttributeIndex,
                 ClassDataAttributeIndex = classArguments.DataAttributeIndex,
-                SharedClassDataSourceKeys = GetSharedDataKeys(classArguments.SharedInstanceKey, testArguments.SharedInstanceKey).ToArray(),
-                InjectedGlobalClassDataSourceTypes = GetGlobalClassDataSourceTypes(classArguments, testArguments).ToArray(),
+                SharedClassDataSourceKeys = classArguments.Arguments.OfType<KeyedSharedArgument>().Concat(testArguments.Arguments.OfType<KeyedSharedArgument>()).Select(x => new SharedInstanceKey(x.Key, x.Type)).ToArray(),
+                InjectedGlobalClassDataSourceTypes = classArguments.Arguments.OfType<GloballySharedArgument>().Concat(testArguments.Arguments.OfType<GloballySharedArgument>()).Select(x => x.Type).ToArray(),
+                InjectedClassDataType = GetInjectedClassDataType(classArguments.Arguments),
+                InjectedMethodDataType = GetInjectedClassDataType(testArguments.Arguments)
             });
         }
     }
 
-    private static IEnumerable<string> GetGlobalClassDataSourceTypes(ArgumentsContainer classArguments, ArgumentsContainer testArguments)
+    private static string GetInjectedClassDataType(Argument[] classArguments)
     {
-        if (classArguments.IsGlobalClassDataSource)
+        if (classArguments.OfType<GloballySharedArgument>().Any())
         {
-            yield return classArguments.Arguments[0].Type;
+            return "global::TUnit.Core.InjectedDataType.SharedGlobally";
         }
         
-        if (testArguments.IsGlobalClassDataSource)
+        if (classArguments.OfType<KeyedSharedArgument>().Any())
         {
-            yield return testArguments.Arguments[0].Type;
-        }
-    }
-
-    private static IEnumerable<SharedInstanceKey> GetSharedDataKeys(SharedInstanceKey? classArgumentsSharedInstanceKey, SharedInstanceKey? testArgumentsSharedInstanceKey)
-    {
-        if (classArgumentsSharedInstanceKey != null)
-        {
-            yield return classArgumentsSharedInstanceKey;
+            return "global::TUnit.Core.InjectedDataType.SharedByKey";
         }
         
-        if (testArgumentsSharedInstanceKey != null)
+        if (classArguments.OfType<TestClassTypeSharedArgument>().Any())
         {
-            yield return testArgumentsSharedInstanceKey;
+            return "global::TUnit.Core.InjectedDataType.SharedByTestClassType";
         }
+        
+        return "global::TUnit.Core.InjectedDataType.None";
     }
 
     private static TestSourceDataModel GetTestSourceDataModel(TestGenerationContext testGenerationContext)
@@ -173,6 +172,8 @@ internal static class TestSourceDataModelRetriever
             CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string,
             SharedClassDataSourceKeys = testGenerationContext.SharedClassDataSourceKeys,
             InjectedGlobalClassDataSourceTypes = testGenerationContext.InjectedGlobalClassDataSourceTypes,
+            InjectedClassDataType = testGenerationContext.InjectedClassDataType,
+            InjectedMethodDataType = testGenerationContext.InjectedMethodDataType, 
         };
     }
 }

@@ -1,6 +1,6 @@
 ﻿using TUnit.Engine.SourceGenerator.Enums;
 
-namespace TUnit.Engine.SourceGenerator.Models;
+namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record Argument
 {
