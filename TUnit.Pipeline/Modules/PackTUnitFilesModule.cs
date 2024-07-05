@@ -43,7 +43,8 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                                 new KeyValue("Version", version.SemVer!),
                                 new KeyValue("PackageVersion", packageVersion!)
                             },
-                            IncludeSource = !project.Name.Contains("Generator"),
+                            IncludeSource = true,
+                            Configuration = Configuration.Release,
                         }, cancellationToken);
             }, cancellationToken: cancellationToken).ProcessOneAtATime();
         
