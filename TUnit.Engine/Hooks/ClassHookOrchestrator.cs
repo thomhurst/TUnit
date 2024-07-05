@@ -21,12 +21,42 @@ public static class ClassHookOrchestrator
 
     private static readonly ConcurrentDictionary<Type, int> InstanceTrackers = new();
     
-    public static void RegisterInstance(Type classType)
+    public static void RegisterInstance(TestContext testContext)
     {
+        var classType = testContext.TestInformation.ClassType;
+        
         foreach (var type in GetTypesIncludingBase(classType))
         {
             var count = InstanceTrackers.GetOrAdd(type, _ => 0);
             InstanceTrackers[type] = count + 1;
+        }
+
+        var testInformation = testContext.TestInformation;
+        
+        foreach (var argument in testInformation.InternalTestClassArguments)
+        {
+            if (argument.InjectedDataType == InjectedDataType.SharedByKey)
+            {
+                TestDataContainer.IncrementKeyUsage(argument.StringKey!, argument.Type);
+            }
+            
+            if (argument.InjectedDataType == InjectedDataType.SharedGlobally)
+            {
+                TestDataContainer.IncrementGlobalUsage(argument.Type);
+            }
+        }
+        
+        foreach (var argument in testInformation.InternalTestMethodArguments)
+        {
+            if (argument.InjectedDataType == InjectedDataType.SharedByKey)
+            {
+                TestDataContainer.IncrementKeyUsage(argument.StringKey!, argument.Type);
+            }
+            
+            if (argument.InjectedDataType == InjectedDataType.SharedGlobally)
+            {
+                TestDataContainer.IncrementGlobalUsage(argument.Type);
+            }
         }
     }
     

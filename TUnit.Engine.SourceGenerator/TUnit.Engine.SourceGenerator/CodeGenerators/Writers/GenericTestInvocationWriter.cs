@@ -89,8 +89,8 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("Attributes = attributes,");
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.GetClassArgumentVariableNamesAsList()}],");
         sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.GetMethodArgumentVariableNamesAsList()}],");
-        sourceBuilder.WriteLine($"TestClassArgumentsInjectedTypes = [{string.Join(", ", testSourceDataModel.ClassArguments.Select(ToInjectedType))}],");
-        sourceBuilder.WriteLine($"TestMethodArgumentsInjectedTypes = [{string.Join(", ", testSourceDataModel.MethodArguments.Select(ToInjectedType))}],");
+        sourceBuilder.WriteLine($"InternalTestClassArguments = [{string.Join(", ", testSourceDataModel.ClassArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.ClassArg)))}],");
+        sourceBuilder.WriteLine($"InternalTestMethodArguments = [{string.Join(", ", testSourceDataModel.MethodArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.MethodArg)))}],");
         sourceBuilder.WriteLine(
             $"TestClassParameterTypes = [{classParameterTypesList}],");
         sourceBuilder.WriteLine(
@@ -147,24 +147,29 @@ internal static class GenericTestInvocationWriter
         }
     }
 
-    private static string ToInjectedType(Argument arg)
+    private static string ToInjectedType(Argument arg, int index, string variablePrefix)
     {
-        if (arg is KeyedSharedArgument)
+        if (arg is KeyedSharedArgument keyedSharedArgument)
         {
-            return "global::TUnit.Core.InjectedDataType.SharedByKey";
+            return $$"""
+                   new global::TUnit.Core.TestData({{variablePrefix}}{{index}}, typeof({{keyedSharedArgument.Type}}), global::TUnit.Core.InjectedDataType.SharedByKey)
+                   {
+                        StringKey = "{{keyedSharedArgument.Key}}"
+                   }
+                   """;
         }
 
-        if (arg is GloballySharedArgument)
+        if (arg is GloballySharedArgument globallySharedArgument)
         {
-            return "global::TUnit.Core.InjectedDataType.SharedGlobally";
+            return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({globallySharedArgument.Type}), global::TUnit.Core.InjectedDataType.SharedGlobally)";
         }
 
-        if (arg is TestClassTypeSharedArgument)
+        if (arg is TestClassTypeSharedArgument testClassTypeSharedArgument)
         {
-            return "global::TUnit.Core.InjectedDataType.SharedByTestClassType";
+            return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({testClassTypeSharedArgument.Type}), global::TUnit.Core.InjectedDataType.SharedByTestClassType)";
         }
 
-        return "global::TUnit.Core.InjectedDataType.None";
+        return $"new global::TUnit.Core.TestData({variablePrefix}{index}, {variablePrefix}{index}.GetType(), global::TUnit.Core.InjectedDataType.None)";
     }
 
     private static string GetAttribute(FullyQualifiedTypeName attributeFullyQualifiedName)

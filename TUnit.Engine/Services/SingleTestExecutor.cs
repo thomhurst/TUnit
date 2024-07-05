@@ -164,18 +164,14 @@ internal class SingleTestExecutor : IDataProducer
     {
         var testInformation = testContext.TestInformation;
 
-        for (var index = 0; index < testInformation.TestMethodArguments.Length; index++)
+        foreach (var methodArgument in testInformation.InternalTestMethodArguments)
         {
-            var methodArgument = testInformation.TestMethodArguments[index];
-            var type = testInformation.TestMethodArgumentsInjectedTypes[index];
-            await DisposeInjectedData(methodArgument, type);
+            await DisposeInjectedData(methodArgument.Argument, methodArgument.InjectedDataType);
         }
-
-        for (var index = 0; index < testInformation.TestClassArguments.Length; index++)
+        
+        foreach (var classArgument in testInformation.InternalTestClassArguments)
         {
-            var classArgument = testInformation.TestClassArguments[index];
-            var type = testInformation.TestClassArgumentsInjectedTypes[index];
-            await DisposeInjectedData(classArgument, type);
+            await DisposeInjectedData(classArgument.Argument, classArgument.InjectedDataType);
         }
 
         await _disposer.DisposeAsync(testContext);
@@ -197,30 +193,30 @@ internal class SingleTestExecutor : IDataProducer
     
     private static async Task DecrementSharedData(UnInvokedTest unInvokedTest)
     {
-        if (unInvokedTest.TestContext.TestInformation.SharedClassDataSourceKeys.Any())
+        foreach (var methodArgument in unInvokedTest.TestContext.TestInformation.InternalTestMethodArguments)
         {
-            await DecrementKeyedSharedData(unInvokedTest);
+            if (methodArgument.InjectedDataType == InjectedDataType.SharedByKey)
+            {
+                await TestDataContainer.ConsumeKey(methodArgument.StringKey!, methodArgument.Type);
+            }
+            
+            if (methodArgument.InjectedDataType == InjectedDataType.SharedGlobally)
+            {
+                await TestDataContainer.ConsumeGlobalCount(methodArgument.Type);
+            }
         }
-
-        if (unInvokedTest.TestContext.TestInformation.InjectedGlobalClassDataSourceTypes.Any())
+        
+        foreach (var classArgument in unInvokedTest.TestContext.TestInformation.InternalTestClassArguments)
         {
-            await DecrementGlobalData(unInvokedTest);
-        }
-    }
-
-    private static async Task DecrementKeyedSharedData(UnInvokedTest unInvokedTest)
-    {
-        foreach (var sharedDataKey in unInvokedTest.TestContext.TestInformation.SharedClassDataSourceKeys)
-        {
-            await TestDataContainer.ConsumeKey(sharedDataKey.Key, sharedDataKey.Type);
-        }
-    }
-    
-    private static async Task DecrementGlobalData(UnInvokedTest unInvokedTest)
-    {
-        foreach (var type in unInvokedTest.TestContext.TestInformation.InjectedGlobalClassDataSourceTypes)
-        {
-            await TestDataContainer.ConsumeGlobalCount(type);
+            if (classArgument.InjectedDataType == InjectedDataType.SharedByKey)
+            {
+                await TestDataContainer.ConsumeKey(classArgument.StringKey!, classArgument.Type);
+            }
+            
+            if (classArgument.InjectedDataType == InjectedDataType.SharedGlobally)
+            {
+                await TestDataContainer.ConsumeGlobalCount(classArgument.Type);
+            }
         }
     }
 

@@ -52,7 +52,7 @@ internal class TestsExecutor
 
             foreach (var test in tests.AllTests)
             {
-                ClassHookOrchestrator.RegisterInstance(test.TestContext.TestInformation.ClassType);
+                ClassHookOrchestrator.RegisterInstance(test.TestContext);
             }
 
             // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint

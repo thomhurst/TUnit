@@ -25,26 +25,32 @@ public static class TestDataContainer
         var objectsForClass = InjectedSharedPerClassType.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
         return (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
     }
+
+    public static void IncrementGlobalUsage(Type type)
+    {
+        var count = CountsPerGlobalType.GetOrAdd(type, _ => 0);
+
+        CountsPerGlobalType[type] = count + 1;
+    }
     
     public static T GetGlobalInstance<T>(Func<T> func)
     {
-        var count = CountsPerGlobalType.GetOrAdd(typeof(T), _ => 0);
-
-        CountsPerGlobalType[typeof(T)] = count + 1;
-        
         return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => func()!);
+    }
+
+    public static void IncrementKeyUsage(string key, Type type)
+    {
+        var keysForType = CountsPerKey.GetOrAdd(type, _ => new ConcurrentDictionary<string, int>());
+
+        var count = keysForType.GetOrAdd(key, _ => 0);
+
+        keysForType[key] = count + 1;
     }
 
     public static T GetInstanceForKey<T>(string key, Func<T> func)
     {
         lock (Lock)
         {
-            var keysForType = CountsPerKey.GetOrAdd(typeof(T), _ => new ConcurrentDictionary<string, int>());
-
-            var count = keysForType.GetOrAdd(key, _ => 0);
-
-            keysForType[key] = count + 1;
-
             var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
 
             return (T)instancesForType.GetOrAdd(key, _ => func()!);
