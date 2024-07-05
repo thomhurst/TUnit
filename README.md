@@ -82,6 +82,7 @@ or with more complex test orchestration needs
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
+    [DisplayName("Go to the page numbered $page")]
     public async Task GoToPage(int page) { ... }
 
     [Category("Cookies")]
