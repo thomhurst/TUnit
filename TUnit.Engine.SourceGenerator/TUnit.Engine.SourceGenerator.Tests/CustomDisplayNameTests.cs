@@ -10,9 +10,11 @@ internal class CustomDisplayNameTests : TestsBase<TestsGenerator>
             "CustomDisplayNameTests.cs"),
         generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(2));
+            Assert.That(generatedFiles.Length, Is.EqualTo(4));
             
             Assert.That(generatedFiles[0], Does.Contain("DisplayName = $\"A super important test!\","));
             Assert.That(generatedFiles[1], Does.Contain("DisplayName = $\"Another super important test!\","));
+            Assert.That(generatedFiles[2], Does.Contain("DisplayName = $\"Test with: {methodArg0} {methodArg1} {methodArg2}!\","));
+            Assert.That(generatedFiles[3], Does.Contain("DisplayName = $\"Test with: {methodArg0} {methodArg1} {methodArg2}!\","));
         });
 }

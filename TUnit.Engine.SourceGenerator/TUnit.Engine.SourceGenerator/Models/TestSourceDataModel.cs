@@ -16,6 +16,7 @@ internal record TestSourceDataModel
     public required Argument[] MethodArguments { get; init; }
     
     public required string[] MethodParameterTypes { get; init; }
+    public required string[] MethodParameterNames { get; init; }
     public required int MethodGenericTypeCount { get; init; }
     
     public required bool IsEnumerableClassArguments { get; init; }
