@@ -95,7 +95,7 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
     [Test]
     public Task Shared_Argument_Is_Keyed() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
-            "ClassDataSourceDrivenTests_Shared_Keyed.cs"),
+            "ClassDataSourceDrivenTestsSharedKeyed.cs"),
         new RunTestOptions
         {
             AdditionalFiles =
