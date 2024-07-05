@@ -4,7 +4,6 @@ using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Engine.CommandLineProviders;
-using TUnit.Engine.Data;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;

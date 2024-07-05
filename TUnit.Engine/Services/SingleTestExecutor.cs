@@ -152,25 +152,39 @@ internal class SingleTestExecutor : IDataProducer
         finally
         {
             testContext._taskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
-            
-            if(!testContext.TestInformation.SharedClassDataSourceKeys.Any() && !testContext.TestInformation.InjectedGlobalClassDataSourceTypes.Any())
-            {
-                //await _disposer.DisposeAsync(testContext.TestInformation.ClassInstance);
-            }
+
 
             using var lockHandle = await _consoleStandardOutLock.WaitAsync();
             
-            await _disposer.DisposeAsync(testContext);
+            await Dispose(testContext);
         }
     }
 
-    private async Task Dispose(object? obj, InjectedDataType injectedDataType)
+    private async Task Dispose(TestContext testContext)
+    {
+        var testInformation = testContext.TestInformation;
+        
+        foreach (var methodArgument in testInformation.TestMethodArguments)
+        {
+            await DisposeInjectedData(methodArgument, testInformation.InjectedMethodDataType);
+        }
+        
+        foreach (var classArgument in testInformation.TestClassArguments)
+        {
+            await DisposeInjectedData(classArgument, testInformation.InjectedMethodDataType);
+        }
+
+        await _disposer.DisposeAsync(testContext);
+    }
+
+    private async Task DisposeInjectedData(object? obj, InjectedDataType injectedDataType)
     {
         if (injectedDataType 
             is InjectedDataType.SharedGloballly 
             or InjectedDataType.SharedByKey
             or InjectedDataType.SharedByTestClassType)
         {
+            // Handled later - Might be shared with other tests too so we can't just dispose it without checking
             return;
         }
 
