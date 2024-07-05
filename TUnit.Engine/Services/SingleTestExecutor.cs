@@ -163,15 +163,19 @@ internal class SingleTestExecutor : IDataProducer
     private async Task Dispose(TestContext testContext)
     {
         var testInformation = testContext.TestInformation;
-        
-        foreach (var methodArgument in testInformation.TestMethodArguments)
+
+        for (var index = 0; index < testInformation.TestMethodArguments.Length; index++)
         {
-            await DisposeInjectedData(methodArgument, testInformation.InjectedMethodDataType);
+            var methodArgument = testInformation.TestMethodArguments[index];
+            var type = testInformation.TestMethodArgumentsInjectedTypes[index];
+            await DisposeInjectedData(methodArgument, type);
         }
-        
-        foreach (var classArgument in testInformation.TestClassArguments)
+
+        for (var index = 0; index < testInformation.TestClassArguments.Length; index++)
         {
-            await DisposeInjectedData(classArgument, testInformation.InjectedMethodDataType);
+            var classArgument = testInformation.TestClassArguments[index];
+            var type = testInformation.TestClassArgumentsInjectedTypes[index];
+            await DisposeInjectedData(classArgument, type);
         }
 
         await _disposer.DisposeAsync(testContext);

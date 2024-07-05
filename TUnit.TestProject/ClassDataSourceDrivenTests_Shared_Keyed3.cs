@@ -3,31 +3,32 @@ using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
+using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;
 
-[ClassDataSource<SomeClass>(Shared = SharedType.Keyed, Key = "🌲")]
+[ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🌲")]
 [SuppressMessage("Usage", "TUnit0018:Test methods should not assign instance data")]
 public class ClassDataSourceDrivenTests_Shared_Keyed3
 {
-    private static readonly List<SomeClass> MethodLevels = [];
-    private static readonly List<SomeClass> ClassLevels = [];
+    private static readonly List<SomeAsyncDisposableClass> MethodLevels = [];
+    private static readonly List<SomeAsyncDisposableClass> ClassLevels = [];
 
-    public ClassDataSourceDrivenTests_Shared_Keyed3(SomeClass someClass)
+    public ClassDataSourceDrivenTests_Shared_Keyed3(SomeAsyncDisposableClass someClass)
     {
         ClassLevels.Add(someClass);
     }
     
     [DataSourceDrivenTest]
-    [ClassDataSource<SomeClass>(Shared = SharedType.Keyed, Key = "🔑")]
-    public void DataSource_Class(SomeClass value)
+    [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
+    public void DataSource_Class(SomeAsyncDisposableClass value)
     {
         MethodLevels.Add(value);
     }
 
     [DataSourceDrivenTest]
-    [ClassDataSource<SomeClass>(Shared = SharedType.Keyed, Key = "🔑")]
-    public void DataSource_Class_Generic(SomeClass value)
+    [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
+    public void DataSource_Class_Generic(SomeAsyncDisposableClass value)
     {
         MethodLevels.Add(value);
     }
@@ -46,19 +47,6 @@ public class ClassDataSourceDrivenTests_Shared_Keyed3
         foreach (var methodLevel in MethodLevels)
         {
             await Assert.That(methodLevel.IsDisposed).Is.True();
-        }
-    }
-
-    public record SomeClass : IAsyncDisposable
-    {
-        public bool IsDisposed { get; private set; }
-        
-        public int Value => 1;
-
-        public ValueTask DisposeAsync()
-        {
-            IsDisposed = true;
-            return ValueTask.CompletedTask;
         }
     }
 }

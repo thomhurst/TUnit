@@ -2,6 +2,7 @@
 using System.Linq;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
@@ -88,6 +89,8 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("Attributes = attributes,");
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.GetClassArgumentVariableNamesAsList()}],");
         sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.GetMethodArgumentVariableNamesAsList()}],");
+        sourceBuilder.WriteLine($"TestClassArgumentsInjectedTypes = [{string.Join(", ", testSourceDataModel.ClassArguments.Select(ToInjectedType))}],");
+        sourceBuilder.WriteLine($"TestMethodArgumentsInjectedTypes = [{string.Join(", ", testSourceDataModel.MethodArguments.Select(ToInjectedType))}],");
         sourceBuilder.WriteLine(
             $"TestClassParameterTypes = [{classParameterTypesList}],");
         sourceBuilder.WriteLine(
@@ -111,9 +114,6 @@ internal static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine($"SharedClassDataSourceKeys = [{string.Join(", ", testSourceDataModel.SharedClassDataSourceKeys.Select(x => $"new(\"{x.Key}\", typeof({x.FullyQualifiedTypeName}))"))}],");
         sourceBuilder.WriteLine($"InjectedGlobalClassDataSourceTypes = [{string.Join(", ", testSourceDataModel.InjectedGlobalClassDataSourceTypes.Select(x => $"typeof({x})"))}],");
-        
-        sourceBuilder.WriteLine($"InjectedClassDataType = {testSourceDataModel.InjectedClassDataType},");
-        sourceBuilder.WriteLine($"InjectedMethodDataType = {testSourceDataModel.InjectedMethodDataType},");
         
         sourceBuilder.WriteLine("};");
         sourceBuilder.WriteLine();
@@ -145,6 +145,26 @@ internal static class GenericTestInvocationWriter
         {
             sourceBuilder.WriteLine("}");
         }
+    }
+
+    private static string ToInjectedType(Argument arg)
+    {
+        if (arg is KeyedSharedArgument)
+        {
+            return "global::TUnit.Core.InjectedDataType.SharedByKey";
+        }
+
+        if (arg is GloballySharedArgument)
+        {
+            return "global::TUnit.Core.InjectedDataType.SharedGlobally";
+        }
+
+        if (arg is TestClassTypeSharedArgument)
+        {
+            return "global::TUnit.Core.InjectedDataType.SharedByTestClassType";
+        }
+
+        return "global::TUnit.Core.InjectedDataType.None";
     }
 
     private static string GetAttribute(FullyQualifiedTypeName attributeFullyQualifiedName)

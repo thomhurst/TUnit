@@ -1,33 +1,21 @@
 using TUnit.Core;
+using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;
 
 public class ClassDataSourceDrivenTests
 {
     [DataSourceDrivenTest]
-    [ClassDataSource(typeof(SomeClass))]
-    public void DataSource_Class(SomeClass value)
+    [ClassDataSource(typeof(SomeAsyncDisposableClass))]
+    public void DataSource_Class(SomeAsyncDisposableClass value)
     {
         // Dummy method
     }
 
     [DataSourceDrivenTest]
-    [ClassDataSource<SomeClass>]
-    public void DataSource_Class_Generic(SomeClass value)
+    [ClassDataSource<SomeAsyncDisposableClass>]
+    public void DataSource_Class_Generic(SomeAsyncDisposableClass value)
     {
         // Dummy method
-    }
-
-    public record SomeClass : IAsyncDisposable
-    {
-        public bool IsDisposed { get; private set; }
-        
-        public int Value => 1;
-
-        public ValueTask DisposeAsync()
-        {
-            IsDisposed = true;
-            return ValueTask.CompletedTask;
-        }
     }
 }

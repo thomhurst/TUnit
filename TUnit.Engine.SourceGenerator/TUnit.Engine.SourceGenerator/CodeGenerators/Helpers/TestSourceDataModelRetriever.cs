@@ -84,8 +84,6 @@ internal static class TestSourceDataModelRetriever
                     TestDataAttributeIndex = testArguments.DataAttributeIndex,
                     SharedClassDataSourceKeys = testArguments.Arguments.OfType<KeyedSharedArgument>().Select(x => new SharedInstanceKey(x.Key, x.Type)).ToArray(),
                     InjectedGlobalClassDataSourceTypes = testArguments.Arguments.OfType<GloballySharedArgument>().Select(x => x.Type).ToArray(),
-                    InjectedClassDataType = GetInjectedClassDataType([]),
-                    InjectedMethodDataType = GetInjectedClassDataType(testArguments.Arguments)
                 });
         }
     }
@@ -112,30 +110,8 @@ internal static class TestSourceDataModelRetriever
                 ClassDataAttributeIndex = classArguments.DataAttributeIndex,
                 SharedClassDataSourceKeys = classArguments.Arguments.OfType<KeyedSharedArgument>().Concat(testArguments.Arguments.OfType<KeyedSharedArgument>()).Select(x => new SharedInstanceKey(x.Key, x.Type)).ToArray(),
                 InjectedGlobalClassDataSourceTypes = classArguments.Arguments.OfType<GloballySharedArgument>().Concat(testArguments.Arguments.OfType<GloballySharedArgument>()).Select(x => x.Type).ToArray(),
-                InjectedClassDataType = GetInjectedClassDataType(classArguments.Arguments),
-                InjectedMethodDataType = GetInjectedClassDataType(testArguments.Arguments)
             });
         }
-    }
-
-    private static string GetInjectedClassDataType(Argument[] classArguments)
-    {
-        if (classArguments.OfType<GloballySharedArgument>().Any())
-        {
-            return "global::TUnit.Core.InjectedDataType.SharedGlobally";
-        }
-        
-        if (classArguments.OfType<KeyedSharedArgument>().Any())
-        {
-            return "global::TUnit.Core.InjectedDataType.SharedByKey";
-        }
-        
-        if (classArguments.OfType<TestClassTypeSharedArgument>().Any())
-        {
-            return "global::TUnit.Core.InjectedDataType.SharedByTestClassType";
-        }
-        
-        return "global::TUnit.Core.InjectedDataType.None";
     }
 
     private static TestSourceDataModel GetTestSourceDataModel(TestGenerationContext testGenerationContext)
@@ -172,8 +148,6 @@ internal static class TestSourceDataModelRetriever
             CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string,
             SharedClassDataSourceKeys = testGenerationContext.SharedClassDataSourceKeys,
             InjectedGlobalClassDataSourceTypes = testGenerationContext.InjectedGlobalClassDataSourceTypes,
-            InjectedClassDataType = testGenerationContext.InjectedClassDataType,
-            InjectedMethodDataType = testGenerationContext.InjectedMethodDataType, 
         };
     }
 }
