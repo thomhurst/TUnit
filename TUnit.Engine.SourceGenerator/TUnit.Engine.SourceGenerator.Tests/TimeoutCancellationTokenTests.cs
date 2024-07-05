@@ -26,7 +26,7 @@ internal class TimeoutCancellationTokenTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles[2], Does.Contain("classInstance.DataTest(methodArg0, methodArg1)"));
             
             Assert.That(generatedFiles[3], Does.Contain("TestName = \"DataSourceTest\""));
-            Assert.That(generatedFiles[3], Does.Contain("var methodArg0 = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();"));
+            Assert.That(generatedFiles[3], Does.Contain("global::System.Int32 methodArg0 = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();"));
             Assert.That(generatedFiles[3], Does.Contain("global::TUnit.Engine.TimedCancellationToken methodArg1 = global::TUnit.Engine.EngineCancellationToken.CreateToken(attributes.OfType<global::TUnit.Core.TimeoutAttribute>().First().Timeout);"));
             Assert.That(generatedFiles[3], Does.Contain("classInstance.DataSourceTest(methodArg0, methodArg1)"));
             
