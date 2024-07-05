@@ -41,12 +41,12 @@ internal static class TestInformationRetriever
             
             if (testGenerationContext.ClassDataAttributeIndex != null)
             {
-                stringBuilder.Append($":{testGenerationContext.ClassDataAttributeIndex}");
+                stringBuilder.Append($":CDAI{testGenerationContext.ClassDataAttributeIndex}");
             }
             
             if (testGenerationContext.HasEnumerableClassMethodData)
             {
-                stringBuilder.Append($":{{{VariableNames.EnumerableClassDataIndex}}}");
+                stringBuilder.Append($":ECMD{{{VariableNames.EnumerableClassDataIndex}}}");
             }
 
             stringBuilder.Append(':');
@@ -58,12 +58,12 @@ internal static class TestInformationRetriever
             
             if (testGenerationContext.TestDataAttributeIndex != null)
             {
-                stringBuilder.Append($":{testGenerationContext.TestDataAttributeIndex}");
+                stringBuilder.Append($":TDAI{testGenerationContext.TestDataAttributeIndex}");
             }
             
             if (testGenerationContext.HasEnumerableTestMethodData)
             {
-                stringBuilder.Append($":{{{VariableNames.EnumerableTestDataIndex}}}");
+                stringBuilder.Append($":ETMD{{{VariableNames.EnumerableTestDataIndex}}}");
             }
         }
         else
