@@ -176,7 +176,34 @@ internal static class GenericTestInvocationWriter
 
     private static string GetDisplayName(TestSourceDataModel testSourceDataModel)
     {
-        return $"{testSourceDataModel.CustomDisplayName ?? testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}";
+        var customDisplayName = GetCustomDisplayName(testSourceDataModel);
+
+        if (!string.IsNullOrEmpty(customDisplayName))
+        {
+            return customDisplayName!;
+        }
+
+        return $"{testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}";
+    }
+
+    private static string? GetCustomDisplayName(TestSourceDataModel testSourceDataModel)
+    {
+        var displayName = testSourceDataModel.CustomDisplayName;
+
+        if (string.IsNullOrEmpty(displayName))
+        {
+            return null;
+        }
+        
+        var args = testSourceDataModel.GetMethodArgumentVariableNames().ToList();
+
+        for (var index = 0; index < testSourceDataModel.MethodParameterNames.Length; index++)
+        {
+            var methodParameterName = testSourceDataModel.MethodParameterNames[index];
+            displayName = displayName!.Replace($"${methodParameterName}", $"{{{args[index]}}}");
+        }
+
+        return displayName;
     }
 
     private static string GetMethodArgs(TestSourceDataModel testSourceDataModel)

@@ -139,6 +139,7 @@ internal static class TestSourceDataModelRetriever
             AfterEachTestInvocations = AfterEachTestRetriever.GenerateCode(namedTypeSymbol),
             ApplicableTestAttributes = CustomTestAttributeRetriever.GetCustomAttributes(allAttributes),
             MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
+            MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             ClassParameterTypes = [..namedTypeSymbol.Constructors.First().Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
             CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string,
