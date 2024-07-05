@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Enums;
-using TUnit.Engine.SourceGenerator.Models;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
