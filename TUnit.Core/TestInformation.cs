@@ -60,9 +60,6 @@ public abstract record TestInformation
     public required int TestLineNumber { get; init; }
     public required string DisplayName { get; set; }
     
-    public required SharedDataKey[] SharedClassDataSourceKeys { get; init; }
-    public required Type[] InjectedGlobalClassDataSourceTypes { get; init; }
-    
     public required TestData[] InternalTestClassArguments { internal get; init; }
 
     public required TestData[] InternalTestMethodArguments { internal get; init; }
