@@ -30,7 +30,7 @@ public class AfterEachTestRetriever
         
         foreach (var oneTimeSetUpMethod in cleanUp)
         {
-            stringBuilder.Append($"classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}()),");
+            stringBuilder.Append($"classInstance => RunHelpers.RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}()),");
         }
         
         return stringBuilder.ToString();

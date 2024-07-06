@@ -84,7 +84,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("Categories = attributes.OfType<global::TUnit.Core.CategoryAttribute>().Select(x => x.Category).ToArray(),");
         sourceBuilder.WriteLine("LazyClassInstance = resettableClassFactory,");
         sourceBuilder.WriteLine("ClassType = classType,");
-        sourceBuilder.WriteLine($"Timeout = {GetAttribute(WellKnownFullyQualifiedClassNames.TimeoutAttribute)}?.Timeout,");
+        sourceBuilder.WriteLine($"Timeout = {GetAttribute(ClassNames.TimeoutAttribute)}?.Timeout,");
         sourceBuilder.WriteLine("AssemblyAttributes = assemblyAttributes,");
         sourceBuilder.WriteLine("ClassAttributes = typeAttributes,");
         sourceBuilder.WriteLine("TestAttributes = methodAttributes,");
@@ -98,10 +98,10 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine(
             $"TestMethodParameterTypes = [{methodParameterTypesList}],");
         sourceBuilder.WriteLine(
-            $"NotInParallelConstraintKeys = {GetAttribute(WellKnownFullyQualifiedClassNames.NotInParallelAttribute)}?.ConstraintKeys,");
+            $"NotInParallelConstraintKeys = {GetAttribute(ClassNames.NotInParallelAttribute)}?.ConstraintKeys,");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
-        sourceBuilder.WriteLine($"RetryLimit = {GetAttribute(WellKnownFullyQualifiedClassNames.RetryAttribute)}?.Times ?? 0,");
+        sourceBuilder.WriteLine($"RetryLimit = {GetAttribute(ClassNames.RetryAttribute)}?.Times ?? 0,");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
         sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
@@ -109,7 +109,7 @@ internal static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine($"ReturnType = {testSourceDataModel.ReturnType},");
 
-        sourceBuilder.WriteLine($"Order = {GetAttribute(WellKnownFullyQualifiedClassNames.NotInParallelAttribute)}?.Order ?? {DefaultOrder},");
+        sourceBuilder.WriteLine($"Order = {GetAttribute(ClassNames.NotInParallelAttribute)}?.Order ?? {DefaultOrder},");
 
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
@@ -131,11 +131,11 @@ internal static class GenericTestInvocationWriter
             "AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),");
         sourceBuilder.WriteLine($"BeforeEachTestSetUps = [{testSourceDataModel.BeforeEachTestInvocations}],");
         sourceBuilder.WriteLine(
-            $"TestBody = classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetMethodArgumentVariableNamesAsList()})),");
+            $"TestBody = classInstance => RunHelpers.RunAsync(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetMethodArgumentVariableNamesAsList()})),");
         sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{testSourceDataModel.AfterEachTestInvocations}],");
         sourceBuilder.WriteLine("};");
         sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.AddTest($\"{testId}\", unInvokedTest);");
+        sourceBuilder.WriteLine($"TestDictionary.AddTest($\"{testId}\", unInvokedTest);");
         
         if (hasEnumerableClassData)
         {
@@ -176,9 +176,9 @@ internal static class GenericTestInvocationWriter
         return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({arg.Type}), global::TUnit.Core.InjectedDataType.None)";
     }
 
-    private static string GetAttribute(FullyQualifiedTypeName attributeFullyQualifiedName)
+    private static string GetAttribute(string attributeName)
     {
-        return $"global::TUnit.Engine.Helpers.AttributeHelper.GetAttribute<{attributeFullyQualifiedName.WithGlobalPrefix}>(attributes)";
+        return $"AttributeHelper.GetAttribute<{attributeName}>(attributes)";
     }
 
     private static string GetDisplayName(TestSourceDataModel testSourceDataModel)

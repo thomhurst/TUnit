@@ -13,14 +13,14 @@ internal class ClassHooksGenerator : IIncrementalGenerator
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.BeforeAllTestsInClassAttribute.WithoutGlobalPrefix,
+                "TUnit.Core.BeforeAllTestsInClassAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
         var cleanUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.AfterAllTestsInClassAttribute.WithoutGlobalPrefix,
+                "TUnit.Core.AfterAllTestsInClassAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
@@ -73,6 +73,7 @@ internal class ClassHooksGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("using global::System.Reflection;");
         sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
         sourceBuilder.WriteLine("using global::TUnit.Core;");
+        sourceBuilder.WriteLine("using global::TUnit.Core.Helpers;");
         sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
         sourceBuilder.WriteLine("using global::TUnit.Engine;");
         sourceBuilder.WriteLine("using global::TUnit.Engine.Data;");
@@ -91,12 +92,12 @@ internal class ClassHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.Hooks.ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"global::TUnit.Engine.Hooks.ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), () => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.Hooks.ClassHookOrchestrator.RegisterCleanUp(typeof({model.FullyQualifiedTypeName}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"global::TUnit.Engine.Hooks.ClassHookOrchestrator.RegisterCleanUp(typeof({model.FullyQualifiedTypeName}), () => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
 
         sourceBuilder.WriteLine("}");

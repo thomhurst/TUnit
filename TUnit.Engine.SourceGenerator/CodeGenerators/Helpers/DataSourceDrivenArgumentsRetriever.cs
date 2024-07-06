@@ -20,8 +20,7 @@ internal static class DataSourceDrivenArgumentsRetriever
     {
         var methodDataIndex = 0;
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                                  == WellKnownFullyQualifiedClassNames
-                                                                      .MethodDataSourceAttribute.WithGlobalPrefix))
+                                                                  == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix))
         {
             var methodData = ParseMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
             var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
@@ -35,8 +34,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         }
 
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                                  == WellKnownFullyQualifiedClassNames
-                                                                      .EnumerableMethodDataAttribute.WithGlobalPrefix))
+                                                                  == WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix))
         {
             var methodData = ParseEnumerableMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
             var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
@@ -50,8 +48,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         }
 
         foreach (var classDataAttribute in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                                       == WellKnownFullyQualifiedClassNames
-                                                                           .ClassDataSourceAttribute.WithGlobalPrefix))
+                                                                       == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix))
         {
             var genericType = classDataAttribute.AttributeClass!.TypeArguments.FirstOrDefault() ?? (INamedTypeSymbol)classDataAttribute.ConstructorArguments[0].Value!;
             var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
