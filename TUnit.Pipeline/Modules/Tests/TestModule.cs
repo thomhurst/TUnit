@@ -21,8 +21,6 @@ namespace TUnit.Pipeline.Modules.Tests;
 [DependsOn<ListTestsModule>]
 public abstract class TestModule : Module<TestResult>
 {
-    public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
-
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
 
     private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount * 4);
