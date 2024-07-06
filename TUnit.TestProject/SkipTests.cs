@@ -29,6 +29,7 @@ public class AfterTestAttributeTests
     {
         public async Task OnAfterTest(TestContext testContext)
         {
+            Console.WriteLine(@"Writing file inside WriteFileAfterTestAttribute!");
             await File.WriteAllTextAsync(Filename, "Foo!");
         }
     }
