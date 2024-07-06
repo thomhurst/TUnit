@@ -57,6 +57,7 @@ public abstract class TestModule : Module<TestResult>
             [
                 "--treenode-filter", filter, 
                 "--report-trx", "--report-trx-filename", trxFilename,
+                "--display-test-output",
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
                 ..runOptions.AdditionalArguments
             ]
