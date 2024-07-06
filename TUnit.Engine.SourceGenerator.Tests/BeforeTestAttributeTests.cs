@@ -3,7 +3,7 @@ using TUnit.Engine.SourceGenerator.Tests.Options;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
-internal class ApplicableAttributeTests : TestsBase<TestsGenerator>
+internal class BeforeTestAttributeTests : TestsBase<TestsGenerator>
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -25,6 +25,6 @@ internal class ApplicableAttributeTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
 
-            Assert.That(generatedFiles[0], Does.Contain("BeforeTestAttributes = [..methodInfo.GetCustomAttributes<global::TUnit.TestProject.CustomSkipAttribute>(), ..classType.GetCustomAttributes<global::TUnit.TestProject.CustomSkipAttribute>(), ..methodInfo.GetCustomAttributes<global::TUnit.TestProject.SomethingElseAttribute>(), ..classType.GetCustomAttributes<global::TUnit.TestProject.SomethingElseAttribute>()],"));
+            Assert.That(generatedFiles[0], Does.Contain("BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),"));
         });
 }
