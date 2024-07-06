@@ -28,7 +28,8 @@ internal record TestSourceDataModel
     public required string ReturnType { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
-    public required string ApplicableTestAttributes { get; init; }
+    public required string BeforeTestAttributes { get; init; }
+    public required string AfterTestAttributes { get; init; }
     public required string BeforeEachTestInvocations { get; init; }
     public required string AfterEachTestInvocations { get; init; }
     
@@ -147,7 +148,7 @@ internal record TestSourceDataModel
     //            && FilePath == other.FilePath 
     //            && LineNumber == other.LineNumber 
     //            && CustomProperties.SequenceEqual(other.CustomProperties) 
-    //            && ApplicableTestAttributes == other.ApplicableTestAttributes 
+    //            && BeforeTestAttributes == other.BeforeTestAttributes 
     //            && BeforeEachTestInvocations == other.BeforeEachTestInvocations 
     //            && AfterEachTestInvocations == other.AfterEachTestInvocations;
     // }
@@ -176,7 +177,7 @@ internal record TestSourceDataModel
     //         hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
     //         hashCode = (hashCode * 397) ^ LineNumber;
     //         hashCode = (hashCode * 397) ^ CustomProperties.GetHashCode();
-    //         hashCode = (hashCode * 397) ^ ApplicableTestAttributes.GetHashCode();
+    //         hashCode = (hashCode * 397) ^ BeforeTestAttributes.GetHashCode();
     //         hashCode = (hashCode * 397) ^ BeforeEachTestInvocations.GetHashCode();
     //         hashCode = (hashCode * 397) ^ AfterEachTestInvocations.GetHashCode();
     //         return hashCode;

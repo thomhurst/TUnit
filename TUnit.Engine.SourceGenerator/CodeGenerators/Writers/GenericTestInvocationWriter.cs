@@ -126,7 +126,9 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"Id = $\"{testId}\",");
         sourceBuilder.WriteLine("TestContext = testContext,");
         sourceBuilder.WriteLine(
-            $"ApplicableTestAttributes = [{testSourceDataModel.ApplicableTestAttributes}],");
+            "BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),");
+        sourceBuilder.WriteLine(
+            "AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),");
         sourceBuilder.WriteLine($"BeforeEachTestSetUps = [{testSourceDataModel.BeforeEachTestInvocations}],");
         sourceBuilder.WriteLine(
             $"TestBody = classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetMethodArgumentVariableNamesAsList()})),");

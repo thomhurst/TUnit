@@ -21,8 +21,6 @@ namespace TUnit.Pipeline.Modules.Tests;
 [DependsOn<ListTestsModule>]
 public abstract class TestModule : Module<TestResult>
 {
-    public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
-
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
 
     private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount * 4);
@@ -59,6 +57,7 @@ public abstract class TestModule : Module<TestResult>
             [
                 "--treenode-filter", filter, 
                 "--report-trx", "--report-trx-filename", trxFilename,
+                "--display-test-output",
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
                 ..runOptions.AdditionalArguments
             ]

@@ -164,16 +164,6 @@ public static class ClassHookOrchestrator
             {
                 await RunHelpers.RunSafelyAsync(cleanUp, cleanUpExceptions);
             }
-
-            if (cleanUpExceptions.Count == 1)
-            {
-                throw cleanUpExceptions[0];
-            }
-
-            if (cleanUpExceptions.Count > 1)
-            {
-                throw new AggregateException(cleanUpExceptions);
-            }
         }
     }
 

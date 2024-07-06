@@ -39,7 +39,8 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName GlobalAfterEachTestAttribute = "TUnit.Core.GlobalAfterEachTestAttribute";
 
     // Interfaces
-    public static readonly FullyQualifiedTypeName IApplicableTestAttribute = "TUnit.Core.Interfaces.IApplicableTestAttribute";
+    public static readonly FullyQualifiedTypeName IBeforeTestAttribute = "TUnit.Core.Interfaces.IBeforeTestAttribute";
+    public static readonly FullyQualifiedTypeName IAfterTestAttribute = "TUnit.Core.Interfaces.IAfterTestAttribute";
  
     // Other
     public static readonly FullyQualifiedTypeName TestContext = "TUnit.Core.TestContext";
