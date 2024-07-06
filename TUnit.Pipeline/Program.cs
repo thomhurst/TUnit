@@ -15,5 +15,5 @@ await PipelineHostBuilder.Create()
         collection.Configure<NuGetOptions>(context.Configuration.GetSection("NuGet"));
         collection.AddModulesFromAssembly(typeof(Program).Assembly);
     })
-    .ConfigurePipelineOptions((context, options) => options.ExecutionMode = ExecutionMode.WaitForAllModules)
+    .ConfigurePipelineOptions((_, options) => options.ExecutionMode = ExecutionMode.WaitForAllModules)
     .ExecutePipelineAsync();

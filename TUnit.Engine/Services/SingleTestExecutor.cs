@@ -93,13 +93,15 @@ internal class SingleTestExecutor : IDataProducer
                 
                 await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, cleanUpExceptions);
             }
-            
-            switch (cleanUpExceptions.Count)
+
+            if (cleanUpExceptions.Count == 1)
             {
-                case 1:
-                    throw cleanUpExceptions[0];
-                case > 1:
-                    throw new AggregateException(cleanUpExceptions);
+                throw cleanUpExceptions[0];
+            }
+            
+            if (cleanUpExceptions.Count > 1)
+            {
+                throw new AggregateException(cleanUpExceptions);
             }
 
             var end = DateTimeOffset.Now;
