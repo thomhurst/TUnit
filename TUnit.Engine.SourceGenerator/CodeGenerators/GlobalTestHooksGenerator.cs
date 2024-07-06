@@ -92,12 +92,12 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.Hooks.GlobalTestHookOrchestrator.RegisterSetUp(testContext => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}(testContext)));");
+                $"GlobalTestHookOrchestrator.RegisterSetUp(testContext => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}(testContext)));");
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.Hooks.GlobalTestHookOrchestrator.RegisterCleanUp(testContext => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}(testContext)));");
+                $"GlobalTestHookOrchestrator.RegisterCleanUp(testContext => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}(testContext)));");
         }
 
         sourceBuilder.WriteLine("}");

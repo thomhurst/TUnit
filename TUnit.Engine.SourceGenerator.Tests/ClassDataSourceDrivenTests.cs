@@ -83,12 +83,12 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
 
             Assert.That(generatedFiles[0],
                 Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
             Assert.That(generatedFiles[0], Does.Contain("classInstance.DataSource_Class(methodArg0)"));
 
             Assert.That(generatedFiles[1],
                 Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
             Assert.That(generatedFiles[1], Does.Contain("classInstance.DataSource_Class_Generic(methodArg0)"));
         });
 
@@ -112,12 +112,12 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
 
             Assert.That(generatedFiles[0],
                 Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(\"🔑\", () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = TestDataContainer.GetInstanceForKey<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(\"🔑\", () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
             Assert.That(generatedFiles[0], Does.Contain("classInstance.DataSource_Class(methodArg0)"));
 
             Assert.That(generatedFiles[1],
                 Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(\"🔑\", () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg0 = TestDataContainer.GetInstanceForKey<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(\"🔑\", () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
             Assert.That(generatedFiles[1], Does.Contain("classInstance.DataSource_Class_Generic(methodArg0)"));
         });
 }

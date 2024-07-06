@@ -76,7 +76,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")
+                        $"TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")
                 ];
             }
             
@@ -85,7 +85,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new TestClassTypeSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
+                        $"TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
                     {
                         TestClassType = className
                     }
@@ -97,7 +97,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new KeyedSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
+                        $"TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
                     {
                         Key = key!
                     }
