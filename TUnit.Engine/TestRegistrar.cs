@@ -70,7 +70,7 @@ public static class TestRegistrar
 			BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),
 			AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),
 			BeforeEachTestSetUps = testMetadata.BeforeEachTestSetUps,
-			TestBody = classInstance => RunHelpers.RunAsync(() => testMetadata.TestMethodFactory(classInstance)),
+			TestBody = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => testMetadata.TestMethodFactory(classInstance, cancellationToken)),
 			AfterEachTestCleanUps = testMetadata.AfterEachTestCleanUps,
 		};
 
@@ -92,7 +92,7 @@ public record TestMetadata<TClassType>
 
 
     public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
-    public required Func<TClassType, Task> TestMethodFactory { get; init; }
+    public required Func<TClassType, CancellationToken, Task> TestMethodFactory { get; init; }
     
     public required object?[] TestClassArguments { get; init; }
     public required object?[] TestMethodArguments { get; init; }

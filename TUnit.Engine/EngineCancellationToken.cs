@@ -3,7 +3,7 @@
 public static class EngineCancellationToken
 {
     internal static CancellationTokenSource CancellationTokenSource { get; private set; } = new();
-    public static TimedCancellationToken CreateToken(TimeSpan timeout)
+    public static TimedCancellationToken CreateToken(TimeSpan? timeout)
     {
         return new TimedCancellationToken(timeout);
     }

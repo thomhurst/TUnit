@@ -15,7 +15,7 @@ internal class TimeoutCancellationTokenRetriever
         
         if (timeoutAttribute != null)
         {
-            return new Argument(ArgumentSource.TimeoutAttribute, "global::TUnit.Engine.TimedCancellationToken", "global::TUnit.Engine.EngineCancellationToken.CreateToken(attributes.OfType<TimeoutAttribute>().First().Timeout)");
+            return new Argument(ArgumentSource.TimeoutAttribute, "global::System.Threading.CancellationToken", "cancellationToken)");
         }
 
         return null;

@@ -16,7 +16,7 @@ public class UnInvokedTest<TTestClass> : UnInvokedTest
 
     public TTestClass TestClass => _resettableLazyTestClassFactory.Value;
     
-    public required Func<TTestClass, Task> TestBody { get; init; }
+    public required Func<TTestClass, CancellationToken, Task> TestBody { get; init; }
     
     public required List<Func<TTestClass, Task>> AfterEachTestCleanUps { get; init; }
     
@@ -29,9 +29,9 @@ public class UnInvokedTest<TTestClass> : UnInvokedTest
         }
     }
 
-    public override async Task ExecuteTest()
+    public override async Task ExecuteTest(CancellationToken cancellationToken)
     {
-        await TestBody.Invoke(TestClass);
+        await TestBody.Invoke(TestClass, cancellationToken);
     }
 
     public override async Task RunAfterEachTestCleanUps(List<Exception> exceptionsTracker)
@@ -59,7 +59,7 @@ public abstract class UnInvokedTest
     public required IAfterTestAttribute[] AfterTestAttributes { get; init; }
 
     public abstract Task RunBeforeEachTestSetUps();
-    public abstract Task ExecuteTest();
+    public abstract Task ExecuteTest(CancellationToken cancellationToken);
     public abstract Task RunAfterEachTestCleanUps(List<Exception> exceptionsTracker);
     public abstract void ResetTestInstance();
 }

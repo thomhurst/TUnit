@@ -6,9 +6,9 @@ using System.ComponentModel;
 #endif
 public class TimedCancellationToken
 {
-    private readonly TimeSpan _timeout;
+    private readonly TimeSpan? _timeout;
 
-    public TimedCancellationToken(TimeSpan timeout)
+    public TimedCancellationToken(TimeSpan? timeout)
     {
         _timeout = timeout;
     }
@@ -16,7 +16,12 @@ public class TimedCancellationToken
     public static implicit operator CancellationToken(TimedCancellationToken cancellationToken)
     {
         var newCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.CancellationTokenSource.Token);
-        newCancellationTokenSource.CancelAfter(cancellationToken._timeout);
+        
+        if (cancellationToken._timeout != null)
+        {
+            newCancellationTokenSource.CancelAfter(cancellationToken._timeout.Value);
+        }
+
         return newCancellationTokenSource.Token;
     }
 }
