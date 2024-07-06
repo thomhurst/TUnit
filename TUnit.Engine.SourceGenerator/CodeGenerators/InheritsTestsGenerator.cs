@@ -16,8 +16,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var inheritsTestsClasses = context.SyntaxProvider
-            .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.InheritsTestsAttribute.WithoutGlobalPrefix,
+            .ForAttributeWithMetadataName("TUnit.Core.InheritsTestsAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
@@ -79,6 +78,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("using global::System.Reflection;");
             sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
             sourceBuilder.WriteLine("using global::TUnit.Core;");
+            sourceBuilder.WriteLine("using global::TUnit.Core.Helpers;");
             sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
             sourceBuilder.WriteLine("using global::TUnit.Engine;");
             sourceBuilder.WriteLine("using global::TUnit.Engine.Data;");
@@ -110,7 +110,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("}");
             sourceBuilder.WriteLine("catch (Exception exception)");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.RegisterFailedTest(\"{modelTestSourceDataModel.TestId}\", new global::TUnit.Core.FailedInitializationTest");
+            sourceBuilder.WriteLine($"TestDictionary.RegisterFailedTest(\"{modelTestSourceDataModel.TestId}\", new FailedInitializationTest");
             sourceBuilder.WriteLine("{");
             FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, modelTestSourceDataModel);
             sourceBuilder.WriteLine("});");

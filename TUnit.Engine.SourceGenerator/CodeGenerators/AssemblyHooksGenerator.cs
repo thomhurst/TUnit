@@ -13,14 +13,14 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.AssemblySetUpAttribute.WithoutGlobalPrefix,
+                "TUnit.Core.AssemblySetUpAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
         var cleanUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.AssemblyCleanUpAttribute.WithoutGlobalPrefix,
+                "TUnit.Core.AssemblyCleanUpAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
@@ -73,6 +73,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("using global::System.Reflection;");
         sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
         sourceBuilder.WriteLine("using global::TUnit.Core;");
+        sourceBuilder.WriteLine("using global::TUnit.Core.Helpers;");
         sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
         sourceBuilder.WriteLine("using global::TUnit.Engine;");
         sourceBuilder.WriteLine("using global::TUnit.Engine.Data;");
@@ -91,12 +92,12 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.Hooks.AssemblyHookOrchestrators.RegisterSetUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"AssemblyHookOrchestrators.RegisterSetUp(() => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"global::TUnit.Engine.Hooks.AssemblyHookOrchestrators.RegisterCleanUp(() => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"AssemblyHookOrchestrators.RegisterCleanUp(() => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
 
         sourceBuilder.WriteLine("}");

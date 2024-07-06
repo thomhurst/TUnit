@@ -20,8 +20,7 @@ internal static class DataSourceDrivenArgumentsRetriever
     {
         var methodDataIndex = 0;
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                                  == WellKnownFullyQualifiedClassNames
-                                                                      .MethodDataSourceAttribute.WithGlobalPrefix))
+                                                                  == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix))
         {
             var methodData = ParseMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
             var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
@@ -35,8 +34,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         }
 
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                                  == WellKnownFullyQualifiedClassNames
-                                                                      .EnumerableMethodDataAttribute.WithGlobalPrefix))
+                                                                  == WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix))
         {
             var methodData = ParseEnumerableMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
             var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
@@ -50,8 +48,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         }
 
         foreach (var classDataAttribute in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                                       == WellKnownFullyQualifiedClassNames
-                                                                           .ClassDataSourceAttribute.WithGlobalPrefix))
+                                                                       == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix))
         {
             var genericType = classDataAttribute.AttributeClass!.TypeArguments.FirstOrDefault() ?? (INamedTypeSymbol)classDataAttribute.ConstructorArguments[0].Value!;
             var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
@@ -79,7 +76,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")
+                        $"TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")
                 ];
             }
             
@@ -88,7 +85,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new TestClassTypeSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
+                        $"TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
                     {
                         TestClassType = className
                     }
@@ -100,7 +97,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 return
                 [
                     new KeyedSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                        $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
+                        $"TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
                     {
                         Key = key!
                     }

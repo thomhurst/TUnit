@@ -93,7 +93,7 @@ internal static class ClassArgumentsRetriever
                     DataAttribute = classDataAttribute,
                     DataAttributeIndex = ++index,
                     IsEnumerableData = false,
-                    Arguments = [new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"global::TUnit.Engine.Data.TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")],
+                    Arguments = [new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")],
                 };
             }
             
@@ -108,7 +108,7 @@ internal static class ClassArgumentsRetriever
                     [
                         new TestClassTypeSharedArgument(ArgumentSource.ClassDataSourceAttribute,
                             fullyQualifiedGenericType,
-                            $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
+                            $"TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
                         {
                             TestClassType = className
                         }
@@ -128,7 +128,7 @@ internal static class ClassArgumentsRetriever
                     Arguments =
                     [
                         new KeyedSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                            $"global::TUnit.Engine.Data.TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
+                            $"TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
                         {
                             Key = key
                         }

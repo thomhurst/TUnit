@@ -16,28 +16,28 @@ internal class TestsGenerator : IIncrementalGenerator
     {
         var basicTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.TestAttribute.WithoutGlobalPrefix,
+                "TUnit.Core.TestAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.Basic)))
             .Where(static m => m is not null);
         
         var dataDrivenTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.DataDrivenTestAttribute.WithoutGlobalPrefix,
+                "TUnit.Core.DataDrivenTestAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.DataDriven)))
             .Where(static m => m is not null);
         
         var dataSourceDrivenTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.DataSourceDrivenTestAttribute.WithoutGlobalPrefix,
+                "TUnit.Core.DataSourceDrivenTestAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.DataSourceDriven)))
             .Where(static m => m is not null);
         
         var combinativeTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                WellKnownFullyQualifiedClassNames.CombinativeTestAttribute.WithoutGlobalPrefix,
+                "TUnit.Core.CombinativeTestAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.Combinative)))
             .Where(static m => m is not null);
@@ -94,6 +94,7 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("using global::System.Reflection;");
             sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
             sourceBuilder.WriteLine("using global::TUnit.Core;");
+            sourceBuilder.WriteLine("using global::TUnit.Core.Helpers;");
             sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
             sourceBuilder.WriteLine("using global::TUnit.Engine;");
             sourceBuilder.WriteLine("using global::TUnit.Engine.Data;");
@@ -125,7 +126,7 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("}");
             sourceBuilder.WriteLine("catch (Exception exception)");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.RegisterFailedTest(\"{model.TestId}\", new global::TUnit.Core.FailedInitializationTest");
+            sourceBuilder.WriteLine($"TestDictionary.RegisterFailedTest(\"{model.TestId}\", new FailedInitializationTest");
             sourceBuilder.WriteLine("{");
             FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, model);
             sourceBuilder.WriteLine("});");

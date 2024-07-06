@@ -32,12 +32,12 @@ public static class MethodParenthesisRetriever
     {
         var displayString = parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
         
-        if (displayString == WellKnownFullyQualifiedClassNames.TestContext)
+        if (displayString == ClassNames.TestContext)
         {
             return "testContext";
         }
         
-        if (displayString == WellKnownFullyQualifiedClassNames.CancellationToken)
+        if (displayString == ClassNames.CancellationToken)
         {
             return "global::TUnit.Engine.EngineCancellationToken.CancellationTokenSource.Token";
         }

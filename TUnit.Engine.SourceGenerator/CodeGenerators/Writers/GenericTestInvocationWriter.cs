@@ -27,8 +27,8 @@ internal static class GenericTestInvocationWriter
             $"var methodInfo = classType.GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
 
         sourceBuilder.WriteLine("var methodAttributes = methodInfo.GetCustomAttributes().ToArray();");
-        sourceBuilder.WriteLine("var typeAttributes = global::TUnit.Engine.Data.AttributeCache.Types.GetOrAdd(classType, _ => classType.GetCustomAttributes().ToArray());");
-        sourceBuilder.WriteLine("var assemblyAttributes = global::TUnit.Engine.Data.AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => classType.Assembly.GetCustomAttributes().ToArray());");
+        sourceBuilder.WriteLine("var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => classType.GetCustomAttributes().ToArray());");
+        sourceBuilder.WriteLine("var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => classType.Assembly.GetCustomAttributes().ToArray());");
         sourceBuilder.WriteLine("Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];");
         sourceBuilder.WriteLine();
         
@@ -53,7 +53,7 @@ internal static class GenericTestInvocationWriter
         }
         
         sourceBuilder.WriteLine(
-            $"var resettableClassFactory = new global::TUnit.Core.ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
+            $"var resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
 
         sourceBuilder.WriteLine();
         
@@ -78,13 +78,13 @@ internal static class GenericTestInvocationWriter
         }
         
         sourceBuilder.WriteLine(
-            $"var testInformation = new global::TUnit.Core.TestInformation<{fullyQualifiedClassType}>()");
+            $"var testInformation = new TestInformation<{fullyQualifiedClassType}>()");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine("Categories = attributes.OfType<global::TUnit.Core.CategoryAttribute>().Select(x => x.Category).ToArray(),");
+        sourceBuilder.WriteLine("Categories = attributes.OfType<CategoryAttribute>().Select(x => x.Category).ToArray(),");
         sourceBuilder.WriteLine("LazyClassInstance = resettableClassFactory,");
         sourceBuilder.WriteLine("ClassType = classType,");
-        sourceBuilder.WriteLine($"Timeout = {GetAttribute(WellKnownFullyQualifiedClassNames.TimeoutAttribute)}?.Timeout,");
+        sourceBuilder.WriteLine($"Timeout = {GetAttribute(ClassNames.TimeoutAttribute)}?.Timeout,");
         sourceBuilder.WriteLine("AssemblyAttributes = assemblyAttributes,");
         sourceBuilder.WriteLine("ClassAttributes = typeAttributes,");
         sourceBuilder.WriteLine("TestAttributes = methodAttributes,");
@@ -98,30 +98,30 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine(
             $"TestMethodParameterTypes = [{methodParameterTypesList}],");
         sourceBuilder.WriteLine(
-            $"NotInParallelConstraintKeys = {GetAttribute(WellKnownFullyQualifiedClassNames.NotInParallelAttribute)}?.ConstraintKeys,");
+            $"NotInParallelConstraintKeys = {GetAttribute(ClassNames.NotInParallelAttribute)}?.ConstraintKeys,");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
-        sourceBuilder.WriteLine($"RetryLimit = {GetAttribute(WellKnownFullyQualifiedClassNames.RetryAttribute)}?.Times ?? 0,");
+        sourceBuilder.WriteLine($"RetryLimit = {GetAttribute(ClassNames.RetryAttribute)}?.Times ?? 0,");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
         sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
-        sourceBuilder.WriteLine("CustomProperties = attributes.OfType<global::TUnit.Core.PropertyAttribute>().ToDictionary(x => x.Name, x => x.Value),");
+        sourceBuilder.WriteLine("CustomProperties = attributes.OfType<PropertyAttribute>().ToDictionary(x => x.Name, x => x.Value),");
 
         sourceBuilder.WriteLine($"ReturnType = {testSourceDataModel.ReturnType},");
 
-        sourceBuilder.WriteLine($"Order = {GetAttribute(WellKnownFullyQualifiedClassNames.NotInParallelAttribute)}?.Order ?? {DefaultOrder},");
+        sourceBuilder.WriteLine($"Order = {GetAttribute(ClassNames.NotInParallelAttribute)}?.Order ?? {DefaultOrder},");
 
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         
         sourceBuilder.WriteLine("};");
         sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine("var testContext = new global::TUnit.Core.TestContext(testInformation);");
+        sourceBuilder.WriteLine("var testContext = new TestContext(testInformation);");
         sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine("global::TUnit.Engine.Hooks.ClassHookOrchestrator.RegisterTestContext(classType, testContext);");
+        sourceBuilder.WriteLine("ClassHookOrchestrator.RegisterTestContext(classType, testContext);");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine(
-            $"var unInvokedTest = new global::TUnit.Core.UnInvokedTest<{fullyQualifiedClassType}>(resettableClassFactory)");
+            $"var unInvokedTest = new UnInvokedTest<{fullyQualifiedClassType}>(resettableClassFactory)");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"Id = $\"{testId}\",");
         sourceBuilder.WriteLine("TestContext = testContext,");
@@ -131,11 +131,11 @@ internal static class GenericTestInvocationWriter
             "AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),");
         sourceBuilder.WriteLine($"BeforeEachTestSetUps = [{testSourceDataModel.BeforeEachTestInvocations}],");
         sourceBuilder.WriteLine(
-            $"TestBody = classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetMethodArgumentVariableNamesAsList()})),");
+            $"TestBody = classInstance => RunHelpers.RunAsync(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetMethodArgumentVariableNamesAsList()})),");
         sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{testSourceDataModel.AfterEachTestInvocations}],");
         sourceBuilder.WriteLine("};");
         sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine($"global::TUnit.Core.TestDictionary.AddTest($\"{testId}\", unInvokedTest);");
+        sourceBuilder.WriteLine($"TestDictionary.AddTest($\"{testId}\", unInvokedTest);");
         
         if (hasEnumerableClassData)
         {
@@ -145,7 +145,7 @@ internal static class GenericTestInvocationWriter
         if (hasEnumerableMethodData)
         {
             sourceBuilder.WriteLine(
-                $"resettableClassFactory = new global::TUnit.Core.ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
+                $"resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
 
             sourceBuilder.WriteLine("}");
         }
@@ -156,7 +156,7 @@ internal static class GenericTestInvocationWriter
         if (arg is KeyedSharedArgument keyedSharedArgument)
         {
             return $$"""
-                   new global::TUnit.Core.TestData({{variablePrefix}}{{index}}, typeof({{arg.Type}}), global::TUnit.Core.InjectedDataType.SharedByKey)
+                   new TestData({{variablePrefix}}{{index}}, typeof({{arg.Type}}), InjectedDataType.SharedByKey)
                    {
                         StringKey = "{{keyedSharedArgument.Key}}"
                    }
@@ -165,20 +165,20 @@ internal static class GenericTestInvocationWriter
 
         if (arg is GloballySharedArgument)
         {
-            return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({arg.Type}), global::TUnit.Core.InjectedDataType.SharedGlobally)";
+            return $"new TestData({variablePrefix}{index}, typeof({arg.Type}), InjectedDataType.SharedGlobally)";
         }
 
         if (arg is TestClassTypeSharedArgument)
         {
-            return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({arg.Type}), global::TUnit.Core.InjectedDataType.SharedByTestClassType)";
+            return $"new TestData({variablePrefix}{index}, typeof({arg.Type}), InjectedDataType.SharedByTestClassType)";
         }
 
-        return $"new global::TUnit.Core.TestData({variablePrefix}{index}, typeof({arg.Type}), global::TUnit.Core.InjectedDataType.None)";
+        return $"new TestData({variablePrefix}{index}, typeof({arg.Type}), InjectedDataType.None)";
     }
 
-    private static string GetAttribute(FullyQualifiedTypeName attributeFullyQualifiedName)
+    private static string GetAttribute(string attributeName)
     {
-        return $"global::TUnit.Engine.Helpers.AttributeHelper.GetAttribute<{attributeFullyQualifiedName.WithGlobalPrefix}>(attributes)";
+        return $"AttributeHelper.GetAttribute<{attributeName}>(attributes)";
     }
 
     private static string GetDisplayName(TestSourceDataModel testSourceDataModel)

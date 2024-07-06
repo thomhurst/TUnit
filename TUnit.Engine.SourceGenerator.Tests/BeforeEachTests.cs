@@ -14,9 +14,9 @@ internal class BeforeEachTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles.Length, Is.EqualTo(2));
             
             Assert.That(generatedFiles[0], Does.Contain("TestName = \"Test1\","));
-            Assert.That(generatedFiles[0], Does.Contain("\t\t\t\tBeforeEachTestSetUps = [classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.BeforeEach1()),classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.BeforeEach2()),classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.BeforeEach3()),classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.Setup()),],"));
+            Assert.That(generatedFiles[0], Does.Contain("\t\t\t\tBeforeEachTestSetUps = [classInstance => RunHelpers.RunAsync(() => classInstance.BeforeEach1()),classInstance => RunHelpers.RunAsync(() => classInstance.BeforeEach2()),classInstance => RunHelpers.RunAsync(() => classInstance.BeforeEach3()),classInstance => RunHelpers.RunAsync(() => classInstance.Setup()),],"));
             
             Assert.That(generatedFiles[1], Does.Contain("TestName = \"Test2\","));
-            Assert.That(generatedFiles[1], Does.Contain("\t\t\t\tBeforeEachTestSetUps = [classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.BeforeEach1()),classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.BeforeEach2()),classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.BeforeEach3()),classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.Setup()),],"));
+            Assert.That(generatedFiles[1], Does.Contain("\t\t\t\tBeforeEachTestSetUps = [classInstance => RunHelpers.RunAsync(() => classInstance.BeforeEach1()),classInstance => RunHelpers.RunAsync(() => classInstance.BeforeEach2()),classInstance => RunHelpers.RunAsync(() => classInstance.BeforeEach3()),classInstance => RunHelpers.RunAsync(() => classInstance.Setup()),],"));
         });
 }

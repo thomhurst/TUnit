@@ -31,7 +31,7 @@ public class AfterAllTestsInClassWriter
         foreach (var oneTimeCleanUpMethod in oneTimeCleanUpMethods)
         {
             var typeContainingCleanUpMethod = oneTimeCleanUpMethod.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-            stringBuilder.AppendLine($"global::TUnit.Engine.AfterAllTestsInClassOrchestrator.RegisterOneTimeTearDown(typeof({typeContainingCleanUpMethod}), () => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => {typeContainingCleanUpMethod}.{oneTimeCleanUpMethod.Name}()));");
+            stringBuilder.AppendLine($"global::TUnit.Engine.AfterAllTestsInClassOrchestrator.RegisterOneTimeTearDown(typeof({typeContainingCleanUpMethod}), () => RunHelpers.RunAsync(() => {typeContainingCleanUpMethod}.{oneTimeCleanUpMethod.Name}()));");
         }
         
         return stringBuilder.ToString();

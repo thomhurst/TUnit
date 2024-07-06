@@ -29,7 +29,7 @@ public class BeforeEachTestRetriever
         
         foreach (var beforeEachTestMethod in beforeEachTestMethods)
         {
-            stringBuilder.Append($"classInstance => global::TUnit.Core.Helpers.RunHelpers.RunAsync(() => classInstance.{beforeEachTestMethod.Name}()),");
+            stringBuilder.Append($"classInstance => RunHelpers.RunAsync(() => classInstance.{beforeEachTestMethod.Name}()),");
         }
         
         return stringBuilder.ToString();
