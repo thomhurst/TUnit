@@ -55,7 +55,8 @@ public abstract class UnInvokedTest
     public required string Id { get; init; }
     public required TestContext TestContext { get; init; }
     
-    public required List<IApplicableTestAttribute> ApplicableTestAttributes { get; init; }
+    public required List<IBeforeTestAttribute> BeforeTestAttributes { get; init; }
+    public required List<IAfterTestAttribute> AfterTestAttributes { get; init; }
 
     public abstract Task RunBeforeEachTestSetUps();
     public abstract Task ExecuteTest();

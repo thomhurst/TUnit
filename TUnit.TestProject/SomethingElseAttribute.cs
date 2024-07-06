@@ -3,9 +3,9 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 
-public class SomethingElseAttribute : Attribute, IApplicableTestAttribute
+public class SomethingElseAttribute : Attribute, IBeforeTestAttribute
 {
-    public Task Apply(TestContext testContext)
+    public Task OnBeforeTest(TestContext testContext)
     {
         return Task.CompletedTask;
     }

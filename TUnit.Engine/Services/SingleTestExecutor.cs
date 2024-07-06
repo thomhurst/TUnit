@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Requests;
 using Semaphores;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Helpers;
 using TUnit.Engine.Data;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
@@ -55,6 +56,8 @@ internal class SingleTestExecutor : IDataProducer
         
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode.WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
+        var cleanUpExceptions = new List<Exception>();
+        
         DateTimeOffset? start = null;
         try
         {
@@ -69,22 +72,36 @@ internal class SingleTestExecutor : IDataProducer
 
             var unInvokedTest = test.UnInvokedTest;
             
-            foreach (var applicableTestAttribute in unInvokedTest.ApplicableTestAttributes)
+            foreach (var applicableTestAttribute in unInvokedTest.BeforeTestAttributes)
             {
-                await applicableTestAttribute.Apply(testContext);
+                await applicableTestAttribute.OnBeforeTest(testContext);
             }
 
             try
             {
                 await ClassHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext.TestInformation.ClassType);
-                await ExecuteWithRetries(unInvokedTest);
+                await ExecuteWithRetries(unInvokedTest, cleanUpExceptions);
             }
             finally
             {
                 await DecrementSharedData(unInvokedTest);
-                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, new List<Exception>());
+                
+                foreach (var applicableTestAttribute in unInvokedTest.AfterTestAttributes)
+                {
+                    await RunHelpers.RunSafelyAsync(() => applicableTestAttribute.OnAfterTest(testContext), cleanUpExceptions);
+                }
+                
+                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, cleanUpExceptions);
             }
             
+            switch (cleanUpExceptions.Count)
+            {
+                case 1:
+                    throw cleanUpExceptions[0];
+                case > 1:
+                    throw new AggregateException(cleanUpExceptions);
+            }
+
             var end = DateTimeOffset.Now;
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
@@ -220,15 +237,15 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task RunTest(UnInvokedTest unInvokedTest)
+    private async Task RunTest(UnInvokedTest unInvokedTest, List<Exception> cleanUpExceptions)
     {
         ConsoleInterceptor.Instance.SetModule(unInvokedTest.TestContext);
-        await _testInvoker.Invoke(unInvokedTest);
+        await _testInvoker.Invoke(unInvokedTest, cleanUpExceptions);
     }
 
     private readonly AsyncSemaphore _consoleStandardOutLock = new(1);
 
-    private async Task ExecuteWithRetries(UnInvokedTest unInvokedTest)
+    private async Task ExecuteWithRetries(UnInvokedTest unInvokedTest, List<Exception> cleanUpExceptions)
     {
         var testInformation = unInvokedTest.TestContext.TestInformation;
         var retryCount = testInformation.RetryLimit;
@@ -238,7 +255,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             try
             {
-                await ExecuteCore(unInvokedTest);
+                await ExecuteCore(unInvokedTest, cleanUpExceptions);
                 break;
             }
             catch (Exception e)
@@ -276,7 +293,7 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task ExecuteCore(UnInvokedTest unInvokedTest)
+    private async Task ExecuteCore(UnInvokedTest unInvokedTest, List<Exception> cleanUpExceptions)
     {
         if (_cancellationTokenSource.IsCancellationRequested)
         {
@@ -298,7 +315,7 @@ internal class SingleTestExecutor : IDataProducer
 
         await ExecuteTestMethodWithTimeout(
             testInformation,
-            () => RunTest(unInvokedTest),
+            () => RunTest(unInvokedTest, cleanUpExceptions),
             testLevelCancellationTokenSource
         );
     }

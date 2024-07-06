@@ -4,7 +4,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class SkipAttribute : TUnitAttribute, IApplicableTestAttribute
+public class SkipAttribute : TUnitAttribute, IBeforeTestAttribute
 {
     public string Reason { get; }
 
@@ -13,7 +13,7 @@ public class SkipAttribute : TUnitAttribute, IApplicableTestAttribute
         Reason = reason;
     }
 
-    public Task Apply(TestContext testContext)
+    public Task OnBeforeTest(TestContext testContext)
     {
         if (ShouldSkipPredicate(testContext))
         {

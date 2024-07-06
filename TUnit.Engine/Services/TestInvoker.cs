@@ -5,10 +5,8 @@ namespace TUnit.Engine.Services;
 
 internal class TestInvoker
 {
-    public async Task Invoke(UnInvokedTest unInvokedTest)
+    public async Task Invoke(UnInvokedTest unInvokedTest, List<Exception> cleanUpExceptions)
     {
-        var cleanUpExceptions = new List<Exception>();
-        
         try
         {
             TestContext.TestContexts.Value = unInvokedTest.TestContext;
@@ -24,16 +22,6 @@ internal class TestInvoker
             await unInvokedTest.RunAfterEachTestCleanUps(cleanUpExceptions);
             
             await GlobalTestHookOrchestrator.ExecuteCleanUps(unInvokedTest.TestContext, cleanUpExceptions);
-        }
-
-        if (cleanUpExceptions.Any())
-        {
-            if (cleanUpExceptions.Count == 1)
-            {
-                throw cleanUpExceptions.First();
-            }
-
-            throw new AggregateException(cleanUpExceptions);
         }
     }
 }
