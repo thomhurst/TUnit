@@ -14,6 +14,8 @@ using System.ComponentModel;
 #endif
 public static class TestRegistrar
 {
+	private const int DefaultOrder = int.MaxValue / 2;
+
 	public static void RegisterTest<TClassType>(TestMetadata<TClassType> testMetadata)
 	{
 		var testId = testMetadata.TestId;
@@ -52,7 +54,7 @@ public static class TestRegistrar
 			DisplayName = testMetadata.DisplayName,
 			CustomProperties = attributes.OfType<PropertyAttribute>().ToDictionary(x => x.Name, x => x.Value),
 			ReturnType = methodInfo.ReturnType,
-			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? 1073741823,
+			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = testMetadata.TestFilePath,
 			TestLineNumber = testMetadata.TestLineNumber,
 		};

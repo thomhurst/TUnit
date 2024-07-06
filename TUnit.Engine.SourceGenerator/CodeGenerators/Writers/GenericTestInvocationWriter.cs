@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using TUnit.Engine.SourceGenerator.Extensions;
+﻿using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
@@ -8,8 +6,6 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
 internal static class GenericTestInvocationWriter
 {
-    private const int DefaultOrder = int.MaxValue / 2;
-
     public static void GenerateTestInvocationCode(SourceCodeWriter sourceBuilder,
         TestSourceDataModel testSourceDataModel)
     {
@@ -21,16 +17,9 @@ internal static class GenericTestInvocationWriter
         var hasEnumerableMethodData = testSourceDataModel.IsEnumerableMethodArguments;
         
         var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"));
-        var classParameterTypesList = string.Join(", ", testSourceDataModel.ClassParameterTypes.Select(x => $"typeof({x})"));
-        sourceBuilder.WriteLine($"var classType = typeof({fullyQualifiedClassType});");
+
         sourceBuilder.WriteLine(
             $"var methodInfo = classType.GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
-
-        sourceBuilder.WriteLine("var methodAttributes = methodInfo.GetCustomAttributes().ToArray();");
-        sourceBuilder.WriteLine("var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => classType.GetCustomAttributes().ToArray());");
-        sourceBuilder.WriteLine("var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => classType.Assembly.GetCustomAttributes().ToArray());");
-        sourceBuilder.WriteLine("Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];");
-        sourceBuilder.WriteLine();
         
         if (hasEnumerableClassData)
         {
