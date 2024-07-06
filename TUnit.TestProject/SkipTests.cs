@@ -25,7 +25,7 @@ public class AfterTestAttributeTests
         await Assert.That(File.Exists(Filename)).Is.False();
     }
 
-    private class WriteFileAfterTestAttribute : Attribute, IAfterTestAttribute
+    public class WriteFileAfterTestAttribute : Attribute, IAfterTestAttribute
     {
         public async Task OnAfterTest(TestContext testContext)
         {
