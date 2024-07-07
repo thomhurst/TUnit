@@ -95,7 +95,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
                   AssemblyHookOrchestrator.RegisterSetUp(new StaticMethod
                   { 
                      MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     Body = cancellationToken => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                     Body = cancellationToken => RunHelpers.RunWithTimeoutAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}), cancellationToken)
                   });
                   """);
         }
@@ -106,7 +106,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
                   AssemblyHookOrchestrator.RegisterCleanUp(new StaticMethod
                   { 
                      MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     Body = cancellationToken => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                     Body = cancellationToken => RunHelpers.RunWithTimeoutAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}), cancellationToken)
                   });
                   """);
         }

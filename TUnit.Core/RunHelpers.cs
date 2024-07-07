@@ -17,6 +17,35 @@ public static class RunHelpers
     {
         await action();
     }
+    
+    public static Task RunWithTimeoutAsync(Action action, CancellationToken cancellationToken)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), cancellationToken);
+    }
+    
+    public static Task RunWithTimeoutAsync(Func<Task> action, CancellationToken cancellationToken)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), cancellationToken);
+    }
+    
+    public static Task RunWithTimeoutAsync(Func<ValueTask> action, CancellationToken cancellationToken)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), cancellationToken);
+    }
+    
+    public static async Task RunWithTimeoutAsync(Task task, CancellationToken cancellationToken)
+    {
+        var timeoutTask = Task.Run(async () =>
+        {
+            while (!task.IsCompleted)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+        }, CancellationToken.None);
+
+        await await Task.WhenAny(task, timeoutTask);
+    }
 
     public static async Task RunSafelyAsync(Action action, List<Exception> exceptions)
     {

@@ -96,7 +96,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
                   GlobalTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
                   { 
                      MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     Body = (testContext, cancellationToken) => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
+                     Body = (testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}), cancellationToken)
                   });
                   """);
         }
@@ -107,7 +107,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
                   GlobalTestHookOrchestrator.RegisterCleanUp(new StaticMethod<TestContext>
                   { 
                      MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     Body = (testContext, cancellationToken) => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
+                     Body = (testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}), cancellationToken)
                   });
                   """);
         }

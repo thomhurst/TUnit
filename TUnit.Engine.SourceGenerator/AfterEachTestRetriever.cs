@@ -38,7 +38,7 @@ public class AfterEachTestRetriever
                                    new InstanceMethod<{{fullyQualifiedType}}>
                                    {
                                        MethodInfo = typeof({{fullyQualifiedType}}).GetMethod("{{oneTimeSetUpMethod.Name}}", 0, [{{string.Join(", ", oneTimeSetUpMethod.Parameters.Select(x => $"typeof({x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})"))}}]),
-                                       Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.{{oneTimeSetUpMethod.Name}}({{args}})),
+                                       Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.{{oneTimeSetUpMethod.Name}}({{args}}), cancellationToken),
                                    },
                                    """);
         }

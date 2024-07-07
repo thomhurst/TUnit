@@ -20,22 +20,22 @@ internal class BeforeEachTests : TestsBase<TestsGenerator>
                 new InstanceMethod<global::TUnit.TestProject.BeforeEachTests.SetupTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeEachTests.SetupTests).GetMethod("BeforeEach1", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.BeforeEach1()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach1(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.BeforeEachTests.SetupTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeEachTests.SetupTests).GetMethod("BeforeEach2", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.BeforeEach2()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach2(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.BeforeEachTests.SetupTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeEachTests.SetupTests).GetMethod("BeforeEach3", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.BeforeEach3()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach3(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.BeforeEachTests.SetupTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeEachTests.SetupTests).GetMethod("Setup", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.Setup()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.Setup(), cancellationToken),
                 },],
                 """));
 
@@ -46,22 +46,22 @@ internal class BeforeEachTests : TestsBase<TestsGenerator>
                 new InstanceMethod<global::TUnit.TestProject.BeforeEachTests.SetupTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeEachTests.SetupTests).GetMethod("BeforeEach1", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.BeforeEach1()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach1(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.BeforeEachTests.SetupTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeEachTests.SetupTests).GetMethod("BeforeEach2", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.BeforeEach2()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach2(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.BeforeEachTests.SetupTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeEachTests.SetupTests).GetMethod("BeforeEach3", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.BeforeEach3()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach3(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.BeforeEachTests.SetupTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeEachTests.SetupTests).GetMethod("Setup", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.Setup()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.Setup(), cancellationToken),
                 },],
                 """));
         });
