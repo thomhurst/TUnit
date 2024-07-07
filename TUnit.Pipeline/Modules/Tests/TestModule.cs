@@ -9,7 +9,6 @@ using ModularPipelines.DotNet.Parsers.NUnitTrx;
 using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
 using ModularPipelines.Modules;
 using Polly;
 using Polly.Retry;
@@ -22,9 +21,9 @@ public abstract class TestModule : Module<TestResult>
 {
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
 
-    private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount * 4);
+    private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount * 2);
 
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = true 
     };
@@ -41,14 +40,12 @@ public abstract class TestModule : Module<TestResult>
     {
         using var lockHandle = await AsyncSemaphore.WaitAsync(cancellationToken);
 
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj")
-            .AssertExists();
-
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
         var result = await context.DotNet().Run(new DotNetRunOptions
         {
-            Project = project,
+            WorkingDirectory = context.Git().RootDirectory.GetFolder("TUnit.TestProject"),
+            Configuration = Configuration.Release,
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
             CommandLogging = runOptions.CommandLogging,
@@ -61,6 +58,11 @@ public abstract class TestModule : Module<TestResult>
                 ..runOptions.AdditionalArguments
             ]
         }, cancellationToken);
+
+        if (result.StandardError.Contains("System.ComponentModel.Win32Exception"))
+        {
+            throw new Exception("Unknown error running tests");
+        }
 
         var trxFileContents = await context.Git()
             .RootDirectory

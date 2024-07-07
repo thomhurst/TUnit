@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using TUnit.Engine.SourceGenerator.Extensions;
-using TUnit.Engine.SourceGenerator.Models.Arguments;
+﻿using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 

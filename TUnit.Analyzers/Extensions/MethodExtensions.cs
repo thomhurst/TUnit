@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;

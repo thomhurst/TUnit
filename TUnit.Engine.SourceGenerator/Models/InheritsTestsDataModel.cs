@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TUnit.Engine.SourceGenerator.Models;
+﻿namespace TUnit.Engine.SourceGenerator.Models;
 
 internal record InheritsTestsDataModel : TestCollectionDataModel
 {

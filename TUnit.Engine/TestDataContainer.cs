@@ -1,12 +1,12 @@
 ﻿using System.Collections.Concurrent;
+using TUnit.Engine.Data;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 
-namespace TUnit.Engine.Data;
+namespace TUnit.Engine;
 
 #if !DEBUG
-using System.ComponentModel;
-[EditorBrowsable(EditorBrowsableState.Never)]
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
 public static class TestDataContainer
 {

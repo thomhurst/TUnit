@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.Testing;
 
 namespace TUnit.Assertions.Analyzers.Tests;

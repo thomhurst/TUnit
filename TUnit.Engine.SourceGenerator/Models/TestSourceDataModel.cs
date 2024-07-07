@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using TUnit.Engine.SourceGenerator.CodeGenerators;
-using TUnit.Engine.SourceGenerator.Enums;
+﻿using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.Models;

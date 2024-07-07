@@ -16,6 +16,10 @@ public class RunSourceGeneratorTestsModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Engine.SourceGenerator.Tests.csproj").AssertExists();
         
-        return await context.DotNet().Test(new DotNetTestOptions(project), cancellationToken);
+        return await context.DotNet().Test(new DotNetTestOptions(project)
+        {
+            NoBuild = true,
+            Configuration = Configuration.Release
+        }, cancellationToken);
     }
 }

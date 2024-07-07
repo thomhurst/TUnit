@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using TUnit.Core;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Data;
 using TUnit.Engine.Helpers;
@@ -9,8 +8,7 @@ using TUnit.Engine.Hooks;
 namespace TUnit.Engine;
 
 #if !DEBUG
-using System.ComponentModel;
-[EditorBrowsable(EditorBrowsableState.Never)]
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
 public static class TestRegistrar
 {
