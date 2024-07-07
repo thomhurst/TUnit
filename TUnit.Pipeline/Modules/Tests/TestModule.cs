@@ -24,7 +24,7 @@ public abstract class TestModule : Module<TestResult>
 
     private static readonly AsyncSemaphore AsyncSemaphore = new(1);
 
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = true 
     };
@@ -41,14 +41,11 @@ public abstract class TestModule : Module<TestResult>
     {
         using var lockHandle = await AsyncSemaphore.WaitAsync(cancellationToken);
 
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.TestProject.csproj")
-            .AssertExists();
-
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
         var result = await context.DotNet().Run(new DotNetRunOptions
         {
-            Project = project,
+            WorkingDirectory = context.Git().RootDirectory.GetFolder("TUnit.TestProject"),
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
             CommandLogging = runOptions.CommandLogging,
@@ -62,7 +59,7 @@ public abstract class TestModule : Module<TestResult>
             ]
         }, cancellationToken);
 
-        if (result.ExitCode is not 0 and not 1 and not 8)
+        if (result.StandardError.Contains("System.ComponentModel.Win32Exception"))
         {
             throw new Exception("Unknown error running tests");
         }
