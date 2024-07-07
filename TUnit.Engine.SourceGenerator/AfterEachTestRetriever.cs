@@ -29,7 +29,8 @@ public class AfterEachTestRetriever
         
         foreach (var oneTimeSetUpMethod in cleanUp)
         {
-            stringBuilder.Append($"classInstance => RunHelpers.RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}()),");
+            var args = oneTimeSetUpMethod.HasTimeoutAttribute() ? "cancellationToken" : string.Empty;
+            stringBuilder.Append($"(classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}({args})),");
         }
         
         return stringBuilder.ToString();

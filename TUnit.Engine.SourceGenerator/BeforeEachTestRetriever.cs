@@ -28,7 +28,8 @@ public class BeforeEachTestRetriever
         
         foreach (var beforeEachTestMethod in beforeEachTestMethods)
         {
-            stringBuilder.Append($"classInstance => RunHelpers.RunAsync(() => classInstance.{beforeEachTestMethod.Name}()),");
+            var args = beforeEachTestMethod.HasTimeoutAttribute() ? "cancellationToken" : string.Empty;
+            stringBuilder.Append($"(classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.{beforeEachTestMethod.Name}({args})),");
         }
         
         return stringBuilder.ToString();

@@ -89,12 +89,19 @@ internal class ClassHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), () => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $"ClassHookOrchestrator.RegisterSetUp(typeof({model.FullyQualifiedTypeName}), cancellationToken => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
         }
         else if (hookType == HookType.CleanUp)
         {
+            typeof(string).GetMethod()
             sourceBuilder.WriteLine(
-                $"ClassHookOrchestrator.RegisterCleanUp(typeof({model.FullyQualifiedTypeName}), () => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $$"""
+                 ClassHookOrchestrator.RegisterCleanUp(typeof({{model.FullyQualifiedTypeName}}), new StaticMethod
+                 { 
+                    MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod({{model.MethodName}}, 0, {{m)
+                    Body = cancellationToken => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                 });
+                 """);
         }
 
         sourceBuilder.WriteLine("}");

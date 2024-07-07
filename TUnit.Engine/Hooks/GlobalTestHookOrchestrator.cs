@@ -23,7 +23,7 @@ public static class GlobalTestHookOrchestrator
         CleanUps.Add(taskFactory);
     }
 
-    public static async Task ExecuteSetups(TestContext testContext)
+    public static async Task ExecuteSetups(TestContext testContext, CancellationToken token)
     {
         foreach (var setUp in SetUps)
         {
@@ -31,7 +31,8 @@ public static class GlobalTestHookOrchestrator
         }
     }
 
-    public static async Task ExecuteCleanUps(TestContext testContext, List<Exception> cleanUpExceptions)
+    public static async Task ExecuteCleanUps(TestContext testContext, List<Exception> cleanUpExceptions,
+        CancellationToken token)
     {
         foreach (var cleanUp in CleanUps)
         {

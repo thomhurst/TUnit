@@ -95,8 +95,8 @@ public record TestMetadata<TClassType>
     public required object?[] TestClassArguments { get; init; }
     public required object?[] TestMethodArguments { get; init; }
     
-    public required List<Func<TClassType, Task>> BeforeEachTestSetUps { get; init; }
-    public required List<Func<TClassType, Task>> AfterEachTestCleanUps { get; init; }
+    public required List<InstanceMethod<TClassType>> BeforeEachTestSetUps { get; init; }
+    public required List<InstanceMethod<TClassType>> AfterEachTestCleanUps { get; init; }
 
     
     public required TestData[] InternalTestClassArguments { internal get; init; }
