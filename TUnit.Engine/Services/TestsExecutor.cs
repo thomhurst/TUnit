@@ -46,7 +46,7 @@ internal class TestsExecutor
 
         try
         {
-            await AssemblyHookOrchestrators.ExecuteSetups();
+            await AssemblyHookOrchestrator.ExecuteSetups();
 
             var tests = _testGrouper.OrganiseTests(testNodes);
 
@@ -66,7 +66,7 @@ internal class TestsExecutor
         }
         finally
         {
-            await AssemblyHookOrchestrators.ExecuteCleanups();
+            await AssemblyHookOrchestrator.ExecuteCleanups();
         }
     }
 

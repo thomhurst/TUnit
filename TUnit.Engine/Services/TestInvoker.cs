@@ -11,17 +11,17 @@ internal class TestInvoker
         {
             TestContext.TestContexts.Value = unInvokedTest.TestContext;
 
-            await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext);
+            await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext, EngineCancellationToken.CancellationTokenSource.Token);
 
-            await unInvokedTest.RunBeforeEachTestSetUps();
+            await unInvokedTest.RunBeforeEachTestSetUps(EngineCancellationToken.CancellationTokenSource.Token);
 
             await unInvokedTest.ExecuteTest(unInvokedTest.TestContext.CancellationToken);
         }
         finally
         {
-            await unInvokedTest.RunAfterEachTestCleanUps(cleanUpExceptions);
+            await unInvokedTest.RunAfterEachTestCleanUps(cleanUpExceptions, EngineCancellationToken.CancellationTokenSource.Token);
             
-            await GlobalTestHookOrchestrator.ExecuteCleanUps(unInvokedTest.TestContext, cleanUpExceptions);
+            await GlobalTestHookOrchestrator.ExecuteCleanUps(unInvokedTest.TestContext, cleanUpExceptions, EngineCancellationToken.CancellationTokenSource.Token);
         }
     }
 }

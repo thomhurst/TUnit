@@ -25,10 +25,21 @@ public class BeforeEachTestRetriever
         }
 
         var stringBuilder = new StringBuilder();
+
+        var fullyQualifiedType = classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         
         foreach (var beforeEachTestMethod in beforeEachTestMethods)
         {
-            stringBuilder.Append($"classInstance => RunHelpers.RunAsync(() => classInstance.{beforeEachTestMethod.Name}()),");
+            var args = beforeEachTestMethod.HasTimeoutAttribute() ? "cancellationToken" : string.Empty;
+
+            stringBuilder.Append($$"""
+                                 
+                                 new InstanceMethod<{{fullyQualifiedType}}>
+                                 {
+                                     MethodInfo = typeof({{fullyQualifiedType}}).GetMethod("{{beforeEachTestMethod.Name}}", 0, [{{string.Join(", ", beforeEachTestMethod.Parameters.Select(x => $"typeof({x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})"))}}]),
+                                     Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.{{beforeEachTestMethod.Name}}({{args}})),
+                                 },
+                                 """);
         }
         
         return stringBuilder.ToString();

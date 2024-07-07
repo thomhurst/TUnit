@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Reflection;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -11,20 +12,28 @@ public class UnInvokedTest<TTestClass> : UnInvokedTest
         _resettableLazyTestClassFactory = resettableLazyTestClassFactory;
     }
     
-    public required List<Func<TTestClass, Task>> BeforeEachTestSetUps { get; init; }
+    public required List<InstanceMethod<TTestClass>> BeforeEachTestSetUps { get; init; }
 
     public TTestClass TestClass => _resettableLazyTestClassFactory.Value;
     
     public required Func<TTestClass, CancellationToken, Task> TestBody { get; init; }
     
-    public required List<Func<TTestClass, Task>> AfterEachTestCleanUps { get; init; }
+    public required List<InstanceMethod<TTestClass>> AfterEachTestCleanUps { get; init; }
     
     
-    public override async Task RunBeforeEachTestSetUps()
+    public override async Task RunBeforeEachTestSetUps(CancellationToken engineToken)
     {
         foreach (var setUp in BeforeEachTestSetUps)
         {
-            await setUp(TestClass);
+            var timeout = setUp.MethodInfo.GetCustomAttributes().OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout;
+            var token = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
+
+            if (timeout != null)
+            {
+                token.CancelAfter(timeout.Value);
+            }
+            
+            await setUp.Body(TestClass, token.Token);
         }
     }
 
@@ -33,11 +42,19 @@ public class UnInvokedTest<TTestClass> : UnInvokedTest
         await TestBody.Invoke(TestClass, cancellationToken);
     }
 
-    public override async Task RunAfterEachTestCleanUps(List<Exception> exceptionsTracker)
+    public override async Task RunAfterEachTestCleanUps(List<Exception> exceptionsTracker, CancellationToken engineToken)
     {
         foreach (var cleanUp in AfterEachTestCleanUps)
         {
-            await RunHelpers.RunSafelyAsync(() => cleanUp(TestClass), exceptionsTracker);
+            var timeout = cleanUp.MethodInfo.GetCustomAttributes().OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout;
+            var token = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
+
+            if (timeout != null)
+            {
+                token.CancelAfter(timeout.Value);
+            }
+            
+            await RunHelpers.RunSafelyAsync(() => cleanUp.Body(TestClass, token.Token), exceptionsTracker);
         }
         
         await RunHelpers.RunSafelyAsync(() => RunHelpers.Dispose(TestClass), exceptionsTracker);
@@ -57,8 +74,8 @@ public abstract class UnInvokedTest
     public required IBeforeTestAttribute[] BeforeTestAttributes { get; init; }
     public required IAfterTestAttribute[] AfterTestAttributes { get; init; }
 
-    public abstract Task RunBeforeEachTestSetUps();
+    public abstract Task RunBeforeEachTestSetUps(CancellationToken engineToken);
     public abstract Task ExecuteTest(CancellationToken cancellationToken);
-    public abstract Task RunAfterEachTestCleanUps(List<Exception> exceptionsTracker);
+    public abstract Task RunAfterEachTestCleanUps(List<Exception> exceptionsTracker, CancellationToken engineToken);
     public abstract void ResetTestInstance();
 }

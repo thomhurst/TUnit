@@ -2,6 +2,7 @@
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Models;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Hooks;
 
@@ -57,18 +58,29 @@ public static class ClassHookOrchestrator
         }
     }
     
-    public static void RegisterSetUp(Type type, Func<Task> taskFactory)
+    public static void RegisterSetUp(Type type, StaticMethod staticMethod)
     {
         var taskFunctions = SetUps.GetOrAdd(type, _ => []);
 
-        taskFunctions.Add(new Lazy<Task>(taskFactory));
+        taskFunctions.Add(Convert(staticMethod));
     }
     
-    public static void RegisterCleanUp(Type type, Func<Task> taskFactory)
+    public static void RegisterCleanUp(Type type, StaticMethod staticMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(type, _ => []);
 
-        taskFunctions.Add(taskFactory);
+        taskFunctions.Add(() =>
+        {
+            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.CancellationTokenSource.Token);
+            var timeout = staticMethod.MethodInfo.GetTimeout();
+
+            if (timeout != null)
+            {
+                cancellationToken.CancelAfter(timeout.Value);
+            }
+
+            return staticMethod.Body(cancellationToken.Token);
+        });
     }
     
     public static void RegisterTestContext(Type type, TestContext testContext)
@@ -192,5 +204,21 @@ public static class ClassHookOrchestrator
             var count = InstanceTrackers[type];
             return InstanceTrackers[type] = count - 1;
         }
+    }
+    
+    private static Lazy<Task> Convert(StaticMethod staticMethod)
+    {
+        return new Lazy<Task>(() =>
+        {
+            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.CancellationTokenSource.Token);
+            var timeout = staticMethod.MethodInfo.GetTimeout();
+
+            if (timeout != null)
+            {
+                cancellationToken.CancelAfter(timeout.Value);
+            }
+            
+            return staticMethod.Body(cancellationToken.Token);
+        });
     }
 }

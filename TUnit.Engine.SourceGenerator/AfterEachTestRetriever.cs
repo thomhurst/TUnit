@@ -27,9 +27,20 @@ public class AfterEachTestRetriever
 
         var stringBuilder = new StringBuilder();
         
+        var fullyQualifiedType = classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+
         foreach (var oneTimeSetUpMethod in cleanUp)
         {
-            stringBuilder.Append($"classInstance => RunHelpers.RunAsync(() => classInstance.{oneTimeSetUpMethod.Name}()),");
+            var args = oneTimeSetUpMethod.HasTimeoutAttribute() ? "cancellationToken" : string.Empty;
+            
+            stringBuilder.Append($$"""
+                                   
+                                   new InstanceMethod<{{fullyQualifiedType}}>
+                                   {
+                                       MethodInfo = typeof({{fullyQualifiedType}}).GetMethod("{{oneTimeSetUpMethod.Name}}", 0, [{{string.Join(", ", oneTimeSetUpMethod.Parameters.Select(x => $"typeof({x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})"))}}]),
+                                       Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.{{oneTimeSetUpMethod.Name}}({{args}})),
+                                   },
+                                   """);
         }
         
         return stringBuilder.ToString();

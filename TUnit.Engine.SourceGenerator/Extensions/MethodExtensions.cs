@@ -10,6 +10,13 @@ public static class MethodExtensions
             .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
                                  == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
     }
+    
+    public static bool HasTimeoutAttribute(this IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.GetAttributes()
+            .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
+                                     == WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix);
+    }
 
     public static AttributeData GetRequiredTestAttribute(this IMethodSymbol methodSymbol)
     {

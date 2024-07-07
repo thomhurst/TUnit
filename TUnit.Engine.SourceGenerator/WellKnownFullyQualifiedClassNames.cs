@@ -45,4 +45,6 @@ public static class WellKnownFullyQualifiedClassNames
     // Other
     public static readonly FullyQualifiedTypeName TestContext = "TUnit.Core.TestContext";
     public static readonly FullyQualifiedTypeName CancellationToken = "System.Threading.CancellationToken";
+    public static readonly FullyQualifiedTypeName AssemblyHookContext = "TUnit.Core.Models.AssemblyHookContext";
+    public static readonly FullyQualifiedTypeName ClassHookContext = "TUnit.Core.Models.ClassHookContext";
 }
