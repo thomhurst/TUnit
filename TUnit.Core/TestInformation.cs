@@ -58,11 +58,11 @@ public abstract record TestInformation
     public required int Order { get; init; }
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
-    public required string DisplayName { get; set; }
-    
-    public required TestData[] InternalTestClassArguments { internal get; init; }
+    public required string DisplayName { get; init; }
 
-    public required TestData[] InternalTestMethodArguments { internal get; init; }
+    [JsonIgnore] internal TestData[] InternalTestClassArguments { get; init; } = null!;
+
+    [JsonIgnore] internal TestData[] InternalTestMethodArguments { get; init; } = null!;
 
 
     internal bool IsSameTest(TestInformation testInformation) => TestName == testInformation.TestName &&
