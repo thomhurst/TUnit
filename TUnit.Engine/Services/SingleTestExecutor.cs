@@ -6,7 +6,6 @@ using Microsoft.Testing.Platform.Requests;
 using Semaphores;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
-using TUnit.Core.Helpers;
 using TUnit.Engine.Data;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;

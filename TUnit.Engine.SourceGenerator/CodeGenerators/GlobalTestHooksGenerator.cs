@@ -72,10 +72,8 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         sourceBuilder.WriteLine("using global::System.Reflection;");
         sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
         sourceBuilder.WriteLine("using global::TUnit.Core;");
-        sourceBuilder.WriteLine("using global::TUnit.Core.Helpers;");
         sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
         sourceBuilder.WriteLine("using global::TUnit.Engine;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine.Data;");
         sourceBuilder.WriteLine("using global::TUnit.Engine.Helpers;");
         sourceBuilder.WriteLine("using global::TUnit.Engine.Hooks;");
         sourceBuilder.WriteLine();
