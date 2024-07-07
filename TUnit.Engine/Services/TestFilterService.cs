@@ -19,7 +19,9 @@ internal class TestFilterService
     
     public IEnumerable<DiscoveredTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IEnumerable<DiscoveredTest> testNodes)
     {
-        if (testExecutionFilter is null)
+#pragma warning disable TPEXP
+        if (testExecutionFilter is null or NopFilter)
+#pragma warning restore TPEXP
         {
             return testNodes;
         }
@@ -59,7 +61,7 @@ internal class TestFilterService
         return new PropertyBag(
             [
                 ..testInformation.CustomProperties.Select(x => new KeyValuePairStringProperty(x.Key, x.Value)),
-                ..testInformation.Categories.Select(x => new CategoryProperty(x))
+                ..testInformation.Categories.Select(x => new KeyValuePairStringProperty("Category", x))
             ]
         );
     }
