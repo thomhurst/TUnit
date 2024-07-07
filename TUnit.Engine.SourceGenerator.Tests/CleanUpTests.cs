@@ -19,22 +19,22 @@ internal class CleanUpTests : TestsBase<TestsGenerator>
                 new InstanceMethod<global::TUnit.TestProject.CleanUpTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.CleanUpTests).GetMethod("CleanUp", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.CleanUp()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.CleanUp(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.CleanUpTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.CleanUpTests).GetMethod("AfterEach3", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach3()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach3(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.CleanUpTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.CleanUpTests).GetMethod("AfterEach2", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach2()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach2(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.CleanUpTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.CleanUpTests).GetMethod("AfterEach1", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach1()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach1(), cancellationToken),
                 },],
                 """));
                 
@@ -45,22 +45,22 @@ internal class CleanUpTests : TestsBase<TestsGenerator>
                 new InstanceMethod<global::TUnit.TestProject.CleanUpTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.CleanUpTests).GetMethod("CleanUp", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.CleanUp()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.CleanUp(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.CleanUpTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.CleanUpTests).GetMethod("AfterEach3", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach3()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach3(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.CleanUpTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.CleanUpTests).GetMethod("AfterEach2", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach2()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach2(), cancellationToken),
                 },
                 new InstanceMethod<global::TUnit.TestProject.CleanUpTests>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.CleanUpTests).GetMethod("AfterEach1", 0, []),
-                    Body = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach1()),
+                    Body = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach1(), cancellationToken),
                 },],
                 """
             ));

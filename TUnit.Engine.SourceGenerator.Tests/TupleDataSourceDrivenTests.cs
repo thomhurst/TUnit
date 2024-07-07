@@ -16,6 +16,6 @@ internal class TupleDataSourceDrivenTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles[0], Does.Contain("var (methodArg1, methodArg2, methodArg3) = methodArg0;"));
             Assert.That(generatedFiles[0], Does.Contain("TestMethodArguments = [methodArg1, methodArg2, methodArg3],"));
             Assert.That(generatedFiles[0], Does.Contain("DisplayName = $\"DataSource_TupleMethod({methodArg1}, {methodArg2}, {methodArg3})\","));
-            Assert.That(generatedFiles[0], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.DataSource_TupleMethod(methodArg1, methodArg2, methodArg3)),"));
+            Assert.That(generatedFiles[0], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.DataSource_TupleMethod(methodArg1, methodArg2, methodArg3), cancellationToken),"));
         });
 }
