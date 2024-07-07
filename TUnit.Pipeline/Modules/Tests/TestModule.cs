@@ -22,7 +22,7 @@ public abstract class TestModule : Module<TestResult>
 {
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
 
-    private static readonly AsyncSemaphore AsyncSemaphore = new(1);
+    private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount * 2);
 
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
