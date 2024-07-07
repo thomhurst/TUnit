@@ -33,7 +33,7 @@ public static class AssemblyHookOrchestrator
     {
         return new Lazy<Task>(() =>
         {
-            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.CancellationTokenSource.Token);
+            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
             var timeout = staticMethod.MethodInfo.GetTimeout();
 
             if (timeout != null)

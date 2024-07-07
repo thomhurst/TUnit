@@ -17,7 +17,7 @@ public static class GlobalTestHookOrchestrator
     {
         SetUps.Add(context =>
         {
-            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.CancellationTokenSource.Token);
+            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
             var timeout = staticMethod.MethodInfo.GetTimeout();
 
             if (timeout != null)
@@ -34,7 +34,7 @@ public static class GlobalTestHookOrchestrator
     {
         CleanUps.Add(context =>
         {
-            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.CancellationTokenSource.Token);
+            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
             var timeout = staticMethod.MethodInfo.GetTimeout();
 
             if (timeout != null)

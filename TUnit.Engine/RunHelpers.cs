@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
+using TUnit.Core.Exceptions;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
-namespace TUnit.Core;
+namespace TUnit.Engine;
 
 public static class RunHelpers
 {
@@ -57,7 +58,16 @@ public static class RunHelpers
 
         if (cancellationToken.CanBeCanceled)
         {
-            cancellationToken.Register(() => taskCompletionSource.TrySetException(new TimeoutException(stopwatch.Elapsed)));
+            cancellationToken.Register(() =>
+            {
+                if (EngineCancellationToken.Token.IsCancellationRequested)
+                {
+                    taskCompletionSource.TrySetException(new TestRunCanceledException());
+                    return;
+                }
+                
+                taskCompletionSource.TrySetException(new TimeoutException(stopwatch.Elapsed));
+            });
         }
 
         await taskCompletionSource.Task;
