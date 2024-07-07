@@ -6,7 +6,7 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public static class AssemblyHookOrchestrators
+public static class AssemblyHookOrchestrator
 {
     private static readonly List<Lazy<Task>> SetUps = [];
     private static readonly List<Lazy<Task>> CleanUps = [];

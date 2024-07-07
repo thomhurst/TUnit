@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Core;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Hooks;
 
@@ -12,15 +13,37 @@ public static class GlobalTestHookOrchestrator
     private static readonly List<Func<TestContext, Task>> CleanUps = [];
 
     [MethodImpl(MethodImplOptions.Synchronized)]
-    public static void RegisterSetUp(Func<TestContext, Task> taskFactory)
+    public static void RegisterSetUp(StaticMethod<TestContext> staticMethod)
     {
-        SetUps.Add(taskFactory);
+        SetUps.Add(context =>
+        {
+            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.CancellationTokenSource.Token);
+            var timeout = staticMethod.MethodInfo.GetTimeout();
+
+            if (timeout != null)
+            {
+                cancellationToken.CancelAfter(timeout.Value);
+            }
+            
+            return staticMethod.Body(context, cancellationToken.Token);
+        });
     }
 
     [MethodImpl(MethodImplOptions.Synchronized)]
-    public static void RegisterCleanUp(Func<TestContext, Task> taskFactory)
+    public static void RegisterCleanUp(StaticMethod<TestContext> staticMethod)
     {
-        CleanUps.Add(taskFactory);
+        CleanUps.Add(context =>
+        {
+            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.CancellationTokenSource.Token);
+            var timeout = staticMethod.MethodInfo.GetTimeout();
+
+            if (timeout != null)
+            {
+                cancellationToken.CancelAfter(timeout.Value);
+            }
+
+            return staticMethod.Body(context, cancellationToken.Token);
+        });
     }
 
     public static async Task ExecuteSetups(TestContext testContext, CancellationToken token)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Engine.SourceGenerator.Enums;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
@@ -52,7 +53,8 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             MinimalTypeName = methodSymbol.ContainingType.Name,
-            HasParameters = !methodSymbol.Parameters.IsDefaultOrEmpty
+            ParameterTypes = methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray(),
+            HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute()
         };
     }
 
@@ -89,12 +91,24 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"AssemblyHookOrchestrators.RegisterSetUp(() => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $$"""
+                  AssemblyHookOrchestrator.RegisterSetUp(new StaticMethod
+                  { 
+                     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                     Body = cancellationToken => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                  });
+                  """);
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"AssemblyHookOrchestrators.RegisterCleanUp(() => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GenerateContextObject(model)})));");
+                $$"""
+                  AssemblyHookOrchestrator.RegisterCleanUp(new StaticMethod
+                  { 
+                     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                     Body = cancellationToken => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                  });
+                  """);
         }
 
         sourceBuilder.WriteLine("}");
@@ -105,11 +119,21 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
     
     private string GenerateContextObject(AssemblyHooksDataModel model)
     {
-        if (!model.HasParameters)
+        List<string> args = [];
+        
+        foreach (var type in model.ParameterTypes)
         {
-            return string.Empty;
+            if (type == WellKnownFullyQualifiedClassNames.AssemblyHookContext.WithGlobalPrefix)
+            {
+                args.Add($"TUnit.Engine.Hooks.ClassHookOrchestrator.GetAssemblyHookContext(typeof({model.FullyQualifiedTypeName}))");
+            }
+            
+            if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)
+            {
+                args.Add("cancellationToken");
+            }
         }
 
-        return $"TUnit.Engine.Hooks.ClassHookOrchestrator.GetAssemblyHookContext(typeof({model.FullyQualifiedTypeName}))";
+        return string.Join(", ", args);
     }
 }

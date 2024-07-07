@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Engine.SourceGenerator.Enums;
+using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
@@ -53,6 +54,8 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             MinimalTypeName = methodSymbol.ContainingType.Name,
+            ParameterTypes = methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray(),
+            HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute()
         };
     }
 
@@ -89,17 +92,44 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         if (hookType == HookType.SetUp)
         {
             sourceBuilder.WriteLine(
-                $"GlobalTestHookOrchestrator.RegisterSetUp((testContext, cancellationToken) => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}(testContext)));");
+                $$"""
+                  GlobalTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
+                  { 
+                     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                     Body = (testContext, cancellationToken) => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
+                  });
+                  """);
         }
         else if (hookType == HookType.CleanUp)
         {
             sourceBuilder.WriteLine(
-                $"GlobalTestHookOrchestrator.RegisterCleanUp((testContext, cancellationToken) => RunHelpers.RunAsync(() => {model.FullyQualifiedTypeName}.{model.MethodName}(testContext)));");
+                $$"""
+                  GlobalTestHookOrchestrator.RegisterCleanUp(new StaticMethod<TestContext>
+                  { 
+                     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                     Body = (testContext, cancellationToken) => RunHelpers.RunAsync(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
+                  });
+                  """);
         }
 
         sourceBuilder.WriteLine("}");
         sourceBuilder.WriteLine("}");
 
         context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
+    }
+
+    private string GetArgs(GlobalTestHooksDataModel model)
+    {
+        List<string> args = [ "testContext" ];
+        
+        foreach (var type in model.ParameterTypes)
+        {
+            if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)
+            {
+                args.Add("cancellationToken");
+            }
+        }
+
+        return string.Join(", ", args);
     }
 }
