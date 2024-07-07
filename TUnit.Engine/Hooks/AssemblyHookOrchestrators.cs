@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Engine.Hooks;
 
 #if !DEBUG
-[System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
 public static class AssemblyHookOrchestrators
 {

@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Core;
 
 #if !DEBUG
-[System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
 public static class TestDictionary
 {
