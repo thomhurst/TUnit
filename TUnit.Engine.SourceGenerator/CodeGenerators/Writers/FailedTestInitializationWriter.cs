@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using TUnit.Engine.SourceGenerator.Models;
+﻿using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 

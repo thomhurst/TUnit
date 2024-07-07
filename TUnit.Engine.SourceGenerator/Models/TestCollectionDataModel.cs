@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace TUnit.Engine.SourceGenerator.Models;
+﻿namespace TUnit.Engine.SourceGenerator.Models;
 
 internal record TestCollectionDataModel
 {

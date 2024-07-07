@@ -9,7 +9,6 @@ using ModularPipelines.DotNet.Parsers.NUnitTrx;
 using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
 using ModularPipelines.Modules;
 using Polly;
 using Polly.Retry;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TUnit.Engine.SourceGenerator.Enums;
+﻿namespace TUnit.Engine.SourceGenerator.Enums;
 
 [Flags]
 public enum HookType
