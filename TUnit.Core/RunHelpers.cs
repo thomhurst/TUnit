@@ -1,4 +1,7 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics;
+using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
+
+namespace TUnit.Core;
 
 public static class RunHelpers
 {
@@ -35,16 +38,29 @@ public static class RunHelpers
     
     public static async Task RunWithTimeoutAsync(Task task, CancellationToken cancellationToken)
     {
-        var timeoutTask = Task.Run(async () =>
+        var stopwatch = Stopwatch.StartNew();
+        
+        var taskCompletionSource = new TaskCompletionSource();
+
+        _ = task.ContinueWith(async t =>
         {
-            while (!task.IsCompleted)
+            try
             {
-                await Task.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
-                cancellationToken.ThrowIfCancellationRequested();
+                await t;
+                taskCompletionSource.TrySetResult();
+            }
+            catch (Exception e)
+            {
+                taskCompletionSource.TrySetException(e);
             }
         }, CancellationToken.None);
 
-        await await Task.WhenAny(task, timeoutTask);
+        if (cancellationToken.CanBeCanceled)
+        {
+            cancellationToken.Register(() => taskCompletionSource.TrySetException(new TimeoutException(stopwatch.Elapsed)));
+        }
+
+        await taskCompletionSource.Task;
     }
 
     public static async Task RunSafelyAsync(Action action, List<Exception> exceptions)

@@ -405,28 +405,8 @@ internal class SingleTestExecutor : IDataProducer
             await methodResult;
             return;
         }
-        
-        var timeoutTask = Task.Delay(testInformation.Timeout.Value, cancellationTokenSource.Token)
-            .ContinueWith(_ =>
-            {
-                if (methodResult.IsCompleted)
-                {
-                    return;
-                }
-                
-                throw new TimeoutException(testInformation);
-            });
 
-        var failQuicklyTask = Task.Run(async () =>
-        {
-            while (!methodResult.IsCompleted && !timeoutTask.IsCompleted)
-            {
-                cancellationTokenSource.Token.ThrowIfCancellationRequested();
-                await Task.Delay(TimeSpan.FromMilliseconds(500));
-            }
-        });
-
-        await await Task.WhenAny(methodResult, timeoutTask, failQuicklyTask);
+        await RunHelpers.RunWithTimeoutAsync(testDelegate, cancellationTokenSource.Token);
     }
 
 
