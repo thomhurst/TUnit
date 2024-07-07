@@ -15,6 +15,9 @@ public class BuildSolutionModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.sln").AssertExists();
         
-        return await context.DotNet().Build(new DotNetBuildOptions(project), cancellationToken);
+        return await context.DotNet().Build(new DotNetBuildOptions(project)
+        {
+            Configuration = Configuration.Release
+        }, cancellationToken);
     }
 }
