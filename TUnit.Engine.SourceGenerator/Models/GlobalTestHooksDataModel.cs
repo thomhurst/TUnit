@@ -10,8 +10,16 @@ public record GlobalTestHooksDataModel
 
     public virtual bool Equals(GlobalTestHooksDataModel? other)
     {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return FullyQualifiedTypeName == other.FullyQualifiedTypeName && MinimalTypeName == other.MinimalTypeName && MethodName == other.MethodName && ParameterTypes.SequenceEqual(other.ParameterTypes) && HasTimeoutAttribute == other.HasTimeoutAttribute;
     }
 
