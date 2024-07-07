@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.Models;
@@ -11,7 +12,6 @@ internal record TestSourceDataModel
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
     public required Argument[] ClassArguments { get; init; }
-    public required string[] ClassParameterTypes { get; init; }
 
     public required Argument[] MethodArguments { get; init; }
     
@@ -25,13 +25,12 @@ internal record TestSourceDataModel
     public required string TestId { get; init; }
     public required int CurrentRepeatAttempt { get; init; }
     
-    public required string ReturnType { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
-    public required string BeforeTestAttributes { get; init; }
-    public required string AfterTestAttributes { get; init; }
     public required string BeforeEachTestInvocations { get; init; }
     public required string AfterEachTestInvocations { get; init; }
+    
+    public required bool HasTimeoutAttribute { get; init; }
     
     public bool IsClassTupleArguments => ClassArguments.Any(x => x.IsTuple);
 
@@ -98,13 +97,29 @@ internal record TestSourceDataModel
         for (var i = 0; i < MethodArguments.Length; i++)
         {
             var argument = MethodArguments[i];
+            
             var variable = variableNames[i];
             yield return $"{SpecifyTypeOrVar(argument)} {variable} = {argument.Invocation};";
         }
     }
     
-    public string GetMethodArgumentVariableNamesAsList()
-        => string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0)).TrimStart('(').TrimEnd(')');
+    public string GetCommaSeparatedMethodArgumentVariableNames()
+    {
+        return string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0)).TrimStart('(')
+            .TrimEnd(')');
+    }
+    
+    public string GetCommaSeparatedMethodArgumentVariableNamesWithCancellationToken()
+    {
+        var variableNamesAsList = GetCommaSeparatedMethodArgumentVariableNames();
+
+        if (HasTimeoutAttribute)
+        {
+            return string.IsNullOrEmpty(variableNamesAsList) ? "cancellationToken" : $"{variableNamesAsList}, cancellationToken";
+        }
+        
+        return variableNamesAsList;
+    }
 
     private string SpecifyTypeOrVar(Argument argument)
     {

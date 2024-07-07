@@ -17,11 +17,10 @@ internal static class DataDrivenArgumentsRetriever
         var index = 0;
         return methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                  == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
-            .Select(argumentAttribute => ParseArguments(testAndClassAttributes, argumentAttribute, methodSymbolParameters, ++index));
+            .Select(argumentAttribute => ParseArguments(argumentAttribute, methodSymbolParameters, ++index));
     }
 
-    private static ArgumentsContainer ParseArguments(AttributeData[] testAndClassAttributes,
-        AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> parameterSymbols,
+    private static ArgumentsContainer ParseArguments(AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> parameterSymbols,
         int dataAttributeIndex)
     {
         var constructorArgument = argumentAttribute.ConstructorArguments.SafeFirstOrDefault();
@@ -41,7 +40,6 @@ internal static class DataDrivenArgumentsRetriever
                             .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
                         invocation: null
                     ),
-                    ..Array.Empty<Argument>().WithTimeoutArgument(testAndClassAttributes)
                 ]
             };
         }
@@ -55,7 +53,7 @@ internal static class DataDrivenArgumentsRetriever
             DataAttribute = argumentAttribute,
             DataAttributeIndex = dataAttributeIndex,
             IsEnumerableData = false,
-            Arguments = [..args.WithTimeoutArgument(testAndClassAttributes)]
+            Arguments = [..args]
         };
     }
 

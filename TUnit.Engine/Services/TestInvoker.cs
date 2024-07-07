@@ -15,7 +15,7 @@ internal class TestInvoker
 
             await unInvokedTest.RunBeforeEachTestSetUps();
 
-            await unInvokedTest.ExecuteTest();
+            await unInvokedTest.ExecuteTest(unInvokedTest.TestContext.CancellationToken);
         }
         finally
         {

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using TUnit.Engine.SourceGenerator.Extensions;
+﻿using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
@@ -8,8 +6,6 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
 internal static class GenericTestInvocationWriter
 {
-    private const int DefaultOrder = int.MaxValue / 2;
-
     public static void GenerateTestInvocationCode(SourceCodeWriter sourceBuilder,
         TestSourceDataModel testSourceDataModel)
     {
@@ -21,16 +17,9 @@ internal static class GenericTestInvocationWriter
         var hasEnumerableMethodData = testSourceDataModel.IsEnumerableMethodArguments;
         
         var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"));
-        var classParameterTypesList = string.Join(", ", testSourceDataModel.ClassParameterTypes.Select(x => $"typeof({x})"));
-        sourceBuilder.WriteLine($"var classType = typeof({fullyQualifiedClassType});");
-        sourceBuilder.WriteLine(
-            $"var methodInfo = classType.GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
 
-        sourceBuilder.WriteLine("var methodAttributes = methodInfo.GetCustomAttributes().ToArray();");
-        sourceBuilder.WriteLine("var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => classType.GetCustomAttributes().ToArray());");
-        sourceBuilder.WriteLine("var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => classType.Assembly.GetCustomAttributes().ToArray());");
-        sourceBuilder.WriteLine("Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];");
-        sourceBuilder.WriteLine();
+        sourceBuilder.WriteLine(
+            $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
         
         if (hasEnumerableClassData)
         {
@@ -76,67 +65,25 @@ internal static class GenericTestInvocationWriter
         {
             sourceBuilder.WriteLine();
         }
-        
-        sourceBuilder.WriteLine(
-            $"var testInformation = new TestInformation<{fullyQualifiedClassType}>()");
-        sourceBuilder.WriteLine("{");
+
+        sourceBuilder.WriteLine($"TestRegistrar.RegisterTest<{fullyQualifiedClassType}>(new TestMetadata<{fullyQualifiedClassType}>");
+        sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine("Categories = attributes.OfType<CategoryAttribute>().Select(x => x.Category).ToArray(),");
-        sourceBuilder.WriteLine("LazyClassInstance = resettableClassFactory,");
-        sourceBuilder.WriteLine("ClassType = classType,");
-        sourceBuilder.WriteLine($"Timeout = {GetAttribute(ClassNames.TimeoutAttribute)}?.Timeout,");
-        sourceBuilder.WriteLine("AssemblyAttributes = assemblyAttributes,");
-        sourceBuilder.WriteLine("ClassAttributes = typeAttributes,");
-        sourceBuilder.WriteLine("TestAttributes = methodAttributes,");
-        sourceBuilder.WriteLine("Attributes = attributes,");
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.GetClassArgumentVariableNamesAsList()}],");
-        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.GetMethodArgumentVariableNamesAsList()}],");
+        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.GetCommaSeparatedMethodArgumentVariableNames()}],");
         sourceBuilder.WriteLine($"InternalTestClassArguments = [{string.Join(", ", testSourceDataModel.ClassArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.ClassArg)))}],");
         sourceBuilder.WriteLine($"InternalTestMethodArguments = [{string.Join(", ", testSourceDataModel.MethodArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.MethodArg)))}],");
-        sourceBuilder.WriteLine(
-            $"TestClassParameterTypes = [{classParameterTypesList}],");
-        sourceBuilder.WriteLine(
-            $"TestMethodParameterTypes = [{methodParameterTypesList}],");
-        sourceBuilder.WriteLine(
-            $"NotInParallelConstraintKeys = {GetAttribute(ClassNames.NotInParallelAttribute)}?.ConstraintKeys,");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
-        sourceBuilder.WriteLine($"RetryLimit = {GetAttribute(ClassNames.RetryAttribute)}?.Times ?? 0,");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
-        sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
+        sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
+        sourceBuilder.WriteLine($"BeforeEachTestSetUps = [{testSourceDataModel.BeforeEachTestInvocations}],");
+        sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => RunHelpers.RunAsync(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetCommaSeparatedMethodArgumentVariableNamesWithCancellationToken()})),");
+        sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{testSourceDataModel.AfterEachTestInvocations}],");
         sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
-        sourceBuilder.WriteLine("CustomProperties = attributes.OfType<PropertyAttribute>().ToDictionary(x => x.Name, x => x.Value),");
-
-        sourceBuilder.WriteLine($"ReturnType = {testSourceDataModel.ReturnType},");
-
-        sourceBuilder.WriteLine($"Order = {GetAttribute(ClassNames.NotInParallelAttribute)}?.Order ?? {DefaultOrder},");
-
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        
-        sourceBuilder.WriteLine("};");
-        sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine("var testContext = new TestContext(testInformation);");
-        sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine("ClassHookOrchestrator.RegisterTestContext(classType, testContext);");
-        sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine(
-            $"var unInvokedTest = new UnInvokedTest<{fullyQualifiedClassType}>(resettableClassFactory)");
-        sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"Id = $\"{testId}\",");
-        sourceBuilder.WriteLine("TestContext = testContext,");
-        sourceBuilder.WriteLine(
-            "BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),");
-        sourceBuilder.WriteLine(
-            "AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),");
-        sourceBuilder.WriteLine($"BeforeEachTestSetUps = [{testSourceDataModel.BeforeEachTestInvocations}],");
-        sourceBuilder.WriteLine(
-            $"TestBody = classInstance => RunHelpers.RunAsync(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetMethodArgumentVariableNamesAsList()})),");
-        sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{testSourceDataModel.AfterEachTestInvocations}],");
-        sourceBuilder.WriteLine("};");
-        sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine($"TestDictionary.AddTest($\"{testId}\", unInvokedTest);");
-        
+        sourceBuilder.WriteLine("});");
         if (hasEnumerableClassData)
         {
             sourceBuilder.WriteLine("}");
