@@ -6,8 +6,7 @@ using TUnit.Engine.Logging;
 namespace TUnit.Engine;
 
 #if !DEBUG
-using System.ComponentModel;
-[EditorBrowsable(EditorBrowsableState.Never)]
+[System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
 #endif
 public static class TestDataContainer
 {

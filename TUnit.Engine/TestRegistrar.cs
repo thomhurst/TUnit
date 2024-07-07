@@ -8,8 +8,7 @@ using TUnit.Engine.Hooks;
 namespace TUnit.Engine;
 
 #if !DEBUG
-using System.ComponentModel;
-[EditorBrowsable(EditorBrowsableState.Never)]
+[System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
 #endif
 public static class TestRegistrar
 {
