@@ -12,6 +12,7 @@ namespace TUnit.Pipeline.Modules;
 
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<GenerateVersionModule>]
+[DependsOn<BuildSolutionModule>]
 [DependsOnAllModulesInheritingFrom<TestModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
