@@ -44,30 +44,21 @@ internal class TestsExecutor
     {
         _consoleInterceptor.Initialize();
 
-        try
+        var tests = _testGrouper.OrganiseTests(testNodes);
+
+        foreach (var test in tests.AllTests)
         {
-            await AssemblyHookOrchestrator.ExecuteSetups();
-
-            var tests = _testGrouper.OrganiseTests(testNodes);
-
-            foreach (var test in tests.AllTests)
-            {
-                ClassHookOrchestrator.RegisterInstance(test.TestContext);
-            }
-
-            // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint
-            await Task.WhenAll(
-                ProcessParallelTests(tests.Parallel, filter, context),
-                ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context)
-            );
-
-            // These have to run on their own
-            await ProcessNotInParallelTests(tests.NotInParallel, filter, context);
+            ClassHookOrchestrator.RegisterInstance(test.TestContext);
         }
-        finally
-        {
-            await AssemblyHookOrchestrator.ExecuteCleanups();
-        }
+
+        // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint
+        await Task.WhenAll(
+            ProcessParallelTests(tests.Parallel, filter, context),
+            ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context)
+        );
+
+        // These have to run on their own
+        await ProcessNotInParallelTests(tests.NotInParallel, filter, context);
     }
 
     private async Task ProcessNotInParallelTests(Queue<DiscoveredTest> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)

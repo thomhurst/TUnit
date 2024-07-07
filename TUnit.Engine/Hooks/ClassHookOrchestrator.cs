@@ -22,6 +22,8 @@ public static class ClassHookOrchestrator
     public static void RegisterInstance(TestContext testContext)
     {
         var classType = testContext.TestInformation.ClassType;
+
+        AssemblyHookOrchestrator.Increment(classType.Assembly);
         
         foreach (var type in GetTypesIncludingBase(classType))
         {
@@ -126,6 +128,8 @@ public static class ClassHookOrchestrator
     
     public static async Task ExecuteSetups(Type testClassType)
     {
+        await AssemblyHookOrchestrator.ExecuteSetups(testClassType.Assembly);
+
         // Reverse so base types are first - We'll run those ones first
         var typesIncludingBase = GetTypesIncludingBase(testClassType)
             .Reverse();

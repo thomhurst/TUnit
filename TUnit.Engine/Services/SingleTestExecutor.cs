@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using System.Reflection;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -91,6 +92,7 @@ internal class SingleTestExecutor : IDataProducer
                 }
                 
                 await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(unInvokedTest.TestContext.TestInformation.ClassType, cleanUpExceptions);
+                await AssemblyHookOrchestrator.ExecuteCleanups(unInvokedTest.TestContext.TestInformation.ClassType.Assembly, cleanUpExceptions);
             }
 
             if (cleanUpExceptions.Count == 1)
@@ -150,7 +152,7 @@ internal class SingleTestExecutor : IDataProducer
             var end = DateTimeOffset.Now;
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.TestNode
-                .WithProperty(new FailedTestNodeStateProperty(e))
+                .WithProperty(GetFailureStateProperty(testContext, e, end, start))
                 .WithProperty(new TimingProperty(new TimingInfo(start ?? end, end, start.HasValue ? end-start.Value : TimeSpan.Zero)))
                 .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
 
@@ -176,6 +178,19 @@ internal class SingleTestExecutor : IDataProducer
             
             await Dispose(testContext);
         }
+    }
+
+    private static IProperty GetFailureStateProperty(TestContext testContext, Exception e, DateTimeOffset end, DateTimeOffset? start)
+    {
+        if (testContext.TestInformation.Timeout.HasValue
+            && start.HasValue
+            && e is TaskCanceledException or OperationCanceledException
+            && end - start.Value >= testContext.TestInformation.Timeout.Value)
+        {
+            return new TimeoutTestNodeStateProperty(e);
+        }
+        
+        return new FailedTestNodeStateProperty(e);
     }
 
     private async Task Dispose(TestContext testContext)

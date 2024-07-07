@@ -1,4 +1,7 @@
-﻿using TUnit.Core;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
+using TUnit.Core;
+using TUnit.Engine.Data;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Hooks;
@@ -8,17 +11,22 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class AssemblyHookOrchestrator
 {
-    private static readonly List<Lazy<Task>> SetUps = [];
-    private static readonly List<Lazy<Task>> CleanUps = [];
+    private static readonly GetOnlyDictionary<Assembly, List<Lazy<Task>>> SetUps = new();
+    private static readonly GetOnlyDictionary<Assembly, List<Lazy<Task>>> CleanUps = new();
+
+    private static readonly object Lock = new();
+    private static readonly ConcurrentDictionary<Assembly, int> CountTracker = new(); 
 
     public static void RegisterSetUp(StaticMethod staticMethod)
     {
-        SetUps.Add(Convert(staticMethod));
+        var setups = SetUps.GetOrAdd(staticMethod.MethodInfo.ReflectedType!.Assembly, _ => []);
+        setups.Add(Convert(staticMethod));
     }
 
     public static void RegisterCleanUp(StaticMethod staticMethod)
     {
-        CleanUps.Add(Convert(staticMethod));
+        var cleanups = CleanUps.GetOrAdd(staticMethod.MethodInfo.ReflectedType!.Assembly, _ => []);
+        cleanups.Add(Convert(staticMethod));
     }
 
     private static Lazy<Task> Convert(StaticMethod staticMethod)
@@ -37,19 +45,29 @@ public static class AssemblyHookOrchestrator
         });
     }
 
-    public static async Task ExecuteSetups()
+    public static async Task ExecuteSetups(Assembly assembly)
     {
-        foreach (var setUp in SetUps)
+        foreach (var setUp in SetUps.GetOrAdd(assembly, _ => []))
         {
             await setUp.Value;
         }
     }
 
-    public static async Task ExecuteCleanups()
+    public static async Task ExecuteCleanups(Assembly assembly, List<Exception> exceptions)
     {
-        var exceptions = new List<Exception>();
+        lock (Lock)
+        {
+            var count = CountTracker.GetOrAdd(assembly, _ => 0);
+            var newCount = count - 1;
+            CountTracker[assembly] = newCount;
+
+            if (newCount > 0)
+            {
+                return;
+            }
+        }
         
-        foreach (var cleanUp in CleanUps)
+        foreach (var cleanUp in CleanUps.GetOrAdd(assembly, _ => []))
         {
             try
             {
@@ -60,15 +78,11 @@ public static class AssemblyHookOrchestrator
                 exceptions.Add(e);
             }
         }
+    }
 
-        if (exceptions.Count == 1)
-        {
-            throw exceptions[0];
-        }
-
-        if (exceptions.Count > 1)
-        {
-            throw new AggregateException(exceptions);
-        }
+    public static void Increment(Assembly assembly)
+    {
+        var count = CountTracker.GetOrAdd(assembly, _ => 0);
+        CountTracker[assembly] = count + 1;
     }
 }
