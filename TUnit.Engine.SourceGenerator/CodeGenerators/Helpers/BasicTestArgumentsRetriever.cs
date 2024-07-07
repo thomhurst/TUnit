@@ -15,7 +15,7 @@ internal static class BasicTestArgumentsRetriever
             DataAttribute = null,
             DataAttributeIndex = null,
             IsEnumerableData = false,
-            Arguments = [..Array.Empty<Argument>().WithTimeoutArgument(testAndClassAttributes)]
+            Arguments = Array.Empty<Argument>()
         };
     }
 }

@@ -41,7 +41,6 @@ internal static class DataDrivenArgumentsRetriever
                             .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
                         invocation: null
                     ),
-                    ..Array.Empty<Argument>().WithTimeoutArgument(testAndClassAttributes)
                 ]
             };
         }
@@ -55,7 +54,7 @@ internal static class DataDrivenArgumentsRetriever
             DataAttribute = argumentAttribute,
             DataAttributeIndex = dataAttributeIndex,
             IsEnumerableData = false,
-            Arguments = [..args.WithTimeoutArgument(testAndClassAttributes)]
+            Arguments = [..args]
         };
     }
 

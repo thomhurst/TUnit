@@ -53,8 +53,7 @@ internal static class CombinativeValuesRetriever
                 return new Argument(ArgumentSource.CombinativeDataAttribute,
                     parameterSymbolType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                     TypedConstantParser.GetTypedConstantValue(typedConstant, parameterSymbolType));
-            })
-            .WithTimeoutArgument(methodAndClassAttributes);
+            });
     }
 
     private static readonly IEnumerable<IEnumerable<TypedConstant>> Seed = new[] { Enumerable.Empty<TypedConstant>() };

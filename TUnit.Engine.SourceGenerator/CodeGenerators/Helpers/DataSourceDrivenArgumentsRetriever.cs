@@ -22,8 +22,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                                   == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix))
         {
-            var methodData = ParseMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
-            var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
+            var arguments = ParseMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
             yield return new ArgumentsContainer
             {
                 DataAttribute = attributeData,
@@ -36,8 +35,7 @@ internal static class DataSourceDrivenArgumentsRetriever
         foreach (var attributeData in methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
                                                                   == WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix))
         {
-            var methodData = ParseEnumerableMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
-            var arguments = methodData.WithTimeoutArgument(testAndClassAttributes);
+            var arguments = ParseEnumerableMethodData(namedTypeSymbol, methodSymbol, attributeData, argPrefix);
             yield return new ArgumentsContainer
             {
                 DataAttribute = attributeData,
@@ -64,7 +62,7 @@ internal static class DataSourceDrivenArgumentsRetriever
                 DataAttribute = classDataAttribute,
                 DataAttributeIndex = ++methodDataIndex,
                 IsEnumerableData = false,
-                Arguments = [..arguments.WithTimeoutArgument(testAndClassAttributes)]
+                Arguments = arguments
             };
         }
     }
