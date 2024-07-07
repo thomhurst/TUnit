@@ -18,44 +18,28 @@ public static class RunHelpers
         await action();
     }
     
-    public static async Task RunWithTimeoutAsync(Action action, CancellationToken cancellationToken)
+    public static Task RunWithTimeoutAsync(Action action, CancellationToken cancellationToken)
     {
-        var task = RunAsync(action);
-        
-        var timeoutTask = Task.Run(() =>
-        {
-            while (!task.IsCompleted)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-        }, CancellationToken.None);
-
-        await await Task.WhenAny(task, timeoutTask);
+        return RunWithTimeoutAsync(RunAsync(action), cancellationToken);
     }
     
-    public static async Task RunWithTimeoutAsync(Func<Task> action, CancellationToken cancellationToken)
+    public static Task RunWithTimeoutAsync(Func<Task> action, CancellationToken cancellationToken)
     {
-        var task = RunAsync(action);
-        
-        var timeoutTask = Task.Run(() =>
-        {
-            while (!task.IsCompleted)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-        }, CancellationToken.None);
-
-        await await Task.WhenAny(task, timeoutTask);
+        return RunWithTimeoutAsync(RunAsync(action), cancellationToken);
     }
     
-    public static async Task RunWithTimeoutAsync(Func<ValueTask> action, CancellationToken cancellationToken)
+    public static Task RunWithTimeoutAsync(Func<ValueTask> action, CancellationToken cancellationToken)
     {
-        var task = RunAsync(action);
-        
-        var timeoutTask = Task.Run(() =>
+        return RunWithTimeoutAsync(RunAsync(action), cancellationToken);
+    }
+    
+    public static async Task RunWithTimeoutAsync(Task task, CancellationToken cancellationToken)
+    {
+        var timeoutTask = Task.Run(async () =>
         {
             while (!task.IsCompleted)
             {
+                await Task.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
                 cancellationToken.ThrowIfCancellationRequested();
             }
         }, CancellationToken.None);
