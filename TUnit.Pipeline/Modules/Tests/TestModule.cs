@@ -22,7 +22,7 @@ public abstract class TestModule : Module<TestResult>
 {
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
 
-    private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount * 4);
+    private static readonly AsyncSemaphore AsyncSemaphore = new(1);
 
     private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions
     {
@@ -61,6 +61,11 @@ public abstract class TestModule : Module<TestResult>
                 ..runOptions.AdditionalArguments
             ]
         }, cancellationToken);
+
+        if (result.ExitCode is not 0 and not 1 and not 8)
+        {
+            throw new Exception("Unknown error running tests");
+        }
 
         var trxFileContents = await context.Git()
             .RootDirectory

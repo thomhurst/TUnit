@@ -16,6 +16,10 @@ public class RunAssertionsAnalyzersTestsModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Assertions.Analyzers.Tests.csproj").AssertExists();
         
-        return await context.DotNet().Test(new DotNetTestOptions(project), cancellationToken);
+        return await context.DotNet().Test(new DotNetTestOptions(project)
+        {
+            NoBuild = true,
+            Configuration = Configuration.Release
+        }, cancellationToken);
     }
 }
