@@ -46,6 +46,7 @@ public abstract class TestModule : Module<TestResult>
         var result = await context.DotNet().Run(new DotNetRunOptions
         {
             WorkingDirectory = context.Git().RootDirectory.GetFolder("TUnit.TestProject"),
+            Configuration = Configuration.Release,
             NoBuild = true,
             ThrowOnNonZeroExitCode = false,
             CommandLogging = runOptions.CommandLogging,
