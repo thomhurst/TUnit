@@ -6,7 +6,7 @@ namespace TUnit.TestProject;
 
 public static class SharedInjectedGloballyContainer
 {
-    public static readonly List<DummyReferenceTypeClass> Instances = new();
+    public static readonly List<DummyReferenceTypeClass> Instances = [];
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]

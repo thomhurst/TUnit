@@ -9,8 +9,8 @@ using System.ComponentModel;
 #endif
 public static class GlobalTestHookOrchestrator
 {
-    private static readonly List<Func<TestContext, Task>> SetUps = new();
-    private static readonly List<Func<TestContext, Task>> CleanUps = new();
+    private static readonly List<Func<TestContext, Task>> SetUps = [];
+    private static readonly List<Func<TestContext, Task>> CleanUps = [];
 
     [MethodImpl(MethodImplOptions.Synchronized)]
     public static void RegisterSetUp(Func<TestContext, Task> taskFactory)

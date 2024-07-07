@@ -34,7 +34,8 @@ public class InjectSharedPerKey1
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }
@@ -53,7 +54,8 @@ public class InjectSharedPerKey1
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }
@@ -72,7 +74,8 @@ public class InjectSharedPerKey1
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }
@@ -102,7 +105,8 @@ public class InjectSharedPerKey2
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }
@@ -121,7 +125,8 @@ public class InjectSharedPerKey2
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }
@@ -140,7 +145,8 @@ public class InjectSharedPerKey2
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }
@@ -170,7 +176,8 @@ public class InjectSharedPerKey3
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }
@@ -189,7 +196,8 @@ public class InjectSharedPerKey3
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }
@@ -208,7 +216,8 @@ public class InjectSharedPerKey3
             await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
         }
 
-        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ => new List<DummyReferenceTypeClass>());
+        list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestInformation.TestName, _ =>
+            []);
         list.Add(_dummyReferenceTypeClass);
         await Assert.That(list.Distinct()).Has.SingleItem();
     }

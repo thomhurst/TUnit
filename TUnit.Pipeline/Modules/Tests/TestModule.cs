@@ -18,7 +18,6 @@ using Semaphores;
 namespace TUnit.Pipeline.Modules.Tests;
 
 [NotInParallel("Unit Tests")]
-[DependsOn<BuildSolutionModule>]
 public abstract class TestModule : Module<TestResult>
 {
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);

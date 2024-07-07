@@ -6,9 +6,9 @@ namespace TUnit.TestProject;
 
 public static class SharedInjectedTypesContainer
 {
-    public static readonly List<DummyReferenceTypeClass> TestClass1Instances = new();
-    public static readonly List<DummyReferenceTypeClass> TestClass2Instances = new();
-    public static readonly List<DummyReferenceTypeClass> TestClass3Instances = new();
+    public static readonly List<DummyReferenceTypeClass> TestClass1Instances = [];
+    public static readonly List<DummyReferenceTypeClass> TestClass2Instances = [];
+    public static readonly List<DummyReferenceTypeClass> TestClass3Instances = [];
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]

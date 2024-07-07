@@ -6,7 +6,7 @@ namespace TUnit.TestProject;
 
 public class OrderedTests
 {
-    private static readonly List<string> RegisteredOrders = new();
+    private static readonly List<string> RegisteredOrders = [];
 
     [Test, NotInParallel(nameof(OrderedTests), Order = 2)]
     public async Task Second()

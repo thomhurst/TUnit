@@ -6,8 +6,8 @@ using System.ComponentModel;
 #endif
 public static class AssemblyHookOrchestrators
 {
-    private static readonly List<Lazy<Task>> SetUps = new();
-    private static readonly List<Lazy<Task>> CleanUps = new();
+    private static readonly List<Lazy<Task>> SetUps = [];
+    private static readonly List<Lazy<Task>> CleanUps = [];
 
     public static void RegisterSetUp(Func<Task> func) => SetUps.Add(new Lazy<Task>(func));
     public static void RegisterCleanUp(Func<Task> func) => CleanUps.Add(new Lazy<Task>(func));

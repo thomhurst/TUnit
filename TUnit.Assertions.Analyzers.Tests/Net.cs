@@ -12,7 +12,7 @@ internal static class Net
                     "Microsoft.NETCore.App.Ref",
                     "8.0.1"),
                 Path.Combine("ref", "net8.0"))
-            .AddPackages(ImmutableArray.Create(new PackageIdentity("Microsoft.Extensions.Logging", "8.0.0")))
+            .AddPackages([new PackageIdentity("Microsoft.Extensions.Logging", "8.0.0")])
     );
 
     public static ReferenceAssemblies Net80 => LazyNet80.Value;

@@ -259,7 +259,7 @@ public class Tests
     public async Task Count1()
     {
         var list = new List<int> { 1, 2, 3 };
-        await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3 }).And.Has.Count().EqualTo(3);
+        await Assert.That(list).Is.EquivalentTo([1, 2, 3]).And.Has.Count().EqualTo(3);
     }
     
     [Test]
@@ -291,7 +291,7 @@ public class Tests
     public async Task Count2()
     {
         var list = new List<int> { 1, 2, 3 };
-        await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 }).And.Has.Count().EqualTo(5);
+        await Assert.That(list).Is.EquivalentTo([1, 2, 3, 4, 5]).And.Has.Count().EqualTo(5);
     }
     
     [Test]
@@ -301,7 +301,7 @@ public class Tests
         
         await using (Assert.Multiple())
         {
-            await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
+            await Assert.That(list).Is.EquivalentTo([1, 2, 3, 4, 5]);
             await Assert.That(list).Has.Count().EqualTo(5);
         }
     }

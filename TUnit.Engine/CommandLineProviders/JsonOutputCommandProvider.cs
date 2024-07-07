@@ -32,12 +32,12 @@ internal class JsonOutputCommandProvider : ICommandLineOptionsProvider
     
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
-        return new[]
-        {
+        return
+        [
             new CommandLineOption(OutputJson, "Output JSON", ArgumentArity.Zero, false),
             new CommandLineOption(OutputJsonFilename, "Output JSON filename", ArgumentArity.ExactlyOne, false),
-            new CommandLineOption(OutputJsonFilenamePrefix, "Output JSON filename prefix", ArgumentArity.ExactlyOne, false),
-        };
+            new CommandLineOption(OutputJsonFilenamePrefix, "Output JSON filename prefix", ArgumentArity.ExactlyOne, false)
+        ];
     }
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)

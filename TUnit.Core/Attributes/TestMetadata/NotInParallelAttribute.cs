@@ -3,7 +3,7 @@
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
 public class NotInParallelAttribute : SingleTUnitAttribute
 {
-    public string[] ConstraintKeys { get; } = Array.Empty<string>();
+    public string[] ConstraintKeys { get; } = [];
 
     public int Order { get; init; }
     

@@ -7,7 +7,7 @@ namespace TUnit.TestProject;
 
 public class ParallelTests
 {
-    private static readonly ConcurrentBag<DateTimeRange> TestDateTimeRanges = new();
+    private static readonly ConcurrentBag<DateTimeRange> TestDateTimeRanges = [];
 
     [Test, Repeat(3)]
     public async Task Parallel_Test1()

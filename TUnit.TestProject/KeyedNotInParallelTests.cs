@@ -7,7 +7,7 @@ namespace TUnit.TestProject;
 
 public class KeyedNotInParallelTests
 {
-    private static readonly ConcurrentBag<ConstraintDateTimeRange> TestDateTimeRanges = new();
+    private static readonly ConcurrentBag<ConstraintDateTimeRange> TestDateTimeRanges = [];
 
     [Test, NotInParallel("1"), Repeat(3)]
     public async Task NotInParallel_Test1()

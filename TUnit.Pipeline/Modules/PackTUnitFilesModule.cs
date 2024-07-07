@@ -12,7 +12,6 @@ namespace TUnit.Pipeline.Modules;
 
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<GenerateVersionModule>]
-[DependsOn<BuildSolutionModule>]
 [DependsOnAllModulesInheritingFrom<TestModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
@@ -33,21 +32,19 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         }
 
         await projects.Value!.SelectAsync(
-            async project =>
-            {
-                return await context.DotNet()
-                    .Pack(
-                        new DotNetPackOptions(project)
-                        {
-                            Properties = new[]
-                            {
-                                new KeyValue("Version", version.SemVer!),
-                                new KeyValue("PackageVersion", packageVersion!)
-                            },
-                            IncludeSource = true,
-                            Configuration = Configuration.Release,
-                        }, cancellationToken);
-            }, cancellationToken: cancellationToken).ProcessOneAtATime();
+            async project => await context.DotNet()
+                .Pack(
+                    new DotNetPackOptions(project)
+                    {
+                        Properties =
+                        [
+                            new KeyValue("Version", version.SemVer!),
+                            new KeyValue("PackageVersion", packageVersion!)
+                        ],
+                        NoBuild = true,
+                        IncludeSource = true,
+                        Configuration = Configuration.Release,
+                    }, cancellationToken), cancellationToken: cancellationToken).ProcessOneAtATime();
         
         return projects.Value!.Select(x => new PackedProject(x.NameWithoutExtension, version.SemVer!)).ToList();
     }

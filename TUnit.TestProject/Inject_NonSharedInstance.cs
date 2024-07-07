@@ -9,7 +9,7 @@ public class InjectNonSharedInstance
 {
     private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
     
-    private static readonly List<DummyReferenceTypeClass> Instances = new();
+    private static readonly List<DummyReferenceTypeClass> Instances = [];
     
     public InjectNonSharedInstance(DummyReferenceTypeClass dummyReferenceTypeClass)
     {

@@ -30,10 +30,10 @@ internal class DisplayTestOutputCommandProvider : ICommandLineOptionsProvider
     
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
-        return new[]
-        {
-            new CommandLineOption(DisplayTestOutput, "Display Test Output", ArgumentArity.Zero, false),
-        };
+        return
+        [
+            new CommandLineOption(DisplayTestOutput, "Display Test Output", ArgumentArity.Zero, false)
+        ];
     }
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)

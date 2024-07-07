@@ -30,10 +30,10 @@ internal class MaximumParallelTestsCommandProvider : ICommandLineOptionsProvider
     
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
-        return new[]
-        {
-            new CommandLineOption(MaximumParallelTests, "Maximum Parallel Tests", ArgumentArity.ExactlyOne, false),
-        };
+        return
+        [
+            new CommandLineOption(MaximumParallelTests, "Maximum Parallel Tests", ArgumentArity.ExactlyOne, false)
+        ];
     }
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
