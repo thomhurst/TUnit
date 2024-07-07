@@ -30,9 +30,9 @@ internal static class MethodArgumentsRetriever
         
         return testType switch
         {
-            TestType.Basic => [BasicTestArgumentsRetriever.Parse(testAndClassAttributes)],
+            TestType.Basic => [BasicTestArgumentsRetriever.Parse()],
             TestType.DataDriven => DataDrivenArgumentsRetriever.Parse(methodAttributes, testAndClassAttributes, methodSymbol.Parameters),
-            TestType.DataSourceDriven => DataSourceDrivenArgumentsRetriever.Parse(namedTypeSymbol, methodSymbol, methodAttributes, testAndClassAttributes, VariableNames.MethodArg),
+            TestType.DataSourceDriven => DataSourceDrivenArgumentsRetriever.Parse(namedTypeSymbol, methodSymbol, methodAttributes, VariableNames.MethodArg),
             TestType.Combinative => CombinativeValuesRetriever.Parse(methodSymbol, testAndClassAttributes),
             _ => throw new ArgumentOutOfRangeException()
         };

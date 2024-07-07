@@ -12,7 +12,6 @@ internal record TestSourceDataModel
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
     public required Argument[] ClassArguments { get; init; }
-    public required string[] ClassParameterTypes { get; init; }
 
     public required Argument[] MethodArguments { get; init; }
     
@@ -26,11 +25,8 @@ internal record TestSourceDataModel
     public required string TestId { get; init; }
     public required int CurrentRepeatAttempt { get; init; }
     
-    public required string ReturnType { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
-    public required string BeforeTestAttributes { get; init; }
-    public required string AfterTestAttributes { get; init; }
     public required string BeforeEachTestInvocations { get; init; }
     public required string AfterEachTestInvocations { get; init; }
     

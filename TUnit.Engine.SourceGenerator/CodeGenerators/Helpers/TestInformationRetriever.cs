@@ -5,7 +5,6 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
-using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
@@ -17,18 +16,6 @@ internal static class TestInformationRetriever
             .SafeFirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                      == "global::TUnit.Core.RepeatAttribute")
             ?.ConstructorArguments.SafeFirstOrDefault().Value as int? ?? 0;
-    }
-    
-    public static TestLocation GetTestLocation(AttributeData[] methodAndClassAttributes)
-    {
-        var testAttribute = methodAndClassAttributes
-            .First(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix) == true);
-
-        return new TestLocation
-        {
-            FilePath = TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[0])!,
-            LineNumber = int.Parse(TypedConstantParser.GetTypedConstantValue(testAttribute.ConstructorArguments[1])!)
-        };
     }
 
     public static string GetTestId(TestGenerationContext testGenerationContext)
@@ -107,16 +94,6 @@ internal static class TestInformationRetriever
         return stringBuilder.ToString();
     }
 
-    private static string GetArgumentSourcePrefix(IEnumerable<Argument> testArguments)
-    {
-        if (testArguments.SafeFirstOrDefault()?.ArgumentSource is { } argumentSource)
-        {
-            return $"{argumentSource}:";
-        }
-        
-        return string.Empty;
-    }
-
     public static string GetTypes(ImmutableArray<IParameterSymbol> parameters)
     {
         if (parameters.IsDefaultOrEmpty)
@@ -128,17 +105,5 @@ internal static class TestInformationRetriever
             .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix));
         
         return $"({string.Join(",", parameterTypesFullyQualified)})";
-    }
-
-    public static string GetReturnType(IMethodSymbol methodSymbol)
-    {
-        var returnType = methodSymbol.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-        
-        if (returnType == "global::System.Void")
-        {
-            return "typeof(void)";
-        }
-
-        return $"typeof({returnType})";
     }
 }

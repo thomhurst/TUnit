@@ -15,7 +15,6 @@ internal static class DataSourceDrivenArgumentsRetriever
         INamedTypeSymbol namedTypeSymbol,
         IMethodSymbol methodSymbol,
         ImmutableArray<AttributeData> methodAttributes,
-        AttributeData[] testAndClassAttributes,
         string argPrefix)
     {
         var methodDataIndex = 0;
