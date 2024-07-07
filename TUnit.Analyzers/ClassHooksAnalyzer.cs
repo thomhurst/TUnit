@@ -66,7 +66,7 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             );
         }
             
-        if (!methodSymbol.Parameters.IsDefaultOrEmpty && !IsClassHookContextParameter(methodSymbol))
+        if (!IsClassHookContextParameter(methodSymbol))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.UnknownParameters,
                 methodDeclarationSyntax.GetLocation(),
@@ -77,7 +77,28 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static bool IsClassHookContextParameter(IMethodSymbol methodSymbol)
     {
-        return methodSymbol.Parameters.Length == 1
-               && methodSymbol.Parameters[0].Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.ClassHookContext;
+        if (methodSymbol.Parameters.IsDefaultOrEmpty)
+        {
+            return true;
+        }
+
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+                WellKnown.AttributeFullyQualifiedClasses.ClassHookContext)
+            {
+                continue;
+            }
+
+            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+                WellKnown.AttributeFullyQualifiedClasses.CancellationToken)
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

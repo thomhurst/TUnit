@@ -40,5 +40,6 @@ internal static class WellKnown
 
         public const string NotInParallelAttribute = "global::TUnit.Core.NotInParallelAttribute";
         public const string DependsOnAttribute = "global::TUnit.Core.DependsOnAttribute";
+        public const string CancellationToken = "global::System.Threading.CancellationToken";
     }
 }

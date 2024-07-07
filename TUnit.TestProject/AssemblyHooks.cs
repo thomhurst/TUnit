@@ -19,6 +19,18 @@ public class AssemblyHooks
         await Assert.That(context.TestCount).Is.Positive();
     }
     
+    [AssemblySetUp, Timeout(30_000)]
+    public static void BeforeHook3(CancellationToken cancellationToken)
+    {
+        // Dummy method
+    }
+    
+    [AssemblySetUp, Timeout(30_000)]
+    public static async Task BeforeHook4(AssemblyHookContext context, CancellationToken cancellationToken)
+    {
+        await Assert.That(context.TestCount).Is.Positive();
+    }
+    
     [AssemblyCleanUp]
     public static void AfterHook1()
     {
@@ -27,6 +39,18 @@ public class AssemblyHooks
     
     [AssemblyCleanUp]
     public static async Task AfterHook2(AssemblyHookContext context)
+    {
+        await Assert.That(context.TestCount).Is.Positive();
+    }
+    
+    [AssemblyCleanUp, Timeout(30_000)]
+    public static void AfterHook3(CancellationToken cancellationToken)
+    {
+        // Dummy method
+    }
+    
+    [AssemblyCleanUp, Timeout(30_000)]
+    public static async Task AfterHook4(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         await Assert.That(context.TestCount).Is.Positive();
     }

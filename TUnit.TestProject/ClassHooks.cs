@@ -19,6 +19,18 @@ public class ClassHooks
         await Assert.That(context.TestCount).Is.EqualTo(1);
     }
     
+    [BeforeAllTestsInClass, Timeout(30_000)]
+    public static void BeforeHook3(CancellationToken cancellationToken)
+    {
+        // Dummy method
+    }
+    
+    [BeforeAllTestsInClass, Timeout(30_000)]
+    public static async Task BeforeHook4(ClassHookContext context, CancellationToken cancellationToken)
+    {
+        await Assert.That(context.TestCount).Is.EqualTo(1);
+    }
+    
     [AfterAllTestsInClass]
     public static void AfterHook1()
     {
@@ -27,6 +39,19 @@ public class ClassHooks
     
     [AfterAllTestsInClass]
     public static async Task AfterHook2(ClassHookContext context)
+    {
+        await Assert.That(context.TestCount).Is.EqualTo(1);
+        await Assert.That(context.Tests.Where(x => x.Result?.Status == Status.Passed)).Has.Count().EqualTo(1);
+    }
+    
+    [AfterAllTestsInClass, Timeout(30_000)]
+    public static void AfterHook3(CancellationToken cancellationToken)
+    {
+        // Dummy method
+    }
+    
+    [AfterAllTestsInClass, Timeout(30_000)]
+    public static async Task AfterHook4(ClassHookContext context, CancellationToken cancellationToken)
     {
         await Assert.That(context.TestCount).Is.EqualTo(1);
         await Assert.That(context.Tests.Where(x => x.Result?.Status == Status.Passed)).Has.Count().EqualTo(1);

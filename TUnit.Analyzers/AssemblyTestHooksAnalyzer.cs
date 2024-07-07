@@ -66,18 +66,39 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             );
         }
         
-        if (!methodSymbol.Parameters.IsDefaultOrEmpty && !IsAssemblyHookContextParameter(methodSymbol))
+        if (!IsAssemblyHookContextParameter(methodSymbol))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.UnknownParameters,
                 methodDeclarationSyntax.GetLocation(),
-                "empty or only contain `AssemblyHookContext`")
+                "empty or only contain `AssemblyHookContext` and `CancellationToken`")
             );
         }
     }
 
     private static bool IsAssemblyHookContextParameter(IMethodSymbol methodSymbol)
     {
-        return methodSymbol.Parameters.Length == 1
-               && methodSymbol.Parameters[0].Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext;
+        if (methodSymbol.Parameters.IsDefaultOrEmpty)
+        {
+            return true;
+        }
+        
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+                WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext)
+            {
+                continue;
+            }
+            
+            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+                WellKnown.AttributeFullyQualifiedClasses.CancellationToken)
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }
