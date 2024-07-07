@@ -110,7 +110,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("}");
             sourceBuilder.WriteLine("catch (Exception exception)");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"TestDictionary.RegisterFailedTest(\"{modelTestSourceDataModel.TestId}\", new FailedInitializationTest");
+            sourceBuilder.WriteLine($"TestDictionary.RegisterFailedTest($\"{modelTestSourceDataModel.TestId}\", new FailedInitializationTest");
             sourceBuilder.WriteLine("{");
             FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, modelTestSourceDataModel);
             sourceBuilder.WriteLine("});");
