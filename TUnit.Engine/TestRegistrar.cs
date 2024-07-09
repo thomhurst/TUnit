@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Data;
 using TUnit.Engine.Helpers;
@@ -63,7 +64,6 @@ public static class TestRegistrar
 
 		var unInvokedTest = new UnInvokedTest<TClassType>(testMetadata.ResettableClassFactory)
 		{
-			Id = testId,
 			TestContext = testContext,
 			BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),
 			AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),
@@ -73,6 +73,11 @@ public static class TestRegistrar
 		};
 
 		TestDictionary.AddTest(testId, unInvokedTest);
+	}
+	
+	public static void Failed(string testId, FailedInitializationTest failedInitializationTest)
+	{
+		TestDictionary.RegisterFailedTest(testId, failedInitializationTest);
 	}
 }
 

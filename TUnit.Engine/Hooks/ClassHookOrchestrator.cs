@@ -74,7 +74,7 @@ public static class ClassHookOrchestrator
         taskFunctions.Add(() =>
         {
             var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
-            var timeout = staticMethod.MethodInfo.GetTimeout();
+            var timeout = staticMethod.Timeout;
 
             if (timeout != null)
             {
@@ -215,7 +215,7 @@ public static class ClassHookOrchestrator
         return new Lazy<Task>(() =>
         {
             var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
-            var timeout = staticMethod.MethodInfo.GetTimeout();
+            var timeout = staticMethod.Timeout;
 
             if (timeout != null)
             {

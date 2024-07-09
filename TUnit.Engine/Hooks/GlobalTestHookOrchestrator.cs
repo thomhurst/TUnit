@@ -18,7 +18,7 @@ public static class GlobalTestHookOrchestrator
         SetUps.Add(context =>
         {
             var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
-            var timeout = staticMethod.MethodInfo.GetTimeout();
+            var timeout = staticMethod.Timeout;
 
             if (timeout != null)
             {
@@ -35,7 +35,7 @@ public static class GlobalTestHookOrchestrator
         CleanUps.Add(context =>
         {
             var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
-            var timeout = staticMethod.MethodInfo.GetTimeout();
+            var timeout = staticMethod.Timeout;
 
             if (timeout != null)
             {

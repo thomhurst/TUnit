@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
@@ -19,22 +20,17 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.SimpleMemberAccessExpression);
+        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeOperation(OperationAnalysisContext context)
     {
-        if (context.Node is not MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+        if (context.Operation is not IInvocationOperation invocationOperation)
         {
             return;
         }
 
-        var symbol = context.SemanticModel.GetSymbolInfo(memberAccessExpressionSyntax);
-
-        if (symbol.Symbol is not IMethodSymbol methodSymbol)
-        {
-            return;
-        }
+        var methodSymbol = invocationOperation.TargetMethod;
 
         var fullyQualifiedNonGenericMethodName = methodSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
         if (fullyQualifiedNonGenericMethodName 
@@ -44,29 +40,24 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var expressionStatementParent = memberAccessExpressionSyntax.GetAncestorSyntaxOfType<ExpressionStatementSyntax>();
-
-        if (expressionStatementParent is null)
-        {
-            return;
-        }
+        var parentOperations = invocationOperation.GetAncestorOperations().ToArray();
         
         if(fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple"
-            && !expressionStatementParent.DescendantNodes().Any(x => x is UsingStatementSyntax))
+            && !parentOperations.OfType<IUsingOperation>().Any())
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(Rules.DisposableUsingMultiple, expressionStatementParent.GetLocation())
+                Diagnostic.Create(Rules.DisposableUsingMultiple, context.Operation.Syntax.GetLocation())
             );
             return;
         }
         
-        if (expressionStatementParent.DescendantNodes().Any(x => x is AwaitExpressionSyntax))
+        if (parentOperations.SelectMany(x => x.DescendantsAndSelf()).OfType<IAwaitOperation>().Any())
         {
             return;
         }
         
         context.ReportDiagnostic(
-            Diagnostic.Create(Rules.AwaitAssertion, expressionStatementParent.GetLocation())
+            Diagnostic.Create(Rules.AwaitAssertion, context.Operation.Syntax.GetLocation())
         );
     }
 }

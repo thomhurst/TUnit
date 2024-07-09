@@ -16,18 +16,12 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(methodDeclarationSyntax)
-            is not { } methodSymbol)
+        if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
         }
@@ -53,7 +47,7 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
         context.ReportDiagnostic(
                 Diagnostic.Create(Rules.ConflictingExplicitAttributes,
                     methodExplicitAttribute.GetLocation()
-                    ?? methodDeclarationSyntax.GetLocation())
+                    ?? context.Symbol.Locations.FirstOrDefault())
             );
     }
 }

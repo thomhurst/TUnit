@@ -16,18 +16,12 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ClassDeclaration);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)
-            is not { } namedTypeSymbol)
+        if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
         }
@@ -41,7 +35,7 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
         }
     }
 
-    private void Check(SyntaxNodeAnalysisContext context, INamedTypeSymbol namedTypeSymbol, AttributeData attributeData,
+    private void Check(SymbolAnalysisContext context, INamedTypeSymbol namedTypeSymbol, AttributeData attributeData,
         ImmutableArray<IParameterSymbol> parameters)
     {
         var attributeClass = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);

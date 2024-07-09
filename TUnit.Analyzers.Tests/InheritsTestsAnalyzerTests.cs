@@ -48,9 +48,9 @@ public class InheritsTestsAnalyzerTests
         const string text = """
                             using TUnit.Core;
 
-                            {|#0:public class Tests : BaseClass
+                            public class {|#0:Tests|} : BaseClass
                             {
-                            }|}
+                            }
 
                             public class BaseClass
                             {

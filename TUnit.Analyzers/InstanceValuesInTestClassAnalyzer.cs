@@ -15,19 +15,12 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ClassDeclaration);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
-        {
-            return;
-        }
-
-        var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
-       
-        if (symbol is not { } namedTypeSymbol)
+        if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
         }
@@ -66,7 +59,7 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private void CheckMethod(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclarationSyntax,
+    private void CheckMethod(SymbolAnalysisContext context, MethodDeclarationSyntax methodDeclarationSyntax,
         SyntaxNode? fieldOrPropertySyntax)
     {
         var descendantNodes = methodDeclarationSyntax.DescendantNodes();

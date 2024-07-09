@@ -18,18 +18,12 @@ public class ForbidRedefiningAttributeUsageAnalyzer : ConcurrentDiagnosticAnalyz
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ClassDeclaration);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)
-            is not { } namedTypeSymbol)
+        if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
         }
@@ -46,6 +40,6 @@ public class ForbidRedefiningAttributeUsageAnalyzer : ConcurrentDiagnosticAnalyz
             return;
         }
 
-        context.ReportDiagnostic(Diagnostic.Create(Rules.DoNotOverrideAttributeUsageMetadata, context.Node.GetLocation()));
+        context.ReportDiagnostic(Diagnostic.Create(Rules.DoNotOverrideAttributeUsageMetadata, attributeUsage?.GetLocation() ?? context.Symbol.Locations.FirstOrDefault()));
     }
 }

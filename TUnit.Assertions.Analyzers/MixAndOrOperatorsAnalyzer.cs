@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
@@ -19,44 +20,35 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.SimpleMemberAccessExpression);
+        context.RegisterOperationAction(AnalyzeOperation, OperationKind.PropertyReference);
     }
     
-    private static void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private static void AnalyzeOperation(OperationAnalysisContext context)
     {
-        // The Roslyn architecture is based on inheritance.
-        // To get the required metadata, we should match the 'Node' object to the particular type: 'ClassDeclarationSyntax'.
-        if (context.Node is not MemberAccessExpressionSyntax memberAccessExpressionSyntax)
-        {
-            return;
-        }
-
-        if (memberAccessExpressionSyntax.Name.Identifier.Value is not "And" and not "Or")
-        {
-            return;
-        }
-
-        if (memberAccessExpressionSyntax.GetAncestorSyntaxOfType<InvocationExpressionSyntax>() is not { } invocationExpressionSyntax)
+        if (context.Operation is not IPropertyReferenceOperation propertyReferenceOperation)
         {
             return;
         }
         
-        var symbolInfo = context.SemanticModel.GetSymbolInfo(invocationExpressionSyntax);
-
-        var fullyQualifiedSymbolInformation = symbolInfo.Symbol?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
-                                              ?? string.Empty;
+        if (propertyReferenceOperation.Property.Name is not "And" and not "Or")
+        {
+            return;
+        }
         
-        if (!fullyQualifiedSymbolInformation.StartsWith("global::TUnit.Assertions"))
+        if(propertyReferenceOperation.Property.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) !=
+            "global::TUnit.Assertions.AssertConditions.BaseAssertCondition")
         {
             return;
         }
 
-        var fullInvocationStatement = invocationExpressionSyntax.ToFullString();
-        if(fullInvocationStatement.Contains(".And.") 
-           && fullInvocationStatement.Contains(".Or."))
+        var awaitOperation = propertyReferenceOperation.GetAncestorOperations().OfType<IAwaitOperation>().FirstOrDefault();
+        var chainedMethodCalls = awaitOperation?.Descendants().OfType<IPropertyReferenceOperation>().ToArray() ?? [];
+
+        if (chainedMethodCalls.Any(x => x.Property.Name == "And")
+            && chainedMethodCalls.Any(x => x.Property.Name == "Or"))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MixAndOrConditionsAssertion,
-                    invocationExpressionSyntax.GetLocation())
+                awaitOperation?.Syntax.GetLocation() ?? propertyReferenceOperation.Syntax.GetLocation())
             );
         }
     }

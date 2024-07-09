@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.SourceGenerator;
 
-public class SourceCodeWriter : IDisposable
+internal class SourceCodeWriter : IDisposable
 {
     private int _tabLevel;
     private readonly StringBuilder _stringBuilder = new();

@@ -3,7 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public class UnInvokedTest<TTestClass> : UnInvokedTest
+internal class UnInvokedTest<TTestClass> : UnInvokedTest
 {
     private readonly ResettableLazy<TTestClass> _resettableLazyTestClassFactory;
 
@@ -32,14 +32,17 @@ public class UnInvokedTest<TTestClass> : UnInvokedTest
             var timeout = setUp.MethodInfo.GetCustomAttributes().OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout;
             var token = engineToken ;
 
-            if (timeout != null)
+            yield return () =>
             {
-                var cts = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
-                token = cts.Token;
-                cts.CancelAfter(timeout.Value);
-            }
-
-            yield return () => setUp.Body.Invoke(TestClass, token);
+                if (timeout != null)
+                {
+                    var cts = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
+                    token = cts.Token;
+                    cts.CancelAfter(timeout.Value);
+                }
+                
+                return setUp.Body.Invoke(TestClass, TestContext, token);
+            };
         }
     }
 
@@ -49,15 +52,18 @@ public class UnInvokedTest<TTestClass> : UnInvokedTest
         {
             var timeout = cleanUp.MethodInfo.GetCustomAttributes().OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout;
             var token = engineToken ;
-
-            if (timeout != null)
+            
+            yield return () =>
             {
-                var cts = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
-                token = cts.Token;
-                cts.CancelAfter(timeout.Value);
-            }
+                if (timeout != null)
+                {
+                    var cts = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
+                    token = cts.Token;
+                    cts.CancelAfter(timeout.Value);
+                }
 
-            yield return () => cleanUp.Body.Invoke(TestClass, token);
+                return cleanUp.Body.Invoke(TestClass, TestContext, token);
+            };
         }
     }
 
@@ -67,9 +73,8 @@ public class UnInvokedTest<TTestClass> : UnInvokedTest
     }
 }
 
-public abstract class UnInvokedTest
+internal abstract class UnInvokedTest
 {
-    public required string Id { get; init; }
     public required TestContext TestContext { get; init; }
     
     public required IBeforeTestAttribute[] BeforeTestAttributes { get; init; }

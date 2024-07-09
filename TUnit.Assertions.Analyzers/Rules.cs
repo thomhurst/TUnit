@@ -13,7 +13,7 @@ internal static class Rules
         CreateDescriptor("TUnitAnalyzers0002", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor CompilerArgumentsPopulated =
-        CreateDescriptor("TUnitAnalyzers0004", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnitAnalyzers0003", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor DisposableUsingMultiple =
         CreateDescriptor("TUnitAnalyzers0004", UsageCategory, DiagnosticSeverity.Error);

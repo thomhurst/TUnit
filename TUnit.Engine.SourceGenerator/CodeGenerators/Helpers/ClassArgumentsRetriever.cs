@@ -12,19 +12,10 @@ internal static class ClassArgumentsRetriever
     {
         var className =
             namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-        
+
         if (namedTypeSymbol.InstanceConstructors.SafeFirstOrDefault()?.Parameters.IsDefaultOrEmpty != false)
         {
-            return
-            [
-                new ArgumentsContainer
-                {
-                    Arguments = [],
-                    DataAttributeIndex = null,
-                    IsEnumerableData = false,
-                    DataAttribute = null
-                }
-            ];
+            return [ BasicTestArgumentsRetriever.Parse() ];
         }
 
         return ParseArguments(namedTypeSymbol, className);
@@ -67,72 +58,92 @@ internal static class ClassArgumentsRetriever
         foreach (var classDataAttribute in classAttributes
                      .Where(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix) == true))
         {
-            var genericType = classDataAttribute.AttributeClass?.TypeArguments.SafeFirstOrDefault() ?? (ITypeSymbol) classDataAttribute.ConstructorArguments.First().Value!;
-            var fullyQualifiedGenericType = genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-            var sharedArgument = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Shared").Value;
-
-            var sharedArgumentType = sharedArgument.ToCSharpString();
-            
-            if (sharedArgumentType is "TUnit.Core.SharedType.None" or "" or null)
-            {
-                yield return new ArgumentsContainer
-                {
-                    DataAttribute = classDataAttribute,
-                    DataAttributeIndex = ++index,
-                    IsEnumerableData = false,
-                    Arguments = [new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"new {fullyQualifiedGenericType}()")]
-                };
-            }
-            
-            if (sharedArgumentType is "TUnit.Core.SharedType.Globally")
-            {
-                yield return new ArgumentsContainer
-                {
-                    DataAttribute = classDataAttribute,
-                    DataAttributeIndex = ++index,
-                    IsEnumerableData = false,
-                    Arguments = [new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType, $"TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")],
-                };
-            }
-            
-            if (sharedArgumentType is "TUnit.Core.SharedType.ForClass")
-            {
-                yield return new ArgumentsContainer
-                {
-                    DataAttribute = classDataAttribute,
-                    DataAttributeIndex = ++index,
-                    IsEnumerableData = false,
-                    Arguments =
-                    [
-                        new TestClassTypeSharedArgument(ArgumentSource.ClassDataSourceAttribute,
-                            fullyQualifiedGenericType,
-                            $"TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
-                        {
-                            TestClassType = className
-                        }
-                    ]
-                };
-            }
-            
-            if (sharedArgumentType is "TUnit.Core.SharedType.Keyed")
-            {
-                var key = classDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Key").Value.Value?.ToString() ?? string.Empty;
-
-                yield return new ArgumentsContainer
-                {
-                    DataAttribute = classDataAttribute,
-                    DataAttributeIndex = ++index,
-                    IsEnumerableData = false,
-                    Arguments =
-                    [
-                        new KeyedSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
-                            $"TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
-                        {
-                            Key = key
-                        }
-                    ]
-                };
-            }
+            yield return ParseClassDataSource(classDataAttribute, className, ++index);
         }
+    }
+
+    private static ArgumentsContainer ParseClassDataSource(AttributeData classDataAttribute, string className, int index)
+    {
+        var genericType = classDataAttribute.AttributeClass?.TypeArguments.SafeFirstOrDefault() ??
+                          (ITypeSymbol)classDataAttribute.ConstructorArguments.First().Value!;
+        
+        var fullyQualifiedGenericType =
+            genericType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        
+        var sharedArgument = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Shared").Value;
+
+        var sharedArgumentType = sharedArgument.ToCSharpString();
+
+        if (sharedArgumentType is "TUnit.Core.SharedType.None" or "" or null)
+        {
+            return new ArgumentsContainer
+            {
+                DataAttribute = classDataAttribute,
+                DataAttributeIndex = index,
+                IsEnumerableData = false,
+                Arguments =
+                [
+                    new Argument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                        $"new {fullyQualifiedGenericType}()")
+                ]
+            };
+        }
+
+        if (sharedArgumentType is "TUnit.Core.SharedType.Globally")
+        {
+            return new ArgumentsContainer
+            {
+                DataAttribute = classDataAttribute,
+                DataAttributeIndex = index,
+                IsEnumerableData = false,
+                Arguments =
+                [
+                    new GloballySharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                        $"TestDataContainer.GetGlobalInstance<{fullyQualifiedGenericType}>(() => new {fullyQualifiedGenericType}())")
+                ],
+            };
+        }
+
+        if (sharedArgumentType is "TUnit.Core.SharedType.ForClass")
+        {
+            return new ArgumentsContainer
+            {
+                DataAttribute = classDataAttribute,
+                DataAttributeIndex = index,
+                IsEnumerableData = false,
+                Arguments =
+                [
+                    new TestClassTypeSharedArgument(ArgumentSource.ClassDataSourceAttribute,
+                        fullyQualifiedGenericType,
+                        $"TestDataContainer.GetInstanceForType<{fullyQualifiedGenericType}>(typeof({className}), () => new {fullyQualifiedGenericType}())")
+                    {
+                        TestClassType = className
+                    }
+                ]
+            };
+        }
+
+        if (sharedArgumentType is "TUnit.Core.SharedType.Keyed")
+        {
+            var key = classDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Key").Value.Value?.ToString() ??
+                      string.Empty;
+
+            return new ArgumentsContainer
+            {
+                DataAttribute = classDataAttribute,
+                DataAttributeIndex = index,
+                IsEnumerableData = false,
+                Arguments =
+                [
+                    new KeyedSharedArgument(ArgumentSource.ClassDataSourceAttribute, fullyQualifiedGenericType,
+                        $"TestDataContainer.GetInstanceForKey<{fullyQualifiedGenericType}>(\"{key}\", () => new {fullyQualifiedGenericType}())")
+                    {
+                        Key = key
+                    }
+                ]
+            };
+        }
+
+        return BasicTestArgumentsRetriever.Parse();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace TUnit.Engine.Helpers;
+namespace TUnit.Core.Helpers;
 
 internal static class AttributeHelper
 {

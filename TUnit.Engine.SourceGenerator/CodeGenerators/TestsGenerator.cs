@@ -116,10 +116,7 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("}");
             sourceBuilder.WriteLine("catch (Exception exception)");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"TestDictionary.RegisterFailedTest($\"{model.TestId}\", new FailedInitializationTest");
-            sourceBuilder.WriteLine("{");
             FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, model);
-            sourceBuilder.WriteLine("});");
             sourceBuilder.WriteLine("}");
             
             sourceBuilder.WriteLine("}");
