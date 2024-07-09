@@ -11,7 +11,7 @@ public record InstanceMethod<TClassType>
     public Type ClassType { get; } = typeof(TClassType);
     public Assembly Assembly { get; } = typeof(TClassType).Assembly;
     public required MethodInfo MethodInfo { get; init; }
-    public required Func<TClassType, CancellationToken, Task> Body { get; init; }
+    public required Func<TClassType, TestContext, CancellationToken, Task> Body { get; init; }
 
     private IEnumerable<Attribute>? _attributes;
 

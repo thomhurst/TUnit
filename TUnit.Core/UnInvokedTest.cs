@@ -41,7 +41,7 @@ internal class UnInvokedTest<TTestClass> : UnInvokedTest
                     cts.CancelAfter(timeout.Value);
                 }
                 
-                return setUp.Body.Invoke(TestClass, token);
+                return setUp.Body.Invoke(TestClass, TestContext, token);
             };
         }
     }
@@ -62,7 +62,7 @@ internal class UnInvokedTest<TTestClass> : UnInvokedTest
                     cts.CancelAfter(timeout.Value);
                 }
 
-                return cleanUp.Body.Invoke(TestClass, token);
+                return cleanUp.Body.Invoke(TestClass, TestContext, token);
             };
         }
     }
