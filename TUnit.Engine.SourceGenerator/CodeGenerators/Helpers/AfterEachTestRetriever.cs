@@ -4,7 +4,7 @@ using TUnit.Engine.SourceGenerator.Extensions;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-public class AfterEachTestRetriever
+public static class AfterEachTestRetriever
 {
     public static string GenerateCode(INamedTypeSymbol classType)
     {
@@ -17,7 +17,7 @@ public class AfterEachTestRetriever
                 .Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                           == "global::TUnit.Core.AfterEachTestAttribute")
             )
-            .ToList();
+            .ToArray();
         
         if(!cleanUp.Any())
         {
