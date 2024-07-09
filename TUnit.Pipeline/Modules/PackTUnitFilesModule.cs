@@ -28,7 +28,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
 
         if (context.Git().Information.BranchName == "main")
         {
-            packageVersion += "-alpha01";
+            // packageVersion += "-alpha01";
         }
 
         await projects.Value!.SelectAsync(
