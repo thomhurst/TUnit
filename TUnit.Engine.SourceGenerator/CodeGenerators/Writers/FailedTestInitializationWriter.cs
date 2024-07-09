@@ -9,12 +9,15 @@ internal static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
         
+        sourceBuilder.WriteLine($"TestRegistrar.Failed($\"{testId}\", new FailedInitializationTest");
+        sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
         sourceBuilder.WriteLine($"DisplayName = \"{testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        sourceBuilder.WriteLine($"Exception = exception,");
+        sourceBuilder.WriteLine("Exception = exception,");
+        sourceBuilder.WriteLine("});");
     }
 
     private static string GetMethodArgs(TestSourceDataModel testSourceDataModel)

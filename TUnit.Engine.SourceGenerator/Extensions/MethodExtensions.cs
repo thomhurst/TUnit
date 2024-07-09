@@ -48,7 +48,7 @@ public static class MethodExtensions
 
         if (methodSymbol.Parameters.Last().Type
                 .ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
-            ClassNames.CancellationToken)
+            WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)
         {
             return methodSymbol.Parameters.Take(methodSymbol.Parameters.Length - 1);
         }

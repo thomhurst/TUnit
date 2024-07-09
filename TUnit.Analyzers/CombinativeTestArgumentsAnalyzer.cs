@@ -16,18 +16,12 @@ public class CombinativeTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.Parameter);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Parameter);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not ParameterSyntax parameterSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(parameterSyntax)
-            is not { } parameterSymbol)
+        if (context.Symbol is not IParameterSymbol parameterSymbol)
         {
             return;
         }

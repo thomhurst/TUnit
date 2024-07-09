@@ -28,19 +28,13 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSyntaxNodeAction(AnalyzeMethod, SyntaxKind.MethodDeclaration);
-        context.RegisterSyntaxNodeAction(AnalyzeClass, SyntaxKind.ClassDeclaration);
+        context.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
+        context.RegisterSymbolAction(AnalyzeClass, SymbolKind.NamedType);
     }
     
-    private void AnalyzeMethod(SyntaxNodeAnalysisContext context)
+    private void AnalyzeMethod(SymbolAnalysisContext context)
     {
-        if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(methodDeclarationSyntax)
-            is not { } methodSymbol)
+        if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
         }
@@ -73,15 +67,9 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         }
     }
     
-    private void AnalyzeClass(SyntaxNodeAnalysisContext context)
+    private void AnalyzeClass(SymbolAnalysisContext context)
     {
-        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)
-            is not { } namedTypeSymbol)
+        if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
         }
@@ -101,7 +89,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         }
     }
 
-    private void CheckAttributeAgainstMethod(SyntaxNodeAnalysisContext context,
+    private void CheckAttributeAgainstMethod(SymbolAnalysisContext context,
         ImmutableArray<IParameterSymbol> parameters,
         AttributeData dataSourceDrivenAttribute,
         INamedTypeSymbol fallbackClassToSearchForDataSourceIn,
@@ -264,7 +252,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             .Construct(typeSymbol);
     }
 
-    private IMethodSymbol? FindMethodContainingTestData(SyntaxNodeAnalysisContext context, AttributeData dataSourceDrivenAttribute,
+    private IMethodSymbol? FindMethodContainingTestData(SymbolAnalysisContext context, AttributeData dataSourceDrivenAttribute,
         INamedTypeSymbol classContainingTest)
     {
         if (dataSourceDrivenAttribute.ConstructorArguments.Length == 1)

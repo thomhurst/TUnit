@@ -27,6 +27,7 @@ internal static class WellKnown
         public const string ClassDataSource = "global::TUnit.Core.ClassDataSourceAttribute";
         public const string EnumerableMethodDataSource = "global::TUnit.Core.EnumerableMethodDataSourceAttribute";
 
+        public const string TestContext = "global::TUnit.Core.TestContext";
         public const string ClassHookContext = "global::TUnit.Core.Models.ClassHookContext";
         public const string AssemblyHookContext = "global::TUnit.Core.Models.AssemblyHookContext";
         

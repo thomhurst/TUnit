@@ -123,11 +123,6 @@ internal static class GenericTestInvocationWriter
         return $"new TestData({variablePrefix}{index}, typeof({arg.Type}), InjectedDataType.None)";
     }
 
-    private static string GetAttribute(string attributeName)
-    {
-        return $"AttributeHelper.GetAttribute<{attributeName}>(attributes)";
-    }
-
     private static string GetDisplayName(TestSourceDataModel testSourceDataModel)
     {
         var customDisplayName = GetCustomDisplayName(testSourceDataModel);

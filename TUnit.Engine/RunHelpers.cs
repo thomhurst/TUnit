@@ -36,8 +36,8 @@ public static class RunHelpers
     {
         return RunWithTimeoutAsync(RunAsync(action), cancellationToken);
     }
-    
-    public static async Task RunWithTimeoutAsync(Task task, CancellationToken cancellationToken)
+
+    private static async Task RunWithTimeoutAsync(Task task, CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
         
@@ -107,6 +107,33 @@ public static class RunHelpers
         catch (Exception exception)
         {
             exceptions.Add(exception);
+        }
+    }
+    
+    public static Task RunSafelyWithTimeoutAsync(Action action, List<Exception> exceptions, CancellationToken cancellationToken)
+    {
+        return RunSafelyWithTimeoutAsync(RunAsync(action), exceptions, cancellationToken);
+    }
+    
+    public static Task RunSafelyWithTimeoutAsync(Func<Task> action, List<Exception> exceptions, CancellationToken cancellationToken)
+    {
+        return RunSafelyWithTimeoutAsync(RunAsync(action), exceptions, cancellationToken);
+    }
+    
+    public static Task RunSafelyWithTimeoutAsync(Func<ValueTask> action, List<Exception> exceptions, CancellationToken cancellationToken)
+    {
+        return RunSafelyWithTimeoutAsync(RunAsync(action), exceptions, cancellationToken);
+    }
+
+    private static async Task RunSafelyWithTimeoutAsync(Task task, List<Exception> exceptions, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await RunWithTimeoutAsync(task, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            exceptions.Add(e);
         }
     }
     

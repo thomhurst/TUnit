@@ -16,17 +16,12 @@ public class InheritsTestsAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.ClassDeclaration);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not ClassDeclarationSyntax declarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(declarationSyntax) is not { } namedTypeSymbol)
+        if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
         }
@@ -47,7 +42,7 @@ public class InheritsTestsAnalyzer : ConcurrentDiagnosticAnalyzer
         if (methods.Any(HasTestAttribute))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.DoesNotInheritTestsWarning,
-                declarationSyntax.GetLocation())
+                namedTypeSymbol.Locations.FirstOrDefault())
             );
         }
     }

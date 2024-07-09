@@ -15,18 +15,12 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(methodDeclarationSyntax)
-            is not { } methodSymbol)
+        if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
         }
@@ -48,21 +42,21 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         if (!methodSymbol.IsStatic)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeStatic,
-                methodDeclarationSyntax.GetLocation())
+                context.Symbol.Locations.FirstOrDefault())
             );
         }
 
         if (methodSymbol.IsAbstract)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustNotBeAbstract,
-                methodDeclarationSyntax.GetLocation())
+                context.Symbol.Locations.FirstOrDefault())
             );
         }
         
         if(methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
-                methodDeclarationSyntax.GetLocation())
+                context.Symbol.Locations.FirstOrDefault())
             );
         }
     }

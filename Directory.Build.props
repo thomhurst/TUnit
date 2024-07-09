@@ -22,14 +22,22 @@
             <_Parameter1>TUnit</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
+    
+    <PropertyGroup>
+        <CurrentYear>$([System.DateTime]::Now.ToString("yyyy"))</CurrentYear>
+    </PropertyGroup>
 
     <PropertyGroup>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Copyright>Copyright (c) Tom Longhurst $(CurrentYear)</Copyright>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/thomhurst/TUnit</PackageProjectUrl>
+        <Description>A .NET Testing Framework</Description>
         <Authors>Tom Longhurst</Authors>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <PackageTags>testing;unit;integration;component;test;assert;tester;framework</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>

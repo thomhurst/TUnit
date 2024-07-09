@@ -19,19 +19,12 @@ public class ConstantInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.InvocationExpression);
+        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeOperation(OperationAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocationExpressionSyntax)
-        {
-            return;
-        }
-
-        var operation = context.SemanticModel.GetOperation(invocationExpressionSyntax);
-
-        if (operation is not IInvocationOperation invocationOperation)
+        if (context.Operation is not IInvocationOperation invocationOperation)
         {
             return;
         }
@@ -47,7 +40,7 @@ public class ConstantInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
         if (firstArgument.ConstantValue.HasValue || firstArgument.Value.ConstantValue.HasValue)
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(Rules.ConstantValueInAssertThat, invocationExpressionSyntax.GetLocation())
+                Diagnostic.Create(Rules.ConstantValueInAssertThat, invocationOperation.Syntax.GetLocation())
             );
         }
     }

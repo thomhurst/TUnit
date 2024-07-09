@@ -20,18 +20,12 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(methodDeclarationSyntax)
-            is not { } methodSymbol)
+        if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
         }
@@ -58,7 +52,7 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
         CompareCombinative(context, methodSymbol, attributes, methodSymbol.Locations.FirstOrDefault());
     }
 
-    private void CompareCombinative(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol,
+    private void CompareCombinative(SymbolAnalysisContext context, IMethodSymbol methodSymbol,
         ImmutableArray<AttributeData> attributes, Location? location)
     {
         var combinativeTestAttribute = attributes.Get(WellKnown.AttributeFullyQualifiedClasses.CombinativeTest);
@@ -89,7 +83,7 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private void Compare(SyntaxNodeAnalysisContext context, 
+    private void Compare(SymbolAnalysisContext context, 
         ImmutableArray<AttributeData> attributes,
         string requiredTestAttributeName, 
         string requiredDataAttributeName,
@@ -110,7 +104,7 @@ public class TestRequiresDataAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
     
-    private void Compare(SyntaxNodeAnalysisContext context, 
+    private void Compare(SymbolAnalysisContext context, 
         ImmutableArray<AttributeData> attributes,
         string requiredTestAttributeName, 
         IEnumerable<string> requiredDataAttributes,

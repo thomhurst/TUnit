@@ -29,13 +29,13 @@ public class ForbidRedefiningAttributeUsageAnalyzerTests
                             using System;
                             using TUnit.Core;
                             
-                            {|#0:[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+                            [{|#0:AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)|}]
                             public class InheritedNotInParallelAttribute : NotInParallelAttribute
                             {
                                 public InheritedNotInParallelAttribute() : base("Blah")
                                 {
                                 }
-                            }|}
+                            }
                             """;
         
         var expected = Verifier.Diagnostic(Rules.DoNotOverrideAttributeUsageMetadata).WithLocation(0);

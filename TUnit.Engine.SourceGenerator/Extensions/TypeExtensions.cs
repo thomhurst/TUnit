@@ -21,7 +21,7 @@ internal static class TypeExtensions
         return displayString is "global::System.Tuple" or "global::System.ValueTuple";
     }
     
-    public static IEnumerable<ISymbol> GetMembersIncludingBase(this INamedTypeSymbol namedTypeSymbol)
+    public static IEnumerable<ISymbol> GetMembersIncludingBase(this INamedTypeSymbol namedTypeSymbol, bool reverse = true)
     {
         var list = new List<ISymbol>();
 
@@ -40,11 +40,14 @@ internal static class TypeExtensions
                 break;
             }
             
-            list.AddRange(symbol.GetMembers());
+            list.AddRange(reverse ? symbol.GetMembers().Reverse() : symbol.GetMembers());
             symbol = symbol.BaseType;
         }
         
-        list.Reverse();
+        if(reverse)
+        {
+            list.Reverse();
+        }
 
         return list;
     }

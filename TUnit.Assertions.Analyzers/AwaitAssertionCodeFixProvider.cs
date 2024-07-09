@@ -25,22 +25,17 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
     {
         var diagnostic = context.Diagnostics.Single();
 
-        // 'SourceSpan' of 'Location' is the highlighted area. We're going to use this area to find the 'SyntaxNode' to rename.
         var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-        // Get the root of Syntax Tree that contains the highlighted diagnostic.
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 
-        // Find SyntaxNode corresponding to the diagnostic.
         var diagnosticNode = root?.FindNode(diagnosticSpan);
 
-        // To get the required metadata, we should match the Node to the specific type: 'ClassDeclarationSyntax'.
         if (diagnosticNode is not ExpressionStatementSyntax expressionStatementSyntax)
         {
             return;
         }
 
-        // Register a code action that will invoke the fix.
         context.RegisterCodeFix(
             CodeAction.Create(
                 title: Resources.TUnitAnalyzers0002CodeFixTitle,

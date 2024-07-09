@@ -1,17 +1,17 @@
 ﻿using TUnit.Core;
 
-namespace TUnit.TestProject.BeforeEachTests;
+namespace TUnit.TestProject.AfterTests;
 
 public class Base1
 {
-    [BeforeAllTestsInClass]
-    public static async Task BeforeAll1()
+    [AfterAllTestsInClass]
+    public static async Task AfterAll1()
     {
         await Task.CompletedTask;
     }
     
-    [BeforeEachTest]
-    public async Task BeforeEach1()
+    [AfterEachTest]
+    public async Task AfterEach1()
     {
         await Task.CompletedTask;
     }
@@ -19,14 +19,14 @@ public class Base1
 
 public class Base2 : Base1
 {
-    [BeforeAllTestsInClass]
-    public static async Task BeforeAll2()
+    [AfterAllTestsInClass]
+    public static async Task AfterAll2()
     {
         await Task.CompletedTask;
     }
     
-    [BeforeEachTest]
-    public async Task BeforeEach2()
+    [AfterEachTest]
+    public async Task AfterEach2()
     {
         await Task.CompletedTask;
     }
@@ -34,35 +34,35 @@ public class Base2 : Base1
 
 public class Base3 : Base2
 {
-    [BeforeAllTestsInClass]
-    public static async Task BeforeAll3()
+    [AfterAllTestsInClass]
+    public static async Task AfterAll3()
     {
         await Task.CompletedTask;
     }
     
-    [BeforeEachTest]
-    public async Task BeforeEach3()
+    [AfterEachTest]
+    public async Task AfterEach3()
     {
         await Task.CompletedTask;
     }
 }
 
-public class SetupTests : Base3
+public class CleanupTests : Base3
 {
-    [BeforeAllTestsInClass]
-    public static async Task BeforeAllSetUp()
-    {
-        await Task.CompletedTask;
-    }
-
     [AfterAllTestsInClass]
-    public static async Task AfterAllTearDown()
+    public static async Task AfterAllCleanup()
     {
         await Task.CompletedTask;
     }
     
-    [BeforeEachTest]
-    public async Task Setup()
+    [AfterEachTest]
+    public async Task Cleanup()
+    {
+        await Task.CompletedTask;
+    }
+    
+    [AfterEachTest]
+    public async Task CleanupWithContext(TestContext testContext)
     {
         await Task.CompletedTask;
     }

@@ -32,4 +32,15 @@ public static class SyntaxExtensions
 
         return parent as TOutput;
     }
+        
+    public static IEnumerable<IOperation> GetAncestorOperations(this IOperation operation) 
+    {
+        var parent = operation.Parent;
+        
+        while (parent != null)
+        {
+            yield return parent;
+            parent = parent.Parent;
+        } ;
+    }
 }

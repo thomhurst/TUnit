@@ -15,18 +15,12 @@ public class InstanceTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
-        context.RegisterSyntaxNodeAction(AnalyzeSyntax, SyntaxKind.MethodDeclaration);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
     
-    private void AnalyzeSyntax(SyntaxNodeAnalysisContext context)
+    private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Node is not MethodDeclarationSyntax methodDeclarationSyntax)
-        {
-            return;
-        }
-
-        if (context.SemanticModel.GetDeclaredSymbol(methodDeclarationSyntax)
-            is not { } methodSymbol)
+        if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
         }
@@ -48,22 +42,49 @@ public class InstanceTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         if (methodSymbol.IsStatic)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustNotBeStatic,
-                methodDeclarationSyntax.GetLocation())
+                context.Symbol.Locations.FirstOrDefault())
             );
         }
 
-        if (!methodSymbol.Parameters.IsDefaultOrEmpty)
+        if (!IsContextParameter(methodSymbol))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeParameterless,
-                methodDeclarationSyntax.GetLocation())
+                context.Symbol.Locations.FirstOrDefault())
             );
         }
         
         if(methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
-                methodDeclarationSyntax.GetLocation())
+                context.Symbol.Locations.FirstOrDefault())
             );
         }
+    }
+    
+    private static bool IsContextParameter(IMethodSymbol methodSymbol)
+    {
+        if (methodSymbol.Parameters.IsDefaultOrEmpty)
+        {
+            return true;
+        }
+
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+                WellKnown.AttributeFullyQualifiedClasses.TestContext)
+            {
+                continue;
+            }
+
+            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+                WellKnown.AttributeFullyQualifiedClasses.CancellationToken)
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

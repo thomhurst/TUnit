@@ -8,7 +8,7 @@ public static class TestDictionary
     private static readonly Dictionary<string, UnInvokedTest> Tests = new();
     private static readonly Dictionary<string, FailedInitializationTest> FailedInitializationTests = new();
 
-    public static void AddTest(string testId, UnInvokedTest unInvokedTest)
+    internal static void AddTest(string testId, UnInvokedTest unInvokedTest)
     {
         Tests[testId] = unInvokedTest;
     }
@@ -16,11 +16,6 @@ public static class TestDictionary
     public static void RegisterFailedTest(string testId, FailedInitializationTest failedInitializationTest)
     {
         FailedInitializationTests[testId] = failedInitializationTest;
-    }
-    
-    internal static FailedInitializationTest GetFailedInitializationTest(string id)
-    {
-        return FailedInitializationTests[id] ?? throw new Exception($"Test with ID {id} was not found");
     }
     
     internal static IEnumerable<UnInvokedTest> GetAllTests()

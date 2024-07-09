@@ -31,9 +31,8 @@ internal static class CombinativeValuesRetriever
         
         var index = 0;
         return GetCombinativeArgumentsList(mappedToConstructorArrays)
-            .Select(x =>
-                MapToArgumentEnumerable(x, methodAndClassAttributes, methodSymbolParameters)
-            ).Select(x => new ArgumentsContainer
+            .Select(x => MapToArgumentEnumerable(x, methodSymbolParameters))
+            .Select(x => new ArgumentsContainer
             {
                 DataAttribute = attr,
                 DataAttributeIndex = ++index,
@@ -42,7 +41,7 @@ internal static class CombinativeValuesRetriever
             });
     }
 
-    private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> typedConstants, AttributeData[] methodAndClassAttributes, ImmutableArray<IParameterSymbol> parameterSymbols)
+    private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> typedConstants, ImmutableArray<IParameterSymbol> parameterSymbols)
     {
         return typedConstants.Select((typedConstant, index) =>
             {
@@ -54,7 +53,7 @@ internal static class CombinativeValuesRetriever
             });
     }
 
-    private static readonly IEnumerable<IEnumerable<TypedConstant>> Seed = [Enumerable.Empty<TypedConstant>()];
+    private static readonly IEnumerable<IEnumerable<TypedConstant>> Seed = [[]];
     
     private static IEnumerable<IEnumerable<TypedConstant>> GetCombinativeArgumentsList(IEnumerable<ImmutableArray<TypedConstant>> elements)
     {

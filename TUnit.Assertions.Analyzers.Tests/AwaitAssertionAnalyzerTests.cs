@@ -20,7 +20,7 @@ public class AwaitAssertionAnalyzerTests
                                 public async Task MyTest()
                                 {
                                     var one = 1;
-                                    {|#0:Assert.That(one).Is.EqualTo(1);|}
+                                    {|#0:Assert.That(one)|}.Is.EqualTo(1);
                                 }
 
                             }
@@ -46,7 +46,7 @@ public class AwaitAssertionAnalyzerTests
                                 public async Task MyTest()
                                 {
                                     var one = 1;
-                                    {|#0:Assert.That<long>(one).Is.EqualTo(1);|}
+                                    {|#0:Assert.That<long>(one)|}.Is.EqualTo(1);
                                 }
 
                             }
@@ -72,7 +72,7 @@ public class AwaitAssertionAnalyzerTests
                                 public async Task MyTest()
                                 {
                                     var one = 1;
-                                    {|#0:Assert.Multiple();|}
+                                    {|#0:Assert.Multiple()|};
                                 }
 
                             }

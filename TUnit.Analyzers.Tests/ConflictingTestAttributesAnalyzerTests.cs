@@ -101,12 +101,12 @@ public class ConflictingTestAttributesAnalyzerTests
                             public class MyClass
                             {
                             
-                                {|#0:[Test]
+                                [Test]
                                 [DataDrivenTest]
                                 [Arguments(1)]
-                                public void MyTest(int value)
+                                public void {|#0:MyTest|}(int value)
                                 {
-                                }|}
+                                }
 
                             }
                             """;
