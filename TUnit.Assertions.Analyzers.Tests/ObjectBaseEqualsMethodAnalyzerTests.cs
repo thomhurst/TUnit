@@ -86,13 +86,14 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                             public class MyClass
                             {
                                 [Test]
+                                [System.Obsolete("Obsolete")]
                                 public void Test()
                                 {
                                     {|#0:Assert.That(1).Equals(1)|};
                                 }
                             }
                             """;
-
+        
         var expected = Verifier
             .Diagnostic(Rules.ObjectEqualsBaseMethod)
             .WithLocation(0);
