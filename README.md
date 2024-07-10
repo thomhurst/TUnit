@@ -120,7 +120,7 @@ or with more complex test orchestration needs
 
         public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception, int currentRetryCount)
         {
-            return Task.FromResult(exception is HttpRequestException httpRequestException && httpRequestException.StatusCode == HttpStatusCode.ServiceUnavailable);
+            return Task.FromResult(exception is HttpRequestException { StatusCode: HttpStatusCode.ServiceUnavailable });
         }
     }
 ```
@@ -138,6 +138,7 @@ xUnit doesn't offer a way out-of-the-box to retrieve the test state within a hoo
 xUnit performs tear downs through interfaces such as IDisposable. TUnit also allows this, but a problem occurs if you want to use test class inheritance. Say you have a class that wants to take a screenshot, and then a base class that disposes the browser. You have to declare another `Dispose()` method, and hide the visibility of the base one with the `new` keyword, which is generally frowned up. You then also have to remember to call `base.Dispose()` - and if you don't, you may have bugs and/or unreleased resources. And then to top it off, you have to manage exceptions yourself to ensure they still run. In TUnit, all cleanup methods will run, even if previous code has encountered exceptions.
 
 xUnit assertions are fairly basic and have the problem of it being unclear which argument goes in which position:
+
 ```csharp
 var one = 2;
 Assert.Equal(1, one)
@@ -150,6 +151,7 @@ TUnit assertions are built with the type system in mind. Specific assertions are
 ## Extras
 
 TUnit offers a few extra bits that NUnit and xUnit do not (that I'm aware of):
+
 - Tests are source generated - And not relied upon using reflection to discover them
 - Hooks are available at the assembly, class and test level, each with respective objects available to be referenced in your hook methods. An `AssemblyHookContext` object will have details on the current assembly and a collection of all the tests its discovered. If you're in a tear down, each test object will have details of its result. A `ClassHookContext` is the same, but with details of the class and its tests instead. And a `TestContext` will just be the details for a single test.
 - Dependent tests - Tests can depend on another and delay their execution until their dependencies have finished - Without turning off parallelism or having to manually work out the best way to configure this.
