@@ -26,6 +26,7 @@ public class DependsOnTests3
     
     [Test]
     [DependsOn(nameof(Test1))]
+    [DependsOn(nameof(Test2))]
     public async Task Test3()
     {
         _test3Start = DateTime.Now;
