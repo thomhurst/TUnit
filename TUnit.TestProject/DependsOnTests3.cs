@@ -24,17 +24,8 @@ public class DependsOnTests3
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
     
-    [DataDrivenTest]
-    [Arguments(1)]
-    public async Task Test2(int value)
-    {
-        await Task.Delay(TimeSpan.FromSeconds(value));
-    }
-    
     [Test]
     [DependsOn(nameof(Test1))]
-    [DependsOn(nameof(Test2))]
-    [DependsOn("B")]
     public async Task Test3()
     {
         _test3Start = DateTime.Now;
