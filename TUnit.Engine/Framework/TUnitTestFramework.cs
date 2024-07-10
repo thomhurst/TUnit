@@ -102,6 +102,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             }
             finally
             {
+                await _serviceProvider
+                    .GetRequiredService<TUnitOnEndExecutor>()
+                    .ExecuteAsync();
+
                 context.Complete();
             }
         }
@@ -140,11 +144,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         try
         {
             await using var _ = _serviceProvider;
-        
-            await _serviceProvider
-                .GetRequiredService<TUnitOnEndExecutor>()
-                .ExecuteAsync();
-        
+            
             return new CloseTestSessionResult
             {
                 IsSuccess = true
