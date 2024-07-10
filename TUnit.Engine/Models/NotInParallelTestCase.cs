@@ -1,8 +1,10 @@
-﻿namespace TUnit.Engine.Models;
+﻿using TUnit.Core;
+
+namespace TUnit.Engine.Models;
 
 internal record NotInParallelTestCase
 {
-    public string Id => Test.TestInformation.TestId;
+    public string Id => Test.TestDetails.TestId;
     public required ConstraintKeysCollection ConstraintKeys { get; init; }
     public required DiscoveredTest Test { get; init; }
 

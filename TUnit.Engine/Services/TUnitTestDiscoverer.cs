@@ -1,5 +1,5 @@
 ﻿using Microsoft.Testing.Platform.Requests;
-using TUnit.Engine.Models;
+using TUnit.Core;
 
 namespace TUnit.Engine.Services;
 
@@ -14,7 +14,7 @@ internal class TUnitTestDiscoverer
         _testFilterService = testFilterService;
     }
     
-    public IEnumerable<DiscoveredTest> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest, CancellationToken cancellationToken)
+    public ParallelQuery<DiscoveredTest> DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         

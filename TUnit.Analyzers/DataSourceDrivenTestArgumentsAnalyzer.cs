@@ -14,7 +14,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(
             Rules.NoTestDataSourceProvided,
-            Rules.NoDataSourceMethodFound,
+            Rules.NoMethodFound,
             Rules.MethodMustBeStatic,
             Rules.MethodMustBePublic,
             Rules.MethodMustNotBeAbstract,
@@ -129,7 +129,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.NoDataSourceMethodFound,
+                    Rules.NoMethodFound,
                     dataSourceDrivenAttribute.GetLocation())
             );
             return;

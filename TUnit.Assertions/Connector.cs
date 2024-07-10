@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 
@@ -31,23 +32,19 @@ public abstract class Connector<TActual, TAnd, TOr>
         return AssertionConditionCombiner.Combine(OtherAssertCondition, ConnectorType, assertCondition);
     }
 
+    [Obsolete("This is a base `object` method that should not be called.", true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public override bool Equals(object? obj)
+    [DebuggerHidden]
+    public new void Equals(object? obj)
     {
-        // ReSharper disable once BaseObjectEqualsIsObjectEquals
-        return base.Equals(obj);
+        throw new InvalidOperationException("This is a base `object` method that should not be called.");
     }
 
+    [Obsolete("This is a base `object` method that should not be called.", true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public override int GetHashCode()
+    [DebuggerHidden]
+    public new void ReferenceEquals(object a, object b)
     {
-        // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
-        return base.GetHashCode();
-    }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public override string? ToString()
-    {
-        return base.ToString();
+        throw new InvalidOperationException("This is a base `object` method that should not be called.");
     }
 }

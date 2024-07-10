@@ -8,357 +8,318 @@ using TUnit.Engine.CommandLineProviders;
 
 namespace TUnit.Engine.Logging;
 
-internal class ConsoleInterceptor : TextWriter
+internal abstract class ConsoleInterceptor : TextWriter
 {
-    private readonly ICommandLineOptions _commandLineOptions;
-    public static ConsoleInterceptor Instance { get; private set; } = null!;
-
-    private readonly TUnitLogger _logger;
-    public override Encoding Encoding => InnerWriter?.Encoding ?? Encoding.UTF8;
-
-    public static TextWriter DefaultOut { get; }
+    public override Encoding Encoding => OutputWriter?.Encoding ?? Encoding.UTF8;
     
-    public StringWriter? InnerWriter => TestContext.Current?.OutputWriter;
+    public abstract StringWriter? OutputWriter { get; }
 
-    static ConsoleInterceptor()
-    {
-        DefaultOut = Console.Out;
-    }
+    public abstract void Initialize();
 
-    public ConsoleInterceptor(TUnitLogger logger, ICommandLineOptions commandLineOptions)
-    {
-        _commandLineOptions = commandLineOptions;
-        _logger = logger;
-        Instance = this;
-    }
+    public abstract void SetModule(TestContext testContext);
     
-    public void Initialize()
-    {
-        Console.SetOut(this);
-    }
-
-    public void SetModule(TestContext testContext)
-    {
-        testContext.OnDispose = async (_, _) =>
-        {
-            try
-            {
-                if (_commandLineOptions.IsOptionSet(DisplayTestOutputCommandProvider.DisplayTestOutput))
-                {
-                    await _logger.LogInformationAsync(testContext.GetConsoleOutput());
-                }
-            }
-            catch (Exception e)
-            {
-                await _logger.LogErrorAsync(e);
-            }
-        };
-    }
-    
-    public new void Dispose()
-    {
-        InnerWriter?.Dispose();
-        Console.SetOut(DefaultOut);
-    }
+    private protected abstract void ResetDefault();
 
     public override async ValueTask DisposeAsync()
     {
-        if (InnerWriter is not null)
+        await base.DisposeAsync();
+        
+        if (OutputWriter is not null)
         {
-            await InnerWriter.DisposeAsync();
+            await OutputWriter.DisposeAsync();
         }
-
-        Console.SetOut(DefaultOut);
+        
+        ResetDefault();
     }
-
+    
     public override void Flush()
     {
-        InnerWriter?.Flush();
+        OutputWriter?.Flush();
     }
 
     public override void Write(bool value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(char[]? buffer)
     {
-        InnerWriter?.Write(buffer);
+        OutputWriter?.Write(buffer);
     }
 
     public override void Write(decimal value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(double value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(int value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(long value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(object? value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(float value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(string format, object? arg0)
     {
-        InnerWriter?.Write(format, arg0);
+        OutputWriter?.Write(format, arg0);
     }
 
     public override void Write(string format, object? arg0, object? arg1)
     {
-        InnerWriter?.Write(format, arg0, arg1);
+        OutputWriter?.Write(format, arg0, arg1);
     }
 
     public override void Write(string format, object? arg0, object? arg1, object? arg2)
     {
-        InnerWriter?.Write(format, arg0, arg1, arg2);
+        OutputWriter?.Write(format, arg0, arg1, arg2);
     }
 
     public override void Write(string format, params object?[] arg)
     {
-        InnerWriter?.Write(format, arg);
+        OutputWriter?.Write(format, arg);
     }
 
     public override void Write(uint value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(ulong value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public new Task WriteAsync(char[]? buffer)
     {
-        return InnerWriter?.WriteAsync(buffer) ?? Task.CompletedTask;
+        return OutputWriter?.WriteAsync(buffer) ?? Task.CompletedTask;
     }
 
     public override void WriteLine()
     {
-        InnerWriter?.WriteLine();
+        OutputWriter?.WriteLine();
     }
 
     public override void WriteLine(bool value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(char value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(char[]? buffer)
     {
-        InnerWriter?.WriteLine(buffer);
+        OutputWriter?.WriteLine(buffer);
     }
 
     public override void WriteLine(char[] buffer, int index, int count)
     {
-        InnerWriter?.WriteLine(buffer, index, count);
+        OutputWriter?.WriteLine(buffer, index, count);
     }
 
     public override void WriteLine(decimal value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(double value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(int value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(long value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(object? value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(float value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(string? value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(string format, object? arg0)
     {
-        InnerWriter?.WriteLine(format, arg0);
+        OutputWriter?.WriteLine(format, arg0);
     }
 
     public override void WriteLine(string format, object? arg0, object? arg1)
     {
-        InnerWriter?.WriteLine(format, arg0, arg1);
+        OutputWriter?.WriteLine(format, arg0, arg1);
     }
 
     public override void WriteLine(string format, object? arg0, object? arg1, object? arg2)
     {
-        InnerWriter?.WriteLine(format, arg0, arg1, arg2);
+        OutputWriter?.WriteLine(format, arg0, arg1, arg2);
     }
 
     public override void WriteLine(string format, params object?[] arg)
     {
-        InnerWriter?.WriteLine(format, arg);
+        OutputWriter?.WriteLine(format, arg);
     }
 
     public override void WriteLine(uint value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override void WriteLine(ulong value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override Task WriteLineAsync()
     {
-        return InnerWriter?.WriteLineAsync() ?? Task.CompletedTask;
+        return OutputWriter?.WriteLineAsync() ?? Task.CompletedTask;
     }
 
     public new Task WriteLineAsync(char[]? buffer)
     {
-        return InnerWriter?.WriteLineAsync(buffer) ?? Task.CompletedTask;
+        return OutputWriter?.WriteLineAsync(buffer) ?? Task.CompletedTask;
     }
 
-    public override IFormatProvider FormatProvider => InnerWriter?.FormatProvider ?? CultureInfo.CurrentCulture;
+    public override IFormatProvider FormatProvider => OutputWriter?.FormatProvider ?? CultureInfo.CurrentCulture;
 
     public override string NewLine
     {
-        get => InnerWriter?.NewLine ?? Environment.NewLine;
+        get => OutputWriter?.NewLine ?? Environment.NewLine;
         set
         {
-            if (InnerWriter is null)
+            if (OutputWriter is null)
             {
                 return;
             }
             
-            InnerWriter.NewLine = value;
+            OutputWriter.NewLine = value;
         }
     }
 
     public override void Close()
     {
-        InnerWriter?.Close();
+        OutputWriter?.Close();
     }
 
     public override Task FlushAsync()
     {
-        return InnerWriter?.FlushAsync() ?? Task.CompletedTask;
+        return OutputWriter?.FlushAsync() ?? Task.CompletedTask;
     }
 
     public override void Write(char value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(char[] buffer, int index, int count)
     {
-        InnerWriter?.Write(buffer, index, count);
+        OutputWriter?.Write(buffer, index, count);
     }
 
     public override void Write(ReadOnlySpan<char> buffer)
     {
-        InnerWriter?.Write(buffer);
+        OutputWriter?.Write(buffer);
     }
 
     public override void Write(string? value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override void Write(StringBuilder? value)
     {
-        InnerWriter?.Write(value);
+        OutputWriter?.Write(value);
     }
 
     public override Task WriteAsync(char value)
     {
-        return InnerWriter?.WriteAsync(value) ?? Task.CompletedTask;
+        return OutputWriter?.WriteAsync(value) ?? Task.CompletedTask;
     }
 
     public override Task WriteAsync(char[] buffer, int index, int count)
     {
-        return InnerWriter?.WriteAsync(buffer, index, count) ?? Task.CompletedTask;
+        return OutputWriter?.WriteAsync(buffer, index, count) ?? Task.CompletedTask;
     }
 
     public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
     {
-        return InnerWriter?.WriteAsync(buffer, cancellationToken) ?? Task.CompletedTask;
+        return OutputWriter?.WriteAsync(buffer, cancellationToken) ?? Task.CompletedTask;
     }
 
     public override Task WriteAsync(string? value)
     {
-        return InnerWriter?.WriteAsync(value) ?? Task.CompletedTask;
+        return OutputWriter?.WriteAsync(value) ?? Task.CompletedTask;
     }
 
     public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new())
     {
-        return InnerWriter?.WriteAsync(value, cancellationToken) ?? Task.CompletedTask;
+        return OutputWriter?.WriteAsync(value, cancellationToken) ?? Task.CompletedTask;
     }
 
     public override void WriteLine(ReadOnlySpan<char> buffer)
     {
-        InnerWriter?.WriteLine(buffer);
+        OutputWriter?.WriteLine(buffer);
     }
 
     public override void WriteLine(StringBuilder? value)
     {
-        InnerWriter?.WriteLine(value);
+        OutputWriter?.WriteLine(value);
     }
 
     public override Task WriteLineAsync(char value)
     {
-        return InnerWriter?.WriteLineAsync(value) ?? Task.CompletedTask;
+        return OutputWriter?.WriteLineAsync(value) ?? Task.CompletedTask;
     }
 
     public override Task WriteLineAsync(char[] buffer, int index, int count)
     {
-        return InnerWriter?.WriteLineAsync(buffer, index, count) ?? Task.CompletedTask;
+        return OutputWriter?.WriteLineAsync(buffer, index, count) ?? Task.CompletedTask;
     }
 
     public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
     {
-        return InnerWriter?.WriteLineAsync(buffer, cancellationToken) ?? Task.CompletedTask;
+        return OutputWriter?.WriteLineAsync(buffer, cancellationToken) ?? Task.CompletedTask;
     }
 
     public override Task WriteLineAsync(string? value)
     {
-        return InnerWriter?.WriteLineAsync(value) ?? Task.CompletedTask;
+        return OutputWriter?.WriteLineAsync(value) ?? Task.CompletedTask;
     }
 
     public override Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
     {
-        return InnerWriter?.WriteLineAsync(value, cancellationToken) ?? Task.CompletedTask;
+        return OutputWriter?.WriteLineAsync(value, cancellationToken) ?? Task.CompletedTask;
     }
 }

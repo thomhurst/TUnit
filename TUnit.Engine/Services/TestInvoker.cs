@@ -13,30 +13,43 @@ internal class TestInvoker
         _disposer = disposer;
     }
     
-    public async Task Invoke(UnInvokedTest unInvokedTest, List<Exception> cleanUpExceptions)
+    public async Task Invoke(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
     {
         try
         {
-            TestContext.TestContexts.Value = unInvokedTest.TestContext;
+            TestContext.TestContexts.Value = discoveredTest.TestContext;
 
-            await GlobalTestHookOrchestrator.ExecuteSetups(unInvokedTest.TestContext, EngineCancellationToken.Token);
+            await GlobalTestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext, EngineCancellationToken.Token);
 
-            foreach (var setUp in unInvokedTest.GetSetUps(EngineCancellationToken.Token))
+            foreach (var setUp in discoveredTest.GetSetUps(EngineCancellationToken.Token))
             {
                 await RunHelpers.RunAsync(setUp);
             }
             
-            await unInvokedTest.ExecuteTest(unInvokedTest.TestContext.CancellationToken);
+            discoveredTest.TestContext.SetUpEnd = DateTimeOffset.Now;
+            
+            discoveredTest.TestContext.TestStart = DateTimeOffset.Now;
+            
+            await discoveredTest.ExecuteTest(discoveredTest.TestContext.CancellationToken);
+            
+            discoveredTest.TestContext.TestEnd = DateTimeOffset.Now;
         }
         finally
         {
-            foreach (var cleanUp in unInvokedTest.GetCleanUps(EngineCancellationToken.Token))
+            discoveredTest.TestContext.SetUpEnd ??= DateTimeOffset.Now;
+            
+            discoveredTest.TestContext.TestStart ??= DateTimeOffset.Now;
+            discoveredTest.TestContext.TestEnd ??= DateTimeOffset.Now;
+            
+            discoveredTest.TestContext.CleanUpStart = DateTimeOffset.Now;
+            
+            foreach (var cleanUp in discoveredTest.GetCleanUps(EngineCancellationToken.Token))
             {
                 await RunHelpers.RunSafelyAsync(cleanUp, cleanUpExceptions);
             }
             
-            await RunHelpers.RunSafelyAsync(() => _disposer.DisposeAsync(unInvokedTest.TestContext.TestInformation.ClassInstance), cleanUpExceptions);
-            await GlobalTestHookOrchestrator.ExecuteCleanUps(unInvokedTest.TestContext, cleanUpExceptions, EngineCancellationToken.Token);
+            await RunHelpers.RunSafelyAsync(() => _disposer.DisposeAsync(discoveredTest.TestContext.TestDetails.ClassInstance), cleanUpExceptions);
+            await GlobalTestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext, cleanUpExceptions, EngineCancellationToken.Token);
         }
     }
 }

@@ -80,7 +80,7 @@ public class ClassDataSourceMatchesConstructorAnalyzerTests
                             }
                             """;
         
-        var expected = Verifier.Diagnostic(Rules.NoDataSourceMethodFound).WithLocation(0);
+        var expected = Verifier.Diagnostic(Rules.NoMethodFound).WithLocation(0);
         
         await Verifier.VerifyAnalyzerAsync(text, expected);
     }

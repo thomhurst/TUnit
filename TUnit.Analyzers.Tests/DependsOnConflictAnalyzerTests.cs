@@ -40,6 +40,35 @@ public class DependsOnConflictAnalyzerTests
     }
     
     [Test]
+    public async Task Not_Found_Test_Raises_Error()
+    {
+        const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [Test]
+                                public void Test()
+                                {
+                                }
+                                
+                                [Test, {|#0:DependsOn("Test3")|}]
+                                public void Test2()
+                                {
+                                }
+                            
+                            }
+                            """;
+
+        var expected = Verifier
+            .Diagnostic(Rules.NoMethodFound)
+            .WithLocation(0);
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+    }
+    
+    [Test]
     public async Task Nested_Conflict_Raises_Error()
     {
         const string text = """

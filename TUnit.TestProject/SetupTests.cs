@@ -105,7 +105,7 @@ public class SetupTests : Base3
     [BeforeEachTest]
     public async Task Setup()
     {
-        _response = await new HttpClient().GetAsync($"{_serverAddress}/ping/?testName={TestContext.Current?.TestInformation.TestName}");
+        _response = await new HttpClient().GetAsync($"{_serverAddress}/ping/?testName={TestContext.Current?.TestDetails.TestName}");
     }
 
     [AfterEachTest]

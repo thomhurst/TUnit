@@ -9,13 +9,13 @@ public class GlobalTestHooks
     [GlobalBeforeEachTest]
     public static void SetUp(TestContext testContext)
     {
-        testContext.ObjectBag.TryAdd("SetUpCustomTestNameProperty", testContext.TestInformation.TestName);
+        testContext.ObjectBag.TryAdd("SetUpCustomTestNameProperty", testContext.TestDetails.TestName);
     }
     
     [GlobalAfterEachTest]
     public static void CleanUp(TestContext testContext)
     {
-        testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.TestInformation.TestName);
+        testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.TestDetails.TestName);
     }
 }
 

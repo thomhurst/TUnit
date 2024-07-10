@@ -1,6 +1,8 @@
-﻿using TUnit.Assertions;
+﻿using System.Net;
+using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
+using HttpRequestException = System.Net.Http.HttpRequestException;
 
 namespace TUnit.TestProject;
 
@@ -57,7 +59,7 @@ public class CustomRetryTests
         {
         }
 
-        public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception, int currentRetryCount)
+        public override Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)
         {
             return Task.FromResult(exception is OperationCanceledException);
         }
@@ -69,7 +71,7 @@ public class CustomRetryTests
         {
         }
 
-        public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception, int currentRetryCount)
+        public override Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)
         {
             return Task.FromResult(exception is NullReferenceException);
         }

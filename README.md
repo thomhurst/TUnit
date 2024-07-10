@@ -17,7 +17,7 @@ See here: <https://thomhurst.github.io/TUnit/>
 - Injectable test data functionality
 - Hooks before and after: Assembly, Class, Test
 - Designed to avoid common pitfalls such as leaky test states
-- Ability to view metadata and results (if in a cleanup method) for a test from a `TestContext` object
+- Ability to view and interrogate metadata and results from various assembly/class/test context objects
 
 ## Installation
 
@@ -43,16 +43,16 @@ or with more complex test orchestration needs
 
 ```csharp
     [BeforeAllTestsInClass]
-    public static async Task ClearDatabase() { ... }
+    public static async Task ClearDatabase(ClassHookContext context) { ... }
 
     [AfterAllTestsInClass]
-    public static async Task AssertDatabaseIsAsExpected() { ... }
+    public static async Task AssertDatabaseIsAsExpected(ClassHookContext context) { ... }
 
     [BeforeEachTest]
-    public async Task CreatePlaywrightBrowser() { ... }
+    public async Task CreatePlaywrightBrowser(TestContext context) { ... }
 
     [AfterEachTest]
-    public async Task DisposePlaywrightBrowser() { ... }
+    public async Task DisposePlaywrightBrowser(TestContext context) { ... }
 
     [Retry(3)]
     [Test, DisplayName("Register an account")]
@@ -63,7 +63,7 @@ or with more complex test orchestration needs
     [EnumerableMethodData(nameof(GetAuthDetails))]
     public async Task Login(string username, string password) { ... }
 
-    [DataSourceDrivenTest, DependsOn(nameof(Login))]
+    [DataSourceDrivenTest, DependsOn(nameof(Login), [typeof(string), typeof(string)])]
     [EnumerableMethodData(nameof(GetAuthDetails))]
     public async Task DeleteAccount(string username, string password) { ... }
 
@@ -89,7 +89,7 @@ or with more complex test orchestration needs
     [Test, Skip("Not yet built!")]
     public async Task CheckCookies() { ... }
 
-    [Test, Explicit]
+    [Test, Explicit, WindowsOnlyTest, RetryHttpServiceUnavailable]
     [Property("Some Key", "Some Value")]
     public async Task Ping() { ... }
 
@@ -99,60 +99,57 @@ or with more complex test orchestration needs
         yield return ("user2", "password2");
         yield return ("user3", "password3");
     }
+
+    public class WindowsOnlyTestAttribute : SkipAttribute
+    {
+        public WindowsOnlyTestAttribute() : base("Windows only test")
+        {
+        }
+
+        public override Task<bool> ShouldSkip(TestContext testContext)
+        {
+            return Task.FromResult(!OperatingSystem.IsWindows());
+        }
+    }
+
+    public class RetryHttpServiceUnavailableAttribute : RetryAttribute
+    {
+        public RetryHttpServiceUnavailableAttribute(int times) : base(times)
+        {
+        }
+
+        public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception, int currentRetryCount)
+        {
+            return Task.FromResult(exception is HttpRequestException httpRequestException && httpRequestException.StatusCode == HttpStatusCode.ServiceUnavailable);
+        }
+    }
 ```
 
 ## Motivations
 
-There are only three main testing frameworks in the .NET world - xUnit, NUnit and MSTest. More frameworks means more options, and more options motivates more features or improvements.
+TUnit is inspired by NUnit and xUnit - two of the most popular testing frameworks for .NET.
 
-These testing frameworks are amazing, but I've had some issues with them. You might not have had any of these, but these are my experiences:
+It aims to build upon the useful features of both while trying to address any pain points that they may have. You may have experienced these, or you may have not even known and experienced flakiness or bugs due to it.
 
-### xUnit
+NUnit by default creates 1 test class for all the tests within it, and runs them all against the same instance. Therefore if a test stores or accesses any state, it could be a hangover from another test, meaning leaky test states and potentially dodgy data.
 
-There is no way to tap into information about a test in a generic way. For example, I've had some Playwright tests run before, and I want them to save a screenshot or video ONLY when the test fails. If the test passes, I don't have anything to investigate, and it'll use up unnecessary storage, and it'll probably slow my test suite down if I had hundreds or thousands of tests all trying to save screenshots.
+xUnit doesn't offer a way out-of-the-box to retrieve the test state within a hook. For example, running UI tests, in a tear down method, you might want to take a screenshot but only if the test failed. The hook is written generically to work with every test, but we don't have anything available to us to query for the test status.
 
-However, if I'm in a Dispose method which is called when the test ends, then there's no way for me to know if my test succeeded or failed. I'd have to do some really clunky workaround involving try catch and setting a boolean or exception to a class field and checking that. And to do that for every test was just not ideal.
+xUnit performs tear downs through interfaces such as IDisposable. TUnit also allows this, but a problem occurs if you want to use test class inheritance. Say you have a class that wants to take a screenshot, and then a base class that disposes the browser. You have to declare another `Dispose()` method, and hide the visibility of the base one with the `new` keyword, which is generally frowned up. You then also have to remember to call `base.Dispose()` - and if you don't, you may have bugs and/or unreleased resources. And then to top it off, you have to manage exceptions yourself to ensure they still run. In TUnit, all cleanup methods will run, even if previous code has encountered exceptions.
 
-#### Assertions
-
-I have stumbled across assertions so many times where the arguments are the wrong way round. This can result in really confusing error messages.
-
+xUnit assertions are fairly basic and have the problem of it being unclear which argument goes in which position:
 ```csharp
 var one = 2;
 Assert.Equal(1, one)
 Assert.Equal(one, 1)
 ```
 
-### NUnit
+NUnit assertions largely influenced the way that TUnit assertions work. However, NUnit assertions do not have compile time checks. I could check if a string is negative (`NUnitAssert.That("String", Is.Negative);`) or if a boolean throws an exception (`NUnitAssert.That(true, Throws.ArgumentException);`). These assertions don't make sense. There are analyzers to help catch these - But they will compile if these analyzers aren't run.
+TUnit assertions are built with the type system in mind. Specific assertions are built via extensions to the relevant types, and not in a generic sense that could apply to anything. That means when you're using intellisense to see what methods you have available, you should only see assertions that are relevant for your type. This makes it harder to make mistakes, and decreases your feedback loop time.
 
-#### Assertions
+## Extras
 
-I absolutely love the newer assertion syntax in NUnit. The `Assert.That(something, Is.Something)`. I think it's really clear to read, it's clear what is being asserted, and it's clear what you're trying to achieve.
-
-However, there is a lack of type checking on assertions. (Yes, there are analyzer packages to help with this, but this still isn't strict type checking.)
-
-`Assert.That("1", Throws.Exception);`
-
-This assertion makes no sense, because we're passing in a string. This can never throw an exception because it isn't a delegate that can be executed. But it's still perfectly valid code that will compile.
-
-As does this: `Assert.That(1, Does.Contain("Foo!"));`
-
-An integer can not contain a string. Of course these will fail at runtime, but we could move these errors up to compile time for faster feedback. This is very useful for long pipelines or build times.
-
-Some methods also just read a little bit weird: `Assert.That(() => Something(), Throws.Exception.Message.Contain(someMessage));`
-
-"Throws Exception Message Contain someMessage" - It's not terrible, but it could read a little better.
-
-With TUnit assertions, I wanted to make these impossible to compile. So type constraints are built into the assertions themselves. There should be no way for a non-delegate to be able to do a `Throws` assertion, or for an `int` assertion to check for `string` conditions.
-
-So in TUnit, this will compile:
-
-```csharp
-await Assert.That(() => GetSomeValue()).Throws.Nothing;
-```
-
-This won't:
-
-```csharp
-await Assert.That(GetSomeValue()).Throws.Nothing;
-```
+TUnit offers a few extra bits that NUnit and xUnit do not (that I'm aware of):
+- Tests are source generated - And not relied upon using reflection to discover them
+- Hooks are available at the assembly, class and test level, each with respective objects available to be referenced in your hook methods. An `AssemblyHookContext` object will have details on the current assembly and a collection of all the tests its discovered. If you're in a tear down, each test object will have details of its result. A `ClassHookContext` is the same, but with details of the class and its tests instead. And a `TestContext` will just be the details for a single test.
+- Dependent tests - Tests can depend on another and delay their execution until their dependencies have finished - Without turning off parallelism or having to manually work out the best way to configure this.

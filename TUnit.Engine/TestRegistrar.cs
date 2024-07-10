@@ -3,7 +3,6 @@ using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Data;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 
 namespace TUnit.Engine;
@@ -27,7 +26,7 @@ public static class TestRegistrar
 			_ => classType.Assembly.GetCustomAttributes().ToArray());
 		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
 		
-		var testInformation = new TestInformation<TClassType>
+		var testInformation = new TestDetails<TClassType>
 		{
 			TestId = testId,
 			Categories = attributes.OfType<CategoryAttribute>().Select(x => x.Category).ToArray(),
@@ -62,7 +61,7 @@ public static class TestRegistrar
 
 		ClassHookOrchestrator.RegisterTestContext(classType, testContext);
 
-		var unInvokedTest = new UnInvokedTest<TClassType>(testMetadata.ResettableClassFactory)
+		var unInvokedTest = new DiscoveredTest<TClassType>(testMetadata.ResettableClassFactory)
 		{
 			TestContext = testContext,
 			BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),

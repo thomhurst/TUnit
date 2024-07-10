@@ -15,7 +15,7 @@ internal static class Rules
     public static readonly DiagnosticDescriptor NoTestDataSourceProvided =
         CreateDescriptor("TUnit0003", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor NoDataSourceMethodFound =
+    public static readonly DiagnosticDescriptor NoMethodFound =
         CreateDescriptor("TUnit0004", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MethodParameterBadNullability =
@@ -104,6 +104,9 @@ internal static class Rules
     
     public static readonly DiagnosticDescriptor DependsOnConflicts =
         CreateDescriptor("TUnit0033", UsageCategory, DiagnosticSeverity.Error);
+        
+    public static readonly DiagnosticDescriptor NoMainMethod =
+        CreateDescriptor("TUnit0034", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

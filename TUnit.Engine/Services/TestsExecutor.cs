@@ -3,6 +3,7 @@ using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
@@ -16,7 +17,8 @@ internal class TestsExecutor
 
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly TestGrouper _testGrouper;
-    private readonly ConsoleInterceptor _consoleInterceptor;
+    private readonly StandardOutConsoleInterceptor _standardOutConsoleInterceptor;
+    private readonly StandardErrorConsoleInterceptor _standardErrorConsoleInterceptor;
     private readonly TUnitLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
 
@@ -27,22 +29,25 @@ internal class TestsExecutor
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
         TestGrouper testGrouper,
-        ConsoleInterceptor consoleInterceptor,
+        StandardOutConsoleInterceptor standardOutConsoleInterceptor,
+        StandardErrorConsoleInterceptor standardErrorConsoleInterceptor,
         TUnitLogger logger,
         ICommandLineOptions commandLineOptions)
     {
         _singleTestExecutor = singleTestExecutor;
         _testGrouper = testGrouper;
-        _consoleInterceptor = consoleInterceptor;
+        _standardOutConsoleInterceptor = standardOutConsoleInterceptor;
+        _standardErrorConsoleInterceptor = standardErrorConsoleInterceptor;
         _logger = logger;
         _commandLineOptions = commandLineOptions;
 
         _maximumParallelTests = GetMaximumParallelTests();
     }
 
-    public async Task ExecuteAsync(List<DiscoveredTest> testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
+    public async Task ExecuteAsync(ParallelQuery<DiscoveredTest> testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
     {
-        _consoleInterceptor.Initialize();
+        _standardOutConsoleInterceptor.Initialize();
+        _standardErrorConsoleInterceptor.Initialize();
 
         var tests = _testGrouper.OrganiseTests(testNodes);
 
@@ -81,7 +86,7 @@ internal class TestsExecutor
     private async Task ProcessGroup(ITestExecutionFilter? filter, ExecuteRequestContext context,
         IEnumerable<NotInParallelTestCase> tests)
     {
-        foreach (var test in tests.OrderBy(x => x.Test.TestInformation.Order))
+        foreach (var test in tests.OrderBy(x => x.Test.TestDetails.Order))
         {
             var keys = test.ConstraintKeys;
 

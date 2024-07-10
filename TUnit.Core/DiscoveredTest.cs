@@ -3,11 +3,11 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-internal class UnInvokedTest<TTestClass> : UnInvokedTest
+internal class DiscoveredTest<TTestClass> : DiscoveredTest
 {
     private readonly ResettableLazy<TTestClass> _resettableLazyTestClassFactory;
 
-    public UnInvokedTest(ResettableLazy<TTestClass> resettableLazyTestClassFactory)
+    public DiscoveredTest(ResettableLazy<TTestClass> resettableLazyTestClassFactory)
     {
         _resettableLazyTestClassFactory = resettableLazyTestClassFactory;
     }
@@ -73,7 +73,7 @@ internal class UnInvokedTest<TTestClass> : UnInvokedTest
     }
 }
 
-internal abstract class UnInvokedTest
+internal abstract class DiscoveredTest
 {
     public required TestContext TestContext { get; init; }
     
@@ -85,4 +85,6 @@ internal abstract class UnInvokedTest
     public abstract IEnumerable<Func<Task>> GetCleanUps(CancellationToken engineToken);
 
     public abstract void ResetTestInstance();
+    
+    public TestDetails TestDetails => TestContext.TestDetails;
 }

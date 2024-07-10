@@ -26,7 +26,8 @@ internal static class ServiceCollectionExtensions
         return services
             .AddSingleton(EngineCancellationToken.CancellationTokenSource)
             .AddSingleton<Disposer>()
-            .AddSingleton<ConsoleInterceptor>()
+            .AddSingleton<StandardOutConsoleInterceptor>()
+            .AddSingleton<StandardErrorConsoleInterceptor>()
             .AddSingleton<TestsLoader>()
             .AddSingleton<TestsExecutor>()
             .AddSingleton<TestGrouper>()

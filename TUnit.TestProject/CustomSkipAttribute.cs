@@ -1,4 +1,5 @@
-﻿using TUnit.Core;
+﻿using System.Runtime.InteropServices;
+using TUnit.Core;
 
 namespace TUnit.TestProject;
 

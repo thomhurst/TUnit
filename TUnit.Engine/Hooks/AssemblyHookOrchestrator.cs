@@ -2,7 +2,6 @@
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Engine.Data;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Hooks;
 

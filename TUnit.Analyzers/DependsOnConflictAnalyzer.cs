@@ -10,8 +10,7 @@ namespace TUnit.Analyzers;
 public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(
-            Rules.DependsOnConflicts);
+        ImmutableArray.Create(Rules.DependsOnConflicts, Rules.NoMethodFound);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -25,7 +24,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var dependencies = GetDependencies(methodSymbol, methodSymbol).ToArray();
+        var dependencies = GetDependencies(context, methodSymbol, methodSymbol).ToArray();
 
         if (!dependencies.Any() || !dependencies.Contains(methodSymbol, SymbolEqualityComparer.Default))
         {
@@ -35,7 +34,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(Rules.DependsOnConflicts, methodSymbol.Locations.FirstOrDefault(), string.Join(" > ", [methodSymbol.Name, ..dependencies.Select(x => x.Name)])));
     }
 
-    private IEnumerable<IMethodSymbol> GetDependencies(IMethodSymbol originalMethod, IMethodSymbol methodToGetDependenciesFor)
+    private IEnumerable<IMethodSymbol> GetDependencies(SymbolAnalysisContext context, IMethodSymbol originalMethod, IMethodSymbol methodToGetDependenciesFor)
     {
         if (!methodToGetDependenciesFor.IsTestMethod())
         {
@@ -61,17 +60,28 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         }).ToArray();
 
         var methods = methodToGetDependenciesFor.ReceiverType?.GetMembers().OfType<IMethodSymbol>().ToArray() ?? [];
+
+        if (!methods.Any())
+        {
+            foreach (var dependsOnAttribute in dependsOnAttributes)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMethodFound, dependsOnAttribute.GetLocation()));
+            }
+
+            yield break;
+        }
         
         for (var i = 0; i < dependencyNames.Length; i++)
         {
             var name = dependencyNames[i];
             var parameterTypes = parameterTypesArray[i];
 
-            var foundDependency = methods.FirstOrDefault(x => x.Name == name && x.Parameters.Select(p => p.Type).SequenceEqual(parameterTypes, SymbolEqualityComparer.Default));
+            var foundDependency = methods.SingleOrDefault(x => x.Name == name)
+                                  ?? methods.FirstOrDefault(x => x.Name == name && x.Parameters.Select(p => p.Type).SequenceEqual(parameterTypes, SymbolEqualityComparer.Default));
 
             if (foundDependency == null)
             {
-                // TODO: Can't find method
+                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMethodFound, dependsOnAttributes[i].GetLocation()));
                 continue;
             }
 
@@ -82,7 +92,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
                 yield break;
             }
             
-            foreach (var nestedDependency in GetDependencies(originalMethod, foundDependency))
+            foreach (var nestedDependency in GetDependencies(context, originalMethod, foundDependency))
             {
                 yield return nestedDependency;
                 

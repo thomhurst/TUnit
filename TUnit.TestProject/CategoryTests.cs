@@ -24,7 +24,7 @@ public class CategoryTests
 
     private static IEnumerable<string> GetDictionary()
     {
-        return TestContext.Current?.TestInformation.Categories ?? [];
+        return TestContext.Current?.TestDetails.Categories ?? [];
     }
 
     private class ClassCategoryAttribute : CategoryAttribute

@@ -12,7 +12,7 @@ public class Tests
     {
         Console.WriteLine("Blah!");
 
-        await Assert.That(TestContext.Current?.GetConsoleOutput()).Is.EqualTo("Blah!", StringComparison.Ordinal);
+        await Assert.That(TestContext.Current?.GetConsoleStandardOutput()).Is.EqualTo("Blah!", StringComparison.Ordinal);
     }
     
     [Test]
@@ -188,14 +188,14 @@ public class Tests
     [Category("Pass")]
     public async Task TestContext1()
     {
-        await Assert.That(TestContext.Current?.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current?.TestDetails.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]
     [Category("Fail")]
     public async Task TestContext2()
     {
-        await Assert.That(TestContext.Current?.TestInformation.TestName).Is.EqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current?.TestDetails.TestName).Is.EqualTo(nameof(TestContext1));
     }
 
     [Test]

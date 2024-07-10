@@ -72,6 +72,30 @@ public static class RunHelpers
 
         await taskCompletionSource.Task;
     }
+    
+    public static Task RunWithTimeoutAsync(Action action, TimeSpan timeout)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), timeout);
+    }
+    
+    public static Task RunWithTimeoutAsync(Func<Task> action, TimeSpan timeout)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), timeout);
+    }
+    
+    public static Task RunWithTimeoutAsync(Func<ValueTask> action, TimeSpan timeout)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), timeout);
+    }
+
+    private static async Task RunWithTimeoutAsync(Task task, TimeSpan timeout)
+    {
+        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
+        
+        cancellationTokenSource.CancelAfter(timeout);
+
+        await RunWithTimeoutAsync(task, cancellationTokenSource.Token);
+    }
 
     public static async Task RunSafelyAsync(Action action, List<Exception> exceptions)
     {
