@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace TUnit.Core;
 
-public record TestInformation<TClassType> : TestInformation
+public record TestDetails<TClassType> : TestDetails
 {
     [JsonIgnore]
     public required ResettableLazy<TClassType?> LazyClassInstance { get; init; }
@@ -11,7 +11,7 @@ public record TestInformation<TClassType> : TestInformation
     public override object? ClassInstance => LazyClassInstance.Value;
 } 
 
-public abstract record TestInformation
+public abstract record TestDetails
 {
     public required string TestId { get; init; }
     
@@ -31,7 +31,6 @@ public abstract record TestInformation
     public required int CurrentRepeatAttempt { get; init; }
     public required int RepeatLimit { get; init; }
     public required int RetryLimit { get; init; }
-    public int CurrentRetryAttempt { get; internal set; }
 
     public required TimeSpan? Timeout { get; init; }
     
@@ -65,7 +64,7 @@ public abstract record TestInformation
     [JsonIgnore] internal TestData[] InternalTestMethodArguments { get; init; } = null!;
 
 
-    internal bool IsSameTest(TestInformation testInformation) => TestName == testInformation.TestName &&
-                                                                 ClassType == testInformation.ClassType &&
-                                                                 TestMethodParameterTypes.SequenceEqual(testInformation.TestMethodParameterTypes);
+    internal bool IsSameTest(TestDetails testDetails) => TestName == testDetails.TestName &&
+                                                                 ClassType == testDetails.ClassType &&
+                                                                 TestMethodParameterTypes.SequenceEqual(testDetails.TestMethodParameterTypes);
 }

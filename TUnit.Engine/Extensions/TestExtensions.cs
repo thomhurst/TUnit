@@ -1,13 +1,12 @@
 ﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
-using TUnit.Engine.Properties;
 
 namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
-    public static TestNode ToTestNode(this TestInformation testDetails)
+    public static TestNode ToTestNode(this TestDetails testDetails)
     {
         var testNode = new TestNode
         {

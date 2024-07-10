@@ -8,8 +8,8 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Models;
 using TUnit.Engine.Services;
-using ServiceProviderServiceExtensions = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions;
 
 namespace TUnit.Engine.Framework;
 
@@ -17,8 +17,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 {
     private readonly IExtension _extension;
     private readonly ITestFrameworkCapabilities _capabilities;
-    private readonly ServiceProvider _myServiceProvider;
+    private readonly ServiceProvider _serviceProvider;
     private readonly TUnitLogger _logger;
+    private readonly TUnitTestDiscoverer _testDiscover;
+    private readonly TestsExecutor _testsExecutor;
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider serviceProvider,
@@ -27,12 +29,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _extension = extension;
         _capabilities = capabilities;
         
-        _myServiceProvider = new ServiceCollection()
+        _serviceProvider = new ServiceCollection()
             .AddTestEngineServices()
             .AddFromFrameworkServiceProvider(serviceProvider, extension)
             .BuildServiceProvider();
 
-        _logger = _myServiceProvider.GetRequiredService<TUnitLogger>();
+        _logger = _serviceProvider.GetRequiredService<TUnitLogger>();
+        _testDiscover = _serviceProvider.GetRequiredService<TUnitTestDiscoverer>();
+        _testsExecutor = _serviceProvider.GetRequiredService<TestsExecutor>();
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -58,58 +62,50 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
         EngineCancellationToken.Initialise(context.CancellationToken);
         
-        await using (_myServiceProvider)
+        await using (_serviceProvider)
         {
             try
             {
-                var discoveredTests = _myServiceProvider
-                    .GetRequiredService<TUnitTestDiscoverer>()
-                    .DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken)
-                    .ToList();
+                var discoveredTests = _testDiscover.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken);
 
                 var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
 
-                if (context.Request is DiscoverTestExecutionRequest)
+                switch (context.Request)
                 {
-                    foreach (var testInformation in discoveredTests)
+                    case DiscoverTestExecutionRequest:
                     {
-                        var testNode = testInformation.TestNode;
-                        testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
+                        foreach (var testNode in discoveredTests.Select(testInformation => testInformation.ToTestNode()))
+                        {
+                            testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
 
-                        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-                            sessionUid: context.Request.Session.SessionUid,
-                            testNode: testNode)
-                        );
+                            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+                                sessionUid: context.Request.Session.SessionUid,
+                                testNode: testNode)
+                            );
+                        }
+
+                        await NotifyFailedTests(context, failedToInitializeTests, true);
+                        break;
                     }
-
-                    await NotifyFailedTests(context, failedToInitializeTests, true);
-                }
-                else if (context.Request is RunTestExecutionRequest runTestExecutionRequest)
-                {
-                    await NotifyFailedTests(context, failedToInitializeTests, false);
-
-                    await _myServiceProvider.GetRequiredService<TestsExecutor>()
-                        .ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
+                    case RunTestExecutionRequest runTestExecutionRequest:
+                        await NotifyFailedTests(context, failedToInitializeTests, false);
+                    
+                        await _testsExecutor.ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
                 }
             }
-            catch (TaskCanceledException) when (context.CancellationToken.IsCancellationRequested)
+            catch (Exception e) when (e is TaskCanceledException or OperationCanceledException && context.CancellationToken.IsCancellationRequested)
             {
                 await _logger.LogErrorAsync("The test run was cancelled.");
             }
-            catch (Exception e)
-            {
-                throw new ArgumentException("Tests aren't safe! - We shouldn't be throwing exceptions here", e);
-            }
             finally
             {
-                await ServiceProviderServiceExtensions
-                    .GetRequiredService<TUnitOnEndExecutor>(_myServiceProvider)
+                await _serviceProvider
+                    .GetRequiredService<TUnitOnEndExecutor>()
                     .ExecuteAsync();
-                
+
                 context.Complete();
             }
         }
@@ -125,7 +121,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 Uid = failedToInitializeTest.TestId,
                 DisplayName = failedToInitializeTest.DisplayName,
                 Properties = new PropertyBag(
-                    isDiscovered ? DiscoveredTestNodeStateProperty.CachedInstance : new FailedTestNodeStateProperty(failedToInitializeTest.Exception, "Test failed to initialize"),
+                    isDiscovered ? DiscoveredTestNodeStateProperty.CachedInstance : new ErrorTestNodeStateProperty(failedToInitializeTest.Exception, "Test failed to initialize"),
                     new TestFileLocationProperty(failedToInitializeTest.TestFilePath,
                         new LinePositionSpan(new LinePosition(failedToInitializeTest.TestLineNumber, 0),
                             new LinePosition(failedToInitializeTest.TestLineNumber, 0))
@@ -143,12 +139,25 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
     }
 
-    public Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
+    public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {
-        return Task.FromResult(new CloseTestSessionResult
+        try
         {
-            IsSuccess = true
-        });
+            await using var _ = _serviceProvider;
+            
+            return new CloseTestSessionResult
+            {
+                IsSuccess = true
+            };
+        }
+        catch (Exception e)
+        {
+            return new CloseTestSessionResult
+            {
+                IsSuccess = false,
+                ErrorMessage = e.Message
+            };
+        }
     }
 
     public Type[] DataTypesProduced { get; } =

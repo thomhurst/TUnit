@@ -29,7 +29,7 @@ public class CustomPropertyTests
 
     private static ImmutableDictionary<string, string> GetDictionary()
     {
-        return TestContext.Current?.TestInformation.CustomProperties.ToImmutableDictionary(x => x.Key, x => x.Value)
+        return TestContext.Current?.TestDetails.CustomProperties.ToImmutableDictionary(x => x.Key, x => x.Value)
             ?? ImmutableDictionary<string, string>.Empty;
     }
 

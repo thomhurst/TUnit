@@ -27,4 +27,23 @@ public class AsyncVoidAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
+    
+    [Test]
+    public async Task Async_Task_Raises_No_Error()
+    {
+        const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [Test]
+                                public async Task Test()
+                                {
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+    }
 }

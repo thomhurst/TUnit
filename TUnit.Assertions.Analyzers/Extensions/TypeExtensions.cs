@@ -13,7 +13,7 @@ public static class TypeExtensions
         return index == -1 ? name : name.Substring(0, index);
     }
     
-    public static IEnumerable<INamedTypeSymbol> GetSelfAndBaseTypes(this INamedTypeSymbol namedTypeSymbol)
+    public static IEnumerable<ITypeSymbol> GetSelfAndBaseTypes(this ITypeSymbol namedTypeSymbol)
     {
         var type = namedTypeSymbol;
 
@@ -24,10 +24,17 @@ public static class TypeExtensions
         }
     }
     
-    public static bool IsOrInherits(this INamedTypeSymbol namedTypeSymbol, string typeName)
+    public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, string typeName)
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
             .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == typeName);
+    }
+    
+    public static bool IsOrInheritsNonGeneric(this ITypeSymbol namedTypeSymbol, string typeName)
+    {
+        return namedTypeSymbol
+            .GetSelfAndBaseTypes()
+            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == typeName);
     }
 }

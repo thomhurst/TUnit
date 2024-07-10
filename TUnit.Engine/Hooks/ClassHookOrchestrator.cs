@@ -2,7 +2,6 @@
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Models;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Hooks;
 
@@ -21,7 +20,7 @@ public static class ClassHookOrchestrator
     
     public static void RegisterInstance(TestContext testContext)
     {
-        var classType = testContext.TestInformation.ClassType;
+        var classType = testContext.TestDetails.ClassType;
 
         AssemblyHookOrchestrator.Increment(classType.Assembly);
         
@@ -31,7 +30,7 @@ public static class ClassHookOrchestrator
             InstanceTrackers[type] = count + 1;
         }
 
-        var testInformation = testContext.TestInformation;
+        var testInformation = testContext.TestDetails;
         
         foreach (var argument in testInformation.InternalTestClassArguments)
         {

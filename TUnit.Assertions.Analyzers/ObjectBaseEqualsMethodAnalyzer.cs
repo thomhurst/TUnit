@@ -23,18 +23,16 @@ public class ObjectBaseEqualsMethodAnalyzer : ConcurrentDiagnosticAnalyzer
     
     private void AnalyzeOperation(OperationAnalysisContext context)
     {
-        var operation = context.Operation;
+        if (context.Operation is not IInvocationOperation invocationOperation)
+        {
+            return;
+        }
+
+        if (invocationOperation.TargetMethod.Name != "Equals")
+        {
+            return;
+        }
         
-        if (operation is not IInvocationOperation invocationOperation)
-        {
-            return;
-        }
-
-        if (invocationOperation.TargetMethod.Name != "Equals" || !SymbolEqualityComparer.Default.Equals(invocationOperation.TargetMethod.ReceiverType, context.Compilation.GetSpecialType(SpecialType.System_Object)))
-        {
-            return;
-        }
-
         if ((invocationOperation.Instance?.Type as INamedTypeSymbol)
             ?.GetSelfAndBaseTypes()
             .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))

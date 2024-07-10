@@ -12,7 +12,7 @@ namespace TUnit.Analyzers;
 public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.NoDataSourceMethodFound, Rules.Argument_Count_Not_Matching_Parameter_Count, Rules.WrongArgumentTypeTestDataSource, Rules.NotIEnumerable);
+        ImmutableArray.Create(Rules.NoMethodFound, Rules.Argument_Count_Not_Matching_Parameter_Count, Rules.WrongArgumentTypeTestDataSource, Rules.NotIEnumerable);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -61,7 +61,7 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                 if (dataSourceMethod is null)
                 {
                     context.ReportDiagnostic(
-                        Diagnostic.Create(Rules.NoDataSourceMethodFound, attributeData.GetLocation())
+                        Diagnostic.Create(Rules.NoMethodFound, attributeData.GetLocation())
                     );
                     return;
                 }
@@ -129,7 +129,7 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                 if (method is null)
                 {
                     context.ReportDiagnostic(
-                        Diagnostic.Create(Rules.NoDataSourceMethodFound, attributeData.GetLocation())
+                        Diagnostic.Create(Rules.NoMethodFound, attributeData.GetLocation())
                     );
                     return;
                 }

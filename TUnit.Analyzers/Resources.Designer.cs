@@ -141,7 +141,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data source method found..
+        ///   Looks up a localized string similar to No method found..
         /// </summary>
         internal static string TUnit0004Description {
             get {
@@ -150,7 +150,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data source method found.
+        ///   Looks up a localized string similar to No method found.
         /// </summary>
         internal static string TUnit0004MessageFormat {
             get {
@@ -159,7 +159,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data source method found.
+        ///   Looks up a localized string similar to No method found.
         /// </summary>
         internal static string TUnit0004Title {
             get {
@@ -947,6 +947,33 @@ namespace TUnit.Analyzers {
         internal static string TUnit0033Title {
             get {
                 return ResourceManager.GetString("TUnit0033Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not declare a main method..
+        /// </summary>
+        internal static string TUnit0034Description {
+            get {
+                return ResourceManager.GetString("TUnit0034Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not declare a main method.
+        /// </summary>
+        internal static string TUnit0034MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0034MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not declare a main method.
+        /// </summary>
+        internal static string TUnit0034Title {
+            get {
+                return ResourceManager.GetString("TUnit0034Title", resourceCulture);
             }
         }
     }

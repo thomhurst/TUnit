@@ -1,15 +1,16 @@
-﻿using TUnit.Engine.Models;
+﻿using TUnit.Core;
+using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
 
 internal class TestGrouper
 {
-    public GroupedTests OrganiseTests(List<DiscoveredTest> testCases)
+    public GroupedTests OrganiseTests(ParallelQuery<DiscoveredTest> testCases)
     {
         var allTestsOrderedByClass = testCases
-            .GroupBy(x => x.TestInformation.ClassType)
+            .GroupBy(x => x.TestDetails.ClassType)
             .SelectMany(x => x)
-            .OrderByDescending(x => x.TestInformation.Order)
+            .OrderByDescending(x => x.TestDetails.Order)
             .ToList();
 
         var notInParallel = new Queue<DiscoveredTest>();
@@ -18,7 +19,7 @@ internal class TestGrouper
 
         foreach (var test in allTestsOrderedByClass)
         {
-            var notInParallelConstraintKey = test.TestInformation.NotInParallelConstraintKeys;
+            var notInParallelConstraintKey = test.TestDetails.NotInParallelConstraintKeys;
             
             if (notInParallelConstraintKey == null)
             {

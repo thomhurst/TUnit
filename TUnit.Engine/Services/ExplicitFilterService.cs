@@ -7,9 +7,9 @@ namespace TUnit.Engine.Services;
 
 internal class ExplicitFilterService
 {
-    public bool CanRun(TestInformation testInformation, ITestExecutionFilter? filter)
+    public bool CanRun(TestDetails testDetails, ITestExecutionFilter? filter)
     {
-        if (!testInformation.Attributes.Any(x => x is ExplicitAttribute))
+        if (!testDetails.Attributes.Any(x => x is ExplicitAttribute))
         {
             // These tests don't have any ExplicitAttributes
             return true;

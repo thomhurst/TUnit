@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Core;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Hooks;
 

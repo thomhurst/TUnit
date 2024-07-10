@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Messages;
@@ -56,5 +58,21 @@ public abstract class AssertionBuilder<TActual>
         }
 
         return AppendExpression($"{methodName}({string.Join(", ", expressions)})");
+    }
+    
+    [Obsolete("This is a base `object` method that should not be called.", true)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [DebuggerHidden]
+    public new void Equals(object? obj)
+    {
+        throw new InvalidOperationException("This is a base `object` method that should not be called.");
+    }
+
+    [Obsolete("This is a base `object` method that should not be called.", true)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [DebuggerHidden]
+    public new void ReferenceEquals(object a, object b)
+    {
+        throw new InvalidOperationException("This is a base `object` method that should not be called.");
     }
 }
