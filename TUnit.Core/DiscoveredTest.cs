@@ -29,20 +29,7 @@ internal class DiscoveredTest<TTestClass> : DiscoveredTest
     {
         foreach (var setUp in BeforeEachTestSetUps)
         {
-            var timeout = setUp.MethodInfo.GetCustomAttributes().OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout;
-            var token = engineToken ;
-
-            yield return () =>
-            {
-                if (timeout != null)
-                {
-                    var cts = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
-                    token = cts.Token;
-                    cts.CancelAfter(timeout.Value);
-                }
-                
-                return setUp.Body.Invoke(TestClass, TestContext, token);
-            };
+            yield return () => setUp.Body.Invoke(TestClass, TestContext, setUp.MethodInfo);
         }
     }
 
@@ -50,20 +37,7 @@ internal class DiscoveredTest<TTestClass> : DiscoveredTest
     {
         foreach (var cleanUp in AfterEachTestCleanUps)
         {
-            var timeout = cleanUp.MethodInfo.GetCustomAttributes().OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout;
-            var token = engineToken ;
-            
-            yield return () =>
-            {
-                if (timeout != null)
-                {
-                    var cts = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
-                    token = cts.Token;
-                    cts.CancelAfter(timeout.Value);
-                }
-
-                return cleanUp.Body.Invoke(TestClass, TestContext, token);
-            };
+            yield return () => cleanUp.Body.Invoke(TestClass, TestContext, cleanUp.MethodInfo);
         }
     }
 

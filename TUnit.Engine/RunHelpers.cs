@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using TUnit.Core.Exceptions;
+using TUnit.Engine.Extensions;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
@@ -73,28 +75,51 @@ public static class RunHelpers
         await taskCompletionSource.Task;
     }
     
-    public static Task RunWithTimeoutAsync(Action action, TimeSpan timeout)
+    public static Task RunWithTimeoutAsync(Action action, TimeSpan? timeout)
     {
         return RunWithTimeoutAsync(RunAsync(action), timeout);
     }
     
-    public static Task RunWithTimeoutAsync(Func<Task> action, TimeSpan timeout)
+    public static Task RunWithTimeoutAsync(Func<Task> action, TimeSpan? timeout)
     {
         return RunWithTimeoutAsync(RunAsync(action), timeout);
     }
     
-    public static Task RunWithTimeoutAsync(Func<ValueTask> action, TimeSpan timeout)
+    public static Task RunWithTimeoutAsync(Func<ValueTask> action, TimeSpan? timeout)
     {
         return RunWithTimeoutAsync(RunAsync(action), timeout);
     }
 
-    private static async Task RunWithTimeoutAsync(Task task, TimeSpan timeout)
+    private static async Task RunWithTimeoutAsync(Task task, TimeSpan? timeout)
     {
         using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
         
-        cancellationTokenSource.CancelAfter(timeout);
+        if (timeout != null)
+        {
+            cancellationTokenSource.CancelAfter(timeout.Value);
+        }
 
         await RunWithTimeoutAsync(task, cancellationTokenSource.Token);
+    }
+    
+    public static Task RunWithTimeoutAsync(Action action, MethodInfo methodInfo)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), methodInfo);
+    }
+    
+    public static Task RunWithTimeoutAsync(Func<Task> action, MethodInfo methodInfo)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), methodInfo);
+    }
+    
+    public static Task RunWithTimeoutAsync(Func<ValueTask> action, MethodInfo methodInfo)
+    {
+        return RunWithTimeoutAsync(RunAsync(action), methodInfo);
+    }
+
+    private static async Task RunWithTimeoutAsync(Task task, MethodInfo methodInfo)
+    {
+        await RunWithTimeoutAsync(task, methodInfo.GetTimeout());
     }
 
     public static async Task RunSafelyAsync(Action action, List<Exception> exceptions)
