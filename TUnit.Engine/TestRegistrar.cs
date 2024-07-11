@@ -67,7 +67,7 @@ public static class TestRegistrar
 			BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),
 			AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),
 			BeforeEachTestSetUps = testMetadata.BeforeEachTestSetUps,
-			TestBody = (classInstance, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => testMetadata.TestMethodFactory(classInstance, cancellationToken), cancellationToken),
+			TestBody = (classInstance, cancellationToken) => testMetadata.TestMethodFactory(classInstance, cancellationToken),
 			AfterEachTestCleanUps = testMetadata.AfterEachTestCleanUps,
 		};
 

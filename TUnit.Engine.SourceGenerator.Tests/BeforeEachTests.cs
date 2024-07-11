@@ -20,27 +20,27 @@ internal class BeforeTests : TestsBase<TestsGenerator>
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeEach1", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach1(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach1()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeEach2", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach2(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach2()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeEach3", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach3(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach3()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.Setup(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Setup()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.SetupWithContext(testContext), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(testContext)),
                 				    },],
                 """));
 
@@ -51,27 +51,27 @@ internal class BeforeTests : TestsBase<TestsGenerator>
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeEach1", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach1(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach1()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeEach2", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach2(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach2()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeEach3", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.BeforeEach3(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach3()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.Setup(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Setup()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.SetupWithContext(testContext), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(testContext)),
                 				    },],
                 """));
         });

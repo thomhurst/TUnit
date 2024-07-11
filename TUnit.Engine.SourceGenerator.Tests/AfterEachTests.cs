@@ -20,27 +20,27 @@ internal class AfterTests : TestsBase<TestsGenerator>
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.Cleanup(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.CleanupWithContext(testContext), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext)),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach3", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach3(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach3()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach2", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach2(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach2()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach1", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach1(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach1()),
                 				    },],
                 """));
 
@@ -51,27 +51,27 @@ internal class AfterTests : TestsBase<TestsGenerator>
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.Cleanup(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.CleanupWithContext(testContext), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext)),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach3", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach3(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach3()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach2", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach2(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach2()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach1", 0, []),
-                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach1(), cancellationToken),
+                    				    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach1()),
                 				    },],
                 """));
         });

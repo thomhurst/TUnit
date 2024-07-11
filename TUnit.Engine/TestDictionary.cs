@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core;
+
+namespace TUnit.Engine;
 
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

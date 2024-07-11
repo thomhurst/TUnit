@@ -3,24 +3,11 @@
 public partial class TestContext : IDisposable
 {
     internal EventHandler? OnDispose;
-    private CancellationTokenSource? _cancellationTokenSource;
     
     internal readonly TaskCompletionSource TaskCompletionSource = new();
     internal readonly StringWriter OutputWriter = new();
     internal readonly StringWriter ErrorWriter = new();
-
-    internal CancellationTokenSource? CancellationTokenSource
-    {
-        get => _cancellationTokenSource;
-        set
-        {
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = value;
-        }
-    }
-
-    public CancellationToken CancellationToken => CancellationTokenSource?.Token ?? default;
-
+    
     public Task TestTask => TaskCompletionSource.Task;
 
     public TestDetails TestDetails { get; }
@@ -60,6 +47,5 @@ public partial class TestContext : IDisposable
         OnDispose?.Invoke(this, EventArgs.Empty);
         OutputWriter.Dispose();
         ErrorWriter.Dispose();
-        CancellationTokenSource?.Dispose();
     }
 }

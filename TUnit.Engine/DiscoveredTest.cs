@@ -1,7 +1,8 @@
-﻿using System.Reflection;
+﻿using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Extensions;
 
-namespace TUnit.Core;
+namespace TUnit.Engine;
 
 internal class DiscoveredTest<TTestClass> : DiscoveredTest
 {
@@ -25,45 +26,19 @@ internal class DiscoveredTest<TTestClass> : DiscoveredTest
         await TestBody.Invoke(TestClass, cancellationToken);
     }
 
-    public override IEnumerable<Func<Task>> GetSetUps(CancellationToken engineToken)
+    public override IEnumerable<Func<Task>> GetSetUps()
     {
         foreach (var setUp in BeforeEachTestSetUps)
         {
-            var timeout = setUp.MethodInfo.GetCustomAttributes().OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout;
-            var token = engineToken ;
-
-            yield return () =>
-            {
-                if (timeout != null)
-                {
-                    var cts = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
-                    token = cts.Token;
-                    cts.CancelAfter(timeout.Value);
-                }
-                
-                return setUp.Body.Invoke(TestClass, TestContext, token);
-            };
+            yield return () => RunHelpers.RunWithTimeoutAsync(cancellationToken => setUp.Body.Invoke(TestClass, TestContext, cancellationToken), setUp.MethodInfo.GetTimeout());
         }
     }
 
-    public override IEnumerable<Func<Task>> GetCleanUps(CancellationToken engineToken)
+    public override IEnumerable<Func<Task>> GetCleanUps()
     {
         foreach (var cleanUp in AfterEachTestCleanUps)
         {
-            var timeout = cleanUp.MethodInfo.GetCustomAttributes().OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout;
-            var token = engineToken ;
-            
-            yield return () =>
-            {
-                if (timeout != null)
-                {
-                    var cts = CancellationTokenSource.CreateLinkedTokenSource(engineToken);
-                    token = cts.Token;
-                    cts.CancelAfter(timeout.Value);
-                }
-
-                return cleanUp.Body.Invoke(TestClass, TestContext, token);
-            };
+            yield return () => RunHelpers.RunWithTimeoutAsync(cancellationToken => cleanUp.Body.Invoke(TestClass, TestContext, cancellationToken), cleanUp.MethodInfo.GetTimeout());
         }
     }
 
@@ -81,8 +56,8 @@ internal abstract class DiscoveredTest
     public required IAfterTestAttribute[] AfterTestAttributes { get; init; }
 
     public abstract Task ExecuteTest(CancellationToken cancellationToken);
-    public abstract IEnumerable<Func<Task>> GetSetUps(CancellationToken engineToken);
-    public abstract IEnumerable<Func<Task>> GetCleanUps(CancellationToken engineToken);
+    public abstract IEnumerable<Func<Task>> GetSetUps();
+    public abstract IEnumerable<Func<Task>> GetCleanUps();
 
     public abstract void ResetTestInstance();
     
