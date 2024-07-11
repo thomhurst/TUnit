@@ -35,7 +35,7 @@ public static class BeforeEachTestRetriever
                                  				    new InstanceMethod<{{fullyQualifiedType}}>
                                  				    {
                                      				    MethodInfo = typeof({{fullyQualifiedType}}).GetMethod("{{beforeEachTestMethod.Name}}", 0, [{{string.Join(", ", beforeEachTestMethod.Parameters.Select(x => $"typeof({x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})"))}}]),
-                                     				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.{{beforeEachTestMethod.Name}}({{GetArgs(beforeEachTestMethod)}}), methodInfo),
+                                     				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.{{beforeEachTestMethod.Name}}({{GetArgs(beforeEachTestMethod)}})),
                                  				    },
                                  """);
         }

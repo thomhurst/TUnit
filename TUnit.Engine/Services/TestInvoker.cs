@@ -13,7 +13,7 @@ internal class TestInvoker
         _disposer = disposer;
     }
     
-    public async Task Invoke(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    public async Task Invoke(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions, CancellationToken cancellationToken)
     {
         try
         {
@@ -21,7 +21,7 @@ internal class TestInvoker
 
             await GlobalTestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext, EngineCancellationToken.Token);
 
-            foreach (var setUp in discoveredTest.GetSetUps(EngineCancellationToken.Token))
+            foreach (var setUp in discoveredTest.GetSetUps())
             {
                 await RunHelpers.RunAsync(setUp);
             }
@@ -30,7 +30,7 @@ internal class TestInvoker
             
             discoveredTest.TestContext.TestStart = DateTimeOffset.Now;
             
-            await discoveredTest.ExecuteTest(discoveredTest.TestContext.CancellationToken);
+            await discoveredTest.ExecuteTest(cancellationToken);
             
             discoveredTest.TestContext.TestEnd = DateTimeOffset.Now;
         }
@@ -43,7 +43,7 @@ internal class TestInvoker
             
             discoveredTest.TestContext.CleanUpStart = DateTimeOffset.Now;
             
-            foreach (var cleanUp in discoveredTest.GetCleanUps(EngineCancellationToken.Token))
+            foreach (var cleanUp in discoveredTest.GetCleanUps())
             {
                 await RunHelpers.RunSafelyAsync(cleanUp, cleanUpExceptions);
             }

@@ -20,27 +20,27 @@ internal class AfterTests : TestsBase<TestsGenerator>
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, []),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.Cleanup(), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.Cleanup()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.CleanupWithContext(testContext), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.CleanupWithContext(testContext)),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach3", 0, []),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach3(), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach3()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach2", 0, []),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach2(), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach2()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach1", 0, []),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach1(), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach1()),
                 				    },],
                 """));
 
@@ -51,27 +51,27 @@ internal class AfterTests : TestsBase<TestsGenerator>
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, []),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.Cleanup(), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.Cleanup()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.CleanupWithContext(testContext), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.CleanupWithContext(testContext)),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach3", 0, []),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach3(), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach3()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach2", 0, []),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach2(), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach2()),
                 				    },
                 				    new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                 				    {
                     				    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterEach1", 0, []),
-                    				    Body = (classInstance, testContext, methodInfo) => RunHelpers.RunWithTimeoutAsync(() => classInstance.AfterEach1(), methodInfo),
+                    				    Body = (classInstance, testContext, cancellationToken) => RunHelpers.RunAsync(() => classInstance.AfterEach1()),
                 				    },],
                 """));
         });

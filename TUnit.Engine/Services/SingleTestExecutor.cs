@@ -276,11 +276,12 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task RunTest(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async Task RunTest(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions,
+        CancellationToken cancellationToken)
     {
         StandardOutConsoleInterceptor.Instance.SetModule(discoveredTest.TestContext);
         StandardErrorConsoleInterceptor.Instance.SetModule(discoveredTest.TestContext);
-        await _testInvoker.Invoke(discoveredTest, cleanUpExceptions);
+        await _testInvoker.Invoke(discoveredTest, cleanUpExceptions, cancellationToken);
     }
 
     private readonly AsyncSemaphore _consoleStandardOutLock = new(1);
@@ -340,24 +341,7 @@ internal class SingleTestExecutor : IDataProducer
             return;
         }
         
-        var testContext = discoveredTest.TestContext;
-        var testInformation = testContext.TestDetails;
-        
-        using var testLevelCancellationTokenSource =
-            CancellationTokenSource.CreateLinkedTokenSource(_cancellationTokenSource.Token);
-
-        if (testInformation.Timeout != null && testInformation.Timeout.Value != default)
-        {
-            testLevelCancellationTokenSource.CancelAfter(testInformation.Timeout.Value);
-        }
-
-        testContext.CancellationTokenSource = testLevelCancellationTokenSource;
-
-        await ExecuteTestMethodWithTimeout(
-            testInformation,
-            () => RunTest(discoveredTest, cleanUpExceptions),
-            testLevelCancellationTokenSource
-        );
+        await ExecuteTestMethodWithTimeout(discoveredTest, cleanUpExceptions);
     }
 
     private async Task WaitForDependsOnTests(TestContext testContext)
@@ -419,18 +403,17 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task ExecuteTestMethodWithTimeout(TestDetails testDetails, Func<Task> testDelegate,
-        CancellationTokenSource cancellationTokenSource)
+    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
     {
-        var methodResult = testDelegate();
-
+        var testDetails = discoveredTest.TestDetails;
+        
         if (testDetails.Timeout == null || testDetails.Timeout.Value == default)
         {
-            await methodResult;
+            await RunTest(discoveredTest, cleanUpExceptions, EngineCancellationToken.Token);
             return;
         }
 
-        await RunHelpers.RunWithTimeoutAsync(testDelegate, cancellationTokenSource.Token);
+        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, cleanUpExceptions, token), testDetails.Timeout);
     }
 
 
