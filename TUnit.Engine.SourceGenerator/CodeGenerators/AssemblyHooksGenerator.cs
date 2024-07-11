@@ -93,10 +93,10 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine(
                 $$"""
                   AssemblyHookOrchestrator.RegisterSetUp(new StaticMethod
-                  { 
-                     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
-                  });
+                  		{ 
+                     		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                     		Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                  		});
                   """);
         }
         else if (hookType == HookType.CleanUp)
@@ -104,10 +104,10 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine(
                 $$"""
                   AssemblyHookOrchestrator.RegisterCleanUp(new StaticMethod
-                  { 
-                     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
-                  });
+                  		{ 
+                     		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                     		Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                  		});
                   """);
         }
 
