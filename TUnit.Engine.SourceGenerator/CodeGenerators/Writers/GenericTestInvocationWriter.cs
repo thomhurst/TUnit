@@ -78,7 +78,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
         sourceBuilder.WriteLine($"BeforeEachTestSetUps = [{testSourceDataModel.BeforeEachTestInvocations}],");
-        sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => ConvertAsync.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetCommaSeparatedMethodArgumentVariableNamesWithCancellationToken()})),");
+        sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetCommaSeparatedMethodArgumentVariableNamesWithCancellationToken()})),");
         sourceBuilder.WriteLine($"AfterEachTestCleanUps = [{testSourceDataModel.AfterEachTestInvocations}],");
         sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
