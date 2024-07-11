@@ -17,6 +17,7 @@ internal record Argument
     public bool IsTuple { get; }
     public string Invocation { get; }
     public string? TupleVariableNames { get; init; }
+    public bool DisposeAfterTest { get; init; }
 
     private static string MapValue(string type, string? value, bool isTuple)
     {

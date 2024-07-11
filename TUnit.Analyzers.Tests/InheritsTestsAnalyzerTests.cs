@@ -43,7 +43,7 @@ public class InheritsTestsAnalyzerTests
     }
     
     [Test]
-    public async Task Warning()
+    public async Task Warning_Test()
     {
         const string text = """
                             using TUnit.Core;
