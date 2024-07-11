@@ -219,20 +219,20 @@ internal class SingleTestExecutor : IDataProducer
 
         foreach (var methodArgument in testInformation.InternalTestMethodArguments)
         {
-            await DisposeInjectedData(methodArgument.Argument, methodArgument.InjectedDataType);
+            await DisposeInjectedData(methodArgument);
         }
         
         foreach (var classArgument in testInformation.InternalTestClassArguments)
         {
-            await DisposeInjectedData(classArgument.Argument, classArgument.InjectedDataType);
+            await DisposeInjectedData(classArgument);
         }
 
         await _disposer.DisposeAsync(testContext);
     }
 
-    private async Task DisposeInjectedData(object? obj, InjectedDataType injectedDataType)
+    private async Task DisposeInjectedData(TestData? testData)
     {
-        if (injectedDataType 
+        if (testData?.InjectedDataType 
             is InjectedDataType.SharedGlobally 
             or InjectedDataType.SharedByKey
             or InjectedDataType.SharedByTestClassType)
@@ -241,7 +241,10 @@ internal class SingleTestExecutor : IDataProducer
             return;
         }
 
-        await _disposer.DisposeAsync(obj);
+        if (testData?.DisposeAfterTest == true)
+        {
+            await _disposer.DisposeAsync(testData);
+        }
     }
     
     private static async Task DecrementSharedData(DiscoveredTest discoveredTest)

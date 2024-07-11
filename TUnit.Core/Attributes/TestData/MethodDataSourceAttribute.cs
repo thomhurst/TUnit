@@ -6,6 +6,8 @@ public class MethodDataSourceAttribute : TUnitAttribute
     public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }
 
+    public bool DisposeAfterTest { get; init; } = true;
+
     public MethodDataSourceAttribute(string methodNameProvidingDataSource)
     {
         ArgumentException.ThrowIfNullOrEmpty(methodNameProvidingDataSource);

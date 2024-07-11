@@ -141,11 +141,18 @@ internal static class DataSourceDrivenArgumentsRetriever
                 .OfType<IMethodSymbol>().First();
         }
 
+        var disposeAfterTest = methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true;
+
         var unfoldTupleArgument = methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "UnfoldTuple");
         
         if (unfoldTupleArgument.Value.Value is true)
         {
-            yield return new Argument(ArgumentSource.MethodDataSourceAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation);
+            yield return new Argument(ArgumentSource.MethodDataSourceAttribute,
+                dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                methodInvocation)
+            {
+                DisposeAfterTest = disposeAfterTest
+            };
 
             var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{argPrefix}{i+1}").ToList();
             
@@ -153,13 +160,17 @@ internal static class DataSourceDrivenArgumentsRetriever
                 dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 $"{argPrefix}0", isTuple: true)
             {
-                TupleVariableNames = $"({string.Join(", ", variableNames)})"
+                TupleVariableNames = $"({string.Join(", ", variableNames)})",
+                DisposeAfterTest = disposeAfterTest
             };
 
             yield break;
         }
         
-        yield return new Argument(ArgumentSource.MethodDataSourceAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation);
+        yield return new Argument(ArgumentSource.MethodDataSourceAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation)
+        {
+            DisposeAfterTest = disposeAfterTest
+        };
     }
     
     public static IEnumerable<Argument> ParseEnumerableMethodData(INamedTypeSymbol namedTypeSymbol,
@@ -201,11 +212,18 @@ internal static class DataSourceDrivenArgumentsRetriever
             methodInvocation = $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()";
         }
 
+        var disposeAfterTest = methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true;
+        
         var unfoldTupleArgument = methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "UnfoldTuple");
         
         if (unfoldTupleArgument.Value.Value is true)
         {
-            yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation);
+            yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute,
+                dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                methodInvocation)
+            {
+                DisposeAfterTest = disposeAfterTest
+            };
 
             var variableNames = methodSymbol.ParametersWithoutTimeoutCancellationToken().Select((x, i) => $"{argPrefix}{i+1}").ToList();
             
@@ -213,12 +231,18 @@ internal static class DataSourceDrivenArgumentsRetriever
                 dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 $"{argPrefix}0", isTuple: true)
             {
-                TupleVariableNames = $"({string.Join(", ", variableNames)})"
+                TupleVariableNames = $"({string.Join(", ", variableNames)})",
+                DisposeAfterTest = disposeAfterTest
             };
 
             yield break;
         }
-        
-        yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute, dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation);
+
+        yield return new Argument(ArgumentSource.EnumerableMethodDataAttribute,
+            dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            methodInvocation)
+        {
+            DisposeAfterTest = disposeAfterTest
+        };
     }
 }

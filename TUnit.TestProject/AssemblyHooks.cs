@@ -5,7 +5,7 @@ using TUnit.Core.Models;
 
 namespace TUnit.TestProject;
 
-public class AssemblyHooks
+public abstract class AssemblyHooks
 {
     [AssemblySetUp]
     public static void BeforeHook1()

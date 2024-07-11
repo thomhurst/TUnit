@@ -120,7 +120,12 @@ internal static class GenericTestInvocationWriter
             return $"new TestData({variablePrefix}{index}, typeof({arg.Type}), InjectedDataType.SharedByTestClassType)";
         }
 
-        return $"new TestData({variablePrefix}{index}, typeof({arg.Type}), InjectedDataType.None)";
+        return $$"""
+                new TestData({{variablePrefix}}{{index}}, typeof({{arg.Type}}), InjectedDataType.None)
+                				{
+                    				DisposeAfterTest = {{arg.DisposeAfterTest.ToString().ToLower()}},
+                				}
+                """;
     }
 
     private static string GetDisplayName(TestSourceDataModel testSourceDataModel)

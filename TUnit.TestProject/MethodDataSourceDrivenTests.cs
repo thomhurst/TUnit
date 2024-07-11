@@ -10,6 +10,13 @@ public class MethodDataSourceDrivenTests
     {
         // Dummy method
     }
+    
+    [DataSourceDrivenTest]
+    [MethodDataSource(nameof(SomeMethod), DisposeAfterTest = false)]
+    public void DataSource_Method2(int value)
+    {
+        // Dummy method
+    }
 
     public static int SomeMethod() => 1;
 }
