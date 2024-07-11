@@ -59,20 +59,6 @@ internal static class RunHelpers
 
         await taskCompletionSource.Task;
     }
-
-    public static Task RunSafelyAsync(Action action, List<Exception> exceptions)
-    {
-        try
-        {
-            action();
-        }
-        catch (Exception exception)
-        {
-            exceptions.Add(exception);
-        }
-        
-        return Task.CompletedTask;
-    }
     
     public static async Task RunSafelyAsync(Func<Task> action, List<Exception> exceptions)
     {
@@ -96,20 +82,5 @@ internal static class RunHelpers
         {
             exceptions.Add(exception);
         }
-    }
-    
-    public static ValueTask Dispose(object? obj)
-    {
-        if (obj is IAsyncDisposable asyncDisposable)
-        {
-            return asyncDisposable.DisposeAsync();
-        }
-
-        if (obj is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-
-        return ValueTask.CompletedTask;
     }
 }

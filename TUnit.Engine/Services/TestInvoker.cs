@@ -23,7 +23,7 @@ internal class TestInvoker
 
             foreach (var setUp in discoveredTest.GetSetUps())
             {
-                await RunHelpers.RunAsync(setUp);
+                await setUp();
             }
             
             discoveredTest.TestContext.SetUpEnd = DateTimeOffset.Now;
