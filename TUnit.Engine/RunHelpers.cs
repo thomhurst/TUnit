@@ -6,24 +6,8 @@ using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;
 
-public static class RunHelpers
+internal static class RunHelpers
 {
-    public static Task RunAsync(Action action)
-    {
-        action();
-        return Task.CompletedTask;
-    }
-    
-    public static async Task RunAsync(Func<Task> action)
-    {
-        await action();
-    }
-    
-    public static async Task RunAsync(Func<ValueTask> action)
-    {
-        await action();
-    }
-
     internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan? timeout)
     {
         using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
