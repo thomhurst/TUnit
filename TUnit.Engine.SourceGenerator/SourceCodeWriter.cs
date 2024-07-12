@@ -14,7 +14,12 @@ internal class SourceCodeWriter : IDisposable
     
     public void WriteLine(string value)
     {
-        if (value.StartsWith("}"))
+        if (string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+        
+        if (value[0] == '}')
         {
             _tabLevel--;
         }
@@ -26,7 +31,7 @@ internal class SourceCodeWriter : IDisposable
         
         _stringBuilder.AppendLine(value);
 
-        if (value.StartsWith("{"))
+        if (value[0] == '{')
         {
             _tabLevel++;
         }

@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using TUnit.Core.Exceptions;
-using TUnit.Engine.Extensions;
+﻿using TUnit.Core.Exceptions;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine;

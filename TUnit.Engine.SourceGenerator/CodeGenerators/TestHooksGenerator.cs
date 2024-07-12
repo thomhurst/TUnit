@@ -7,20 +7,20 @@ using TUnit.Engine.SourceGenerator.Models;
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 [Generator]
-internal class AssemblyHooksGenerator : IIncrementalGenerator
+internal class TestHooksGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                "TUnit.Core.AssemblySetUpAttribute",
+                "TUnit.Core.BeforeEachTestAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
         var cleanUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                "TUnit.Core.AssemblyCleanUpAttribute",
+                "TUnit.Core.AfterEachTestAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
@@ -36,7 +36,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         return node is MethodDeclarationSyntax;
     }
 
-    static AssemblyHooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
+    static ClassHooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
@@ -48,7 +48,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
             return null;
         }
 
-        return new AssemblyHooksDataModel
+        return new ClassHooksDataModel
         {
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
@@ -58,14 +58,14 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         };
     }
 
-    private void Execute(SourceProductionContext context, AssemblyHooksDataModel? model, HookType hookType)
+    private void Execute(SourceProductionContext context, ClassHooksDataModel? model, HookType hookType)
     {
         if (model is null)
         {
             return;
         }
         
-        var className = $"AssemblyHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
+        var className = $"ClassHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 
@@ -92,7 +92,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  AssemblyHookOrchestrator.RegisterSetUp(new StaticMethod
+                  ClassHookOrchestrator.RegisterSetUp(typeof({{model.FullyQualifiedTypeName}}), new StaticMethod
                   		{ 
                      		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                      		Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
@@ -103,12 +103,12 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  AssemblyHookOrchestrator.RegisterCleanUp(new StaticMethod
-                  		{ 
-                     		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     		Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
-                  		});
-                  """);
+                 ClassHookOrchestrator.RegisterCleanUp(typeof({{model.FullyQualifiedTypeName}}), new StaticMethod
+                 		{ 
+                    		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                    		Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                 		});
+                 """);
         }
 
         sourceBuilder.WriteLine("}");
@@ -116,16 +116,16 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
 
         context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
     }
-    
-    private string GenerateContextObject(AssemblyHooksDataModel model)
+
+    private string GenerateContextObject(ClassHooksDataModel model)
     {
         List<string> args = [];
         
         foreach (var type in model.ParameterTypes)
         {
-            if (type == WellKnownFullyQualifiedClassNames.AssemblyHookContext.WithGlobalPrefix)
+            if (type == WellKnownFullyQualifiedClassNames.ClassHookContext.WithGlobalPrefix)
             {
-                args.Add($"TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof({model.FullyQualifiedTypeName}))");
+                args.Add($"TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof({model.FullyQualifiedTypeName}))");
             }
             
             if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)

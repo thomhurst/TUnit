@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.Engine.Services;
+﻿namespace TUnit.Engine.Services;
 
 internal class TestsLoader
 {
