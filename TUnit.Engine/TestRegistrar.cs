@@ -64,9 +64,7 @@ public static class TestRegistrar
 			TestContext = testContext,
 			BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),
 			AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),
-			BeforeEachTestSetUps = testMetadata.BeforeEachTestSetUps,
 			TestBody = (classInstance, cancellationToken) => testMetadata.TestMethodFactory(classInstance, cancellationToken),
-			AfterEachTestCleanUps = testMetadata.AfterEachTestCleanUps,
 		};
 
 		TestDictionary.AddTest(testId, unInvokedTest);
@@ -133,10 +131,6 @@ public record TestMetadata<TClassType>
     
     public required object?[] TestClassArguments { get; init; }
     public required object?[] TestMethodArguments { get; init; }
-    
-    public required List<InstanceMethod<TClassType>> BeforeEachTestSetUps { get; init; }
-    public required List<InstanceMethod<TClassType>> AfterEachTestCleanUps { get; init; }
-
     
     public required TestData[] InternalTestClassArguments { internal get; init; }
 

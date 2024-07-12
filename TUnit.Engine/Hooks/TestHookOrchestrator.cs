@@ -42,8 +42,7 @@ public static class TestHookOrchestrator
         await AssemblyHookOrchestrator.ExecuteSetups(testClassType.Assembly);
 
         // Reverse so base types are first - We'll run those ones first
-        var typesIncludingBase = GetTypesIncludingBase(testClassType)
-            .Reverse();
+        var typesIncludingBase = GetTypesIncludingBase(testClassType).Reverse();
 
         foreach (var type in typesIncludingBase)
         {

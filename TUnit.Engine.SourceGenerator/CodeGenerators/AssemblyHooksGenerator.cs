@@ -36,7 +36,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         return node is MethodDeclarationSyntax;
     }
 
-    static AssemblyHooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
+    static HooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
@@ -48,7 +48,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
             return null;
         }
 
-        return new AssemblyHooksDataModel
+        return new HooksDataModel
         {
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
@@ -58,7 +58,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         };
     }
 
-    private void Execute(SourceProductionContext context, AssemblyHooksDataModel? model, HookType hookType)
+    private void Execute(SourceProductionContext context, HooksDataModel? model, HookType hookType)
     {
         if (model is null)
         {
@@ -117,7 +117,7 @@ internal class AssemblyHooksGenerator : IIncrementalGenerator
         context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
     }
     
-    private string GenerateContextObject(AssemblyHooksDataModel model)
+    private string GenerateContextObject(HooksDataModel model)
     {
         List<string> args = [];
         

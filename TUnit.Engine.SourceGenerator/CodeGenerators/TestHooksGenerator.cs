@@ -36,19 +36,19 @@ internal class TestHooksGenerator : IIncrementalGenerator
         return node is MethodDeclarationSyntax;
     }
 
-    static ClassHooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
+    static HooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
             return null;
         }
 
-        if (!methodSymbol.IsStatic)
+        if (methodSymbol.IsStatic)
         {
             return null;
         }
 
-        return new ClassHooksDataModel
+        return new HooksDataModel
         {
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
@@ -58,14 +58,14 @@ internal class TestHooksGenerator : IIncrementalGenerator
         };
     }
 
-    private void Execute(SourceProductionContext context, ClassHooksDataModel? model, HookType hookType)
+    private void Execute(SourceProductionContext context, HooksDataModel? model, HookType hookType)
     {
         if (model is null)
         {
             return;
         }
         
-        var className = $"ClassHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
+        var className = $"TestHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 
@@ -92,10 +92,10 @@ internal class TestHooksGenerator : IIncrementalGenerator
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  ClassHookOrchestrator.RegisterSetUp(typeof({{model.FullyQualifiedTypeName}}), new StaticMethod
+                  TestHookOrchestrator.RegisterSetUp<{{model.FullyQualifiedTypeName}}>(new InstanceMethod<{{model.FullyQualifiedTypeName}}>
                   		{ 
                      		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     		Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                     		Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}}))
                   		});
                   """);
         }
@@ -103,10 +103,10 @@ internal class TestHooksGenerator : IIncrementalGenerator
         {
             sourceBuilder.WriteLine(
                 $$"""
-                 ClassHookOrchestrator.RegisterCleanUp(typeof({{model.FullyQualifiedTypeName}}), new StaticMethod
+                 TestHookOrchestrator.RegisterCleanUp<{{model.FullyQualifiedTypeName}}>(new InstanceMethod<{{model.FullyQualifiedTypeName}}>
                  		{ 
                     		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                    		Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                    		Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}}))
                  		});
                  """);
         }
@@ -117,15 +117,15 @@ internal class TestHooksGenerator : IIncrementalGenerator
         context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
     }
 
-    private string GenerateContextObject(ClassHooksDataModel model)
+    private string GenerateContextObject(HooksDataModel model)
     {
         List<string> args = [];
         
         foreach (var type in model.ParameterTypes)
         {
-            if (type == WellKnownFullyQualifiedClassNames.ClassHookContext.WithGlobalPrefix)
+            if (type == WellKnownFullyQualifiedClassNames.TestContext.WithGlobalPrefix)
             {
-                args.Add($"TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof({model.FullyQualifiedTypeName}))");
+                args.Add("testContext");
             }
             
             if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)

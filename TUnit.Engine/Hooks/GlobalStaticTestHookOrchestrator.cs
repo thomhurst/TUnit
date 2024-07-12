@@ -6,7 +6,7 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public static class GlobalTestHookOrchestrator
+public static class GlobalStaticTestHookOrchestrator
 {
     private static readonly List<Func<TestContext, Task>> SetUps = [];
     private static readonly List<Func<TestContext, Task>> CleanUps = [];

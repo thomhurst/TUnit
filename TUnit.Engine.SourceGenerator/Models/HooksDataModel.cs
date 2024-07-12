@@ -1,6 +1,6 @@
-namespace TUnit.Engine.SourceGenerator.Models;
+﻿namespace TUnit.Engine.SourceGenerator.Models;
 
-public record ClassHooksDataModel
+public record HooksDataModel
 {
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
@@ -8,7 +8,7 @@ public record ClassHooksDataModel
     public required string[] ParameterTypes { get; init; }
     public required bool HasTimeoutAttribute { get; init; }
 
-    public virtual bool Equals(ClassHooksDataModel? other)
+    public virtual bool Equals(HooksDataModel? other)
     {
         if (other is null)
         {
@@ -20,10 +20,7 @@ public record ClassHooksDataModel
             return true;
         }
 
-        return FullyQualifiedTypeName == other.FullyQualifiedTypeName 
-               && MinimalTypeName == other.MinimalTypeName 
-               && MethodName == other.MethodName 
-               && ParameterTypes.SequenceEqual(other.ParameterTypes);
+        return FullyQualifiedTypeName == other.FullyQualifiedTypeName && MinimalTypeName == other.MinimalTypeName && MethodName == other.MethodName && ParameterTypes.SequenceEqual(other.ParameterTypes) && HasTimeoutAttribute == other.HasTimeoutAttribute;
     }
 
     public override int GetHashCode()
@@ -34,6 +31,7 @@ public record ClassHooksDataModel
             hashCode = (hashCode * 397) ^ MinimalTypeName.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodName.GetHashCode();
             hashCode = (hashCode * 397) ^ ParameterTypes.GetHashCode();
+            hashCode = (hashCode * 397) ^ HasTimeoutAttribute.GetHashCode();
             return hashCode;
         }
     }

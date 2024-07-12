@@ -19,12 +19,9 @@ internal class TestInvoker
         {
             TestContext.TestContexts.Value = discoveredTest.TestContext;
 
-            await GlobalTestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext, EngineCancellationToken.Token);
+            await GlobalStaticTestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext, EngineCancellationToken.Token);
 
-            foreach (var setUp in discoveredTest.GetSetUps())
-            {
-                await setUp();
-            }
+            await TestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext.TestDetails.ClassInstance!, discoveredTest.TestContext);
             
             discoveredTest.TestContext.SetUpEnd = DateTimeOffset.Now;
             
@@ -43,13 +40,11 @@ internal class TestInvoker
             
             discoveredTest.TestContext.CleanUpStart = DateTimeOffset.Now;
             
-            foreach (var cleanUp in discoveredTest.GetCleanUps())
-            {
-                await RunHelpers.RunSafelyAsync(cleanUp, cleanUpExceptions);
-            }
+            await TestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext.TestDetails.ClassInstance!, discoveredTest.TestContext, cleanUpExceptions);
+            
+            await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext, cleanUpExceptions, EngineCancellationToken.Token);
             
             await RunHelpers.RunSafelyAsync(() => _disposer.DisposeAsync(discoveredTest.TestContext.TestDetails.ClassInstance), cleanUpExceptions);
-            await GlobalTestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext, cleanUpExceptions, EngineCancellationToken.Token);
         }
     }
 }
