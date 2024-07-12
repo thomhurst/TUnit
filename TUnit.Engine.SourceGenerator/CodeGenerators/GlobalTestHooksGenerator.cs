@@ -37,7 +37,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         return node is MethodDeclarationSyntax;
     }
 
-    static GlobalTestHooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
+    static HooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
@@ -49,7 +49,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
             return null;
         }
 
-        return new GlobalTestHooksDataModel
+        return new HooksDataModel
         {
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
@@ -59,14 +59,14 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         };
     }
 
-    private void Execute(SourceProductionContext context, GlobalTestHooksDataModel? model, HookType hookType)
+    private void Execute(SourceProductionContext context, HooksDataModel? model, HookType hookType)
     {
         if (model is null)
         {
             return;
         }
         
-        var className = $"GlobalTestHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
+        var className = $"GlobalStaticTestHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 
@@ -93,7 +93,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
+                  GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
                   		{ 
                      		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                      		Body = (testContext, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
@@ -104,7 +104,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalTestHookOrchestrator.RegisterCleanUp(new StaticMethod<TestContext>
+                  GlobalStaticTestHookOrchestrator.RegisterCleanUp(new StaticMethod<TestContext>
                   		{ 
                      		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                      		Body = (testContext, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
@@ -118,7 +118,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
     }
 
-    private string GetArgs(GlobalTestHooksDataModel model)
+    private string GetArgs(HooksDataModel model)
     {
         List<string> args = [ "testContext" ];
         

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Models;
 
@@ -13,51 +12,7 @@ public static class ClassHookOrchestrator
     private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
     private static readonly ConcurrentDictionary<Type, List<Func<Task>>> CleanUps = new();
     
-    private static readonly ConcurrentDictionary<Assembly, AssemblyHookContext> AssemblyHookContexts = new();
     private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
-
-    private static readonly ConcurrentDictionary<Type, int> InstanceTrackers = new();
-    
-    public static void RegisterInstance(TestContext testContext)
-    {
-        var classType = testContext.TestDetails.ClassType;
-
-        AssemblyHookOrchestrator.Increment(classType.Assembly);
-        
-        foreach (var type in GetTypesIncludingBase(classType))
-        {
-            var count = InstanceTrackers.GetOrAdd(type, _ => 0);
-            InstanceTrackers[type] = count + 1;
-        }
-
-        var testInformation = testContext.TestDetails;
-        
-        foreach (var argument in testInformation.InternalTestClassArguments)
-        {
-            if (argument.InjectedDataType == InjectedDataType.SharedByKey)
-            {
-                TestDataContainer.IncrementKeyUsage(argument.StringKey!, argument.Type);
-            }
-            
-            if (argument.InjectedDataType == InjectedDataType.SharedGlobally)
-            {
-                TestDataContainer.IncrementGlobalUsage(argument.Type);
-            }
-        }
-        
-        foreach (var argument in testInformation.InternalTestMethodArguments)
-        {
-            if (argument.InjectedDataType == InjectedDataType.SharedByKey)
-            {
-                TestDataContainer.IncrementKeyUsage(argument.StringKey!, argument.Type);
-            }
-            
-            if (argument.InjectedDataType == InjectedDataType.SharedGlobally)
-            {
-                TestDataContainer.IncrementGlobalUsage(argument.Type);
-            }
-        }
-    }
     
     public static void RegisterSetUp(Type type, StaticMethod staticMethod)
     {
@@ -92,13 +47,8 @@ public static class ClassHookOrchestrator
             });
 
         classHookContext.Tests.Add(testContext);
-
-        var assemblyHookContext = AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
-        {
-            Assembly = type.Assembly
-        });
-
-        assemblyHookContext.TestClasses.Add(classHookContext);
+        
+        AssemblyHookOrchestrator.RegisterTestContext(type.Assembly, classHookContext);
     }
     
     public static ClassHookContext GetClassHookContext(Type type)
@@ -111,19 +61,6 @@ public static class ClassHookOrchestrator
             });
         }
     }
-
-    public static AssemblyHookContext GetAssemblyHookContext(Type type)
-    {
-        lock (type)
-        {
-            return AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
-            {
-                Assembly = type.Assembly
-            });
-        }
-    }
-
-    public static IEnumerable<AssemblyHookContext> GetAllAssemblyHookContexts() => AssemblyHookContexts.Values;
     
     public static async Task ExecuteSetups(Type testClassType)
     {
@@ -157,9 +94,7 @@ public static class ClassHookOrchestrator
 
         foreach (var type in typesIncludingBase)
         {
-            var instanceCount = DecreaseCount(type);
-
-            if (instanceCount != 0)
+            if (!InstanceTracker.IsLastTestForType(type))
             {
                 // Only run one time clean down's when no instances are left!
                 continue;
@@ -200,28 +135,13 @@ public static class ClassHookOrchestrator
         }
     }
     
-    private static int DecreaseCount(Type type)
-    {
-        lock (type)
-        {
-            var count = InstanceTrackers[type];
-            return InstanceTrackers[type] = count - 1;
-        }
-    }
-    
     private static Lazy<Task> Convert(StaticMethod staticMethod)
     {
         return new Lazy<Task>(() =>
         {
-            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
             var timeout = staticMethod.Timeout;
 
-            if (timeout != null)
-            {
-                cancellationToken.CancelAfter(timeout.Value);
-            }
-            
-            return staticMethod.Body(cancellationToken.Token);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(token), timeout);
         });
     }
 }

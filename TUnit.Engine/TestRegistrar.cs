@@ -58,17 +58,13 @@ public static class TestRegistrar
 		};
 
 		var testContext = new TestContext(testInformation);
-
-		ClassHookOrchestrator.RegisterTestContext(classType, testContext);
-
+		
 		var unInvokedTest = new DiscoveredTest<TClassType>(testMetadata.ResettableClassFactory)
 		{
 			TestContext = testContext,
 			BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),
 			AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),
-			BeforeEachTestSetUps = testMetadata.BeforeEachTestSetUps,
 			TestBody = (classInstance, cancellationToken) => testMetadata.TestMethodFactory(classInstance, cancellationToken),
-			AfterEachTestCleanUps = testMetadata.AfterEachTestCleanUps,
 		};
 
 		TestDictionary.AddTest(testId, unInvokedTest);
@@ -77,6 +73,43 @@ public static class TestRegistrar
 	public static void Failed(string testId, FailedInitializationTest failedInitializationTest)
 	{
 		TestDictionary.RegisterFailedTest(testId, failedInitializationTest);
+	}
+	
+	public static void RegisterInstance(TestContext testContext)
+	{
+		var classType = testContext.TestDetails.ClassType;
+		
+		InstanceTracker.Register(classType);
+		
+		ClassHookOrchestrator.RegisterTestContext(classType, testContext);
+		
+		var testInformation = testContext.TestDetails;
+        
+		foreach (var argument in testInformation.InternalTestClassArguments)
+		{
+			if (argument.InjectedDataType == InjectedDataType.SharedByKey)
+			{
+				TestDataContainer.IncrementKeyUsage(argument.StringKey!, argument.Type);
+			}
+            
+			if (argument.InjectedDataType == InjectedDataType.SharedGlobally)
+			{
+				TestDataContainer.IncrementGlobalUsage(argument.Type);
+			}
+		}
+        
+		foreach (var argument in testInformation.InternalTestMethodArguments)
+		{
+			if (argument.InjectedDataType == InjectedDataType.SharedByKey)
+			{
+				TestDataContainer.IncrementKeyUsage(argument.StringKey!, argument.Type);
+			}
+            
+			if (argument.InjectedDataType == InjectedDataType.SharedGlobally)
+			{
+				TestDataContainer.IncrementGlobalUsage(argument.Type);
+			}
+		}
 	}
 }
 
@@ -98,10 +131,6 @@ public record TestMetadata<TClassType>
     
     public required object?[] TestClassArguments { get; init; }
     public required object?[] TestMethodArguments { get; init; }
-    
-    public required List<InstanceMethod<TClassType>> BeforeEachTestSetUps { get; init; }
-    public required List<InstanceMethod<TClassType>> AfterEachTestCleanUps { get; init; }
-
     
     public required TestData[] InternalTestClassArguments { internal get; init; }
 

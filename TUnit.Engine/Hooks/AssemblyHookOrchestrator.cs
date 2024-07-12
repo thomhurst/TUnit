@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Models;
 using TUnit.Engine.Data;
 
 namespace TUnit.Engine.Hooks;
@@ -10,12 +11,11 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class AssemblyHookOrchestrator
 {
+    private static readonly ConcurrentDictionary<Assembly, AssemblyHookContext> AssemblyHookContexts = new();
+    
     private static readonly GetOnlyDictionary<Assembly, List<Lazy<Task>>> SetUps = new();
     private static readonly GetOnlyDictionary<Assembly, List<Lazy<Task>>> CleanUps = new();
-
-    private static readonly object Lock = new();
-    private static readonly ConcurrentDictionary<Assembly, int> CountTracker = new(); 
-
+    
     public static void RegisterSetUp(StaticMethod staticMethod)
     {
         var setups = SetUps.GetOrAdd(staticMethod.MethodInfo.ReflectedType!.Assembly, _ => []);
@@ -27,20 +27,37 @@ public static class AssemblyHookOrchestrator
         var cleanups = CleanUps.GetOrAdd(staticMethod.MethodInfo.ReflectedType!.Assembly, _ => []);
         cleanups.Add(Convert(staticMethod));
     }
+    
+    public static IEnumerable<AssemblyHookContext> GetAllAssemblyHookContexts() => AssemblyHookContexts.Values;
+    
+    public static void RegisterTestContext(Assembly assembly, ClassHookContext classHookContext)
+    {
+        var assemblyHookContext = AssemblyHookContexts.GetOrAdd(assembly, _ => new AssemblyHookContext
+        {
+            Assembly = assembly
+        });
+
+        assemblyHookContext.TestClasses.Add(classHookContext);
+    }
+    
+    public static AssemblyHookContext GetAssemblyHookContext(Type type)
+    {
+        lock (type)
+        {
+            return AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
+            {
+                Assembly = type.Assembly
+            });
+        }
+    }
 
     private static Lazy<Task> Convert(StaticMethod staticMethod)
     {
         return new Lazy<Task>(() =>
         {
-            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
             var timeout = staticMethod.Timeout;
-
-            if (timeout != null)
-            {
-                cancellationToken.CancelAfter(timeout.Value);
-            }
             
-            return staticMethod.Body(cancellationToken.Token);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(token), timeout);
         });
     }
 
@@ -54,16 +71,9 @@ public static class AssemblyHookOrchestrator
 
     public static async Task ExecuteCleanups(Assembly assembly, List<Exception> exceptions)
     {
-        lock (Lock)
+        if (!InstanceTracker.IsLastTestForAssembly(assembly))
         {
-            var count = CountTracker.GetOrAdd(assembly, _ => 0);
-            var newCount = count - 1;
-            CountTracker[assembly] = newCount;
-
-            if (newCount > 0)
-            {
-                return;
-            }
+            return;
         }
         
         foreach (var cleanUp in CleanUps.GetOrAdd(assembly, _ => []))
@@ -77,11 +87,5 @@ public static class AssemblyHookOrchestrator
                 exceptions.Add(e);
             }
         }
-    }
-
-    public static void Increment(Assembly assembly)
-    {
-        var count = CountTracker.GetOrAdd(assembly, _ => 0);
-        CountTracker[assembly] = count + 1;
     }
 }

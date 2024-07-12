@@ -3,9 +3,7 @@ using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
-using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
-using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 
@@ -53,7 +51,7 @@ internal class TestsExecutor
 
         foreach (var test in tests.AllTests)
         {
-            ClassHookOrchestrator.RegisterInstance(test.TestContext);
+            TestRegistrar.RegisterInstance(test.TestContext);
         }
 
         // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint

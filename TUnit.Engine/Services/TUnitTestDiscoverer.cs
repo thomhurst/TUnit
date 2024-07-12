@@ -1,5 +1,4 @@
 ﻿using Microsoft.Testing.Platform.Requests;
-using TUnit.Core;
 
 namespace TUnit.Engine.Services;
 

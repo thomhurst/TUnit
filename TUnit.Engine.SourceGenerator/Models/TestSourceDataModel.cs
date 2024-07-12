@@ -26,8 +26,7 @@ internal record TestSourceDataModel
                IsEnumerableClassArguments == other.IsEnumerableClassArguments &&
                IsEnumerableMethodArguments == other.IsEnumerableMethodArguments && TestId == other.TestId &&
                CurrentRepeatAttempt == other.CurrentRepeatAttempt && FilePath == other.FilePath &&
-               LineNumber == other.LineNumber && BeforeEachTestInvocations == other.BeforeEachTestInvocations &&
-               AfterEachTestInvocations == other.AfterEachTestInvocations &&
+               LineNumber == other.LineNumber && 
                HasTimeoutAttribute == other.HasTimeoutAttribute && CustomDisplayName == other.CustomDisplayName &&
                RepeatLimit == other.RepeatLimit;
     }
@@ -50,8 +49,6 @@ internal record TestSourceDataModel
             hashCode = (hashCode * 397) ^ CurrentRepeatAttempt;
             hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
             hashCode = (hashCode * 397) ^ LineNumber;
-            hashCode = (hashCode * 397) ^ BeforeEachTestInvocations.GetHashCode();
-            hashCode = (hashCode * 397) ^ AfterEachTestInvocations.GetHashCode();
             hashCode = (hashCode * 397) ^ HasTimeoutAttribute.GetHashCode();
             hashCode = (hashCode * 397) ^ (CustomDisplayName != null ? CustomDisplayName.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ RepeatLimit;
@@ -78,8 +75,6 @@ internal record TestSourceDataModel
     
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
-    public required string BeforeEachTestInvocations { get; init; }
-    public required string AfterEachTestInvocations { get; init; }
     
     public required bool HasTimeoutAttribute { get; init; }
     

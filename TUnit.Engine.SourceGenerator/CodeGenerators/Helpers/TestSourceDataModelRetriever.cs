@@ -132,8 +132,6 @@ internal static class TestSourceDataModelRetriever
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            BeforeEachTestInvocations = BeforeEachTestRetriever.GenerateCode(namedTypeSymbol),
-            AfterEachTestInvocations = AfterEachTestRetriever.GenerateCode(namedTypeSymbol),
             MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
