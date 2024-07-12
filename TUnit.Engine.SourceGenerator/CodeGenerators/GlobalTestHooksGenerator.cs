@@ -120,10 +120,15 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
 
     private string GetArgs(HooksDataModel model)
     {
-        List<string> args = [ "testContext" ];
+        List<string> args = [];
         
         foreach (var type in model.ParameterTypes)
         {
+            if (type == WellKnownFullyQualifiedClassNames.TestContext.WithGlobalPrefix)
+            {
+                args.Add("testContext");
+            }
+
             if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)
             {
                 args.Add("cancellationToken");
