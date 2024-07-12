@@ -12,7 +12,7 @@ internal class BeforeTests : TestsBase<TestHooksGenerator>
             "BeforeTests.cs"),
         generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(5));
+            Assert.That(generatedFiles.Length, Is.EqualTo(7));
 
             Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
@@ -43,20 +43,38 @@ internal class BeforeTests : TestsBase<TestHooksGenerator>
             
             Assert.That(generatedFiles[3].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-	            TestHookOrchestrator.RegisterSetUp<global::TUnit.TestProject.BeforeTests.SetupTests>(new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
-	            { 
-	            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", 0, []),
-	            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Setup())
-	            });
-	            """.IgnoreWhitespaceFormatting()));
+		            TestHookOrchestrator.RegisterSetUp<global::TUnit.TestProject.BeforeTests.SetupTests>(new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
+		            { 
+		            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", 0, []),
+		            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Setup())
+		            });
+		            """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-	            TestHookOrchestrator.RegisterSetUp<global::TUnit.TestProject.BeforeTests.SetupTests>(new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
-	            { 
-	            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-	            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(testContext))
-	            });
-	            """.IgnoreWhitespaceFormatting()));
+		            TestHookOrchestrator.RegisterSetUp<global::TUnit.TestProject.BeforeTests.SetupTests>(new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
+		            { 
+		            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("Setup", 0, [typeof(global::System.Threading.CancellationToken)]),
+		            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Setup(cancellationToken))
+		            });
+		            """.IgnoreWhitespaceFormatting()));
+            
+            Assert.That(generatedFiles[5].IgnoreWhitespaceFormatting(), Does.Contain(
+	            """
+		            TestHookOrchestrator.RegisterSetUp<global::TUnit.TestProject.BeforeTests.SetupTests>(new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
+		            { 
+		            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
+		            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(testContext))
+		            });
+		            """.IgnoreWhitespaceFormatting()));
+            
+            Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
+	            """
+		            TestHookOrchestrator.RegisterSetUp<global::TUnit.TestProject.BeforeTests.SetupTests>(new InstanceMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
+		            { 
+		            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
+		            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(testContext, cancellationToken))
+		            });
+		            """.IgnoreWhitespaceFormatting()));
         });
 }

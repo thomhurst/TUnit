@@ -61,8 +61,20 @@ public class CleanupTests : Base3
         await Task.CompletedTask;
     }
     
+    [AfterEachTest, Timeout(30_000)]
+    public async Task Cleanup(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+    
     [AfterEachTest]
     public async Task CleanupWithContext(TestContext testContext)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [AfterEachTest, Timeout(30_000)]
+    public async Task CleanupWithContext(TestContext testContext, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }

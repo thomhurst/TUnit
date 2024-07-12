@@ -67,8 +67,20 @@ public class SetupTests : Base3
         await Task.CompletedTask;
     }
     
+    [BeforeEachTest, Timeout(30_000)]
+    public async Task Setup(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+    
     [BeforeEachTest]
     public async Task SetupWithContext(TestContext testContext)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeEachTest, Timeout(30_000)]
+    public async Task SetupWithContext(TestContext testContext, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }

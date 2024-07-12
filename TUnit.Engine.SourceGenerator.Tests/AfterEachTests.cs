@@ -12,7 +12,7 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
             "AfterTests.cs"),
         generatedFiles =>
         {
-	        Assert.That(generatedFiles.Length, Is.EqualTo(5));
+	        Assert.That(generatedFiles.Length, Is.EqualTo(7));
 
             Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
@@ -43,20 +43,38 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
             
             Assert.That(generatedFiles[3].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-	             TestHookOrchestrator.RegisterCleanUp<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
-	             {
-	               	 MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, []),
-	               	 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup())
-	             });
-	            """.IgnoreWhitespaceFormatting()));
+		             TestHookOrchestrator.RegisterCleanUp<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+		             {
+		               	 MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, []),
+		               	 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup())
+		             });
+		            """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-	             TestHookOrchestrator.RegisterCleanUp<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
-	             {
-	               	 MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-	               	 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext))
-	             });
-	            """.IgnoreWhitespaceFormatting()));
+		             TestHookOrchestrator.RegisterCleanUp<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+		             {
+		               	 MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, [typeof(global::System.Threading.CancellationToken)]),
+		               	 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup(cancellationToken))
+		             });
+		            """.IgnoreWhitespaceFormatting()));
+            
+            Assert.That(generatedFiles[5].IgnoreWhitespaceFormatting(), Does.Contain(
+	            """
+		             TestHookOrchestrator.RegisterCleanUp<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+		             {
+		               	 MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
+		               	 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext))
+		             });
+		            """.IgnoreWhitespaceFormatting()));
+                        
+            Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
+	            """
+		             TestHookOrchestrator.RegisterCleanUp<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+		             {
+		               	 MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
+		               	 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext, cancellationToken))
+		             });
+		            """.IgnoreWhitespaceFormatting()));
         });
 }
