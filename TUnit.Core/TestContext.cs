@@ -14,15 +14,7 @@ public partial class TestContext : IDisposable
 
     public int CurrentRetryAttempt { get; internal set; }
 
-    public DateTimeOffset? SetUpStart { get; internal set; }
-    public DateTimeOffset? SetUpEnd { get; internal set; }
-    
-    public DateTimeOffset? TestStart { get; internal set; }
-    public DateTimeOffset? TestEnd { get; internal set; }
-    
-    public DateTimeOffset? CleanUpStart { get; internal set; }
-    public DateTimeOffset? CleanUpEnd { get; internal set; }
-    
+    public List<Timing> Timings { get; } = [];
     public Dictionary<string, object> ObjectBag { get; } = new();
 
     public TestContext(TestDetails testDetails)

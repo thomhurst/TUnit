@@ -44,6 +44,7 @@ internal class SingleTestExecutor : IDataProducer
         ExecuteRequestContext context)
     {
         var testContext = test.TestContext;
+        var timings = testContext.Timings;
 
         if (_cancellationTokenSource.IsCancellationRequested)
         {
@@ -59,8 +60,6 @@ internal class SingleTestExecutor : IDataProducer
         try
         {
             await WaitForDependsOnTests(test.TestContext);
-
-            testContext.SetUpStart = DateTimeOffset.Now;
             
             if (!_explicitFilterService.CanRun(test.TestDetails, filter))
             {
@@ -69,12 +68,14 @@ internal class SingleTestExecutor : IDataProducer
             
             foreach (var applicableTestAttribute in test.BeforeTestAttributes)
             {
-                await applicableTestAttribute.OnBeforeTest(testContext);
+                await Timings.Record($"{applicableTestAttribute.GetType().Name}.OnBeforeTest", testContext,
+                    () => applicableTestAttribute.OnBeforeTest(testContext));
             }
 
             try
             {
-                await ClassHookOrchestrator.ExecuteSetups(test.TestContext.TestDetails.ClassType);
+                await AssemblyHookOrchestrator.ExecuteSetups(test.TestContext.TestDetails.ClassType.Assembly, testContext);
+                await ClassHookOrchestrator.ExecuteSetups(test.TestContext.TestDetails.ClassType, testContext);
                 await ExecuteWithRetries(test, cleanUpExceptions);
             }
             finally
@@ -83,13 +84,13 @@ internal class SingleTestExecutor : IDataProducer
                 
                 foreach (var applicableTestAttribute in test.AfterTestAttributes)
                 {
-                    await RunHelpers.RunSafelyAsync(() => applicableTestAttribute.OnAfterTest(testContext), cleanUpExceptions);
+                    await Timings.Record($"{applicableTestAttribute.GetType().Name}.OnAfterTest", testContext,
+                        () => RunHelpers.RunSafelyAsync(() => applicableTestAttribute.OnAfterTest(testContext),
+                            cleanUpExceptions));
                 }
                 
-                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(test.TestContext.TestDetails.ClassType, cleanUpExceptions);
-                await AssemblyHookOrchestrator.ExecuteCleanups(test.TestContext.TestDetails.ClassType.Assembly, cleanUpExceptions);
-                
-                testContext.CleanUpEnd = DateTimeOffset.Now;
+                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
+                await AssemblyHookOrchestrator.ExecuteCleanups(test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
             }
 
             if (cleanUpExceptions.Count == 1)
@@ -137,8 +138,8 @@ internal class SingleTestExecutor : IDataProducer
             testContext.Result = new TUnitTestResult
             {
                 Duration = TimeSpan.Zero,
-                Start = testContext.SetUpStart ?? now,
-                End = testContext.SetUpStart ?? now,
+                Start = timings.MinBy(x => x.Start)?.Start ?? now,
+                End = timings.MinBy(x => x.End)?.End ?? timings.MinBy(x => x.Start)?.Start ?? now,
                 ComputerName = Environment.MachineName,
                 Exception = null,
                 Status = Status.Skipped,
@@ -180,22 +181,13 @@ internal class SingleTestExecutor : IDataProducer
     {
         var now = DateTimeOffset.Now;
 
-        return new TimingProperty(
-            new TimingInfo(testContext.SetUpStart ?? now, testContext.CleanUpEnd ?? now,
-                (testContext.CleanUpEnd ?? now) - (testContext.SetUpStart ?? now)),
-            [
-                new StepTimingInfo("Set Ups", "Set Ups",
-                    new TimingInfo(testContext.SetUpStart ?? now, testContext.SetUpEnd ?? now,
-                        (testContext.SetUpEnd ?? now) - (testContext.SetUpStart ?? now))),
-                
-                new StepTimingInfo("Test", "Test Execution",
-                    new TimingInfo(testContext.TestStart ?? now, testContext.TestEnd ?? now,
-                        (testContext.TestEnd ?? now) - (testContext.TestStart ?? now))),
-                
-                new StepTimingInfo("Clean Ups", "Clean Ups",
-                    new TimingInfo(testContext.CleanUpStart ?? now, testContext.CleanUpEnd ?? now,
-                        (testContext.CleanUpEnd ?? now) - (testContext.CleanUpStart ?? now))),
-            ]);
+        var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? now;
+        var end = testContext.Timings.MaxBy(x => x.End)?.End ?? now;
+
+        var stepTimings = testContext.Timings.Select(x =>
+            new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
+        
+        return new TimingProperty(new TimingInfo(start, end, end - start), [..stepTimings]);
     }
 
     private static IProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)

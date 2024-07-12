@@ -19,30 +19,17 @@ internal class TestInvoker
         {
             TestContext.TestContexts.Value = discoveredTest.TestContext;
 
-            await GlobalStaticTestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext, EngineCancellationToken.Token);
+            await GlobalStaticTestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext);
 
             await TestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext.TestDetails.ClassInstance!, discoveredTest.TestContext);
             
-            discoveredTest.TestContext.SetUpEnd = DateTimeOffset.Now;
-            
-            discoveredTest.TestContext.TestStart = DateTimeOffset.Now;
-            
-            await discoveredTest.ExecuteTest(cancellationToken);
-            
-            discoveredTest.TestContext.TestEnd = DateTimeOffset.Now;
+            await Timings.Record("Main Test Body", discoveredTest.TestContext, () => discoveredTest.ExecuteTest(cancellationToken));
         }
         finally
         {
-            discoveredTest.TestContext.SetUpEnd ??= DateTimeOffset.Now;
-            
-            discoveredTest.TestContext.TestStart ??= DateTimeOffset.Now;
-            discoveredTest.TestContext.TestEnd ??= DateTimeOffset.Now;
-            
-            discoveredTest.TestContext.CleanUpStart = DateTimeOffset.Now;
-            
             await TestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext.TestDetails.ClassInstance!, discoveredTest.TestContext, cleanUpExceptions);
             
-            await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext, cleanUpExceptions, EngineCancellationToken.Token);
+            await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext, cleanUpExceptions);
             
             await RunHelpers.RunSafelyAsync(() => _disposer.DisposeAsync(discoveredTest.TestContext.TestDetails.ClassInstance), cleanUpExceptions);
         }

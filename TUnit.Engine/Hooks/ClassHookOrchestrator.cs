@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Models;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Hooks;
 
@@ -9,8 +10,8 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class ClassHookOrchestrator
 {
-    private static readonly ConcurrentDictionary<Type, List<Lazy<Task>>> SetUps = new();
-    private static readonly ConcurrentDictionary<Type, List<Func<Task>>> CleanUps = new();
+    private static readonly ConcurrentDictionary<Type, List<(string Name, Lazy<Task> Action)>> SetUps = new();
+    private static readonly ConcurrentDictionary<Type, List<(string Name, Func<Task> Action)>> CleanUps = new();
     
     private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
     
@@ -18,25 +19,19 @@ public static class ClassHookOrchestrator
     {
         var taskFunctions = SetUps.GetOrAdd(type, _ => []);
 
-        taskFunctions.Add(Convert(staticMethod));
+        taskFunctions.Add((staticMethod.Name, Convert(staticMethod)));
     }
     
     public static void RegisterCleanUp(Type type, StaticMethod staticMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(type, _ => []);
 
-        taskFunctions.Add(() =>
+        taskFunctions.Add((staticMethod.Name, () =>
         {
-            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
             var timeout = staticMethod.Timeout;
 
-            if (timeout != null)
-            {
-                cancellationToken.CancelAfter(timeout.Value);
-            }
-
-            return staticMethod.Body(cancellationToken.Token);
-        });
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(token), timeout);
+        }));
     }
     
     public static void RegisterTestContext(Type type, TestContext testContext)
@@ -62,10 +57,8 @@ public static class ClassHookOrchestrator
         }
     }
     
-    public static async Task ExecuteSetups(Type testClassType)
+    public static async Task ExecuteSetups(Type testClassType, TestContext testContext)
     {
-        await AssemblyHookOrchestrator.ExecuteSetups(testClassType.Assembly);
-
         // Reverse so base types are first - We'll run those ones first
         var typesIncludingBase = GetTypesIncludingBase(testClassType)
             .Reverse();
@@ -82,12 +75,13 @@ public static class ClassHookOrchestrator
                 // As these are lazy we should always get the same Task
                 // So we await the same Task to ensure it's finished first
                 // and also gives the benefit of rethrowing the same exception if it failed
-                await setUp.Value;
+                await Timings.Record("Class Hook Set Up: " + setUp.Name, testContext, () => setUp.Action.Value);
             }
         }
     }
     
     public static async Task ExecuteCleanUpsIfLastInstance(Type testClassType,
+        TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
         var typesIncludingBase = GetTypesIncludingBase(testClassType);
@@ -109,7 +103,7 @@ public static class ClassHookOrchestrator
 
             foreach (var cleanUp in cleanUpsForType)
             {
-                await RunHelpers.RunSafelyAsync(cleanUp, cleanUpExceptions);
+                await Timings.Record("Class Hook Clean Up: " + cleanUp.Name, testContext, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Core;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Hooks;
 
@@ -8,39 +9,37 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class TestHookOrchestrator
 {
-    private static readonly ConcurrentDictionary<Type, List<Func<object, TestContext, Task>>> SetUps = new();
-    private static readonly ConcurrentDictionary<Type, List<Func<object, TestContext, Task>>> CleanUps = new();
+    private static readonly ConcurrentDictionary<Type, List<(string Name, Func<object, TestContext, Task> Action)>> SetUps = new();
+    private static readonly ConcurrentDictionary<Type, List<(string Name, Func<object, TestContext, Task> Action)>> CleanUps = new();
     
     public static void RegisterSetUp<TClassType>(InstanceMethod<TClassType> instanceMethod)
     {
         var taskFunctions = SetUps.GetOrAdd(typeof(TClassType), _ => []);
 
-        taskFunctions.Add((classInstance, testContext) =>
+        taskFunctions.Add((instanceMethod.Name, (classInstance, testContext) =>
         {
             var timeout = instanceMethod.Timeout;
 
             return RunHelpers.RunWithTimeoutAsync(token => instanceMethod.Body((TClassType) classInstance, testContext, token), timeout);
-        });
+        }));
     }
     
     public static void RegisterCleanUp<TClassType>(InstanceMethod<TClassType> instanceMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(typeof(TClassType), _ => []);
 
-        taskFunctions.Add((classInstance, testContext) =>
+        taskFunctions.Add((instanceMethod.Name,(classInstance, testContext) =>
         {
             var timeout = instanceMethod.Timeout;
 
             return RunHelpers.RunWithTimeoutAsync(token => instanceMethod.Body((TClassType) classInstance, testContext, token), timeout);
-        });
+        }));
     }
     
     public static async Task ExecuteSetups(object classInstance, TestContext testContext)
     {
         var testClassType = classInstance.GetType();
         
-        await AssemblyHookOrchestrator.ExecuteSetups(testClassType.Assembly);
-
         // Reverse so base types are first - We'll run those ones first
         var typesIncludingBase = GetTypesIncludingBase(testClassType).Reverse();
 
@@ -53,7 +52,7 @@ public static class TestHookOrchestrator
 
             foreach (var setUp in setUpsForType)
             {
-                await setUp(classInstance, testContext);
+                await Timings.Record("Test Hook Set Up: " + setUp.Name, testContext, () => setUp.Action(classInstance, testContext));
             }
         }
     }
@@ -73,7 +72,7 @@ public static class TestHookOrchestrator
 
             foreach (var cleanUp in cleanUpsForType)
             {
-                await RunHelpers.RunSafelyAsync(() => cleanUp(classInstance, testContext), cleanUpExceptions);
+                await Timings.Record("Test Hook Clean Up: " + cleanUp.Name, testContext, () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(classInstance, testContext), cleanUpExceptions));
             }
         }
     }
