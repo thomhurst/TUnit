@@ -1,0 +1,112 @@
+﻿using TUnit.Core;
+using TUnit.Core.Models;
+
+namespace TUnit.TestProject.BeforeTests;
+
+public class AssemblyBase1
+{
+    [AssemblySetUp]
+    public static async Task BeforeAll1()
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeEachTest]
+    public async Task BeforeEach1()
+    {
+        await Task.CompletedTask;
+    }
+}
+
+public class AssemblyBase2 : AssemblyBase1
+{
+    [AssemblySetUp]
+    public static async Task BeforeAll2()
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeEachTest]
+    public async Task BeforeEach2()
+    {
+        await Task.CompletedTask;
+    }
+}
+
+public class AssemblyBase3 : AssemblyBase2
+{
+    [AssemblySetUp]
+    public static async Task BeforeAll3()
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeEachTest]
+    public async Task BeforeEach3()
+    {
+        await Task.CompletedTask;
+    }
+}
+
+public class AssemblySetupTests : AssemblyBase3
+{
+    [AssemblySetUp]
+    public static async Task BeforeAllSetUp()
+    {
+        await Task.CompletedTask;
+    }
+        
+    [AssemblySetUp]
+    public static async Task BeforeAllSetUpWithContext(AssemblyHookContext context)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [AssemblySetUp]
+    public static async Task BeforeAllSetUp(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [AssemblySetUp]
+    public static async Task BeforeAllSetUpWithContext(AssemblyHookContext context, CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeEachTest]
+    public async Task Setup()
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeEachTest, Timeout(30_000)]
+    public async Task Setup(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeEachTest]
+    public async Task SetupWithContext(TestContext testContext)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeEachTest, Timeout(30_000)]
+    public async Task SetupWithContext(TestContext testContext, CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task Test1()
+    {
+        await Task.CompletedTask;
+    }
+    
+    [Test]
+    public async Task Test2()
+    {
+        await Task.CompletedTask;
+    }
+}
