@@ -95,8 +95,8 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
                 $$"""
                   GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
                   		{ 
-                     		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     		Body = (testContext, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
+                            MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                            Body = (testContext, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
                   		});
                   """);
         }
@@ -106,8 +106,8 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
                 $$"""
                   GlobalStaticTestHookOrchestrator.RegisterCleanUp(new StaticMethod<TestContext>
                   		{ 
-                     		MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                     		Body = (testContext, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
+                            MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                            Body = (testContext, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
                   		});
                   """);
         }

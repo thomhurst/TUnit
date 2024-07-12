@@ -10,7 +10,7 @@ public record StaticMethod
 {
     public required MethodInfo MethodInfo { get; init; }
     public required Func<CancellationToken, Task> Body { get; init; }
-    
+    public string Name => $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
     public Type ClassType => MethodInfo.ReflectedType!;
     public Assembly Assembly => ClassType.Assembly;
 
@@ -28,7 +28,7 @@ public record StaticMethod<T>
 {
     public required MethodInfo MethodInfo { get; init; }
     public required Func<T, CancellationToken, Task> Body { get; init; }
-    
+    public string Name => $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
     public Type ClassType => MethodInfo.ReflectedType!;
     public Assembly Assembly => ClassType.Assembly;
 

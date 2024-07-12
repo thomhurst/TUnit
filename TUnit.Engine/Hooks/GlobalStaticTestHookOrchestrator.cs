@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Core;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Hooks;
 
@@ -8,74 +9,46 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class GlobalStaticTestHookOrchestrator
 {
-    private static readonly List<Func<TestContext, Task>> SetUps = [];
-    private static readonly List<Func<TestContext, Task>> CleanUps = [];
+    private static readonly List<(string Name, Func<TestContext, Task> Action)> SetUps = [];
+    private static readonly List<(string Name, Func<TestContext, Task> Action)> CleanUps = [];
 
     [MethodImpl(MethodImplOptions.Synchronized)]
     public static void RegisterSetUp(StaticMethod<TestContext> staticMethod)
     {
-        SetUps.Add(context =>
+        SetUps.Add((staticMethod.Name, context =>
         {
-            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
             var timeout = staticMethod.Timeout;
 
-            if (timeout != null)
-            {
-                cancellationToken.CancelAfter(timeout.Value);
-            }
-            
-            return staticMethod.Body(context, cancellationToken.Token);
-        });
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+        }));
     }
 
     [MethodImpl(MethodImplOptions.Synchronized)]
     public static void RegisterCleanUp(StaticMethod<TestContext> staticMethod)
     {
-        CleanUps.Add(context =>
+        CleanUps.Add((staticMethod.Name, context =>
         {
-            var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
             var timeout = staticMethod.Timeout;
-
-            if (timeout != null)
-            {
-                cancellationToken.CancelAfter(timeout.Value);
-            }
-
-            return staticMethod.Body(context, cancellationToken.Token);
-        });
+            
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+        }));
     }
 
-    public static async Task ExecuteSetups(TestContext testContext, CancellationToken token)
+    public static async Task ExecuteSetups(TestContext testContext)
     {
         foreach (var setUp in SetUps)
         {
-            await setUp(testContext);
+            await Timings.Record("Global Static Test Hook Set Up: " + setUp.Name, testContext, 
+                () => setUp.Action(testContext));
         }
     }
 
-    public static async Task ExecuteCleanUps(TestContext testContext, List<Exception> cleanUpExceptions,
-        CancellationToken token)
+    public static async Task ExecuteCleanUps(TestContext testContext, List<Exception> cleanUpExceptions)
     {
         foreach (var cleanUp in CleanUps)
         {
-            try
-            {
-                await cleanUp(testContext);
-            }
-            catch (Exception e)
-            {
-                cleanUpExceptions.Add(e);
-            }
-        }
-
-        if (cleanUpExceptions.Count == 1)
-        {
-            throw cleanUpExceptions[0];
-        }
-
-        if (cleanUpExceptions.Count > 1)
-        {
-            throw new AggregateException(cleanUpExceptions);
+            await Timings.Record("Global Static Test Hook Set Up: " + cleanUp.Name, testContext,
+                () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(testContext), cleanUpExceptions));
         }
     }
 }
