@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Models;
 
 namespace TUnit.TestProject.AfterTests;
 
@@ -50,7 +51,25 @@ public class Base3 : Base2
 public class CleanupTests : Base3
 {
     [AfterAllTestsInClass]
-    public static async Task AfterAllCleanup()
+    public static async Task AfterAllCleanUp()
+    {
+        await Task.CompletedTask;
+    }
+    
+    [AfterAllTestsInClass]
+    public static async Task AfterAllCleanUpWithContext(ClassHookContext context)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [AfterAllTestsInClass]
+    public static async Task AfterAllCleanUp(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [AfterAllTestsInClass]
+    public static async Task AfterAllCleanUpWithContext(ClassHookContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }

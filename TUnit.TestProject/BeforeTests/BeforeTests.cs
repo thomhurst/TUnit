@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Models;
 
 namespace TUnit.TestProject.BeforeTests;
 
@@ -54,9 +55,21 @@ public class SetupTests : Base3
     {
         await Task.CompletedTask;
     }
-
-    [AfterAllTestsInClass]
-    public static async Task AfterAllTearDown()
+        
+    [BeforeAllTestsInClass]
+    public static async Task BeforeAllSetUpWithContext(ClassHookContext context)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeAllTestsInClass]
+    public static async Task BeforeAllSetUp(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [BeforeAllTestsInClass]
+    public static async Task BeforeAllSetUpWithContext(ClassHookContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
