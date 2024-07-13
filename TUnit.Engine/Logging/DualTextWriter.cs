@@ -297,4 +297,17 @@ internal class DualTextWriter : TextWriter
             }
         }
     }
+
+    public override void Close()
+    {
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
 }
