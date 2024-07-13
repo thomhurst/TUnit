@@ -23,10 +23,7 @@ internal abstract class ConsoleInterceptor : TextWriter
     {
         await base.DisposeAsync();
         
-        if (OutputWriter is not null)
-        {
-            await OutputWriter.DisposeAsync();
-        }
+        await (RedirectedOutputWriter?.DisposeAsync() ?? ValueTask.CompletedTask);
         
         ResetDefault();
     }
