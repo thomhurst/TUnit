@@ -8,9 +8,9 @@ internal class DualTextWriter : TextWriter
 {
     private readonly List<TextWriter> _textWriters;
 
-    public DualTextWriter(TextWriter one, TextWriter two)
+    public DualTextWriter(params TextWriter?[] textWriters)
     {
-        _textWriters = [one, two];
+        _textWriters = textWriters.OfType<TextWriter>().ToList();
     }
 
     public override void Flush()

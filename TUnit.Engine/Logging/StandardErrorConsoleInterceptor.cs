@@ -14,8 +14,8 @@ internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
     private readonly TUnitLogger _logger;
 
     public static TextWriter DefaultError { get; }
-    
-    public override StringWriter RedirectedOutputWriter => TestContext.Current?.ErrorWriter!;
+
+    protected override StringWriter RedirectedOutputWriter => TestContext.Current?.ErrorWriter!;
     
     static StandardErrorConsoleInterceptor()
     {

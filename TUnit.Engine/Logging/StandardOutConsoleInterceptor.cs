@@ -14,8 +14,8 @@ internal class StandardOutConsoleInterceptor : ConsoleInterceptor
     private readonly TUnitLogger _logger;
 
     public static TextWriter DefaultOut { get; }
-    
-    public override StringWriter RedirectedOutputWriter => TestContext.Current?.OutputWriter!;
+
+    protected override StringWriter RedirectedOutputWriter => TestContext.Current?.OutputWriter!;
 
     static StandardOutConsoleInterceptor()
     {
