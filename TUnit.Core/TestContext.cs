@@ -37,7 +37,5 @@ public partial class TestContext : IDisposable
     public void Dispose()
     {
         OnDispose?.Invoke(this, EventArgs.Empty);
-        OutputWriter.Dispose();
-        ErrorWriter.Dispose();
     }
 }
