@@ -8,13 +8,14 @@ namespace TUnit.Engine.Logging;
 
 internal abstract class ConsoleInterceptor : TextWriter
 {
-    public override Encoding Encoding => OutputWriter?.Encoding ?? Encoding.UTF8;
+    public override Encoding Encoding => RedirectedOutputWriter?.Encoding ?? Encoding.UTF8;
     
-    public abstract StringWriter? OutputWriter { get; }
+    public abstract StringWriter RedirectedOutputWriter { get; }
 
-    public abstract void Initialize();
-
-    public abstract void SetModule(TestContext testContext);
+    private TextWriter? _outputWriter;
+    private TextWriter OutputWriter => _outputWriter ??= new DualTextWriter(GetOriginalOut(), RedirectedOutputWriter);
+    
+    private protected abstract TextWriter GetOriginalOut();
     
     private protected abstract void ResetDefault();
 
