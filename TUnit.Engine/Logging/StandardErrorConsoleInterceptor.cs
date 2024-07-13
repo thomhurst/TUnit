@@ -14,8 +14,8 @@ internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
     private readonly TUnitLogger _logger;
 
     public static TextWriter DefaultError { get; }
-    
-    public override StringWriter? OutputWriter => TestContext.Current?.ErrorWriter;
+
+    protected override StringWriter RedirectedOutputWriter => TestContext.Current?.ErrorWriter!;
     
     static StandardErrorConsoleInterceptor()
     {
@@ -29,12 +29,12 @@ internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
         Instance = this;
     }
     
-    public override void Initialize()
+    public void Initialize()
     {
         Console.SetError(this);
     }
 
-    public override void SetModule(TestContext testContext)
+    public void SetModule(TestContext testContext)
     {
         testContext.OnDispose = async (_, _) =>
         {
@@ -50,6 +50,11 @@ internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
                 await _logger.LogErrorAsync(e);
             }
         };
+    }
+
+    private protected override TextWriter GetOriginalOut()
+    {
+        return DefaultError;
     }
 
     private protected override void ResetDefault()
