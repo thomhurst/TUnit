@@ -7,8 +7,9 @@
     <ItemGroup>
       <PackageReference Include="AsyncSemaphore" Version="1.2.2" />
       <PackageReference Include="FluentAssertions" Version="6.12.0" />
-      <PackageReference Include="ModularPipelines.DotNet" Version="2.36.29" />
-      <PackageReference Include="ModularPipelines.Git" Version="2.36.29" />
+      <PackageReference Include="ModularPipelines.DotNet" Version="2.37.9" />
+      <PackageReference Include="ModularPipelines.Git" Version="2.37.9" />
+      <PackageReference Include="ModularPipelines.GitHub" Version="2.37.9" />
     </ItemGroup>
 
 </Project>
