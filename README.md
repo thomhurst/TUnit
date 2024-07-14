@@ -6,6 +6,15 @@ T(est)Unit!
 
 See here: <https://thomhurst.github.io/TUnit/>
 
+## IDE
+
+TUnit is built on top of newer Microsoft.Testing.Platform libraries, as opposed to older legacy VSTest libraries. As of July 2024, IDEs do not fully support this testing platform yet.
+Visual Studio Preview versions can run the new tests by enabling the new testing platform server mode, within Visual Studio preview/experimental features. You will have to opt in to this manually.
+
+For Rider, it is not yet supported. I believe they are working on it so we just have to wait for now.
+
+`dotnet` CLI - Fully supported. Tests should be runnable with both `dotnet test` or `dotnet run`. `dotnet run` should give you a better experience and make it simpler to pass in test flags!
+
 ## Features
 
 - Source generated tests
