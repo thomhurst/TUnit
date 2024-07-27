@@ -23,13 +23,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
 
         var version = versionResult.Value!;
 
-        // TODO: Full version
-        var packageVersion = version.NuGetVersionV2;
-
-        if (context.Git().Information.BranchName == "main")
-        {
-            // packageVersion += "-alpha01";
-        }
+        var packageVersion = version.SemVer!;
 
         await projects.Value!.SelectAsync(
             async project => await context.DotNet()
