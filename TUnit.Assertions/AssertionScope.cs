@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Exceptions;
@@ -32,6 +33,11 @@ internal class AssertionScope : IAsyncDisposable
         {
             if (!await baseAssertCondition.AssertAsync())
             {
+                if (Debugger.IsAttached)
+                {
+                    throw new AssertionException(baseAssertCondition.Message?.Trim());
+                }
+                
                 failed.Add(baseAssertCondition);
             }
         }
