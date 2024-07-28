@@ -43,7 +43,7 @@ jobs:
         env:
           DOTNET_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
           NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
-          NuGet__ShouldPublish: ${{ github.event.inputs.publish-packages && matrix.os == 'ubuntu-latest' || false }}
+          NuGet__ShouldPublish: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
       
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4.3.4
