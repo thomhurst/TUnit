@@ -7,22 +7,22 @@ internal static class Rules
     private const string UsageCategory = "Usage";
 
     public static readonly DiagnosticDescriptor MixAndOrConditionsAssertion =
-        CreateDescriptor("TUnitAnalyzers0001", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnitAssertions0001", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor AwaitAssertion =
-        CreateDescriptor("TUnitAnalyzers0002", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnitAssertions0002", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor CompilerArgumentsPopulated =
-        CreateDescriptor("TUnitAnalyzers0003", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnitAssertions0003", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor DisposableUsingMultiple =
-        CreateDescriptor("TUnitAnalyzers0004", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnitAssertions0004", UsageCategory, DiagnosticSeverity.Error);
         
     public static readonly DiagnosticDescriptor ConstantValueInAssertThat =
-        CreateDescriptor("TUnitAnalyzers0005", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor("TUnitAssertions0005", UsageCategory, DiagnosticSeverity.Warning);
         
     public static readonly DiagnosticDescriptor ObjectEqualsBaseMethod =
-        CreateDescriptor("TUnitAnalyzers0006", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnitAssertions0006", UsageCategory, DiagnosticSeverity.Error);
 
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
