@@ -74,7 +74,7 @@ internal static class ClassArgumentsRetriever
 
         var sharedArgumentType = sharedArgument.ToCSharpString();
 
-        if (sharedArgumentType is "TUnit.Core.SharedType.None" or "" or null)
+        if (sharedArgumentType is "TUnit.Core.SharedType.None" or "" or "null" or null)
         {
             return new ArgumentsContainer
             {

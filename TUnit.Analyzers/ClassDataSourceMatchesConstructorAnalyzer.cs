@@ -78,12 +78,12 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                     return;
                 }
 
-                for (int i = 0; i < returnTypes.Length; i++)
+                for (var i = 0; i < returnTypes.Length; i++)
                 {
                     var parameterType = parameters[i].Type;
                     var argumentType = returnTypes[i];
 
-                    if (!SymbolEqualityComparer.Default.Equals(parameterType, argumentType))
+                    if (!context.Compilation.HasImplicitConversion(parameterType, argumentType))
                     {
                         context.ReportDiagnostic(
                             Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
@@ -100,11 +100,13 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
             {
                 var type = attributeData.AttributeClass?.TypeArguments.ElementAtOrDefault(0) ?? (INamedTypeSymbol)attributeData.ConstructorArguments.First().Value!;
 
-                if (parameters.Length != 1 || !SymbolEqualityComparer.Default.Equals(type, parameters.FirstOrDefault()?.Type))
+                var parameterType = parameters.FirstOrDefault()?.Type;
+                if (parameters.Length != 1 || !context.Compilation.HasImplicitConversion(type, parameterType))
                 {
                     context.ReportDiagnostic(
                         Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
-                            attributeData.GetLocation() ?? namedTypeSymbol.Locations.FirstOrDefault())
+                            attributeData.GetLocation() ?? namedTypeSymbol.Locations.FirstOrDefault(),
+                            type, parameterType)
                     );
                 }
 
@@ -157,7 +159,7 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                     return;
                 }
 
-                for (int i = 0; i < innerTypes.Length; i++)
+                for (var i = 0; i < innerTypes.Length; i++)
                 {
                     var parameterType = parameters[i].Type;
                     var argumentType = innerTypes[i];
