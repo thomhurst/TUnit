@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -26,7 +27,7 @@ public static class TestRegistrar
 			_ => classType.Assembly.GetCustomAttributes().ToArray());
 		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
 		
-		var testInformation = new TestDetails<TClassType>
+		var testDetails = new TestDetails<TClassType>
 		{
 			TestId = testId,
 			Categories = attributes.OfType<CategoryAttribute>().Select(x => x.Category).ToArray(),
@@ -57,7 +58,9 @@ public static class TestRegistrar
 			TestLineNumber = testMetadata.TestLineNumber,
 		};
 
-		var testContext = new TestContext(testInformation);
+		var testContext = new TestContext(testDetails);
+
+		RunOnTestDiscoveryAttributes(attributes, testContext);
 		
 		var unInvokedTest = new DiscoveredTest<TClassType>(testMetadata.ResettableClassFactory)
 		{
@@ -69,7 +72,36 @@ public static class TestRegistrar
 
 		TestDictionary.AddTest(testId, unInvokedTest);
 	}
-	
+
+	private static void RunOnTestDiscoveryAttributes(IEnumerable<Attribute> attributes, TestContext testContext)
+	{
+		DiscoveredTestContext? discoveredTestContext = null;
+		foreach (var onTestDiscoveryAttribute in attributes.OfType<IOnTestDiscoveryAttribute>().Reverse()) // Reverse to run assembly, then class, then method
+		{
+			onTestDiscoveryAttribute.OnTestDiscovery(discoveredTestContext ??= new DiscoveredTestContext(testContext.TestDetails));
+		}
+
+		if (discoveredTestContext is null)
+		{
+			return;
+		}
+		
+		if (!Debugger.IsAttached)
+		{
+			Debugger.Launch();
+		}
+
+		foreach (var (key, value) in discoveredTestContext.Properties ?? [])
+		{
+			((Dictionary<string, string>) testContext.TestDetails.CustomProperties).Add(key, value);
+		}
+
+		foreach (var (key, value) in discoveredTestContext.ObjectBag ?? [])
+		{
+			testContext.ObjectBag.Add(key, value);
+		}
+	}
+
 	public static void Failed(string testId, FailedInitializationTest failedInitializationTest)
 	{
 		TestDictionary.RegisterFailedTest(testId, failedInitializationTest);
