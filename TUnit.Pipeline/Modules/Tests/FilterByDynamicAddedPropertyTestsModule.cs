@@ -3,7 +3,7 @@ using ModularPipelines.Context;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
-public class FilterByDynamicAddedPropertyTests : TestModule
+public class FilterByDynamicAddedPropertyTestsModule : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
