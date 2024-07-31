@@ -51,7 +51,7 @@ public static class TestRegistrar
 			MethodInfo = methodInfo,
 			TestName = methodInfo.Name,
 			DisplayName = testMetadata.DisplayName,
-			CustomProperties = attributes.OfType<PropertyAttribute>().ToDictionary(x => x.Name, x => x.Value),
+			InternalCustomProperties = attributes.OfType<PropertyAttribute>().ToDictionary(x => x.Name, x => x.Value),
 			ReturnType = methodInfo.ReturnType,
 			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = testMetadata.TestFilePath,
@@ -93,12 +93,7 @@ public static class TestRegistrar
 
 		foreach (var (key, value) in discoveredTestContext.Properties ?? [])
 		{
-			((Dictionary<string, string>) testContext.TestDetails.CustomProperties).Add(key, value);
-		}
-
-		foreach (var (key, value) in discoveredTestContext.ObjectBag ?? [])
-		{
-			testContext.ObjectBag.Add(key, value);
+			testContext.TestDetails.InternalCustomProperties.Add(key, value);
 		}
 	}
 

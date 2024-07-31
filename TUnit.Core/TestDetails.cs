@@ -35,7 +35,8 @@ public abstract record TestDetails
     public required TimeSpan? Timeout { get; init; }
     
     public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
-    public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
+    public IReadOnlyDictionary<string, string> CustomProperties => InternalCustomProperties;
+    public required Dictionary<string, string> InternalCustomProperties { get; init; }
 
     [JsonIgnore]
     public required Attribute[] AssemblyAttributes { get; init; }
