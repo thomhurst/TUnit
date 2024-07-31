@@ -34,7 +34,7 @@ internal record JsonOutput
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
     
-    public required Dictionary<string, object> ObjectBag { get; init; }
+    public required Dictionary<string, object?> ObjectBag { get; init; }
     
     public required TUnitTestResult? Result { get; set; }
 }

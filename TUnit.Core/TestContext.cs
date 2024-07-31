@@ -15,7 +15,7 @@ public partial class TestContext : IDisposable
     public int CurrentRetryAttempt { get; internal set; }
 
     public List<Timing> Timings { get; } = [];
-    public Dictionary<string, object> ObjectBag { get; } = new();
+    public Dictionary<string, object?> ObjectBag { get; } = new();
 
     public TestContext(TestDetails testDetails)
     {
