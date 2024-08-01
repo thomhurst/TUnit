@@ -39,23 +39,11 @@ public class InheritsTestsAnalyzer : ConcurrentDiagnosticAnalyzer
             .SelectMany(x => x.GetMembers())
             .OfType<IMethodSymbol>();
 
-        if (methods.Any(HasTestAttribute))
+        if (methods.Any(x => x.IsTestMethod()))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.DoesNotInheritTestsWarning,
                 namedTypeSymbol.Locations.FirstOrDefault())
             );
         }
-    }
-
-    private static bool HasTestAttribute(IMethodSymbol m)
-    {
-        return m.GetAttributes().Any(IsTestAttribute);
-    }
-
-    private static bool IsTestAttribute(AttributeData x)
-    {
-        var qualifiedName = x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-
-        return WellKnown.AttributeFullyQualifiedClasses.TestAttributes.Contains(qualifiedName);
     }
 }

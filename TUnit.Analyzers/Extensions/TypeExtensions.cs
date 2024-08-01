@@ -30,4 +30,12 @@ public static class TypeExtensions
             .GetSelfAndBaseTypes()
             .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == typeName);
     }
+    
+    public static bool IsTestClass(this INamedTypeSymbol namedTypeSymbol)
+    {
+        return namedTypeSymbol
+            .GetMembers()
+            .OfType<IMethodSymbol>()
+            .Any(x => x.IsTestMethod());
+    }
 }
