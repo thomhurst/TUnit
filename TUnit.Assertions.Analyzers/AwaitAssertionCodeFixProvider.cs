@@ -38,9 +38,9 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
 
         context.RegisterCodeFix(
             CodeAction.Create(
-                title: Resources.TUnitAssertions00040002CodeFixTitle,
+                title: Resources.TUnitAssertions0002CodeFixTitle,
                 createChangedDocument: c => AwaitAssertionAsync(context.Document, expressionStatementSyntax, c),
-                equivalenceKey: nameof(Resources.TUnitAssertions00040002CodeFixTitle)),
+                equivalenceKey: nameof(Resources.TUnitAssertions0002CodeFixTitle)),
             diagnostic);
     }
 

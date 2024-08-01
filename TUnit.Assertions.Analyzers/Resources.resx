@@ -18,64 +18,64 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
-    <data name="TUnitAssertions00040001Description" xml:space="preserve">
+    <data name="TUnitAssertions0001Description" xml:space="preserve">
         <value>Don't mix 'Or' &amp; 'And' operators in assertions.</value>
     </data>
-    <data name="TUnitAssertions00040001MessageFormat" xml:space="preserve">
+    <data name="TUnitAssertions0001MessageFormat" xml:space="preserve">
         <value>Don't mix 'Or' &amp; 'And' operators in assertions</value>
     </data>
-    <data name="TUnitAssertions00040001Title" xml:space="preserve">
+    <data name="TUnitAssertions0001Title" xml:space="preserve">
         <value>Don't mix 'Or' &amp; 'And' operators in assertions</value>
     </data>
-    <data name="TUnitAssertions00040001CodeFixTitle" xml:space="preserve">
+    <data name="TUnitAssertions0001CodeFixTitle" xml:space="preserve">
         <value>Don't mix 'Or' &amp; 'And' operators in assertions</value><comment>The title of the code fix.</comment>
     </data>
-    <data name="TUnitAssertions00040002Description" xml:space="preserve">
+    <data name="TUnitAssertions0002Description" xml:space="preserve">
         <value>Assert statements must be awaited.</value>
     </data>
-    <data name="TUnitAssertions00040002MessageFormat" xml:space="preserve">
+    <data name="TUnitAssertions0002MessageFormat" xml:space="preserve">
         <value>Assert statements must be awaited</value>
     </data>
-    <data name="TUnitAssertions00040002Title" xml:space="preserve">
+    <data name="TUnitAssertions0002Title" xml:space="preserve">
         <value>Assert statements must be awaited</value>
     </data>
-    <data name="TUnitAssertions00040002CodeFixTitle" xml:space="preserve">
+    <data name="TUnitAssertions0002CodeFixTitle" xml:space="preserve">
         <value>Assert statements must be awaited</value><comment>The title of the code fix.</comment>
     </data>
-    <data name="TUnitAssertions00040003Description" xml:space="preserve">
+    <data name="TUnitAssertions0003Description" xml:space="preserve">
         <value>Do not populate this argument. The compiler will do this.</value>
     </data>
-    <data name="TUnitAssertions00040003MessageFormat" xml:space="preserve">
+    <data name="TUnitAssertions0003MessageFormat" xml:space="preserve">
         <value>Do not populate this argument. The compiler will do this</value>
     </data>
-    <data name="TUnitAssertions00040003Title" xml:space="preserve">
+    <data name="TUnitAssertions0003Title" xml:space="preserve">
         <value>Compiler argument populated</value>
     </data>
-    <data name="TUnitAssertions00040004Description" xml:space="preserve">
+    <data name="TUnitAssertions0004Description" xml:space="preserve">
         <value>Assert.Multiple needs an `await using` before it.</value>
     </data>
-    <data name="TUnitAssertions00040004MessageFormat" xml:space="preserve">
+    <data name="TUnitAssertions0004MessageFormat" xml:space="preserve">
         <value>Assert.Multiple needs an `await using` before it</value>
     </data>
-    <data name="TUnitAssertions00040004Title" xml:space="preserve">
+    <data name="TUnitAssertions0004Title" xml:space="preserve">
         <value>Assert.Multiple needs an `await using` before it</value>
     </data>
-    <data name="TUnitAssertions00040005Description" xml:space="preserve">
+    <data name="TUnitAssertions0005Description" xml:space="preserve">
         <value>Assert.That(...) should not be used with a constant value.</value>
     </data>
-    <data name="TUnitAssertions00040005MessageFormat" xml:space="preserve">
+    <data name="TUnitAssertions0005MessageFormat" xml:space="preserve">
         <value>Assert.That(...) should not be used with a constant value</value>
     </data>
-    <data name="TUnitAssertions00040005Title" xml:space="preserve">
+    <data name="TUnitAssertions0005Title" xml:space="preserve">
         <value>Assert.That(...) should not be used with a constant value</value>
     </data>
-    <data name="TUnitAssertions00040006Description" xml:space="preserve">
+    <data name="TUnitAssertions0006Description" xml:space="preserve">
         <value>Object `Equals` base method should not be called. Use `.Is.EqualTo(...).</value>
     </data>
-    <data name="TUnitAssertions00040006MessageFormat" xml:space="preserve">
+    <data name="TUnitAssertions0006MessageFormat" xml:space="preserve">
         <value>Object `Equals` base method should not be called. Use `.Is.EqualTo(...)</value>
     </data>
-    <data name="TUnitAssertions00040006Title" xml:space="preserve">
+    <data name="TUnitAssertions0006Title" xml:space="preserve">
         <value>Object `Equals` base method should not be called</value>
     </data>
 </root>
