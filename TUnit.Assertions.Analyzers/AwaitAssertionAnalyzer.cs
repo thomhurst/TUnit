@@ -39,19 +39,17 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-
-        var parentOperations = invocationOperation.GetAncestorOperations().ToArray();
         
         if(fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple"
-            && !parentOperations.OfType<IUsingOperation>().Any())
+            && invocationOperation.Parent is not IUsingOperation)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.DisposableUsingMultiple, context.Operation.Syntax.GetLocation())
             );
             return;
         }
-        
-        if (parentOperations.SelectMany(x => x.DescendantsAndSelf()).OfType<IAwaitOperation>().Any())
+
+        if (IsAwaited(invocationOperation))
         {
             return;
         }
@@ -59,5 +57,22 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         context.ReportDiagnostic(
             Diagnostic.Create(Rules.AwaitAssertion, context.Operation.Syntax.GetLocation())
         );
+    }
+
+    private static bool IsAwaited(IInvocationOperation invocationOperation)
+    {
+        var parent = invocationOperation.Parent;
+
+        while (parent != null)
+        {
+            if (parent is IUsingOperation or IAwaitOperation)
+            {
+                return true;
+            }
+            
+            parent = parent.Parent;
+        }
+        
+        return false;
     }
 }

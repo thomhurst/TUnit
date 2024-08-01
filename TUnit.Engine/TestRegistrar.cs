@@ -86,11 +86,6 @@ public static class TestRegistrar
 			return;
 		}
 		
-		if (!Debugger.IsAttached)
-		{
-			Debugger.Launch();
-		}
-
 		foreach (var (key, value) in discoveredTestContext.Properties ?? [])
 		{
 			testContext.TestDetails.InternalCustomProperties.Add(key, value);

@@ -16,11 +16,11 @@ internal static class TestApplicationBuilderExtensions
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(new TrxReportCapability()),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
-
         
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new DisplayTestOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
     }
 }
