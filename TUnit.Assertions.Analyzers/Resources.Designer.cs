@@ -62,180 +62,180 @@ namespace TUnit.Assertions.Analyzers {
         /// <summary>
         ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions.
         /// </summary>
-        internal static string TUnitAnalyzers0001CodeFixTitle {
+        internal static string TUnitAssertions00040001CodeFixTitle {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0001CodeFixTitle", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040001CodeFixTitle", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions..
         /// </summary>
-        internal static string TUnitAnalyzers0001Description {
+        internal static string TUnitAssertions00040001Description {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0001Description", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040001Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions.
         /// </summary>
-        internal static string TUnitAnalyzers0001MessageFormat {
+        internal static string TUnitAssertions00040001MessageFormat {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0001MessageFormat", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040001MessageFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Don&apos;t mix &apos;Or&apos; &amp; &apos;And&apos; operators in assertions.
         /// </summary>
-        internal static string TUnitAnalyzers0001Title {
+        internal static string TUnitAssertions00040001Title {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0001Title", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040001Title", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert statements must be awaited.
         /// </summary>
-        internal static string TUnitAnalyzers0002CodeFixTitle {
+        internal static string TUnitAssertions00040002CodeFixTitle {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0002CodeFixTitle", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040002CodeFixTitle", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert statements must be awaited..
         /// </summary>
-        internal static string TUnitAnalyzers0002Description {
+        internal static string TUnitAssertions00040002Description {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0002Description", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040002Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert statements must be awaited.
         /// </summary>
-        internal static string TUnitAnalyzers0002MessageFormat {
+        internal static string TUnitAssertions00040002MessageFormat {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0002MessageFormat", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040002MessageFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert statements must be awaited.
         /// </summary>
-        internal static string TUnitAnalyzers0002Title {
+        internal static string TUnitAssertions00040002Title {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0002Title", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040002Title", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Do not populate this argument. The compiler will do this..
         /// </summary>
-        internal static string TUnitAnalyzers0003Description {
+        internal static string TUnitAssertions00040003Description {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0003Description", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040003Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Do not populate this argument. The compiler will do this.
         /// </summary>
-        internal static string TUnitAnalyzers0003MessageFormat {
+        internal static string TUnitAssertions00040003MessageFormat {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0003MessageFormat", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040003MessageFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Compiler argument populated.
         /// </summary>
-        internal static string TUnitAnalyzers0003Title {
+        internal static string TUnitAssertions00040003Title {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0003Title", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040003Title", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it..
         /// </summary>
-        internal static string TUnitAnalyzers0004Description {
+        internal static string TUnitAssertions00040004Description {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0004Description", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040004Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it.
         /// </summary>
-        internal static string TUnitAnalyzers0004MessageFormat {
+        internal static string TUnitAssertions00040004MessageFormat {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0004MessageFormat", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040004MessageFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it.
         /// </summary>
-        internal static string TUnitAnalyzers0004Title {
+        internal static string TUnitAssertions00040004Title {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0004Title", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040004Title", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert.That(...) should not be used with a constant value..
         /// </summary>
-        internal static string TUnitAnalyzers0005Description {
+        internal static string TUnitAssertions00040005Description {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0005Description", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040005Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert.That(...) should not be used with a constant value.
         /// </summary>
-        internal static string TUnitAnalyzers0005MessageFormat {
+        internal static string TUnitAssertions00040005MessageFormat {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0005MessageFormat", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040005MessageFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Assert.That(...) should not be used with a constant value.
         /// </summary>
-        internal static string TUnitAnalyzers0005Title {
+        internal static string TUnitAssertions00040005Title {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0005Title", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040005Title", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Object `Equals` base method should not be called. Use `.Is.EqualTo(...)..
         /// </summary>
-        internal static string TUnitAnalyzers0006Description {
+        internal static string TUnitAssertions00040006Description {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0006Description", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040006Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Object `Equals` base method should not be called. Use `.Is.EqualTo(...).
         /// </summary>
-        internal static string TUnitAnalyzers0006MessageFormat {
+        internal static string TUnitAssertions00040006MessageFormat {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0006MessageFormat", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040006MessageFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Object `Equals` base method should not be called.
         /// </summary>
-        internal static string TUnitAnalyzers0006Title {
+        internal static string TUnitAssertions00040006Title {
             get {
-                return ResourceManager.GetString("TUnitAnalyzers0006Title", resourceCulture);
+                return ResourceManager.GetString("TUnitAssertions00040006Title", resourceCulture);
             }
         }
     }

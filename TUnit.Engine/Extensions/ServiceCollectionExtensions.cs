@@ -37,6 +37,7 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<TestFilterService>()
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<TUnitOnEndExecutor>()
-            .AddSingleton<TUnitLogger>();
+            .AddSingleton<TUnitLogger>()
+            .AddSingleton<TUnitInitializer>();
     }
 }

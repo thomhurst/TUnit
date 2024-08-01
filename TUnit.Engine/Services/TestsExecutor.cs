@@ -131,25 +131,6 @@ internal class TestsExecutor
         {
             await ProcessTest(test, filter, context, token);
         });
-        
-        // while (queue.Count > 0)
-        // {
-        //     if (_cancellationTokenSource.IsCancellationRequested)
-        //     {
-        //         break;
-        //     }
-        //     
-        //     if (_currentlyExecutingTests < _maximumParallelTests && !_systemResourceMonitor.IsSystemStrained())
-        //     {
-        //         var test = queue.Dequeue();
-        //
-        //         yield return ProcessTest(test, filter, context);
-        //     }
-        //     else
-        //     {
-        //         await Task.Delay(500);
-        //     }
-        // }
     }
 
     private async Task ProcessTest(DiscoveredTest test,

@@ -21,6 +21,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly TUnitLogger _logger;
     private readonly TUnitTestDiscoverer _testDiscover;
     private readonly TestsExecutor _testsExecutor;
+    private readonly TUnitInitializer _initializer;
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider serviceProvider,
@@ -37,6 +38,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _logger = _serviceProvider.GetRequiredService<TUnitLogger>();
         _testDiscover = _serviceProvider.GetRequiredService<TUnitTestDiscoverer>();
         _testsExecutor = _serviceProvider.GetRequiredService<TestsExecutor>();
+        _initializer = _serviceProvider.GetRequiredService<TUnitInitializer>();
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -66,6 +68,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             try
             {
+                _initializer.Initialize();
+                
                 var discoveredTests = _testDiscover.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken);
 
                 var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
