@@ -107,6 +107,9 @@ internal static class Rules
         
     public static readonly DiagnosticDescriptor NoMainMethod =
         CreateDescriptor("TUnit0034", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor NoMatchingParameterClassDataSource =
+        CreateDescriptor("TUnit0035", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

@@ -976,5 +976,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0034Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ClassDataSource expects a matching parameter..
+        /// </summary>
+        internal static string TUnit0035Description {
+            get {
+                return ResourceManager.GetString("TUnit0035Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ClassDataSource expects a matching parameter.
+        /// </summary>
+        internal static string TUnit0035MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0035MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ClassDataSource expects a matching parameter.
+        /// </summary>
+        internal static string TUnit0035Title {
+            get {
+                return ResourceManager.GetString("TUnit0035Title", resourceCulture);
+            }
+        }
     }
 }
