@@ -50,8 +50,15 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
             );
             return;
         }
+
+        var operations = parentOperations.SelectMany(x => x.DescendantsAndSelf()).ToArray();
         
-        if (parentOperations.SelectMany(x => x.DescendantsAndSelf()).OfType<IAwaitOperation>().Any())
+        if (operations.OfType<IAwaitOperation>().Any())
+        {
+            return;
+        }
+        
+        if (operations.OfType<IUsingOperation>().Any())
         {
             return;
         }
