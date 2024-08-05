@@ -2,8 +2,8 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-[ClassDataSource(typeof(Derived1))]
-[ClassDataSource(typeof(Derived2))]
+[ClassDataSource<Derived1>]
+[ClassDataSource<Derived2>]
 public class ClassDataSourceDrivenTests2
 {
     private readonly Base _base;

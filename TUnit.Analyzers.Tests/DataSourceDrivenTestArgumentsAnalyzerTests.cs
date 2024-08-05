@@ -13,7 +13,6 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
 
                             public class MyClass
                             {
-                            
                                 [{|#0:MethodDataSource(nameof(Data))|}]
                                 public void MyTest(string value)
                                 {

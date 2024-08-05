@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
@@ -9,7 +10,14 @@ namespace TUnit.Analyzers;
 public class ClassDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.NoMethodFound, Rules.Argument_Count_Not_Matching_Parameter_Count, Rules.WrongArgumentTypeTestDataSource, Rules.NoMatchingParameterClassDataSource);
+        ImmutableArray.Create
+        (
+            Rules.TypeMustBePublic,
+            Rules.Argument_Count_Not_Matching_Parameter_Count,
+            Rules.WrongArgumentTypeTestDataSource,
+            Rules.NoMatchingParameterClassDataSource,
+            Rules.ConstructorMustBeParameterless
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -52,10 +60,22 @@ public class ClassDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var type = attributeData.ConstructorArguments.FirstOrDefault().Value as INamedTypeSymbol
                        ?? attributeData.AttributeClass!.TypeArguments.First();
+
+            if (type.DeclaredAccessibility != Accessibility.Public)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.TypeMustBePublic, attributeData.GetLocation()));
+                return;
+            }
+            
+            if (type is INamedTypeSymbol namedTypeSymbol && !namedTypeSymbol.InstanceConstructors.Any(x => x.Parameters.Length == 0))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.ConstructorMustBeParameterless, attributeData.GetLocation()));
+                return;
+            }
             
             if (!parameterSymbols.Any(parameter => context.Compilation.HasImplicitConversion(type, parameter.Type)))
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMatchingParameterClassDataSource, context.Symbol.Locations.FirstOrDefault()));
+                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMatchingParameterClassDataSource, attributeData.GetLocation()));
             }
         }
     }

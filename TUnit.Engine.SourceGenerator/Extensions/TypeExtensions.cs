@@ -81,6 +81,6 @@ internal static class TypeExtensions
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == typeName);
+            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == typeName);
     }
 }

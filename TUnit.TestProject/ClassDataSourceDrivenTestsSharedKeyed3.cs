@@ -6,7 +6,7 @@ using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;
 
-[ClassDataSource(typeof(SomeAsyncDisposableClass), Shared = SharedType.Keyed, Key = "🌲")]
+[ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🌲")]
 [SuppressMessage("Usage", "TUnit0018:Test methods should not assign instance data")]
 public class ClassDataSourceDrivenTestsSharedKeyed3
 {
@@ -21,7 +21,7 @@ public class ClassDataSourceDrivenTestsSharedKeyed3
     }
     
     [DataSourceDrivenTest]
-    [ClassDataSource(typeof(SomeAsyncDisposableClass), Shared = SharedType.Keyed, Key = "🔑")]
+    [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public async Task DataSource_Class(SomeAsyncDisposableClass value)
     {
         await Assert.That(_someAsyncDisposableClass.IsDisposed).Is.False();

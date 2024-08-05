@@ -6,7 +6,7 @@ namespace TUnit.TestProject;
 public class ClassDataSourceDrivenTests
 {
     [DataSourceDrivenTest]
-    [ClassDataSource(typeof(SomeAsyncDisposableClass))]
+    [ClassDataSource<SomeAsyncDisposableClass>]
     public void DataSource_Class(SomeAsyncDisposableClass value)
     {
         // Dummy method
