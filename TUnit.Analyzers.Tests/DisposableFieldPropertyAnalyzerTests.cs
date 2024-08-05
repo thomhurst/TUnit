@@ -41,7 +41,7 @@ public class DisposableFieldPropertyAnalyzerTests
                             using System.Net.Http;
                             using TUnit.Core;
 
-                            [ClassDataSource(typeof(HttpClient), Shared = SharedType.Keyed, Key = "🌲")]
+                            [ClassDataSource<HttpClient>(Shared = SharedType.Keyed, Key = "🌲")]
                             public class DisposableFieldTests
                             {
                                 private HttpClient _httpClient;

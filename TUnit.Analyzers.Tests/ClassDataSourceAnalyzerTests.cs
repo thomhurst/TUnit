@@ -11,7 +11,7 @@ public class ClassDataSourceAnalyzerTests
         const string text = """
                             using TUnit.Core;
 
-                            [ClassDataSource(typeof(int))]
+                            [ClassDataSource<int>]
                             public class MyClass
                             {
                                 public MyClass(int value)
@@ -83,8 +83,8 @@ public class ClassDataSourceAnalyzerTests
         const string text = """
                             using TUnit.Core;
 
-                            [ClassDataSource<int>]
-                            public class {|#0:MyClass|}
+                            [{|#0:ClassDataSource<int>|}]
+                            public class MyClass
                             {
                                 public MyClass(string value)
                                 {
@@ -110,7 +110,7 @@ public class ClassDataSourceAnalyzerTests
 
                             public class MyClass
                             {
-                                [ClassDataSource(typeof(int))]
+                                [ClassDataSource<int>]
                                 [Test]
                                 public void MyTest(int value)
                                 {
@@ -170,9 +170,9 @@ public class ClassDataSourceAnalyzerTests
 
                             public class MyClass
                             {
-                                [ClassDataSource<int>]
+                                [{|#0:ClassDataSource<int>|}]
                                 [DataSourceDrivenTest]
-                                public void {|#0:MyTest|}(string value)
+                                public void MyTest(string value)
                                 {
                                 }
                             }

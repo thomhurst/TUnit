@@ -6,7 +6,7 @@ namespace TUnit.TestProject;
 public class ClassDataSourceDrivenTestsSharedForClass
 {
     [DataSourceDrivenTest]
-    [ClassDataSource(typeof(SomeAsyncDisposableClass), Shared = SharedType.ForClass)]
+    [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.ForClass)]
     public void DataSource_Class(SomeAsyncDisposableClass value)
     {
         // Dummy method

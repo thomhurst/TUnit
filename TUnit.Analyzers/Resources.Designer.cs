@@ -1003,5 +1003,59 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0035Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public...
+        /// </summary>
+        internal static string TUnit0036Description {
+            get {
+                return ResourceManager.GetString("TUnit0036Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public.
+        /// </summary>
+        internal static string TUnit0036MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0036MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type must be public.
+        /// </summary>
+        internal static string TUnit0036Title {
+            get {
+                return ResourceManager.GetString("TUnit0036Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Constructor should be parameterless..
+        /// </summary>
+        internal static string TUnit0037Description {
+            get {
+                return ResourceManager.GetString("TUnit0037Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Constructor should be parameterless.
+        /// </summary>
+        internal static string TUnit0037MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0037MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Constructor should be parameterless.
+        /// </summary>
+        internal static string TUnit0037Title {
+            get {
+                return ResourceManager.GetString("TUnit0037Title", resourceCulture);
+            }
+        }
     }
 }

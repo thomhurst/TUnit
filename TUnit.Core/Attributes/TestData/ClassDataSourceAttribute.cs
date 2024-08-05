@@ -1,26 +1,18 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<T>() : ClassDataSourceAttribute(typeof(T)) where T : new(); 
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class ClassDataSourceAttribute : TUnitAttribute
+public sealed class ClassDataSourceAttribute<T> : TUnitAttribute where T : new()
 {
     public Type Type { get; }
 
-    public ClassDataSourceAttribute(Type type)
+    public ClassDataSourceAttribute()
     {
-        if (type.GetConstructors().First().GetParameters().Any())
-        {
-            throw new ArgumentException($"{type.FullName} cannot be used within [ClassData] as it does not have a parameterless constructor.");
-        }
+        Type = typeof(T);
 
-        if (!type.GetConstructors().First().IsPublic)
+        if (!Type.GetConstructors().Any(x => x.IsPublic && x.GetParameters().Length == 0))
         {
-            throw new ArgumentException($"{type.FullName} cannot be used within [ClassData] as it does not have a public constructor.");
+            throw new ArgumentException($"{Type.FullName} cannot be used within [ClassData] as it does not have a public constructor.");
         }
-        
-        Type = type;
     }
     
     public SharedType Shared { get; set; } = SharedType.None;

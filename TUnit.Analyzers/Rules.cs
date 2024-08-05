@@ -110,6 +110,15 @@ internal static class Rules
     
     public static readonly DiagnosticDescriptor NoMatchingParameterClassDataSource =
         CreateDescriptor("TUnit0035", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor TypeMustBePublic =
+        CreateDescriptor("TUnit0036", UsageCategory, DiagnosticSeverity.Error);
+
+    public static readonly DiagnosticDescriptor ConstructorMustBeParameterless =
+        CreateDescriptor("TUnit0037", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor NoDataSourceProvided =
+        CreateDescriptor("TUnit0038", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
