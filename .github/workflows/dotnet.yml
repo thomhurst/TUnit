@@ -47,7 +47,7 @@ jobs:
           NuGet__ShouldPublish: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
       
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4.3.4
+        uses: actions/upload-artifact@v4.3.5
         if: always()
         with:
           name: TestingPlatformDiagnosticLogs
