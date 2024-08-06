@@ -18,6 +18,9 @@ public class NUnitModule : Module<CommandResult>
         var project = context.Git().RootDirectory.AssertExists().FindFile(x => x.Name == "NUnitTimer.csproj")
             .AssertExists();
 
-        return await context.DotNet().Test(new DotNetTestOptions(project), cancellationToken);
+        return await context.DotNet().Test(new DotNetTestOptions(project)
+        {
+            Configuration = Configuration.Release
+        }, cancellationToken);
     }
 }

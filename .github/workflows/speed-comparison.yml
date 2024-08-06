@@ -31,9 +31,18 @@ jobs:
         with:
           dotnet-version: 8.0.x
           
-      - name: Build
+      - name: Build TUnit
         run: dotnet build -c Release
-
+        working-directory: "tools/speed-comparison/TUnitTimer"
+                  
+      - name: Build xUnit
+        run: dotnet build -c Release
+        working-directory: "tools/speed-comparison/xUnitTimer"
+            
+      - name: Build NUnit
+        run: dotnet build -c Release
+        working-directory: "tools/speed-comparison/NUnitTimer"
+      
       - name: Run Pipeline
         run: dotnet run -c Release
         working-directory: "tools/speed-comparison/TUnit.SpeedComparison.Pipeline/TUnit.SpeedComparison.Pipeline"

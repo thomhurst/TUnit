@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using ModularPipelines.Host;
+﻿using ModularPipelines.Host;
 using TUnit.SpeedComparison.Pipeline;
 
 await PipelineHostBuilder.Create()
