@@ -11,7 +11,7 @@ internal static class TestSourceDataModelRetriever
     public static IEnumerable<TestSourceDataModel> ParseTestDatas(this IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol)
     {
-        if (methodSymbol.IsAbstract || namedTypeSymbol.IsAbstract)
+        if (methodSymbol.IsAbstract || namedTypeSymbol.IsAbstract || namedTypeSymbol.IsGenericType)
         {
             yield break;
         }
