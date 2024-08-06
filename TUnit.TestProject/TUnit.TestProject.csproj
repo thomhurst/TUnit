@@ -26,6 +26,11 @@
     <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"
                       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
+
+    <PropertyGroup>
+<!--        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+<!--        <CompilerGeneratedFilesOutputPath>EmittedSourceGeneratedFiles</CompilerGeneratedFilesOutputPath>-->
+    </PropertyGroup>
     
     <ItemGroup>
         <TestingPlatformBuilderHook Include="6ADF853A-6945-4A06-9A4B-D99BC1DC1094" >

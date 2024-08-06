@@ -7,8 +7,7 @@ sidebar_position: 4
 It's common to want to repeat tests but pass in different values on each execution.
 We can do that with a data driven test.
 
-Instead of the `[Test]` attribute, we'll use a `[DataDrivenTest]` attribute to mark this test.
-We'll also include some `[Arguments(...)]` attributes. 
+Compile-time known data can be injected via `[Arguments(...)]` attributes. 
 This attribute takes an array of arguments. It can take as many as you like, but your test method has to have the same number of parameters and they must be the same type.
 If you include multiple `[Arguments]` attributes, your test will be repeated that many times, containing the data passed into the attribute.
 
@@ -24,7 +23,7 @@ namespace MyTestProject;
 
 public class MyTestClass
 {
-    [DataDrivenTest]
+    [Test]
     [Arguments(1, 1, 2)]
     [Arguments(1, 2, 3)]
     [Arguments(2, 2, 4)]

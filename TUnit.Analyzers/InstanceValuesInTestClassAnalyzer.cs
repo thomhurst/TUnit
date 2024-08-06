@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Helpers;
@@ -30,8 +29,8 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         var tests = classMembers
             .OfType<IMethodSymbol>()
             .Where(x => x.GetAttributes()
-                .Any(a => WellKnown.AttributeFullyQualifiedClasses.TestAttributes.Contains(
-                    a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))))
+                .Any(a => WellKnown.AttributeFullyQualifiedClasses.Test == a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
+            )
             .ToList();
 
         if (!tests.Any())

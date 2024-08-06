@@ -29,7 +29,7 @@ public static partial class IsNotExtensions
     {
         return AssertionConditionCombiner.Combine(isNot, new DelegateAssertCondition<string, int,TAnd,TOr>(
             isNot.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _, self) => value != string.Empty,
+            (value, _, _, _) => value != string.Empty,
             (s, _) => $"'{s}' is empty"));
     }
     
@@ -39,7 +39,7 @@ public static partial class IsNotExtensions
     {
         return AssertionConditionCombiner.Combine(isNot, new DelegateAssertCondition<string, int, TAnd,TOr>(
             isNot.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _, self) => !string.IsNullOrEmpty(value),
+            (value, _, _, _) => !string.IsNullOrEmpty(value),
             (s, _) => $"'{s}' is null or empty"));
     }
     
@@ -49,7 +49,7 @@ public static partial class IsNotExtensions
     {
         return AssertionConditionCombiner.Combine(isNot, new DelegateAssertCondition<string, int,TAnd,TOr>(
             isNot.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _, self) => !string.IsNullOrWhiteSpace(value),
+            (value, _, _, _) => !string.IsNullOrWhiteSpace(value),
             (s, _) => $"'{s}' is null or whitespace"));
     }
 }

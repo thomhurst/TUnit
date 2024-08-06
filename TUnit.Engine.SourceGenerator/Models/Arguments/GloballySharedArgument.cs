@@ -1,10 +1,8 @@
-﻿using TUnit.Engine.SourceGenerator.Enums;
-
-namespace TUnit.Engine.SourceGenerator.Models.Arguments;
+﻿namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record GloballySharedArgument : Argument
 {
-    public GloballySharedArgument(ArgumentSource argumentSource, string type, string? invocation, bool isTuple = false) : base(argumentSource, type, invocation, isTuple)
+    public GloballySharedArgument(string type, string? invocation, bool isTuple = false) : base(type, invocation, isTuple)
     {
     }
 }

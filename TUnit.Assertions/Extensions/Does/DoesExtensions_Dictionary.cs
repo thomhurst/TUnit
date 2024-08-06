@@ -17,12 +17,12 @@ public static partial class DoesExtensions
         return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<TDictionary, TKey, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
             expected,
-            (actual, _, _, self) =>
+            (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.Keys.Cast<TKey>().Contains(expected, equalityComparer);
             },
-            (actual, _) => $"The key \"{expected}\" was not found in the dictionary"));
+            (_, _) => $"The key \"{expected}\" was not found in the dictionary"));
     }
     
     public static BaseAssertCondition<TDictionary, TAnd, TOr> ContainValue<TDictionary, TValue, TAnd, TOr>(this Does<TDictionary, TAnd, TOr> does, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -33,11 +33,11 @@ public static partial class DoesExtensions
         return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<TDictionary, TValue, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
             expected,
-            (actual, _, _, self) =>
+            (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.Values.Cast<TValue>().Contains(expected, equalityComparer);
             },
-            (actual, _) => $"The value \"{expected}\" was not found in the dictionary"));
+            (_, _) => $"The value \"{expected}\" was not found in the dictionary"));
     }
 }

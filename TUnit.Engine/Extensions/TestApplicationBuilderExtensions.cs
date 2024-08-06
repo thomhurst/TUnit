@@ -14,7 +14,7 @@ internal static class TestApplicationBuilderExtensions
         TUnitExtension extension = new();
         
         testApplicationBuilder.RegisterTestFramework(
-            serviceProvider => new TestFrameworkCapabilities(new TrxReportCapability()),
+            _ => new TestFrameworkCapabilities(new TrxReportCapability()),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
         
         testApplicationBuilder.AddTreeNodeFilterService(extension);

@@ -5,35 +5,42 @@ namespace TUnit.Engine.SourceGenerator.Extensions;
 
 public static class AttributeDataExtensions
 {
+    private static readonly string[] DataSourceAttributes =
+    [
+        WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix,
+        WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix,
+        WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix,
+        WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix,
+    ];
+    
     public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)
     {
         return attributeData?.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
     }
 
-    public static TestType GetTestType(this AttributeData? attributeData)
+    public static bool IsTest(this AttributeData? attributeData)
     {
         var displayString = attributeData?.GetFullyQualifiedAttributeTypeName();
 
         if (displayString == WellKnownFullyQualifiedClassNames.TestAttribute.WithGlobalPrefix)
         {
-            return TestType.Basic;
+            return true;
         }
 
-        if (displayString == WellKnownFullyQualifiedClassNames.DataDrivenTestAttribute.WithGlobalPrefix)
-        {
-            return TestType.DataDriven;
-        }
+        return false;
+    }
+    
+    public static bool IsDataSourceAttribute(this AttributeData? attributeData)
+    {
+        var displayString = attributeData?.GetFullyQualifiedAttributeTypeName();
 
-        if (displayString == WellKnownFullyQualifiedClassNames.DataSourceDrivenTestAttribute.WithGlobalPrefix)
-        {
-            return TestType.DataSourceDriven;
-        }
+        return DataSourceAttributes.Any(x => x == displayString);
+    }
+    
+    public static bool IsMatrixAttribute(this AttributeData? attributeData)
+    {
+        var displayString = attributeData?.GetFullyQualifiedAttributeTypeName();
 
-        if (displayString == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute.WithGlobalPrefix)
-        {
-            return TestType.Combinative;
-        }
-
-        throw new ArgumentException($"{displayString ?? "null"} does not map to a known test type");
+        return WellKnownFullyQualifiedClassNames.MatrixAttribute.WithGlobalPrefix == displayString;
     }
 }

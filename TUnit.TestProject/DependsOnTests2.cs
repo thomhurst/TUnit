@@ -9,7 +9,7 @@ public class DependsOnTests2
     private static DateTime _test1Start;
     private static DateTime _test2Start;
 
-    [DataDrivenTest]
+    [Test]
     [Arguments("1", 2, true)]
     public async Task Test1(string one, int two, bool three)
     {

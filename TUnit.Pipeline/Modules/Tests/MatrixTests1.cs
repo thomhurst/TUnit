@@ -3,12 +3,12 @@ using ModularPipelines.Context;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
-public class CombinativeTests1 : TestModule
+public class MatrixTests1 : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "/*/*/CombinativeTests/CombinativeTest_One",
+            "/*/*/MatrixTests/MatrixTest_One",
             [
                 result => result.Successful.Should().BeTrue(),
                 result => result.Total.Should().Be(24, "Total"),

@@ -20,7 +20,7 @@ public class ClassDataSourceDrivenTestsSharedKeyed2
         ClassLevels.Add(someAsyncDisposableClass);
     }
     
-    [DataSourceDrivenTest]
+    [Test]
     [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public async Task DataSource_Class(SomeAsyncDisposableClass value)
     {
@@ -29,7 +29,7 @@ public class ClassDataSourceDrivenTestsSharedKeyed2
         MethodLevels.Add(value);
     }
 
-    [DataSourceDrivenTest]
+    [Test]
     [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public async Task DataSource_Class_Generic(SomeAsyncDisposableClass value)
     {

@@ -28,9 +28,8 @@ internal static class GenericTestInvocationWriter
             sourceBuilder.WriteLine($"{VariableNames.EnumerableClassDataIndex}++;");
         }
 
-        var classArguments = testSourceDataModel.GetClassArgumentsInvocations();
         var wasArgument = false;
-        foreach (var classArgument in classArguments)
+        foreach (var classArgument in testSourceDataModel.ClassDataInvocations)
         {
             wasArgument = true;
             sourceBuilder.WriteLine(classArgument);
@@ -42,7 +41,7 @@ internal static class GenericTestInvocationWriter
         }
         
         sourceBuilder.WriteLine(
-            $"var resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
+            $"var resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.ClassVariables.ToCommaSeparatedString()}));");
 
         sourceBuilder.WriteLine();
         
@@ -54,8 +53,7 @@ internal static class GenericTestInvocationWriter
         }
         
         wasArgument = false;
-        var methodArguments = testSourceDataModel.GetMethodArgumentsInvocations();
-        foreach (var methodArgument in methodArguments)
+        foreach (var methodArgument in testSourceDataModel.MethodDataInvocations)
         {
             wasArgument = true;
             sourceBuilder.WriteLine(methodArgument);
@@ -66,18 +64,21 @@ internal static class GenericTestInvocationWriter
             sourceBuilder.WriteLine();
         }
 
+        var classVariables = testSourceDataModel.ClassVariables;
+        var methodVariables = testSourceDataModel.MethodVariables;
+
         sourceBuilder.WriteLine($"TestRegistrar.RegisterTest<{fullyQualifiedClassType}>(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.GetClassArgumentVariableNamesAsList()}],");
-        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.GetCommaSeparatedMethodArgumentVariableNames()}],");
-        sourceBuilder.WriteLine($"InternalTestClassArguments = [{string.Join(", ", testSourceDataModel.ClassArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.ClassArg)))}],");
-        sourceBuilder.WriteLine($"InternalTestMethodArguments = [{string.Join(", ", testSourceDataModel.MethodArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.MethodArg)))}],");
+        sourceBuilder.WriteLine($"TestClassArguments = [{classVariables.ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestMethodArguments = [{methodVariables.ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"InternalTestClassArguments = [{testSourceDataModel.ClassArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.ClassArg)).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"InternalTestMethodArguments = [{testSourceDataModel.MethodArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.MethodArg)).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
-        sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.GetCommaSeparatedMethodArgumentVariableNamesWithCancellationToken()})),");
+        sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
         sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
@@ -90,7 +91,7 @@ internal static class GenericTestInvocationWriter
         if (hasEnumerableMethodData)
         {
             sourceBuilder.WriteLine(
-                $"resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.GetClassArgumentVariableNamesAsList()}));");
+                $"resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.ClassVariables.ToCommaSeparatedString()}));");
 
             sourceBuilder.WriteLine("}");
         }
@@ -147,7 +148,7 @@ internal static class GenericTestInvocationWriter
             return null;
         }
         
-        var args = testSourceDataModel.GetMethodArgumentVariableNames().ToList();
+        var args = testSourceDataModel.MethodVariables;
 
         for (var index = 0; index < testSourceDataModel.MethodParameterNames.Length; index++)
         {
@@ -165,25 +166,7 @@ internal static class GenericTestInvocationWriter
             return string.Empty;
         }
 
-        if (testSourceDataModel is { IsEnumerableMethodArguments: true, IsMethodTupleArguments: false })
-        {
-            return $"({{{VariableNames.MethodData}}})";
-        }
-
-        var isMethodTupleArguments = testSourceDataModel.IsMethodTupleArguments;
-        var args = testSourceDataModel.GetMethodArgumentVariableNames()
-            .Select(x => $"{{{x}}}")
-            .Skip(isMethodTupleArguments ? 1 : 0);
-
-        if (isMethodTupleArguments)
-        {
-            args = args.First()
-                .TrimStart('{', '(')
-                .TrimEnd('}', ')')
-                .Split([','], StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => x.Trim())
-                .Select(x => $"{{{x}}}");
-        }
+        var args = testSourceDataModel.MethodVariables.Select(x => $"{{{x}}}");
         
         return $"({string.Join(", ", args)})";
     }

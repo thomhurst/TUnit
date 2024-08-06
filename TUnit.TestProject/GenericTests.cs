@@ -14,10 +14,10 @@ public abstract class GenericTests<T>
         await Assert.That(GetData()).Is.Positive();
     }
 
-    [DataDrivenTest]
+    [Test]
     public abstract Task DataDrivenTest(T t);
 
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(nameof(GetData))]
     [EnumerableMethodDataSource(nameof(GetEnumerableData))]
     public async Task DataSourceDrivenTest(T t)
@@ -46,7 +46,7 @@ public class GenericInt : GenericTests<int>
         yield return 4;
     }
 
-    [DataDrivenTest]
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
@@ -60,7 +60,7 @@ public class GenericInt : GenericTests<int>
 [InheritsTests]
 public class GenericDouble : GenericTests<double>
 {
-    [DataDrivenTest]
+    [Test]
     [Arguments(1.7)]
     [Arguments(2.7)]
     [Arguments(3.7)]

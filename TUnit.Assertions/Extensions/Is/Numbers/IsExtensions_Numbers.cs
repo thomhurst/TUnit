@@ -18,7 +18,7 @@ public static partial class IsExtensions
         return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TActual,TActual,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
-            (actual, _, _, self) =>
+            (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 ArgumentNullException.ThrowIfNull(expected);

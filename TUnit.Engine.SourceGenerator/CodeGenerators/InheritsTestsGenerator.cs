@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
-using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -52,9 +51,10 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
         return new InheritsTestsDataModel(namedTypeSymbol.Name,
             namedTypeSymbol.GetMembersIncludingBase()
                 .OfType<IMethodSymbol>()
+                .Where(x => !x.IsAbstract)
                 .Where(x => x.MethodKind != MethodKind.Constructor)
                 .Where(x => x.IsTest())
-                .SelectMany(x => x.ParseTestDatas(namedTypeSymbol, TestType.Unknown))
+                .SelectMany(x => x.ParseTestDatas(namedTypeSymbol))
         );
     }
 

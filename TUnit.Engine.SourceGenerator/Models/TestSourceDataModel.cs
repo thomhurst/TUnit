@@ -1,4 +1,4 @@
-﻿using TUnit.Engine.SourceGenerator.CodeGenerators;
+﻿using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.Models;
@@ -17,18 +17,7 @@ internal record TestSourceDataModel
             return true;
         }
 
-        return FullyQualifiedTypeName == other.FullyQualifiedTypeName && MinimalTypeName == other.MinimalTypeName &&
-               MethodName == other.MethodName && ClassArguments.SequenceEqual(other.ClassArguments) &&
-               MethodArguments.SequenceEqual(other.MethodArguments) &&
-               MethodParameterTypes.SequenceEqual(other.MethodParameterTypes) &&
-               MethodParameterNames.SequenceEqual(other.MethodParameterNames) &&
-               MethodGenericTypeCount == other.MethodGenericTypeCount &&
-               IsEnumerableClassArguments == other.IsEnumerableClassArguments &&
-               IsEnumerableMethodArguments == other.IsEnumerableMethodArguments && TestId == other.TestId &&
-               CurrentRepeatAttempt == other.CurrentRepeatAttempt && FilePath == other.FilePath &&
-               LineNumber == other.LineNumber && 
-               HasTimeoutAttribute == other.HasTimeoutAttribute && CustomDisplayName == other.CustomDisplayName &&
-               RepeatLimit == other.RepeatLimit;
+        return TestId == other.TestId;
     }
 
     public override int GetHashCode()
@@ -70,6 +59,12 @@ internal record TestSourceDataModel
     public required bool IsEnumerableClassArguments { get; init; }
     public required bool IsEnumerableMethodArguments { get; init; }
     
+    public required string[] ClassDataInvocations { get; init; }
+    public required string[] ClassVariables { get; init; }
+    
+    public required string[] MethodDataInvocations { get; init; }
+    public required string[] MethodVariables { get; init; }
+    
     public required string TestId { get; init; }
     public required int CurrentRepeatAttempt { get; init; }
     
@@ -78,86 +73,12 @@ internal record TestSourceDataModel
     
     public required bool HasTimeoutAttribute { get; init; }
     
-    public bool IsClassTupleArguments => ClassArguments.Any(x => x.IsTuple);
-
-    public bool IsMethodTupleArguments => MethodArguments.Any(x => x.IsTuple);
-    
     public required string? CustomDisplayName { get; init; }
     public required int RepeatLimit { get; init; }
 
-    public IEnumerable<string> GetClassArgumentVariableNames()
+    public string MethodVariablesWithCancellationToken()
     {
-        return Enumerable.Range(0, ClassArguments.Length)
-            .Select(i => ClassArguments[i].TupleVariableNames ?? $"{VariableNames.ClassArg}{i}");
-    }
-
-    public IEnumerable<string> GetClassArgumentsInvocations()
-    {
-        if (IsEnumerableClassArguments && !IsClassTupleArguments)
-        {
-            yield return $"var {VariableNames.ClassArg}0 = {VariableNames.ClassData};";
-            yield break;
-        }
-        
-        if (IsEnumerableClassArguments && IsClassTupleArguments)
-        {
-            yield return $"var {VariableNames.ClassArg}0 = {VariableNames.ClassData};";
-            yield return $"var {ClassArguments[1].TupleVariableNames} = {VariableNames.ClassArg}0;";
-            yield break;
-        }
-        
-        var variableNames = GetClassArgumentVariableNames().ToList();
-        for (var i = 0; i < ClassArguments.Length; i++)
-        {
-            var argument = ClassArguments[i];
-            var variable = variableNames[i];
-            yield return $"{SpecifyTypeOrVar(argument)} {variable} = {argument.Invocation};";
-        }
-    }
-
-    public string GetClassArgumentVariableNamesAsList()
-        => string.Join(", ", GetClassArgumentVariableNames().Skip(IsClassTupleArguments ? 1 : 0)).TrimStart('(').TrimEnd(')');
-    
-    public IEnumerable<string> GetMethodArgumentVariableNames()
-    {
-        return Enumerable.Range(0, MethodArguments.Length)
-            .Select(i => MethodArguments[i].TupleVariableNames ?? $"{VariableNames.MethodArg}{i}");
-    }
-
-    public IEnumerable<string> GetMethodArgumentsInvocations()
-    {
-        if (IsEnumerableMethodArguments && !IsMethodTupleArguments)
-        {
-            yield return $"var {VariableNames.MethodArg}0 = {VariableNames.MethodData};";
-            yield break;
-        }
-        
-        if (IsEnumerableMethodArguments && IsMethodTupleArguments)
-        {
-            yield return $"var {VariableNames.MethodArg}0 = {VariableNames.MethodData};";
-            yield return $"var {MethodArguments[1].TupleVariableNames} = {VariableNames.MethodArg}0;";
-            yield break;
-        }
-        
-        var variableNames = GetMethodArgumentVariableNames().ToList();
-        for (var i = 0; i < MethodArguments.Length; i++)
-        {
-            var argument = MethodArguments[i];
-            
-            var variable = variableNames[i];
-            yield return $"{SpecifyTypeOrVar(argument)} {variable} = {argument.Invocation};";
-        }
-    }
-    
-    public string GetCommaSeparatedMethodArgumentVariableNames()
-    {
-        return string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0)).TrimStart('(')
-            .TrimEnd(')');
-    }
-    
-    public string GetCommaSeparatedMethodArgumentVariableNamesWithCancellationToken()
-    {
-        var variableNamesAsList = GetCommaSeparatedMethodArgumentVariableNames();
+        var variableNamesAsList = MethodVariables.ToCommaSeparatedString();
 
         if (HasTimeoutAttribute)
         {
@@ -165,15 +86,5 @@ internal record TestSourceDataModel
         }
         
         return variableNamesAsList;
-    }
-
-    private string SpecifyTypeOrVar(Argument argument)
-    {
-        if (argument.TupleVariableNames != null)
-        {
-            return "var";
-        }
-            
-        return argument.Type;
     }
 }

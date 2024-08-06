@@ -10,7 +10,7 @@ public class ClassTupleDataSourceDrivenTests
         // Dummy method
     }
     
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(nameof(TupleMethod), UnfoldTuple = true)]
     public void DataSource_TupleMethod(int value, string value2, bool value3)
     {

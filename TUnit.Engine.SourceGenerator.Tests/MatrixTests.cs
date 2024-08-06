@@ -3,12 +3,12 @@ using TUnit.Engine.SourceGenerator.Tests.Options;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
-internal class CombinativeTests : TestsBase<TestsGenerator>
+internal class MatrixTests : TestsBase<TestsGenerator>
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
-            "CombinativeTests.cs"),
+            "MatrixTests.cs"),
         new RunTestOptions
         {
             AdditionalFiles =

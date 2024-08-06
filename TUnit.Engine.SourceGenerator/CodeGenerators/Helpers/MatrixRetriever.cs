@@ -1,37 +1,34 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class CombinativeValuesRetriever
+internal static class MatrixRetriever
 {
     // We return a List of a List. Inner List is for each test.
-    public static IEnumerable<ArgumentsContainer> Parse(IMethodSymbol methodSymbol, AttributeData[] methodAndClassAttributes)
+    public static IEnumerable<ArgumentsContainer> Parse(ImmutableArray<IParameterSymbol> parameters)
     {
-        var methodSymbolParameters = methodSymbol.Parameters;
-        
-        if (methodSymbolParameters.IsDefaultOrEmpty)
+        if (parameters.IsDefaultOrEmpty || !parameters.HasMatrixAttribute())
         {
             return [];
         }
         
-        var combinativeValuesAttributes = methodSymbolParameters
-            .Select(x => x.GetAttributes().SafeFirstOrDefault(x => x.GetFullyQualifiedAttributeTypeName()
-                                                               == WellKnownFullyQualifiedClassNames.CombinativeValuesAttribute.WithGlobalPrefix))
+        var matrixAttributes = parameters
+            .Select(p => p.GetAttributes().SafeFirstOrDefault(a => a.GetFullyQualifiedAttributeTypeName()
+                                                               == WellKnownFullyQualifiedClassNames.MatrixAttribute.WithGlobalPrefix))
             .OfType<AttributeData>()
             .ToList();
         
-        var mappedToConstructorArrays = combinativeValuesAttributes
+        var mappedToConstructorArrays = matrixAttributes
             .Select(x => x.ConstructorArguments.SafeFirstOrDefault().Values);
 
-        var attr = combinativeValuesAttributes.SafeFirstOrDefault();
+        var attr = matrixAttributes.SafeFirstOrDefault();
         
         var index = 0;
-        return GetCombinativeArgumentsList(mappedToConstructorArrays)
-            .Select(x => MapToArgumentEnumerable(x, methodSymbolParameters))
+        return GetMatrixArgumentsList(mappedToConstructorArrays)
+            .Select(x => MapToArgumentEnumerable(x, parameters))
             .Select(x => new ArgumentsContainer
             {
                 DataAttribute = attr,
@@ -47,15 +44,14 @@ internal static class CombinativeValuesRetriever
             {
                 var parameterSymbolType = parameterSymbols.ElementAt(index).Type;
                 
-                return new Argument(ArgumentSource.CombinativeDataAttribute,
-                    parameterSymbolType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                return new Argument(parameterSymbolType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                     TypedConstantParser.GetTypedConstantValue(typedConstant, parameterSymbolType));
             });
     }
 
     private static readonly IEnumerable<IEnumerable<TypedConstant>> Seed = [[]];
     
-    private static IEnumerable<IEnumerable<TypedConstant>> GetCombinativeArgumentsList(IEnumerable<ImmutableArray<TypedConstant>> elements)
+    private static IEnumerable<IEnumerable<TypedConstant>> GetMatrixArgumentsList(IEnumerable<ImmutableArray<TypedConstant>> elements)
     {
         return elements.Aggregate(Seed, (accumulator, enumerable)
             => accumulator.SelectMany(x => enumerable.Select(x.Append)));

@@ -28,11 +28,11 @@ public class IsNot<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     
     public BaseAssertCondition<TActual, TAnd, TOr> AssignableTo<TExpected>() => Combine(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
         default,
-        (value, _, _, self) => !value!.GetType().IsAssignableTo(typeof(TExpected)),
+        (value, _, _, _) => !value!.GetType().IsAssignableTo(typeof(TExpected)),
         (actual, _) => $"{actual?.GetType()} is assignable to {typeof(TExpected).Name}"));
 
     public BaseAssertCondition<TActual, TAnd, TOr> AssignableFrom<TExpected>() => Combine(new DelegateAssertCondition<TActual,TExpected,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
         default,
-        (value, _, _, self) => !value!.GetType().IsAssignableFrom(typeof(TExpected)),
+        (value, _, _, _) => !value!.GetType().IsAssignableFrom(typeof(TExpected)),
         (actual, _) => $"{actual?.GetType()} is assignable from {typeof(TExpected).Name}"));
 }

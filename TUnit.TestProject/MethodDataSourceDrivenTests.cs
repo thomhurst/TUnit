@@ -4,14 +4,14 @@ namespace TUnit.TestProject;
 
 public class MethodDataSourceDrivenTests
 {
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(nameof(SomeMethod))]
     public void DataSource_Method(int value)
     {
         // Dummy method
     }
     
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(nameof(SomeMethod), DisposeAfterTest = false)]
     public void DataSource_Method2(int value)
     {

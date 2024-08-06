@@ -26,16 +26,16 @@ internal class TimeoutCancellationTokenTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles[3], Does.Contain("global::System.Int32 methodArg0 = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();"));
             Assert.That(generatedFiles[3], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceTest(methodArg0, cancellationToken))"));
             
-            Assert.That(generatedFiles[4], Does.Contain("TestName = \"CombinativeTest\""));
+            Assert.That(generatedFiles[4], Does.Contain("TestName = \"MatrixTest\""));
             Assert.That(generatedFiles[4], Does.Contain("global::System.Int32 methodArg0 = 1;"));
-            Assert.That(generatedFiles[4], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.CombinativeTest(methodArg0, cancellationToken))"));
+            Assert.That(generatedFiles[4], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg0, cancellationToken))"));
             
-            Assert.That(generatedFiles[5], Does.Contain("TestName = \"CombinativeTest\""));
+            Assert.That(generatedFiles[5], Does.Contain("TestName = \"MatrixTest\""));
             Assert.That(generatedFiles[5], Does.Contain("global::System.Int32 methodArg0 = 2;"));
-            Assert.That(generatedFiles[5], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.CombinativeTest(methodArg0, cancellationToken))"));
+            Assert.That(generatedFiles[5], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg0, cancellationToken))"));
             
-            Assert.That(generatedFiles[6], Does.Contain("TestName = \"CombinativeTest\""));
+            Assert.That(generatedFiles[6], Does.Contain("TestName = \"MatrixTest\""));
             Assert.That(generatedFiles[6], Does.Contain("global::System.Int32 methodArg0 = 3;"));
-            Assert.That(generatedFiles[6], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.CombinativeTest(methodArg0, cancellationToken))"));
+            Assert.That(generatedFiles[6], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg0, cancellationToken))"));
         });
 }

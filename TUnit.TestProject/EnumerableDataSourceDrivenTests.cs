@@ -6,14 +6,14 @@ namespace TUnit.TestProject;
 
 public class EnumerableDataSourceDrivenTests
 {
-    [DataSourceDrivenTest]
+    [Test]
     [EnumerableMethodDataSource(nameof(SomeMethod))]
     public async Task DataSource_Method(int value)
     {
         await Assert.That(value).Is.EqualTo(1);
     }
     
-    [DataSourceDrivenTest]
+    [Test]
     [EnumerableMethodDataSource(nameof(SomeMethod), DisposeAfterTest = false)]
     public async Task DataSource_Method2(int value)
     {

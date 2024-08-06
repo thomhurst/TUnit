@@ -1,5 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.Enums;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
@@ -9,19 +9,18 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 internal static class TestSourceDataModelRetriever
 {
     public static IEnumerable<TestSourceDataModel> ParseTestDatas(this IMethodSymbol methodSymbol,
-        INamedTypeSymbol namedTypeSymbol,
-        TestType testType)
+        INamedTypeSymbol namedTypeSymbol)
     {
-        var testAttribute = methodSymbol.GetRequiredTestAttribute();
-
-        if (testType is TestType.Unknown)
+        if (methodSymbol.IsAbstract || namedTypeSymbol.IsAbstract)
         {
-            testType = testAttribute.GetTestType();
+            yield break;
         }
-
-        var classArgumentsContainers = ClassArgumentsRetriever.GetClassArguments(namedTypeSymbol).ToList();
-        var testArgumentsContainers =
-            MethodArgumentsRetriever.GetMethodArguments(methodSymbol, namedTypeSymbol, testType);
+        
+        var testAttribute = methodSymbol.GetRequiredTestAttribute();
+        
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes(), namedTypeSymbol, VariableNames.ClassArg).ToArray();
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(methodSymbol.Parameters, methodSymbol.GetAttributes(), namedTypeSymbol, VariableNames.MethodArg);
+        
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
 
@@ -127,6 +126,10 @@ internal static class TestSourceDataModelRetriever
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
+            ClassDataInvocations = GenerateInvocations(classArguments, testGenerationContext.HasEnumerableClassMethodData, "class").ToArray(),
+            ClassVariables = GetVariables(classArguments, testGenerationContext.HasEnumerableClassMethodData, "class"),
+            MethodDataInvocations = GenerateInvocations(testArguments, testGenerationContext.HasEnumerableTestMethodData, "method").ToArray(),
+            MethodVariables = GetVariables(testArguments, testGenerationContext.HasEnumerableTestMethodData, "method"),
             IsEnumerableClassArguments = testGenerationContext.HasEnumerableClassMethodData,
             IsEnumerableMethodArguments = testGenerationContext.HasEnumerableTestMethodData,
             MethodArguments = testArguments,
@@ -138,5 +141,30 @@ internal static class TestSourceDataModelRetriever
             CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string,
             HasTimeoutAttribute = allAttributes.Any(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix) == true)
         };
+    }
+
+    private static string[] GetVariables(Argument[] arguments, bool hasEnumerableData, string prefix)
+    {
+        if (hasEnumerableData)
+        {
+            return arguments[0].TupleVariableNames ?? [$"{prefix}Arg0"];
+        }
+
+        return arguments.SelectMany((x, i) => x.TupleVariableNames ?? [$"{prefix}Arg{i}"]).ToArray();
+    }
+
+    private static IEnumerable<string> GenerateInvocations(Argument[] arguments, bool hasEnumerableData, string prefix)
+    {
+        for (var index = 0; index < arguments.Length; index++)
+        {
+            var argument = arguments[index];
+            var invocation = hasEnumerableData ? $"{prefix}Data" : argument.Invocation;
+            var variableName = argument.TupleVariableNames != null
+                ? $"({string.Join(", ", argument.TupleVariableNames)})"
+                : $"{prefix}Arg{index}";
+            var varOrType = hasEnumerableData || argument.TupleVariableNames != null ? "var" : argument.Type;
+
+            yield return $"{varOrType} {variableName} = {invocation};";
+        }
     }
 }

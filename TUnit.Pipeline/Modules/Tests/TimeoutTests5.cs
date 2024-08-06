@@ -9,7 +9,7 @@ public class TimeoutTests5 : TestModule
     {
         var start = DateTime.UtcNow;
         return await RunTestsWithFilter(context, 
-            "/*/*/TimeoutCancellationTokenTests/CombinativeTest",
+            "/*/*/TimeoutCancellationTokenTests/MatrixTest",
             [
                 result => result.Successful.Should().BeFalse(),
                 result => result.Total.Should().Be(3),

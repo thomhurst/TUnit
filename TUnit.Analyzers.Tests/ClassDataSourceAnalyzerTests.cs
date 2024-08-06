@@ -171,7 +171,7 @@ public class ClassDataSourceAnalyzerTests
                             public class MyClass
                             {
                                 [{|#0:ClassDataSource<int>|}]
-                                [DataSourceDrivenTest]
+                                [Test]
                                 public void MyTest(string value)
                                 {
                                 }

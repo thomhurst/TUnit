@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
@@ -9,7 +7,7 @@ using TUnit.Analyzers.Helpers;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class CombinativeTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
+public class MatrixTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability);
@@ -26,22 +24,22 @@ public class CombinativeTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var combinativeValuesAttribute = parameterSymbol.GetAttributes()
+        var matrixAttribute = parameterSymbol.GetAttributes()
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                        == WellKnown.AttributeFullyQualifiedClasses.CombinativeValues);
+                        == WellKnown.AttributeFullyQualifiedClasses.Matrix);
 
-        if (combinativeValuesAttribute is null)
+        if (matrixAttribute is null)
         {
             return;
         }
 
-        var objectParamsArray = combinativeValuesAttribute.ConstructorArguments;
+        var objectParamsArray = matrixAttribute.ConstructorArguments;
 
         if (objectParamsArray.IsDefaultOrEmpty)
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.NoTestDataProvided,
-                    combinativeValuesAttribute.GetLocation())
+                    matrixAttribute.GetLocation())
             );
             return;
         }
@@ -53,7 +51,7 @@ public class CombinativeTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
-                        combinativeValuesAttribute.GetLocation(),
+                        matrixAttribute.GetLocation(),
                         typedConstant.Type?.ToDisplayString(),
                         parameterSymbol.ToDisplayString())
                 );

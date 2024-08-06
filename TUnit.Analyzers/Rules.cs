@@ -60,7 +60,7 @@ internal static class Rules
     public static readonly DiagnosticDescriptor InstanceAssignmentInTestClass =
         CreateDescriptor("TUnit0018", UsageCategory, DiagnosticSeverity.Warning);
     
-    public static readonly DiagnosticDescriptor MissingDataDrivenTestAttribute =
+    public static readonly DiagnosticDescriptor MissingTestAttribute =
         CreateDescriptor("TUnit0019", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor RequiredPair_Attributes_DataDrivenTest_Arguments =
@@ -69,7 +69,7 @@ internal static class Rules
     public static readonly DiagnosticDescriptor RequiredCombinations_Attributes_DataSourceDrivenTest_MethodData_EnumerableMethodData_ClassData =
         CreateDescriptor("TUnit0021", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor RequiredPair_Attributes_CombinativeTest_CombinativeValues =
+    public static readonly DiagnosticDescriptor RequiredPair_Attributes_MatrixTest_Matrix =
         CreateDescriptor("TUnit0022", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor Dispose_Member_In_Cleanup =

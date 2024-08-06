@@ -48,7 +48,7 @@ public static partial class IsExtensions
     {
         return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<string, int,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _, self) => string.IsNullOrEmpty(value),
+            (value, _, _, _) => string.IsNullOrEmpty(value),
             (s, _) => $"'{s}' is not null or empty"));
     }
     
@@ -58,7 +58,7 @@ public static partial class IsExtensions
     {
         return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<string, int,TAnd,TOr>(
             @is.AssertionBuilder.AppendCallerMethod(null), 0,
-            (value, _, _, self) => string.IsNullOrWhiteSpace(value),
+            (value, _, _, _) => string.IsNullOrWhiteSpace(value),
             (s, _) => $"'{s}' is not null or whitespace"));
     }
 }

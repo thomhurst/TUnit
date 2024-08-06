@@ -4,7 +4,7 @@ namespace TUnit.TestProject;
 
 public class DataDrivenTests
 {
-    [DataDrivenTest]
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
@@ -13,7 +13,7 @@ public class DataDrivenTests
         // Dummy method
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments(1, "String")]
     [Arguments(2, "String2")]
     [Arguments(3, "String3")]
@@ -22,7 +22,7 @@ public class DataDrivenTests
         // Dummy method
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments(TestEnum.One)]
     [Arguments(TestEnum.Two)]
     [Arguments(-1)]
@@ -31,28 +31,28 @@ public class DataDrivenTests
         // Dummy method
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments(null)]
     public void NullValue(string? value)
     {
         // Dummy method
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments("")]
     public void EmptyString(string? value)
     {
         // Dummy method
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments("Foo bar!")]
     public void NonEmptyString(string? value)
     {
         // Dummy method
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments(null)]
     [Arguments(false)]
     [Arguments(true)]

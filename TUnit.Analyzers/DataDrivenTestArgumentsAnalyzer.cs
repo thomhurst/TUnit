@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
@@ -12,7 +10,7 @@ namespace TUnit.Analyzers;
 public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability, Rules.MissingDataDrivenTestAttribute);
+        ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability, Rules.MissingTestAttribute);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -31,16 +29,6 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (methodSymbol.GetDataDrivenTestAttribute() != null
-            && methodSymbol.GetArgumentsAttribute() == null)
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(Rules.NoTestDataProvided,
-                    context.Symbol.Locations.FirstOrDefault())
-            );
-            return;
-        }
-
         var attributes = methodSymbol.GetAttributes();
         
         foreach (var argumentsAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
@@ -53,10 +41,10 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
     private void CheckAttributeAgainstMethod(SymbolAnalysisContext context, IMethodSymbol methodSymbol,
         AttributeData argumentsAttribute)
     {
-        if (methodSymbol.GetDataDrivenTestAttribute() == null)
+        if (!methodSymbol.IsTestMethod())
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(Rules.MissingDataDrivenTestAttribute,
+                Diagnostic.Create(Rules.MissingTestAttribute,
                     argumentsAttribute.GetLocation() ?? methodSymbol.Locations.FirstOrDefault())
             );
         }

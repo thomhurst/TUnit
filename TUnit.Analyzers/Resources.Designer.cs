@@ -546,7 +546,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute..
+        ///   Looks up a localized string similar to Missing `Test` Attribute..
         /// </summary>
         internal static string TUnit0019Description {
             get {
@@ -555,7 +555,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        ///   Looks up a localized string similar to Missing `Test` Attribute.
         /// </summary>
         internal static string TUnit0019MessageFormat {
             get {
@@ -564,7 +564,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Missing `DataDrivenTest` Attribute.
+        ///   Looks up a localized string similar to Missing `Test` Attribute.
         /// </summary>
         internal static string TUnit0019Title {
             get {
@@ -627,7 +627,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to `CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa..
+        ///   Looks up a localized string similar to `MatrixTest` parameters must have `Matrix` attributes on them, or vice versa..
         /// </summary>
         internal static string TUnit0022Description {
             get {
@@ -636,7 +636,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to `CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa..
+        ///   Looks up a localized string similar to `MatrixTest` parameters must have `Matrix` attributes on them, or vice versa..
         /// </summary>
         internal static string TUnit0022MessageFormat {
             get {
@@ -645,7 +645,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to `CombinativeTest` must be paired with `CombinativeValues` attributes..
+        ///   Looks up a localized string similar to `MatrixTest` must be paired with `Matrix` attributes..
         /// </summary>
         internal static string TUnit0022Title {
             get {
@@ -1055,6 +1055,33 @@ namespace TUnit.Analyzers {
         internal static string TUnit0037Title {
             get {
                 return ResourceManager.GetString("TUnit0037Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data source provided..
+        /// </summary>
+        internal static string TUnit0038Description {
+            get {
+                return ResourceManager.GetString("TUnit0038Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data source provided.
+        /// </summary>
+        internal static string TUnit0038MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0038MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data source provided.
+        /// </summary>
+        internal static string TUnit0038Title {
+            get {
+                return ResourceManager.GetString("TUnit0038Title", resourceCulture);
             }
         }
     }

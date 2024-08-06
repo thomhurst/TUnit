@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
@@ -9,7 +7,7 @@ using TUnit.Analyzers.Helpers;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MissingCombinativeValuesAnalyzer : ConcurrentDiagnosticAnalyzer
+public class MissingMatrixAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.NoTestDataProvided);
@@ -28,7 +26,7 @@ public class MissingCombinativeValuesAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (!methodSymbol.GetAttributes().Any(x =>
                 x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == "global::TUnit.Core.CombinativeTestAttribute"))
+                == "global::TUnit.Core.MatrixTestAttribute"))
         {
             return;
         }
@@ -55,13 +53,13 @@ public class MissingCombinativeValuesAnalyzer : ConcurrentDiagnosticAnalyzer
         
         foreach (var parameterSymbol in parameters)
         {
-            var combinativeValueAttribute = parameterSymbol.GetAttributes().FirstOrDefault(attribute =>
+            var matrixAttribute = parameterSymbol.GetAttributes().FirstOrDefault(attribute =>
                 attribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == WellKnown.AttributeFullyQualifiedClasses.CombinativeValues);
+                == WellKnown.AttributeFullyQualifiedClasses.Matrix);
 
-            if (combinativeValueAttribute is null
-                || combinativeValueAttribute.ConstructorArguments.IsDefaultOrEmpty
-                || combinativeValueAttribute.ConstructorArguments[0].Values.IsDefaultOrEmpty)
+            if (matrixAttribute is null
+                || matrixAttribute.ConstructorArguments.IsDefaultOrEmpty
+                || matrixAttribute.ConstructorArguments[0].Values.IsDefaultOrEmpty)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.NoTestDataProvided,
