@@ -69,7 +69,7 @@ internal static class MethodDataSourceRetriever
         
         if (unfoldTupleArgument.Value.Value is true)
         {
-            var variableNames = parameters.Select((x, i) => $"{argPrefix}{i}").ToArray();
+            var variableNames = parameters.Select((_, i) => $"{argPrefix}{i}").ToArray();
             
             yield return new Argument(dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation, isTuple: true)
             {
@@ -124,7 +124,7 @@ internal static class MethodDataSourceRetriever
         
         if (unfoldTupleArgument.Value.Value is true)
         {
-            var variableNames = parameters.Select((x, i) => $"{argPrefix}{i}").ToArray();
+            var variableNames = parameters.Select((_, i) => $"{argPrefix}{i}").ToArray();
             
             yield return new Argument(dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation, isTuple: true)
             {

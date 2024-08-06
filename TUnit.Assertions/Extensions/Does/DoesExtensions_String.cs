@@ -66,7 +66,7 @@ public static partial class DoesExtensions
         return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<string, string, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
-            (actual, _, _, self) =>
+            (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.EndsWith(expected, stringComparison);
@@ -88,7 +88,7 @@ public static partial class DoesExtensions
         return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<string, Regex, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethod(expression), 
             regex,
-            (actual, _, _, self) =>
+            (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return regex.IsMatch(actual);

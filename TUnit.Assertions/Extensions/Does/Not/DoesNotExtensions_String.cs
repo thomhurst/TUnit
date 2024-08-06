@@ -37,7 +37,7 @@ public static partial class DoesNotExtensions
         return AssertionConditionCombiner.Combine(doesNot, new DelegateAssertCondition<string, string, TAnd, TOr>(
             doesNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
-            (actual, _, _, self) =>
+            (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.StartsWith(expected, stringComparison);
@@ -60,7 +60,7 @@ public static partial class DoesNotExtensions
         return AssertionConditionCombiner.Combine(doesNot, new DelegateAssertCondition<string, string, TAnd, TOr>(
             doesNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
-            (actual, _, _, self) =>
+            (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.EndsWith(expected, stringComparison);
