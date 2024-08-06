@@ -1,4 +1,4 @@
-﻿using TUnit.Engine.SourceGenerator.CodeGenerators;
+﻿using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.Models;
@@ -59,6 +59,12 @@ internal record TestSourceDataModel
     public required bool IsEnumerableClassArguments { get; init; }
     public required bool IsEnumerableMethodArguments { get; init; }
     
+    public required string[] ClassDataInvocations { get; init; }
+    public required string[] ClassVariables { get; init; }
+    
+    public required string[] MethodDataInvocations { get; init; }
+    public required string[] MethodVariables { get; init; }
+    
     public required string TestId { get; init; }
     public required int CurrentRepeatAttempt { get; init; }
     
@@ -70,91 +76,9 @@ internal record TestSourceDataModel
     public required string? CustomDisplayName { get; init; }
     public required int RepeatLimit { get; init; }
 
-    public IEnumerable<string> GetClassArgumentVariableNames()
+    public string MethodVariablesWithCancellationToken()
     {
-        for (var index = 0; index < ClassArguments.Length; index++)
-        {
-            var classArgument = ClassArguments[index];
-            if (classArgument.TupleVariableNames != null)
-            {
-                foreach (var tupleVariableName in classArgument.TupleVariableNames)
-                {
-                    yield return tupleVariableName;
-                }
-            }
-            else
-            {
-                yield return $"{VariableNames.ClassArg}{index}";
-            }
-        }
-    }
-
-    public IEnumerable<string> GetClassArgumentsInvocations()
-    {
-        for (var index = 0; index < ClassArguments.Length; index++)
-        {
-            var argument = ClassArguments[index];
-            yield return
-                $"{SpecifyTypeOrVar(argument, IsEnumerableClassArguments)} {GetVariableName(argument, VariableNames.ClassArg, index)} = {GetArgumentInvocation(argument, IsEnumerableClassArguments, VariableNames.ClassData)};";
-        }
-    }
-
-    private static string GetArgumentInvocation(Argument argument, bool isEnumerableArguments, string defaultEnumerableVariableName)
-    {
-        return isEnumerableArguments ? defaultEnumerableVariableName : argument.Invocation;
-    }
-
-    private string GetVariableName(Argument argument, string prefix, int index)
-    {
-        if (argument.TupleVariableNames != null)
-        {
-            return $"({string.Join(", ", argument.TupleVariableNames)})";
-        }
-
-        return $"{prefix}{index}";
-    }
-
-    public string GetClassArgumentVariableNamesAsList()
-        => string.Join(", ", GetClassArgumentVariableNames()).TrimStart('(').TrimEnd(')');
-    
-    public IEnumerable<string> GetMethodArgumentVariableNames()
-    {
-        for (var index = 0; index < MethodArguments.Length; index++)
-        {
-            var methodArgument = MethodArguments[index];
-            if (methodArgument.TupleVariableNames != null)
-            {
-                foreach (var tupleVariableName in methodArgument.TupleVariableNames)
-                {
-                    yield return tupleVariableName;
-                }
-            }
-            else
-            {
-                yield return $"{VariableNames.MethodArg}{index}";
-            }
-        }
-    }
-
-    public IEnumerable<string> GetMethodArgumentsInvocations()
-    {
-        for (var index = 0; index < MethodArguments.Length; index++)
-        {
-            var argument = MethodArguments[index];
-            yield return
-                $"{SpecifyTypeOrVar(argument, IsEnumerableMethodArguments)} {GetVariableName(argument, VariableNames.MethodArg, index)} = {GetArgumentInvocation(argument, IsEnumerableMethodArguments, VariableNames.MethodData)};";
-        }
-    }
-    
-    public string GetCommaSeparatedMethodArgumentVariableNames()
-    {
-        return string.Join(", ", GetMethodArgumentVariableNames()).TrimStart('(')
-            .TrimEnd(')');
-    }
-    
-    public string GetCommaSeparatedMethodArgumentVariableNamesWithCancellationToken()
-    {
-        var variableNamesAsList = GetCommaSeparatedMethodArgumentVariableNames();
+        var variableNamesAsList = MethodVariables.ToCommaSeparatedString();
 
         if (HasTimeoutAttribute)
         {
@@ -162,15 +86,5 @@ internal record TestSourceDataModel
         }
         
         return variableNamesAsList;
-    }
-
-    private string SpecifyTypeOrVar(Argument argument, bool isEnumerableArguments)
-    {
-        if (argument.TupleVariableNames != null || isEnumerableArguments)
-        {
-            return "var";
-        }
-            
-        return argument.Type;
     }
 }

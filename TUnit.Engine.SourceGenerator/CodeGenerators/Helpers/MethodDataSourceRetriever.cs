@@ -101,7 +101,6 @@ internal static class MethodDataSourceRetriever
             dataSourceMethod = namedTypeSymbol.GetMembers(methodDataAttribute.ConstructorArguments[0].Value!.ToString())
                 .OfType<IMethodSymbol>().First();
             
-
             methodInvocation = dataSourceMethod.IsStatic 
                 ? $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()" 
                 : $"resettableClassFactory.Value.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
