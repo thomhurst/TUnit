@@ -5,14 +5,14 @@ namespace TUnit.TestProject;
 
 public class ClassDataSourceDrivenTests
 {
-    [DataSourceDrivenTest]
+    [Test]
     [ClassDataSource<SomeAsyncDisposableClass>]
     public void DataSource_Class(SomeAsyncDisposableClass value)
     {
         // Dummy method
     }
 
-    [DataSourceDrivenTest]
+    [Test]
     [ClassDataSource<SomeAsyncDisposableClass>]
     public void DataSource_Class_Generic(SomeAsyncDisposableClass value)
     {

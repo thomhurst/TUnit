@@ -8,10 +8,7 @@ internal static class TypeExtensions
     {
         var displayString = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
 
-        return displayString == WellKnownFullyQualifiedClassNames.TestAttribute.WithGlobalPrefix
-               || displayString == WellKnownFullyQualifiedClassNames.DataDrivenTestAttribute.WithGlobalPrefix
-               || displayString == WellKnownFullyQualifiedClassNames.DataSourceDrivenTestAttribute.WithGlobalPrefix
-               || displayString == WellKnownFullyQualifiedClassNames.CombinativeTestAttribute.WithGlobalPrefix;
+        return displayString == WellKnownFullyQualifiedClassNames.TestAttribute.WithGlobalPrefix;
     }
     
     public static bool IsTuple(this INamedTypeSymbol namedTypeSymbol)

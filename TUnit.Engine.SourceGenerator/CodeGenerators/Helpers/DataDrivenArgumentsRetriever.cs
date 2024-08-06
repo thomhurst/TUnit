@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
@@ -8,16 +7,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataDrivenArgumentsRetriever
 {
-    public static IEnumerable<ArgumentsContainer> Parse(ImmutableArray<AttributeData> methodAttributes,
-        AttributeData[] testAndClassAttributes, ImmutableArray<IParameterSymbol> methodSymbolParameters)
-    {
-        var index = 0;
-        return methodAttributes.Where(x => x.GetFullyQualifiedAttributeTypeName()
-                                                 == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
-            .Select(argumentAttribute => ParseArguments(argumentAttribute, methodSymbolParameters, ++index));
-    }
-
-    private static ArgumentsContainer ParseArguments(AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> parameterSymbols,
+    public static ArgumentsContainer ParseArguments(AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> parameterSymbols,
         int dataAttributeIndex)
     {
         var constructorArgument = argumentAttribute.ConstructorArguments.SafeFirstOrDefault();
@@ -31,9 +21,7 @@ internal static class DataDrivenArgumentsRetriever
                 IsEnumerableData = false,
                 Arguments =
                 [
-                    new Argument(
-                        argumentSource: ArgumentSource.ArgumentAttribute,
-                        type: parameterSymbols.SafeFirstOrDefault()?.Type
+                    new Argument(type: parameterSymbols.SafeFirstOrDefault()?.Type
                             .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
                         invocation: null
                     ),
@@ -62,16 +50,15 @@ internal static class DataDrivenArgumentsRetriever
             var type = parameterSymbols.SafeFirstOrDefault()?.Type
                 ?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var";
             
-            return [new Argument(ArgumentSource.ArgumentAttribute, type, null)];
+            return [new Argument(type, null)];
         }
 
         return objectArray.Select((x, i) =>
         {
             var type = GetTypeFromParameters(parameterSymbols, i);
             
-            return new Argument(ArgumentSource.ArgumentAttribute,
-                type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
-                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
+            return new Argument(type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
+                                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
                 TypedConstantParser.GetTypedConstantValue(x, type));
         });
     }

@@ -7,11 +7,7 @@ public static class MethodExtensions
 {
     public static bool IsTestMethod(this IMethodSymbol methodSymbol)
     {
-        return methodSymbol.GetAttributes().Any(x =>
-            WellKnown.AttributeFullyQualifiedClasses.TestAttributes.Contains(
-                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            )
-        );
+        return methodSymbol.GetAttributes().Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.Test);
     }
     
     public static bool HasTimeoutAttribute(this IMethodSymbol methodSymbol, out AttributeData? timeoutAttribute)
@@ -24,11 +20,6 @@ public static class MethodExtensions
     public static AttributeData? GetTimeoutAttribute(this IMethodSymbol methodSymbol)
     {
         return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.TimeoutAttribute, true);
-    }
-    
-    public static AttributeData? GetDataDrivenTestAttribute(this IMethodSymbol methodSymbol)
-    {
-        return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.DataDrivenTest, false);
     }
     
     public static AttributeData? GetArgumentsAttribute(this IMethodSymbol methodSymbol)

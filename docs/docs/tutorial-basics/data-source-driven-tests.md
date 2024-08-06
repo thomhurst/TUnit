@@ -4,13 +4,11 @@ sidebar_position: 5
 
 # Data Source Driven Tests
 
-A limitation of passing data into the `[DataDrivenTest]` is that the data must be `constant` values. For example, we can't new up an object and pass it into this attribute as an argument. This is a constraint of the language and we can't change that.
+A limitation of passing data in with `[Arguments(...)]` is that the data must be `constant` values. For example, we can't new up an object and pass it into this attribute as an argument. This is a constraint of the language and we can't change that.
 
-If we want test data represented in the form of objects, or just to use something that isn't a constant, we can declare a test data source. This is a `public static` method that returns your object.
+If we want test data represented in the form of objects, or just to use something that isn't a constant, we can declare a test data source.
 
-
-Instead of the `[Test]` or `[DataDrivenTest]` attributes, we'll use a `[DataSourceDrivenTest]` attribute.
-Combined with this, we can pass in either:
+This can come in 3 forms, with help of the following attributes:
 - `[MethodDataSource]`
 - `[EnumerableMethodDataSource]`
 - `[ClassDataSource]`
@@ -41,7 +39,7 @@ public static class MyTestDataSources
 
 public class MyTestClass
 {
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
     public async Task MyTest(AdditionTestData additionTestData)
     {
@@ -76,7 +74,7 @@ public static class MyTestDataSources
 
 public class MyTestClass
 {
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
     public async Task MyTest(int value1, int value2, int expectedResult)
     {
@@ -119,7 +117,7 @@ public static class MyTestDataSources
 
 public class MyTestClass
 {
-    [DataSourceDrivenTest]
+    [Test]
     [EnumerableMethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
     public async Task MyTest(AdditionTestData additionTestData)
     {
@@ -156,7 +154,7 @@ public static class MyTestDataSources
 
 public class MyTestClass
 {
-    [DataSourceDrivenTest]
+    [Test]
     [EnumerableMethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
     public async Task MyTest(int value1, int value2, int expectedResult)
     {
@@ -202,7 +200,7 @@ The instance is shared for every test that also has this setting, and also uses 
 ```csharp
 public class MyTestClass
 {
-    [DataSourceDrivenTest]
+    [Test]
     [ClassDataSource<SomeClass>(Shared = SharedType.Globally)]
     public void MyTest(SomeClass value)
     {

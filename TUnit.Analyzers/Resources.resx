@@ -181,13 +181,13 @@
         <value>Test methods should not assign instance data</value>
     </data>
     <data name="TUnit0019Description" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute.</value>
+        <value>Missing `Test` Attribute.</value>
     </data>
     <data name="TUnit0019MessageFormat" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
+        <value>Missing `Test` Attribute</value>
     </data>
     <data name="TUnit0019Title" xml:space="preserve">
-        <value>Missing `DataDrivenTest` Attribute</value>
+        <value>Missing `Test` Attribute</value>
     </data>
     <data name="TUnit0020Description" xml:space="preserve">
         <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
@@ -208,13 +208,13 @@
         <value>`DataSourceDrivenTest` must be paired with either `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attributes.</value>
     </data>
     <data name="TUnit0022Description" xml:space="preserve">
-        <value>`CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa.</value>
+        <value>`MatrixTest` parameters must have `Matrix` attributes on them, or vice versa.</value>
     </data>
     <data name="TUnit0022MessageFormat" xml:space="preserve">
-        <value>`CombinativeTest` parameters must have `CombinativeValues` attributes on them, or vice versa.</value>
+        <value>`MatrixTest` parameters must have `Matrix` attributes on them, or vice versa.</value>
     </data>
     <data name="TUnit0022Title" xml:space="preserve">
-        <value>`CombinativeTest` must be paired with `CombinativeValues` attributes.</value>
+        <value>`MatrixTest` must be paired with `Matrix` attributes.</value>
     </data>
     <data name="TUnit0023Description" xml:space="preserve">
         <value>Member should be disposed within a clean up method</value>
@@ -350,5 +350,14 @@
     </data>
     <data name="TUnit0037Title" xml:space="preserve">
         <value>Constructor should be parameterless</value>
+    </data>
+    <data name="TUnit0038Description" xml:space="preserve">
+        <value>No data source provided.</value>
+    </data>
+    <data name="TUnit0038MessageFormat" xml:space="preserve">
+        <value>No data source provided</value>
+    </data>
+    <data name="TUnit0038Title" xml:space="preserve">
+        <value>No data source provided</value>
     </data>
 </root>

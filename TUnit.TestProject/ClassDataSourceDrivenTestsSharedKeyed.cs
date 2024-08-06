@@ -5,14 +5,14 @@ namespace TUnit.TestProject;
 
 public class ClassDataSourceDrivenTestsSharedKeyed
 {
-    [DataSourceDrivenTest]
+    [Test]
     [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public void DataSource_Class(SomeAsyncDisposableClass value)
     {
         // Dummy method
     }
 
-    [DataSourceDrivenTest]
+    [Test]
     [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public void DataSource_Class_Generic(SomeAsyncDisposableClass value)
     {

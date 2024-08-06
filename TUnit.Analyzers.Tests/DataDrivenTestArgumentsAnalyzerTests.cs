@@ -14,7 +14,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                             
-                                [DataDrivenTest]
+                                [Test]
                                 [{|#0:Arguments|}]
                                 public void MyTest(string value)
                                 {
@@ -38,7 +38,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                             
-                                [DataDrivenTest]
+                                [Test]
                                 [{|#0:Arguments(1)|}]
                                 public void MyTest(string value)
                                 {
@@ -62,7 +62,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                             public class MyClass
                             {
                             
-                                [DataDrivenTest]
+                                [Test]
                                 [Arguments(1)]
                                 public void MyTest(int value)
                                 {

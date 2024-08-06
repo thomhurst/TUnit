@@ -18,7 +18,7 @@ public class CustomDisplayNameTests
         await Task.CompletedTask;
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments("foo", 1, true)]
     [Arguments("bar", 2, false)]
     [DisplayName("Test with: $value1 $value2 $value3!")]

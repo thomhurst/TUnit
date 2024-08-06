@@ -11,7 +11,7 @@ public class PassFailTests
         // Dummy method
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
@@ -23,7 +23,7 @@ public class PassFailTests
         // Dummy method
     }
 
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(nameof(Data1))]
     [MethodDataSource(nameof(Data2))]
     [MethodDataSource(nameof(Data3))]
@@ -38,12 +38,12 @@ public class PassFailTests
         // Dummy method
     }
     
-    [CombinativeTest]
+    [Test]
     [Category("Pass")]
     public void Pass4(
-        [CombinativeValues(1, 2, 3, 4, 5)] int value,
-        [CombinativeValues(1, 2, 3, 4)] int value2,
-        [CombinativeValues(1, 2, 3)] int value3)
+        [Matrix(1, 2, 3, 4, 5)] int value,
+        [Matrix(1, 2, 3, 4)] int value2,
+        [Matrix(1, 2, 3)] int value3)
     {
         // Dummy method
     }
@@ -55,7 +55,7 @@ public class PassFailTests
         throw new Exception();
     }
     
-    [DataDrivenTest]
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
@@ -67,7 +67,7 @@ public class PassFailTests
         throw new Exception();
     }
 
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(nameof(Data1))]
     [MethodDataSource(nameof(Data2))]
     [MethodDataSource(nameof(Data3))]
@@ -82,12 +82,12 @@ public class PassFailTests
         throw new Exception();
     }
     
-    [CombinativeTest]
+    [Test]
     [Category("Fail")]
     public void Fail4(
-        [CombinativeValues(1, 2, 3, 4, 5)] int value,
-        [CombinativeValues(1, 2, 3, 4)] int value2,
-        [CombinativeValues(1, 2, 3)] int value3)
+        [Matrix(1, 2, 3, 4, 5)] int value,
+        [Matrix(1, 2, 3, 4)] int value2,
+        [Matrix(1, 2, 3)] int value3)
     {
         throw new Exception();
     }

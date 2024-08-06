@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
-using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
@@ -16,34 +15,11 @@ internal class TestsGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.Basic)))
-            .Where(static m => m is not null);
-        
-        var dataDrivenTests = context.SyntaxProvider
-            .ForAttributeWithMetadataName(
-                "TUnit.Core.DataDrivenTestAttribute",
-                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.DataDriven)))
-            .Where(static m => m is not null);
-        
-        var dataSourceDrivenTests = context.SyntaxProvider
-            .ForAttributeWithMetadataName(
-                "TUnit.Core.DataSourceDrivenTestAttribute",
-                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.DataSourceDriven)))
-            .Where(static m => m is not null);
-        
-        var combinativeTests = context.SyntaxProvider
-            .ForAttributeWithMetadataName(
-                "TUnit.Core.CombinativeTestAttribute",
-                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx, TestType.Combinative)))
+                transform: static (ctx, _) =>
+                    new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx)))
             .Where(static m => m is not null);
         
         context.RegisterSourceOutput(basicTests, Execute);
-        context.RegisterSourceOutput(dataDrivenTests, Execute);
-        context.RegisterSourceOutput(dataSourceDrivenTests, Execute);
-        context.RegisterSourceOutput(combinativeTests, Execute);
     }
 
     static bool IsSyntaxTargetForGeneration(SyntaxNode node)
@@ -51,7 +27,7 @@ internal class TestsGenerator : IIncrementalGenerator
         return node is MethodDeclarationSyntax;
     }
 
-    static IEnumerable<TestSourceDataModel> GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context, TestType testType)
+    static IEnumerable<TestSourceDataModel> GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
@@ -73,7 +49,7 @@ internal class TestsGenerator : IIncrementalGenerator
             yield break;
         }
 
-        foreach (var testSourceDataModel in methodSymbol.ParseTestDatas(methodSymbol.ContainingType, testType))
+        foreach (var testSourceDataModel in methodSymbol.ParseTestDatas(methodSymbol.ContainingType))
         {
             yield return testSourceDataModel;
         }

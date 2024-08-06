@@ -1,22 +1,18 @@
-﻿using TUnit.Engine.SourceGenerator.Enums;
-
-namespace TUnit.Engine.SourceGenerator.Models.Arguments;
+﻿namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record Argument
 {
-    public Argument(ArgumentSource argumentSource, string type, string? invocation, bool isTuple = false)
+    public Argument(string type, string? invocation, bool isTuple = false)
     {
-        ArgumentSource = argumentSource;
         Type = type;
         IsTuple = isTuple;
         Invocation = MapValue(type, invocation, isTuple);
     }
 
-    public ArgumentSource ArgumentSource { get; }
     public string Type { get; }
     public bool IsTuple { get; }
     public string Invocation { get; }
-    public string? TupleVariableNames { get; init; }
+    public string[]? TupleVariableNames { get; init; }
     public bool DisposeAfterTest { get; init; }
 
     private static string MapValue(string type, string? value, bool isTuple)

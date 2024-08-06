@@ -9,7 +9,7 @@ public class DataSourceClassCombinedWithDataSourceMethod(int i)
 {
     private readonly int _i = i;
 
-    [DataSourceDrivenTest]
+    [Test]
     [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.One))]
     [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Two))]
     [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Three))]

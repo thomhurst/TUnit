@@ -43,17 +43,28 @@ public static class TypeExtensions
     private static readonly string[] DataDrivenAttributes =
     [
         WellKnown.AttributeFullyQualifiedClasses.ClassDataSource,
-        WellKnown.AttributeFullyQualifiedClasses.MethodDataSource
+        WellKnown.AttributeFullyQualifiedClasses.MethodDataSource,
+        WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource,
+        WellKnown.AttributeFullyQualifiedClasses.Arguments
     ];
     
     public static bool HasDataDrivenAttributes(this INamedTypeSymbol symbol)
     {
         var attributes = symbol.GetAttributes();
 
-        return attributes.Select(x =>
+        var hasDataDrivenAttributes = attributes.Select(x =>
                 x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
             )
             .Intersect(DataDrivenAttributes)
             .Any();
+
+        return hasDataDrivenAttributes
+               || symbol.InstanceConstructors
+                   .FirstOrDefault()?
+                   .Parameters
+                   .Any(p => p.GetAttributes().Any(a =>
+                       a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+                       WellKnown.AttributeFullyQualifiedClasses.Matrix))
+               == true;
     }
 }

@@ -8,16 +8,13 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName BaseTestAttribute = "TUnit.Core.BaseTestAttribute";
 
     public static readonly FullyQualifiedTypeName TestAttribute = "TUnit.Core.TestAttribute";
-    public static readonly FullyQualifiedTypeName DataDrivenTestAttribute = "TUnit.Core.DataDrivenTestAttribute";
-    public static readonly FullyQualifiedTypeName DataSourceDrivenTestAttribute = "TUnit.Core.DataSourceDrivenTestAttribute";
-    public static readonly FullyQualifiedTypeName CombinativeTestAttribute = "TUnit.Core.CombinativeTestAttribute";
     
     // Test Data Attributes
     public static readonly FullyQualifiedTypeName ArgumentsAttribute = "TUnit.Core.ArgumentsAttribute";
     public static readonly FullyQualifiedTypeName MethodDataSourceAttribute = "TUnit.Core.MethodDataSourceAttribute";
     public static readonly FullyQualifiedTypeName EnumerableMethodDataAttribute = "TUnit.Core.EnumerableMethodDataSourceAttribute";
     public static readonly FullyQualifiedTypeName ClassDataSourceAttribute = "TUnit.Core.ClassDataSourceAttribute";
-    public static readonly FullyQualifiedTypeName CombinativeValuesAttribute = "TUnit.Core.CombinativeValuesAttribute";
+    public static readonly FullyQualifiedTypeName MatrixAttribute = "TUnit.Core.MatrixAttribute";
     
     // Marker Attributes
     public static readonly FullyQualifiedTypeName InheritsTestsAttribute = "TUnit.Core.InheritsTestsAttribute";

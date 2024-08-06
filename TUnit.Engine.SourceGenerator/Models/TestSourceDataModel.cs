@@ -17,18 +17,7 @@ internal record TestSourceDataModel
             return true;
         }
 
-        return FullyQualifiedTypeName == other.FullyQualifiedTypeName && MinimalTypeName == other.MinimalTypeName &&
-               MethodName == other.MethodName && ClassArguments.SequenceEqual(other.ClassArguments) &&
-               MethodArguments.SequenceEqual(other.MethodArguments) &&
-               MethodParameterTypes.SequenceEqual(other.MethodParameterTypes) &&
-               MethodParameterNames.SequenceEqual(other.MethodParameterNames) &&
-               MethodGenericTypeCount == other.MethodGenericTypeCount &&
-               IsEnumerableClassArguments == other.IsEnumerableClassArguments &&
-               IsEnumerableMethodArguments == other.IsEnumerableMethodArguments && TestId == other.TestId &&
-               CurrentRepeatAttempt == other.CurrentRepeatAttempt && FilePath == other.FilePath &&
-               LineNumber == other.LineNumber && 
-               HasTimeoutAttribute == other.HasTimeoutAttribute && CustomDisplayName == other.CustomDisplayName &&
-               RepeatLimit == other.RepeatLimit;
+        return TestId == other.TestId;
     }
 
     public override int GetHashCode()
@@ -78,80 +67,88 @@ internal record TestSourceDataModel
     
     public required bool HasTimeoutAttribute { get; init; }
     
-    public bool IsClassTupleArguments => ClassArguments.Any(x => x.IsTuple);
-
-    public bool IsMethodTupleArguments => MethodArguments.Any(x => x.IsTuple);
-    
     public required string? CustomDisplayName { get; init; }
     public required int RepeatLimit { get; init; }
 
     public IEnumerable<string> GetClassArgumentVariableNames()
     {
-        return Enumerable.Range(0, ClassArguments.Length)
-            .Select(i => ClassArguments[i].TupleVariableNames ?? $"{VariableNames.ClassArg}{i}");
+        for (var index = 0; index < ClassArguments.Length; index++)
+        {
+            var classArgument = ClassArguments[index];
+            if (classArgument.TupleVariableNames != null)
+            {
+                foreach (var tupleVariableName in classArgument.TupleVariableNames)
+                {
+                    yield return tupleVariableName;
+                }
+            }
+            else
+            {
+                yield return $"{VariableNames.ClassArg}{index}";
+            }
+        }
     }
 
     public IEnumerable<string> GetClassArgumentsInvocations()
     {
-        if (IsEnumerableClassArguments && !IsClassTupleArguments)
+        for (var index = 0; index < ClassArguments.Length; index++)
         {
-            yield return $"var {VariableNames.ClassArg}0 = {VariableNames.ClassData};";
-            yield break;
-        }
-        
-        if (IsEnumerableClassArguments && IsClassTupleArguments)
-        {
-            yield return $"var {VariableNames.ClassArg}0 = {VariableNames.ClassData};";
-            yield return $"var {ClassArguments[1].TupleVariableNames} = {VariableNames.ClassArg}0;";
-            yield break;
-        }
-        
-        var variableNames = GetClassArgumentVariableNames().ToList();
-        for (var i = 0; i < ClassArguments.Length; i++)
-        {
-            var argument = ClassArguments[i];
-            var variable = variableNames[i];
-            yield return $"{SpecifyTypeOrVar(argument)} {variable} = {argument.Invocation};";
+            var argument = ClassArguments[index];
+            yield return
+                $"{SpecifyTypeOrVar(argument, IsEnumerableClassArguments)} {GetVariableName(argument, VariableNames.ClassArg, index)} = {GetArgumentInvocation(argument, IsEnumerableClassArguments, VariableNames.ClassData)};";
         }
     }
 
+    private static string GetArgumentInvocation(Argument argument, bool isEnumerableArguments, string defaultEnumerableVariableName)
+    {
+        return isEnumerableArguments ? defaultEnumerableVariableName : argument.Invocation;
+    }
+
+    private string GetVariableName(Argument argument, string prefix, int index)
+    {
+        if (argument.TupleVariableNames != null)
+        {
+            return $"({string.Join(", ", argument.TupleVariableNames)})";
+        }
+
+        return $"{prefix}{index}";
+    }
+
     public string GetClassArgumentVariableNamesAsList()
-        => string.Join(", ", GetClassArgumentVariableNames().Skip(IsClassTupleArguments ? 1 : 0)).TrimStart('(').TrimEnd(')');
+        => string.Join(", ", GetClassArgumentVariableNames()).TrimStart('(').TrimEnd(')');
     
     public IEnumerable<string> GetMethodArgumentVariableNames()
     {
-        return Enumerable.Range(0, MethodArguments.Length)
-            .Select(i => MethodArguments[i].TupleVariableNames ?? $"{VariableNames.MethodArg}{i}");
+        for (var index = 0; index < MethodArguments.Length; index++)
+        {
+            var methodArgument = MethodArguments[index];
+            if (methodArgument.TupleVariableNames != null)
+            {
+                foreach (var tupleVariableName in methodArgument.TupleVariableNames)
+                {
+                    yield return tupleVariableName;
+                }
+            }
+            else
+            {
+                yield return $"{VariableNames.MethodArg}{index}";
+            }
+        }
     }
 
     public IEnumerable<string> GetMethodArgumentsInvocations()
     {
-        if (IsEnumerableMethodArguments && !IsMethodTupleArguments)
+        for (var index = 0; index < MethodArguments.Length; index++)
         {
-            yield return $"var {VariableNames.MethodArg}0 = {VariableNames.MethodData};";
-            yield break;
-        }
-        
-        if (IsEnumerableMethodArguments && IsMethodTupleArguments)
-        {
-            yield return $"var {VariableNames.MethodArg}0 = {VariableNames.MethodData};";
-            yield return $"var {MethodArguments[1].TupleVariableNames} = {VariableNames.MethodArg}0;";
-            yield break;
-        }
-        
-        var variableNames = GetMethodArgumentVariableNames().ToList();
-        for (var i = 0; i < MethodArguments.Length; i++)
-        {
-            var argument = MethodArguments[i];
-            
-            var variable = variableNames[i];
-            yield return $"{SpecifyTypeOrVar(argument)} {variable} = {argument.Invocation};";
+            var argument = MethodArguments[index];
+            yield return
+                $"{SpecifyTypeOrVar(argument, IsEnumerableMethodArguments)} {GetVariableName(argument, VariableNames.MethodArg, index)} = {GetArgumentInvocation(argument, IsEnumerableMethodArguments, VariableNames.MethodData)};";
         }
     }
     
     public string GetCommaSeparatedMethodArgumentVariableNames()
     {
-        return string.Join(", ", GetMethodArgumentVariableNames().Skip(IsMethodTupleArguments ? 1 : 0)).TrimStart('(')
+        return string.Join(", ", GetMethodArgumentVariableNames()).TrimStart('(')
             .TrimEnd(')');
     }
     
@@ -167,9 +164,9 @@ internal record TestSourceDataModel
         return variableNamesAsList;
     }
 
-    private string SpecifyTypeOrVar(Argument argument)
+    private string SpecifyTypeOrVar(Argument argument, bool isEnumerableArguments)
     {
-        if (argument.TupleVariableNames != null)
+        if (argument.TupleVariableNames != null || isEnumerableArguments)
         {
             return "var";
         }

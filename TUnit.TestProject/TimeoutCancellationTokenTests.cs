@@ -28,7 +28,7 @@ public class TimeoutCancellationTokenTests
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
-    [DataDrivenTest]
+    [Test]
     [Arguments(1)]
     [Timeout(30_000)]
     public async Task DataTest(int value, CancellationToken cancellationToken)
@@ -39,18 +39,18 @@ public class TimeoutCancellationTokenTests
 
     [MethodDataSource(nameof(DataSource))]
     [Timeout(30_000)]
-    [DataSourceDrivenTest]
+    [Test]
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
         await Assert.That(value).Is.EqualTo(1);
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
     
-    [CombinativeTest]
+    [Test]
     [Timeout(30_000)]
     [Category("Blah")]
-    public async Task CombinativeTest(
-        [CombinativeValues(1, 2, 3)] int value, 
+    public async Task MatrixTest(
+        [Matrix(1, 2, 3)] int value, 
         CancellationToken cancellationToken)
     {
         await Assert.That(value).Is.EqualTo(1).Or.Is.EqualTo(2).Or.Is.EqualTo(3);

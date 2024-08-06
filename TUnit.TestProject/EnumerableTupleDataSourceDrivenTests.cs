@@ -4,7 +4,7 @@ namespace TUnit.TestProject;
 
 public class EnumerableTupleDataSourceDrivenTests
 {
-    [DataSourceDrivenTest]
+    [Test]
     [EnumerableMethodDataSource(nameof(TupleMethod), UnfoldTuple = true)]
     [EnumerableMethodDataSource(nameof(NamedTupleMethod), UnfoldTuple = true)]
     public void DataSource_TupleMethod(int value, string value2, bool value3)

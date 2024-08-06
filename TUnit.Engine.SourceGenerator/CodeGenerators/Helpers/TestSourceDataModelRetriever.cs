@@ -1,5 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.Enums;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
@@ -9,19 +9,18 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 internal static class TestSourceDataModelRetriever
 {
     public static IEnumerable<TestSourceDataModel> ParseTestDatas(this IMethodSymbol methodSymbol,
-        INamedTypeSymbol namedTypeSymbol,
-        TestType testType)
+        INamedTypeSymbol namedTypeSymbol)
     {
-        var testAttribute = methodSymbol.GetRequiredTestAttribute();
-
-        if (testType is TestType.Unknown)
+        if (methodSymbol.IsAbstract || namedTypeSymbol.IsAbstract)
         {
-            testType = testAttribute.GetTestType();
+            yield break;
         }
-
-        var classArgumentsContainers = ClassArgumentsRetriever.GetClassArguments(namedTypeSymbol).ToList();
-        var testArgumentsContainers =
-            MethodArgumentsRetriever.GetMethodArguments(methodSymbol, namedTypeSymbol, testType);
+        
+        var testAttribute = methodSymbol.GetRequiredTestAttribute();
+        
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes(), namedTypeSymbol, VariableNames.ClassArg).ToArray();
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(methodSymbol.Parameters, methodSymbol.GetAttributes(), namedTypeSymbol, VariableNames.MethodArg);
+        
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
 

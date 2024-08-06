@@ -164,26 +164,14 @@ internal static class GenericTestInvocationWriter
         {
             return string.Empty;
         }
-
-        if (testSourceDataModel is { IsEnumerableMethodArguments: true, IsMethodTupleArguments: false })
+        
+        if (testSourceDataModel is { IsEnumerableMethodArguments: true })
         {
             return $"({{{VariableNames.MethodData}}})";
         }
 
-        var isMethodTupleArguments = testSourceDataModel.IsMethodTupleArguments;
         var args = testSourceDataModel.GetMethodArgumentVariableNames()
-            .Select(x => $"{{{x}}}")
-            .Skip(isMethodTupleArguments ? 1 : 0);
-
-        if (isMethodTupleArguments)
-        {
-            args = args.First()
-                .TrimStart('{', '(')
-                .TrimEnd('}', ')')
-                .Split([','], StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => x.Trim())
-                .Select(x => $"{{{x}}}");
-        }
+            .Select(x => $"{{{x}}}");
         
         return $"({string.Join(", ", args)})";
     }

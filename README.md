@@ -69,11 +69,11 @@ or with more complex test orchestration needs
     [EnumerableMethodData(nameof(GetAuthDetails))]
     public async Task Register(string username, string password) { ... }
 
-    [DataSourceDrivenTest, DependsOn(nameof(Register))]
+    [Test, DependsOn(nameof(Register))]
     [EnumerableMethodData(nameof(GetAuthDetails))]
     public async Task Login(string username, string password) { ... }
 
-    [DataSourceDrivenTest, DependsOn(nameof(Login), [typeof(string), typeof(string)])]
+    [Test, DependsOn(nameof(Login), [typeof(string), typeof(string)])]
     [EnumerableMethodData(nameof(GetAuthDetails))]
     public async Task DeleteAccount(string username, string password) { ... }
 
@@ -88,7 +88,7 @@ or with more complex test orchestration needs
     public async Task DownloadFile2() { ... }
 
     [Repeat(10)]
-    [DataDrivenTest]
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
