@@ -11,12 +11,13 @@ using ModularPipelines.Modules;
 namespace TUnit.SpeedComparison.Pipeline;
 
 [NotInParallel("SpeedComparison")]
+[DependsOn<FindProjectsModule>]
 public class TUnitModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        var project = context.Git().RootDirectory.AssertExists().FindFile(x => x.Name == "TUnitTimer.csproj")
-            .AssertExists();
+        var projectPaths = await GetModule<FindProjectsModule>();
+        var project = projectPaths.Value!.TUnit;
 
         return await context.DotNet().Run(new DotNetRunOptions
         {

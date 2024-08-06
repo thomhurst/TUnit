@@ -42,6 +42,10 @@ jobs:
       - name: Build NUnit
         run: dotnet build -c Release
         working-directory: "tools/speed-comparison/NUnitTimer"
+                    
+      - name: Build MSTest
+        run: dotnet build -c Release
+        working-directory: "tools/speed-comparison/MSTestTimer"
       
       - name: Run Pipeline
         run: dotnet run -c Release

@@ -12,12 +12,12 @@ namespace TUnit.SpeedComparison.Pipeline;
 
 [NotInParallel("SpeedComparison")]
 [DependsOn<FindProjectsModule>]
-public class NUnitModule : Module<CommandResult>
+public class MSTestModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var projectPaths = await GetModule<FindProjectsModule>();
-        var project = projectPaths.Value!.NUnit;
+        var project = projectPaths.Value!.MSTest;
 
         return await context.DotNet().Test(new DotNetTestOptions(project)
         {
