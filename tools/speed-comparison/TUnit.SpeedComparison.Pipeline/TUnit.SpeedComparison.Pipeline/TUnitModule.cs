@@ -22,7 +22,8 @@ public class TUnitModule : Module<CommandResult>
         return await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project,
-            Configuration = Configuration.Release
+            Configuration = Configuration.Release,
+            NoBuild = true
         }, cancellationToken);
     }
 }

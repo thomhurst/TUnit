@@ -21,7 +21,8 @@ public class MSTestModule : Module<CommandResult>
 
         return await context.DotNet().Test(new DotNetTestOptions(project)
         {
-            Configuration = Configuration.Release
+            Configuration = Configuration.Release,
+            NoBuild = true
         }, cancellationToken);
     }
 }
