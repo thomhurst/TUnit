@@ -13,7 +13,7 @@ public class ParametersTests
         await using (Assert.Multiple())
         {
             await Assert.That(TestContext.Parameters.ToImmutableDictionary()).Does.ContainKey("TestParam1");
-            await Assert.That(TestContext.Parameters["TestParam1"]).Is.EqualTo("TestParamValue1");
+            await Assert.That(TestContext.Parameters["TestParam1"]).Is.EqualTo("TestParam1Value");
         }
     }
 }
