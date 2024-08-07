@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" ExcludeAssets="all" />
+        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" />
     </ItemGroup>
 
 </Project>
