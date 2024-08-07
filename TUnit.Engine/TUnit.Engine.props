@@ -10,10 +10,6 @@
         <LangVersion>latest</LangVersion>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
-    
-    <PropertyGroup>
-        <TUnitImplicitUsings>true</TUnitImplicitUsings>
-    </PropertyGroup>
 
     <ItemGroup>
         <!--
