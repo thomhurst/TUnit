@@ -1,4 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    
     <ItemGroup>
         <Content Include="TUnit.Core.props">
             <Pack>true</Pack>
@@ -9,5 +13,15 @@
             <Pack>true</Pack>
             <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
         </Content>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Polyfill" Version="6.1.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="System.Text.Json" Version="8.0.4">
+          <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
     </ItemGroup>
 </Project>

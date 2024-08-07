@@ -9,7 +9,7 @@ public record HooksDataModel
     public required string MethodName { get; init; }
     public required string[] ParameterTypes { get; init; }
     public required bool HasTimeoutAttribute { get; init; }
-    public required HookLevel HookLevel { get; init; }
+    public required Core.HookType HookLevel { get; init; }
 
     public virtual bool Equals(HooksDataModel? other)
     {

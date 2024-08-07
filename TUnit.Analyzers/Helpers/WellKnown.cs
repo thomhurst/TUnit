@@ -1,30 +1,36 @@
-﻿namespace TUnit.Analyzers.Helpers;
+﻿using TUnit.Analyzers.Extensions;
+using TUnit.Core;
+using TUnit.Core.Models;
+
+namespace TUnit.Analyzers.Helpers;
 
 internal static class WellKnown
 {
     public static class AttributeFullyQualifiedClasses
     {
-        public const string TimeoutAttribute = "global::TUnit.Core.TimeoutAttribute";
-        public const string Explicit = "global::TUnit.Core.ExplicitAttribute";
-        public const string Matrix = "global::TUnit.Core.MatrixAttribute";
+        public static readonly string TimeoutAttribute = GetTypeName(typeof(TimeoutAttribute));
+        public static readonly string Explicit = GetTypeName(typeof(ExplicitAttribute));
+        public static readonly string Matrix = GetTypeName(typeof(MatrixAttribute));
 
-        public const string BeforeAttribute = "global::TUnit.Core.BeforeAttribute";
-        public const string AfterAttribute = "global::TUnit.Core.AfterAttribute";
-        
-        public const string Test = "global::TUnit.Core.TestAttribute";
-        public const string Arguments = "global::TUnit.Core.ArgumentsAttribute";
-        public const string MethodDataSource = "global::TUnit.Core.MethodDataSourceAttribute";
-        public const string ClassDataSource = "global::TUnit.Core.ClassDataSourceAttribute";
-        public const string EnumerableMethodDataSource = "global::TUnit.Core.EnumerableMethodDataSourceAttribute";
+        public static readonly string BeforeAttribute = GetTypeName(typeof(BeforeAttribute));
+        public static readonly string AfterAttribute = GetTypeName(typeof(AfterAttribute));
 
-        public const string TestContext = "global::TUnit.Core.TestContext";
-        public const string ClassHookContext = "global::TUnit.Core.Models.ClassHookContext";
-        public const string AssemblyHookContext = "global::TUnit.Core.Models.AssemblyHookContext";
-        
-        public const string InheritsTestsAttribute = "global::TUnit.Core.InheritsTestsAttribute";
+        public static readonly string Test = GetTypeName(typeof(TestAttribute));
+        public static readonly string Arguments = GetTypeName(typeof(ArgumentsAttribute));
+        public static readonly string MethodDataSource = GetTypeName(typeof(MethodDataSourceAttribute));
+        public static readonly string ClassDataSource = GetTypeName(typeof(ClassDataSourceAttribute<>));
+        public static readonly string EnumerableMethodDataSource = GetTypeName(typeof(EnumerableMethodDataSourceAttribute));
 
-        public const string NotInParallelAttribute = "global::TUnit.Core.NotInParallelAttribute";
-        public const string DependsOnAttribute = "global::TUnit.Core.DependsOnAttribute";
-        public const string CancellationToken = "global::System.Threading.CancellationToken";
+        public static readonly string TestContext = GetTypeName(typeof(TestContext));
+        public static readonly string ClassHookContext = GetTypeName(typeof(ClassHookContext));
+        public static readonly string AssemblyHookContext = GetTypeName(typeof(AssemblyHookContext));
+
+        public static readonly string InheritsTestsAttribute = GetTypeName(typeof(InheritsTestsAttribute));
+
+        public static readonly string NotInParallelAttribute = GetTypeName(typeof(NotInParallelAttribute));
+        public static readonly string DependsOnAttribute = GetTypeName(typeof(DependsOnAttribute));
+        public static readonly string CancellationToken = GetTypeName(typeof(CancellationToken));
+
+        private static string GetTypeName(Type type) => $"global::{type.GetFullNameWithoutGenericArity()}";
     }
 }

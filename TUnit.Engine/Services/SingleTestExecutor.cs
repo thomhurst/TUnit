@@ -110,7 +110,7 @@ internal class SingleTestExecutor : IDataProducer
                     .WithProperty(timingProperty)
             ));
             
-            testContext.TaskCompletionSource.SetResult();
+            testContext.TaskCompletionSource.SetResult(null);
 
             testContext.Result = new TUnitTestResult
             {

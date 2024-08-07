@@ -27,12 +27,8 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
 
-        var onlyOnceAttributes = attributes.Where(x =>
-            x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute
-                or WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
-            && x.GetHookType() == HookType.Assembly
-            )
+        var onlyOnceAttributes = attributes
+            .Where(x => x.IsHook() && x.GetHookType() == HookType.Assembly)
             .ToList();
 
         if (!onlyOnceAttributes.Any())

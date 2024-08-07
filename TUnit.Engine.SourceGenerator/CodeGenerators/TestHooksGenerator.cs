@@ -31,19 +31,19 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == HookLevel.EachTest)
+                    if (model.HookLevel == Core.HookType.EachTest)
                     {
                         TestHooksWriter.Execute(productionContext, model, HookType.SetUp);
                     }
-                    else if (model.HookLevel == HookLevel.Class)
+                    else if (model.HookLevel == Core.HookType.Class)
                     {
                         ClassHooksWriter.Execute(productionContext, model, HookType.SetUp);
                     }
-                    else if (model.HookLevel == HookLevel.Assembly)
+                    else if (model.HookLevel == Core.HookType.Assembly)
                     {
                         AssemblyHooksWriter.Execute(productionContext, model, HookType.SetUp);
                     }
-                    else if (model.HookLevel == HookLevel.EachTestGlobally)
+                    else if (model.HookLevel == Core.HookType.EachTestGlobally)
                     {
                         GlobalTestHooksWriter.Execute(productionContext, model, HookType.SetUp);
                     }
@@ -55,19 +55,19 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == HookLevel.EachTest)
+                    if (model.HookLevel == Core.HookType.EachTest)
                     {
                         TestHooksWriter.Execute(productionContext, model, HookType.CleanUp);
                     }
-                    else if (model.HookLevel == HookLevel.Class)
+                    else if (model.HookLevel == Core.HookType.Class)
                     {
                         ClassHooksWriter.Execute(productionContext, model, HookType.CleanUp);
                     }
-                    else if (model.HookLevel == HookLevel.Assembly)
+                    else if (model.HookLevel == Core.HookType.Assembly)
                     {
                         AssemblyHooksWriter.Execute(productionContext, model, HookType.CleanUp);
                     }
-                    else if (model.HookLevel == HookLevel.EachTestGlobally)
+                    else if (model.HookLevel == Core.HookType.EachTestGlobally)
                     {
                         GlobalTestHooksWriter.Execute(productionContext, model, HookType.CleanUp);
                     }
@@ -89,7 +89,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
 
         foreach (var contextAttribute in context.Attributes)
         {
-            var hookLevel = (HookLevel) Enum.ToObject(typeof(HookLevel), contextAttribute.ConstructorArguments[0].Value!);
+            var hookLevel = (Core.HookType) Enum.ToObject(typeof(Core.HookType), contextAttribute.ConstructorArguments[0].Value!);
 
             yield return new HooksDataModel
             {

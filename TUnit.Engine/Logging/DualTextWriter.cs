@@ -286,10 +286,12 @@ internal class DualTextWriter : TextWriter
 
     public override Encoding Encoding => _textWriters.First().Encoding;
 
-    [AllowNull] public override string NewLine
+    public override string NewLine
     {
         get => _textWriters.First().NewLine;
+#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
         set
+#pragma warning restore CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
         {
             foreach (var textWriter in _textWriters)
             {

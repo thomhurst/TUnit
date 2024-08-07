@@ -10,15 +10,26 @@ public class MethodDataSourceAttribute : TUnitAttribute
 
     public MethodDataSourceAttribute(string methodNameProvidingDataSource)
     {
-        ArgumentException.ThrowIfNullOrEmpty(methodNameProvidingDataSource);
+        if (methodNameProvidingDataSource is null or { Length: < 1 })
+        {
+            throw new ArgumentException("No method name was provided");
+        }
+        
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
     
     public MethodDataSourceAttribute(Type classProvidingDataSource, 
         string methodNameProvidingDataSource)
     {
-        ArgumentNullException.ThrowIfNull(classProvidingDataSource);
-        ArgumentException.ThrowIfNullOrEmpty(methodNameProvidingDataSource);
+        if (classProvidingDataSource == null)
+        {
+            throw new ArgumentNullException(nameof(classProvidingDataSource), "No class type was provided");
+        }
+
+        if (methodNameProvidingDataSource is null or { Length: < 1 })
+        {
+            throw new ArgumentException("No method name was provided");
+        }
 
         ClassProvidingDataSource = classProvidingDataSource;
         MethodNameProvidingDataSource = methodNameProvidingDataSource;

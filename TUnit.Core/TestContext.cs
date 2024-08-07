@@ -4,7 +4,7 @@ public partial class TestContext : IDisposable
 {
     internal EventHandler? OnDispose;
     
-    internal readonly TaskCompletionSource TaskCompletionSource = new();
+    internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly StringWriter OutputWriter = new();
     internal readonly StringWriter ErrorWriter = new();
     

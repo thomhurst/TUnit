@@ -1,9 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
-using TUnit.Core;
 
 namespace TUnit.TestProject;
 
+[SuppressMessage("Usage", "TUnitAssertions0005:Assert.That(...) should not be used with a constant value")]
 public class Tests
 {
     [Test]

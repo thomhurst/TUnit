@@ -52,14 +52,14 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => 
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
-                         is WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
+                         == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
         {
             CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, false, true);
         }
         
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => 
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
-                         is WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource))
+                         == WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource))
         {
             CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, true, true);
         }

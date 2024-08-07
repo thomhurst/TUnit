@@ -136,13 +136,13 @@
         <value>A data source method must only have 1 matching parameter</value>
     </data>
     <data name="TUnit0014Description" xml:space="preserve">
-        <value>Method should have a `Test` attribute or be made `private`.</value>
+        <value>Method should have a `Test` attribute or be made `private` or `protected`.</value>
     </data>
     <data name="TUnit0014MessageFormat" xml:space="preserve">
-        <value>Method should have a `Test` attribute or be made `private`</value>
+        <value>Method should have a `Test` attribute or be made `private` or `protected`</value>
     </data>
     <data name="TUnit0014Title" xml:space="preserve">
-        <value>Method should have a `Test` attribute or be made `private`</value>
+        <value>Method should have a `Test` attribute or be made `private` or `protected`</value>
     </data>
     <data name="TUnit0015Description" xml:space="preserve">
         <value>Missing TimeoutAttribute cancellation token parameter.</value>

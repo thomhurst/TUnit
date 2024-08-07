@@ -13,7 +13,6 @@ internal static class SerializationExtensions
         ReferenceHandler = ReferenceHandler.Preserve,
     };
     
-    [return: NotNullIfNotNull("t")]
     public static string? ToJson<T>(this T? t)
     {
         if (t is null)

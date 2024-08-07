@@ -49,4 +49,11 @@
         </Compile>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </ProjectReference>
+    </ItemGroup>
+
 </Project>
