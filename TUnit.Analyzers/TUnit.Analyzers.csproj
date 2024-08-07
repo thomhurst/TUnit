@@ -49,11 +49,11 @@
         </Compile>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(Target)' != 'Pack'">
+    <ItemGroup Condition="'$(IsPackTarget)' != 'true'">
         <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(Target)' == 'Pack'">
+    <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
         <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     </ItemGroup>
 

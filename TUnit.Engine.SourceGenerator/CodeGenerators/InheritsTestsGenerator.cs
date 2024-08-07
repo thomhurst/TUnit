@@ -67,7 +67,8 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
 
         foreach (var modelTestSourceDataModel in model.TestSourceDataModels)
         {
-            var className = $"{model.MinimalTypeName}_Inherited_{Guid.NewGuid():N}";
+            var className = $"{model.MinimalTypeName}_Inherited";
+            var fileName = $"{className}_{Guid.NewGuid():N}";
 
             using var sourceBuilder = new SourceCodeWriter();
 
@@ -78,7 +79,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("namespace TUnit.Engine;");
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.WriteLine($"file class {className}");
+            sourceBuilder.WriteLine($"file partial class {className}");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");
@@ -106,7 +107,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("}");
             sourceBuilder.WriteLine("}");
 
-            context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
+            context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
         }
     }
 }
