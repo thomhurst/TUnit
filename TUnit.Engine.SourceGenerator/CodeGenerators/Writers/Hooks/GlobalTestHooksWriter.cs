@@ -26,7 +26,7 @@ internal static class GlobalTestHooksWriter
         sourceBuilder.WriteLine("namespace TUnit.Engine;");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-        sourceBuilder.WriteLine($"file class {className}");
+        sourceBuilder.WriteLine($"file partial class {className}");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine("[ModuleInitializer]");
         sourceBuilder.WriteLine("public static void Initialise()");
