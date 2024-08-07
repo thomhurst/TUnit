@@ -36,11 +36,11 @@
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(Target)' != 'Pack'">
+    <ItemGroup Condition="'$(IsPackTarget)' != 'true'">
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(Target)' == 'Pack'">
+    <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
         <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     </ItemGroup>
     

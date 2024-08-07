@@ -5,12 +5,12 @@
       <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
     </ItemGroup>
     
-    <ItemGroup Condition="'$(Target)' != 'Pack'">
+    <ItemGroup Condition="'$(IsPackTarget)' != 'true'">
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj"
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(Target)' == 'Pack'">
+    <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" />
     </ItemGroup>
 
