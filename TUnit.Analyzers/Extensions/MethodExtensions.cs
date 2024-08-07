@@ -15,7 +15,7 @@ public static class MethodExtensions
         return methodSymbol.GetAttributes().Any(x =>
         {
             var attributeType = x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-            return attributeType is WellKnown.AttributeFullyQualifiedClasses.BeforeEachTest or WellKnown.AttributeFullyQualifiedClasses.AfterEachTest;
+            return attributeType is WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute or WellKnown.AttributeFullyQualifiedClasses.AfterAttribute;
         });
     }
     

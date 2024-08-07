@@ -45,4 +45,6 @@ public class DisplayFormats
         SymbolDisplayKindOptions.None, 
         SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
     );
+    
+    public static readonly SymbolDisplayFormat NameOnly = new();
 }

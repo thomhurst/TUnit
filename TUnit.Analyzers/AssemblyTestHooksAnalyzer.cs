@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Enums;
+using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
@@ -27,8 +29,9 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var onlyOnceAttributes = attributes.Where(x =>
             x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is WellKnown.AttributeFullyQualifiedClasses.AssemblySetUp
-                or WellKnown.AttributeFullyQualifiedClasses.AssemblyCleanUp
+                is WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute
+                or WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
+            && x.GetHookType() == HookType.Assembly
             )
             .ToList();
 

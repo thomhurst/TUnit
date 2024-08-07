@@ -1,71 +1,13 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Engine.SourceGenerator.Enums;
-using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
-namespace TUnit.Engine.SourceGenerator.CodeGenerators;
+namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 
-[Generator]
-internal class GlobalTestHooksGenerator : IIncrementalGenerator
+internal static class GlobalTestHooksWriter
 {
-    public void Initialize(IncrementalGeneratorInitializationContext context)
+    public static void Execute(SourceProductionContext context, HooksDataModel model, HookType hookType)
     {
-        var setUpMethods = context.SyntaxProvider
-            .ForAttributeWithMetadataName(
-                "TUnit.Core.GlobalBeforeEachTestAttribute",
-                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
-            .Where(static m => m is not null);
-        
-        var cleanUpMethods = context.SyntaxProvider
-            .ForAttributeWithMetadataName(
-                "TUnit.Core.GlobalAfterEachTestAttribute",
-                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
-            .Where(static m => m is not null);
-        
-        context.RegisterSourceOutput(setUpMethods,
-            (productionContext, model) => Execute(productionContext, model, HookType.SetUp));
-        
-        context.RegisterSourceOutput(cleanUpMethods,
-            (productionContext, model) => Execute(productionContext, model, HookType.CleanUp));
-    }
-
-    static bool IsSyntaxTargetForGeneration(SyntaxNode node)
-    {
-        return node is MethodDeclarationSyntax;
-    }
-
-    static HooksDataModel? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
-    {
-        if (context.TargetSymbol is not IMethodSymbol methodSymbol)
-        {
-            return null;
-        }
-
-        if (!methodSymbol.IsStatic)
-        {
-            return null;
-        }
-
-        return new HooksDataModel
-        {
-            MethodName = methodSymbol.Name,
-            FullyQualifiedTypeName = methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            MinimalTypeName = methodSymbol.ContainingType.Name,
-            ParameterTypes = methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray(),
-            HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute()
-        };
-    }
-
-    private void Execute(SourceProductionContext context, HooksDataModel? model, HookType hookType)
-    {
-        if (model is null)
-        {
-            return;
-        }
-        
         var className = $"GlobalStaticTestHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
@@ -118,7 +60,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
         context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
     }
 
-    private string GetArgs(HooksDataModel model)
+    private static string GetArgs(HooksDataModel model)
     {
         List<string> args = [];
         

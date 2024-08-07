@@ -7,49 +7,49 @@ namespace TUnit.TestProject;
 
 public abstract class AssemblyHooks
 {
-    [AssemblySetUp]
+    [Before(Assembly)]
     public static void BeforeHook1()
     {
         // Dummy method
     }
     
-    [AssemblySetUp]
+    [Before(Assembly)]
     public static async Task BeforeHook2(AssemblyHookContext context)
     {
         await Assert.That(context.TestCount).Is.Positive();
     }
     
-    [AssemblySetUp, Timeout(30_000)]
+    [Before(Assembly), Timeout(30_000)]
     public static void BeforeHook3(CancellationToken cancellationToken)
     {
         // Dummy method
     }
     
-    [AssemblySetUp, Timeout(30_000)]
+    [Before(Assembly), Timeout(30_000)]
     public static async Task BeforeHook4(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         await Assert.That(context.TestCount).Is.Positive();
     }
     
-    [AssemblyCleanUp]
+    [After(Assembly)]
     public static void AfterHook1()
     {
         // Dummy method
     }
     
-    [AssemblyCleanUp]
+    [After(Assembly)]
     public static async Task AfterHook2(AssemblyHookContext context)
     {
         await Assert.That(context.TestCount).Is.Positive();
     }
     
-    [AssemblyCleanUp, Timeout(30_000)]
+    [After(Assembly), Timeout(30_000)]
     public static void AfterHook3(CancellationToken cancellationToken)
     {
         // Dummy method
     }
     
-    [AssemblyCleanUp, Timeout(30_000)]
+    [After(Assembly), Timeout(30_000)]
     public static async Task AfterHook4(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         await Assert.That(context.TestCount).Is.Positive();

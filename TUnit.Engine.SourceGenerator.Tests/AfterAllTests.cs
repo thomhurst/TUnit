@@ -3,7 +3,7 @@ using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
-internal class AfterAllTests : TestsBase<ClassHooksGenerator>
+internal class AfterAllTests : TestsBase<TestHooksGenerator>
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -12,7 +12,7 @@ internal class AfterAllTests : TestsBase<ClassHooksGenerator>
             "AfterTests.cs"),
         generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(7));
+            Assert.That(generatedFiles.Length, Is.EqualTo(14));
 
             Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
@@ -23,7 +23,7 @@ internal class AfterAllTests : TestsBase<ClassHooksGenerator>
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[1].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 	            ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.Base2), new StaticMethod
 	            { 
@@ -32,7 +32,7 @@ internal class AfterAllTests : TestsBase<ClassHooksGenerator>
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 	            ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.Base3), new StaticMethod
 	            { 
@@ -41,7 +41,7 @@ internal class AfterAllTests : TestsBase<ClassHooksGenerator>
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[3].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
 		            		{ 
@@ -50,7 +50,7 @@ internal class AfterAllTests : TestsBase<ClassHooksGenerator>
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[7].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
 		            		{ 
@@ -59,7 +59,7 @@ internal class AfterAllTests : TestsBase<ClassHooksGenerator>
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[5].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[8].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
 		            		{ 
@@ -68,7 +68,7 @@ internal class AfterAllTests : TestsBase<ClassHooksGenerator>
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[9].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
 		            		{ 

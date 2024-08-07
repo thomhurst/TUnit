@@ -6,13 +6,13 @@ public class AsyncDisposableFieldTests
 {
     private TextWriter? _textWriter;
 
-    [BeforeEachTest]
+    [Before(EachTest)]
     public void Setup()
     {
         _textWriter = new StringWriter();
     }
 
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task Blah()
     {
         await _textWriter!.DisposeAsync();

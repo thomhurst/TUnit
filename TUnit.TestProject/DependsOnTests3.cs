@@ -33,7 +33,7 @@ public class DependsOnTests3
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
 
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AssertStartTimes()
     {
         await Assert.That(_test3Start).Is.GreaterThanOrEqualTo(_test1Start.AddSeconds(1));

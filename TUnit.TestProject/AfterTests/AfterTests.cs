@@ -5,13 +5,13 @@ namespace TUnit.TestProject.AfterTests;
 
 public class Base1
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAll1()
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task AfterEach1()
     {
         await Task.CompletedTask;
@@ -20,13 +20,13 @@ public class Base1
 
 public class Base2 : Base1
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAll2()
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task AfterEach2()
     {
         await Task.CompletedTask;
@@ -35,13 +35,13 @@ public class Base2 : Base1
 
 public class Base3 : Base2
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAll3()
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task AfterEach3()
     {
         await Task.CompletedTask;
@@ -50,49 +50,49 @@ public class Base3 : Base2
 
 public class CleanupTests : Base3
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAllCleanUp()
     {
         await Task.CompletedTask;
     }
     
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAllCleanUpWithContext(ClassHookContext context)
     {
         await Task.CompletedTask;
     }
     
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAllCleanUp(CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
     
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAllCleanUpWithContext(ClassHookContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task Cleanup()
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest, Timeout(30_000)]
+    [After(EachTest), Timeout(30_000)]
     public async Task Cleanup(CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task CleanupWithContext(TestContext testContext)
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest, Timeout(30_000)]
+    [After(EachTest), Timeout(30_000)]
     public async Task CleanupWithContext(TestContext testContext, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;

@@ -66,7 +66,7 @@ public class PublicMethodMissingTestAttributeAnalyzerTests
                                 {
                                 }
                                 
-                                [BeforeEachTest]
+                                [Before(HookType.EachTest)]
                                 public void SetUp()
                                 {
                                 }
@@ -89,9 +89,57 @@ public class PublicMethodMissingTestAttributeAnalyzerTests
                                 {
                                 }
                                 
-                                [AfterEachTest]
+                                [After(HookType.EachTest)]
                                 public void SetUp()
                                 {
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [Test]
+    public async Task IDisposable_No_Error()
+    {
+        const string text = """
+                            using System;
+                            using TUnit.Core;
+
+                            public class MyClass : IDisposable
+                            {
+                                [Test]
+                                public void MyTest()
+                                {
+                                }
+                                
+                                public void Dispose()
+                                {
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [Test]
+    public async Task IAsyncDisposable_No_Error()
+    {
+        const string text = """
+                            using System;
+                            using System.Threading.Tasks;
+                            using TUnit.Core;
+
+                            public class MyClass : IAsyncDisposable
+                            {
+                                [Test]
+                                public void MyTest()
+                                {
+                                }
+                                
+                                public ValueTask DisposeAsync()
+                                {
+                                    return ValueTask.CompletedTask;
                                 }
                             }
                             """;

@@ -12,13 +12,13 @@ namespace TUnit.TestProject;
 
 public class Base1
 {
-    [BeforeAllTestsInClass]
+    [Before(Class)]
     public static async Task BeforeAll1()
     {
         await Task.CompletedTask;
     }
     
-    [BeforeEachTest]
+    [Before(EachTest)]
     public async Task BeforeEach1()
     {
         await Task.CompletedTask;
@@ -27,13 +27,13 @@ public class Base1
 
 public class Base2 : Base1
 {
-    [BeforeAllTestsInClass]
+    [Before(Class)]
     public static async Task BeforeAll2()
     {
         await Task.CompletedTask;
     }
     
-    [BeforeEachTest]
+    [Before(EachTest)]
     public async Task BeforeEach2()
     {
         await Task.CompletedTask;
@@ -42,13 +42,13 @@ public class Base2 : Base1
 
 public class Base3 : Base2
 {
-    [BeforeAllTestsInClass]
+    [Before(Class)]
     public static async Task BeforeAll3()
     {
         await Task.CompletedTask;
     }
     
-    [BeforeEachTest]
+    [Before(EachTest)]
     public async Task BeforeEach3()
     {
         await Task.CompletedTask;
@@ -64,7 +64,7 @@ public class SetupTests : Base3
     private static int _beforeAllTestsInClassExecutionCount = 0;
     private static int _afterAllTestsInClassExecutionCount = 0;
 
-    [BeforeAllTestsInClass]
+    [Before(Class)]
     public static async Task SetUpLocalWebServer()
     {
         try
@@ -87,13 +87,13 @@ public class SetupTests : Base3
         {
             Console.WriteLine(e);
             throw new Exception($$"""
-                                  BeforeAllTestsInClass Count: {{_beforeAllTestsInClassExecutionCount}}
-                                  AfterAllTestsInClass Count: {{_afterAllTestsInClassExecutionCount}}
+                                  Before(Class) Count: {{_beforeAllTestsInClassExecutionCount}}
+                                  After(Class) Count: {{_afterAllTestsInClassExecutionCount}}
                                   """, e);
         }
     }
 
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task StopServer()
     {
         Interlocked.Increment(ref _afterAllTestsInClassExecutionCount);
@@ -102,13 +102,13 @@ public class SetupTests : Base3
         await _app.DisposeAsync();
     }
     
-    [BeforeEachTest]
+    [Before(EachTest)]
     public async Task Setup()
     {
         _response = await new HttpClient().GetAsync($"{_serverAddress}/ping/?testName={TestContext.Current?.TestDetails.TestName}");
     }
 
-    [AfterEachTest]
+    [After(EachTest)]
     public void Dispose()
     {
         _response?.Dispose();

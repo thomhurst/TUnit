@@ -1,6 +1,6 @@
 ﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 
-namespace TUnit.Engine.Properties;
+namespace TUnit.Engine.Capabilities;
 
 internal class TrxReportCapability : ITrxReportCapability
 {

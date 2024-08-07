@@ -1,9 +1,10 @@
 using TUnit.Engine.SourceGenerator.CodeGenerators;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
-internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
+internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -12,7 +13,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
             "GlobalBeforeTests.cs"),
         generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(7));
+            Assert.That(generatedFiles.Length, Is.EqualTo(14));
 
             Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
@@ -23,7 +24,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[1].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 	            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 	            { 
@@ -32,7 +33,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 	            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 	            { 
@@ -41,7 +42,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[3].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 		            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 		            { 
@@ -50,7 +51,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[7].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 		            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 		            { 
@@ -59,7 +60,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[5].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[8].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 		            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 		            { 
@@ -68,7 +69,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
-            Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
+            Assert.That(generatedFiles[9].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
 		            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 		            { 
