@@ -49,11 +49,11 @@
         </Compile>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
+    <ItemGroup Condition="'$(Target)' != 'Pack'">
         <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ItemGroup Condition="'$(Target)' == 'Pack'">
         <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     </ItemGroup>
 
