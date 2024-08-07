@@ -1,14 +1,14 @@
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
-using Microsoft.CodeAnalysis.Testing.Verifiers;
+using Microsoft.CodeAnalysis.Testing;
 
 namespace TUnit.Assertions.Analyzers.Tests.Verifiers;
 
 public static partial class CSharpCodeRefactoringVerifier<TCodeRefactoring>
     where TCodeRefactoring : CodeRefactoringProvider, new()
 {
-    public class Test : CSharpCodeRefactoringTest<TCodeRefactoring, NUnitVerifier>
+    public class Test : CSharpCodeRefactoringTest<TCodeRefactoring, DefaultVerifier>
     {
         public Test()
         {

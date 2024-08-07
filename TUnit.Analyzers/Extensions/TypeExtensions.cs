@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;
 
@@ -38,33 +37,5 @@ public static class TypeExtensions
             .GetMembers()
             .OfType<IMethodSymbol>()
             .Any(x => x.IsTestMethod());
-    }
-
-    private static readonly string[] DataDrivenAttributes =
-    [
-        WellKnown.AttributeFullyQualifiedClasses.ClassDataSource,
-        WellKnown.AttributeFullyQualifiedClasses.MethodDataSource,
-        WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource,
-        WellKnown.AttributeFullyQualifiedClasses.Arguments
-    ];
-    
-    public static bool HasDataDrivenAttributes(this INamedTypeSymbol symbol)
-    {
-        var attributes = symbol.GetAttributes();
-
-        var hasDataDrivenAttributes = attributes.Select(x =>
-                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            )
-            .Intersect(DataDrivenAttributes)
-            .Any();
-
-        return hasDataDrivenAttributes
-               || symbol.InstanceConstructors
-                   .FirstOrDefault()?
-                   .Parameters
-                   .Any(p => p.GetAttributes().Any(a =>
-                       a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
-                       WellKnown.AttributeFullyQualifiedClasses.Matrix))
-               == true;
     }
 }

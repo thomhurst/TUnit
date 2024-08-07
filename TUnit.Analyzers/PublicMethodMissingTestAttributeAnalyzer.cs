@@ -6,12 +6,12 @@ using TUnit.Analyzers.Extensions;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
+public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create
         (
-            Rules.NoDataSourceProvided
+            Rules.PublicMethodMissingTestAttribute
         );
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -26,27 +26,21 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (namedTypeSymbol.IsAbstract)
-        {
-            return;
-        }
-
-        if (namedTypeSymbol.InstanceConstructors.Length == 0 ||
-            namedTypeSymbol.InstanceConstructors.All(x => x.Parameters.Length == 0))
-        {
-            return;
-        }
-
-        if (!namedTypeSymbol.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Any(x => x.IsTestMethod()))
+        var methods = namedTypeSymbol.GetMembers().OfType<IMethodSymbol>().ToArray();
+        
+        if (!methods.Any(x => x.IsTestMethod()))
         {
             return;
         }
         
-        if (!namedTypeSymbol.HasDataDrivenAttributes())
+        foreach (var method in methods
+                     .Where(x => x.MethodKind == MethodKind.Ordinary)
+                     .Where(x => !x.IsStatic)
+                     .Where(x => x.DeclaredAccessibility == Accessibility.Public)
+                     .Where(x => !x.IsTestMethod())
+                     .Where(x => !x.IsHookMethod()))
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.NoDataSourceProvided, namedTypeSymbol.Locations.FirstOrDefault()));
+            context.ReportDiagnostic(Diagnostic.Create(Rules.PublicMethodMissingTestAttribute, method.Locations.FirstOrDefault()));
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
 public class RetryAttribute : TUnitAttribute

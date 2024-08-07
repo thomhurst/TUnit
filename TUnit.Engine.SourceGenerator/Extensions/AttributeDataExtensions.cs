@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Extensions;
 

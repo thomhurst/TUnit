@@ -1,6 +1,5 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine;
 

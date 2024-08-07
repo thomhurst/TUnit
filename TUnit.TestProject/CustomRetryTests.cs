@@ -1,8 +1,6 @@
-﻿using System.Net;
-using TUnit.Assertions;
+﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
-using HttpRequestException = System.Net.Http.HttpRequestException;
 
 namespace TUnit.TestProject;
 

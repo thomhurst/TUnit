@@ -1,5 +1,4 @@
 ﻿using TUnit.Core;
-using TUnit.Core.Models;
 
 namespace TUnit.TestProject.AfterTests;
 

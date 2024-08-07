@@ -411,7 +411,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are conflicting test attributes..
+        ///   Looks up a localized string similar to Method should have a `Test` attribute or be made `private`..
         /// </summary>
         internal static string TUnit0014Description {
             get {
@@ -420,7 +420,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are conflicting test attributes.
+        ///   Looks up a localized string similar to Method should have a `Test` attribute or be made `private`.
         /// </summary>
         internal static string TUnit0014MessageFormat {
             get {
@@ -429,7 +429,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are conflicting test attributes.
+        ///   Looks up a localized string similar to Method should have a `Test` attribute or be made `private`.
         /// </summary>
         internal static string TUnit0014Title {
             get {
