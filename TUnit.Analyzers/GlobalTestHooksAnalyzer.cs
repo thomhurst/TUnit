@@ -27,12 +27,8 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
 
-        var onlyOnceAttributes = attributes.Where(x =>
-            x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                is WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute
-                or WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
-            && x.GetHookType() == HookType.EachTestGlobally
-            )
+        var onlyOnceAttributes = attributes
+            .Where(x => x.IsHook() && x.GetHookType() == HookType.EachTestGlobally)
             .ToList();
 
         if (!onlyOnceAttributes.Any())

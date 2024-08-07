@@ -13,7 +13,10 @@ public class NotInParallelAttribute : SingleTUnitAttribute
     
     public NotInParallelAttribute(string constraintKey) : this([constraintKey])
     {
-        ArgumentException.ThrowIfNullOrEmpty(constraintKey);
+        if (constraintKey is null or { Length: < 1 })
+        {
+            throw new ArgumentException("No constraint key was provided");
+        }
     }
     
     public NotInParallelAttribute(string[] constraintKeys)

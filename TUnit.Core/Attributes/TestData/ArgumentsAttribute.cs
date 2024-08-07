@@ -7,7 +7,10 @@ public sealed class ArgumentsAttribute : TUnitAttribute
 
     public ArgumentsAttribute()
     {
-        ArgumentNullException.ThrowIfNull(Values);
+        if (Values == null)
+        {
+            throw new ArgumentNullException(nameof(Values), "No arguments were provided");
+        }
     }
 
     public ArgumentsAttribute(params object?[]? values)
