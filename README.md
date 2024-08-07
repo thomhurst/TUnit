@@ -62,16 +62,16 @@ For Rider, it is not yet supported. I believe they are working on it so we just 
 or with more complex test orchestration needs
 
 ```csharp
-    [BeforeAllTestsInClass]
+    [Before(Class)]
     public static async Task ClearDatabase(ClassHookContext context) { ... }
 
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AssertDatabaseIsAsExpected(ClassHookContext context) { ... }
 
-    [BeforeEachTest]
+    [Before(EachTest)]
     public async Task CreatePlaywrightBrowser(TestContext context) { ... }
 
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task DisposePlaywrightBrowser(TestContext context) { ... }
 
     [Retry(3)]

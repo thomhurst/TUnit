@@ -1,5 +1,4 @@
 ﻿using TUnit.Engine.SourceGenerator.CodeGenerators;
-using TUnit.Engine.SourceGenerator.Tests.Options;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 

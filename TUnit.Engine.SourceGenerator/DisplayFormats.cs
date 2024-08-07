@@ -51,4 +51,6 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType
     );
+    
+    public static readonly SymbolDisplayFormat NameOnly = new();
 }

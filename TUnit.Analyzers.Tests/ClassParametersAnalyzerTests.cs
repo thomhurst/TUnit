@@ -46,4 +46,26 @@ public class ClassParametersAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text, expected);
     }
+    
+    [Test]
+    public async Task Abstract_Class_Missing_Parameter__NoError()
+    {
+        const string text = """
+                            using TUnit.Core;
+
+                            public abstract class MyClass
+                            {
+                                public MyClass(int value)
+                                {
+                                }
+                            
+                                [Test]
+                                public void MyTest()
+                                {
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
 }

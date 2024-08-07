@@ -1,1 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <Content Include="TUnit.Core.props">
+            <Pack>true</Pack>
+            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        </Content>
+        
+        <Content Include="TUnit.Core.targets">
+            <Pack>true</Pack>
+            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        </Content>
+    </ItemGroup>
+</Project>

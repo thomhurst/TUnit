@@ -6,13 +6,13 @@ public class DisposablePropertyTests
 {
     public HttpClient? HttpClient { get; private set; }
 
-    [BeforeEachTest]
+    [Before(EachTest)]
     public void Setup()
     {
         HttpClient = new HttpClient();
     }
 
-    [AfterEachTest]
+    [After(EachTest)]
     public void Blah()
     {
         HttpClient?.Dispose();

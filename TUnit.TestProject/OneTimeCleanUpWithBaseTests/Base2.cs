@@ -4,13 +4,13 @@ namespace TUnit.TestProject.OneTimeCleanUpWithBaseTests;
 
 public class Base2
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static Task Base2AfterAllTestsInClass()
     {
         return Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public Task Base2CleanUp()
     {
         return Task.CompletedTask;

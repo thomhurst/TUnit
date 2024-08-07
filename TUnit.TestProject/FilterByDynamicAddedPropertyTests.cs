@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using TUnit.Core;
+﻿using TUnit.Core;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;

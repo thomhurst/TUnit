@@ -4,13 +4,13 @@ namespace TUnit.TestProject.OneTimeCleanUpWithBaseTests;
 
 public class NonBase : Base1
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static Task NonBaseAfterAllTestsInClass()
     {
         return Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public Task NonBaseCleanUp()
     {
         return Task.CompletedTask;

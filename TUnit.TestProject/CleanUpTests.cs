@@ -4,13 +4,13 @@ namespace TUnit.TestProject;
 
 public class CleanUpBase1
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAll1()
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task AfterEach1()
     {
         await Task.CompletedTask;
@@ -19,13 +19,13 @@ public class CleanUpBase1
 
 public class CleanUpBase2 : CleanUpBase1
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAll2()
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task AfterEach2()
     {
         await Task.CompletedTask;
@@ -34,13 +34,13 @@ public class CleanUpBase2 : CleanUpBase1
 
 public class CleanUpBase3 : CleanUpBase2
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AfterAll3()
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task AfterEach3()
     {
         await Task.CompletedTask;
@@ -49,13 +49,13 @@ public class CleanUpBase3 : CleanUpBase2
 
 public class CleanUpTests : CleanUpBase3, IDisposable
 {
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task FinalClean()
     {
         await Task.CompletedTask;
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task CleanUp()
     {
         await Task.CompletedTask;

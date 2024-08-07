@@ -4,19 +4,19 @@ namespace TUnit.TestProject;
 
 public static class GlobalSetUpCleanUp
 {
-    [AssemblySetUp]
+    [Before(Assembly)]
     public static void BlahSetUp()
     {
         // Dummy method
     }
     
-    [AssemblySetUp]
+    [Before(Assembly)]
     public static void BlahSetUp2()
     {
         // Dummy method
     }
 
-    [AssemblyCleanUp]
+    [After(Assembly)]
     public static Task BlahCleanUp()
     {
         return Task.CompletedTask;

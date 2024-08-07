@@ -1,9 +1,11 @@
 ﻿using Microsoft.Testing.Platform.Builder;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Helpers;
+using Microsoft.Testing.Platform.Services;
+using TUnit.Engine.Capabilities;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
-using TUnit.Engine.Properties;
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine.Extensions;
 
@@ -14,7 +16,7 @@ internal static class TestApplicationBuilderExtensions
         TUnitExtension extension = new();
         
         testApplicationBuilder.RegisterTestFramework(
-            _ => new TestFrameworkCapabilities(new TrxReportCapability()),
+            serviceProvider  => new TestFrameworkCapabilities(new TrxReportCapability(), new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>())),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
         
         testApplicationBuilder.AddTreeNodeFilterService(extension);

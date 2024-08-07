@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using TUnit.Analyzers.Enums;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
@@ -55,14 +56,14 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
         
-        var expectedTearDownMethodAttribute = field.IsStatic
-            ? WellKnown.AttributeFullyQualifiedClasses.AfterAllTestsInClassAttribute
-            : WellKnown.AttributeFullyQualifiedClasses.AfterEachTest;
+        var expectedHookType = field.IsStatic
+            ? HookType.Class
+            : HookType.EachTest;
             
         var methodsRequiringDisposeCall = field.ContainingType.GetMembers()
             .Where(x => x.IsStatic == field.IsStatic)
             .OfType<IMethodSymbol>()
-            .Where(x => IsExpectedMethod(x, expectedTearDownMethodAttribute));
+            .Where(x => IsExpectedMethod(x, expectedHookType));
 
         var syntaxesWithinMethods = methodsRequiringDisposeCall
             .SelectMany(x => x.DeclaringSyntaxReferences)
@@ -117,14 +118,14 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
         
-        var expectedTearDownMethodAttribute = property.IsStatic
-                ? WellKnown.AttributeFullyQualifiedClasses.AfterAllTestsInClassAttribute
-                : WellKnown.AttributeFullyQualifiedClasses.AfterEachTest;
+        var expectedHookType = property.IsStatic
+                ? HookType.Class
+                : HookType.EachTest;
             
         var methodsRequiringDisposeCall = property.ContainingType.GetMembers()
             .Where(x => x.IsStatic == property.IsStatic)
             .OfType<IMethodSymbol>()
-            .Where(x => IsExpectedMethod(x, expectedTearDownMethodAttribute));
+            .Where(x => IsExpectedMethod(x, expectedHookType));
 
         var syntaxesWithinMethods = methodsRequiringDisposeCall
             .SelectMany(x => x.DeclaringSyntaxReferences)
@@ -150,7 +151,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         return classType.GetMembers().OfType<IMethodSymbol>().Any(x => x.IsTestMethod());
     }
 
-    private static bool IsExpectedMethod(IMethodSymbol method, string expectedTearDownMethodAttribute)
+    private static bool IsExpectedMethod(IMethodSymbol method, HookType expectedHookType)
     {
         if (method.Name == "DisposeAsync" && IsAsyncDisposable(method.ContainingType))
         {
@@ -162,7 +163,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
         
-        return method.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == expectedTearDownMethodAttribute);
+        return method.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.AfterAttribute && a.GetHookType() == expectedHookType);
     }
 
     private static bool IsDisposable(ITypeSymbol type)

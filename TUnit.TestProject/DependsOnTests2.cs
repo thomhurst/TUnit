@@ -24,7 +24,7 @@ public class DependsOnTests2
         await Task.CompletedTask;
     }
 
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task AssertStartTimes()
     {
         await Assert.That(_test2Start).Is.GreaterThanOrEqualTo(_test1Start.AddSeconds(5));

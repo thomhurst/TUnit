@@ -10,6 +10,15 @@ public static class MethodExtensions
         return methodSymbol.GetAttributes().Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.Test);
     }
     
+    public static bool IsHookMethod(this IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.GetAttributes().Any(x =>
+        {
+            var attributeType = x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+            return attributeType is WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute or WellKnown.AttributeFullyQualifiedClasses.AfterAttribute;
+        });
+    }
+    
     public static bool HasTimeoutAttribute(this IMethodSymbol methodSymbol, out AttributeData? timeoutAttribute)
     {
         timeoutAttribute = GetTimeoutAttribute(methodSymbol);

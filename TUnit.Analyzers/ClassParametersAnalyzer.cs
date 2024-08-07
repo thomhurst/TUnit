@@ -26,6 +26,11 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        if (namedTypeSymbol.IsAbstract)
+        {
+            return;
+        }
+
         if (namedTypeSymbol.InstanceConstructors.Length == 0 ||
             namedTypeSymbol.InstanceConstructors.All(x => x.Parameters.Length == 0))
         {

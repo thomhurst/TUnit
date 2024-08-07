@@ -30,6 +30,8 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             global using global::System.Net.Http;
             global using global::System.Threading;
             global using global::System.Threading.Tasks;
+            global using global::TUnit.Core;
+            global using static global::TUnit.Core.HookType;
             """,
             ..await Task.WhenAll(runTestOptions.AdditionalFiles.Select(x => File.ReadAllTextAsync(x)))
         ];

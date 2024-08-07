@@ -10,6 +10,11 @@
     </PropertyGroup>
     
     <ItemGroup>
+        <Using Include="TUnit.Core.HookType" Static="True" />
+        <Using Include="TUnit.Core" />
+    </ItemGroup>
+    
+    <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.7" />
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="1.3.2" />

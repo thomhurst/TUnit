@@ -45,8 +45,8 @@ internal static class Rules
     public static readonly DiagnosticDescriptor TooManyArgumentsInTestMethod =
         CreateDescriptor("TUnit0013", UsageCategory, DiagnosticSeverity.Error);
     
-    public static readonly DiagnosticDescriptor ConflictingTestAttributes =
-        CreateDescriptor("TUnit0014", UsageCategory, DiagnosticSeverity.Error);
+    public static readonly DiagnosticDescriptor PublicMethodMissingTestAttribute =
+        CreateDescriptor("TUnit0014", UsageCategory, DiagnosticSeverity.Warning);
     
     public static readonly DiagnosticDescriptor MissingTimeoutCancellationTokenAttributes =
         CreateDescriptor("TUnit0015", UsageCategory, DiagnosticSeverity.Error);
