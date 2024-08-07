@@ -7,12 +7,6 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
-    
-    <Target Name="Pack">
-        <PropertyGroup>
-            <IsPackTarget>true</IsPackTarget>
-        </PropertyGroup>
-    </Target>
 
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
