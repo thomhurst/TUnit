@@ -6,13 +6,13 @@ public class Tests
 {
     private static Stopwatch _stopwatch;
 
-    [BeforeAllTestsInClass]
+    [Before(Class)]
     public static void Setup()
     {
         _stopwatch = Stopwatch.StartNew();
     }
     
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static void Teardown()
     {
         Console.WriteLine(_stopwatch.Elapsed);
