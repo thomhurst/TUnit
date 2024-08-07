@@ -164,7 +164,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
     private static bool IsDisposable(ITypeSymbol type)
     {
         return type.AllInterfaces
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == "global::System.IDisposable");
+            .Any(x => x.SpecialType == SpecialType.System_IDisposable);
     }
     
     private static bool IsAsyncDisposable(ITypeSymbol type)
