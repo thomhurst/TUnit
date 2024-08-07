@@ -35,7 +35,9 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
         
         foreach (var method in methods
                      .Where(x => x.MethodKind == MethodKind.Ordinary)
+                     .Where(x => !x.IsAbstract)
                      .Where(x => !x.IsStatic)
+                     .Where(x => !x.IsOverride)
                      .Where(x => x.DeclaredAccessibility == Accessibility.Public)
                      .Where(x => !x.IsTestMethod())
                      .Where(x => !x.IsHookMethod())
