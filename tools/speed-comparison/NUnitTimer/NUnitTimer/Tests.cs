@@ -5,12 +5,12 @@ namespace NUnitTimer;
 [Parallelizable(ParallelScope.All)]
 public class Tests
 {
-    private Stopwatch _stopwatch;
+    private readonly Stopwatch _stopwatch = new();
 
     [OneTimeSetUp]
     public void Setup()
     {
-        _stopwatch = Stopwatch.StartNew();
+        _stopwatch.Start();
     }
     
     [OneTimeTearDown]
