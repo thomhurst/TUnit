@@ -33,7 +33,6 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         [
                             new KeyValue("Version", version.SemVer!),
                             new KeyValue("PackageVersion", packageVersion!),
-                            new KeyValue("IsPackTarget", "true")
                         ],
                         IncludeSource = true,
                         Configuration = Configuration.Release,
