@@ -107,7 +107,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("}");
             sourceBuilder.WriteLine("}");
 
-            context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
+            context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
         }
     }
 }
