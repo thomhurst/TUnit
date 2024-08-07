@@ -49,11 +49,12 @@
         </Compile>
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </ProjectReference>
+    <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
+        <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     </ItemGroup>
 
 </Project>
