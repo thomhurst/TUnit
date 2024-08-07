@@ -28,7 +28,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var field = (IFieldSymbol) context.SemanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables[0])!;
 
-        if (!IsTestClass(field.ContainingType))
+        if (!field.ContainingType.IsTestClass())
         {
             return;
         }
@@ -90,7 +90,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var property = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration)!;
 
-        if (!IsTestClass(property.ContainingType))
+        if (!property.ContainingType.IsTestClass())
         {
             return;
         }
@@ -144,11 +144,6 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.Dispose_Member_In_Cleanup, context.Node.GetLocation()));
         }
-    }
-
-    private bool IsTestClass(INamedTypeSymbol classType)
-    {
-        return classType.GetMembers().OfType<IMethodSymbol>().Any(x => x.IsTestMethod());
     }
 
     private static bool IsExpectedMethod(IMethodSymbol method, HookType expectedHookType)

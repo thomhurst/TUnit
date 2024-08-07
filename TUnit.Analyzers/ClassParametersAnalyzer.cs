@@ -37,9 +37,7 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!namedTypeSymbol.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Any(x => x.IsTestMethod()))
+        if (!namedTypeSymbol.IsTestClass())
         {
             return;
         }
