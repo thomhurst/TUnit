@@ -35,7 +35,6 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                             new KeyValue("PackageVersion", packageVersion!),
                             new KeyValue("IsPackTarget", "true")
                         ],
-                        NoBuild = true,
                         IncludeSource = true,
                         Configuration = Configuration.Release,
                     }, cancellationToken), cancellationToken: cancellationToken).ProcessOneAtATime();
