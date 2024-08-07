@@ -16,7 +16,7 @@ public static class ParameterExtensions
         if (parameterSymbols.Last().Type.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
             WellKnown.AttributeFullyQualifiedClasses.CancellationToken)
         {
-            return parameterSymbols.SkipLast(1);
+            return parameterSymbols.Take(parameterSymbols.Length - 1);
         }
 
         return parameterSymbols;

@@ -10,7 +10,7 @@ public static class TypeExtensions
         
         var index = name.IndexOf('`');
         
-        return index == -1 ? name : name[..index];
+        return index == -1 ? name : name.Substring(0, index);
     }
     
     public static IEnumerable<INamedTypeSymbol> GetSelfAndBaseTypes(this INamedTypeSymbol namedTypeSymbol)
