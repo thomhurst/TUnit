@@ -11,8 +11,10 @@ E.g. pinging a service to wake it up in preparation for the tests.
 
 For this, we can declare a method with a `[BeforeEachTest]` or an `[BeforeAllTestsInClass]` attribute.
 
-- `[BeforeEachTest]` methods should NOT be static, and they will be executed repeatedly before each test in their class starts.
-- `[BeforeAllTestsInClass]` methods SHOULD be static, and they will be executed only once, before any test in their class starts.
+- `[Before(EachTest)]` methods should NOT be static, and they will be executed repeatedly before each test in their class starts.
+- `[Before(Class)]` methods SHOULD be static, and they will be executed only once, before any test in their class starts.
+- `[Before(Assembly)]` methods SHOULD be static, and they will be executed only once, before any test in their assembly starts.
+- `[Before(EachTestGlobally)]` methods SHOULD be static, and they will be executed repeatedly before each test in their assembly starts.
 
 Methods will be executed bottom-up, so the base class set ups will execute first and then the inheriting class.
 

@@ -8,9 +8,11 @@ TUnit supports having your test class implement `IDisposable` or `IAsyncDisposab
 
 You can also declare a method with a `[AfterEachTest]` or an `[AfterAllTestsInClass]` attribute.
 
-- `[AfterEachTest]` methods should NOT be static, and they will be executed repeatedly after each test in their class ends.
-- `[AfterAllTestsInClass]` methods SHOULD be static, and they will be executed only once, after all tests in their class end.
-
+- `[After(EachTest)]` methods should NOT be static, and they will be executed repeatedly after each test in their class ends.
+- `[After(Class)]` methods SHOULD be static, and they will be executed only once, after all tests in their class end.
+- `[After(Assembly)]` methods SHOULD be static, and they will be executed only once, after all tests in their assembly end.
+- `[After(EachTestGlobally)]` methods SHOULD be static, and they will be executed repeatedly after each test in their assembly ends.
+- 
 Methods will be executed top-down, so the current class clean ups will execute first, then the base classes.
 
 ```csharp
