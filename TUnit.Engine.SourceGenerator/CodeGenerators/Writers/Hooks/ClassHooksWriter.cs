@@ -8,7 +8,8 @@ internal static class ClassHooksWriter
 {
     public static void Execute(SourceProductionContext context, HooksDataModel model, HookType hookType)
     {
-        var className = $"ClassHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
+        var className = $"ClassHooks_{model.MinimalTypeName}";
+        var fileName = $"{className}_{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 
@@ -25,7 +26,7 @@ internal static class ClassHooksWriter
         sourceBuilder.WriteLine("namespace TUnit.Engine;");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-        sourceBuilder.WriteLine($"file class {className}");
+        sourceBuilder.WriteLine($"file partial class {className}");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine("[ModuleInitializer]");
         sourceBuilder.WriteLine("public static void Initialise()");
@@ -57,7 +58,7 @@ internal static class ClassHooksWriter
         sourceBuilder.WriteLine("}");
         sourceBuilder.WriteLine("}");
 
-        context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
+        context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
     }
 
     private static string GenerateContextObject(HooksDataModel model)

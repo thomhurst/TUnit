@@ -13,7 +13,8 @@ internal static class AssemblyHooksWriter
             return;
         }
         
-        var className = $"AssemblyHooks_{model.MinimalTypeName}_{Guid.NewGuid():N}";
+        var className = $"AssemblyHooks_{model.MinimalTypeName}";
+        var fileName = $"{className}_{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 
@@ -30,7 +31,7 @@ internal static class AssemblyHooksWriter
         sourceBuilder.WriteLine("namespace TUnit.Engine;");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-        sourceBuilder.WriteLine($"file class {className}");
+        sourceBuilder.WriteLine($"file partial class {className}");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine("[ModuleInitializer]");
         sourceBuilder.WriteLine("public static void Initialise()");
@@ -62,7 +63,7 @@ internal static class AssemblyHooksWriter
         sourceBuilder.WriteLine("}");
         sourceBuilder.WriteLine("}");
 
-        context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
+        context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
     }
     
     private static string GenerateContextObject(HooksDataModel model)
