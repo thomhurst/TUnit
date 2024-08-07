@@ -20,7 +20,8 @@ internal class BannerCapability : IBannerMessageOwnerCapability
     {
         return Task.FromResult<string?>(
             $"""
-                                                                                                       
+            
+            
             ████████╗██╗   ██╗███╗   ██╗██╗████████╗
             ╚══██╔══╝██║   ██║████╗  ██║██║╚══██╔══╝
                ██║   ██║   ██║██╔██╗ ██║██║   ██║   
