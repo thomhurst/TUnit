@@ -5,18 +5,18 @@ namespace MSTestTimer;
 [TestClass]
 public class Tests
 {
-    private static Stopwatch _stopwatch;
+    private static readonly Stopwatch Stopwatch = new();
 
     [ClassInitialize]
     public static void Setup(TestContext _)
     {
-        _stopwatch = Stopwatch.StartNew();
+        Stopwatch.Start();
     }
 
     [ClassCleanup]
     public static void Cleanup()
     {
-        Console.WriteLine(_stopwatch.Elapsed);
+        Console.WriteLine(Stopwatch.Elapsed);
     }
     
     [TestMethod]

@@ -4,18 +4,18 @@ namespace TUnitTimer;
 
 public class Tests
 {
-    private static Stopwatch _stopwatch;
+    private static readonly Stopwatch Stopwatch = new();
 
     [Before(Class)]
     public static void Setup()
     {
-        _stopwatch = Stopwatch.StartNew();
+        Stopwatch.Start();
     }
     
     [After(Class)]
     public static void Teardown()
     {
-        Console.WriteLine(_stopwatch.Elapsed);
+        Console.WriteLine(Stopwatch.Elapsed);
     }
 
     [Test, Repeat(1_000)]
