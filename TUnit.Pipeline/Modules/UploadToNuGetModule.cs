@@ -14,6 +14,7 @@ namespace TUnit.Pipeline.Modules;
 [RunOnlyOnBranch("main")]
 [RunOnLinuxOnly]
 [DependsOn<PackTUnitFilesModule>]
+[DependsOn<TestNugetPackageModule>]
 public class UploadToNuGetModule : Module<CommandResult[]>
 {
     private readonly IOptions<NuGetOptions> _options;

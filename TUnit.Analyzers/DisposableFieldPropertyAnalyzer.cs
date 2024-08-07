@@ -28,7 +28,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var field = (IFieldSymbol) context.SemanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables[0])!;
 
-        if (!IsTestClass(field.ContainingType))
+        if (!field.ContainingType.IsTestClass())
         {
             return;
         }
@@ -90,7 +90,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var property = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration)!;
 
-        if (!IsTestClass(property.ContainingType))
+        if (!property.ContainingType.IsTestClass())
         {
             return;
         }
@@ -146,11 +146,6 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private bool IsTestClass(INamedTypeSymbol classType)
-    {
-        return classType.GetMembers().OfType<IMethodSymbol>().Any(x => x.IsTestMethod());
-    }
-
     private static bool IsExpectedMethod(IMethodSymbol method, HookType expectedHookType)
     {
         if (method.Name == "DisposeAsync" && IsAsyncDisposable(method.ContainingType))
@@ -169,7 +164,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
     private static bool IsDisposable(ITypeSymbol type)
     {
         return type.AllInterfaces
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == "global::System.IDisposable");
+            .Any(x => x.SpecialType == SpecialType.System_IDisposable);
     }
     
     private static bool IsAsyncDisposable(ITypeSymbol type)
