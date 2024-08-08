@@ -38,6 +38,9 @@ public static class TestHookOrchestrator
     
     public static async Task ExecuteSetups(object classInstance, TestContext testContext)
     {
+        // Run Global Hooks First
+        await GlobalStaticTestHookOrchestrator.ExecuteSetups(testContext);
+
         var testClassType = classInstance.GetType();
         
         // Reverse so base types are first - We'll run those ones first
@@ -75,6 +78,9 @@ public static class TestHookOrchestrator
                 await Timings.Record("Test Hook Clean Up: " + cleanUp.Name, testContext, () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(classInstance, testContext), cleanUpExceptions));
             }
         }
+        
+        // Run Global Hooks Last
+        await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(testContext, cleanUpExceptions);
     }
 
     private static IEnumerable<Type> GetTypesIncludingBase(Type testClassType)

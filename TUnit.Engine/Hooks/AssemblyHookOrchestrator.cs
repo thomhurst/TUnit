@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using TUnit.Core;
-using TUnit.Core.Models;
 using TUnit.Engine.Data;
 using TUnit.Engine.Helpers;
 
@@ -47,13 +46,13 @@ public static class AssemblyHookOrchestrator
         assemblyHookContext.TestClasses.Add(classHookContext);
     }
     
-    public static AssemblyHookContext GetAssemblyHookContext(Type type)
+    public static AssemblyHookContext GetAssemblyHookContext(Assembly assembly)
     {
-        lock (type)
+        lock (assembly)
         {
-            return AssemblyHookContexts.GetOrAdd(type.Assembly, _ => new AssemblyHookContext
+            return AssemblyHookContexts.GetOrAdd(assembly, _ => new AssemblyHookContext
             {
-                Assembly = type.Assembly
+                Assembly = assembly
             });
         }
     }
@@ -70,6 +69,11 @@ public static class AssemblyHookOrchestrator
 
     internal static async Task ExecuteSetups(Assembly assembly, TestContext testContext)
     {
+        var context = GetAssemblyHookContext(assembly);
+        
+        // Run global ones first
+        await GlobalStaticTestHookOrchestrator.ExecuteSetups(context);
+            
         foreach (var setUp in SetUps.GetOrAdd(assembly, _ => []))
         {
             // As these are lazy we should always get the same Task
@@ -89,5 +93,10 @@ public static class AssemblyHookOrchestrator
         {
             await Timings.Record("Assembly Hook Clean Up: " + cleanUp.Name, testContext, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
         }
+        
+        var context = GetAssemblyHookContext(assembly);
+        
+        // Run global ones last
+        await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(context, cleanUpExceptions);
     }
 }

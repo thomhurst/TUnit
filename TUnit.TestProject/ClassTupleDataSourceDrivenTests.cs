@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 [MethodDataSource(nameof(TupleMethod), UnfoldTuple = true)]
 public class ClassTupleDataSourceDrivenTests

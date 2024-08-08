@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace TUnit.Core.Models;
+namespace TUnit.Core;
 
 public class AssemblyHookContext
 {

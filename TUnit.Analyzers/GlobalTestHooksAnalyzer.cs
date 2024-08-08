@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Enums;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
@@ -11,7 +10,15 @@ namespace TUnit.Analyzers;
 public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic);
+    ImmutableArray.Create
+    (
+        Rules.MethodMustNotBeAbstract,
+        Rules.MethodMustBeStatic,
+        Rules.MethodMustBePublic,
+        Rules.SingleTestContextParameterRequired,
+        Rules.SingleClassHookContextParameterRequired,
+        Rules.SingleAssemblyHookContextParameterRequired
+    );
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -27,11 +34,11 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
 
-        var onlyOnceAttributes = attributes
-            .Where(x => x.IsHook() && x.GetHookType() == HookType.EachTestGlobally)
+        var globalHooks = attributes
+            .Where(x => x.IsGlobalHook())
             .ToList();
 
-        if (!onlyOnceAttributes.Any())
+        if (!globalHooks.Any())
         {
             return;
         }
@@ -56,5 +63,32 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
+        
+        foreach (var attributeData in globalHooks)
+        {
+            if (attributeData.GetHookType() == Core.HookType.EachTest
+                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
+            }
+            
+            if (attributeData.GetHookType() == Core.HookType.Class
+                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.ClassHookContext))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
+            }
+            
+            if (attributeData.GetHookType() == Core.HookType.Assembly
+                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
+            }
+        }
+    }
+
+    private static bool HasSingleParameter(IMethodSymbol methodSymbol, string parameterType)
+    {
+        return methodSymbol.Parameters.WithoutTimeoutParameter().Count() == 1
+               && methodSymbol.Parameters[0].Type.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == parameterType;
     }
 }

@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
-using TUnit.Analyzers.Enums;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
@@ -57,8 +56,8 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         var expectedHookType = field.IsStatic
-            ? HookType.Class
-            : HookType.EachTest;
+            ? Core.HookType.Class
+            : Core.HookType.EachTest;
             
         var methodsRequiringDisposeCall = field.ContainingType.GetMembers()
             .Where(x => x.IsStatic == field.IsStatic)
@@ -119,8 +118,8 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         var expectedHookType = property.IsStatic
-                ? HookType.Class
-                : HookType.EachTest;
+                ? Core.HookType.Class
+                : Core.HookType.EachTest;
             
         var methodsRequiringDisposeCall = property.ContainingType.GetMembers()
             .Where(x => x.IsStatic == property.IsStatic)
@@ -146,7 +145,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static bool IsExpectedMethod(IMethodSymbol method, HookType expectedHookType)
+    private static bool IsExpectedMethod(IMethodSymbol method, Core.HookType expectedHookType)
     {
         if (method.Name == "DisposeAsync" && IsAsyncDisposable(method.ContainingType))
         {

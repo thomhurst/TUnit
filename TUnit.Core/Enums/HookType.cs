@@ -16,9 +16,4 @@ public enum HookType
     /// Static hook to run once on assembly set up and tear down
     /// </summary>
     Assembly,
-    
-    /// <summary>
-    /// Static hook to run before every test in the assembly 
-    /// </summary>
-    EachTestGlobally
 }

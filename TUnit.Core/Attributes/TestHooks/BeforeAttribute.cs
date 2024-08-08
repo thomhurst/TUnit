@@ -3,4 +3,4 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class BeforeAttribute(HookType hookType) : TUnitAttribute;
+public sealed class BeforeAttribute(HookType hookType) : TUnitAttribute;

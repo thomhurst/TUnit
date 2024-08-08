@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using TUnit.Analyzers.Enums;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;
@@ -30,9 +29,16 @@ public static class AttributeExtensions
         return displayString == WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute ||
                displayString == WellKnown.AttributeFullyQualifiedClasses.AfterAttribute;
     }
-
-    public static HookType GetHookType(this AttributeData attributeData)
+    
+    public static bool IsGlobalHook(this AttributeData attributeData)
     {
-        return (HookType) Enum.ToObject(typeof(HookType), attributeData.ConstructorArguments[0].Value!);
+        var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+        return displayString == WellKnown.AttributeFullyQualifiedClasses.GlobalBeforeAttribute ||
+               displayString == WellKnown.AttributeFullyQualifiedClasses.GlobalAfterAttribute;
+    }
+
+    public static Core.HookType GetHookType(this AttributeData attributeData)
+    {
+        return (Core.HookType) Enum.ToObject(typeof(Core.HookType), attributeData.ConstructorArguments[0].Value!);
     }
 }

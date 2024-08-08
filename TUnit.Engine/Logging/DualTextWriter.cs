@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Text;
 using EnumerableAsyncProcessor.Extensions;
 
 namespace TUnit.Engine.Logging;

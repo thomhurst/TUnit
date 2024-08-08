@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using TUnit.Core;
 
 namespace TUnit.TestProject;
 

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Core;
-using TUnit.Core.Models;
 using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Hooks;
@@ -59,6 +58,11 @@ public static class ClassHookOrchestrator
     
     public static async Task ExecuteSetups(Type testClassType, TestContext testContext)
     {
+        var context = GetClassHookContext(testClassType);
+        
+        // Run Global Hooks First
+        await GlobalStaticTestHookOrchestrator.ExecuteSetups(context);
+            
         // Reverse so base types are first - We'll run those ones first
         var typesIncludingBase = GetTypesIncludingBase(testClassType)
             .Reverse();
@@ -105,6 +109,11 @@ public static class ClassHookOrchestrator
             {
                 await Timings.Record("Class Hook Clean Up: " + cleanUp.Name, testContext, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
             }
+            
+            var context = GetClassHookContext(testClassType);
+        
+            // Run Global Hooks Last
+            await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(context, cleanUpExceptions);
         }
     }
 

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
-using TUnit.Core;
 using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;

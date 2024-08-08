@@ -1,11 +1,9 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject.BeforeTests;
+﻿namespace TUnit.TestProject.BeforeTests;
 
 public class GlobalBase1
 {
-    [Before(EachTestGlobally)]
-    public static async Task BeforeAll1()
+    [GlobalBefore(EachTest)]
+    public static async Task BeforeAll1(TestContext context)
     {
         await Task.CompletedTask;
     }
@@ -19,8 +17,8 @@ public class GlobalBase1
 
 public class GlobalBase2 : GlobalBase1
 {
-    [Before(EachTestGlobally)]
-    public static async Task BeforeAll2()
+    [GlobalBefore(EachTest)]
+    public static async Task BeforeAll2(TestContext context)
     {
         await Task.CompletedTask;
     }
@@ -34,8 +32,8 @@ public class GlobalBase2 : GlobalBase1
 
 public class GlobalBase3 : GlobalBase2
 {
-    [Before(EachTestGlobally)]
-    public static async Task BeforeAll3()
+    [GlobalBefore(EachTest)]
+    public static async Task BeforeAll3(TestContext context)
     {
         await Task.CompletedTask;
     }
@@ -49,25 +47,25 @@ public class GlobalBase3 : GlobalBase2
 
 public class GlobalSetUpTests : GlobalBase3
 {
-    [Before(EachTestGlobally)]
-    public static async Task BeforeAllSetUp()
+    [GlobalBefore(EachTest)]
+    public static async Task BeforeAllSetUp(TestContext context)
     {
         await Task.CompletedTask;
     }
     
-    [Before(EachTestGlobally)]
-    public static async Task BeforeAllSetUp(CancellationToken cancellationToken)
+    [GlobalBefore(EachTest)]
+    public static async Task BeforeAllSetUp(TestContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
         
-    [Before(EachTestGlobally)]
+    [GlobalBefore(EachTest)]
     public static async Task BeforeAllSetUpWithContext(TestContext context)
     {
         await Task.CompletedTask;
     }
     
-    [Before(EachTestGlobally)]
+    [GlobalBefore(EachTest)]
     public static async Task BeforeAllSetUpWithContext(TestContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;

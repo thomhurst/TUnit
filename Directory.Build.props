@@ -1,61 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-
-    <PropertyGroup>
-        <TargetFramework Condition="'$(TargetFramework)' == ''">net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>TUnit.Core</_Parameter1>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>TUnit.Assertions</_Parameter1>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>TUnit.Engine</_Parameter1>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>TUnit</_Parameter1>
-        </AssemblyAttribute>
-    </ItemGroup>
-    
-    <PropertyGroup>
-        <CurrentYear>$([System.DateTime]::Now.ToString("yyyy"))</CurrentYear>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Copyright>Copyright (c) Tom Longhurst $(CurrentYear)</Copyright>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageProjectUrl>https://github.com/thomhurst/TUnit</PackageProjectUrl>
-        <Description>A .NET Testing Framework</Description>
-        <Authors>Tom Longhurst</Authors>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <PackageTags>testing;unit;integration;component;test;assert;tester;framework</PackageTags>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    </ItemGroup>
-
-    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    </PropertyGroup>
-
-    <ItemGroup
-        Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(TargetFramework)' != 'netstandard2.0'">
-        <ProjectReference
-            Include="$(MSBuildThisFileDirectory)TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj"
-            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework Condition="'$(TargetFramework)' == ''">net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>TUnit.Core</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>TUnit.Assertions</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>TUnit.Engine</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>TUnit</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <PropertyGroup>
+    <CurrentYear>$([System.DateTime]::Now.ToString("yyyy"))</CurrentYear>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) Tom Longhurst $(CurrentYear)</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/thomhurst/TUnit</PackageProjectUrl>
+    <Description>A .NET Testing Framework</Description>
+    <Authors>Tom Longhurst</Authors>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PackageTags>testing;unit;integration;component;test;assert;tester;framework</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(TargetFramework)' != 'netstandard2.0'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>

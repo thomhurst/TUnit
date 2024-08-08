@@ -1,11 +1,9 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject.AfterTests;
+﻿namespace TUnit.TestProject.AfterTests;
 
 public class GlobalBase1
 {
-    [After(EachTestGlobally)]
-    public static async Task AfterAll1()
+    [GlobalAfter(EachTest)]
+    public static async Task AfterAll1(TestContext context)
     {
         await Task.CompletedTask;
     }
@@ -19,8 +17,8 @@ public class GlobalBase1
 
 public class GlobalBase2 : GlobalBase1
 {
-    [After(EachTestGlobally)]
-    public static async Task AfterAll2()
+    [GlobalAfter(EachTest)]
+    public static async Task AfterAll2(TestContext context)
     {
         await Task.CompletedTask;
     }
@@ -34,8 +32,8 @@ public class GlobalBase2 : GlobalBase1
 
 public class GlobalBase3 : GlobalBase2
 {
-    [After(EachTestGlobally)]
-    public static async Task AfterAll3()
+    [GlobalAfter(EachTest)]
+    public static async Task AfterAll3(TestContext context)
     {
         await Task.CompletedTask;
     }
@@ -49,25 +47,25 @@ public class GlobalBase3 : GlobalBase2
 
 public class GlobalCleanUpTests : GlobalBase3
 {
-    [After(EachTestGlobally)]
-    public static async Task AfterAllCleanUp()
+    [GlobalAfter(EachTest)]
+    public static async Task AfterAllCleanUp(TestContext context)
     {
         await Task.CompletedTask;
     }
     
-    [After(EachTestGlobally)]
-    public static async Task AfterAllCleanUp(CancellationToken cancellationToken)
+    [GlobalAfter(EachTest)]
+    public static async Task AfterAllCleanUp(TestContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
         
-    [After(EachTestGlobally)]
+    [GlobalAfter(EachTest)]
     public static async Task AfterAllCleanUpWithContext(TestContext context)
     {
         await Task.CompletedTask;
     }
     
-    [After(EachTestGlobally)]
+    [GlobalAfter(EachTest)]
     public static async Task AfterAllCleanUpWithContext(TestContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;

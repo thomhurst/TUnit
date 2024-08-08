@@ -1,5 +1,4 @@
 ﻿using TUnit.Core;
-using TUnit.Core.Models;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator;
