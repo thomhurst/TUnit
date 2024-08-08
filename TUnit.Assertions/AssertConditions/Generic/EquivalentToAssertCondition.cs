@@ -70,6 +70,11 @@ public class EquivalentToAssertCondition<TActual, TAnd, TOr> : AssertCondition<T
             return comparableActual4.CompareTo(actualValue) == 0;
         }
 
+        if (actualValue is IEnumerable enumerable && ExpectedValue is IEnumerable enumerable2)
+        {
+            return enumerable.Cast<object>().SequenceEqual(enumerable2.Cast<object>());
+        }
+
         return actualValue.Equals(ExpectedValue);
     }
 }
