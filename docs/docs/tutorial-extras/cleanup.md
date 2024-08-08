@@ -27,7 +27,7 @@ public class MyTestClass
     private int _value;
     private static HttpResponseMessage? _pingResponse;
 
-    [AfterAllTestsInClass]
+    [After(Class)]
     public static async Task KillChromedrivers()
     {
         await Task.CompletedTask;
@@ -38,7 +38,7 @@ public class MyTestClass
         }
     }
     
-    [AfterEachTest]
+    [After(EachTest)]
     public async Task AfterEachTest()
     {
         await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.TestInformation.TestName}");

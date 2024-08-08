@@ -30,13 +30,13 @@ public class MyTestClass
     private int _value;
     private static HttpResponseMessage? _pingResponse;
 
-    [BeforeAllTestsInClass]
+    [Before(Class)]
     public static async Task Ping()
     {
         _pingResponse = await new HttpClient().GetAsync("https://localhost/ping");
     }
     
-    [BeforeEachTest]
+    [Before(EachTest)]
     public async Task Setup()
     {
         await Task.CompletedTask;
