@@ -6,7 +6,7 @@ sidebar_position: 2
 
 TUnit supports having your test class implement `IDisposable` or `IAsyncDisposable`. These will be called after your test has finished executing.
 
-You can also declare a method with a `[AfterEachTest]` or an `[AfterAllTestsInClass]` attribute.
+You can also declare a method with an `[After(...)]` or a `[GlobalAfter(...)]` attribute.
 
 - `[After(EachTest)]` methods should NOT be static, and they will be executed repeatedly after each test in their class ends.
 - `[After(Class)]` methods SHOULD be static, and they will be executed only once, after all tests in their class end.
