@@ -14,9 +14,11 @@ For this, we can declare a method with a `[BeforeEachTest]` or an `[BeforeAllTes
 - `[Before(EachTest)]` methods should NOT be static, and they will be executed repeatedly before each test in their class starts.
 - `[Before(Class)]` methods SHOULD be static, and they will be executed only once, before any test in their class starts.
 - `[Before(Assembly)]` methods SHOULD be static, and they will be executed only once, before any test in their assembly starts.
-- `[Before(EachTestGlobally)]` methods SHOULD be static, and they will be executed repeatedly before each test in their assembly starts.
 
-Methods will be executed bottom-up, so the base class set ups will execute first and then the inheriting class.
+
+- All `[GlobalBefore(...)]` methods SHOULD be static, and they will follow the same behaviour as above, but fire for every test/class/assembly that is being run in the test session.
+
+Methods will be executed bottom-up, so the base class set ups will execute first and then the inheriting classes.
 
 ```csharp
 using TUnit.Core;
