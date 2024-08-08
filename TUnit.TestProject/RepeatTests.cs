@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 [Repeat(3)]
 public class RepeatTests

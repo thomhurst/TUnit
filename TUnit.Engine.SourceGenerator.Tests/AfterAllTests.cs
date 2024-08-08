@@ -54,7 +54,7 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 	            """
 		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.Models.ClassHookContext)]),
+		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.ClassHookContext)]),
 		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUpWithContext(TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof(global::TUnit.TestProject.AfterTests.CleanupTests))))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
@@ -72,7 +72,7 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 	            """
 		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.Models.ClassHookContext), typeof(global::System.Threading.CancellationToken)]),
+		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken)]),
 		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUpWithContext(TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof(global::TUnit.TestProject.AfterTests.CleanupTests)), cancellationToken))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));

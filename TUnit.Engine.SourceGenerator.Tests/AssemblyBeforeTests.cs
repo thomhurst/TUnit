@@ -1,5 +1,4 @@
 using TUnit.Engine.SourceGenerator.CodeGenerators;
-using TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -55,8 +54,8 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
 	            """
 		            		AssemblyHookOrchestrator.RegisterSetUp(new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.Models.AssemblyHookContext)]),
-		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests))))
+		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext)]),
+		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly)))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -73,8 +72,8 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
 	            """
 		            		AssemblyHookOrchestrator.RegisterSetUp(new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.Models.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
-		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests)), cancellationToken))
+		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
+		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly), cancellationToken))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
         });

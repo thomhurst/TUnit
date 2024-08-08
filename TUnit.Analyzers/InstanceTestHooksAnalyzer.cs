@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Enums;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
@@ -28,7 +27,7 @@ public class InstanceTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var onlyOnceAttributes = attributes
-            .Where(x => x.IsHook() && x.GetHookType() == HookType.EachTest)
+            .Where(x => x.IsHook() && x.GetHookType() == Core.HookType.EachTest)
             .ToList();
 
         if (!onlyOnceAttributes.Any())

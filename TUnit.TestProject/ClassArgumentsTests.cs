@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 [Arguments("str", 1)]
 [Arguments("str2", 2)]

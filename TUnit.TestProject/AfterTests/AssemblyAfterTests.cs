@@ -1,7 +1,4 @@
-﻿using TUnit.Core;
-using TUnit.Core.Models;
-
-namespace TUnit.TestProject.AfterTests;
+﻿namespace TUnit.TestProject.AfterTests;
 
 public class AssemblyBase1
 {

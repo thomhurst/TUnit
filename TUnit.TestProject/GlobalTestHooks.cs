@@ -1,21 +1,40 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
-using TUnit.Core;
 
 namespace TUnit.TestProject;
 
 public class GlobalTestHooks
 {
-    [Before(EachTestGlobally)]
+    [GlobalBefore(EachTest)]
     public static void SetUp(TestContext testContext)
     {
         testContext.ObjectBag.TryAdd("SetUpCustomTestNameProperty", testContext.TestDetails.TestName);
     }
     
-    [After(EachTestGlobally)]
+    [GlobalAfter(EachTest)]
     public static void CleanUp(TestContext testContext)
     {
         testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.TestDetails.TestName);
+    }
+    
+    [GlobalBefore(Class)]
+    public static void ClassSetUp(ClassHookContext context)
+    {
+    }
+    
+    [GlobalAfter(Class)]
+    public static void ClassCleanUp(ClassHookContext context)
+    {
+    }
+    
+    [GlobalBefore(Assembly)]
+    public static void AssemblySetUp(AssemblyHookContext context)
+    {
+    }
+    
+    [GlobalAfter(Assembly)]
+    public static void AssemblyCleanUp(AssemblyHookContext context)
+    {
     }
 }
 

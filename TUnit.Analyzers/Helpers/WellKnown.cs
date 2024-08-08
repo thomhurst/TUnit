@@ -1,6 +1,5 @@
 ﻿using TUnit.Analyzers.Extensions;
 using TUnit.Core;
-using TUnit.Core.Models;
 
 namespace TUnit.Analyzers.Helpers;
 
@@ -15,6 +14,9 @@ internal static class WellKnown
         public static readonly string BeforeAttribute = GetTypeName(typeof(BeforeAttribute));
         public static readonly string AfterAttribute = GetTypeName(typeof(AfterAttribute));
 
+        public static readonly string GlobalBeforeAttribute = GetTypeName(typeof(GlobalBeforeAttribute));
+        public static readonly string GlobalAfterAttribute = GetTypeName(typeof(GlobalAfterAttribute));
+        
         public static readonly string Test = GetTypeName(typeof(TestAttribute));
         public static readonly string Arguments = GetTypeName(typeof(ArgumentsAttribute));
         public static readonly string MethodDataSource = GetTypeName(typeof(MethodDataSourceAttribute));

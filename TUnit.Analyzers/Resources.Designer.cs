@@ -1084,5 +1084,86 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0038Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `TestContext` required..
+        /// </summary>
+        internal static string TUnit0039Description {
+            get {
+                return ResourceManager.GetString("TUnit0039Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `TestContext` required.
+        /// </summary>
+        internal static string TUnit0039MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0039MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `TestContext` required.
+        /// </summary>
+        internal static string TUnit0039Title {
+            get {
+                return ResourceManager.GetString("TUnit0039Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `ClassHookContext` required..
+        /// </summary>
+        internal static string TUnit0040Description {
+            get {
+                return ResourceManager.GetString("TUnit0040Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `ClassHookContext` required.
+        /// </summary>
+        internal static string TUnit0040MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0040MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `ClassHookContext` required.
+        /// </summary>
+        internal static string TUnit0040Title {
+            get {
+                return ResourceManager.GetString("TUnit0040Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `AssemblyHookContext` required..
+        /// </summary>
+        internal static string TUnit0041Description {
+            get {
+                return ResourceManager.GetString("TUnit0041Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `AssemblyHookContext` required.
+        /// </summary>
+        internal static string TUnit0041MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0041MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single parameter of `AssemblyHookContext` required.
+        /// </summary>
+        internal static string TUnit0041Title {
+            get {
+                return ResourceManager.GetString("TUnit0041Title", resourceCulture);
+            }
+        }
     }
 }

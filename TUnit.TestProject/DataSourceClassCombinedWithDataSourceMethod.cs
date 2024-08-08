@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.One))]
 [MethodDataSource(typeof(CommonTestData), nameof(CommonTestData.Two))]

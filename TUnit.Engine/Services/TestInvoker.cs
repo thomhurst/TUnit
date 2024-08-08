@@ -18,9 +18,7 @@ internal class TestInvoker
         try
         {
             TestContext.TestContexts.Value = discoveredTest.TestContext;
-
-            await GlobalStaticTestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext);
-
+            
             await TestHookOrchestrator.ExecuteSetups(discoveredTest.TestContext.TestDetails.ClassInstance!, discoveredTest.TestContext);
             
             await Timings.Record("Main Test Body", discoveredTest.TestContext, () => discoveredTest.ExecuteTest(cancellationToken));
@@ -28,8 +26,6 @@ internal class TestInvoker
         finally
         {
             await TestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext.TestDetails.ClassInstance!, discoveredTest.TestContext, cleanUpExceptions);
-            
-            await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(discoveredTest.TestContext, cleanUpExceptions);
             
             await RunHelpers.RunSafelyAsync(() => _disposer.DisposeAsync(discoveredTest.TestContext.TestDetails.ClassInstance), cleanUpExceptions);
         }

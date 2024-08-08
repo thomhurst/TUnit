@@ -3,4 +3,4 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class AfterAttribute(HookType hookType) : TUnitAttribute;
+public sealed class AfterAttribute(HookType hookType) : TUnitAttribute;

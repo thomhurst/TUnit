@@ -119,6 +119,15 @@ internal static class Rules
     
     public static readonly DiagnosticDescriptor NoDataSourceProvided =
         CreateDescriptor("TUnit0038", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor SingleTestContextParameterRequired =
+        CreateDescriptor("TUnit0039", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor SingleClassHookContextParameterRequired =
+        CreateDescriptor("TUnit0040", UsageCategory, DiagnosticSeverity.Error);
+
+    public static readonly DiagnosticDescriptor SingleAssemblyHookContextParameterRequired =
+        CreateDescriptor("TUnit0041", UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

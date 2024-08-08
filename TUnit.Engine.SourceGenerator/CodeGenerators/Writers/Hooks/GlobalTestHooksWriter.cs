@@ -36,10 +36,10 @@ internal static class GlobalTestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
+                  GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<{{GetClassType(model.HookLevel)}}>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                             Body = (testContext, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
+                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
                   		});
                   """);
         }
@@ -47,10 +47,10 @@ internal static class GlobalTestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalStaticTestHookOrchestrator.RegisterCleanUp(new StaticMethod<TestContext>
+                  GlobalStaticTestHookOrchestrator.RegisterCleanUp(new StaticMethod<{{GetClassType(model.HookLevel)}}>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                             Body = (testContext, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
+                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}}))
                   		});
                   """);
         }
@@ -61,15 +61,33 @@ internal static class GlobalTestHooksWriter
         context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
     }
 
+    private static string GetClassType(Core.HookType hookType)
+    {
+        return hookType switch
+        {
+            Core.HookType.EachTest => "TestContext",
+            Core.HookType.Class => "ClassHookContext",
+            Core.HookType.Assembly => "AssemblyHookContext",
+            _ => throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null)
+        };
+    }
+
     private static string GetArgs(HooksDataModel model)
     {
         List<string> args = [];
+
+        var expectedType = model.HookLevel switch
+        {
+            Core.HookType.EachTest => WellKnownFullyQualifiedClassNames.TestContext,
+            Core.HookType.Class => WellKnownFullyQualifiedClassNames.ClassHookContext,
+            Core.HookType.Assembly => WellKnownFullyQualifiedClassNames.AssemblyHookContext,
+        };
         
         foreach (var type in model.ParameterTypes)
         {
-            if (type == WellKnownFullyQualifiedClassNames.TestContext.WithGlobalPrefix)
+            if (type == expectedType.WithGlobalPrefix)
             {
-                args.Add("testContext");
+                args.Add("context");
             }
 
             if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)

@@ -1,4 +1,3 @@
-using TUnit.Core;
 using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;

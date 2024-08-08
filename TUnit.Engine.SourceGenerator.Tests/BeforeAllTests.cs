@@ -1,5 +1,4 @@
 using TUnit.Engine.SourceGenerator.CodeGenerators;
-using TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -55,7 +54,7 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 	            """
 		            		ClassHookOrchestrator.RegisterSetUp(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.Models.ClassHookContext)]),
+		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.ClassHookContext)]),
 		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUpWithContext(TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof(global::TUnit.TestProject.BeforeTests.SetupTests))))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
@@ -73,7 +72,7 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 	            """
 		            		ClassHookOrchestrator.RegisterSetUp(typeof(global::TUnit.TestProject.BeforeTests.SetupTests), new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.Models.ClassHookContext), typeof(global::System.Threading.CancellationToken)]),
+		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken)]),
 		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUpWithContext(TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof(global::TUnit.TestProject.BeforeTests.SetupTests)), cancellationToken))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));

@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.Models;
+﻿namespace TUnit.Core;
 
 public class ClassHookContext
 {

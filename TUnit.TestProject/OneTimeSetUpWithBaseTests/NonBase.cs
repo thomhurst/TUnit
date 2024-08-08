@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject.OneTimeSetUpWithBaseTests;
+﻿namespace TUnit.TestProject.OneTimeSetUpWithBaseTests;
 
 public class NonBase : Base1
 {

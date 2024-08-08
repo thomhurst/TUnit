@@ -360,4 +360,31 @@
     <data name="TUnit0038Title" xml:space="preserve">
         <value>No data source provided</value>
     </data>
+    <data name="TUnit0039Description" xml:space="preserve">
+        <value>Single parameter of `TestContext` required.</value>
+    </data>
+    <data name="TUnit0039MessageFormat" xml:space="preserve">
+        <value>Single parameter of `TestContext` required</value>
+    </data>
+    <data name="TUnit0039Title" xml:space="preserve">
+        <value>Single parameter of `TestContext` required</value>
+    </data>
+    <data name="TUnit0040Description" xml:space="preserve">
+        <value>Single parameter of `ClassHookContext` required.</value>
+    </data>
+    <data name="TUnit0040MessageFormat" xml:space="preserve">
+        <value>Single parameter of `ClassHookContext` required</value>
+    </data>
+    <data name="TUnit0040Title" xml:space="preserve">
+        <value>Single parameter of `ClassHookContext` required</value>
+    </data>
+    <data name="TUnit0041Description" xml:space="preserve">
+        <value>Single parameter of `AssemblyHookContext` required.</value>
+    </data>
+    <data name="TUnit0041MessageFormat" xml:space="preserve">
+        <value>Single parameter of `AssemblyHookContext` required</value>
+    </data>
+    <data name="TUnit0041Title" xml:space="preserve">
+        <value>Single parameter of `AssemblyHookContext` required</value>
+    </data>
 </root>

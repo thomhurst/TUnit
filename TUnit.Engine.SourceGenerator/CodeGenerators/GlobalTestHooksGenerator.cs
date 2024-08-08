@@ -8,20 +8,20 @@ using TUnit.Engine.SourceGenerator.Models;
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
 [Generator]
-internal class TestHooksGenerator : IIncrementalGenerator
+internal class GlobalTestHooksGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                "TUnit.Core.BeforeAttribute",
+                "TUnit.Core.GlobalBeforeAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
         var cleanUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                "TUnit.Core.AfterAttribute",
+                "TUnit.Core.GlobalAfterAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
@@ -31,18 +31,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == Core.HookType.EachTest)
-                    {
-                        TestHooksWriter.Execute(productionContext, model, HookType.SetUp);
-                    }
-                    else if (model.HookLevel == Core.HookType.Class)
-                    {
-                        ClassHooksWriter.Execute(productionContext, model, HookType.SetUp);
-                    }
-                    else if (model.HookLevel == Core.HookType.Assembly)
-                    {
-                        AssemblyHooksWriter.Execute(productionContext, model, HookType.SetUp);
-                    }
+                    GlobalTestHooksWriter.Execute(productionContext, model, HookType.SetUp);
                 }
             });
         
@@ -51,18 +40,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == Core.HookType.EachTest)
-                    {
-                        TestHooksWriter.Execute(productionContext, model, HookType.CleanUp);
-                    }
-                    else if (model.HookLevel == Core.HookType.Class)
-                    {
-                        ClassHooksWriter.Execute(productionContext, model, HookType.CleanUp);
-                    }
-                    else if (model.HookLevel == Core.HookType.Assembly)
-                    {
-                        AssemblyHooksWriter.Execute(productionContext, model, HookType.CleanUp);
-                    }
+                    GlobalTestHooksWriter.Execute(productionContext, model, HookType.CleanUp);
                 }
             });
     }
@@ -75,6 +53,11 @@ internal class TestHooksGenerator : IIncrementalGenerator
     static IEnumerable<HooksDataModel> GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
+        {
+            yield break;
+        }
+
+        if (!methodSymbol.IsStatic || methodSymbol.IsAbstract || methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             yield break;
         }

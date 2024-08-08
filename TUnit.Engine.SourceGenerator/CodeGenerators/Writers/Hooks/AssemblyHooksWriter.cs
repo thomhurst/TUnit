@@ -74,7 +74,7 @@ internal static class AssemblyHooksWriter
         {
             if (type == WellKnownFullyQualifiedClassNames.AssemblyHookContext.WithGlobalPrefix)
             {
-                args.Add($"TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof({model.FullyQualifiedTypeName}))");
+                args.Add($"TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof({model.FullyQualifiedTypeName}).Assembly)");
             }
             
             if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)

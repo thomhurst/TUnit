@@ -1,7 +1,4 @@
-﻿using TUnit.Core;
-using TUnit.Core.Models;
-
-namespace TUnit.TestProject.BeforeTests;
+﻿namespace TUnit.TestProject.BeforeTests;
 
 public class Base1
 {

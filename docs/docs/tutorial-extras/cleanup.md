@@ -11,9 +11,11 @@ You can also declare a method with a `[AfterEachTest]` or an `[AfterAllTestsInCl
 - `[After(EachTest)]` methods should NOT be static, and they will be executed repeatedly after each test in their class ends.
 - `[After(Class)]` methods SHOULD be static, and they will be executed only once, after all tests in their class end.
 - `[After(Assembly)]` methods SHOULD be static, and they will be executed only once, after all tests in their assembly end.
-- `[After(EachTestGlobally)]` methods SHOULD be static, and they will be executed repeatedly after each test in their assembly ends.
-- 
-Methods will be executed top-down, so the current class clean ups will execute first, then the base classes.
+
+
+- All `[GlobalAfter(...)]` methods SHOULD be static, and they will follow the same behaviour as above, but fire for every test/class/assembly that is being run in the test session.
+
+Methods will be executed top-down, so the current class clean ups will execute first, then the base classes' last.
 
 ```csharp
 using TUnit.Core;

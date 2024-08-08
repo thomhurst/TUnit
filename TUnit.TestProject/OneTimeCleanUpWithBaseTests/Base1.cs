@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.TestProject.OneTimeCleanUpWithBaseTests;
+﻿namespace TUnit.TestProject.OneTimeCleanUpWithBaseTests;
 
 public class Base1 : Base2
 {
