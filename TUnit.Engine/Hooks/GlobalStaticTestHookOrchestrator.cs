@@ -75,20 +75,20 @@ public static class GlobalStaticTestHookOrchestrator
         }));
     }
 
-    public static async Task ExecuteSetups(ClassHookContext context)
+    public static async Task ExecuteSetups(ClassHookContext context, TestContext initiatingTestContext)
     {
         foreach (var setUp in ClassSetUps)
         {
-            await Timings.Record("Global Static Class Hook Set Up: " + setUp.Name, context.Tests.MinBy(x => x.Timings.MinBy(t => t.Start)!.Start)!, 
+            await Timings.Record("Global Static Class Hook Set Up: " + setUp.Name, initiatingTestContext, 
                 () => setUp.Action(context));
         }
     }
 
-    public static async Task ExecuteCleanUps(ClassHookContext context, List<Exception> cleanUpExceptions)
+    public static async Task ExecuteCleanUps(ClassHookContext context, TestContext initiatingTestContext, List<Exception> cleanUpExceptions)
     {
         foreach (var cleanUp in ClassCleanUps)
         {
-            await Timings.Record("Global Static Class Hook Clean Up: " + cleanUp.Name, context.Tests.MaxBy(x => x.Timings.MaxBy(t => t.End)!.End)!,
+            await Timings.Record("Global Static Class Hook Clean Up: " + cleanUp.Name, initiatingTestContext,
                 () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), cleanUpExceptions));
         }
     }

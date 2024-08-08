@@ -61,7 +61,7 @@ public static class ClassHookOrchestrator
         var context = GetClassHookContext(testClassType);
         
         // Run Global Hooks First
-        await GlobalStaticTestHookOrchestrator.ExecuteSetups(context);
+        await GlobalStaticTestHookOrchestrator.ExecuteSetups(context, testContext);
             
         // Reverse so base types are first - We'll run those ones first
         var typesIncludingBase = GetTypesIncludingBase(testClassType)
@@ -113,7 +113,7 @@ public static class ClassHookOrchestrator
             var context = GetClassHookContext(testClassType);
         
             // Run Global Hooks Last
-            await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(context, cleanUpExceptions);
+            await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(context, testContext, cleanUpExceptions);
         }
     }
 
