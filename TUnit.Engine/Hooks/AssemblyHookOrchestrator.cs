@@ -72,7 +72,7 @@ public static class AssemblyHookOrchestrator
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones first
-        await GlobalStaticTestHookOrchestrator.ExecuteSetups(context);
+        await GlobalStaticTestHookOrchestrator.ExecuteSetups(context, testContext);
             
         foreach (var setUp in SetUps.GetOrAdd(assembly, _ => []))
         {
@@ -97,6 +97,6 @@ public static class AssemblyHookOrchestrator
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones last
-        await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(context, cleanUpExceptions);
+        await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(context, testContext, cleanUpExceptions);
     }
 }
