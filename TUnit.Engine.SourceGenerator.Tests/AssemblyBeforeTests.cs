@@ -54,7 +54,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
 	            """
 		            		AssemblyHookOrchestrator.RegisterSetUp(new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.Models.AssemblyHookContext)]),
+		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext)]),
 		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests))))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
@@ -72,7 +72,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
 	            """
 		            		AssemblyHookOrchestrator.RegisterSetUp(new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.Models.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
+		                       MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
 		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests)), cancellationToken))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));

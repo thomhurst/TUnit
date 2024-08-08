@@ -54,7 +54,7 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
 	            """
 		            		AssemblyHookOrchestrator.RegisterCleanUp(new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.Models.AssemblyHookContext)]),
+		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext)]),
 		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContext(TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests))))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
@@ -72,7 +72,7 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
 	            """
 		            		AssemblyHookOrchestrator.RegisterCleanUp(new StaticMethod
 		            		{ 
-		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.Models.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
+		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
 		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContext(TUnit.Engine.Hooks.AssemblyHookOrchestrator.GetAssemblyHookContext(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests)), cancellationToken))
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
