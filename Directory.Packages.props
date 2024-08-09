@@ -28,7 +28,7 @@
     <PackageVersion Include="MSTest.TestAdapter" Version="3.5.1" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.5.1" />
     <PackageVersion Include="NUnit" Version="4.1.0" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.2.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.3.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="PolySharp" Version="1.14.1" />
     <PackageVersion Include="System.Text.Json" Version="8.0.4" />
