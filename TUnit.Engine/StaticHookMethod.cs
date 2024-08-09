@@ -1,20 +1,21 @@
 ﻿using System.Reflection;
+using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
-namespace TUnit.Core;
+namespace TUnit.Engine;
 
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public record InstanceHookMethod<TClassType>
+public record StaticHookMethod<T>
 {
-    public Type ClassType { get; } = typeof(TClassType);
-    public Assembly Assembly { get; } = typeof(TClassType).Assembly;
     public required MethodInfo MethodInfo { get; init; }
+    public required Func<T, CancellationToken, Task> Body { get; init; }
     private string? _name;
-    public string Name =>  _name ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
-    public required Func<TClassType, TestContext, CancellationToken, Task> Body { get; init; }
+    public string Name =>  _name ??=$"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
+    public Type ClassType => MethodInfo.ReflectedType!;
+    public Assembly Assembly => ClassType.Assembly;
 
     private IEnumerable<Attribute>? _attributes;
 
