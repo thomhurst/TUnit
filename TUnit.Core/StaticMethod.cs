@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
+using TUnit.Core.Executors;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -23,6 +25,8 @@ public record StaticMethod
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => AttributeHelper.GetAttribute<TAttribute>(Attributes);
 
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
+
+    public required IHookExecutor HookExecutor { get; init; }
 }
 
 public record StaticMethod<T>
@@ -42,4 +46,6 @@ public record StaticMethod<T>
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => AttributeHelper.GetAttribute<TAttribute>(Attributes);
 
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
+    
+    public required IHookExecutor HookExecutor { get; init; }
 }

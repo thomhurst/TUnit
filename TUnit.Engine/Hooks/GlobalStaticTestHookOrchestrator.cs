@@ -23,7 +23,7 @@ public static class GlobalStaticTestHookOrchestrator
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteTestHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
@@ -33,7 +33,7 @@ public static class GlobalStaticTestHookOrchestrator
         {
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteTestHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
@@ -61,7 +61,7 @@ public static class GlobalStaticTestHookOrchestrator
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteClassHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
@@ -71,7 +71,7 @@ public static class GlobalStaticTestHookOrchestrator
         {
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteClassHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
@@ -99,7 +99,7 @@ public static class GlobalStaticTestHookOrchestrator
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAssemblyHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
@@ -109,7 +109,7 @@ public static class GlobalStaticTestHookOrchestrator
         {
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAssemblyHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 

@@ -71,7 +71,7 @@ internal static class TypeExtensions
     {
         return namedTypeSymbol.AllInterfaces.Any(x =>
             x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
-            == $"global::System.IAsyncDisposable");
+            == "global::System.IAsyncDisposable");
     }
 
     public static bool IsOrInherits(this INamedTypeSymbol namedTypeSymbol, string typeName)

@@ -8,6 +8,7 @@ public record HooksDataModel
     public required string[] ParameterTypes { get; init; }
     public required bool HasTimeoutAttribute { get; init; }
     public required Core.HookType HookLevel { get; init; }
+    public required string? HookExecutor { get; init; }
 
     public virtual bool Equals(HooksDataModel? other)
     {

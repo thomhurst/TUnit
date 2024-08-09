@@ -1,5 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.Executors;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
@@ -93,7 +95,8 @@ internal class TestHooksGenerator : IIncrementalGenerator
                 ParameterTypes = methodSymbol.Parameters
                     .Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
                     .ToArray(),
-                HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute()
+                HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute(),
+                HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(HookExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             };
         }
     }

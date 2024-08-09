@@ -16,64 +16,71 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 
             Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-	            ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.Base1), new StaticMethod
+	            ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.Base1), new StaticMethod<ClassHookContext>
 	            { 
 	                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base1).GetMethod("AfterAll1", 0, []),
-	                Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base1.AfterAll1())
+	                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base1.AfterAll1()),
+	                HookExecutor = DefaultExecutor.Instance,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-	            ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.Base2), new StaticMethod
+	            ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.Base2), new StaticMethod<ClassHookContext>
 	            { 
 	                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base2).GetMethod("AfterAll2", 0, []),
-	                Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base2.AfterAll2())
+	                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base2.AfterAll2()),
+	                HookExecutor = DefaultExecutor.Instance,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-	            ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.Base3), new StaticMethod
+	            ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.Base3), new StaticMethod<ClassHookContext>
 	            { 
 	                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base3).GetMethod("AfterAll3", 0, []),
-	                Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base3.AfterAll3())
+	                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base3.AfterAll3()),
+	                HookExecutor = DefaultExecutor.Instance,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
+		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod<ClassHookContext>
 		            		{ 
 		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUp", 0, []),
-		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUp())
+		                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUp()),
+		                       HookExecutor = DefaultExecutor.Instance,
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[7].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
+		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod<ClassHookContext>
 		            		{ 
 		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.ClassHookContext)]),
-		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUpWithContext(TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof(global::TUnit.TestProject.AfterTests.CleanupTests))))
+		                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUpWithContext(context)),
+		                       HookExecutor = DefaultExecutor.Instance,
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[8].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
+		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod<ClassHookContext>
 		            		{ 
 		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUp", 0, [typeof(global::System.Threading.CancellationToken)]),
-		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUp(cancellationToken))
+		                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUp(cancellationToken)),
+		                       HookExecutor = DefaultExecutor.Instance,
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[9].IgnoreWhitespaceFormatting(), Does.Contain(
 	            """
-		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod
+		            		ClassHookOrchestrator.RegisterCleanUp(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticMethod<ClassHookContext>
 		            		{ 
 		                       MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken)]),
-		                       Body = cancellationToken => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUpWithContext(TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof(global::TUnit.TestProject.AfterTests.CleanupTests)), cancellationToken))
+		                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUpWithContext(context, cancellationToken)),
+		                       HookExecutor = DefaultExecutor.Instance,
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
         });

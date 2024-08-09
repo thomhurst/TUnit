@@ -19,7 +19,8 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 	            { 
 	            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1).GetMethod("BeforeAll1", 0, [typeof(global::TUnit.Core.TestContext)]),
-	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase1.BeforeAll1(context))
+	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase1.BeforeAll1(context)),
+	            HookExecutor = DefaultExecutor.Instance,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -28,7 +29,8 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 	            { 
 	            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2).GetMethod("BeforeAll2", 0, [typeof(global::TUnit.Core.TestContext)]),
-	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase2.BeforeAll2(context))
+	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase2.BeforeAll2(context)),
+	            HookExecutor = DefaultExecutor.Instance,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -37,7 +39,8 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 	            { 
 	            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3).GetMethod("BeforeAll3", 0, [typeof(global::TUnit.Core.TestContext)]),
-	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase3.BeforeAll3(context))
+	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase3.BeforeAll3(context)),
+	            HookExecutor = DefaultExecutor.Instance,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -46,7 +49,8 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 		            { 
 		            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUp", 0, [typeof(global::TUnit.Core.TestContext)]),
-		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context))
+		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context)),
+		            HookExecutor = DefaultExecutor.Instance,
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -55,7 +59,8 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 		            { 
 		            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUp", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context, cancellationToken))
+		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context, cancellationToken)),
+		            HookExecutor = DefaultExecutor.Instance,
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -64,7 +69,8 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 		            { 
 		            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context))
+		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context)),
+		            HookExecutor = DefaultExecutor.Instance,
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -73,7 +79,8 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<TestContext>
 		            { 
 		            MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context, cancellationToken))
+		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context, cancellationToken)),
+		            HookExecutor = DefaultExecutor.Instance,
 		            });
 		            """.IgnoreWhitespaceFormatting()));
         });

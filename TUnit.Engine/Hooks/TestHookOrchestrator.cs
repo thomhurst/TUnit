@@ -20,7 +20,7 @@ public static class TestHookOrchestrator
         {
             var timeout = instanceMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => instanceMethod.Body((TClassType) classInstance, testContext, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => instanceMethod.HookExecutor.ExecuteTestHook(testContext, () => instanceMethod.Body((TClassType) classInstance, testContext, token)), timeout);
         }));
     }
     
@@ -32,7 +32,7 @@ public static class TestHookOrchestrator
         {
             var timeout = instanceMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => instanceMethod.Body((TClassType) classInstance, testContext, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => instanceMethod.HookExecutor.ExecuteTestHook(testContext, () => instanceMethod.Body((TClassType) classInstance, testContext, token)), timeout);
         }));
     }
     
