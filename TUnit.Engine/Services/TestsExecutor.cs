@@ -127,13 +127,10 @@ internal class TestsExecutor
         {
             MaxDegreeOfParallelism = GetMaximumParallelTests(),
             CancellationToken = context.CancellationToken
-        }, async (test, token) =>
-        {
-            await ProcessTest(test, filter, context, token);
-        });
+        }, (test, token) => ProcessTest(test, filter, context, token));
     }
 
-    private async Task ProcessTest(DiscoveredTest test,
+    private async ValueTask ProcessTest(DiscoveredTest test,
         ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
     {
         NotifyTestStart();
@@ -142,9 +139,9 @@ internal class TestsExecutor
         {
             await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context), cancellationToken);
         }
-        catch
+        catch (Exception exception)
         {
-            // Ignored
+            await _logger.LogErrorAsync(exception);
         }
         finally
         {
