@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -36,10 +37,11 @@ internal static class ClassHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  ClassHookOrchestrator.RegisterSetUp(typeof({{model.FullyQualifiedTypeName}}), new StaticMethod
+                  ClassHookOrchestrator.RegisterSetUp(typeof({{model.FullyQualifiedTypeName}}), new StaticHookMethod<ClassHookContext>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                             Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
+                             HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
                   		});
                   """);
         }
@@ -47,10 +49,11 @@ internal static class ClassHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                 ClassHookOrchestrator.RegisterCleanUp(typeof({{model.FullyQualifiedTypeName}}), new StaticMethod
+                 ClassHookOrchestrator.RegisterCleanUp(typeof({{model.FullyQualifiedTypeName}}), new StaticHookMethod<ClassHookContext>
                  		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                             Body = cancellationToken => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
+                             HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
                  		});
                  """);
         }
@@ -61,7 +64,7 @@ internal static class ClassHooksWriter
         context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
     }
 
-    private static string GenerateContextObject(HooksDataModel model)
+    private static string GetArgs(HooksDataModel model)
     {
         List<string> args = [];
         
@@ -69,7 +72,7 @@ internal static class ClassHooksWriter
         {
             if (type == WellKnownFullyQualifiedClassNames.ClassHookContext.WithGlobalPrefix)
             {
-                args.Add($"TUnit.Engine.Hooks.ClassHookOrchestrator.GetClassHookContext(typeof({model.FullyQualifiedTypeName}))");
+                args.Add("context");
             }
             
             if (type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)

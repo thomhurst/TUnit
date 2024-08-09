@@ -79,6 +79,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
         sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
         sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
+        sourceBuilder.WriteLine($"TestExecutor = {GetTestExecutor(testSourceDataModel.TestExecutor)},");
         sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
@@ -95,6 +96,16 @@ internal static class GenericTestInvocationWriter
 
             sourceBuilder.WriteLine("}");
         }
+    }
+
+    private static string GetTestExecutor(string? testExecutor)
+    {
+        if (string.IsNullOrEmpty(testExecutor))
+        {
+            return "DefaultExecutor.Instance";
+        }
+
+        return $"new {testExecutor}()";
     }
 
     private static string ToInjectedType(Argument arg, int index, string variablePrefix)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Models;
 
@@ -36,10 +37,11 @@ internal static class TestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  TestHookOrchestrator.RegisterSetUp<{{model.FullyQualifiedTypeName}}>(new InstanceMethod<{{model.FullyQualifiedTypeName}}>
+                  TestHookOrchestrator.RegisterSetUp<{{model.FullyQualifiedTypeName}}>(new InstanceHookMethod<{{model.FullyQualifiedTypeName}}>
                   		{
                   		     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                  		     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                  		     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}})),
+                  		     HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
                   		});
                   """);
         }
@@ -47,10 +49,11 @@ internal static class TestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                 TestHookOrchestrator.RegisterCleanUp<{{model.FullyQualifiedTypeName}}>(new InstanceMethod<{{model.FullyQualifiedTypeName}}>
+                 TestHookOrchestrator.RegisterCleanUp<{{model.FullyQualifiedTypeName}}>(new InstanceHookMethod<{{model.FullyQualifiedTypeName}}>
                  		{
                  		     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                 		     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}}))
+                 		     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}})),
+                 		     HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
                  		});
                  """);
         }

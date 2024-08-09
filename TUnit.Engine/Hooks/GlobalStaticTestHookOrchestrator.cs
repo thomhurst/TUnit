@@ -17,23 +17,23 @@ public static class GlobalStaticTestHookOrchestrator
     private static readonly List<(string Name, Func<AssemblyHookContext, Task> Action)> AssemblySetUps = [];
     private static readonly List<(string Name, Func<AssemblyHookContext, Task> Action)> AssemblyCleanUps = [];
     
-    public static void RegisterSetUp(StaticMethod<TestContext> staticMethod)
+    public static void RegisterSetUp(StaticHookMethod<TestContext> staticMethod)
     {
         SetUps.Add((staticMethod.Name, context =>
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteTestHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
-    public static void RegisterCleanUp(StaticMethod<TestContext> staticMethod)
+    public static void RegisterCleanUp(StaticHookMethod<TestContext> staticMethod)
     {
         CleanUps.Add((staticMethod.Name, context =>
         {
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteTestHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
@@ -55,23 +55,23 @@ public static class GlobalStaticTestHookOrchestrator
         }
     }
     
-    public static void RegisterSetUp(StaticMethod<ClassHookContext> staticMethod)
+    public static void RegisterSetUp(StaticHookMethod<ClassHookContext> staticMethod)
     {
         ClassSetUps.Add((staticMethod.Name, context =>
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteClassHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
-    public static void RegisterCleanUp(StaticMethod<ClassHookContext> staticMethod)
+    public static void RegisterCleanUp(StaticHookMethod<ClassHookContext> staticMethod)
     {
         ClassCleanUps.Add((staticMethod.Name, context =>
         {
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteClassHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
@@ -93,23 +93,23 @@ public static class GlobalStaticTestHookOrchestrator
         }
     }
     
-    public static void RegisterSetUp(StaticMethod<AssemblyHookContext> staticMethod)
+    public static void RegisterSetUp(StaticHookMethod<AssemblyHookContext> staticMethod)
     {
         AssemblySetUps.Add((staticMethod.Name, context =>
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAssemblyHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
-    public static void RegisterCleanUp(StaticMethod<AssemblyHookContext> staticMethod)
+    public static void RegisterCleanUp(StaticHookMethod<AssemblyHookContext> staticMethod)
     {
         AssemblyCleanUps.Add((staticMethod.Name, context =>
         {
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(context, token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAssemblyHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 

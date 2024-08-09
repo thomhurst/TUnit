@@ -1,12 +1,14 @@
 ﻿using System.Reflection;
+using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 
-namespace TUnit.Core;
+namespace TUnit.Engine;
 
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public record InstanceMethod<TClassType>
+public record InstanceHookMethod<TClassType>
 {
     public Type ClassType { get; } = typeof(TClassType);
     public Assembly Assembly { get; } = typeof(TClassType).Assembly;
@@ -23,4 +25,6 @@ public record InstanceMethod<TClassType>
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => AttributeHelper.GetAttribute<TAttribute>(Attributes);
 
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
+    
+    public required IHookExecutor HookExecutor { get; init; }
 }

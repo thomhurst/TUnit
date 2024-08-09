@@ -14,22 +14,24 @@ public static class ClassHookOrchestrator
     
     private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
     
-    public static void RegisterSetUp(Type type, StaticMethod staticMethod)
+    public static void RegisterSetUp(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
         var taskFunctions = SetUps.GetOrAdd(type, _ => []);
 
-        taskFunctions.Add((staticMethod.Name, Convert(staticMethod)));
+        taskFunctions.Add((staticMethod.Name, Convert(type, staticMethod)));
     }
     
-    public static void RegisterCleanUp(Type type, StaticMethod staticMethod)
+    public static void RegisterCleanUp(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(type, _ => []);
 
         taskFunctions.Add((staticMethod.Name, () =>
         {
+            var context = GetClassHookContext(type);
+            
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteClassHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
     
@@ -138,13 +140,15 @@ public static class ClassHookOrchestrator
         }
     }
     
-    private static Lazy<Task> Convert(StaticMethod staticMethod)
+    private static Lazy<Task> Convert(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
         return new Lazy<Task>(() =>
         {
+            var context = GetClassHookContext(type);
+            
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteClassHook(context, () => staticMethod.Body(context, token)), timeout);
         });
     }
 }

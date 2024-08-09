@@ -16,21 +16,23 @@ public static class AssemblyHookOrchestrator
     private static readonly GetOnlyDictionary<Assembly, List<(string Name, Lazy<Task> Action)>> SetUps = new();
     private static readonly GetOnlyDictionary<Assembly, List<(string Name, Func<Task> Action)>> CleanUps = new();
     
-    public static void RegisterSetUp(StaticMethod staticMethod)
+    public static void RegisterSetUp(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
-        var setups = SetUps.GetOrAdd(staticMethod.MethodInfo.ReflectedType!.Assembly, _ => []);
-        setups.Add((staticMethod.Name, Convert(staticMethod)));
+        var setups = SetUps.GetOrAdd(assembly, _ => []);
+        setups.Add((staticMethod.Name, Convert(assembly, staticMethod)));
     }
 
-    public static void RegisterCleanUp(StaticMethod staticMethod)
+    public static void RegisterCleanUp(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
-        var taskFunctions = CleanUps.GetOrAdd(staticMethod.MethodInfo.ReflectedType!.Assembly, _ => []);
+        var taskFunctions = CleanUps.GetOrAdd(assembly, _ => []);
 
         taskFunctions.Add((staticMethod.Name, () =>
         {
+            var context = GetAssemblyHookContext(assembly);
+            
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAssemblyHook(context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
     
@@ -57,13 +59,15 @@ public static class AssemblyHookOrchestrator
         }
     }
 
-    private static Lazy<Task> Convert(StaticMethod staticMethod)
+    private static Lazy<Task> Convert(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
         return new Lazy<Task>(() =>
         {
+            var context = GetAssemblyHookContext(assembly);
+            
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.Body(token), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAssemblyHook(context, () => staticMethod.Body(context, token)), timeout);
         });
     }
 
