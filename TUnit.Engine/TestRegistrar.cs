@@ -67,6 +67,7 @@ public static class TestRegistrar
 			BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),
 			AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),
 			TestBody = (classInstance, cancellationToken) => testMetadata.TestMethodFactory(classInstance, cancellationToken),
+			TestExecutor = testMetadata.TestExecutor,
 		};
 
 		TestDictionary.AddTest(testId, unInvokedTest);
@@ -156,4 +157,6 @@ public record TestMetadata<TClassType>
     public required TestData[] InternalTestClassArguments { internal get; init; }
 
     public required TestData[] InternalTestMethodArguments { internal get; init; }
+    
+    public required ITestExecutor TestExecutor { get; init; }
 }

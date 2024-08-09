@@ -34,4 +34,7 @@
       <TypeFullName>TUnit.Engine.Framework.TestingPlatformBuilderHook</TypeFullName>
     </TestingPlatformBuilderHook>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Attributes\" />
+  </ItemGroup>
 </Project>

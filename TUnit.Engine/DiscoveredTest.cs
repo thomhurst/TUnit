@@ -16,9 +16,11 @@ internal class DiscoveredTest<TTestClass> : DiscoveredTest
     
     public required Func<TTestClass, CancellationToken, Task> TestBody { get; init; }
     
+    public required ITestExecutor TestExecutor { get; init; }
+    
     public override async Task ExecuteTest(CancellationToken cancellationToken)
     {
-        await TestBody.Invoke(TestClass, cancellationToken);
+        await TestExecutor.ExecuteTest(TestContext, () => TestBody.Invoke(TestClass, cancellationToken));
     }
     
     public override void ResetTestInstance()
