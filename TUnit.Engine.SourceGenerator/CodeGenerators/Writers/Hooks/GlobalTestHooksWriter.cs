@@ -37,7 +37,7 @@ internal static class GlobalTestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticMethod<{{GetClassType(model.HookLevel)}}>
+                  GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticHookMethod<{{GetClassType(model.HookLevel)}}>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
@@ -49,7 +49,7 @@ internal static class GlobalTestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalStaticTestHookOrchestrator.RegisterCleanUp(new StaticMethod<{{GetClassType(model.HookLevel)}}>
+                  GlobalStaticTestHookOrchestrator.RegisterCleanUp(new StaticHookMethod<{{GetClassType(model.HookLevel)}}>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),

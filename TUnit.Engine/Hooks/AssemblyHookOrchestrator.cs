@@ -16,13 +16,13 @@ public static class AssemblyHookOrchestrator
     private static readonly GetOnlyDictionary<Assembly, List<(string Name, Lazy<Task> Action)>> SetUps = new();
     private static readonly GetOnlyDictionary<Assembly, List<(string Name, Func<Task> Action)>> CleanUps = new();
     
-    public static void RegisterSetUp(Assembly assembly, StaticMethod<AssemblyHookContext> staticMethod)
+    public static void RegisterSetUp(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
         var setups = SetUps.GetOrAdd(assembly, _ => []);
         setups.Add((staticMethod.Name, Convert(assembly, staticMethod)));
     }
 
-    public static void RegisterCleanUp(Assembly assembly, StaticMethod<AssemblyHookContext> staticMethod)
+    public static void RegisterCleanUp(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(assembly, _ => []);
 
@@ -59,7 +59,7 @@ public static class AssemblyHookOrchestrator
         }
     }
 
-    private static Lazy<Task> Convert(Assembly assembly, StaticMethod<AssemblyHookContext> staticMethod)
+    private static Lazy<Task> Convert(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
         return new Lazy<Task>(() =>
         {

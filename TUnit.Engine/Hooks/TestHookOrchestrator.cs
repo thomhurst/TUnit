@@ -12,7 +12,7 @@ public static class TestHookOrchestrator
     private static readonly ConcurrentDictionary<Type, List<(string Name, Func<object, TestContext, Task> Action)>> SetUps = new();
     private static readonly ConcurrentDictionary<Type, List<(string Name, Func<object, TestContext, Task> Action)>> CleanUps = new();
     
-    public static void RegisterSetUp<TClassType>(InstanceMethod<TClassType> instanceMethod)
+    public static void RegisterSetUp<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
     {
         var taskFunctions = SetUps.GetOrAdd(typeof(TClassType), _ => []);
 
@@ -24,7 +24,7 @@ public static class TestHookOrchestrator
         }));
     }
     
-    public static void RegisterCleanUp<TClassType>(InstanceMethod<TClassType> instanceMethod)
+    public static void RegisterCleanUp<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(typeof(TClassType), _ => []);
 

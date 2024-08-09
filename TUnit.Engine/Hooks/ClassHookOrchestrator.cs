@@ -14,14 +14,14 @@ public static class ClassHookOrchestrator
     
     private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
     
-    public static void RegisterSetUp(Type type, StaticMethod<ClassHookContext> staticMethod)
+    public static void RegisterSetUp(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
         var taskFunctions = SetUps.GetOrAdd(type, _ => []);
 
         taskFunctions.Add((staticMethod.Name, Convert(type, staticMethod)));
     }
     
-    public static void RegisterCleanUp(Type type, StaticMethod<ClassHookContext> staticMethod)
+    public static void RegisterCleanUp(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(type, _ => []);
 
@@ -140,7 +140,7 @@ public static class ClassHookOrchestrator
         }
     }
     
-    private static Lazy<Task> Convert(Type type, StaticMethod<ClassHookContext> staticMethod)
+    private static Lazy<Task> Convert(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
         return new Lazy<Task>(() =>
         {

@@ -42,7 +42,7 @@ internal static class AssemblyHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  AssemblyHookOrchestrator.RegisterSetUp(typeof({{model.FullyQualifiedTypeName}}).Assembly, new StaticMethod<AssemblyHookContext>
+                  AssemblyHookOrchestrator.RegisterSetUp(typeof({{model.FullyQualifiedTypeName}}).Assembly, new StaticHookMethod<AssemblyHookContext>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
@@ -54,7 +54,7 @@ internal static class AssemblyHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  AssemblyHookOrchestrator.RegisterCleanUp(typeof({{model.FullyQualifiedTypeName}}).Assembly, new StaticMethod<AssemblyHookContext>
+                  AssemblyHookOrchestrator.RegisterCleanUp(typeof({{model.FullyQualifiedTypeName}}).Assembly, new StaticHookMethod<AssemblyHookContext>
                   		{ 
                             MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),

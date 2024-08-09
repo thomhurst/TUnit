@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using TUnit.Core.Executors;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
@@ -8,7 +7,7 @@ namespace TUnit.Core;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public record InstanceMethod<TClassType>
+public record InstanceHookMethod<TClassType>
 {
     public Type ClassType { get; } = typeof(TClassType);
     public Assembly Assembly { get; } = typeof(TClassType).Assembly;

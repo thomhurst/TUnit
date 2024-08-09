@@ -1,5 +1,4 @@
-﻿using TUnit.Core;
-using TUnit.Engine.SourceGenerator.Extensions;
+﻿using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 

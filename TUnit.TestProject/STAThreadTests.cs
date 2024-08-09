@@ -6,6 +6,18 @@ namespace TUnit.TestProject;
 
 public class STAThreadTests
 {
+    [Before(EachTest)]
+    [HookExecutor<STAThreadExecutor>]
+    public void BeforeTest()
+    {
+    }
+    
+    [After(EachTest)]
+    [HookExecutor<STAThreadExecutor>]
+    public void AfterTest()
+    {
+    }
+    
     [Test, TestExecutor<STAThreadExecutor>]
     public async Task With_STA()
     {
