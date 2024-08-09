@@ -68,7 +68,22 @@ const config: Config = {
           position: 'left',
           label: 'Tutorial',
         },
+        {
+          href: 'https://github.com/thomhurst/TUnit/issues',
+          label: 'Issues',
+          left: 'left',
+        },
+        {
+          href: 'https://github.com/thomhurst/TUnit/discussions',
+          label: 'Discussions',
+          left: 'left',
+        },
         // {to: '/blog', label: 'Blog', position: 'left'},
+        {
+          href: 'https://www.nuget.org/packages/TUnit',
+          label: 'NuGet',
+          position: 'right',
+        },
         {
           href: 'https://github.com/thomhurst/TUnit',
           label: 'GitHub',
@@ -95,6 +110,10 @@ const config: Config = {
               label: 'Stack Overflow',
               href: 'https://stackoverflow.com/questions/tagged/tunit',
             },
+            {
+              label: 'Discussions',
+              href: 'https://github.com/thomhurst/TUnit/discussions',
+            },
           ],
         },
         {
@@ -107,6 +126,10 @@ const config: Config = {
             {
               label: 'GitHub',
               href: 'https://github.com/thomhurst/TUnit',
+            },
+            {
+              label: 'NuGet',
+              href: 'https://www.nuget.org/packages/TUnit',
             },
           ],
         },
