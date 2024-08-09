@@ -109,7 +109,7 @@ or with more complex test orchestration needs
     [Test, Skip("Not yet built!")]
     public async Task CheckCookies() { ... }
 
-    [Test, Explicit, WindowsOnlyTest, RetryHttpServiceUnavailable]
+    [Test, Explicit, WindowsOnlyTest, RetryHttpServiceUnavailable(5)]
     [Property("Some Key", "Some Value")]
     public async Task Ping() { ... }
 
