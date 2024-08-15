@@ -52,10 +52,4 @@ public abstract class AssemblyHooks
     {
         await Assert.That(context.TestCount).Is.Positive();
     }
-
-    [Test]
-    public void Test1()
-    {
-        // Dummy method
-    }
 }

@@ -7,7 +7,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 
 internal static class AssemblyHooksWriter
 {
-    public static void Execute(SourceProductionContext context, HooksDataModel? model, HookType hookType)
+    public static void Execute(SourceProductionContext context, HooksDataModel? model, HookLocationType hookLocationType)
     {
         if (model is null)
         {
@@ -38,27 +38,29 @@ internal static class AssemblyHooksWriter
         sourceBuilder.WriteLine("public static void Initialise()");
         sourceBuilder.WriteLine("{");
 
-        if (hookType == HookType.SetUp)
+        if (hookLocationType == HookLocationType.Before)
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  AssemblyHookOrchestrator.RegisterSetUp(typeof({{model.FullyQualifiedTypeName}}).Assembly, new StaticHookMethod<AssemblyHookContext>
+                  AssemblyHookOrchestrator.RegisterBeforeHook(typeof({{model.FullyQualifiedTypeName}}).Assembly, new StaticHookMethod<AssemblyHookContext>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
                              HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
+                             Order = {{model.Order}},
                   		});
                   """);
         }
-        else if (hookType == HookType.CleanUp)
+        else if (hookLocationType == HookLocationType.After)
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  AssemblyHookOrchestrator.RegisterCleanUp(typeof({{model.FullyQualifiedTypeName}}).Assembly, new StaticHookMethod<AssemblyHookContext>
+                  AssemblyHookOrchestrator.RegisterAfterHook(typeof({{model.FullyQualifiedTypeName}}).Assembly, new StaticHookMethod<AssemblyHookContext>
                   		{ 
                             MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
                             HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
+                            Order = {{model.Order}},
                   		});
                   """);
         }

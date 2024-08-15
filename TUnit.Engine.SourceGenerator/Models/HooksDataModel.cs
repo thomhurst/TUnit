@@ -9,6 +9,8 @@ public record HooksDataModel
     public required bool HasTimeoutAttribute { get; init; }
     public required Core.HookType HookLevel { get; init; }
     public required string? HookExecutor { get; init; }
+    
+    public required int Order { get; init; }
 
     public virtual bool Equals(HooksDataModel? other)
     {

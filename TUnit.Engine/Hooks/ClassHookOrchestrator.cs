@@ -9,29 +9,29 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class ClassHookOrchestrator
 {
-    private static readonly ConcurrentDictionary<Type, List<(string Name, Lazy<Task> Action)>> SetUps = new();
-    private static readonly ConcurrentDictionary<Type, List<(string Name, Func<Task> Action)>> CleanUps = new();
+    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Lazy<Task> Action)>> SetUps = new();
+    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<Task> Action)>> CleanUps = new();
     
     private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
     
-    public static void RegisterSetUp(Type type, StaticHookMethod<ClassHookContext> staticMethod)
+    public static void RegisterBeforeHook(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
         var taskFunctions = SetUps.GetOrAdd(type, _ => []);
 
-        taskFunctions.Add((staticMethod.Name, Convert(type, staticMethod)));
+        taskFunctions.Add((staticMethod.Name, staticMethod.Order, Convert(type, staticMethod)));
     }
     
-    public static void RegisterCleanUp(Type type, StaticHookMethod<ClassHookContext> staticMethod)
+    public static void RegisterAfterHook(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(type, _ => []);
 
-        taskFunctions.Add((staticMethod.Name, () =>
+        taskFunctions.Add((staticMethod.Name, staticMethod.Order, () =>
         {
             var context = GetClassHookContext(type);
             
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteClassHook(context, () => staticMethod.Body(context, token)), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
     
@@ -46,8 +46,8 @@ public static class ClassHookOrchestrator
         
         AssemblyHookOrchestrator.RegisterTestContext(type.Assembly, classHookContext);
     }
-    
-    public static ClassHookContext GetClassHookContext(Type type)
+
+    private static ClassHookContext GetClassHookContext(Type type)
     {
         lock (type)
         {
@@ -58,12 +58,12 @@ public static class ClassHookOrchestrator
         }
     }
     
-    public static async Task ExecuteSetups(Type testClassType, TestContext testContext)
+    public static async Task ExecuteBeforeHooks(Type testClassType, TestContext testContext)
     {
         var context = GetClassHookContext(testClassType);
         
         // Run Global Hooks First
-        await GlobalStaticTestHookOrchestrator.ExecuteSetups(context, testContext);
+        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(context, testContext);
             
         // Reverse so base types are first - We'll run those ones first
         var typesIncludingBase = GetTypesIncludingBase(testClassType)
@@ -76,7 +76,7 @@ public static class ClassHookOrchestrator
                 return;
             }
 
-            foreach (var setUp in setUpsForType)
+            foreach (var setUp in setUpsForType.OrderBy(x => x.Order))
             {
                 // As these are lazy we should always get the same Task
                 // So we await the same Task to ensure it's finished first
@@ -107,7 +107,7 @@ public static class ClassHookOrchestrator
                 return;
             }
 
-            foreach (var cleanUp in cleanUpsForType)
+            foreach (var cleanUp in cleanUpsForType.OrderBy(x => x.Order))
             {
                 await Timings.Record("Class Hook Clean Up: " + cleanUp.Name, testContext, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
             }
@@ -115,7 +115,7 @@ public static class ClassHookOrchestrator
             var context = GetClassHookContext(testClassType);
         
             // Run Global Hooks Last
-            await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(context, testContext, cleanUpExceptions);
+            await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(context, testContext, cleanUpExceptions);
         }
     }
 
@@ -148,7 +148,7 @@ public static class ClassHookOrchestrator
             
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteClassHook(context, () => staticMethod.Body(context, token)), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
         });
     }
 }

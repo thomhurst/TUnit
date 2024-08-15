@@ -1,30 +1,8 @@
-﻿using TUnit.Core.Interfaces;
+﻿namespace TUnit.Core;
 
-namespace TUnit.Core;
-
-public class STAThreadExecutor : ITestExecutor, IHookExecutor
+public class STAThreadExecutor : GenericAbstractExecutor
 {
-    public Task ExecuteTest(TestContext context, Func<Task> action)
-    {
-        return Execute(action);
-    }
-
-    public Task ExecuteAssemblyHook(AssemblyHookContext context, Func<Task> action)
-    {
-        return Execute(action);
-    }
-
-    public Task ExecuteClassHook(ClassHookContext context, Func<Task> action)
-    {
-        return Execute(action);
-    }
-
-    public Task ExecuteTestHook(TestContext context, Func<Task> action)
-    {
-        return Execute(action);
-    }
-
-    private static async Task Execute(Func<Task> action)
+    protected override async Task ExecuteAsync(Func<Task> action)
     {
         var tcs = new TaskCompletionSource<object?>();
         

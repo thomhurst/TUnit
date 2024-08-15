@@ -5,34 +5,34 @@ namespace TUnit.TestProject;
 
 public class GlobalTestHooks
 {
-    [GlobalBefore(EachTest)]
+    [BeforeEvery(EachTest)]
     public static void SetUp(TestContext testContext)
     {
         testContext.ObjectBag.TryAdd("SetUpCustomTestNameProperty", testContext.TestDetails.TestName);
     }
     
-    [GlobalAfter(EachTest)]
+    [AfterEvery(EachTest)]
     public static void CleanUp(TestContext testContext)
     {
         testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.TestDetails.TestName);
     }
     
-    [GlobalBefore(Class)]
+    [BeforeEvery(Class)]
     public static void ClassSetUp(ClassHookContext context)
     {
     }
     
-    [GlobalAfter(Class)]
+    [AfterEvery(Class)]
     public static void ClassCleanUp(ClassHookContext context)
     {
     }
     
-    [GlobalBefore(Assembly)]
+    [BeforeEvery(Assembly)]
     public static void AssemblySetUp(AssemblyHookContext context)
     {
     }
     
-    [GlobalAfter(Assembly)]
+    [AfterEvery(Assembly)]
     public static void AssemblyCleanUp(AssemblyHookContext context)
     {
     }

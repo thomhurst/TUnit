@@ -15,6 +15,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         Rules.MethodMustNotBeAbstract,
         Rules.MethodMustBeStatic,
         Rules.MethodMustBePublic,
+        Rules.GlobalHooksSeparateClass,
         Rules.SingleTestContextParameterRequired,
         Rules.SingleClassHookContextParameterRequired,
         Rules.SingleAssemblyHookContextParameterRequired
@@ -42,7 +43,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-
+        
         if (!methodSymbol.IsStatic)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeStatic,
@@ -83,6 +84,13 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
+        }
+        
+        if (methodSymbol.ContainingType.IsTestClass())
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.GlobalHooksSeparateClass,
+                context.Symbol.Locations.FirstOrDefault())
+            );
         }
     }
 

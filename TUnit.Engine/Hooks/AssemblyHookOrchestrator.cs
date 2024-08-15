@@ -13,26 +13,26 @@ public static class AssemblyHookOrchestrator
 {
     private static readonly ConcurrentDictionary<Assembly, AssemblyHookContext> AssemblyHookContexts = new();
     
-    private static readonly GetOnlyDictionary<Assembly, List<(string Name, Lazy<Task> Action)>> SetUps = new();
-    private static readonly GetOnlyDictionary<Assembly, List<(string Name, Func<Task> Action)>> CleanUps = new();
+    private static readonly GetOnlyDictionary<Assembly, List<(string Name, int Order, Lazy<Task> Action)>> SetUps = new();
+    private static readonly GetOnlyDictionary<Assembly, List<(string Name, int Order, Func<Task> Action)>> CleanUps = new();
     
-    public static void RegisterSetUp(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
+    public static void RegisterBeforeHook(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
         var setups = SetUps.GetOrAdd(assembly, _ => []);
-        setups.Add((staticMethod.Name, Convert(assembly, staticMethod)));
+        setups.Add((staticMethod.Name, staticMethod.Order, Convert(assembly, staticMethod)));
     }
 
-    public static void RegisterCleanUp(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
+    public static void RegisterAfterHook(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
         var taskFunctions = CleanUps.GetOrAdd(assembly, _ => []);
 
-        taskFunctions.Add((staticMethod.Name, () =>
+        taskFunctions.Add((staticMethod.Name, staticMethod.Order, () =>
         {
             var context = GetAssemblyHookContext(assembly);
             
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAssemblyHook(context, () => staticMethod.Body(context, token)), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
     
@@ -47,8 +47,8 @@ public static class AssemblyHookOrchestrator
 
         assemblyHookContext.TestClasses.Add(classHookContext);
     }
-    
-    public static AssemblyHookContext GetAssemblyHookContext(Assembly assembly)
+
+    private static AssemblyHookContext GetAssemblyHookContext(Assembly assembly)
     {
         lock (assembly)
         {
@@ -67,18 +67,18 @@ public static class AssemblyHookOrchestrator
             
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAssemblyHook(context, () => staticMethod.Body(context, token)), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
         });
     }
 
-    internal static async Task ExecuteSetups(Assembly assembly, TestContext testContext)
+    internal static async Task ExecuteBeforeHooks(Assembly assembly, TestContext testContext)
     {
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones first
-        await GlobalStaticTestHookOrchestrator.ExecuteSetups(context, testContext);
+        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(context, testContext);
             
-        foreach (var setUp in SetUps.GetOrAdd(assembly, _ => []))
+        foreach (var setUp in SetUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.Order))
         {
             // As these are lazy we should always get the same Task
             // So we await the same Task to ensure it's finished first
@@ -93,7 +93,7 @@ public static class AssemblyHookOrchestrator
             return;
         }
         
-        foreach (var cleanUp in CleanUps.GetOrAdd(assembly, _ => []))
+        foreach (var cleanUp in CleanUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.Order))
         {
             await Timings.Record("Assembly Hook Clean Up: " + cleanUp.Name, testContext, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
         }
@@ -101,6 +101,6 @@ public static class AssemblyHookOrchestrator
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones last
-        await GlobalStaticTestHookOrchestrator.ExecuteCleanUps(context, testContext, cleanUpExceptions);
+        await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(context, testContext, cleanUpExceptions);
     }
 }

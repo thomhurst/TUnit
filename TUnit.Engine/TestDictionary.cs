@@ -45,8 +45,8 @@ public static class TestDictionary
             .Select(x => x.TestContext);
     }
     
-    internal static IEnumerable<FailedInitializationTest> GetFailedToInitializeTests()
+    internal static FailedInitializationTest[] GetFailedToInitializeTests()
     {
-        return FailedInitializationTests.Values.AsParallel();
+        return FailedInitializationTests.Values.ToArray();
     }
 }

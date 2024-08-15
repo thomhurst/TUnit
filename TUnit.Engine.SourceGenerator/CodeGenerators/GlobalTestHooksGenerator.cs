@@ -15,14 +15,14 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                "TUnit.Core.GlobalBeforeAttribute",
+                "TUnit.Core.BeforeEveryAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
         var cleanUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                "TUnit.Core.GlobalAfterAttribute",
+                "TUnit.Core.AfterEveryAttribute",
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
@@ -32,7 +32,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    GlobalTestHooksWriter.Execute(productionContext, model, HookType.SetUp);
+                    GlobalTestHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                 }
             });
         
@@ -41,7 +41,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    GlobalTestHooksWriter.Execute(productionContext, model, HookType.CleanUp);
+                    GlobalTestHooksWriter.Execute(productionContext, model, HookLocationType.After);
                 }
             });
     }
@@ -79,6 +79,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
                     .ToArray(),
                 HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute(),
                 HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(HookExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
             };
         }
     }

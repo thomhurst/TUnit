@@ -16,7 +16,7 @@ public class GlobalTestHooksAnalyzerTests
                             
                             public class Tests
                             {
-                                [GlobalBefore({{hookType}})]
+                                [BeforeEvery({{hookType}})]
                                 public static void SetUp({{classType}} context)
                                 {
                                 }
@@ -37,7 +37,7 @@ public class GlobalTestHooksAnalyzerTests
                      
                      public class Tests
                      {
-                         [GlobalAfter({{hookType}})]
+                         [AfterEvery({{hookType}})]
                          public static void CleanUp({{classType}} context)
                          {
                          }

@@ -27,4 +27,6 @@ public record InstanceHookMethod<TClassType>
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
     
     public required IHookExecutor HookExecutor { get; init; }
+    
+    public required int Order { get; init; }
 }

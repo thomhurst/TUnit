@@ -2,11 +2,15 @@
 
 public partial class TestContext : IDisposable
 {
-    internal EventHandler? OnDispose;
-    
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
-    internal readonly StringWriter OutputWriter = new();
-    internal readonly StringWriter ErrorWriter = new();
+    internal readonly List<Artifact> Artifacts = [];
+
+    internal TestContext(TestDetails testDetails)
+    {
+        TestDetails = testDetails;
+    }
+    
+    public StringWriter Out { get; } = new();
     
     public Task TestTask => TaskCompletionSource.Task;
 
@@ -16,26 +20,21 @@ public partial class TestContext : IDisposable
 
     public List<Timing> Timings { get; } = [];
     public Dictionary<string, object?> ObjectBag { get; } = new();
-
-    public TestContext(TestDetails testDetails)
-    {
-        TestDetails = testDetails;
-    }
     
     public TUnitTestResult? Result { get; internal set; }
 
-    public string GetConsoleStandardOutput()
+    public string GetTestOutput()
     {
-        return OutputWriter.ToString().Trim();
+        return Out.ToString().Trim();
     }
     
-    public string GetConsoleErrorOutput()
+    public void AddArtifact(Artifact artifact)
     {
-        return ErrorWriter.ToString().Trim();
+        Artifacts.Add(artifact);
     }
 
     public void Dispose()
     {
-        OnDispose?.Invoke(this, EventArgs.Empty);
+        Out.Dispose();
     }
 }

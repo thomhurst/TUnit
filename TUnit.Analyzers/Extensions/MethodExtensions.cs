@@ -12,7 +12,7 @@ public static class MethodExtensions
     
     public static bool IsHookMethod(this IMethodSymbol methodSymbol)
     {
-        return methodSymbol.GetAttributes().Any(x => x.IsHook());
+        return methodSymbol.GetAttributes().Any(x => x.IsNonGlobalHook());
     }
     
     public static bool HasTimeoutAttribute(this IMethodSymbol methodSymbol, out AttributeData? timeoutAttribute)

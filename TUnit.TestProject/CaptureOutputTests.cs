@@ -18,7 +18,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(1);
 
-        await Assert.That(TestContext.Current?.GetConsoleStandardOutput()).Is.EqualTo("Blah1");
+        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah1");
     }
     
     [Test]
@@ -26,7 +26,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(2);
 
-        await Assert.That(TestContext.Current?.GetConsoleStandardOutput()).Is.EqualTo("Blah2");
+        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah2");
     }
             
     [Test]
@@ -34,7 +34,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(3);
 
-        await Assert.That(TestContext.Current?.GetConsoleStandardOutput()).Is.EqualTo("Blah3");
+        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah3");
     }
         
     [Test]
@@ -42,7 +42,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(4);
 
-        await Assert.That(TestContext.Current?.GetConsoleStandardOutput()).Is.EqualTo("Blah4");
+        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah4");
     }
         
     [Test]
@@ -50,7 +50,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(5);
 
-        await Assert.That(TestContext.Current?.GetConsoleStandardOutput()).Is.EqualTo("Blah5");
+        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah5");
     }
     
     private class MyClass

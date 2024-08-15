@@ -13,7 +13,7 @@ public record StaticHookMethod<T>
     public required MethodInfo MethodInfo { get; init; }
     public required Func<T, CancellationToken, Task> Body { get; init; }
     private string? _name;
-    public string Name =>  _name ??=$"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
+    public string Name =>  _name ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
     public Type ClassType => MethodInfo.ReflectedType!;
     public Assembly Assembly => ClassType.Assembly;
 
@@ -27,4 +27,6 @@ public record StaticHookMethod<T>
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
     
     public required IHookExecutor HookExecutor { get; init; }
+    
+    public required int Order { get; init; }
 }

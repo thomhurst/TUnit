@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
@@ -27,7 +28,7 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var onlyOnceAttributes = attributes
-                .Where(x => x.IsHook() && x.GetHookType() == Core.HookType.Class)
+                .Where(x => x.IsNonGlobalHook() && x.GetHookType() == Core.HookType.Class)
                 .ToList();
 
         if (!onlyOnceAttributes.Any())
