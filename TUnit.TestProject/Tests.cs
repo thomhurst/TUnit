@@ -13,7 +13,7 @@ public class Tests
     {
         Console.WriteLine("Blah!");
 
-        await Assert.That(TestContext.Current?.GetConsoleStandardOutput()).Is.EqualTo("Blah!", StringComparison.Ordinal);
+        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah!", StringComparison.Ordinal);
     }
     
     [Test]

@@ -14,8 +14,8 @@ internal static class WellKnown
         public static readonly string BeforeAttribute = GetTypeName(typeof(BeforeAttribute));
         public static readonly string AfterAttribute = GetTypeName(typeof(AfterAttribute));
 
-        public static readonly string GlobalBeforeAttribute = GetTypeName(typeof(GlobalBeforeAttribute));
-        public static readonly string GlobalAfterAttribute = GetTypeName(typeof(GlobalAfterAttribute));
+        public static readonly string BeforeEveryAttribute = GetTypeName(typeof(BeforeEveryAttribute));
+        public static readonly string AfterEveryAttribute = GetTypeName(typeof(AfterEveryAttribute));
         
         public static readonly string Test = GetTypeName(typeof(TestAttribute));
         public static readonly string Arguments = GetTypeName(typeof(ArgumentsAttribute));

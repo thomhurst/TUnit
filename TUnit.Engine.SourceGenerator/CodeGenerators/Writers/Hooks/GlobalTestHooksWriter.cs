@@ -7,7 +7,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 
 internal static class GlobalTestHooksWriter
 {
-    public static void Execute(SourceProductionContext context, HooksDataModel model, HookType hookType)
+    public static void Execute(SourceProductionContext context, HooksDataModel model, HookLocationType hookLocationType)
     {
         var className = $"GlobalStaticTestHooks_{model.MinimalTypeName}";
         var fileName = $"{className}_{Guid.NewGuid():N}";
@@ -33,27 +33,29 @@ internal static class GlobalTestHooksWriter
         sourceBuilder.WriteLine("public static void Initialise()");
         sourceBuilder.WriteLine("{");
 
-        if (hookType == HookType.SetUp)
+        if (hookLocationType == HookLocationType.Before)
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalStaticTestHookOrchestrator.RegisterSetUp(new StaticHookMethod<{{GetClassType(model.HookLevel)}}>
+                  GlobalStaticTestHookOrchestrator.RegisterBeforeHook(new StaticHookMethod<{{GetClassType(model.HookLevel, hookLocationType)}}>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
+                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model, hookLocationType)}})),
                              HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
+                             Order = {{model.Order}},
                   		});
                   """);
         }
-        else if (hookType == HookType.CleanUp)
+        else if (hookLocationType == HookLocationType.After)
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalStaticTestHookOrchestrator.RegisterCleanUp(new StaticHookMethod<{{GetClassType(model.HookLevel)}}>
+                  GlobalStaticTestHookOrchestrator.RegisterAfterHook(new StaticHookMethod<{{GetClassType(model.HookLevel, hookLocationType)}}>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
+                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model, hookLocationType)}})),
                              HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
+                             Order = {{model.Order}},
                   		});
                   """);
         }
@@ -64,18 +66,25 @@ internal static class GlobalTestHooksWriter
         context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
     }
 
-    private static string GetClassType(Core.HookType hookType)
+    private static string GetClassType(Core.HookType hookType, HookLocationType hookLocationType)
     {
+        if (hookType == Core.HookType.TestDiscovery && hookLocationType == HookLocationType.Before)
+        {
+            return "BeforeTestDiscoveryContext";
+        }
+        
         return hookType switch
         {
             Core.HookType.EachTest => "TestContext",
             Core.HookType.Class => "ClassHookContext",
             Core.HookType.Assembly => "AssemblyHookContext",
+            Core.HookType.TestSession => "TestSessionContext",
+            Core.HookType.TestDiscovery => "TestDiscoveryContext",
             _ => throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null)
         };
     }
 
-    private static string GetArgs(HooksDataModel model)
+    private static string GetArgs(HooksDataModel model, HookLocationType hookLocationType)
     {
         List<string> args = [];
 
@@ -84,6 +93,10 @@ internal static class GlobalTestHooksWriter
             Core.HookType.EachTest => WellKnownFullyQualifiedClassNames.TestContext,
             Core.HookType.Class => WellKnownFullyQualifiedClassNames.ClassHookContext,
             Core.HookType.Assembly => WellKnownFullyQualifiedClassNames.AssemblyHookContext,
+            Core.HookType.TestSession => WellKnownFullyQualifiedClassNames.TestSessionContext,
+            Core.HookType.TestDiscovery when hookLocationType == HookLocationType.Before => WellKnownFullyQualifiedClassNames.BeforeTestDiscoveryContext,
+            Core.HookType.TestDiscovery when hookLocationType == HookLocationType.After => WellKnownFullyQualifiedClassNames.TestDiscoveryContext,
+            _ => throw new ArgumentOutOfRangeException()
         };
         
         foreach (var type in model.ParameterTypes)

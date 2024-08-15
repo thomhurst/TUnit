@@ -1,18 +1,20 @@
 ﻿using System.Globalization;
 using System.Text;
+using Microsoft.Testing.Platform.CommandLine;
+using TUnit.Engine.CommandLineProviders;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
 namespace TUnit.Engine.Logging;
 
-internal abstract class ConsoleInterceptor : TextWriter
+internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOptions) : TextWriter
 {
-    public override Encoding Encoding => RedirectedOutputWriter?.Encoding ?? Encoding.UTF8;
+    public override Encoding Encoding => RedirectedOut?.Encoding ?? Encoding.UTF8;
 
-    protected abstract StringWriter? RedirectedOutputWriter { get; }
+    protected abstract StringWriter? RedirectedOut { get; }
 
     private TextWriter? _outputWriter;
-    private TextWriter? OutputWriter => _outputWriter ??= new DualTextWriter(GetOriginalOut(), RedirectedOutputWriter);
+    private TextWriter? OutputWriter => _outputWriter ??= !commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput) ? new DualTextWriter(GetOriginalOut(), RedirectedOut) : RedirectedOut;
     
     private protected abstract TextWriter GetOriginalOut();
     
@@ -22,7 +24,7 @@ internal abstract class ConsoleInterceptor : TextWriter
     {
         await base.DisposeAsync();
         
-        await (RedirectedOutputWriter?.DisposeAsync() ?? ValueTask.CompletedTask);
+        await (RedirectedOut?.DisposeAsync() ?? ValueTask.CompletedTask);
         
         ResetDefault();
     }

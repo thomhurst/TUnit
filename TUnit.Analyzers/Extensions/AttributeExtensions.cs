@@ -23,7 +23,7 @@ public static class AttributeExtensions
         return attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
     
-    public static bool IsHook(this AttributeData attributeData)
+    public static bool IsNonGlobalHook(this AttributeData attributeData)
     {
         var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
         return displayString == WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute ||
@@ -33,8 +33,8 @@ public static class AttributeExtensions
     public static bool IsGlobalHook(this AttributeData attributeData)
     {
         var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-        return displayString == WellKnown.AttributeFullyQualifiedClasses.GlobalBeforeAttribute ||
-               displayString == WellKnown.AttributeFullyQualifiedClasses.GlobalAfterAttribute;
+        return displayString == WellKnown.AttributeFullyQualifiedClasses.BeforeEveryAttribute ||
+               displayString == WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute;
     }
 
     public static Core.HookType GetHookType(this AttributeData attributeData)

@@ -29,10 +29,17 @@
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <None Include="$(OutputPath)\TUnit.Core.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPackTarget)' != 'true'">
-    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" PrivateAssets="all" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
-    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
-  </ItemGroup>
+
+  <PropertyGroup>
+    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GetDependencyTargetPaths">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll" IncludeRuntimeDependency="false"/>
+    </ItemGroup>
+  </Target>
 </Project>

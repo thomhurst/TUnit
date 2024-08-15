@@ -4,13 +4,13 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-internal class DisplayTestOutputCommandProvider : ICommandLineOptionsProvider
+internal class HideTestOutputCommandProvider : ICommandLineOptionsProvider
 {
-    public const string DisplayTestOutput = "display-test-output";
+    public const string HideTestOutput = "hide-test-output";
     
     private readonly IExtension _extension;
 
-    public DisplayTestOutputCommandProvider(IExtension extension)
+    public HideTestOutputCommandProvider(IExtension extension)
     {
         _extension = extension;
     }
@@ -32,7 +32,7 @@ internal class DisplayTestOutputCommandProvider : ICommandLineOptionsProvider
     {
         return
         [
-            new CommandLineOption(DisplayTestOutput, "Display Test Output", ArgumentArity.Zero, false)
+            new CommandLineOption(HideTestOutput, "Hide Test Output", ArgumentArity.Zero, false)
         ];
     }
 

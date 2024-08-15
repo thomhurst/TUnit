@@ -128,6 +128,9 @@ internal static class Rules
 
     public static readonly DiagnosticDescriptor SingleAssemblyHookContextParameterRequired =
         CreateDescriptor("TUnit0041", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor GlobalHooksSeparateClass =
+        CreateDescriptor("TUnit0042", UsageCategory, DiagnosticSeverity.Warning);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
@@ -59,7 +60,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
 #if LAUNCH_DEBUGGER
-        Debugger.Launch();
+        System.Diagnostics.Debugger.Launch();
 #endif
         
         EngineCancellationToken.Initialise(context.CancellationToken);
@@ -69,10 +70,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             try
             {
                 _initializer.Initialize();
+
+                await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
                 
                 var discoveredTests = _testDiscover.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken);
 
                 var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
+                
+                await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
 
                 switch (context.Request)
                 {
@@ -93,8 +98,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     }
                     case RunTestExecutionRequest runTestExecutionRequest:
                         await NotifyFailedTests(context, failedToInitializeTests, false);
+
+                        var testSessionContext = new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
+                        
+                        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
                     
-                        await _testsExecutor.ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
+                        await _testsExecutor.ExecuteAsync(discoveredTests.AsParallel(), runTestExecutionRequest.Filter, context);
+                        
+                        await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
+
+                        foreach (var artifact in testSessionContext.Artifacts)
+                        {
+                            await context.MessageBus.PublishAsync(this, new SessionFileArtifact(context.Request.Session.SessionUid, artifact.File, artifact.DisplayName, artifact.Description));
+                        }
+
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
@@ -166,6 +183,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public Type[] DataTypesProduced { get; } =
     [
-        typeof(TestNodeUpdateMessage)
+        typeof(TestNodeUpdateMessage),
+        typeof(SessionFileArtifact)
     ];
 }

@@ -3,17 +3,27 @@
 public enum HookType
 { 
     /// <summary>
-    /// Instance hook to run before/after every test in the same class
+    /// Hook to run before/after every test in the same class
     /// </summary>
     EachTest,
     
     /// <summary>
-    /// Static hook to run once on class set up and tear down
+    /// Hook to run once per class before/after all tests in the class
     /// </summary>
     Class,
     
     /// <summary>
-    /// Static hook to run once on assembly set up and tear down
+    /// Hook to run once per assembly before/after all tests in the assembly
     /// </summary>
     Assembly,
+        
+    /// <summary>
+    /// Hook to run once per test session on test session set up/tear down
+    /// </summary>
+    TestSession,
+        
+    /// <summary>
+    /// Hook to run before/after test discovery
+    /// </summary>
+    TestDiscovery,
 }

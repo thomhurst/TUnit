@@ -31,8 +31,6 @@ internal class BannerCapability : IBannerMessageOwnerCapability
                
                {GetRuntimeDetails()}
                
-               {GetBuildDetails()}
-               
             """
         );
     }
@@ -46,23 +44,7 @@ internal class BannerCapability : IBannerMessageOwnerCapability
         segments.Add(RuntimeInformation.OSDescription);
         segments.Add(RuntimeInformation.RuntimeIdentifier);
         segments.Add(RuntimeInformation.FrameworkDescription);
-        
-        return string.Join(Separator, segments);
-    }
-    
-    private string GetBuildDetails()
-    {
-        var segments = new List<string>();
-        
-        if (_platformInformation.BuildDate != null)
-        {
-            segments.Add(_platformInformation.BuildDate.Value.ToString());
-        }
-        
-        if (_platformInformation.CommitHash != null)
-        {
-            segments.Add($"Commit #{_platformInformation.CommitHash}");
-        }
+        segments.Add($"Microsoft Testing Platform v{_platformInformation.Version}");
         
         return string.Join(Separator, segments);
     }

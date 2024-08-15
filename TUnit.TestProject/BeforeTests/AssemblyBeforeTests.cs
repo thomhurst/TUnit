@@ -94,16 +94,4 @@ public class AssemblySetupTests : AssemblyBase3
     {
         await Task.CompletedTask;
     }
-
-    [Test]
-    public async Task Test1()
-    {
-        await Task.CompletedTask;
-    }
-    
-    [Test]
-    public async Task Test2()
-    {
-        await Task.CompletedTask;
-    }
 }

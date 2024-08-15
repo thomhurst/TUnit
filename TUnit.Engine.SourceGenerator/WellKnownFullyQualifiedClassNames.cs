@@ -26,4 +26,13 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName CancellationToken = typeof(CancellationToken);
     public static readonly FullyQualifiedTypeName AssemblyHookContext = typeof(AssemblyHookContext);
     public static readonly FullyQualifiedTypeName ClassHookContext = typeof(ClassHookContext);
+    public static readonly FullyQualifiedTypeName TestSessionContext = typeof(TestSessionContext);
+    public static readonly FullyQualifiedTypeName TestDiscoveryContext = typeof(TestDiscoveryContext);
+    public static readonly FullyQualifiedTypeName BeforeTestDiscoveryContext = typeof(BeforeTestDiscoveryContext);
+    
+    public static readonly FullyQualifiedTypeName BeforeAttribute = typeof(BeforeAttribute);
+    public static readonly FullyQualifiedTypeName AfterAttribute = typeof(AfterAttribute);
+        
+    public static readonly FullyQualifiedTypeName BeforeEveryAttribute = typeof(BeforeEveryAttribute);
+    public static readonly FullyQualifiedTypeName AfterEveryAttribute = typeof(AfterEveryAttribute);
 }

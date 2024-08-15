@@ -42,4 +42,18 @@ public static class AttributeDataExtensions
 
         return WellKnownFullyQualifiedClassNames.MatrixAttribute.WithGlobalPrefix == displayString;
     }
+    
+    public static bool IsNonGlobalHook(this AttributeData attributeData)
+    {
+        var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+        return displayString == WellKnownFullyQualifiedClassNames.BeforeAttribute.WithGlobalPrefix ||
+               displayString == WellKnownFullyQualifiedClassNames.AfterAttribute.WithGlobalPrefix;
+    }
+    
+    public static bool IsGlobalHook(this AttributeData attributeData)
+    {
+        var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+        return displayString == WellKnownFullyQualifiedClassNames.BeforeEveryAttribute.WithGlobalPrefix ||
+               displayString == WellKnownFullyQualifiedClassNames.AfterEveryAttribute.WithGlobalPrefix;
+    }
 }

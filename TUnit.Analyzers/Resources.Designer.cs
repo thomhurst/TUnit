@@ -1165,5 +1165,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0041Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class..
+        /// </summary>
+        internal static string TUnit0042Description {
+            get {
+                return ResourceManager.GetString("TUnit0042Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class..
+        /// </summary>
+        internal static string TUnit0042MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0042MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class..
+        /// </summary>
+        internal static string TUnit0042Title {
+            get {
+                return ResourceManager.GetString("TUnit0042Title", resourceCulture);
+            }
+        }
     }
 }

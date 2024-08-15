@@ -387,4 +387,13 @@
     <data name="TUnit0041Title" xml:space="preserve">
         <value>Single parameter of `AssemblyHookContext` required</value>
     </data>
+    <data name="TUnit0042Description" xml:space="preserve">
+        <value>Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.</value>
+    </data>
+    <data name="TUnit0042MessageFormat" xml:space="preserve">
+        <value>Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.</value>
+    </data>
+    <data name="TUnit0042Title" xml:space="preserve">
+        <value>Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.</value>
+    </data>
 </root>

@@ -10,7 +10,7 @@ namespace TUnit.Analyzers;
 public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic, Rules.UnknownParameters);
+        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic, Rules.UnknownParameters, Rules.GlobalHooksSeparateClass);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -27,7 +27,7 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var onlyOnceAttributes = attributes
-            .Where(x => x.IsHook() && x.GetHookType() == Core.HookType.Assembly)
+            .Where(x => x.IsNonGlobalHook() && x.GetHookType() == Core.HookType.Assembly)
             .ToList();
 
         if (!onlyOnceAttributes.Any())
@@ -61,6 +61,13 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(Rules.UnknownParameters,
                 context.Symbol.Locations.FirstOrDefault(),
                 "empty or only contain `AssemblyHookContext` and `CancellationToken`")
+            );
+        }
+
+        if (methodSymbol.ContainingType.IsTestClass())
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.GlobalHooksSeparateClass,
+                context.Symbol.Locations.FirstOrDefault())
             );
         }
     }

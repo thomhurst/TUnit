@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core;
 using TUnit.Core.Executors;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Engine.SourceGenerator.Enums;
@@ -32,17 +33,21 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == Core.HookType.EachTest)
+                    if (model.HookLevel == HookType.EachTest)
                     {
-                        TestHooksWriter.Execute(productionContext, model, HookType.SetUp);
+                        TestHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
-                    else if (model.HookLevel == Core.HookType.Class)
+                    else if (model.HookLevel == HookType.Class)
                     {
-                        ClassHooksWriter.Execute(productionContext, model, HookType.SetUp);
+                        ClassHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
-                    else if (model.HookLevel == Core.HookType.Assembly)
+                    else if (model.HookLevel == HookType.Assembly)
                     {
-                        AssemblyHooksWriter.Execute(productionContext, model, HookType.SetUp);
+                        AssemblyHooksWriter.Execute(productionContext, model, HookLocationType.Before);
+                    }
+                    else if (model.HookLevel is HookType.TestDiscovery or HookType.TestSession)
+                    {
+                        GlobalTestHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
                 }
             });
@@ -52,17 +57,21 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == Core.HookType.EachTest)
+                    if (model.HookLevel == HookType.EachTest)
                     {
-                        TestHooksWriter.Execute(productionContext, model, HookType.CleanUp);
+                        TestHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
-                    else if (model.HookLevel == Core.HookType.Class)
+                    else if (model.HookLevel == HookType.Class)
                     {
-                        ClassHooksWriter.Execute(productionContext, model, HookType.CleanUp);
+                        ClassHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
-                    else if (model.HookLevel == Core.HookType.Assembly)
+                    else if (model.HookLevel == HookType.Assembly)
                     {
-                        AssemblyHooksWriter.Execute(productionContext, model, HookType.CleanUp);
+                        AssemblyHooksWriter.Execute(productionContext, model, HookLocationType.After);
+                    }
+                    else if (model.HookLevel is HookType.TestDiscovery or HookType.TestSession)
+                    {
+                        GlobalTestHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
                 }
             });
@@ -82,7 +91,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
 
         foreach (var contextAttribute in context.Attributes)
         {
-            var hookLevel = (Core.HookType) Enum.ToObject(typeof(Core.HookType), contextAttribute.ConstructorArguments[0].Value!);
+            var hookLevel = (HookType) Enum.ToObject(typeof(HookType), contextAttribute.ConstructorArguments[0].Value!);
 
             yield return new HooksDataModel
             {
@@ -96,6 +105,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
                     .ToArray(),
                 HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute(),
                 HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(HookExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
             };
         }
     }

@@ -37,4 +37,12 @@
   <ItemGroup>
     <Folder Include="Attributes\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Data\Blah.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Zip.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

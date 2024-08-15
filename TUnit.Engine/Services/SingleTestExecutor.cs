@@ -66,42 +66,45 @@ internal class SingleTestExecutor : IDataProducer
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
             }
             
-            foreach (var applicableTestAttribute in test.BeforeTestAttributes)
+            foreach (var beforeTestAttribute in test.BeforeTestAttributes)
             {
-                await Timings.Record($"{applicableTestAttribute.GetType().Name}.OnBeforeTest", testContext,
-                    () => applicableTestAttribute.OnBeforeTest(testContext));
+                await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
+                    () => beforeTestAttribute.OnBeforeTest(testContext));
             }
 
             try
             {
-                await AssemblyHookOrchestrator.ExecuteSetups(test.TestContext.TestDetails.ClassType.Assembly, testContext);
-                await ClassHookOrchestrator.ExecuteSetups(test.TestContext.TestDetails.ClassType, testContext);
+                await AssemblyHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly,
+                    testContext);
+                await ClassHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType, testContext);
                 await ExecuteWithRetries(test, cleanUpExceptions);
+            }
+            catch (Exception exception)
+            {
+                cleanUpExceptions.Add(exception);
+                throw;
             }
             finally
             {
                 await DecrementSharedData(test);
                 
-                foreach (var applicableTestAttribute in test.AfterTestAttributes)
+                foreach (var afterTestAttribute in test.AfterTestAttributes)
                 {
-                    await Timings.Record($"{applicableTestAttribute.GetType().Name}.OnAfterTest", testContext,
-                        () => RunHelpers.RunSafelyAsync(() => applicableTestAttribute.OnAfterTest(testContext),
+                    await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
+                        () => RunHelpers.RunSafelyAsync(() => afterTestAttribute.OnAfterTest(testContext),
                             cleanUpExceptions));
                 }
                 
                 await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
                 await AssemblyHookOrchestrator.ExecuteCleanups(test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
+
+                foreach (var artifact in testContext.Artifacts)
+                {
+                    await context.MessageBus.PublishAsync(this, new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(), artifact.File, artifact.DisplayName, artifact.Description));
+                }
             }
 
-            if (cleanUpExceptions.Count == 1)
-            {
-                throw cleanUpExceptions[0];
-            }
-            
-            if (cleanUpExceptions.Count > 1)
-            {
-                throw new AggregateException(cleanUpExceptions);
-            }
+            ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
             
             var timingProperty = GetTimingProperty(testContext);
             
@@ -121,7 +124,7 @@ internal class SingleTestExecutor : IDataProducer
                 ComputerName = Environment.MachineName,
                 Exception = null,
                 Status = Status.Passed,
-                Output = testContext.GetConsoleStandardOutput()
+                Output = testContext.GetTestOutput()
             };
         }
         catch (SkipTestException skipTestException)
@@ -164,7 +167,7 @@ internal class SingleTestExecutor : IDataProducer
                 ComputerName = Environment.MachineName,
                 Exception = e,
                 Status = Status.Failed,
-                Output = testContext.GetConsoleStandardOutput()
+                Output = testContext.GetTestOutput()
             };
         }
         finally
@@ -205,7 +208,7 @@ internal class SingleTestExecutor : IDataProducer
         return new FailedTestNodeStateProperty(e);
     }
 
-    private async Task Dispose(TestContext testContext)
+    private async ValueTask Dispose(TestContext testContext)
     {
         var testInformation = testContext.TestDetails;
 
@@ -222,7 +225,7 @@ internal class SingleTestExecutor : IDataProducer
         await _disposer.DisposeAsync(testContext);
     }
 
-    private async Task DisposeInjectedData(TestData? testData)
+    private async ValueTask DisposeInjectedData(TestData? testData)
     {
         if (testData?.InjectedDataType 
             is InjectedDataType.SharedGlobally 
@@ -239,7 +242,7 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
     
-    private static async Task DecrementSharedData(DiscoveredTest discoveredTest)
+    private static async ValueTask DecrementSharedData(DiscoveredTest discoveredTest)
     {
         foreach (var methodArgument in discoveredTest.TestContext.TestDetails.InternalTestMethodArguments)
         {
@@ -268,17 +271,15 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task RunTest(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions,
+    private Task RunTest(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions,
         CancellationToken cancellationToken)
     {
-        StandardOutConsoleInterceptor.Instance.SetModule(discoveredTest.TestContext);
-        StandardErrorConsoleInterceptor.Instance.SetModule(discoveredTest.TestContext);
-        await _testInvoker.Invoke(discoveredTest, cleanUpExceptions, cancellationToken);
+        return _testInvoker.Invoke(discoveredTest, cleanUpExceptions, cancellationToken);
     }
 
     private readonly AsyncSemaphore _consoleStandardOutLock = new(1);
 
-    private async Task ExecuteWithRetries(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
     {
         var testInformation = discoveredTest.TestContext.TestDetails;
         var retryCount = testInformation.RetryLimit;
@@ -306,7 +307,7 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task<bool> ShouldRetry(TestContext context, Exception e, int currentRetryCount)
+    private async ValueTask<bool> ShouldRetry(TestContext context, Exception e, int currentRetryCount)
     {
         try
         {
@@ -326,7 +327,7 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task ExecuteCore(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async ValueTask ExecuteCore(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
     {
         if (_cancellationTokenSource.IsCancellationRequested)
         {
@@ -336,12 +337,19 @@ internal class SingleTestExecutor : IDataProducer
         await ExecuteTestMethodWithTimeout(discoveredTest, cleanUpExceptions);
     }
 
-    private async Task WaitForDependsOnTests(TestContext testContext)
+    private async ValueTask WaitForDependsOnTests(TestContext testContext)
     {
         foreach (var dependency in GetDependencies(testContext.TestDetails))
         {
             AssertDoNotDependOnEachOther(testContext, dependency);
-            await dependency.TestTask;
+            try
+            {
+                await dependency.TestTask;
+            }
+            catch (Exception e)
+            {
+                throw new InconclusiveTestException($"A dependency has failed: {dependency.TestDetails.TestName}", e);
+            }
         }
     }
 
@@ -424,6 +432,7 @@ internal class SingleTestExecutor : IDataProducer
 
     public Type[] DataTypesProduced { get; } =
     [
-        typeof(TestNodeUpdateMessage)
+        typeof(TestNodeUpdateMessage),
+        typeof(TestNodeFileArtifact)
     ];
 }
