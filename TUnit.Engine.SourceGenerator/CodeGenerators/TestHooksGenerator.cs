@@ -33,7 +33,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == HookType.EachTest)
+                    if (model.HookLevel == HookType.Test)
                     {
                         TestHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
@@ -57,7 +57,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == HookType.EachTest)
+                    if (model.HookLevel == HookType.Test)
                     {
                         TestHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }

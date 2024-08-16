@@ -4,13 +4,13 @@ public class DisposableFieldTests
 {
     private HttpClient? _httpClient;
 
-    [Before(EachTest)]
+    [Before(Test)]
     public void Setup()
     {
         _httpClient = new HttpClient();
     }
 
-    [After(EachTest)]
+    [After(Test)]
     public void Blah()
     {
         _httpClient?.Dispose();

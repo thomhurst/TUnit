@@ -8,7 +8,7 @@ public class Base1
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task AfterEach1()
     {
         await Task.CompletedTask;
@@ -23,7 +23,7 @@ public class Base2 : Base1
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task AfterEach2()
     {
         await Task.CompletedTask;
@@ -38,7 +38,7 @@ public class Base3 : Base2
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task AfterEach3()
     {
         await Task.CompletedTask;
@@ -71,25 +71,25 @@ public class CleanupTests : Base3
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task Cleanup()
     {
         await Task.CompletedTask;
     }
     
-    [After(EachTest), Timeout(30_000)]
+    [After(Test), Timeout(30_000)]
     public async Task Cleanup(CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task CleanupWithContext(TestContext testContext)
     {
         await Task.CompletedTask;
     }
     
-    [After(EachTest), Timeout(30_000)]
+    [After(Test), Timeout(30_000)]
     public async Task CleanupWithContext(TestContext testContext, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;

@@ -57,7 +57,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var expectedHookType = field.IsStatic
             ? Core.HookType.Class
-            : Core.HookType.EachTest;
+            : Core.HookType.Test;
             
         var methodsRequiringDisposeCall = field.ContainingType.GetMembers()
             .Where(x => x.IsStatic == field.IsStatic)
@@ -119,7 +119,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var expectedHookType = property.IsStatic
                 ? Core.HookType.Class
-                : Core.HookType.EachTest;
+                : Core.HookType.Test;
             
         var methodsRequiringDisposeCall = property.ContainingType.GetMembers()
             .Where(x => x.IsStatic == property.IsStatic)

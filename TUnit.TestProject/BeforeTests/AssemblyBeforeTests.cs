@@ -8,7 +8,7 @@ public class AssemblyBase1
         await Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task BeforeEach1()
     {
         await Task.CompletedTask;
@@ -23,7 +23,7 @@ public class AssemblyBase2 : AssemblyBase1
         await Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task BeforeEach2()
     {
         await Task.CompletedTask;
@@ -38,7 +38,7 @@ public class AssemblyBase3 : AssemblyBase2
         await Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task BeforeEach3()
     {
         await Task.CompletedTask;
@@ -71,25 +71,25 @@ public class AssemblySetupTests : AssemblyBase3
         await Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task Setup()
     {
         await Task.CompletedTask;
     }
     
-    [Before(EachTest), Timeout(30_000)]
+    [Before(Test), Timeout(30_000)]
     public async Task Setup(CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task SetupWithContext(TestContext testContext)
     {
         await Task.CompletedTask;
     }
     
-    [Before(EachTest), Timeout(30_000)]
+    [Before(Test), Timeout(30_000)]
     public async Task SetupWithContext(TestContext testContext, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;

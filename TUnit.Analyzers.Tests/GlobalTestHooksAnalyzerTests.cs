@@ -5,7 +5,7 @@ namespace TUnit.Analyzers.Tests;
 
 public class GlobalTestHooksAnalyzerTests
 {
-    [TestCase("EachTest", "TestContext")]
+    [TestCase("Test", "TestContext")]
     [TestCase("Class", "ClassHookContext")]
     [TestCase("Assembly", "AssemblyHookContext")]
     public async Task Before_No_Error(string hookType, string classType)
@@ -26,7 +26,7 @@ public class GlobalTestHooksAnalyzerTests
         await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
     }
     
-    [TestCase("EachTest", "TestContext")]
+    [TestCase("Test", "TestContext")]
     [TestCase("Class", "ClassHookContext")]
     [TestCase("Assembly", "AssemblyHookContext")]
     public async Task After_No_Error(string hookType, string classType)

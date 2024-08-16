@@ -38,20 +38,24 @@ Here are TUnit's equivalent attributes to other test frameworks.
 
 ## Lifecycle Hook Attributes
 
-| TUnit                    | xUnit                                      | NUnit                              | MSTest               |
-| ------------------------ | ------------------------------------------ | ---------------------------------- | -------------------- |
-| [Before(EachTest)]       | `< Constructor >`                          | [SetUp]                            | [TestInitialize]     |
-| [After(EachTest)]        | `IDisposable.Dispose`                      | [TearDown]                         | [TestCleanup]        |
-| [Before(Class)]          | `IClassFixture<T>`                         | [OneTimeSetUp]                     | [ClassInitialize]    |
-| [After(Class)]           | `IClassFixture<T>` + `IDisposable.Dispose` | [OneTimeTearDown]                  | [ClassCleanup]       |
-| [Before(Assembly)]       | -                                          | [SetUpFixture] + [OneTimeSetUp]    | [AssemblyInitialize] |
-| [After(Assembly)]        | -                                          | [SetUpFixture] + [OneTimeTearDown] | [AssemblyCleanup]    |
-| [GlobalBefore(EachTest)] | -                                          | -                                  | -                    |
-| [GlobalAfter(EachTest)]  | -                                          | -                                  | -                    |
-| [GlobalBefore(Class)]    | -                                          | -                                  | -                    |
-| [GlobalAfter(Class)]     | -                                          | -                                  | -                    |
-| [GlobalBefore(Assembly)] | -                                          | -                                  | -                    |
-| [GlobalAfter(Assembly)]  | -                                          | -                                  | -                    |
+| TUnit                   | xUnit                                      | NUnit                              | MSTest               |
+| ----------------------- | ------------------------------------------ | ---------------------------------- | -------------------- |
+| [Before(Test)]          | `< Constructor >`                          | [SetUp]                            | [TestInitialize]     |
+| [After(Test)]           | `IDisposable.Dispose`                      | [TearDown]                         | [TestCleanup]        |
+| [Before(Class)]         | `IClassFixture<T>`                         | [OneTimeSetUp]                     | [ClassInitialize]    |
+| [After(Class)]          | `IClassFixture<T>` + `IDisposable.Dispose` | [OneTimeTearDown]                  | [ClassCleanup]       |
+| [Before(Assembly)]      | -                                          | [SetUpFixture] + [OneTimeSetUp]    | [AssemblyInitialize] |
+| [After(Assembly)]       | -                                          | [SetUpFixture] + [OneTimeTearDown] | [AssemblyCleanup]    |
+| [Before(TestSession)]   | -                                          | -                                  | -                    |
+| [After(TestSession)]    | -                                          | -                                  | -                    |
+| [Before(TestDiscovery)] | -                                          | -                                  | -                    |
+| [After(TestDiscovery)]  | -                                          | -                                  | -                    |
+| [BeforeEvery(Test)]     | -                                          | -                                  | -                    |
+| [AfterEvery(Test)]      | -                                          | -                                  | -                    |
+| [BeforeEvery(Class)]    | -                                          | -                                  | -                    |
+| [AfterEvery(Class)]     | -                                          | -                                  | -                    |
+| [BeforeEvery(Assembly)] | -                                          | -                                  | -                    |
+| [AfterEvery(Assembly)]  | -                                          | -                                  | -                    |
 
 ## Metadata Attributes
 

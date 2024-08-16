@@ -8,7 +8,7 @@ public class NonBase : Base1
         return Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(HookType.Test)]
     public Task NonBaseSetUp()
     {
         return Task.CompletedTask;

@@ -6,13 +6,13 @@ namespace TUnit.TestProject;
 
 public class STAThreadTests
 {
-    [Before(EachTest)]
+    [Before(Test)]
     [HookExecutor<STAThreadExecutor>]
     public void BeforeTest()
     {
     }
     
-    [After(EachTest)]
+    [After(Test)]
     [HookExecutor<STAThreadExecutor>]
     public void AfterTest()
     {
