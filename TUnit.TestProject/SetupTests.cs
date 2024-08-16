@@ -17,7 +17,7 @@ public class Base1
         await Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task BeforeEach1()
     {
         await Task.CompletedTask;
@@ -32,7 +32,7 @@ public class Base2 : Base1
         await Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task BeforeEach2()
     {
         await Task.CompletedTask;
@@ -47,7 +47,7 @@ public class Base3 : Base2
         await Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task BeforeEach3()
     {
         await Task.CompletedTask;
@@ -101,13 +101,13 @@ public class SetupTests : Base3
         await _app.DisposeAsync();
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public async Task Setup()
     {
         _response = await new HttpClient().GetAsync($"{_serverAddress}/ping/?testName={TestContext.Current?.TestDetails.TestName}");
     }
 
-    [After(EachTest)]
+    [After(Test)]
     public void Dispose()
     {
         _response?.Dispose();

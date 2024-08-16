@@ -8,7 +8,7 @@ public class Base1 : Base2
         return Task.CompletedTask;
     }
     
-    [Before(EachTest)]
+    [Before(Test)]
     public Task Base1SetUp()
     {
         return Task.CompletedTask;

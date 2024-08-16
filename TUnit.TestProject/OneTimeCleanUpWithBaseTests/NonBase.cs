@@ -8,7 +8,7 @@ public class NonBase : Base1
         return Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(HookType.Test)]
     public Task NonBaseCleanUp()
     {
         return Task.CompletedTask;

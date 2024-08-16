@@ -4,13 +4,13 @@ public class AsyncDisposablePropertyTests
 {
     public TextWriter? TextWriter { get; private set; }
 
-    [Before(EachTest)]
+    [Before(Test)]
     public void Setup()
     {
         TextWriter = new StringWriter();
     }
 
-    [After(EachTest)]
+    [After(Test)]
     public async Task Blah()
     {
         await TextWriter!.DisposeAsync();

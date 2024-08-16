@@ -66,7 +66,7 @@ public class PublicMethodMissingTestAttributeAnalyzerTests
                                 {
                                 }
                                 
-                                [Before(HookType.EachTest)]
+                                [Before(HookType.Test)]
                                 public void SetUp()
                                 {
                                 }
@@ -89,7 +89,7 @@ public class PublicMethodMissingTestAttributeAnalyzerTests
                                 {
                                 }
                                 
-                                [After(HookType.EachTest)]
+                                [After(HookType.Test)]
                                 public void SetUp()
                                 {
                                 }

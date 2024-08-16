@@ -1,6 +1,7 @@
 ﻿using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.CommandLineProviders;
 

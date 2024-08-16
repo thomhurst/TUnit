@@ -5,7 +5,7 @@ public enum HookType
     /// <summary>
     /// Hook to run before/after every test in the same class
     /// </summary>
-    EachTest,
+    Test,
     
     /// <summary>
     /// Hook to run once per class before/after all tests in the class

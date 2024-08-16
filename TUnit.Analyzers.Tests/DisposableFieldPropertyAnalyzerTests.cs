@@ -16,7 +16,7 @@ public class DisposableFieldPropertyAnalyzerTests
                             {
                                 {|#0:private HttpClient _httpClient;|}
                             
-                                [Before(HookType.EachTest)]
+                                [Before(HookType.Test)]
                                 public void Setup()
                                 {
                                     _httpClient = new HttpClient();

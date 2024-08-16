@@ -8,7 +8,7 @@ public class Base2
         return Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public Task Base2CleanUp()
     {
         return Task.CompletedTask;

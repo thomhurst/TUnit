@@ -67,7 +67,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         
         foreach (var attributeData in globalHooks)
         {
-            if (attributeData.GetHookType() == Core.HookType.EachTest
+            if (attributeData.GetHookType() == Core.HookType.Test
                 && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));

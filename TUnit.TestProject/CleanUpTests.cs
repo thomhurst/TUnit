@@ -8,7 +8,7 @@ public class CleanUpBase1
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task AfterEach1()
     {
         await Task.CompletedTask;
@@ -23,7 +23,7 @@ public class CleanUpBase2 : CleanUpBase1
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task AfterEach2()
     {
         await Task.CompletedTask;
@@ -38,7 +38,7 @@ public class CleanUpBase3 : CleanUpBase2
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task AfterEach3()
     {
         await Task.CompletedTask;
@@ -53,7 +53,7 @@ public class CleanUpTests : CleanUpBase3, IDisposable
         await Task.CompletedTask;
     }
     
-    [After(EachTest)]
+    [After(Test)]
     public async Task CleanUp()
     {
         await Task.CompletedTask;

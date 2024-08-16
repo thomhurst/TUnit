@@ -75,7 +75,7 @@ internal static class GlobalTestHooksWriter
         
         return hookType switch
         {
-            Core.HookType.EachTest => "TestContext",
+            Core.HookType.Test => "TestContext",
             Core.HookType.Class => "ClassHookContext",
             Core.HookType.Assembly => "AssemblyHookContext",
             Core.HookType.TestSession => "TestSessionContext",
@@ -90,7 +90,7 @@ internal static class GlobalTestHooksWriter
 
         var expectedType = model.HookLevel switch
         {
-            Core.HookType.EachTest => WellKnownFullyQualifiedClassNames.TestContext,
+            Core.HookType.Test => WellKnownFullyQualifiedClassNames.TestContext,
             Core.HookType.Class => WellKnownFullyQualifiedClassNames.ClassHookContext,
             Core.HookType.Assembly => WellKnownFullyQualifiedClassNames.AssemblyHookContext,
             Core.HookType.TestSession => WellKnownFullyQualifiedClassNames.TestSessionContext,
