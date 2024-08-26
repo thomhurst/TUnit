@@ -54,6 +54,7 @@ public abstract class TestModule : Module<TestResult>
                 "--treenode-filter", filter, 
                 "--report-trx", "--report-trx-filename", trxFilename,
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
+                "--timeout", "5m",
                 ..runOptions.AdditionalArguments
             ]
         }, cancellationToken);
