@@ -43,6 +43,14 @@ internal class SingleTestExecutor : IDataProducer
     public async Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
+        if (test.IsStarted)
+        {
+            await test.TestContext.TestTask;
+            return;
+        }
+        
+        test.IsStarted = true;
+        
         var testContext = test.TestContext;
         var timings = testContext.Timings;
 
@@ -59,7 +67,7 @@ internal class SingleTestExecutor : IDataProducer
         
         try
         {
-            await WaitForDependsOnTests(test.TestContext);
+            await WaitForDependsOnTests(test, filter, context);
             
             if (!_explicitFilterService.CanRun(test.TestDetails, filter))
             {
@@ -337,14 +345,16 @@ internal class SingleTestExecutor : IDataProducer
         await ExecuteTestMethodWithTimeout(discoveredTest, cleanUpExceptions);
     }
 
-    private async ValueTask WaitForDependsOnTests(TestContext testContext)
+    private async ValueTask WaitForDependsOnTests(DiscoveredTest testContext, ITestExecutionFilter? filter,
+        ExecuteRequestContext context)
     {
         foreach (var dependency in GetDependencies(testContext.TestDetails))
         {
-            AssertDoNotDependOnEachOther(testContext, dependency);
+            AssertDoNotDependOnEachOther(testContext.TestContext, dependency.TestContext);
+            
             try
             {
-                await dependency.TestTask;
+                await ExecuteTestAsync(dependency, filter, context);
             }
             catch (Exception e)
             {
@@ -353,12 +363,12 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private IEnumerable<TestContext> GetDependencies(TestDetails testDetails)
+    private IEnumerable<DiscoveredTest> GetDependencies(TestDetails testDetails)
     {
         return GetDependencies(testDetails, testDetails);
     }
 
-    private IEnumerable<TestContext> GetDependencies(TestDetails original, TestDetails testDetails)
+    private IEnumerable<DiscoveredTest> GetDependencies(TestDetails original, TestDetails testDetails)
     {
         foreach (var dependency in testDetails.Attributes
                      .OfType<DependsOnAttribute>()
@@ -387,7 +397,7 @@ internal class SingleTestExecutor : IDataProducer
 
     private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
     {
-        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails)];
+        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails).Select(x => x.TestContext)];
         
         foreach (var dependencyOfDependency in dependencies)
         {
