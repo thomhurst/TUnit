@@ -25,8 +25,6 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
         ResetDefault();
         
         await base.DisposeAsync();
-        
-        await (RedirectedOut?.DisposeAsync() ?? ValueTask.CompletedTask);
     }
     
     public override void Flush()
