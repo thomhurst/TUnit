@@ -51,3 +51,10 @@ jobs:
         with:
           name: TestingPlatformDiagnosticLogs
           path: '**/log_*.diag'
+          
+      - name: NuGet Packages Artifacts
+        uses: actions/upload-artifact@v4.3.6
+        if: always()
+        with:
+          name: NuGetPackages
+          path: '**/*.*nupkg'
