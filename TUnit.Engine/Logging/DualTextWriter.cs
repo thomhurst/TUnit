@@ -301,6 +301,7 @@ internal class DualTextWriter : TextWriter
 
     public override void Close()
     {
+        Flush();
     }
 
     protected override void Dispose(bool disposing)
