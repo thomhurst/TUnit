@@ -20,11 +20,10 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
     
     private protected abstract void ResetDefault();
 
-    public override async ValueTask DisposeAsync()
+    public override ValueTask DisposeAsync()
     {
         ResetDefault();
-        
-        await base.DisposeAsync();
+        return ValueTask.CompletedTask;
     }
     
     public override void Flush()
@@ -227,7 +226,6 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
     public override void Close()
     {
         ResetDefault();
-        OutputWriter?.Close();
     }
 
     public override Task FlushAsync()
