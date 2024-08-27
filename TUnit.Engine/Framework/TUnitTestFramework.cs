@@ -25,15 +25,15 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly TUnitInitializer _initializer;
 
     public TUnitTestFramework(IExtension extension,
-        IServiceProvider serviceProvider,
+        IServiceProvider frameworkServiceProvider,
         ITestFrameworkCapabilities capabilities)
     {
         _extension = extension;
         _capabilities = capabilities;
         
         _serviceProvider = new ServiceCollection()
-            .AddTestEngineServices()
-            .AddFromFrameworkServiceProvider(serviceProvider, extension)
+            .AddTestEngineServices(frameworkServiceProvider, extension)
+            .AddFromFrameworkServiceProvider(frameworkServiceProvider, extension)
             .BuildServiceProvider();
 
         _logger = _serviceProvider.GetRequiredService<TUnitLogger>();

@@ -10,18 +10,15 @@ namespace TUnit.Engine.Extensions;
 internal static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddFromFrameworkServiceProvider(this IServiceCollection services,
-        IServiceProvider serviceProvider, IExtension extension)
+        IServiceProvider frameworkServiceProvider, IExtension extension)
     {
         return services
             .AddSingleton(extension)
-            .AddTransient(_ => serviceProvider.GetConfiguration())
-            .AddTransient(_ => serviceProvider.GetLoggerFactory())
-            .AddTransient(_ => serviceProvider.GetMessageBus())
-            .AddTransient(_ => serviceProvider.GetCommandLineOptions())
-            .AddTransient(_ => serviceProvider.GetOutputDevice());
+            .AddTransient(_ => frameworkServiceProvider.GetCommandLineOptions());
     }
         
-    public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
+    public static IServiceCollection AddTestEngineServices(this IServiceCollection services,
+        IServiceProvider frameworkServiceProvider, IExtension extension)
     {
         return services
             .AddSingleton(EngineCancellationToken.CancellationTokenSource)
@@ -34,10 +31,10 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<SingleTestExecutor>()
             .AddSingleton<TestInvoker>()
             .AddSingleton<TUnitTestDiscoverer>()
-            .AddSingleton<TestFilterService>()
+            .AddSingleton<TestFilterService>(_ => new TestFilterService(frameworkServiceProvider.GetLoggerFactory()))
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<TUnitOnEndExecutor>()
-            .AddSingleton<TUnitLogger>()
+            .AddSingleton<TUnitLogger>(_ => new TUnitLogger(extension, frameworkServiceProvider.GetOutputDevice(), frameworkServiceProvider.GetLoggerFactory()))
             .AddSingleton<TUnitInitializer>();
     }
 }
