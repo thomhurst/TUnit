@@ -14,14 +14,10 @@ internal static class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(extension)
-            .AddTransient(_ => serviceProvider.GetConfiguration())
-            .AddTransient(_ => serviceProvider.GetLoggerFactory())
-            .AddTransient(_ => serviceProvider.GetMessageBus())
-            .AddTransient(_ => serviceProvider.GetCommandLineOptions())
-            .AddTransient(_ => serviceProvider.GetOutputDevice());
+            .AddTransient(_ => serviceProvider.GetCommandLineOptions());
     }
         
-    public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
+    public static IServiceCollection AddTestEngineServices(this IServiceCollection services, IServiceProvider serviceProvider)
     {
         return services
             .AddSingleton(EngineCancellationToken.CancellationTokenSource)
@@ -37,7 +33,7 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<TestFilterService>()
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<TUnitOnEndExecutor>()
-            .AddSingleton<TUnitLogger>()
+            .AddSingleton<TUnitLogger>(sp => ActivatorUtilities.CreateInstance<TUnitLogger>(sp, serviceProvider.GetOutputDevice(), serviceProvider.GetLoggerFactory()))
             .AddSingleton<TUnitInitializer>();
     }
 }
