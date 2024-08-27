@@ -17,7 +17,7 @@ internal static class ServiceCollectionExtensions
             .AddTransient(_ => frameworkServiceProvider.GetCommandLineOptions());
     }
         
-    public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
+    public static IServiceCollection AddTestEngineServices(this IServiceCollection services, IServiceProvider frameworkServiceProvider)
     {
         return services
             .AddSingleton(EngineCancellationToken.CancellationTokenSource)
@@ -33,7 +33,7 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<TestFilterService>()
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<TUnitOnEndExecutor>()
-            .AddSingleton<TUnitLogger>(sp => ActivatorUtilities.CreateInstance<TUnitLogger>(sp))
+            .AddSingleton<TUnitLogger>(sp => ActivatorUtilities.CreateInstance<TUnitLogger>(frameworkServiceProvider))
             .AddSingleton<TUnitInitializer>();
     }
 }
