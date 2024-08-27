@@ -33,7 +33,7 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<TestFilterService>()
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<TUnitOnEndExecutor>()
-            .AddSingleton<TUnitLogger>(sp => ActivatorUtilities.CreateInstance<TUnitLogger>(frameworkServiceProvider))
+            .AddSingleton<TUnitLogger>(_ => ActivatorUtilities.CreateInstance<TUnitLogger>(frameworkServiceProvider))
             .AddSingleton<TUnitInitializer>();
     }
 }
