@@ -28,6 +28,8 @@ internal class TestInvoker
             await TestHookOrchestrator.ExecuteAfterHooks(discoveredTest.TestContext.TestDetails.ClassInstance!, discoveredTest.TestContext, cleanUpExceptions);
             
             await RunHelpers.RunSafelyAsync(() => _disposer.DisposeAsync(discoveredTest.TestContext.TestDetails.ClassInstance), cleanUpExceptions);
+
+            TestContext.TestContexts.Value = null;
         }
     }
 }
