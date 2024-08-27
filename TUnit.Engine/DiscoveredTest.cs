@@ -41,4 +41,6 @@ internal abstract class DiscoveredTest
     public abstract void ResetTestInstance();
     
     public TestDetails TestDetails => TestContext.TestDetails;
+    
+    public bool IsStarted { get; set; }
 }

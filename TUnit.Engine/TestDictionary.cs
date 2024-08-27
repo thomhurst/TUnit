@@ -25,7 +25,7 @@ public static class TestDictionary
         return Tests.Values;
     }
 
-    internal static IEnumerable<TestContext> GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes, Type classType, IEnumerable<Type> classParameterTypes)
+    internal static DiscoveredTest[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes, Type classType, IEnumerable<Type> classParameterTypes)
     {
         var testsWithoutMethodParameterTypesMatching = Tests.Values.Where(x =>
             x.TestContext.TestDetails.TestName == testName &&
@@ -37,12 +37,10 @@ public static class TestDictionary
                 .Count() > 1)
         {
             return testsWithoutMethodParameterTypesMatching.Where(x =>
-                    x.TestContext.TestDetails.TestMethodParameterTypes.SequenceEqual(methodParameterTypes))
-                .Select(x => x.TestContext);
+                    x.TestContext.TestDetails.TestMethodParameterTypes.SequenceEqual(methodParameterTypes)).ToArray();
         }
         
-        return testsWithoutMethodParameterTypesMatching
-            .Select(x => x.TestContext);
+        return testsWithoutMethodParameterTypesMatching;
     }
     
     internal static FailedInitializationTest[] GetFailedToInitializeTests()

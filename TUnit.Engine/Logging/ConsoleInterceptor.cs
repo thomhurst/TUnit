@@ -22,15 +22,14 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     public override async ValueTask DisposeAsync()
     {
-        await base.DisposeAsync();
-        
-        await (RedirectedOut?.DisposeAsync() ?? ValueTask.CompletedTask);
-        
         ResetDefault();
+        
+        await base.DisposeAsync();
     }
     
     public override void Flush()
     {
+        ResetDefault();
         OutputWriter?.Flush();
     }
 
@@ -227,11 +226,13 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     public override void Close()
     {
+        ResetDefault();
         OutputWriter?.Close();
     }
 
     public override Task FlushAsync()
     {
+        ResetDefault();
         return OutputWriter?.FlushAsync() ?? Task.CompletedTask;
     }
 

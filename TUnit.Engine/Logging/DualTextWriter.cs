@@ -301,14 +301,16 @@ internal class DualTextWriter : TextWriter
 
     public override void Close()
     {
+        Flush();
     }
 
     protected override void Dispose(bool disposing)
     {
+        Flush();
     }
 
-    public override ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        return ValueTask.CompletedTask;
+        await FlushAsync();
     }
 }
