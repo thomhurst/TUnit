@@ -10,14 +10,14 @@ namespace TUnit.Engine.Extensions;
 internal static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddFromFrameworkServiceProvider(this IServiceCollection services,
-        IServiceProvider serviceProvider, IExtension extension)
+        IServiceProvider frameworkServiceProvider, IExtension extension)
     {
         return services
             .AddSingleton(extension)
-            .AddTransient(_ => serviceProvider.GetCommandLineOptions());
+            .AddTransient(_ => frameworkServiceProvider.GetCommandLineOptions());
     }
         
-    public static IServiceCollection AddTestEngineServices(this IServiceCollection services, IServiceProvider serviceProvider)
+    public static IServiceCollection AddTestEngineServices(this IServiceCollection services)
     {
         return services
             .AddSingleton(EngineCancellationToken.CancellationTokenSource)
@@ -33,7 +33,7 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<TestFilterService>()
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<TUnitOnEndExecutor>()
-            .AddSingleton<TUnitLogger>(sp => ActivatorUtilities.CreateInstance<TUnitLogger>(sp, serviceProvider.GetOutputDevice(), serviceProvider.GetLoggerFactory()))
+            .AddSingleton<TUnitLogger>(sp => ActivatorUtilities.CreateInstance<TUnitLogger>(sp))
             .AddSingleton<TUnitInitializer>();
     }
 }
