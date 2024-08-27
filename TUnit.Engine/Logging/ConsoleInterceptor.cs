@@ -28,7 +28,6 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
     
     public override void Flush()
     {
-        ResetDefault();
         OutputWriter?.Flush();
     }
 
@@ -230,7 +229,6 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     public override Task FlushAsync()
     {
-        ResetDefault();
         return OutputWriter?.FlushAsync() ?? Task.CompletedTask;
     }
 
