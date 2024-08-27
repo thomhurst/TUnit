@@ -4,7 +4,7 @@ namespace TUnit.Core;
 
 public partial class TestContext
 {
-    internal static readonly AsyncLocal<TestContext> TestContexts = new();
+    internal static readonly AsyncLocal<TestContext?> TestContexts = new();
     public static TestContext? Current => TestContexts.Value;
 
     internal static readonly Dictionary<string, string> InternalParametersDictionary = new();
