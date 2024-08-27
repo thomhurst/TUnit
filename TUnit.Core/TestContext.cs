@@ -35,6 +35,5 @@ public partial class TestContext : IDisposable
 
     public void Dispose()
     {
-        Out.Dispose();
     }
 }
