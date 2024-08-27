@@ -49,12 +49,12 @@ jobs:
         uses: actions/upload-artifact@v4.3.6
         if: always()
         with:
-          name: TestingPlatformDiagnosticLogs
+          name: TestingPlatformDiagnosticLogs${{matrix.os}}
           path: '**/log_*.diag'
           
       - name: NuGet Packages Artifacts
         uses: actions/upload-artifact@v4.3.6
         if: always()
         with:
-          name: NuGetPackages
+          name: NuGetPackages${{matrix.os}}
           path: '**/*.*nupkg'
