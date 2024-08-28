@@ -17,12 +17,11 @@ using Semaphores;
 namespace TUnit.Pipeline.Modules.Tests;
 
 [NotInParallel("Unit Tests")]
+[ParallelLimiter<ProcessorParallelLimit>]
 public abstract class TestModule : Module<TestResult>
 {
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
-
-    private static readonly AsyncSemaphore AsyncSemaphore = new(Environment.ProcessorCount * 2);
-
+    
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = true 
@@ -38,8 +37,6 @@ public abstract class TestModule : Module<TestResult>
     protected async Task<TestResult> RunTestsWithFilter(IPipelineContext context, string filter,
         List<Action<TestResult>> assertions, RunOptions runOptions, CancellationToken cancellationToken = default)
     {
-        using var lockHandle = await AsyncSemaphore.WaitAsync(cancellationToken);
-
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
         var result = await context.DotNet().Run(new DotNetRunOptions
