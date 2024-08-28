@@ -30,12 +30,20 @@ For Rider, it is not yet supported. I believe they are working on it so we just 
 
 - Source generated tests
 - Full async support
-- Parallel by default, with mechanisms to switch it off for certain tests
+- Parallel by default, with mechanisms to:
+    - Run specific tests completely on their own
+    - Run specific tests not in parallel with other specific tests
+    - Limit the a parallel limit on a per-test, class or assembly level
 - Test ordering (if running not in parallel)
-- Tests can depend on other tests to form chains
+- Tests can depend on other tests to form chains, useful for if one test depends on state from another action
 - Easy to read assertions
 - Injectable test data via classes, methods, compile-time args, or matrices
-- Hooks before and after: TestDiscover, TestSession, Assembly, Class, Test
+- Hooks before and after: 
+    - TestDiscover
+    - TestSession
+    - Assembly
+    - Class
+    - Test
 - Designed to avoid common pitfalls such as leaky test states
 - Ability to view and interrogate metadata and results from various assembly/class/test context objects
 
@@ -114,6 +122,11 @@ or with more complex test orchestration needs
     [Property("Some Key", "Some Value")]
     public async Task Ping() { ... }
 
+    [Test]
+    [ParallelLimit<LoadTestParallelLimit>]
+    [Repeat(1000)]
+    public async Task LoadHomepage() { ... }
+
     public static IEnumerable<(string Username, string Password)> GetAuthDetails()
     {
         yield return ("user1", "password1");
@@ -143,6 +156,11 @@ or with more complex test orchestration needs
         {
             return Task.FromResult(exception is HttpRequestException { StatusCode: HttpStatusCode.ServiceUnavailable });
         }
+    }
+
+    public class LoadTestParallelLimit : IParallelLimit
+    {
+        public int Limit => 50;
     }
 ```
 

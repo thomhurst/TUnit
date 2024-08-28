@@ -76,6 +76,7 @@ internal record TestSourceDataModel
     public required string? CustomDisplayName { get; init; }
     public required int RepeatLimit { get; init; }
     public required string? TestExecutor { get; init; }
+    public required string? ParallelLimit { get; init; }
 
     public string MethodVariablesWithCancellationToken()
     {

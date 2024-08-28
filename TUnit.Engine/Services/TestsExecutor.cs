@@ -137,7 +137,7 @@ internal class TestsExecutor
 
         try
         {
-            await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context), cancellationToken);
+            await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context, false), cancellationToken);
         }
         catch (Exception exception)
         {
