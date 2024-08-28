@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json.Serialization;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -59,6 +60,8 @@ public abstract record TestDetails
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
     public required string DisplayName { get; init; }
+    
+    public required IParallelLimit? ParallelLimit { get; init; }
 
     [JsonIgnore] internal TestData[] InternalTestClassArguments { get; init; } = null!;
 

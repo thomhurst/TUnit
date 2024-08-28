@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Requests;
 using Semaphores;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
@@ -22,6 +23,7 @@ internal class SingleTestExecutor : IDataProducer
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly TestInvoker _testInvoker;
     private readonly ExplicitFilterService _explicitFilterService;
+    private readonly ParallelLimitProvider _parallelLimitProvider;
     private readonly TUnitLogger _logger;
 
     public SingleTestExecutor(
@@ -30,6 +32,7 @@ internal class SingleTestExecutor : IDataProducer
         CancellationTokenSource cancellationTokenSource,
         TestInvoker testInvoker,
         ExplicitFilterService explicitFilterService,
+        ParallelLimitProvider parallelLimitProvider,
         TUnitLogger logger)
     {
         _extension = extension;
@@ -37,17 +40,19 @@ internal class SingleTestExecutor : IDataProducer
         _cancellationTokenSource = cancellationTokenSource;
         _testInvoker = testInvoker;
         _explicitFilterService = explicitFilterService;
+        _parallelLimitProvider = parallelLimitProvider;
         _logger = logger;
     }
 
-    public async Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
-        ExecuteRequestContext context)
+    public async Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
     {
         if (test.IsStarted)
         {
             await test.TestContext.TestTask;
             return;
         }
+
+        using var _ = await WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
         
         test.IsStarted = true;
         
@@ -188,6 +193,16 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
+    private async Task<IDisposable> WaitForParallelLimiter(DiscoveredTest test, bool isStartedAsDependencyForAnotherTest)
+    {
+        if (test.TestDetails.ParallelLimit is { } parallelLimit && !isStartedAsDependencyForAnotherTest)
+        {
+            return await _parallelLimitProvider.GetLock(parallelLimit).WaitAsync();
+        }
+
+        return NoOpDisposable.Instance;
+    }
+
     private static TimingProperty GetTimingProperty(TestContext testContext)
     {
         var now = DateTimeOffset.Now;
@@ -308,7 +323,7 @@ internal class SingleTestExecutor : IDataProducer
                     throw;
                 }
 
-                await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying...");
+                await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying... (attempt {i + 1})");
                 discoveredTest.ResetTestInstance();
                 discoveredTest.TestContext.CurrentRetryAttempt++;
             }
@@ -354,7 +369,7 @@ internal class SingleTestExecutor : IDataProducer
             
             try
             {
-                await ExecuteTestAsync(dependency, filter, context);
+                await ExecuteTestAsync(dependency, filter, context, true);
             }
             catch (Exception e)
             {

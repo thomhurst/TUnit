@@ -55,6 +55,7 @@ public static class TestRegistrar
 			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = testMetadata.TestFilePath,
 			TestLineNumber = testMetadata.TestLineNumber,
+			ParallelLimit = testMetadata.ParallelLimit
 		};
 
 		var testContext = new TestContext(testDetails);
@@ -159,4 +160,6 @@ public record TestMetadata<TClassType>
     public required TestData[] InternalTestMethodArguments { internal get; init; }
     
     public required ITestExecutor TestExecutor { get; init; }
+    
+    public required IParallelLimit? ParallelLimit { get; init; }
 }

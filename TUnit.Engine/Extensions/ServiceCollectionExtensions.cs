@@ -35,6 +35,7 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<TUnitOnEndExecutor>()
             .AddSingleton<TUnitLogger>(_ => new TUnitLogger(extension, frameworkServiceProvider.GetOutputDevice(), frameworkServiceProvider.GetLoggerFactory()))
-            .AddSingleton<TUnitInitializer>();
+            .AddSingleton<TUnitInitializer>()
+            .AddSingleton<ParallelLimitProvider>();
     }
 }
