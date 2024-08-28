@@ -24,5 +24,6 @@ internal static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new HideTestOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
     }
 }

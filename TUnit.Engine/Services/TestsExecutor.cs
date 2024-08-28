@@ -142,6 +142,11 @@ internal class TestsExecutor
         catch (Exception exception)
         {
             await _logger.LogErrorAsync(exception);
+            
+            if (_commandLineOptions.IsOptionSet(FailFastCommandProvider.FailFast))
+            {
+                await EngineCancellationToken.CancellationTokenSource.CancelAsync();
+            }
         }
         finally
         {
