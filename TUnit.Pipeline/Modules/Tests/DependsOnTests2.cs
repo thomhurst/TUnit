@@ -11,8 +11,8 @@ public class DependsOnTests2 : TestModule
             "/*/*/DependsOnTests2/*",
             [
                 result => result.Successful.Should().BeTrue(),
-                result => result.Total.Should().Be(2),
-                result => result.Passed.Should().Be(2),
+                result => result.Total.Should().Be(3),
+                result => result.Passed.Should().Be(3),
                 result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0),
                 result =>

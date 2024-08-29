@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.TestProject;
 
@@ -14,6 +15,8 @@ public class DependsOnTests3
     {
         _test1Start = DateTime.Now;
         await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        TestContext.Current!.ObjectBag.Add("Test1", "1");
     }
     
     [Test]
@@ -21,6 +24,8 @@ public class DependsOnTests3
     {
         _test2Start = DateTime.Now;
         await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        TestContext.Current!.ObjectBag.Add("Test2", "2");
     }
     
     [Test]
@@ -30,6 +35,15 @@ public class DependsOnTests3
     {
         _test3Start = DateTime.Now;
         await Task.Delay(TimeSpan.FromSeconds(1));
+
+        var test1 = TestContext.Current!.GetTests(nameof(Test1));
+        var test2 = TestContext.Current!.GetTests(nameof(Test2));
+
+        await Assert.That(test1).Has.Count().EqualTo(1);
+        await Assert.That(test2).Has.Count().EqualTo(1);
+
+        await Assert.That(test1[0].ObjectBag).Does.ContainKey("Test1");
+        await Assert.That(test2[0].ObjectBag).Does.ContainKey("Test2");
     }
 
     [After(Class)]

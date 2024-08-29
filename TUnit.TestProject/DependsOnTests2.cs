@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.TestProject;
 
@@ -21,6 +22,12 @@ public class DependsOnTests2
     {
         _test2Start = DateTime.Now;
         await Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task Test3()
+    {
+        await Assert.That(() => TestContext.Current!.GetTests(nameof(Test1))).Throws.Exception().With.Message.EqualTo("Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?");
     }
 
     [After(Class)]
