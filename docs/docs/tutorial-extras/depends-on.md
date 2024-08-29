@@ -82,3 +82,30 @@ public async Task AssertItemsInDatabase()
     ...
 }
 ```
+
+## Getting other tests
+If your tests depends on another test, it's possible to retrieve that test's context. This allows you to do things like check its result, or retrieve objects from its object bag.
+
+This is done by calling the `GetTests` method on a `TestContext` object. It takes the test's method name (so you can use `nameof(...)`) and optionally the parameter types for if there's multiple overloads.
+
+You'll notice this returns an array - This is because tests may be data driven and be invoked multiple times - If this is the case you'll have to find the one you want yourself.
+
+Example:
+
+```csharp
+[Test]
+public async Task AddItemToBag() 
+{
+    var itemId = await AddToBag();
+    TestContext.Current!.ObjectBag.Add("ItemId", itemId);
+}
+
+[Test]
+[DependsOn(nameof(AddItemToBag)]
+public async Task DeleteItemFromBag() 
+{
+    var addToBagTestContext = TestContext.Current!.GetTests(nameof(AddItemToBag)).First();
+    var itemId = addToBagTestContext.ObjectBag["ItemId"];
+    await DeleteFromBag(itemId);
+}
+```
