@@ -7,7 +7,6 @@ namespace Tests.Benchmarking;
 [MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
-    private static readonly ManualResetEvent Finished = new ManualResetEvent(false);
     private static readonly string XUnitAssemblyFileName = typeof(xUnitTests).Assembly.Location;
 
     [Benchmark]
@@ -25,13 +24,14 @@ public class Benchmarks
     [Benchmark]
     public void xUnit()
     {
+        using var finished = new ManualResetEvent(false);
+        
         var runner = AssemblyRunner.WithoutAppDomain(XUnitAssemblyFileName);
         
-        runner.OnExecutionComplete += _ => Finished.Set();
+        runner.OnExecutionComplete += _ => finished.Set();
         
         runner.Start();
 
-        Finished.WaitOne();
-        Finished.Reset();
+        finished.WaitOne();
     }
 }
