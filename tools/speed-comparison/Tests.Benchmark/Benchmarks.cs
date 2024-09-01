@@ -5,9 +5,6 @@ using Process = System.Diagnostics.Process;
 [MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
-    private static string GetProjectPath(string name) =>
-        Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "..", name);
-
     private static string TUnitPath = GetProjectPath("TUnitTimer");
     private static string NUnitPath = GetProjectPath("NUnitTimer");
     private static string xUnitPath = GetProjectPath("xUnitTimer");
@@ -47,5 +44,17 @@ public class Benchmarks
         {
             WorkingDirectory = MSTestPath,
         })!.WaitForExitAsync();
+    }
+    
+    private static string GetProjectPath(string name)
+    {
+        var folder = new DirectoryInfo(Environment.CurrentDirectory);
+
+        while (folder.Name != "speed-comparison")
+        {
+            folder = folder.Parent!;
+        }
+        
+        return Path.Combine(folder.FullName, name);
     }
 }
