@@ -7,6 +7,8 @@ namespace Tests.Benchmarking;
 [MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
+    private static readonly ManualResetEvent Finished = new ManualResetEvent(false);
+
     [Benchmark]
     public async Task TUnit()
     {
@@ -24,12 +26,10 @@ public class Benchmarks
     {
         using var runner = AssemblyRunner.WithoutAppDomain(typeof(xUnitTests).Assembly.Location);
         
-        using var finished = new ManualResetEvent(false);
-
-        runner.OnExecutionComplete += _ => finished.Set();
+        runner.OnExecutionComplete += _ => Finished.Set();
         
         runner.Start(new AssemblyRunnerStartOptions());
 
-        finished.WaitOne();
+        Finished.WaitOne();
     }
 }
