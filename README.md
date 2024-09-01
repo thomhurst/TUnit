@@ -7,11 +7,8 @@ T(est)Unit!
 See here: <https://thomhurst.github.io/TUnit/>
 
 ## Speed Comparison
-We can't get an extremely accurate speed comparison because the test host runs as its own process - So tools like Benchmark.NET won't work.
 
-But I've tried to create 4 equal basic test suites, which all execute a test method with a 50ms Task.Delay, and repeat it 1000 times. Some frameworks don't easily have repeat mechanisms so this may be artificially produced with a test data source.
-
-While a 50ms Task.Delay isn't obviously a test in itself, it still helps to demonstrate how TUnit is fast at runtime, due to using a newer test architecture, source generation, parallelization and async-await all the way down the stack.
+Scenario: A test that takes 50ms to execute, repeated 100 times.
 
 See here for the latest speed test comparisons:
 https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml?query=branch%3Amain
