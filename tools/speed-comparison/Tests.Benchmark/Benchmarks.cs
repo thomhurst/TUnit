@@ -13,7 +13,7 @@ public class Benchmarks
     [Benchmark]
     public async Task TUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", "run")
+        await Process.Start(new ProcessStartInfo("dotnet", "run --no-build")
         {
             WorkingDirectory = TUnitPath,
         })!.WaitForExitAsync();
@@ -22,7 +22,7 @@ public class Benchmarks
     [Benchmark]
     public async Task NUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", "test")
+        await Process.Start(new ProcessStartInfo("dotnet", "test --no-build")
         {
             WorkingDirectory = NUnitPath,
         })!.WaitForExitAsync();
@@ -31,7 +31,7 @@ public class Benchmarks
     [Benchmark]
     public async Task xUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", "test")
+        await Process.Start(new ProcessStartInfo("dotnet", "test --no-build")
         {
             WorkingDirectory = xUnitPath,
         })!.WaitForExitAsync();
@@ -40,7 +40,7 @@ public class Benchmarks
     [Benchmark]
     public async Task MSTest()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", "test")
+        await Process.Start(new ProcessStartInfo("dotnet", "test --no-build")
         {
             WorkingDirectory = MSTestPath,
         })!.WaitForExitAsync();
