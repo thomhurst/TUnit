@@ -7,21 +7,6 @@ namespace Tests.Benchmarking;
 [MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
-    private TextWriter _defaultOut;
-
-    [GlobalSetup]
-    public void DisableConsole()
-    {
-        _defaultOut = Console.Out;
-        Console.SetOut(TextWriter.Null);
-    }
-
-    [GlobalCleanup]
-    public void EnableConsole()
-    {
-        Console.SetOut(_defaultOut);
-    }
-    
     [Benchmark]
     public async Task TUnit()
     {
