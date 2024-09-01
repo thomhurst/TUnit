@@ -5,12 +5,20 @@ using Process = System.Diagnostics.Process;
 [MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
+    private static string GetProjectPath(string name) =>
+        Path.Combine(Environment.CurrentDirectory, "..", "..", "..", "..", name);
+
+    private static string TUnitPath = GetProjectPath("TUnitTimer");
+    private static string NUnitPath = GetProjectPath("NUnitTimer");
+    private static string xUnitPath = GetProjectPath("xUnitTimer");
+    private static string MSTestPath = GetProjectPath("MSTestTimer");
+    
     [Benchmark]
     public async Task TUnit()
     {
         await Process.Start(new ProcessStartInfo("dotnet", "run")
         {
-            WorkingDirectory = "../../../../TUnitTimer",
+            WorkingDirectory = TUnitPath,
         })!.WaitForExitAsync();
     }
 
@@ -19,7 +27,7 @@ public class Benchmarks
     {
         await Process.Start(new ProcessStartInfo("dotnet", "test")
         {
-            WorkingDirectory = "../../../../NUnitTimer",
+            WorkingDirectory = NUnitPath,
         })!.WaitForExitAsync();
     }
 
@@ -28,7 +36,7 @@ public class Benchmarks
     {
         await Process.Start(new ProcessStartInfo("dotnet", "test")
         {
-            WorkingDirectory = "../../../../xUnitTimer",
+            WorkingDirectory = xUnitPath,
         })!.WaitForExitAsync();
     }
     
@@ -37,7 +45,7 @@ public class Benchmarks
     {
         await Process.Start(new ProcessStartInfo("dotnet", "test")
         {
-            WorkingDirectory = "../../../../MSTestTimer",
+            WorkingDirectory = MSTestPath,
         })!.WaitForExitAsync();
     }
 }
