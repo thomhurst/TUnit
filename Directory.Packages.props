@@ -34,7 +34,7 @@
     <PackageVersion Include="NUnitLite" Version="4.2.2" />
     <PackageVersion Include="PolySharp" Version="1.14.1" />
     <PackageVersion Include="System.Text.Json" Version="8.0.4" />
-    <PackageVersion Include="TUnit" Version="0.1.476" />
+    <PackageVersion Include="TUnit" Version="0.1.512" />
     <PackageVersion Include="xunit" Version="2.9.0" />
     <PackageVersion Include="xunit.runner.console" Version="2.9.0" />
     <PackageVersion Include="xunit.runner.utility" Version="2.9.0" />
