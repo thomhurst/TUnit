@@ -32,5 +32,6 @@ public class Benchmarks
         runner.Start();
 
         Finished.WaitOne();
+        Finished.Reset();
     }
 }
