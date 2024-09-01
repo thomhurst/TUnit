@@ -5,17 +5,15 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <TUnitImplicitUsings>false</TUnitImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MSTestTimer\MSTestTimer\MSTestTimer.csproj" />
-      <ProjectReference Include="..\NUnitTimer\NUnitTimer\NUnitTimer.csproj" />
-      <ProjectReference Include="..\TUnitTimer\TUnitTimer\TUnitTimer.csproj" />
-      <ProjectReference Include="..\xUnitTimer\xUnitTimer\xUnitTimer.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="BenchmarkDotNet" />
+      <PackageReference Include="NUnitLite" />
+      <PackageReference Include="TUnit" />
+      <PackageReference Include="xunit" />
+      <PackageReference Include="xunit.runner.utility" />
     </ItemGroup>
 
 </Project>

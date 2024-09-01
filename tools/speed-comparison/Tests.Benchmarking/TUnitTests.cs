@@ -1,8 +1,8 @@
 using System.Diagnostics;
 
-namespace TUnitTimer;
+namespace Tests.Benchmarking;
 
-public class Tests
+public class TUnitTests
 {
     private static readonly Stopwatch Stopwatch = new();
 

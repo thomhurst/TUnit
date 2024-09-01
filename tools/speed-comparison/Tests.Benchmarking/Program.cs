@@ -1,3 +1,4 @@
 ﻿using BenchmarkDotNet.Running;
+using Tests.Benchmarking;
 
-BenchmarkRunner.Run<Benchmarks>();
+var summary = BenchmarkRunner.Run<Benchmarks>();

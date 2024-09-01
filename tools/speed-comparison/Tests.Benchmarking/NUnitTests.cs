@@ -1,9 +1,10 @@
 using System.Diagnostics;
+using NUnit.Framework;
 
-namespace NUnitTimer;
+namespace Tests.Benchmarking;
 
 [Parallelizable(ParallelScope.All)]
-public class Tests
+public class NUnitTests
 {
     private readonly Stopwatch _stopwatch = new();
 

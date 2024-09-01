@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace xUnitTimer;
+namespace Tests.Benchmarking;
 
 public class Timer : IDisposable
 {

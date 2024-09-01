@@ -1,8 +1,10 @@
-namespace xUnitTimer;
+using Xunit;
 
-public class Tests : IClassFixture<Timer>
+namespace Tests.Benchmarking;
+
+public class xUnitTests : IClassFixture<Timer>
 {
-    public Tests(Timer timer)
+    public xUnitTests(Timer timer)
     {
     }
     

@@ -2,8 +2,25 @@
 using TUnit.Engine.Services;
 using Xunit.Runners;
 
+namespace Tests.Benchmarking;
+
 public class Benchmarks
 {
+    private TextWriter _defaultOut;
+
+    [GlobalSetup]
+    public void DisableConsole()
+    {
+        _defaultOut = Console.Out;
+        Console.SetOut(TextWriter.Null);
+    }
+
+    [GlobalCleanup]
+    public void EnableConsole()
+    {
+        Console.SetOut(_defaultOut);
+    }
+    
     [Benchmark]
     public async Task TUnit()
     {
@@ -19,11 +36,11 @@ public class Benchmarks
     [Benchmark]
     public void xUnit()
     {
-        using var runner = AssemblyRunner.WithoutAppDomain(typeof(xUnitTimer.Tests).Assembly.FullName);
+        using var runner = AssemblyRunner.WithoutAppDomain(typeof(Timer).Assembly.FullName);
         
         using var finished = new ManualResetEvent(false);
 
-        runner.OnExecutionComplete += _ =>  finished.Set();
+        runner.OnExecutionComplete += _ => finished.Set();
         
         runner.Start(new AssemblyRunnerStartOptions());
 
