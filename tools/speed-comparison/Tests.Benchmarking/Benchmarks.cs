@@ -37,7 +37,7 @@ public class Benchmarks
     [Benchmark]
     public void xUnit()
     {
-        using var runner = AssemblyRunner.WithoutAppDomain(typeof(Timer).Assembly.FullName);
+        using var runner = AssemblyRunner.WithoutAppDomain(typeof(xUnitTests).Assembly.FullName);
         
         using var finished = new ManualResetEvent(false);
 
