@@ -7,4 +7,4 @@ var output = new DirectoryInfo(Environment.CurrentDirectory)
     .GetFiles("*.md", SearchOption.AllDirectories)
     .First();
     
-Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", await File.ReadAllTextAsync(output.FullName));
+Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", await File.ReadAllTextAsync(output.FullName), EnvironmentVariableTarget.Machine);
