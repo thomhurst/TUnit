@@ -28,7 +28,7 @@ public class Benchmarks
         
         runner.OnExecutionComplete += _ => Finished.Set();
         
-        runner.Start(new AssemblyRunnerStartOptions());
+        runner.Start();
 
         Finished.WaitOne();
     }
