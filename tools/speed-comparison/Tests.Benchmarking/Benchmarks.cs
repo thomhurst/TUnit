@@ -24,7 +24,7 @@ public class Benchmarks
     [Benchmark]
     public void xUnit()
     {
-        using var runner = AssemblyRunner.WithoutAppDomain(typeof(xUnitTests).Assembly.Location);
+        var runner = AssemblyRunner.WithoutAppDomain(typeof(xUnitTests).Assembly.Location);
         
         runner.OnExecutionComplete += _ => Finished.Set();
         
