@@ -1,6 +1,6 @@
 namespace xUnitTimer;
 
-public class Tests : IClassFixture<Timer>
+public class Tests
 {
     [Theory, MemberData(nameof(Repeat))]
     public async Task Test1(object _)
