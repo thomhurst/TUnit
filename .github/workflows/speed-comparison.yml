@@ -46,4 +46,4 @@ jobs:
       
       - name: Run Pipeline
         run: dotnet run -c Release
-        working-directory: "tools/speed-comparison/Tests.Benchmarking/Tests.Benchmarking"
+        working-directory: "tools/speed-comparison/Tests.Benchmarking"
