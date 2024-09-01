@@ -22,7 +22,7 @@ public static class TestDictionary
     
     internal static IEnumerable<DiscoveredTest> GetAllTests()
     {
-        return Tests.ToList();
+        return Tests.AsParallel().ToList();
     }
 
     internal static DiscoveredTest[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes, Type classType, IEnumerable<Type> classParameterTypes)
