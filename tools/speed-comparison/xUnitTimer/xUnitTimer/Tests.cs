@@ -10,6 +10,6 @@ public class Tests
 
     public static IEnumerable<object[]> Repeat()
     {
-        return Enumerable.Range(0, 10).Select(i => (object[])[i]);
+        return Enumerable.Range(0, 100).Select(i => (object[])[i]);
     }
 }
