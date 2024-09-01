@@ -8,6 +8,7 @@ namespace Tests.Benchmarking;
 public class Benchmarks
 {
     private static readonly ManualResetEvent Finished = new ManualResetEvent(false);
+    private static readonly string XUnitAssemblyFileName = typeof(xUnitTests).Assembly.Location;
 
     [Benchmark]
     public async Task TUnit()
@@ -24,7 +25,7 @@ public class Benchmarks
     [Benchmark]
     public void xUnit()
     {
-        var runner = AssemblyRunner.WithoutAppDomain(typeof(xUnitTests).Assembly.Location);
+        var runner = AssemblyRunner.WithoutAppDomain(XUnitAssemblyFileName);
         
         runner.OnExecutionComplete += _ => Finished.Set();
         
