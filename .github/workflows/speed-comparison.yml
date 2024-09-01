@@ -28,22 +28,6 @@ jobs:
         with:
           dotnet-version: 8.0.x
           
-      - name: Build TUnit
-        run: dotnet build -c Release
-        working-directory: "tools/speed-comparison/TUnitTimer"
-                  
-      - name: Build xUnit
-        run: dotnet build -c Release
-        working-directory: "tools/speed-comparison/xUnitTimer"
-            
-      - name: Build NUnit
-        run: dotnet build -c Release
-        working-directory: "tools/speed-comparison/NUnitTimer"
-                    
-      - name: Build MSTest
-        run: dotnet build -c Release
-        working-directory: "tools/speed-comparison/MSTestTimer"
-      
       - name: Run Pipeline
         run: dotnet run -c Release
         working-directory: "tools/speed-comparison/Tests.Benchmarking"
