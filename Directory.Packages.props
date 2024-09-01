@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AsyncSemaphore" Version="1.2.2" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="1.3.2" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
@@ -25,14 +26,14 @@
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.40.4" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.40.4" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.40.4" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.5.1" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.5.1" />
-    <PackageVersion Include="NUnit" Version="4.1.0" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.5.2" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.5.2" />
+    <PackageVersion Include="NUnit" Version="4.2.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.3.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="PolySharp" Version="1.14.1" />
     <PackageVersion Include="System.Text.Json" Version="8.0.4" />
-    <PackageVersion Include="TUnit" Version="0.1.476" />
+    <PackageVersion Include="TUnit" Version="0.1.512" />
     <PackageVersion Include="xunit" Version="2.9.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
