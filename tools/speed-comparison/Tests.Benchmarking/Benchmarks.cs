@@ -29,10 +29,4 @@ public class Benchmarks
 
         finished.WaitOne();
     }
-    
-    [Benchmark]
-    public void MSTest()
-    {
-        Microsoft.VisualStudio.TestPlatform.TestHost.Program.Main([]);
-    }
 }
