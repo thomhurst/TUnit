@@ -55,6 +55,6 @@ public class Benchmarks
             folder = folder.Parent!;
         }
         
-        return Path.Combine(folder.FullName, name);
+        return Path.Combine(folder.FullName, name, name);
     }
 }
