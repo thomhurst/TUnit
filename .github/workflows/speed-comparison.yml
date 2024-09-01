@@ -47,6 +47,6 @@ jobs:
         run: dotnet build -c Release
         working-directory: "tools/speed-comparison/MSTestTimer"
       
-      - name: Run Pipeline
+      - name: Run Benchmark
         run: dotnet run -c Release
-        working-directory: "tools/speed-comparison/TUnit.SpeedComparison.Pipeline/TUnit.SpeedComparison.Pipeline"
+        working-directory: "tools/speed-comparison/Tests.Benchmark"

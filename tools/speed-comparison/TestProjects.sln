@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTimer", "NUnitTimer\NU
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSTestTimer", "MSTestTimer\MSTestTimer\MSTestTimer.csproj", "{B225ACB3-8E1B-4649-8D51-ADBFCFFA48E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Benchmark", "Tests.Benchmark\Tests.Benchmark.csproj", "{F8678629-33C9-4A75-9575-CB8EC1DA218E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{B225ACB3-8E1B-4649-8D51-ADBFCFFA48E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B225ACB3-8E1B-4649-8D51-ADBFCFFA48E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B225ACB3-8E1B-4649-8D51-ADBFCFFA48E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8678629-33C9-4A75-9575-CB8EC1DA218E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8678629-33C9-4A75-9575-CB8EC1DA218E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8678629-33C9-4A75-9575-CB8EC1DA218E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8678629-33C9-4A75-9575-CB8EC1DA218E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
