@@ -6,5 +6,10 @@ BenchmarkRunner.Run<Benchmarks>();
 var output = new DirectoryInfo(Environment.CurrentDirectory)
     .GetFiles("*.md", SearchOption.AllDirectories)
     .First();
-    
-Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", await File.ReadAllTextAsync(output.FullName), EnvironmentVariableTarget.Machine);
+
+var file = Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY");
+
+if (!string.IsNullOrEmpty(file))
+{
+    await File.WriteAllTextAsync(file, await File.ReadAllTextAsync(output.FullName));
+}
