@@ -4,6 +4,7 @@ using Xunit.Runners;
 
 namespace Tests.Benchmarking;
 
+[MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
     private TextWriter _defaultOut;
