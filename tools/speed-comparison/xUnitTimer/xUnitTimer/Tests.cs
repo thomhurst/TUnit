@@ -9,7 +9,7 @@ public class Tests : IClassFixture<Timer>
     [Theory, MemberData(nameof(Repeat))]
     public async Task Test1(object _)
     {
-        await Task.Delay(50);
+        await Task.CompletedTask;
     }
 
     public static IEnumerable<object[]> Repeat()

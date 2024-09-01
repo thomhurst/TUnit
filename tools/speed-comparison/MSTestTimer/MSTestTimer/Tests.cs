@@ -23,7 +23,7 @@ public class Tests
     [DynamicData(nameof(Repeat), DynamicDataSourceType.Method)]
     public async Task TestMethod1(int _)
     {
-        await Task.Delay(50);
+        await Task.CompletedTask;
     }
 
     public static IEnumerable<object[]> Repeat()

@@ -21,6 +21,6 @@ public class Tests
     [Test, Repeat(1_000)]
     public async Task Test1()
     {
-        await Task.Delay(50);
+        await Task.CompletedTask;
     }
 }
