@@ -7,12 +7,12 @@ namespace TUnit.Engine;
 #endif
 public static class TestDictionary
 {
-    private static readonly Dictionary<string, DiscoveredTest> Tests = new();
+    private static readonly List<DiscoveredTest> Tests = new();
     private static readonly Dictionary<string, FailedInitializationTest> FailedInitializationTests = new();
 
-    internal static void AddTest(string testId, DiscoveredTest discoveredTest)
+    internal static void AddTest(DiscoveredTest discoveredTest)
     {
-        Tests[testId] = discoveredTest;
+        Tests.Add(discoveredTest);
     }
 
     public static void RegisterFailedTest(string testId, FailedInitializationTest failedInitializationTest)
@@ -22,12 +22,12 @@ public static class TestDictionary
     
     internal static IEnumerable<DiscoveredTest> GetAllTests()
     {
-        return Tests.Values;
+        return Tests.ToList();
     }
 
     internal static DiscoveredTest[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes, Type classType, IEnumerable<Type> classParameterTypes)
     {
-        var testsWithoutMethodParameterTypesMatching = Tests.Values.Where(x =>
+        var testsWithoutMethodParameterTypesMatching = Tests.Where(x =>
             x.TestContext.TestDetails.TestName == testName &&
             x.TestContext.TestDetails.ClassType == classType &&
             x.TestContext.TestDetails.TestClassParameterTypes.SequenceEqual(classParameterTypes))

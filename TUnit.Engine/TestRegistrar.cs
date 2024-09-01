@@ -71,7 +71,7 @@ public static class TestRegistrar
 			TestExecutor = testMetadata.TestExecutor,
 		};
 
-		TestDictionary.AddTest(testId, unInvokedTest);
+		TestDictionary.AddTest(unInvokedTest);
 	}
 
 	private static void RunOnTestDiscoveryAttributes(IEnumerable<Attribute> attributes, TestContext testContext)
