@@ -2,21 +2,14 @@ namespace xUnitTimer;
 
 public class Tests : IClassFixture<Timer>
 {
-    public Tests(Timer timer)
-    {
-    }
-    
     [Theory, MemberData(nameof(Repeat))]
     public async Task Test1(object _)
     {
-        await Task.CompletedTask;
+        await Task.Delay(50);
     }
 
     public static IEnumerable<object[]> Repeat()
     {
-        foreach (var i in Enumerable.Range(0, 1001))
-        {
-            yield return [i];
-        }
+        return Enumerable.Range(0, 10).Select(i => (object[])[i]);
     }
 }
