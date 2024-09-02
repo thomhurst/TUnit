@@ -73,6 +73,18 @@ public class GenerateReadMeModule : Module<File>
 
         await readme.WriteAsync(template.Replace("${{ BENCHMARK }}", markdown), cancellationToken);
 
+        await context.Git().Commands.Config(new GitConfigOptions
+        {
+            Global = true,
+            Arguments = ["user.name", context.GitHub().EnvironmentVariables.Actor!]
+        }, cancellationToken);
+        
+        await context.Git().Commands.Config(new GitConfigOptions
+        {
+            Global = true,
+            Arguments = ["user.email", $"{context.GitHub().EnvironmentVariables.ActorId!}_{context.GitHub().EnvironmentVariables.Actor!}@users.noreply.github.com"]
+        }, cancellationToken);
+        
         await context.Git().Commands.Add(new GitAddOptions
         {
             Arguments = ["README.md"],
