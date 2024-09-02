@@ -49,6 +49,11 @@ public class CommitFilesModule : Module<CommandResult>
         {
             Message = "Update README.md"
         }, cancellationToken);
+
+        await context.Git().Commands.Push(new GitPushOptions
+        {
+            Arguments = ["--set-upstream", "origin", newBranchName]
+        });
         
         await context.Git().Commands.Push(token: cancellationToken);
 
