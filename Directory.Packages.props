@@ -23,9 +23,9 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.4.0-preview.24422.11" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="1.4.0-preview.24422.11" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.0-preview.24422.11" />
-    <PackageVersion Include="ModularPipelines.DotNet" Version="2.40.10" />
-    <PackageVersion Include="ModularPipelines.Git" Version="2.40.10" />
-    <PackageVersion Include="ModularPipelines.GitHub" Version="2.40.10" />
+    <PackageVersion Include="ModularPipelines.DotNet" Version="2.40.18" />
+    <PackageVersion Include="ModularPipelines.Git" Version="2.40.18" />
+    <PackageVersion Include="ModularPipelines.GitHub" Version="2.40.18" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.5.2" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.5.2" />
     <PackageVersion Include="NUnit" Version="4.2.2" />
