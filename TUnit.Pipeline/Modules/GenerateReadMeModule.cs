@@ -44,12 +44,27 @@ public class GenerateReadMeModule : Module<File>
             return null;
         }
 
-        var downloadArtifact =
-            await context.Downloader.DownloadFileAsync(new DownloadFileOptions(new Uri(latestBenchmark.ArtifactsUrl)), cancellationToken);
+        var artifacts = await context.GitHub().Client.Actions.Artifacts.ListWorkflowArtifacts(context.GitHub().RepositoryInfo.Owner,
+            context.GitHub().RepositoryInfo.RepositoryName,
+            latestBenchmark.Id);
 
-        var unzipped = context.Zip.UnZipToFolder(downloadArtifact, Folder.CreateTemporaryFolder());
+        var downloadedArtifacts = await artifacts.Artifacts.SelectAsync(x => context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
+            context.GitHub().RepositoryInfo.Owner,
+            context.GitHub().RepositoryInfo.RepositoryName,
+            x.Id,
+            "zip"))
+            .ProcessInParallel();
 
-        var files = await unzipped.GetFiles("**.md").SelectAsync(x => x.ReadAsync(cancellationToken), cancellationToken: cancellationToken).ProcessInParallel();
+        var artifactFiles = await downloadedArtifacts.SelectAsync(async x =>
+        {
+            var newTemporaryFilePath = File.GetNewTemporaryFilePath();
+            await newTemporaryFilePath.WriteAsync(x, cancellationToken);
+            return newTemporaryFilePath;
+        }).ProcessInParallel();
+
+        var unzipped = artifactFiles.Select(x => context.Zip.UnZipToFolder(x, Folder.CreateTemporaryFolder()));
+
+        var files = await unzipped.SelectMany(x => x.GetFiles("**.md")).SelectAsync(x => x.ReadAsync(cancellationToken), cancellationToken: cancellationToken).ProcessInParallel();
 
         var markdown = string.Join(Environment.NewLine, files);
 
