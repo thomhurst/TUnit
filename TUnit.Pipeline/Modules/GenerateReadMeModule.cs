@@ -6,6 +6,7 @@ using ModularPipelines.FileSystem;
 using ModularPipelines.Git.Attributes;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Git.Options;
+using ModularPipelines.GitHub.Attributes;
 using ModularPipelines.GitHub.Extensions;
 using ModularPipelines.Modules;
 using Octokit;
@@ -17,6 +18,7 @@ namespace TUnit.Pipeline.Modules;
 [RunOnLinuxOnly]
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
+[SkipIfDependabot]
 public class GenerateReadMeModule : Module<File>
 {
     protected override async Task<File?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)

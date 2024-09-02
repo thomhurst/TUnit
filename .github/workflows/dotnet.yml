@@ -42,6 +42,7 @@ jobs:
         run: dotnet run -c Release
         working-directory: "TUnit.Pipeline"
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           DOTNET_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
           NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
           NuGet__ShouldPublish: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
