@@ -6,7 +6,7 @@ T(est)Unit!
 
 See here: <https://thomhurst.github.io/TUnit/>
 
-## BENCHMARK
+## Benchmark
 
 Scenario: A test that takes 50ms to execute, repeated 100 times.
 

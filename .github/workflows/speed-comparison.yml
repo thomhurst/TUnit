@@ -61,4 +61,4 @@ jobs:
         with:
           name: markdown-${{ matrix.os }}
           path: |
-            **/BenchmarkDotNet.Artifacts/*.md
+            **/BenchmarkDotNet.Artifacts/**
