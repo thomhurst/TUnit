@@ -66,9 +66,11 @@ public class GenerateReadMeModule : Module<File>
 
         var unzipped = artifactFiles.Select(x => context.Zip.UnZipToFolder(x, Folder.CreateTemporaryFolder()));
 
-        var files = await unzipped.SelectMany(x => x.GetFiles("**.md")).SelectAsync(x => x.ReadAsync(cancellationToken), cancellationToken: cancellationToken).ProcessInParallel();
+        var files = unzipped.SelectMany(x => x.GetFiles("**.md"));
 
-        var markdown = string.Join(Environment.NewLine, files);
+        var filesContents = await files.SelectAsync(x => x.ReadAsync(cancellationToken), cancellationToken: cancellationToken).ProcessInParallel();
+        
+        var markdown = string.Join(Environment.NewLine, filesContents);
 
         var newContents = template.Replace("${{ BENCHMARK }}", markdown);
 
