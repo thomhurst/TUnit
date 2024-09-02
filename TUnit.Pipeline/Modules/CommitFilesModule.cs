@@ -37,10 +37,7 @@ public class CommitFilesModule : Module<CommandResult>
 
         var newBranchName = $"feature/readme-{Guid.NewGuid():N}";
         
-        await context.Git().Commands.Checkout(new GitCheckoutOptions(newBranchName, true)
-        {
-            Arguments = ["-b"]
-        }, cancellationToken);
+        await context.Git().Commands.Checkout(new GitCheckoutOptions(newBranchName, true), cancellationToken);
         
         await context.Git().Commands.Add(new GitAddOptions
         {
