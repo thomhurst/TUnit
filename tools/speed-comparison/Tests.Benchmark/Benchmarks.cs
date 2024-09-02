@@ -3,12 +3,13 @@ using BenchmarkDotNet.Attributes;
 using Process = System.Diagnostics.Process;
 
 [MarkdownExporterAttribute.GitHub]
+[ShortRunJob]
 public class Benchmarks
 {
-    private static string TUnitPath = GetProjectPath("TUnitTimer");
-    private static string NUnitPath = GetProjectPath("NUnitTimer");
-    private static string xUnitPath = GetProjectPath("xUnitTimer");
-    private static string MSTestPath = GetProjectPath("MSTestTimer");
+    private static readonly string TUnitPath = GetProjectPath("TUnitTimer");
+    private static readonly string NUnitPath = GetProjectPath("NUnitTimer");
+    private static readonly string xUnitPath = GetProjectPath("xUnitTimer");
+    private static readonly string MSTestPath = GetProjectPath("MSTestTimer");
     
     [Benchmark]
     public async Task TUnit()

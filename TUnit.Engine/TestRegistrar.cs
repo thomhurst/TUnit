@@ -71,6 +71,8 @@ public static class TestRegistrar
 			TestExecutor = testMetadata.TestExecutor,
 		};
 
+		testContext.InternalDiscoveredTest = unInvokedTest;
+
 		TestDictionary.AddTest(testId, unInvokedTest);
 	}
 
@@ -79,7 +81,7 @@ public static class TestRegistrar
 		DiscoveredTestContext? discoveredTestContext = null;
 		foreach (var onTestDiscoveryAttribute in attributes.OfType<IOnTestDiscoveryAttribute>().Reverse()) // Reverse to run assembly, then class, then method
 		{
-			onTestDiscoveryAttribute.OnTestDiscovery(discoveredTestContext ??= new DiscoveredTestContext(testContext.TestDetails));
+			onTestDiscoveryAttribute.OnTestDiscovery(discoveredTestContext ??= new DiscoveredTestContext(testContext));
 		}
 
 		if (discoveredTestContext is null)

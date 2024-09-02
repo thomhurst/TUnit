@@ -82,7 +82,7 @@ internal class SingleTestExecutor : IDataProducer
             foreach (var beforeTestAttribute in test.BeforeTestAttributes)
             {
                 await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
-                    () => beforeTestAttribute.OnBeforeTest(testContext));
+                    () => beforeTestAttribute.OnBeforeTest(new BeforeTestContext(testContext.InternalDiscoveredTest)));
             }
 
             try

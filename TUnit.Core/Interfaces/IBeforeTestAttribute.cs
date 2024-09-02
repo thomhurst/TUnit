@@ -2,5 +2,5 @@
 
 public interface IBeforeTestAttribute
 {
-    Task OnBeforeTest(TestContext testContext);
+    Task OnBeforeTest(BeforeTestContext testContext);
 }

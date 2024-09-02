@@ -9,18 +9,18 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class TestHookOrchestrator
 {
-    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, TestContext, Task> Action)>> SetUps = new();
-    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, TestContext, Task> Action)>> CleanUps = new();
+    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, DiscoveredTest, Task> Action)>> SetUps = new();
+    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, DiscoveredTest, Task> Action)>> CleanUps = new();
     
     public static void RegisterBeforeHook<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
     {
         var taskFunctions = SetUps.GetOrAdd(typeof(TClassType), _ => []);
 
-        taskFunctions.Add((instanceMethod.Name, instanceMethod.Order, (classInstance, testContext) =>
+        taskFunctions.Add((instanceMethod.Name, instanceMethod.Order, (classInstance, discoveredTest) =>
         {
             var timeout = instanceMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => instanceMethod.HookExecutor.ExecuteBeforeTestHook(instanceMethod.MethodInfo, testContext, () => instanceMethod.Body((TClassType) classInstance, testContext, token)), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(instanceMethod, discoveredTest).ExecuteBeforeTestHook(instanceMethod.MethodInfo, discoveredTest.TestContext, () => instanceMethod.Body((TClassType) classInstance, discoveredTest.TestContext, token)), timeout);
         }));
     }
     
@@ -28,18 +28,18 @@ public static class TestHookOrchestrator
     {
         var taskFunctions = CleanUps.GetOrAdd(typeof(TClassType), _ => []);
 
-        taskFunctions.Add((instanceMethod.Name, instanceMethod.Order,(classInstance, testContext) =>
+        taskFunctions.Add((instanceMethod.Name, instanceMethod.Order,(classInstance, discoveredTest) =>
         {
             var timeout = instanceMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => instanceMethod.HookExecutor.ExecuteAfterTestHook(instanceMethod.MethodInfo, testContext, () => instanceMethod.Body((TClassType) classInstance, testContext, token)), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(instanceMethod, discoveredTest).ExecuteAfterTestHook(instanceMethod.MethodInfo, discoveredTest.TestContext, () => instanceMethod.Body((TClassType) classInstance, discoveredTest.TestContext, token)), timeout);
         }));
     }
-    
-    public static async Task ExecuteBeforeHooks(object classInstance, TestContext testContext)
+
+    internal static async Task ExecuteBeforeHooks(object classInstance, DiscoveredTest discoveredTest)
     {
         // Run Global Hooks First
-        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testContext);
+        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(discoveredTest);
 
         var testClassType = classInstance.GetType();
         
@@ -55,12 +55,12 @@ public static class TestHookOrchestrator
 
             foreach (var setUp in setUpsForType.OrderBy(x => x.Order))
             {
-                await Timings.Record("Test Hook Set Up: " + setUp.Name, testContext, () => setUp.Action(classInstance, testContext));
+                await Timings.Record("Test Hook Set Up: " + setUp.Name, discoveredTest.TestContext, () => setUp.Action(classInstance, discoveredTest));
             }
         }
     }
     
-    public static async Task ExecuteAfterHooks(object classInstance, TestContext testContext, List<Exception> cleanUpExceptions)
+    internal static async Task ExecuteAfterHooks(object classInstance, DiscoveredTest testContext, List<Exception> cleanUpExceptions)
     {
         var testClassType = classInstance.GetType();
         
@@ -75,7 +75,7 @@ public static class TestHookOrchestrator
 
             foreach (var cleanUp in cleanUpsForType.OrderBy(x => x.Order))
             {
-                await Timings.Record("Test Hook Clean Up: " + cleanUp.Name, testContext, () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(classInstance, testContext), cleanUpExceptions));
+                await Timings.Record("Test Hook Clean Up: " + cleanUp.Name, testContext.TestContext, () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(classInstance, testContext), cleanUpExceptions));
             }
         }
         
