@@ -24,10 +24,10 @@ WarmupCount=3
 ```
 | Method | Mean       | Error    | StdDev   |
 |------- |-----------:|---------:|---------:|
-| TUnit  |   893.3 ms | 773.7 ms | 42.41 ms |
-| NUnit  | 6,527.8 ms | 290.0 ms | 15.89 ms |
-| xUnit  | 6,528.1 ms | 494.9 ms | 27.13 ms |
-| MSTest | 6,505.3 ms | 515.8 ms | 28.27 ms |
+| TUnit  |   865.9 ms | 703.6 ms | 38.56 ms |
+| NUnit  | 6,512.6 ms | 387.5 ms | 21.24 ms |
+| xUnit  | 6,503.7 ms | 474.4 ms | 26.01 ms |
+| MSTest | 6,455.0 ms | 107.0 ms |  5.86 ms |
 
 ```
 
@@ -43,10 +43,10 @@ WarmupCount=3
 ```
 | Method | Mean       | Error    | StdDev   |
 |------- |-----------:|---------:|---------:|
-| TUnit  |   806.1 ms | 437.2 ms | 23.96 ms |
-| NUnit  | 7,469.9 ms | 267.5 ms | 14.66 ms |
-| xUnit  | 7,430.0 ms | 118.3 ms |  6.49 ms |
-| MSTest | 7,389.2 ms | 360.5 ms | 19.76 ms |
+| TUnit  |   846.6 ms | 530.0 ms | 29.05 ms |
+| NUnit  | 7,509.2 ms | 280.4 ms | 15.37 ms |
+| xUnit  | 7,537.7 ms | 205.3 ms | 11.25 ms |
+| MSTest | 7,436.6 ms | 170.0 ms |  9.32 ms |
 
 ```
 
@@ -62,10 +62,10 @@ WarmupCount=3
 ```
 | Method | Mean        | Error       | StdDev    |
 |------- |------------:|------------:|----------:|
-| TUnit  |    593.6 ms |  1,184.7 ms |  64.94 ms |
-| NUnit  | 14,658.5 ms |  6,370.3 ms | 349.18 ms |
-| xUnit  | 14,712.5 ms | 11,572.7 ms | 634.34 ms |
-| MSTest | 14,784.0 ms |  4,218.8 ms | 231.25 ms |
+| TUnit  |    760.0 ms |    484.5 ms |  26.56 ms |
+| NUnit  | 14,171.9 ms | 10,336.5 ms | 566.58 ms |
+| xUnit  | 14,446.2 ms | 14,136.9 ms | 774.89 ms |
+| MSTest | 14,273.7 ms | 11,527.4 ms | 631.86 ms |
 
 
 ## IDE
