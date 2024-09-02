@@ -6,12 +6,67 @@ T(est)Unit!
 
 See here: <https://thomhurst.github.io/TUnit/>
 
-## Speed Comparison
+## Benchmark
 
 Scenario: A test that takes 50ms to execute, repeated 100 times.
 
-See here for the latest speed test comparisons:
-https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml?query=branch%3Amain
+```
+
+BenchmarkDotNet v0.14.0, Ubuntu 22.04.4 LTS (Jammy Jellyfish)
+AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 8.0.401
+  [Host]   : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+  ShortRun : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+
+```
+| Method | Mean       | Error    | StdDev   |
+|------- |-----------:|---------:|---------:|
+| TUnit  |   893.3 ms | 773.7 ms | 42.41 ms |
+| NUnit  | 6,527.8 ms | 290.0 ms | 15.89 ms |
+| xUnit  | 6,528.1 ms | 494.9 ms | 27.13 ms |
+| MSTest | 6,505.3 ms | 515.8 ms | 28.27 ms |
+
+```
+
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
+AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 8.0.401
+  [Host]   : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+  ShortRun : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+
+```
+| Method | Mean       | Error    | StdDev   |
+|------- |-----------:|---------:|---------:|
+| TUnit  |   806.1 ms | 437.2 ms | 23.96 ms |
+| NUnit  | 7,469.9 ms | 267.5 ms | 14.66 ms |
+| xUnit  | 7,430.0 ms | 118.3 ms |  6.49 ms |
+| MSTest | 7,389.2 ms | 360.5 ms | 19.76 ms |
+
+```
+
+BenchmarkDotNet v0.14.0, macOS Sonoma 14.6.1 (23G93) [Darwin 23.6.0]
+Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+.NET SDK 8.0.401
+  [Host]   : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
+  ShortRun : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
+
+Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+
+```
+| Method | Mean        | Error       | StdDev    |
+|------- |------------:|------------:|----------:|
+| TUnit  |    593.6 ms |  1,184.7 ms |  64.94 ms |
+| NUnit  | 14,658.5 ms |  6,370.3 ms | 349.18 ms |
+| xUnit  | 14,712.5 ms | 11,572.7 ms | 634.34 ms |
+| MSTest | 14,784.0 ms |  4,218.8 ms | 231.25 ms |
+
 
 ## IDE
 
