@@ -1,4 +1,5 @@
 ﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using TUnit.Core;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Models;

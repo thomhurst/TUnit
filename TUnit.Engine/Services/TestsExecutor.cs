@@ -3,6 +3,7 @@ using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;

@@ -5,11 +5,12 @@ namespace TUnit.Core;
 public class DiscoveredTestContext
 {
     internal Dictionary<string, string>? Properties;
-    public TestDetails TestDetails { get; }
+    public TestContext TestContext { get; }
+    public TestDetails TestDetails => TestContext.TestDetails;
 
-    internal DiscoveredTestContext(TestDetails testDetails)
+    internal DiscoveredTestContext(TestContext testContext)
     {
-        TestDetails = testDetails;
+        TestContext = testContext;
     }
 
     public void AddProperty(string key, string value)

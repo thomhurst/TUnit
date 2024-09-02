@@ -1,7 +1,6 @@
-﻿using TUnit.Core;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 internal class DiscoveredTest<TTestClass> : DiscoveredTest
 {
@@ -15,8 +14,6 @@ internal class DiscoveredTest<TTestClass> : DiscoveredTest
     public TTestClass TestClass => _resettableLazyTestClassFactory.Value;
     
     public required Func<TTestClass, CancellationToken, Task> TestBody { get; init; }
-    
-    public required ITestExecutor TestExecutor { get; init; }
     
     public override async Task ExecuteTest(CancellationToken cancellationToken)
     {
@@ -41,6 +38,10 @@ internal abstract class DiscoveredTest
     public abstract void ResetTestInstance();
     
     public TestDetails TestDetails => TestContext.TestDetails;
+    
+    public required ITestExecutor TestExecutor { get; internal set; }
+    
+    public IHookExecutor? HookExecutor { get; internal set; }
     
     public bool IsStarted { get; set; }
 }

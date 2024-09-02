@@ -29,7 +29,7 @@ public static class GlobalStaticTestHookOrchestrator
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeTestHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(staticMethod, context.InternalDiscoveredTest).ExecuteBeforeTestHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
@@ -39,25 +39,25 @@ public static class GlobalStaticTestHookOrchestrator
         {
             var timeout = staticMethod.Timeout;
             
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterTestHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            return RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(staticMethod, context.InternalDiscoveredTest).ExecuteAfterTestHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
 
-    public static async Task ExecuteBeforeHooks(TestContext context)
+    internal static async Task ExecuteBeforeHooks(DiscoveredTest discoveredTest)
     {
         foreach (var setUp in SetUps.OrderBy(x => x.Order))
         {
-            await Timings.Record("Global Static Test Hook Set Up: " + setUp.Name, context, 
-                () => setUp.Action(context));
+            await Timings.Record("Global Static Test Hook Set Up: " + setUp.Name, discoveredTest.TestContext, 
+                () => setUp.Action(discoveredTest.TestContext));
         }
     }
 
-    public static async Task ExecuteAfterHooks(TestContext context, List<Exception> cleanUpExceptions)
+    internal static async Task ExecuteAfterHooks(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
     {
         foreach (var cleanUp in CleanUps.OrderBy(x => x.Order))
         {
-            await Timings.Record("Global Static Test Hook Clean Up: " + cleanUp.Name, context,
-                () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), cleanUpExceptions));
+            await Timings.Record("Global Static Test Hook Clean Up: " + cleanUp.Name, discoveredTest.TestContext,
+                () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(discoveredTest.TestContext), cleanUpExceptions));
         }
     }
     
@@ -81,20 +81,20 @@ public static class GlobalStaticTestHookOrchestrator
         }));
     }
 
-    public static async Task ExecuteBeforeHooks(ClassHookContext context, TestContext initiatingTestContext)
+    internal static async Task ExecuteBeforeHooks(ClassHookContext context, DiscoveredTest initiatingTest)
     {
         foreach (var setUp in ClassSetUps.OrderBy(x => x.Order))
         {
-            await Timings.Record("Global Static Class Hook Set Up: " + setUp.Name, initiatingTestContext, 
+            await Timings.Record("Global Static Class Hook Set Up: " + setUp.Name, initiatingTest.TestContext, 
                 () => setUp.Action(context));
         }
     }
 
-    public static async Task ExecuteAfterHooks(ClassHookContext context, TestContext initiatingTestContext, List<Exception> cleanUpExceptions)
+    internal static async Task ExecuteAfterHooks(ClassHookContext context, DiscoveredTest initiatingTest, List<Exception> cleanUpExceptions)
     {
         foreach (var cleanUp in ClassCleanUps.OrderBy(x => x.Order))
         {
-            await Timings.Record("Global Static Class Hook Clean Up: " + cleanUp.Name, initiatingTestContext,
+            await Timings.Record("Global Static Class Hook Clean Up: " + cleanUp.Name, initiatingTest.TestContext,
                 () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), cleanUpExceptions));
         }
     }
@@ -119,21 +119,21 @@ public static class GlobalStaticTestHookOrchestrator
         }));
     }
 
-    public static async Task ExecuteBeforeHooks(AssemblyHookContext context, TestContext initiatingTestContext)
+    internal static async Task ExecuteBeforeHooks(AssemblyHookContext context, DiscoveredTest initiatingTest)
     {
         foreach (var setUp in AssemblySetUps.OrderBy(x => x.Order))
         {
-            await Timings.Record("Global Static Assembly Hook Set Up: " + setUp.Name, initiatingTestContext, 
+            await Timings.Record("Global Static Assembly Hook Set Up: " + setUp.Name, initiatingTest.TestContext, 
                 () => setUp.Action(context));
         }
     }
 
-    public static async Task ExecuteAfterHooks(AssemblyHookContext context, TestContext initiatingTestContext,
+    internal static async Task ExecuteAfterHooks(AssemblyHookContext context, DiscoveredTest initiatingTest,
         List<Exception> cleanUpExceptions)
     {
         foreach (var cleanUp in AssemblyCleanUps.OrderBy(x => x.Order))
         {
-            await Timings.Record("Global Static Assembly Hook Clean Up: " + cleanUp.Name, initiatingTestContext,
+            await Timings.Record("Global Static Assembly Hook Clean Up: " + cleanUp.Name, initiatingTest.TestContext,
                 () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), cleanUpExceptions));
         }
     }
