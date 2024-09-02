@@ -75,9 +75,14 @@ public class GenerateReadMeModule : Module<File>
 
         await context.Git().Commands.Add(new GitAddOptions
         {
-            All = true
+            Arguments = ["README.md"],
         }, cancellationToken);
 
+        await context.Git().Commands.Commit(new GitCommitOptions
+        {
+            Message = "Update README.md"
+        }, cancellationToken);
+        
         await context.Git().Commands.Push(token: cancellationToken);
         
         return readme;
