@@ -1,4 +1,5 @@
 ﻿using EnumerableAsyncProcessor.Extensions;
+using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.Extensions;
@@ -64,12 +65,16 @@ public class GenerateReadMeModule : Module<File>
             await newTemporaryFilePath.WriteAsync(x, cancellationToken);
             return newTemporaryFilePath;
         }).ProcessInParallel();
+        
+        context.Logger.LogInformation("Downloaded Artifacts to: {Files}", string.Join(", ", artifactFiles.Select(x => x.ToString())));
 
         var unzipped = artifactFiles.Select(x => context.Zip.UnZipToFolder(x, Folder.CreateTemporaryFolder()));
 
-        var files = unzipped.SelectMany(x => x.GetFiles("**.md"));
-
-        var filesContents = await files.SelectAsync(x => x.ReadAsync(cancellationToken), cancellationToken: cancellationToken).ProcessInParallel();
+        var markdownFiles = unzipped.SelectMany(x => x.GetFiles("**.md")).ToList();
+        
+        context.Logger.LogInformation("Markdown files found: {Files}", string.Join(", ", markdownFiles.Select(x => x.ToString())));
+        
+        var filesContents = await markdownFiles.SelectAsync(x => x.ReadAsync(cancellationToken), cancellationToken: cancellationToken).ProcessInParallel();
         
         var markdown = string.Join(Environment.NewLine, filesContents);
 
