@@ -76,6 +76,7 @@ public class GenerateReadMeModule : Module<File>
         await context.Git().Commands.Add(new GitAddOptions
         {
             Arguments = ["README.md"],
+            WorkingDirectory = context.Git().RootDirectory.AssertExists()
         }, cancellationToken);
 
         await context.Git().Commands.Commit(new GitCommitOptions
