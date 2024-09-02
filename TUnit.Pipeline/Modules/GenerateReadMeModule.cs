@@ -71,7 +71,14 @@ public class GenerateReadMeModule : Module<File>
 
         var markdown = string.Join(Environment.NewLine, files);
 
-        await readme.WriteAsync(template.Replace("${{ BENCHMARK }}", markdown), cancellationToken);
+        var newContents = template.Replace("${{ BENCHMARK }}", markdown);
+
+        if (newContents == await readme.ReadAsync(cancellationToken))
+        {
+            return null;
+        }
+        
+        await readme.WriteAsync(newContents, cancellationToken);
 
         await context.Git().Commands.Config(new GitConfigOptions
         {
