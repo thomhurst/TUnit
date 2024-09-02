@@ -68,7 +68,9 @@ public class GenerateReadMeModule : Module<File>
         
         context.Logger.LogInformation("Downloaded Artifacts to: {Files}", string.Join(", ", artifactFiles.Select(x => x.ToString())));
 
-        var unzipped = artifactFiles.Select(x => context.Zip.UnZipToFolder(x, Folder.CreateTemporaryFolder()));
+        var unzipped = artifactFiles.Select(x => context.Zip.UnZipToFolder(x, Folder.CreateTemporaryFolder())).ToList();
+        
+        context.Logger.LogInformation("Unzipped locations: {Folders}", string.Join(", ", unzipped.Select(x => x.ToString())));
 
         var markdownFiles = unzipped.SelectMany(x => x.GetFiles(f => f.Extension == ".md")).ToList();
         
