@@ -61,6 +61,6 @@ public class CommitFilesModule : Module<CommandResult>
             context.GitHub().RepositoryInfo.RepositoryName,
             new NewPullRequest("Update ReadMe", newBranchName, "main"));
 
-        return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("gh", "pr", "merge", "--admin", pr.Number.ToString()), cancellationToken);
+        return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("gh", "pr", "merge", "--admin", "--squash", pr.Number.ToString()), cancellationToken);
     }
 }
