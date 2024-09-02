@@ -61,14 +61,6 @@ public class CommitFilesModule : Module<CommandResult>
             context.GitHub().RepositoryInfo.RepositoryName,
             new NewPullRequest("Update ReadMe", newBranchName, "main"));
 
-        await context.GitHub().Client.PullRequest.Review.Create(context.GitHub().RepositoryInfo.Owner,
-            context.GitHub().RepositoryInfo.RepositoryName,
-            pr.Number,
-            new PullRequestReviewCreate
-            {
-                Event = PullRequestReviewEvent.Approve
-            });
-
-        return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("gh", ["pr", "merge", "--auto", pr.Number.ToString()]), cancellationToken);
+        return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("gh", ["pr", "merge", pr.Number.ToString()]), cancellationToken);
     }
 }
