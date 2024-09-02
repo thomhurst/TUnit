@@ -8,14 +8,15 @@ using ModularPipelines.Git.Extensions;
 using ModularPipelines.Git.Options;
 using ModularPipelines.GitHub.Extensions;
 using ModularPipelines.Modules;
-using ModularPipelines.Options;
 using Octokit;
 using File = ModularPipelines.FileSystem.File;
 
 namespace TUnit.Pipeline.Modules;
 
 [RunOnlyOnBranch("main")]
-[DependsOn<UploadToNuGetModule>]
+[RunOnLinuxOnly]
+[DependsOn<PackTUnitFilesModule>]
+[DependsOn<TestNugetPackageModule>]
 public class GenerateReadMeModule : Module<File>
 {
     protected override async Task<File?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
