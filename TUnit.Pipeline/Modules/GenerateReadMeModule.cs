@@ -95,7 +95,7 @@ public class GenerateReadMeModule : Module<File>
 
         var newBranchName = $"feature/readme-{Guid.NewGuid():N}";
         
-        await context.Git().Commands.Checkout(new GitCheckoutOptions(newBranchName)
+        await context.Git().Commands.Checkout(new GitCheckoutOptions(newBranchName, true)
         {
             Arguments = ["-b"]
         }, cancellationToken);
