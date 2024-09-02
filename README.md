@@ -6,12 +6,11 @@ T(est)Unit!
 
 See here: <https://thomhurst.github.io/TUnit/>
 
-## Speed Comparison
+## Benchmark
 
 Scenario: A test that takes 50ms to execute, repeated 100 times.
 
-See here for the latest speed test comparisons:
-https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml?query=branch%3Amain
+
 
 ## IDE
 
