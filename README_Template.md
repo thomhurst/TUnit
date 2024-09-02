@@ -6,12 +6,6 @@ T(est)Unit!
 
 See here: <https://thomhurst.github.io/TUnit/>
 
-## Benchmark
-
-Scenario: A test that takes 50ms to execute, repeated 100 times.
-
-${{ BENCHMARK }}
-
 ## IDE
 
 TUnit is built on top of newer Microsoft.Testing.Platform libraries, as opposed to older legacy VSTest libraries. As of July 2024, IDEs do not fully support this testing platform yet.
@@ -167,3 +161,9 @@ TUnit is inspired by NUnit and xUnit - two of the most popular testing framework
 It aims to build upon the useful features of both while trying to address any pain points that they may have. You may have experienced these, or you may have not even known about them.
 
 [Read more here](https://thomhurst.github.io/TUnit/docs/comparison/framework-differences)
+
+## Benchmark
+
+Scenario: A test that takes 50ms to execute, repeated 100 times.
+
+${{ BENCHMARK }}
