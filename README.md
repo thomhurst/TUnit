@@ -184,10 +184,10 @@ WarmupCount=3
 ```
 | Method | Mean     | Error    | StdDev   |
 |------- |---------:|---------:|---------:|
-| TUnit  | 505.3 ms | 604.8 ms | 33.15 ms |
-| NUnit  | 711.2 ms | 132.6 ms |  7.27 ms |
-| xUnit  | 702.8 ms | 320.8 ms | 17.58 ms |
-| MSTest | 631.6 ms | 220.3 ms | 12.08 ms |
+| TUnit  | 482.7 ms | 311.9 ms | 17.10 ms |
+| NUnit  | 702.1 ms | 138.6 ms |  7.60 ms |
+| xUnit  | 672.8 ms | 103.0 ms |  5.65 ms |
+| MSTest | 619.9 ms | 250.3 ms | 13.72 ms |
 
 
 
@@ -207,10 +207,10 @@ WarmupCount=3
 ```
 | Method | Mean       | Error     | StdDev   |
 |------- |-----------:|----------:|---------:|
-| TUnit  |   767.7 ms | 474.96 ms | 26.03 ms |
-| NUnit  | 1,295.4 ms | 193.02 ms | 10.58 ms |
-| xUnit  | 1,265.6 ms |  52.21 ms |  2.86 ms |
-| MSTest | 1,142.3 ms | 111.08 ms |  6.09 ms |
+| TUnit  |   781.8 ms | 416.53 ms | 22.83 ms |
+| NUnit  | 1,285.2 ms | 322.75 ms | 17.69 ms |
+| xUnit  | 1,251.8 ms |  92.85 ms |  5.09 ms |
+| MSTest | 1,127.6 ms |  71.40 ms |  3.91 ms |
 
 
 
@@ -230,13 +230,59 @@ WarmupCount=3
 ```
 | Method | Mean       | Error    | StdDev   |
 |------- |-----------:|---------:|---------:|
-| TUnit  |   805.7 ms | 682.3 ms | 37.40 ms |
-| NUnit  | 1,357.7 ms | 419.7 ms | 23.00 ms |
-| xUnit  | 1,356.6 ms | 286.4 ms | 15.70 ms |
-| MSTest | 1,217.0 ms | 407.0 ms | 22.31 ms |
+| TUnit  |   807.5 ms | 715.3 ms | 39.21 ms |
+| NUnit  | 1,375.3 ms | 725.8 ms | 39.78 ms |
+| xUnit  | 1,378.5 ms | 449.1 ms | 24.61 ms |
+| MSTest | 1,218.8 ms | 112.1 ms |  6.14 ms |
 
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times
+
+windows-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
+AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 8.0.401
+  [Host]   : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+  ShortRun : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+
+```
+| Method | Mean       | Error      | StdDev   |
+|------- |-----------:|-----------:|---------:|
+| TUnit  |   868.3 ms |   443.0 ms | 24.28 ms |
+| NUnit  | 7,563.1 ms | 1,280.2 ms | 70.17 ms |
+| xUnit  | 8,815.6 ms |   194.8 ms | 10.68 ms |
+| MSTest | 8,777.8 ms |   326.7 ms | 17.91 ms |
+
+
+
+ubuntu-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Ubuntu 22.04.4 LTS (Jammy Jellyfish)
+AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 8.0.401
+  [Host]   : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+  ShortRun : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+
+```
+| Method | Mean       | Error    | StdDev   |
+|------- |-----------:|---------:|---------:|
+| TUnit  |   867.5 ms | 433.1 ms | 23.74 ms |
+| NUnit  | 6,538.2 ms | 198.6 ms | 10.88 ms |
+| xUnit  | 6,538.9 ms | 355.1 ms | 19.47 ms |
+| MSTest | 6,489.1 ms | 430.7 ms | 23.61 ms |
+
+
 
 macos-latest
 
@@ -254,55 +300,9 @@ WarmupCount=3
 ```
 | Method | Mean        | Error       | StdDev    |
 |------- |------------:|------------:|----------:|
-| TUnit  |    631.7 ms |  1,133.4 ms |  62.12 ms |
-| NUnit  | 14,243.1 ms | 11,068.8 ms | 606.72 ms |
-| xUnit  | 14,243.9 ms | 13,794.4 ms | 756.12 ms |
-| MSTest | 13,608.2 ms | 17,461.4 ms | 957.12 ms |
-
-
-
-ubuntu-latest
-
-```
-
-BenchmarkDotNet v0.14.0, Ubuntu 22.04.4 LTS (Jammy Jellyfish)
-AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 8.0.401
-  [Host]   : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-  ShortRun : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-
-Job=ShortRun  IterationCount=3  LaunchCount=1  
-WarmupCount=3  
-
-```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   906.1 ms | 926.2 ms | 50.77 ms |
-| NUnit  | 6,588.5 ms | 165.6 ms |  9.08 ms |
-| xUnit  | 6,610.8 ms | 609.9 ms | 33.43 ms |
-| MSTest | 6,555.7 ms | 286.8 ms | 15.72 ms |
-
-
-
-windows-latest
-
-```
-
-BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
-AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 8.0.401
-  [Host]   : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-  ShortRun : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-
-Job=ShortRun  IterationCount=3  LaunchCount=1  
-WarmupCount=3  
-
-```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   912.3 ms | 356.3 ms | 19.53 ms |
-| NUnit  | 7,582.6 ms | 897.4 ms | 49.19 ms |
-| xUnit  | 7,609.2 ms | 664.7 ms | 36.43 ms |
-| MSTest | 7,501.4 ms | 217.5 ms | 11.92 ms |
+| TUnit  |    866.8 ms |  1,656.0 ms |  90.77 ms |
+| NUnit  | 14,419.1 ms |  1,405.4 ms |  77.03 ms |
+| xUnit  | 14,347.4 ms | 10,275.8 ms | 563.25 ms |
+| MSTest | 14,490.9 ms | 10,899.4 ms | 597.43 ms |
 
 
