@@ -1,6 +1,6 @@
 # TUnit
 
-T(est)Unit!
+A modern, flexible and fast testing framework for .NET
 
 ## Documentation
 
