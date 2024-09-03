@@ -164,6 +164,4 @@ It aims to build upon the useful features of both while trying to address any pa
 
 ## Benchmark
 
-Scenario: A test that takes 50ms to execute, repeated 100 times.
-
 ${{ BENCHMARK }}
