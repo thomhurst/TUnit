@@ -7,6 +7,11 @@
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
   </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Aot)' == true">
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Using Include="TUnit.Core.HookType" Static="True" />
     <Using Include="TUnit.Core" />
