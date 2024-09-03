@@ -10,6 +10,8 @@ public class GenerateVersionModule : Module<GitVersionInformation>
 {
     protected override async Task<GitVersionInformation?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
+        await context.Git().Commands.Fetch(token: cancellationToken);
+        
         var versionInformation = await context.Git().Versioning.GetGitVersioningInformation();
         
         context.LogOnPipelineEnd($"NuGet Version is: {versionInformation.SemVer}");
