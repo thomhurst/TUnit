@@ -1,0 +1,6 @@
+mode: ContinuousDeployment
+strategies:
+  - Mainline
+ignore:
+  sha: 
+    - ff51be779bca13b642a0bc0a1c52716a1cbf5cec
