@@ -52,7 +52,7 @@ public class GenerateReadMeModule : Module<File>
 
         var fileContents = new StringBuilder();
 
-        foreach (var artifact in artifacts.Artifacts)
+        await artifacts.Artifacts.ForEachAsync(async artifact =>
         {
             var operatingSystem = artifact.Name.Split("-")[1];
 
@@ -77,7 +77,7 @@ public class GenerateReadMeModule : Module<File>
             fileContents.AppendLine($"Scenario: {GetScenario(className)}");
             fileContents.AppendLine(contents);
             fileContents.AppendLine();
-        }
+        }, cancellationToken: cancellationToken).ProcessInParallel();
 
         var newContents = template.Replace("${{ BENCHMARK }}", fileContents.ToString());
 
