@@ -24,7 +24,7 @@ public class CommitFilesModule : Module<CommandResult>
     protected override async Task<SkipDecision> ShouldSkip(IPipelineContext context)
     {
         var generateReadMeModule = await GetModule<GenerateReadMeModule>();
-        return generateReadMeModule.Value != null;
+        return generateReadMeModule.Value == null;
     }
 
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
