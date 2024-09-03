@@ -167,7 +167,7 @@ It aims to build upon the useful features of both while trying to address any pa
 Scenario: A test that takes 50ms to execute, repeated 100 times.
 
 windows-latest
-Scenario: A single test that completes instantly
+Scenario: A test that takes 50ms to execute, repeated 100 times
 ```
 
 BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
@@ -182,10 +182,10 @@ WarmupCount=3
 ```
 | Method | Mean       | Error     | StdDev   |
 |------- |-----------:|----------:|---------:|
-| TUnit  |   799.1 ms | 444.29 ms | 24.35 ms |
-| NUnit  | 1,310.7 ms | 173.45 ms |  9.51 ms |
-| xUnit  | 1,291.2 ms | 155.69 ms |  8.53 ms |
-| MSTest | 1,177.9 ms |  74.28 ms |  4.07 ms |
+| TUnit  |   828.1 ms | 467.41 ms | 25.62 ms |
+| NUnit  | 7,457.2 ms | 124.71 ms |  6.84 ms |
+| xUnit  | 7,447.6 ms |  83.02 ms |  4.55 ms |
+| MSTest | 8,707.5 ms | 631.79 ms | 34.63 ms |
 
 
 macos-latest
@@ -202,38 +202,16 @@ Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3  
 
 ```
-| Method | Mean     | Error      | StdDev   |
-|------- |---------:|-----------:|---------:|
-| TUnit  | 487.6 ms |   148.4 ms |  8.14 ms |
-| NUnit  | 819.4 ms | 1,340.3 ms | 73.47 ms |
-| xUnit  | 688.9 ms |   230.5 ms | 12.63 ms |
-| MSTest | 620.6 ms |   411.9 ms | 22.58 ms |
-
-
-ubuntu-latest
-Scenario: A test that takes 50ms to execute, repeated 100 times
-```
-
-BenchmarkDotNet v0.14.0, Ubuntu 22.04.4 LTS (Jammy Jellyfish)
-AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 8.0.401
-  [Host]   : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-  ShortRun : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-
-Job=ShortRun  IterationCount=3  LaunchCount=1  
-WarmupCount=3  
-
-```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   873.3 ms | 353.3 ms | 19.37 ms |
-| NUnit  | 6,600.1 ms | 612.3 ms | 33.56 ms |
-| xUnit  | 6,614.2 ms | 632.5 ms | 34.67 ms |
-| MSTest | 6,535.7 ms | 212.1 ms | 11.63 ms |
+| Method | Mean     | Error     | StdDev   |
+|------- |---------:|----------:|---------:|
+| TUnit  | 531.1 ms | 305.97 ms | 16.77 ms |
+| NUnit  | 745.8 ms | 869.67 ms | 47.67 ms |
+| xUnit  | 692.6 ms |  25.00 ms |  1.37 ms |
+| MSTest | 646.4 ms | 130.19 ms |  7.14 ms |
 
 
 windows-latest
-Scenario: A test that takes 50ms to execute, repeated 100 times
+Scenario: A single test that completes instantly
 ```
 
 BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
@@ -248,10 +226,10 @@ WarmupCount=3
 ```
 | Method | Mean       | Error    | StdDev   |
 |------- |-----------:|---------:|---------:|
-| TUnit  |   843.9 ms | 458.5 ms | 25.13 ms |
-| NUnit  | 7,517.3 ms | 235.5 ms | 12.91 ms |
-| xUnit  | 7,534.8 ms | 904.3 ms | 49.57 ms |
-| MSTest | 7,479.1 ms | 198.2 ms | 10.86 ms |
+| TUnit  |   754.1 ms | 414.9 ms | 22.74 ms |
+| NUnit  | 1,270.9 ms | 183.5 ms | 10.06 ms |
+| xUnit  | 1,264.7 ms | 357.9 ms | 19.62 ms |
+| MSTest | 1,155.1 ms | 221.3 ms | 12.13 ms |
 
 
 ubuntu-latest
@@ -270,10 +248,32 @@ WarmupCount=3
 ```
 | Method | Mean       | Error    | StdDev   |
 |------- |-----------:|---------:|---------:|
-| TUnit  |   847.9 ms | 610.4 ms | 33.46 ms |
-| NUnit  | 1,448.3 ms | 724.8 ms | 39.73 ms |
-| xUnit  | 1,413.9 ms | 235.5 ms | 12.91 ms |
-| MSTest | 1,263.5 ms | 266.7 ms | 14.62 ms |
+| TUnit  |   816.0 ms | 929.7 ms | 50.96 ms |
+| NUnit  | 1,400.4 ms | 531.9 ms | 29.16 ms |
+| xUnit  | 1,366.5 ms | 286.1 ms | 15.68 ms |
+| MSTest | 1,235.4 ms | 221.1 ms | 12.12 ms |
+
+
+ubuntu-latest
+Scenario: A test that takes 50ms to execute, repeated 100 times
+```
+
+BenchmarkDotNet v0.14.0, Ubuntu 22.04.4 LTS (Jammy Jellyfish)
+AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 8.0.401
+  [Host]   : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+  ShortRun : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+
+```
+| Method | Mean       | Error    | StdDev   |
+|------- |-----------:|---------:|---------:|
+| TUnit  |   871.4 ms | 703.6 ms | 38.57 ms |
+| NUnit  | 6,507.3 ms | 144.0 ms |  7.89 ms |
+| xUnit  | 6,509.3 ms | 129.4 ms |  7.09 ms |
+| MSTest | 6,467.1 ms | 575.8 ms | 31.56 ms |
 
 
 macos-latest
@@ -290,11 +290,11 @@ Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3  
 
 ```
-| Method | Mean        | Error       | StdDev   |
-|------- |------------:|------------:|---------:|
-| TUnit  |    694.3 ms |  2,597.6 ms | 142.4 ms |
-| NUnit  | 13,943.2 ms | 13,935.5 ms | 763.9 ms |
-| xUnit  | 15,562.2 ms |  9,455.3 ms | 518.3 ms |
-| MSTest | 14,405.7 ms |  7,641.9 ms | 418.9 ms |
+| Method | Mean        | Error       | StdDev    |
+|------- |------------:|------------:|----------:|
+| TUnit  |    660.6 ms |    180.1 ms |   9.87 ms |
+| NUnit  | 13,920.1 ms |  9,570.2 ms | 524.58 ms |
+| xUnit  | 14,514.9 ms |  6,957.7 ms | 381.37 ms |
+| MSTest | 14,111.8 ms | 10,360.2 ms | 567.88 ms |
 
 
