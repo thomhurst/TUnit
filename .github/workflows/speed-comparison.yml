@@ -21,6 +21,7 @@ jobs:
     strategy: 
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        class: [RepeatTests, BasicTest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
 
@@ -54,11 +55,13 @@ jobs:
       - name: Run Benchmark
         run: dotnet run -c Release
         working-directory: "tools/speed-comparison/Tests.Benchmark"
+        env:
+          CLASS_NAME: ${{ matrix.class }}
 
       - name: Upload Markdown
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: markdown-${{ matrix.os }}
+          name: markdown-${{ matrix.os }}-${{ matrix.class }}
           path: |
             **/BenchmarkDotNet.Artifacts/**

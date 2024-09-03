@@ -1,7 +1,7 @@
 namespace NUnitTimer;
 
 [Parallelizable(ParallelScope.All)]
-public class Tests
+public class RepeatTests
 {
     [Test, Repeat(100)]
     public async Task Test1()

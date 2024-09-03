@@ -1,4 +1,5 @@
-﻿using EnumerableAsyncProcessor.Extensions;
+﻿using System.Text;
+using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
@@ -17,9 +18,6 @@ namespace TUnit.Pipeline.Modules;
 [RunOnlyOnBranch("main")]
 [RunOnLinuxOnly]
 [SkipIfDependabot]
-[DependsOn<UploadToNuGetModule>]
-[DependsOn<PackTUnitFilesModule>]
-[DependsOn<TestNugetPackageModule>]
 public class GenerateReadMeModule : Module<File>
 {
     protected override async Task<File?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
@@ -52,35 +50,36 @@ public class GenerateReadMeModule : Module<File>
             context.GitHub().RepositoryInfo.RepositoryName,
             latestBenchmark.Id);
 
-        var downloadedArtifacts = await artifacts.Artifacts.SelectAsync(x => context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
-            context.GitHub().RepositoryInfo.Owner,
-            context.GitHub().RepositoryInfo.RepositoryName,
-            x.Id,
-            "zip"))
-            .ProcessInParallel();
+        var fileContents = new StringBuilder();
 
-        var artifactFiles = await downloadedArtifacts.SelectAsync(async x =>
+        foreach (var artifact in artifacts.Artifacts)
         {
-            var newTemporaryFilePath = File.GetNewTemporaryFilePath();
-            await newTemporaryFilePath.WriteAsync(x, cancellationToken);
-            return newTemporaryFilePath;
-        }).ProcessInParallel();
-        
-        context.Logger.LogInformation("Downloaded Artifacts to: {Files}", string.Join(", ", artifactFiles.Select(x => x.ToString())));
+            var operatingSystem = artifact.Name.Split("-")[1];
 
-        var unzipped = artifactFiles.Select(x => context.Zip.UnZipToFolder(x, Folder.CreateTemporaryFolder())).ToList();
-        
-        context.Logger.LogInformation("Unzipped locations: {Folders}", string.Join(", ", unzipped.Select(x => x.ToString())));
+            var className = artifact.Name.Split("-")[2];
 
-        var markdownFiles = unzipped.SelectMany(x => x.GetFiles(f => f.Extension == ".md")).ToList();
-        
-        context.Logger.LogInformation("Markdown files found: {Files}", string.Join(", ", markdownFiles.Select(x => x.ToString())));
-        
-        var filesContents = await markdownFiles.SelectAsync(x => x.ReadAsync(cancellationToken), cancellationToken: cancellationToken).ProcessInParallel();
-        
-        var markdown = string.Join(Environment.NewLine, filesContents);
+            var stream = await context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
+                context.GitHub().RepositoryInfo.Owner,
+                context.GitHub().RepositoryInfo.RepositoryName,
+                artifact.Id,
+                "zip");
 
-        var newContents = template.Replace("${{ BENCHMARK }}", markdown);
+            var downloadedZip = File.GetNewTemporaryFilePath();
+            await downloadedZip.WriteAsync(stream, cancellationToken);
+
+            var unzippedDirectory = context.Zip.UnZipToFolder(downloadedZip, Folder.CreateTemporaryFolder());
+
+            var markdownFile = unzippedDirectory.FindFile(x => x.Extension == ".md").AssertExists();
+
+            var contents = await markdownFile.ReadAsync(cancellationToken);
+
+            fileContents.AppendLine(operatingSystem);
+            fileContents.AppendLine($"Scenario: {GetScenario(className)}");
+            fileContents.AppendLine(contents);
+            fileContents.AppendLine();
+        }
+
+        var newContents = template.Replace("${{ BENCHMARK }}", fileContents.ToString());
 
         if (newContents == await readme.ReadAsync(cancellationToken))
         {
@@ -90,5 +89,15 @@ public class GenerateReadMeModule : Module<File>
         await readme.WriteAsync(newContents, cancellationToken);
         
         return readme;
+    }
+
+    private string GetScenario(string className)
+    {
+        return className switch
+        {
+            "BasicTest" => "A single test that completes instantly",
+            "RepeatTests" => "A test that takes 50ms to execute, repeated 100 times",
+            _ => throw new ArgumentException("Unknown class name", nameof(className))
+        };
     }
 }

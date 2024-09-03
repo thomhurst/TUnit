@@ -1,6 +1,6 @@
 namespace xUnitTimer;
 
-public class Tests
+public class RepeatTests
 {
     [Theory, MemberData(nameof(Repeat))]
     public async Task Test1(object _)

@@ -1,6 +1,6 @@
 namespace TUnitTimer;
 
-public class Tests
+public class RepeatTests
 {
     [Test, Repeat(99)]
     public async Task Test1()
