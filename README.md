@@ -180,12 +180,12 @@ Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3  
 
 ```
-| Method | Mean     | Error      | StdDev    |
-|------- |---------:|-----------:|----------:|
-| TUnit  | 611.7 ms | 1,839.3 ms | 100.82 ms |
-| NUnit  | 929.4 ms | 1,560.3 ms |  85.53 ms |
-| xUnit  | 886.7 ms | 1,748.9 ms |  95.86 ms |
-| MSTest | 886.6 ms |   225.8 ms |  12.38 ms |
+| Method | Mean     | Error     | StdDev   |
+|------- |---------:|----------:|---------:|
+| TUnit  | 569.0 ms | 856.08 ms | 46.92 ms |
+| NUnit  | 701.0 ms |  27.00 ms |  1.48 ms |
+| xUnit  | 915.7 ms | 961.68 ms | 52.71 ms |
+| MSTest | 690.8 ms | 139.79 ms |  7.66 ms |
 
 
 
@@ -203,12 +203,12 @@ Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3  
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   837.3 ms | 518.4 ms | 28.42 ms |
-| NUnit  | 1,386.5 ms | 244.5 ms | 13.40 ms |
-| xUnit  | 1,399.2 ms | 418.2 ms | 22.92 ms |
-| MSTest | 1,202.5 ms | 174.5 ms |  9.57 ms |
+| Method | Mean       | Error     | StdDev   |
+|------- |-----------:|----------:|---------:|
+| TUnit  |   818.8 ms | 670.22 ms | 36.74 ms |
+| NUnit  | 1,378.4 ms | 164.97 ms |  9.04 ms |
+| xUnit  | 1,356.9 ms |  61.74 ms |  3.38 ms |
+| MSTest | 1,235.1 ms | 499.42 ms | 27.37 ms |
 
 
 
@@ -226,12 +226,12 @@ Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3  
 
 ```
-| Method | Mean       | Error     | StdDev   |
-|------- |-----------:|----------:|---------:|
-| TUnit  |   754.9 ms | 397.05 ms | 21.76 ms |
-| NUnit  | 1,276.7 ms | 151.17 ms |  8.29 ms |
-| xUnit  | 1,293.9 ms | 230.38 ms | 12.63 ms |
-| MSTest | 1,155.5 ms |  83.83 ms |  4.59 ms |
+| Method | Mean       | Error       | StdDev   |
+|------- |-----------:|------------:|---------:|
+| TUnit  |   777.9 ms |   463.37 ms | 25.40 ms |
+| NUnit  | 1,303.5 ms |   194.86 ms | 10.68 ms |
+| xUnit  | 1,360.7 ms | 1,276.37 ms | 69.96 ms |
+| MSTest | 1,141.6 ms |    57.20 ms |  3.14 ms |
 
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times
@@ -252,10 +252,10 @@ WarmupCount=3
 ```
 | Method | Mean       | Error    | StdDev   |
 |------- |-----------:|---------:|---------:|
-| TUnit  |   865.1 ms | 411.3 ms | 22.54 ms |
-| NUnit  | 6,557.5 ms | 841.6 ms | 46.13 ms |
-| xUnit  | 6,548.2 ms | 220.7 ms | 12.10 ms |
-| MSTest | 6,480.3 ms | 684.9 ms | 37.54 ms |
+| TUnit  |   880.4 ms | 654.0 ms | 35.85 ms |
+| NUnit  | 6,521.6 ms | 332.0 ms | 18.20 ms |
+| xUnit  | 6,524.5 ms | 158.1 ms |  8.66 ms |
+| MSTest | 6,485.1 ms | 923.1 ms | 50.60 ms |
 
 
 
@@ -273,12 +273,12 @@ Job=ShortRun  IterationCount=3  LaunchCount=1
 WarmupCount=3  
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   838.3 ms | 557.1 ms | 30.54 ms |
-| NUnit  | 7,472.2 ms | 478.1 ms | 26.20 ms |
-| xUnit  | 7,504.0 ms | 367.3 ms | 20.13 ms |
-| MSTest | 7,439.6 ms | 569.5 ms | 31.22 ms |
+| Method | Mean       | Error       | StdDev    |
+|------- |-----------:|------------:|----------:|
+| TUnit  |   932.2 ms |    203.6 ms |  11.16 ms |
+| NUnit  | 7,661.2 ms |    320.9 ms |  17.59 ms |
+| xUnit  | 7,642.2 ms |    477.5 ms |  26.17 ms |
+| MSTest | 7,979.9 ms | 15,773.3 ms | 864.59 ms |
 
 
 
@@ -298,9 +298,9 @@ WarmupCount=3
 ```
 | Method | Mean        | Error      | StdDev    |
 |------- |------------:|-----------:|----------:|
-| TUnit  |    835.2 ms | 1,168.1 ms |  64.03 ms |
-| NUnit  | 14,954.0 ms | 6,654.1 ms | 364.74 ms |
-| xUnit  | 14,186.8 ms | 3,597.2 ms | 197.17 ms |
-| MSTest | 14,333.2 ms | 6,197.6 ms | 339.71 ms |
+| TUnit  |    631.7 ms | 1,683.8 ms |  92.29 ms |
+| NUnit  | 14,718.1 ms | 8,304.0 ms | 455.17 ms |
+| xUnit  | 14,807.9 ms | 8,554.7 ms | 468.91 ms |
+| MSTest | 14,053.4 ms | 3,409.9 ms | 186.91 ms |
 
 
