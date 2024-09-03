@@ -79,11 +79,11 @@ public class GenerateReadMeModule : Module<File>
                 var contents = await markdownFile.ReadAsync(cancellationToken);
 
                 fileContents.AppendLine();
-                fileContents.AppendLine(operatingSystem);
+                fileContents.AppendLine($"#### {operatingSystem}");
                 fileContents.AppendLine();
                 fileContents.AppendLine(contents);
                 fileContents.AppendLine();
-            }, cancellationToken: cancellationToken).ProcessInParallel();
+            }, cancellationToken: cancellationToken).ProcessOneAtATime();
         }, cancellationToken: cancellationToken).ProcessOneAtATime();
 
         var newContents = template.Replace("${{ BENCHMARK }}", fileContents.ToString());
