@@ -62,6 +62,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: markdown-${{ matrix.os }}-${{ matrix.class }}
+          name: markdown_${{ matrix.os }}_${{ matrix.class }}
           path: |
             **/BenchmarkDotNet.Artifacts/**
