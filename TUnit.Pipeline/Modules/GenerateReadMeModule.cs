@@ -52,32 +52,39 @@ public class GenerateReadMeModule : Module<File>
 
         var fileContents = new StringBuilder();
 
-        await artifacts.Artifacts.ForEachAsync(async artifact =>
+        // Grouping is by Scenario
+        await artifacts.Artifacts.GroupBy(x => x.Name.Split("_")[2]).ForEachAsync(async groupedArtifacts =>
         {
-            var operatingSystem = artifact.Name.Split("_")[1];
+            var className = groupedArtifacts.Key;
 
-            var className = artifact.Name.Split("_")[2];
+            fileContents.AppendLine($"### Scenario: {GetScenario(className)}");
 
-            var stream = await context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
-                context.GitHub().RepositoryInfo.Owner,
-                context.GitHub().RepositoryInfo.RepositoryName,
-                artifact.Id,
-                "zip");
+            await groupedArtifacts.ForEachAsync(async artifact =>
+            {
+                var operatingSystem = artifact.Name.Split("_")[1];
 
-            var downloadedZip = File.GetNewTemporaryFilePath();
-            await downloadedZip.WriteAsync(stream, cancellationToken);
+                var stream = await context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
+                    context.GitHub().RepositoryInfo.Owner,
+                    context.GitHub().RepositoryInfo.RepositoryName,
+                    artifact.Id,
+                    "zip");
 
-            var unzippedDirectory = context.Zip.UnZipToFolder(downloadedZip, Folder.CreateTemporaryFolder());
+                var downloadedZip = File.GetNewTemporaryFilePath();
+                await downloadedZip.WriteAsync(stream, cancellationToken);
 
-            var markdownFile = unzippedDirectory.FindFile(x => x.Extension == ".md").AssertExists();
+                var unzippedDirectory = context.Zip.UnZipToFolder(downloadedZip, Folder.CreateTemporaryFolder());
 
-            var contents = await markdownFile.ReadAsync(cancellationToken);
+                var markdownFile = unzippedDirectory.FindFile(x => x.Extension == ".md").AssertExists();
 
-            fileContents.AppendLine(operatingSystem);
-            fileContents.AppendLine($"Scenario: {GetScenario(className)}");
-            fileContents.AppendLine(contents);
-            fileContents.AppendLine();
-        }, cancellationToken: cancellationToken).ProcessInParallel();
+                var contents = await markdownFile.ReadAsync(cancellationToken);
+
+                fileContents.AppendLine();
+                fileContents.AppendLine(operatingSystem);
+                fileContents.AppendLine();
+                fileContents.AppendLine(contents);
+                fileContents.AppendLine();
+            }, cancellationToken: cancellationToken).ProcessInParallel();
+        }, cancellationToken: cancellationToken).ProcessOneAtATime();
 
         var newContents = template.Replace("${{ BENCHMARK }}", fileContents.ToString());
 
