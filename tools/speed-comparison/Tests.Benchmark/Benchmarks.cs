@@ -5,7 +5,6 @@ using Process = System.Diagnostics.Process;
 namespace Tests.Benchmark;
 
 [MarkdownExporterAttribute.GitHub]
-[ShortRunJob]
 public class Benchmarks
 {
     private static readonly string TUnitPath = GetProjectPath("TUnitTimer");
