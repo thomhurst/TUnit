@@ -40,7 +40,7 @@ internal class TestsExecutor
         _logger = logger;
         _commandLineOptions = commandLineOptions;
 
-        _maximumParallelTests = GetMaximumParallelTests();
+        _maximumParallelTests = GetParallelTestsLimit();
     }
 
     public async Task ExecuteAsync(ParallelQuery<DiscoveredTest> testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
@@ -126,7 +126,7 @@ internal class TestsExecutor
     {
         await Parallel.ForEachAsync(queue, new ParallelOptions
         {
-            MaxDegreeOfParallelism = GetMaximumParallelTests(),
+            MaxDegreeOfParallelism = GetParallelTestsLimit(),
             CancellationToken = context.CancellationToken
         }, (test, token) => ProcessTest(test, filter, context, token));
     }
@@ -173,7 +173,7 @@ internal class TestsExecutor
         Interlocked.Increment(ref _currentlyExecutingTests);
     }
 
-    private int GetMaximumParallelTests()
+    private int GetParallelTestsLimit()
     {
         if (_commandLineOptions.TryGetOptionArgumentList(MaximumParallelTestsCommandProvider.MaximumParallelTests,
                 out var values))

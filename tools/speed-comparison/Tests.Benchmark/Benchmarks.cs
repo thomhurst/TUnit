@@ -3,7 +3,7 @@ using BenchmarkDotNet.Attributes;
 using Process = System.Diagnostics.Process;
 
 [MarkdownExporterAttribute.GitHub]
-[ShortRunJob]
+[MediumRunJob]
 public class Benchmarks
 {
     private static readonly string TUnitPath = GetProjectPath("TUnitTimer");
