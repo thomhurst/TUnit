@@ -97,7 +97,7 @@ public class GenerateReadMeModule : Module<File>
         {
             "BasicTest" => "A single test that completes instantly",
             "RepeatTests" => "A test that takes 50ms to execute, repeated 100 times",
-            _ => throw new ArgumentException("Unknown class name", nameof(className))
+            _ => throw new ArgumentException($"Unknown class name: {className}", nameof(className))
         };
     }
 }
