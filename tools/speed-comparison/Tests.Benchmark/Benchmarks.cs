@@ -2,8 +2,10 @@
 using BenchmarkDotNet.Attributes;
 using Process = System.Diagnostics.Process;
 
+namespace Tests.Benchmark;
+
 [MarkdownExporterAttribute.GitHub]
-[MediumRunJob]
+[ShortRunJob]
 public class Benchmarks
 {
     private static readonly string TUnitPath = GetProjectPath("TUnitTimer");
@@ -14,7 +16,7 @@ public class Benchmarks
     [Benchmark]
     public async Task TUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", "run --no-build -c Release")
+        await Process.Start(new ProcessStartInfo("dotnet", $"run --no-build -c Release --treenode-filter /*/*/{Environment.GetEnvironmentVariable("CLASS_NAME")}/*")
         {
             WorkingDirectory = TUnitPath,
         })!.WaitForExitAsync();
@@ -23,7 +25,7 @@ public class Benchmarks
     [Benchmark]
     public async Task NUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", "test --no-build -c Release")
+        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{Environment.GetEnvironmentVariable("CLASS_NAME")}")
         {
             WorkingDirectory = NUnitPath,
         })!.WaitForExitAsync();
@@ -32,7 +34,7 @@ public class Benchmarks
     [Benchmark]
     public async Task xUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", "test --no-build -c Release")
+        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{Environment.GetEnvironmentVariable("CLASS_NAME")}")
         {
             WorkingDirectory = xUnitPath,
         })!.WaitForExitAsync();
@@ -41,7 +43,7 @@ public class Benchmarks
     [Benchmark]
     public async Task MSTest()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", "test --no-build -c Release")
+        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{Environment.GetEnvironmentVariable("CLASS_NAME")}")
         {
             WorkingDirectory = MSTestPath,
         })!.WaitForExitAsync();

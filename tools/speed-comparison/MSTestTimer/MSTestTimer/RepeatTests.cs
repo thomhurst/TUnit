@@ -1,7 +1,7 @@
 namespace MSTestTimer;
 
 [TestClass]
-public class Tests
+public class RepeatTests
 {
     [TestMethod]
     [DynamicData(nameof(Repeat), DynamicDataSourceType.Method)]
