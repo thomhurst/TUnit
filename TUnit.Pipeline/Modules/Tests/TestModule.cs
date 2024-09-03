@@ -12,7 +12,6 @@ using ModularPipelines.Git.Extensions;
 using ModularPipelines.Modules;
 using Polly;
 using Polly.Retry;
-using Semaphores;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
