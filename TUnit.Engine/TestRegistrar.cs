@@ -138,7 +138,7 @@ public static class TestRegistrar
 	}
 }
 
-public record TestMetadata<TClassType>
+public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>
 {
     public required string TestId { get; init; }
     public required string DisplayName { get; init; }
