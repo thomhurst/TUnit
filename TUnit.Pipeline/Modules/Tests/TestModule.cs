@@ -109,13 +109,25 @@ public abstract class TestModule : Module<TestResult>
     private static async Task RunWithAot(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
         CancellationToken cancellationToken)
     {
-        var aotApps = context.Git().RootDirectory.AssertExists()
+        var folder = context.Git().RootDirectory.AssertExists()
             .GetFolder("TUnit.TestProject")
             .GetFolder("bin")
             .GetFolder("Release")
             .GetFolder("net8.0")
             .GetFolder(GetFolder())
-            .GetFolder("publish")
+            .GetFolder("publish");
+        
+        foreach (var listFolder in folder.ListFolders())
+        {
+            context.Logger.LogInformation("Folders found: {Path}", listFolder);
+        }
+        
+        foreach (var file in folder.ListFiles())
+        {
+            context.Logger.LogInformation("Files found: {Path}", file);
+        }
+        
+        var aotApps = folder
             .GetFiles(x => x.NameWithoutExtension == "TUnit.TestProject")
             .ToArray();
 
