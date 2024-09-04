@@ -12,15 +12,8 @@ internal class TypeJsonConverter : JsonConverter<Type>
         {
             return null;
         }
-        
-        if (RuntimeFeature.IsDynamicCodeSupported)
-        {
-#pragma warning disable IL2057
-            return Type.GetType(reader.GetString()!);
-#pragma warning restore IL2057
-        }
-        
-        throw new NotSupportedException("Dynamic code is not enabled.");
+
+        return typeToConvert;
     }
 
     public override void Write(Utf8JsonWriter writer, Type value, JsonSerializerOptions options)
