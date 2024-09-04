@@ -20,7 +20,7 @@ public static class TestRegistrar
 		var methodInfo = testMetadata.MethodInfo;
 		var classType = typeof(TClassType);
 
-		var methodAttributes = methodInfo.GetCustomAttributes().ToArray();
+		var methodAttributes = testMetadata.AttributeTypes.SelectMany(x => methodInfo.GetCustomAttributes(x, false)).OfType<Attribute>().ToArray();
 		var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => testMetadata.AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x, false)).OfType<Attribute>().ToArray());
 		var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => testMetadata.AttributeTypes.SelectMany(x => classType.Assembly.GetCustomAttributes(x, false)).OfType<Attribute>().ToArray());
 		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
