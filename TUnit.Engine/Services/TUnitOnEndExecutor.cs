@@ -43,9 +43,9 @@ internal class TUnitOnEndExecutor
         
             await using var file = File.Create(path);
 
-            var jsonOutputs = GetJsonOutputs();
+            var jsonOutput = GetJsonOutput();
         
-            await JsonSerializer.SerializeAsync(file, jsonOutputs, JsonContext.Default.JsonOutput);
+            await JsonSerializer.SerializeAsync(file, jsonOutput, JsonContext.Default.TestSessionJson);
 
             await _logger.LogInformationAsync($"TUnit JSON output saved to: {path}");
         }
@@ -71,32 +71,36 @@ internal class TUnitOnEndExecutor
         return $"{prefix}{filename}.json";
     }
 
-    private static IEnumerable<JsonOutput> GetJsonOutputs()
+    private static TestSessionJson GetJsonOutput()
     {
-        return AssemblyHookOrchestrator.GetAllAssemblyHookContexts()
-            .SelectMany(x => x.AllTests)
-            .Where(x => x.Result != null)
-            .Select(x => new JsonOutput
+        return
+            new TestSessionJson
             {
-                TestId = x.TestDetails.TestId,
-                TestName = x.TestDetails.TestName,
-                DisplayName = x.TestDetails.DisplayName,
-                ClassType = x.TestDetails.ClassType,
-                Categories = x.TestDetails.Categories,
-                Order = x.TestDetails.Order,
-                Timeout = x.TestDetails.Timeout,
-                CustomProperties = x.TestDetails.CustomProperties,
-                RetryLimit = x.TestDetails.RetryLimit,
-                ReturnType = x.TestDetails.ReturnType,
-                TestClassArguments = x.TestDetails.TestClassArguments.Select(y => y?.ToString()).ToArray(),
-                TestFilePath = x.TestDetails.TestFilePath,
-                TestLineNumber = x.TestDetails.TestLineNumber,
-                TestMethodArguments = x.TestDetails.TestMethodArguments.Select(y => y?.ToString()).ToArray(),
-                TestClassParameterTypes = x.TestDetails.TestClassParameterTypes,
-                TestMethodParameterTypes = x.TestDetails.TestMethodParameterTypes,
-                NotInParallelConstraintKeys = x.TestDetails.NotInParallelConstraintKeys,
-                Result = x.Result,
-                ObjectBag = x.ObjectBag,
-            });
+                Tests = AssemblyHookOrchestrator.GetAllAssemblyHookContexts()
+                    .SelectMany(x => x.AllTests)
+                    .Where(x => x.Result != null)
+                    .Select(x => new TestJson
+                    {
+                        TestId = x.TestDetails.TestId,
+                        TestName = x.TestDetails.TestName,
+                        DisplayName = x.TestDetails.DisplayName,
+                        ClassType = x.TestDetails.ClassType,
+                        Categories = x.TestDetails.Categories,
+                        Order = x.TestDetails.Order,
+                        Timeout = x.TestDetails.Timeout,
+                        CustomProperties = x.TestDetails.CustomProperties,
+                        RetryLimit = x.TestDetails.RetryLimit,
+                        ReturnType = x.TestDetails.ReturnType,
+                        TestClassArguments = x.TestDetails.TestClassArguments.Select(y => y?.ToString()).ToArray(),
+                        TestFilePath = x.TestDetails.TestFilePath,
+                        TestLineNumber = x.TestDetails.TestLineNumber,
+                        TestMethodArguments = x.TestDetails.TestMethodArguments.Select(y => y?.ToString()).ToArray(),
+                        TestClassParameterTypes = x.TestDetails.TestClassParameterTypes,
+                        TestMethodParameterTypes = x.TestDetails.TestMethodParameterTypes,
+                        NotInParallelConstraintKeys = x.TestDetails.NotInParallelConstraintKeys,
+                        Result = x.Result,
+                        ObjectBag = x.ObjectBag,
+                    }).ToArray()
+            };
     }
 }

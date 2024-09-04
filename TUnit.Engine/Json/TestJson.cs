@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Json;
 
-internal record JsonOutput
+internal record TestJson
 {
     public required string TestId { get; init; }
     
