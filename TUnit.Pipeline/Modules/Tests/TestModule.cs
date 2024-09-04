@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet;
@@ -108,9 +109,15 @@ public abstract class TestModule : Module<TestResult>
     private static async Task RunWithAot(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
         CancellationToken cancellationToken)
     {
-        var aotApp = context.Git().RootDirectory.AssertExists()
-            .FindFile(x => x.NameWithoutExtension == "TUnit.TestProject" && x.Extension == GetAotExtension())
-            .AssertExists();
+        var aotApps = context.Git().RootDirectory.AssertExists()
+            .GetFiles(x => x.NameWithoutExtension == "TUnit.TestProject" && x.Extension != ".csproj").ToArray();
+        
+        foreach (var file in aotApps)
+        {
+            context.Logger.LogInformation("Found File: {File}", file);
+        }
+
+        var aotApp = aotApps.First();
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
