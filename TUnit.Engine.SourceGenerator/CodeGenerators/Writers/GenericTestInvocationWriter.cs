@@ -84,6 +84,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
+        sourceBuilder.WriteLine($"AttributeTypes = [ {string.Join(", ", testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})"))} ],");
         sourceBuilder.WriteLine("});");
         if (hasEnumerableClassData)
         {

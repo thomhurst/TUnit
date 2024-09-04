@@ -2,7 +2,12 @@
 
 namespace TUnit.Core;
 
-internal class DiscoveredTest<TTestClass> : DiscoveredTest
+internal class DiscoveredTest<
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)] 
+#endif
+    TTestClass
+    > : DiscoveredTest
 {
     private readonly ResettableLazy<TTestClass> _resettableLazyTestClassFactory;
 

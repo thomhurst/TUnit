@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <OutputType>Exe</OutputType>
@@ -7,6 +10,24 @@
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Aot)' == true">
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+    <WarningsAsErrors>true</WarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SingleFile)' == true">
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishTrimmed>true</PublishTrimmed>
+    <WarningsAsErrors>true</WarningsAsErrors>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Using Include="TUnit.Core.HookType" Static="True" />
     <Using Include="TUnit.Core" />

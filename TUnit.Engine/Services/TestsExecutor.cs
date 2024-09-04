@@ -43,7 +43,7 @@ internal class TestsExecutor
         _maximumParallelTests = GetParallelTestsLimit();
     }
 
-    public async Task ExecuteAsync(ParallelQuery<DiscoveredTest> testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
+    public async Task ExecuteAsync(DiscoveredTest[] testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
     {
         _standardOutConsoleInterceptor.Initialize();
         _standardErrorConsoleInterceptor.Initialize();

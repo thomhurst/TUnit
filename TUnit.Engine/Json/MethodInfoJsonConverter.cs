@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -8,11 +9,19 @@ internal class MethodInfoJsonConverter : JsonConverter<MethodInfo>
 {
     public override MethodInfo? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var serializeableMethodInfo = JsonSerializer.Deserialize<SerializeableMethodInfo>(ref reader, options);
-
-        return serializeableMethodInfo
-            ?.Type
-            ?.GetMethod(serializeableMethodInfo.MethodName, serializeableMethodInfo.GenericCount, serializeableMethodInfo.MethodParameterTypes);
+        var serializeableMethodInfo = JsonSerializer.Deserialize(ref reader, JsonContext.Default.SerializeableMethodInfo);
+        
+        if (RuntimeFeature.IsDynamicCodeSupported)
+        {
+            return serializeableMethodInfo
+                ?.Type
+#pragma warning disable IL2075
+                ?.GetMethod(serializeableMethodInfo.MethodName, serializeableMethodInfo.GenericCount,
+                    serializeableMethodInfo.MethodParameterTypes);
+#pragma warning restore IL2075
+        }
+        
+        throw new NotSupportedException("Dynamic code is not enabled.");
     }
 
     public override void Write(Utf8JsonWriter writer, MethodInfo value, JsonSerializerOptions options)
@@ -23,7 +32,7 @@ internal class MethodInfoJsonConverter : JsonConverter<MethodInfo>
             MethodName = value.Name,
             GenericCount = value.ReflectedType?.GenericTypeArguments.Length ?? 0,
             MethodParameterTypes = value.GetParameters().Select(x => x.ParameterType).ToArray(),
-        }, options);
+        }, JsonContext.Default.SerializeableMethodInfo);
     }
 
     internal record SerializeableMethodInfo

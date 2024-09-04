@@ -12,19 +12,21 @@ public class Benchmarks
     private static readonly string xUnitPath = GetProjectPath("xUnitTimer");
     private static readonly string MSTestPath = GetProjectPath("MSTestTimer");
     
+    private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
+
     [Benchmark]
     public async Task TUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"run --no-build -c Release --treenode-filter /*/*/{Environment.GetEnvironmentVariable("CLASS_NAME")}/*")
+        await Process.Start(new ProcessStartInfo("dotnet", $"run --no-build -c Release --treenode-filter /*/*/{ClassName}/*")
         {
             WorkingDirectory = TUnitPath,
         })!.WaitForExitAsync();
     }
-
+    
     [Benchmark]
     public async Task NUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{Environment.GetEnvironmentVariable("CLASS_NAME")}")
+        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
         {
             WorkingDirectory = NUnitPath,
         })!.WaitForExitAsync();
@@ -33,7 +35,7 @@ public class Benchmarks
     [Benchmark]
     public async Task xUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{Environment.GetEnvironmentVariable("CLASS_NAME")}")
+        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
         {
             WorkingDirectory = xUnitPath,
         })!.WaitForExitAsync();
@@ -42,7 +44,7 @@ public class Benchmarks
     [Benchmark]
     public async Task MSTest()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{Environment.GetEnvironmentVariable("CLASS_NAME")}")
+        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
         {
             WorkingDirectory = MSTestPath,
         })!.WaitForExitAsync();

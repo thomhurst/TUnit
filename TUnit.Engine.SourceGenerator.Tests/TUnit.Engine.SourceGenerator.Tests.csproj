@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <IsPackable>false</IsPackable>
     <RootNamespace>TUnit.Engine.SourceGenerator.Tests</RootNamespace>
   </PropertyGroup>

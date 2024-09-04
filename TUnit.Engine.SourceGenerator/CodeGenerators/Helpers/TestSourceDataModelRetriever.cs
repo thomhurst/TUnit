@@ -144,6 +144,7 @@ internal static class TestSourceDataModelRetriever
             HasTimeoutAttribute = allAttributes.Any(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix) == true),
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(TestExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(ParallelLimiterAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            AttributeTypes = allAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(), 
         };
     }
 

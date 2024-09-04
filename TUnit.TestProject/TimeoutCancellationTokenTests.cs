@@ -61,7 +61,7 @@ public class TimeoutCancellationTokenTests
         return 1;
     }
     
-    private class ThirtySecondTimeout : TimeoutAttribute
+    public class ThirtySecondTimeout : TimeoutAttribute
     {
         public ThirtySecondTimeout() : base(30_000)
         {

@@ -1,5 +1,9 @@
-﻿namespace TUnit.Core;
+﻿#if NET8_0_OR_GREATER
+using System.Runtime.Versioning;
 
+namespace TUnit.Core;
+
+[SupportedOSPlatform("windows")]
 public class STAThreadExecutor : GenericAbstractExecutor
 {
     protected override async Task ExecuteAsync(Func<Task> action)
@@ -25,3 +29,4 @@ public class STAThreadExecutor : GenericAbstractExecutor
         await tcs.Task;
     }
 }
+#endif

@@ -1,6 +1,12 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
 
-public class ResettableLazy<T>
+namespace TUnit.Core;
+
+public class ResettableLazy<
+#if NET8_0_OR_GREATER
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
+#endif
+    T>
 {
     private readonly Func<T> _factory;
 

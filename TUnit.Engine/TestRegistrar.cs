@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -14,16 +15,15 @@ public static class TestRegistrar
 {
 	private const int DefaultOrder = int.MaxValue / 2;
 
-	public static void RegisterTest<TClassType>(TestMetadata<TClassType> testMetadata)
+	public static void RegisterTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>(TestMetadata<TClassType> testMetadata)
 	{
 		var testId = testMetadata.TestId;
 		var methodInfo = testMetadata.MethodInfo;
 		var classType = typeof(TClassType);
 
-		var methodAttributes = methodInfo.GetCustomAttributes().ToArray();
-		var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => classType.GetCustomAttributes().ToArray());
-		var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly,
-			_ => classType.Assembly.GetCustomAttributes().ToArray());
+		var methodAttributes = testMetadata.AttributeTypes.SelectMany(x => methodInfo.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
+		var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => testMetadata.AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray());
+		var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => testMetadata.AttributeTypes.SelectMany(x => classType.Assembly.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray());
 		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
 		
 		var testDetails = new TestDetails<TClassType>
@@ -138,7 +138,7 @@ public static class TestRegistrar
 	}
 }
 
-public record TestMetadata<TClassType>
+public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>
 {
     public required string TestId { get; init; }
     public required string DisplayName { get; init; }
@@ -164,4 +164,7 @@ public record TestMetadata<TClassType>
     public required ITestExecutor TestExecutor { get; init; }
     
     public required IParallelLimit? ParallelLimit { get; init; }
+    
+    // Need to be referenced statically for AOT
+    public required Type[] AttributeTypes { get; init; }
 }

@@ -1,4 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
     <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />

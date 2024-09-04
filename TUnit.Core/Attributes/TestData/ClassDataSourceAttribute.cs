@@ -1,17 +1,19 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<T> : TUnitAttribute where T : new()
+public sealed class ClassDataSourceAttribute<
+#if NET8_0_OR_GREATER
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
+#endif
+    T> : TUnitAttribute where T : new()
 {
-    public Type Type { get; }
-
     public ClassDataSourceAttribute()
     {
-        Type = typeof(T);
-
-        if (!Type.GetConstructors().Any(x => x.IsPublic && x.GetParameters().Length == 0))
+        if (!typeof(T).GetConstructors().Any(x => x.IsPublic && x.GetParameters().Length == 0))
         {
-            throw new ArgumentException($"{Type.FullName} cannot be used within [ClassData] as it does not have a public constructor.");
+            throw new ArgumentException($"{typeof(T).FullName} cannot be used within [ClassData] as it does not have a public constructor.");
         }
     }
     

@@ -1,9 +1,11 @@
-﻿using TUnit.Assertions;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Executors;
 
 namespace TUnit.TestProject;
 
+[SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
 public class STAThreadTests
 {
     [Before(Test)]
