@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions;
@@ -60,8 +61,8 @@ public class SetupTests : Base3
     private static string _serverAddress = null!;
     private HttpResponseMessage? _response;
     
-    private static int _beforeAllTestsInClassExecutionCount = 0;
-    private static int _afterAllTestsInClassExecutionCount = 0;
+    private static int _beforeAllTestsInClassExecutionCount;
+    private static int _afterAllTestsInClassExecutionCount;
 
     [Before(Class)]
     public static async Task SetUpLocalWebServer()
@@ -72,8 +73,7 @@ public class SetupTests : Base3
             var builder = WebApplication.CreateBuilder();
             _app = builder.Build();
 
-            _app.MapGet("/ping", ([FromQuery] string testName) => 
-            $"Hello {testName}!");
+            _app.MapGet("/ping", context => context.Response.WriteAsync($"Hello {context.Request.Query["testName"]}!"));
 
             await _app.StartAsync();
             _serverAddress = _app.Services.GetRequiredService<IServer>()
