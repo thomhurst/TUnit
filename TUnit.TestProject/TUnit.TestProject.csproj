@@ -24,8 +24,6 @@
   <PropertyGroup Condition="'$(SingleFile)' == true">
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
-    <PublishTrimmed>true</PublishTrimmed>
-    <WarningsAsErrors>true</WarningsAsErrors>
   </PropertyGroup>
   
   <ItemGroup>
