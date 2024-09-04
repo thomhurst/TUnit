@@ -109,14 +109,17 @@ public abstract class TestModule : Module<TestResult>
     private static async Task RunWithAot(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
         CancellationToken cancellationToken)
     {
-        var aotApp = context.Git().RootDirectory.AssertExists()
+        var aotApps = context.Git().RootDirectory.AssertExists()
             .GetFolder("TUnit.TestProject")
             .GetFolder("bin")
             .GetFolder("Release")
             .GetFolder("net8.0")
             .GetFolder(GetFolder())
             .GetFolder("publish")
-            .FindFile(x => x.NameWithoutExtension == "TUnit.TestProject");
+            .GetFiles(x => x.NameWithoutExtension == "TUnit.TestProject")
+            .ToArray();
+
+        var aotApp = aotApps.FirstOrDefault(x => x.Name == "TUnit.TestProject") ?? aotApps.First();
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
