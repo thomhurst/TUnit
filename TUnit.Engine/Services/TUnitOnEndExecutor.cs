@@ -38,7 +38,7 @@ internal class TUnitOnEndExecutor
 
             var jsonOutputs = GetJsonOutputs();
         
-            await JsonSerializer.SerializeAsync(file, jsonOutputs, CachedJsonOptions.Instance);
+            await JsonSerializer.SerializeAsync(file, jsonOutputs, JsonContext.Default.JsonOutput);
 
             await _logger.LogInformationAsync($"TUnit JSON output saved to: {path}");
         }
