@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -37,6 +38,7 @@ internal class MethodInfoJsonConverter : JsonConverter<MethodInfo>
 
     internal record SerializeableMethodInfo
     {
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
         public Type? Type { get; init; }
         public required string MethodName { get; init; }
         public required int GenericCount { get; init; }
