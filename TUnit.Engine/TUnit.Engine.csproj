@@ -15,7 +15,6 @@
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Microsoft.Testing.Platform" />
-    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TUnit.Engine.props">
