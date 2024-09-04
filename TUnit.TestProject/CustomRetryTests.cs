@@ -50,7 +50,7 @@ public class CustomRetryTests
         await Assert.That(RetryCount4).Is.EqualTo(1);
     }
 
-    private class RetryOperationCancelledExceptionAttribute : RetryAttribute
+    public class RetryOperationCancelledExceptionAttribute : RetryAttribute
     {
         public RetryOperationCancelledExceptionAttribute(int times) : base(times)
         {
@@ -62,7 +62,7 @@ public class CustomRetryTests
         }
     }
     
-    private class RetryNullReferenceExceptionAttribute : RetryAttribute
+    public class RetryNullReferenceExceptionAttribute : RetryAttribute
     {
         public RetryNullReferenceExceptionAttribute(int times) : base(times)
         {
