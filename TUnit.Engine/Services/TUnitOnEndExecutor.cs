@@ -20,7 +20,14 @@ internal class TUnitOnEndExecutor
 
     public async Task ExecuteAsync()
     {
-        await WriteJsonOutputFile();
+        try
+        {
+            await WriteJsonOutputFile();
+        }
+        catch (Exception e)
+        {
+            await _logger.LogErrorAsync(e);
+        }
     }
 
     private async Task WriteJsonOutputFile()
