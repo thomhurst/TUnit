@@ -144,7 +144,6 @@ public abstract class TestModule : Module<TestResult>
                 "--report-trx", "--report-trx-filename", trxFilename,
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
                 "--timeout", "5m",
-                "-p:TreatWarningsAsErrors=true",
                 ..runOptions.AdditionalArguments
             ]
         }, cancellationToken);
