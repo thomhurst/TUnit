@@ -25,7 +25,7 @@ public class JsonOutputTests : TestModule
             new RunOptions
             {
                 AdditionalArguments = [ "--output-json", "--output-json-prefix", prefix, "--output-json-filename", filename ],
-                CommandLogging = CommandLogging.Input | CommandLogging.Duration | CommandLogging.ExitCode | CommandLogging.Output
+                CommandLogging = CommandLogging.Input | CommandLogging.Duration | CommandLogging.ExitCode
             },
             cancellationToken);
 
