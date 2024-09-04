@@ -29,16 +29,23 @@ internal class TUnitOnEndExecutor
         {
             return;
         }
-        
-        var path = Path.Combine(Environment.CurrentDirectory, GetFilename());
-        
-        await using var file = File.Create(path);
 
-        var jsonOutputs = GetJsonOutputs();
+        try
+        {
+            var path = Path.Combine(Environment.CurrentDirectory, GetFilename());
         
-        await JsonSerializer.SerializeAsync(file, jsonOutputs, CachedJsonOptions.Instance);
+            await using var file = File.Create(path);
 
-        await _logger.LogInformationAsync($"TUnit JSON output saved to: {path}");
+            var jsonOutputs = GetJsonOutputs();
+        
+            await JsonSerializer.SerializeAsync(file, jsonOutputs, CachedJsonOptions.Instance);
+
+            await _logger.LogInformationAsync($"TUnit JSON output saved to: {path}");
+        }
+        catch (Exception e)
+        {
+            await _logger.LogErrorAsync(e);
+        }
     }
 
     private string GetFilename()
