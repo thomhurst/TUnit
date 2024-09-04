@@ -95,15 +95,12 @@ public abstract class TestModule : Module<TestResult>
     private static async Task RunWithAot(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
         CancellationToken cancellationToken)
     {
-        var folder = context.Git().RootDirectory.AssertExists()
-            .GetFolder("TUnit.TestProject")
-            .GetFolder("bin")
-            .GetFolder("Release")
-            .GetFolder("net8.0")
-            .GetFolder(GetFolder())
-            .GetFolder("publish");
-        
-        var files = folder.ListFiles().ToArray();
+        var files = context.Git().RootDirectory
+            .AssertExists()
+            .FindFolder(x => x.Name == "TESTPROJECT_AOT")
+            .AssertExists()
+            .GetFiles(_ => true)
+            .ToArray();
 
         var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
                      ?? files.First(x => x.Name == "TUnit.TestProject.exe");
@@ -130,16 +127,13 @@ public abstract class TestModule : Module<TestResult>
     private static async Task RunWithSingleFile(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
         CancellationToken cancellationToken)
     {
-        var folder = context.Git().RootDirectory.AssertExists()
-            .GetFolder("TUnit.TestProject")
-            .GetFolder("bin")
-            .GetFolder("Release")
-            .GetFolder("net8.0")
-            .GetFolder(GetFolder())
-            .GetFolder("publish");
+        var files = context.Git().RootDirectory
+            .AssertExists()
+            .FindFolder(x => x.Name == "TESTPROJECT_SINGLEFILE")
+            .AssertExists()
+            .GetFiles(_ => true)
+            .ToArray();
         
-        var files = folder.ListFiles().ToArray();
-
         var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
                      ?? files.First(x => x.Name == "TUnit.TestProject.exe");
         

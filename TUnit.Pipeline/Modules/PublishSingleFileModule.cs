@@ -21,6 +21,7 @@ public class PublishSingleFileModule : Module<CommandResult>
         {
             RuntimeIdentifier = GetRuntimeIdentifier(),
             Configuration = Configuration.Release,
+            OutputDirectory = "TESTPROJECT_SINGLEFILE",
             Properties = [new KeyValue("SingleFile", "true")]
         }, cancellationToken);
     }

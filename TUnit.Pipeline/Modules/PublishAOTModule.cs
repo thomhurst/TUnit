@@ -19,6 +19,7 @@ public class PublishAOTModule : Module<CommandResult>
         {
             RuntimeIdentifier = GetRuntimeIdentifier(),
             Configuration = Configuration.Release,
+            OutputDirectory = "TESTPROJECT_AOT",
             Properties = [new KeyValue("Aot", "true")]
         }, cancellationToken);
     }
