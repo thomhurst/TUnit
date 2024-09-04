@@ -105,7 +105,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                         
                         await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
                     
-                        await _testsExecutor.ExecuteAsync(discoveredTests.AsParallel(), runTestExecutionRequest.Filter, context);
+                        await _testsExecutor.ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
                         
                         await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
 

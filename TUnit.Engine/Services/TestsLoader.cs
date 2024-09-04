@@ -4,8 +4,8 @@ namespace TUnit.Engine.Services;
 
 internal class TestsLoader
 {
-    public ParallelQuery<DiscoveredTest> GetTests()
+    public IEnumerable<DiscoveredTest> GetTests()
     {
-        return TestDictionary.GetAllTests().AsParallel();
+        return TestDictionary.GetAllTests();
     }
 }

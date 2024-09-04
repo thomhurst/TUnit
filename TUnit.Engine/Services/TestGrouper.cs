@@ -5,7 +5,7 @@ namespace TUnit.Engine.Services;
 
 internal class TestGrouper
 {
-    public GroupedTests OrganiseTests(ParallelQuery<DiscoveredTest> testCases)
+    public GroupedTests OrganiseTests(DiscoveredTest[] testCases)
     {
         var allTestsOrderedByClass = testCases
             .GroupBy(x => x.TestDetails.ClassType)

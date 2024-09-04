@@ -15,7 +15,7 @@ internal class TestFilterService
         _logger = loggerFactory.CreateLogger<TestFilterService>();
     }
     
-    public ParallelQuery<DiscoveredTest> FilterTests(ITestExecutionFilter? testExecutionFilter, ParallelQuery<DiscoveredTest> testNodes)
+    public IEnumerable<DiscoveredTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IEnumerable<DiscoveredTest> testNodes)
     {
 #pragma warning disable TPEXP
         if (testExecutionFilter is null or NopFilter)
