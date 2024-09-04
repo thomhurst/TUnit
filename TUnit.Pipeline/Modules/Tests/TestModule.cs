@@ -110,6 +110,12 @@ public abstract class TestModule : Module<TestResult>
         CancellationToken cancellationToken)
     {
         var aotApps = context.Git().RootDirectory.AssertExists()
+            .GetFolder("TUnit.TestProject")
+            .GetFolder("bin")
+            .GetFolder("Release")
+            .GetFolder("net8.0")
+            .GetFolder(GetFolder())
+            .GetFolder("publish")
             .GetFiles(x => x.NameWithoutExtension == "TUnit.TestProject" && x.Extension != ".csproj").ToArray();
         
         foreach (var file in aotApps)
@@ -159,6 +165,26 @@ public abstract class TestModule : Module<TestResult>
                                  Raw Trx file: {trxFileContents}
                                  """, e);
         }
+    }
+
+    private static string GetFolder()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return "linux-x64";
+        }
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "win-x64";
+        }
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return "osx-x64";
+        }
+
+        throw new ArgumentException("Unknown platform");
     }
 
     private static string GetAotExtension()
