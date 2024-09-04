@@ -11,6 +11,7 @@ using ModularPipelines.DotNet.Parsers.NUnitTrx;
 using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
+using ModularPipelines.Models;
 using ModularPipelines.Modules;
 using ModularPipelines.Options;
 using Polly;
@@ -23,6 +24,8 @@ namespace TUnit.Pipeline.Modules.Tests;
 [DependsOn<PublishAOTModule>]
 public abstract class TestModule : Module<TestResult>
 {
+    public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
+
     protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
     
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
