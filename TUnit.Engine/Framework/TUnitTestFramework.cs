@@ -23,6 +23,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly TUnitTestDiscoverer _testDiscover;
     private readonly TestsExecutor _testsExecutor;
     private readonly TUnitInitializer _initializer;
+    private readonly TUnitOnEndExecutor _onEndExecutor;
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
@@ -40,6 +41,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _testDiscover = _serviceProvider.GetRequiredService<TUnitTestDiscoverer>();
         _testsExecutor = _serviceProvider.GetRequiredService<TestsExecutor>();
         _initializer = _serviceProvider.GetRequiredService<TUnitInitializer>();
+        _onEndExecutor = _serviceProvider.GetRequiredService<TUnitOnEndExecutor>();
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -123,9 +125,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             }
             finally
             {
-                await _serviceProvider
-                    .GetRequiredService<TUnitOnEndExecutor>()
-                    .ExecuteAsync();
+                await _onEndExecutor.ExecuteAsync();
 
                 context.Complete();
             }
