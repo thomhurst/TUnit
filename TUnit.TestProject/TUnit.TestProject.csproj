@@ -10,6 +10,8 @@
   
   <PropertyGroup Condition="'$(Aot)' == true">
     <PublishAot>true</PublishAot>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
   
   <ItemGroup>
