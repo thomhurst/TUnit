@@ -8,6 +8,10 @@
     <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
   </PropertyGroup>
   
+  <PropertyGroup>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(Aot)' == true">
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
