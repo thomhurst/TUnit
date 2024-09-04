@@ -116,7 +116,8 @@ public abstract class TestModule : Module<TestResult>
             .GetFolder("net8.0")
             .GetFolder(GetFolder())
             .GetFolder("publish")
-            .GetFiles(x => x.NameWithoutExtension == "TUnit.TestProject" && x.Extension != ".csproj").ToArray();
+            .ListFiles()
+            .ToArray();
         
         foreach (var file in aotApps)
         {
