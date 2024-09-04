@@ -9,6 +9,9 @@ public sealed class ClassDataSourceAttribute<
 #endif
     T> : TUnitAttribute where T : new()
 {
+#if NET8_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
+#endif
     public Type Type { get; }
 
     public ClassDataSourceAttribute()
