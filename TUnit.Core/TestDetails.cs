@@ -4,7 +4,12 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public record TestDetails<TClassType> : TestDetails
+public record TestDetails<
+#if NET8_0_OR_GREATER
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
+#endif    
+    TClassType
+> : TestDetails
 {
     [JsonIgnore]
     public required ResettableLazy<TClassType?> LazyClassInstance { get; init; }
