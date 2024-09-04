@@ -128,7 +128,7 @@ public abstract class TestModule : Module<TestResult>
             .RootDirectory
             .AssertExists()
             .FindFile(x => x.Name == trxFilename)
-            .AssertExists()
+            .AssertExists($"TRX file not found: {trxFilename}")
             .ReadAsync(cancellationToken);
 
         var parsedTrx = new TrxParser().ParseTrxContents(trxFileContents);
