@@ -83,30 +83,7 @@ public abstract class TestModule : Module<TestResult>
             throw new Exception("Unknown error running tests");
         }
 
-        var trxFileContents = await context.Git()
-            .RootDirectory
-            .AssertExists()
-            .FindFile(x => x.Name == trxFilename)
-            .AssertExists()
-            .ReadAsync(cancellationToken);
-
-        var parsedTrx = new TrxParser().ParseTrxContents(trxFileContents);
-
-        var parsedResult = new TestResult(parsedTrx);
-
-        try
-        {
-            assertions.ForEach(x => x.Invoke(parsedResult));
-        }
-        catch (Exception e)
-        {
-            throw new Exception($"""
-                                 Error asserting results
-
-                                 Trx file: {JsonSerializer.Serialize(parsedResult, JsonSerializerOptions)}
-                                 Raw Trx file: {trxFileContents}
-                                 """, e);
-        }
+        await AssertTrx(context, assertions, cancellationToken, trxFilename);
     }
     
     private static async Task RunWithAot(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
@@ -141,6 +118,12 @@ public abstract class TestModule : Module<TestResult>
             ]
         }, cancellationToken);
 
+        await AssertTrx(context, assertions, cancellationToken, trxFilename);
+    }
+
+    private static async Task AssertTrx(IPipelineContext context, List<Action<TestResult>> assertions, CancellationToken cancellationToken,
+        string trxFilename)
+    {
         var trxFileContents = await context.Git()
             .RootDirectory
             .AssertExists()
