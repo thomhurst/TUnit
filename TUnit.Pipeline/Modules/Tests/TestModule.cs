@@ -120,16 +120,6 @@ public abstract class TestModule : Module<TestResult>
             .GetFolder(GetFolder())
             .GetFolder("publish");
         
-        foreach (var listFolder in folder.ListFolders())
-        {
-            context.Logger.LogInformation("Folders found: {Path}", listFolder);
-        }
-        
-        foreach (var file in folder.ListFiles())
-        {
-            context.Logger.LogInformation("Files found: {Path}", file);
-        }
-
         var files = folder.ListFiles().ToArray();
 
         var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
