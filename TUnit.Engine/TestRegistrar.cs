@@ -21,9 +21,8 @@ public static class TestRegistrar
 		var classType = typeof(TClassType);
 
 		var methodAttributes = methodInfo.GetCustomAttributes().ToArray();
-		var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => classType.GetCustomAttributes().ToArray());
-		var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly,
-			_ => classType.Assembly.GetCustomAttributes().ToArray());
+		var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => testMetadata.AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x)).ToArray());
+		var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => testMetadata.AttributeTypes.SelectMany(x => classType.Assembly.GetCustomAttributes(x)).ToArray());
 		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
 		
 		var testDetails = new TestDetails<TClassType>
@@ -164,4 +163,7 @@ public record TestMetadata<TClassType>
     public required ITestExecutor TestExecutor { get; init; }
     
     public required IParallelLimit? ParallelLimit { get; init; }
+    
+    // Need to be referenced statically for AOT
+    public required Type[] AttributeTypes { get; init; }
 }
