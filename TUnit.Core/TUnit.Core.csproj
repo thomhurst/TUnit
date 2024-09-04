@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <EnableTrimAnalyzer Condition="'$(TargetFramework) == 'netstandard2.0'">false</EnableTrimAnalyzer>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="TUnit.Core.props">
