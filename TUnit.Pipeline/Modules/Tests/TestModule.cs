@@ -53,6 +53,11 @@ public abstract class TestModule : Module<TestResult>
             await RunWithAot(context, filter, assertions, runOptions, cancellationToken);
         });
 
+        await SubModule("SingleFile", async () =>
+        {
+            await RunWithSingleFile(context, filter, assertions, runOptions, cancellationToken);
+        });
+        
         return null;
     }
 
@@ -114,6 +119,43 @@ public abstract class TestModule : Module<TestResult>
                 "--report-trx", "--report-trx-filename", trxFilename,
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
                 "--timeout", "5m",
+                "--property:Aot=true",
+                ..runOptions.AdditionalArguments
+            ]
+        }, cancellationToken);
+
+        await AssertTrx(context, assertions, cancellationToken, trxFilename);
+    }
+    
+    private static async Task RunWithSingleFile(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
+        CancellationToken cancellationToken)
+    {
+        var folder = context.Git().RootDirectory.AssertExists()
+            .GetFolder("TUnit.TestProject")
+            .GetFolder("bin")
+            .GetFolder("Release")
+            .GetFolder("net8.0")
+            .GetFolder(GetFolder())
+            .GetFolder("publish");
+        
+        var files = folder.ListFiles().ToArray();
+
+        var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
+                     ?? files.First(x => x.Name == "TUnit.TestProject.exe");
+        
+        var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
+        
+        var result = await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions(aotApp)
+        {
+            ThrowOnNonZeroExitCode = false,
+            CommandLogging = runOptions.CommandLogging,
+            Arguments =
+            [
+                "--treenode-filter", filter, 
+                "--report-trx", "--report-trx-filename", trxFilename,
+                // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
+                "--timeout", "5m",
+                "--property:SingleFile=true",
                 ..runOptions.AdditionalArguments
             ]
         }, cancellationToken);
