@@ -22,6 +22,7 @@ namespace TUnit.Pipeline.Modules.Tests;
 [NotInParallel("Unit Tests")]
 [ParallelLimiter<ProcessorParallelLimit>]
 [DependsOn<PublishAOTModule>]
+[DependsOn<PublishSingleFileModule>]
 public abstract class TestModule : Module<TestResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
@@ -119,7 +120,6 @@ public abstract class TestModule : Module<TestResult>
                 "--report-trx", "--report-trx-filename", trxFilename,
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
                 "--timeout", "5m",
-                "--property:Aot=true",
                 ..runOptions.AdditionalArguments
             ]
         }, cancellationToken);
@@ -155,7 +155,6 @@ public abstract class TestModule : Module<TestResult>
                 "--report-trx", "--report-trx-filename", trxFilename,
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
                 "--timeout", "5m",
-                "--property:SingleFile=true",
                 ..runOptions.AdditionalArguments
             ]
         }, cancellationToken);
