@@ -10,6 +10,7 @@
     <RootNamespace>TUnit.Assertions.Analyzers</RootNamespace>
     <AssemblyName>TUnit.Assertions.Analyzers</AssemblyName>
     <NoWarn>RS2003</NoWarn>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
   </PropertyGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
