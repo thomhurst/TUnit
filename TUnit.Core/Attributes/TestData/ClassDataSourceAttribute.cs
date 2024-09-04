@@ -3,7 +3,11 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : TUnitAttribute where T : new()
+public sealed class ClassDataSourceAttribute<
+#if NET8_0_OR_GREATER
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
+#endif
+    T> : TUnitAttribute where T : new()
 {
     public Type Type { get; }
 

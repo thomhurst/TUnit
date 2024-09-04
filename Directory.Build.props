@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <TargetFramework Condition="'$(TargetFramework)' == ''">net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -43,7 +42,7 @@
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
-  <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(TargetFramework)' != 'netstandard2.0'">
+  <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(TargetFramework)' != 'netstandard2.0' and '$(MSBuildProjectName)' != 'TUnit.Core'">
     <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>

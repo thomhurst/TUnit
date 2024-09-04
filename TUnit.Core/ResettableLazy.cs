@@ -2,7 +2,11 @@
 
 namespace TUnit.Core;
 
-public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>
+public class ResettableLazy<
+#if NET8_0_OR_GREATER
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
+#endif
+    T>
 {
     private readonly Func<T> _factory;
 
