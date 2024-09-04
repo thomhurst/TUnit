@@ -1,7 +1,9 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<T> : TUnitAttribute where T : new()
+public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : TUnitAttribute where T : new()
 {
     public Type Type { get; }
 

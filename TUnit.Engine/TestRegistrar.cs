@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -14,7 +15,7 @@ public static class TestRegistrar
 {
 	private const int DefaultOrder = int.MaxValue / 2;
 
-	public static void RegisterTest<TClassType>(TestMetadata<TClassType> testMetadata)
+	public static void RegisterTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>(TestMetadata<TClassType> testMetadata)
 	{
 		var testId = testMetadata.TestId;
 		var methodInfo = testMetadata.MethodInfo;
