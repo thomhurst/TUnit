@@ -126,12 +126,11 @@ public abstract class TestModule : Module<TestResult>
         {
             context.Logger.LogInformation("Files found: {Path}", file);
         }
-        
-        var aotApps = folder
-            .GetFiles(x => x.NameWithoutExtension == "TUnit.TestProject")
-            .ToArray();
 
-        var aotApp = aotApps.FirstOrDefault(x => x.Name == "TUnit.TestProject") ?? aotApps.First();
+        var files = folder.ListFiles().ToArray();
+
+        var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
+                     ?? files.First(x => x.Name == "TUnit.TestProject.exe");
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
