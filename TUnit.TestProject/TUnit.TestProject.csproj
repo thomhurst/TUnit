@@ -12,6 +12,7 @@
     <PublishAot>true</PublishAot>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
   
   <ItemGroup>
