@@ -1,4 +1,5 @@
-﻿using System.Runtime.Versioning;
+﻿#if NET8_0_OR_GREATER
+using System.Runtime.Versioning;
 
 namespace TUnit.Core;
 
@@ -28,3 +29,4 @@ public class STAThreadExecutor : GenericAbstractExecutor
         await tcs.Task;
     }
 }
+#endif
