@@ -6,7 +6,7 @@ namespace TUnit.Core;
 
 public record TestDetails<
 #if NET8_0_OR_GREATER
-[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
+[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)] 
 #endif    
     TClassType
 > : TestDetails
