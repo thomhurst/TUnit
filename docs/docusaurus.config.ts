@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'TUnit',
-  tagline: 'Unit Testing: Welcome to TUnit',
+  tagline: 'Welcome to TUnit Testing',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
