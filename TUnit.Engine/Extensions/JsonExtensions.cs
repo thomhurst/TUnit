@@ -37,7 +37,7 @@ public static class JsonExtensions
         {
             Categories = context.TestDetails.Categories,
             Order = context.TestDetails.Order,
-            ClassType = context.TestDetails.ClassType?.FullName,
+            ClassType = context.TestDetails.ClassType.FullName,
             Result = context.Result?.ToJsonModel(),
             Timeout = context.TestDetails.Timeout,
             CustomProperties = context.TestDetails.CustomProperties,
