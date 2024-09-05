@@ -21,7 +21,7 @@ public partial class TestContext : IDisposable
     public List<Timing> Timings { get; } = [];
     public Dictionary<string, object?> ObjectBag { get; } = new();
     
-    public TUnitTestResult? Result { get; internal set; }
+    public TestResult? Result { get; internal set; }
     internal DiscoveredTest InternalDiscoveredTest { get; set; } = null!;
 
     public string GetTestOutput()

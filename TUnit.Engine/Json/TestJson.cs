@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Json;
 
-internal record TestJson
+public record TestJson
 {
     public required string TestId { get; init; }
     
@@ -12,10 +12,10 @@ internal record TestJson
     public required Type ClassType { get; init; }
     
     public required Type[]? TestMethodParameterTypes { get; init; }
-    public required string?[]? TestMethodArguments { get; init; }
+    public required object?[]? TestMethodArguments { get; init; }
     
     public required Type[]? TestClassParameterTypes { get; init; }
-    public required string?[]? TestClassArguments { get; init; }
+    public required object?[]? TestClassArguments { get; init; }
     //
     public required IReadOnlyList<string> Categories { get; init; }
     
@@ -36,5 +36,5 @@ internal record TestJson
     
     public required Dictionary<string, object?> ObjectBag { get; init; }
     
-    public required TUnitTestResult? Result { get; set; }
+    public required TestResultJson? Result { get; set; }
 }
