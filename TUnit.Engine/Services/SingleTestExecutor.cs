@@ -128,7 +128,7 @@ internal class SingleTestExecutor : IDataProducer
             
             testContext.TaskCompletionSource.SetResult(null);
 
-            testContext.Result = new TUnitTestResult
+            testContext.Result = new TestResult
             {
                 TestContext = testContext,
                 Duration = timingProperty.GlobalTiming.Duration,
@@ -151,7 +151,7 @@ internal class SingleTestExecutor : IDataProducer
             
             testContext.TaskCompletionSource.SetException(skipTestException);
                 
-            testContext.Result = new TUnitTestResult
+            testContext.Result = new TestResult
             {
                 Duration = TimeSpan.Zero,
                 Start = timings.MinBy(x => x.Start)?.Start ?? now,
@@ -172,7 +172,7 @@ internal class SingleTestExecutor : IDataProducer
 
             testContext.TaskCompletionSource.SetException(e);
             
-            testContext.Result = new TUnitTestResult
+            testContext.Result = new TestResult
             {
                 Duration = timingProperty.GlobalTiming.Duration,
                 Start = timingProperty.GlobalTiming.StartTime,
@@ -306,6 +306,8 @@ internal class SingleTestExecutor : IDataProducer
     {
         var testInformation = discoveredTest.TestContext.TestDetails;
         var retryCount = testInformation.RetryLimit;
+        
+        discoveredTest.TestContext.TestStart = DateTimeOffset.Now;
         
         // +1 for the original non-retry
         for (var i = 0; i < retryCount + 1; i++)

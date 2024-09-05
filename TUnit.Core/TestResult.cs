@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-public record TUnitTestResult
+public record TestResult
 {
     public required Status Status { get; init; }
     public required DateTimeOffset Start { get; init; }
