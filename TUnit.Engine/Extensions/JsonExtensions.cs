@@ -44,7 +44,7 @@ public static class JsonExtensions
             DisplayName = context.TestDetails.DisplayName,
             ObjectBag = context.ObjectBag,
             RetryLimit = context.TestDetails.RetryLimit,
-            ReturnType = context.TestDetails.ReturnType?.FullName,
+            ReturnType = context.TestDetails.ReturnType.FullName,
             TestId = context.TestDetails.TestId,
             TestName = context.TestDetails.TestName,
             TestClassArguments = context.TestDetails.TestClassArguments,
@@ -77,8 +77,8 @@ public static class JsonExtensions
         {
             Message = exception.Message,
             Stacktrace = exception.StackTrace,
-            Type = exception.GetType()?.FullName,
-            InnerException = exception?.ToJsonModel()
+            Type = exception.GetType().FullName,
+            InnerException = exception.InnerException?.ToJsonModel()
         };
     }
 }
