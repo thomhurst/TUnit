@@ -2,6 +2,6 @@
 
 public record TestClassJson
 {
-    public required string? ClassName { get; init; }
+    public required string? Type { get; init; }
     public required TestJson[] Tests { get; init; }
 }

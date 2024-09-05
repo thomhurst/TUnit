@@ -7,9 +7,8 @@ namespace TUnit.Engine.Json;
     WriteIndented = true,
     IgnoreReadOnlyProperties = true,
     IgnoreReadOnlyFields = true,
-    Converters = [ typeof(TypeJsonConverter), typeof(MethodInfoJsonConverter), typeof(JsonStringEnumConverter<Status>) ],
+    Converters = [ typeof(JsonStringEnumConverter<Status>) ],
     GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(TestSessionJson))]
 [JsonSerializable(typeof(TestJson))]
-[JsonSerializable(typeof(MethodInfoJsonConverter.SerializeableMethodInfo))]
 internal partial class JsonContext : JsonSerializerContext;

@@ -26,7 +26,7 @@ public static class JsonExtensions
     {
         return new TestClassJson
         {
-            ClassName = context.ClassType.FullName,
+            Type = context.ClassType.FullName,
             Tests = context.Tests.Select(x => x.ToJsonModel()).ToArray()
         };
     }
@@ -37,22 +37,22 @@ public static class JsonExtensions
         {
             Categories = context.TestDetails.Categories,
             Order = context.TestDetails.Order,
-            ClassType = context.TestDetails.ClassType,
+            ClassType = context.TestDetails.ClassType?.FullName,
             Result = context.Result?.ToJsonModel(),
             Timeout = context.TestDetails.Timeout,
             CustomProperties = context.TestDetails.CustomProperties,
             DisplayName = context.TestDetails.DisplayName,
             ObjectBag = context.ObjectBag,
             RetryLimit = context.TestDetails.RetryLimit,
-            ReturnType = context.TestDetails.ReturnType,
+            ReturnType = context.TestDetails.ReturnType?.FullName,
             TestId = context.TestDetails.TestId,
             TestName = context.TestDetails.TestName,
             TestClassArguments = context.TestDetails.TestClassArguments,
             TestFilePath = context.TestDetails.TestFilePath,
             TestLineNumber = context.TestDetails.TestLineNumber,
             TestMethodArguments = context.TestDetails.TestMethodArguments,
-            TestClassParameterTypes = context.TestDetails.TestClassParameterTypes,
-            TestMethodParameterTypes = context.TestDetails.TestMethodParameterTypes,
+            TestClassParameterTypes = context.TestDetails.TestClassParameterTypes.Select(x => x.FullName).ToArray(),
+            TestMethodParameterTypes = context.TestDetails.TestMethodParameterTypes.Select(x => x.FullName).ToArray(),
             NotInParallelConstraintKeys = context.TestDetails.NotInParallelConstraintKeys
         };
     }
@@ -77,7 +77,7 @@ public static class JsonExtensions
         {
             Message = exception.Message,
             Stacktrace = exception.StackTrace,
-            Type = exception.GetType(),
+            Type = exception.GetType()?.FullName,
             InnerException = exception?.ToJsonModel()
         };
     }
