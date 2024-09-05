@@ -1,6 +1,6 @@
 # TUnit
 
-A modern, flexible and fast testing framework for .NET
+A modern, flexible and fast testing framework for .NET 8 and up.
 
 ## Documentation
 
