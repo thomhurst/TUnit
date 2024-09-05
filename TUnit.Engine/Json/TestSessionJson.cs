@@ -1,6 +1,6 @@
 namespace TUnit.Engine.Json;
 
-internal record TestSessionJson
+public record TestSessionJson
 {
-    public required TestJson[] Tests { get; init; }
+    public required TestAssemblyJson[] Assemblies { get; init; }
 }

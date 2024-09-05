@@ -10,6 +10,8 @@ public partial class TestContext : IDisposable
         TestDetails = testDetails;
     }
     
+    public DateTimeOffset? TestStart { get; internal set; }
+    
     public StringWriter Out { get; } = new();
     
     public Task TestTask => TaskCompletionSource.Task;
@@ -21,7 +23,7 @@ public partial class TestContext : IDisposable
     public List<Timing> Timings { get; } = [];
     public Dictionary<string, object?> ObjectBag { get; } = new();
     
-    public TUnitTestResult? Result { get; internal set; }
+    public TestResult? Result { get; internal set; }
     internal DiscoveredTest InternalDiscoveredTest { get; set; } = null!;
 
     public string GetTestOutput()
