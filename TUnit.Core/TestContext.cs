@@ -10,6 +10,8 @@ public partial class TestContext : IDisposable
         TestDetails = testDetails;
     }
     
+    public DateTimeOffset? TestStart { get; internal set; }
+    
     public StringWriter Out { get; } = new();
     
     public Task TestTask => TaskCompletionSource.Task;

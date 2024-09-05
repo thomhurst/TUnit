@@ -307,6 +307,8 @@ internal class SingleTestExecutor : IDataProducer
         var testInformation = discoveredTest.TestContext.TestDetails;
         var retryCount = testInformation.RetryLimit;
         
+        discoveredTest.TestContext.TestStart = DateTimeOffset.Now;
+        
         // +1 for the original non-retry
         for (var i = 0; i < retryCount + 1; i++)
         {
