@@ -42,7 +42,7 @@ jobs:
         working-directory: "tools/speed-comparison/TUnitTimer"
 
       - name: Build TUnit AOT
-        run: dotnet publish TUnitTimer.csproj --property:Aot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        run: dotnet publish TUnitTimer.csproj -c Release --property:Aot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
         working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
                   
       - name: Build xUnit
