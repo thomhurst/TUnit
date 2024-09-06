@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     concurrency: 
-      group: "speed-comparison"
+      group: "speed-comparison-${{matrix.os}}"
       cancel-in-progress: true
 
     steps:
