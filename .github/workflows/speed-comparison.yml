@@ -70,3 +70,4 @@ jobs:
           name: markdown_${{ matrix.os }}_${{ matrix.class }}
           path: |
             **/BenchmarkDotNet.Artifacts/**
+            **/aot-publish/**
