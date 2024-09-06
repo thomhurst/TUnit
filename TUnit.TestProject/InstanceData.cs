@@ -10,7 +10,9 @@ public class InstanceData
     [Test]
     public void Test()
     {
+#pragma warning disable TUnit0018
         _value = 99;
+#pragma warning restore TUnit0018
     }
 
     [Test]
