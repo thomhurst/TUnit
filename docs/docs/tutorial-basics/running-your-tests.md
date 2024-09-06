@@ -6,7 +6,7 @@ sidebar_position: 3
 
 As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined with the fact that TUnit tests are source generated, running your tests is available in a variety of ways. 
 
-## dotnet run
+## [dotnet run](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-run)
 
 For a simple execution of a project, `dotnet run` is the preferred method, allowing easier passing in of command line flags.
 
@@ -15,7 +15,7 @@ cd 'C:/Your/Test/Directory'
 dotnet run -c Release --report-trx --coverage
 ```
 
-## dotnet test
+## [dotnet test](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test)
 
 `dotnet test` requires any command line flags to be specified as application arguments, meaning after a `--` - Otherwise you'll get an error about unknown switches.
 
@@ -24,13 +24,20 @@ cd 'C:/Your/Test/Directory'
 dotnet test -c Release -- --report-trx --coverage
 ```
 
-## dotnet exec
+## [dotnet exec](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet)
 
-If your test project has already been built, you can use `dotnet exec` with the `.dll` path
+If your test project has already been built, you can use `dotnet exec` or just `dotnet` with the `.dll` path
 
 ```powershell
 cd 'C:/Your/Test/Directory/bin/Release/net8.0'
 dotnet exec YourTestProject.dll --report-trx --coverage
+```
+
+or
+
+```powershell
+cd 'C:/Your/Test/Directory/bin/Release/net8.0'
+dotnet YourTestProject.dll --report-trx --coverage
 ```
 
 ## Published Test Project
