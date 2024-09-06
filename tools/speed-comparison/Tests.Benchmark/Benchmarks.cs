@@ -20,7 +20,7 @@ public class Benchmarks
     {
         await Process.Start(new ProcessStartInfo(GetExecutableFileName(), $"--treenode-filter /*/*/{ClassName}/*")
         {
-            WorkingDirectory = Path.Combine(TUnitPath, "bin", "Release", "net8.0", GetPlatformFolder(), "publish"),
+            WorkingDirectory = Path.Combine(TUnitPath, "aot-publish"),
         })!.WaitForExitAsync();
     }
 
