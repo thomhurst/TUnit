@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -9,7 +10,8 @@ using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
-public class PublishAOTModule : Module<CommandResult>
+[DependsOn<PublishAOTModule>]
+public class PublishSingleFileModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
@@ -19,8 +21,8 @@ public class PublishAOTModule : Module<CommandResult>
         {
             RuntimeIdentifier = GetRuntimeIdentifier(),
             Configuration = Configuration.Release,
-            OutputDirectory = "TESTPROJECT_AOT",
-            Properties = [new KeyValue("Aot", "true")]
+            OutputDirectory = "TESTPROJECT_SINGLEFILE",
+            Properties = [new KeyValue("SingleFile", "true")]
         }, cancellationToken);
     }
 
