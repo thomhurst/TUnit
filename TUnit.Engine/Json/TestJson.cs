@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.Engine.Json;
+﻿namespace TUnit.Engine.Json;
 
 public record TestJson
 {
