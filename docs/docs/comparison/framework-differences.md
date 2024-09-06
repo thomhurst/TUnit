@@ -64,8 +64,8 @@ NUnit assertions largely influenced the way that TUnit assertions work. However,
 
 ## Other
 
-### Source generated
-As mentioned, TUnit is source generated. This should mean things are fast. And you can check out the generated code yourself!
+### Source generated + Native AOT Support + Single File Support
+As mentioned, TUnit is source generated. This should mean things are fast. And you can check out the generated code yourself! Because tests are source generated and not scanned via reflection, this means you can build your test projects using Native AOT or as a Single File application - Something that you can't current do with NUnit or xUnit.
 
 ### More lifecycle hooks
 TUnit has tried to make it easy to hook into a range of lifecycles.
