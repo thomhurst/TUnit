@@ -1,7 +1,6 @@
 mode: ContinuousDeployment
 strategies:
   - Mainline
-  - MergeMessage
 ignore:
   sha:
     - e39ef8a0ed0d5e12e396e3c87d185ba7b0c512b0
