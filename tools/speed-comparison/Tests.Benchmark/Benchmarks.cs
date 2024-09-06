@@ -10,6 +10,8 @@ namespace Tests.Benchmark;
 [MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
+    private Stream _outputStream;
+    
     private static readonly string TUnitPath = GetProjectPath("TUnitTimer");
     private static readonly string NUnitPath = GetProjectPath("NUnitTimer");
     private static readonly string xUnitPath = GetProjectPath("xUnitTimer");
@@ -18,12 +20,15 @@ public class Benchmarks
     private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
 
     [GlobalSetup]
-    public void Setup()
+    public void GetOutputStream()
     {
-        foreach (var file in new DirectoryInfo(TUnitPath).EnumerateFiles("*", SearchOption.AllDirectories))
-        {
-            Console.WriteLine($"Found file: {file.FullName}");
-        }
+        _outputStream = Console.OpenStandardOutput();
+    }
+
+    [GlobalCleanup]
+    public async Task FlushStream()
+    {
+        await _outputStream.FlushAsync();
     }
     
     [Benchmark]
@@ -31,6 +36,7 @@ public class Benchmarks
     {
         await Cli.Wrap(Path.Combine(TUnitPath, "aot-publish", GetExecutableFileName()))
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteBufferedAsync();
     }
 
@@ -40,6 +46,7 @@ public class Benchmarks
         await Cli.Wrap("dotnet")
             .WithArguments(["run", "--no-build", "-c", "Release", "--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithWorkingDirectory(TUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteBufferedAsync();
     }
 
@@ -49,6 +56,7 @@ public class Benchmarks
         await Cli.Wrap("dotnet")
             .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithWorkingDirectory(NUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteBufferedAsync();
     }
 
@@ -58,6 +66,7 @@ public class Benchmarks
         await Cli.Wrap("dotnet")
             .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithWorkingDirectory(xUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteBufferedAsync();
     }
 
@@ -67,6 +76,7 @@ public class Benchmarks
         await Cli.Wrap("dotnet")
             .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithWorkingDirectory(MSTestPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteBufferedAsync();
     }
 
