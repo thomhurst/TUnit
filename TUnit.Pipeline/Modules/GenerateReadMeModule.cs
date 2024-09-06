@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using EnumerableAsyncProcessor.Extensions;
-using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.Extensions;

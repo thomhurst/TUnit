@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Executors;
 

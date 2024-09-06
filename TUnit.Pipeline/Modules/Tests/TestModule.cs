@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet;
