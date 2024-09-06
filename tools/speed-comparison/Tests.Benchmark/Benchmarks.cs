@@ -29,9 +29,8 @@ public class Benchmarks
     [Benchmark]
     public async Task TUnit_AOT()
     {
-        await Cli.Wrap(GetExecutableFileName())
+        await Cli.Wrap(Path.Combine(TUnitPath, "aot-publish", GetExecutableFileName()))
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
-            .WithWorkingDirectory(Path.Combine(TUnitPath, "aot-publish"))
             .ExecuteBufferedAsync();
     }
 
