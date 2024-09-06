@@ -1,6 +1,6 @@
 # TUnit
 
-A modern, flexible and fast testing framework for .NET 8 and up.
+A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Single File application support included!
 
 ## Documentation
 
@@ -18,6 +18,7 @@ For Rider, it is not yet supported. I believe they are working on it so we just 
 
 ## Features
 
+- Native AOT + Single File application support
 - Source generated tests
 - Full async support
 - Parallel by default, with mechanisms to:
