@@ -7,7 +7,6 @@ public class TimeoutTests1 : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        var start = DateTime.UtcNow;
         return await RunTestsWithFilter(context, 
             "/*/*/TimeoutCancellationTokenTests/BasicTest",
             [
