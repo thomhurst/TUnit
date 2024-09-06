@@ -3,10 +3,15 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
-    
-<ItemGroup>
-    <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
-</ItemGroup>
+
+    <ItemGroup Condition="'$(IsPackTarget)' != 'true'">
+        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
+                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
+        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
+    </ItemGroup>
 
 <ItemGroup>
   <Compile Remove="AssertConditions\Generic\EquatableAssertCondition.cs" />

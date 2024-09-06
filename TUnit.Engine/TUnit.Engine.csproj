@@ -3,7 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(LaunchDebugger)' != ''">
     <DefineConstants>LAUNCH_DEBUGGER</DefineConstants>

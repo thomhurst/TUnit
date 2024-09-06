@@ -3,6 +3,11 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
+
+    <PropertyGroup>
+        <IsTestProject>false</IsTestProject>
+        <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    </PropertyGroup>
     
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />

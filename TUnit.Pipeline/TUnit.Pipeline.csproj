@@ -6,6 +6,7 @@
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AsyncSemaphore" />

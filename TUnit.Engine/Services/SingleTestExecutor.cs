@@ -205,15 +205,18 @@ internal class SingleTestExecutor : IDataProducer
 
     private static TimingProperty GetTimingProperty(TestContext testContext)
     {
-        var now = DateTimeOffset.Now;
+        lock (testContext.Timings)
+        {
+            var now = DateTimeOffset.Now;
 
-        var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? now;
-        var end = testContext.Timings.MaxBy(x => x.End)?.End ?? now;
+            var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? now;
+            var end = testContext.Timings.MaxBy(x => x.End)?.End ?? now;
 
-        var stepTimings = testContext.Timings.Select(x =>
-            new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
-        
-        return new TimingProperty(new TimingInfo(start, end, end - start), [..stepTimings]);
+            var stepTimings = testContext.Timings.Select(x =>
+                new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
+
+            return new TimingProperty(new TimingInfo(start, end, end - start), [..stepTimings]);
+        }
     }
 
     private static IProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
