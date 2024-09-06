@@ -40,6 +40,10 @@ jobs:
       - name: Build TUnit
         run: dotnet build -c Release
         working-directory: "tools/speed-comparison/TUnitTimer"
+
+      - name: Build TUnit AOT
+        run: dotnet publish -p:Aot=true -r ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'linux-latest' && 'linux-x64' || 'osx-x64' }}
+        working-directory: "tools/speed-comparison/TUnitTimer"
                   
       - name: Build xUnit
         run: dotnet build -c Release

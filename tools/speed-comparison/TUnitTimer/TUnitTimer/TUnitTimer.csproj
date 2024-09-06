@@ -7,4 +7,11 @@
   <ItemGroup>
     <PackageReference Include="TUnit" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(Aot)' == true">
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+    <WarningsAsErrors>true</WarningsAsErrors>
+  </PropertyGroup>
+  
 </Project>
