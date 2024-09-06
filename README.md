@@ -179,33 +179,16 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   826.6 ms | 16.50 ms | 39.53 ms |
-| NUnit  | 1,381.2 ms | 18.91 ms | 17.69 ms |
-| xUnit  | 1,364.3 ms | 20.98 ms | 19.62 ms |
-| MSTest | 1,226.8 ms | 23.35 ms | 21.85 ms |
+| Method    | Mean       | Error    | StdDev   | Median     |
+|---------- |-----------:|---------:|---------:|-----------:|
+| TUnit_AOT |         NA |       NA |       NA |         NA |
+| TUnit     |   817.4 ms | 16.24 ms | 38.27 ms |   803.2 ms |
+| NUnit     | 1,387.9 ms | 24.14 ms | 22.58 ms | 1,388.2 ms |
+| xUnit     | 1,382.9 ms | 17.91 ms | 15.88 ms | 1,381.4 ms |
+| MSTest    | 1,254.2 ms | 24.68 ms | 29.39 ms | 1,251.3 ms |
 
-
-
-#### macos-latest
-
-```
-
-BenchmarkDotNet v0.14.0, macOS Sonoma 14.6.1 (23G93) [Darwin 23.6.0]
-Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
-.NET SDK 8.0.401
-  [Host]     : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
-  DefaultJob : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
-
-
-```
-| Method | Mean     | Error    | StdDev    | Median   |
-|------- |---------:|---------:|----------:|---------:|
-| TUnit  | 527.5 ms | 37.76 ms | 111.33 ms | 471.6 ms |
-| NUnit  | 782.2 ms | 15.39 ms |  22.56 ms | 780.1 ms |
-| xUnit  | 731.6 ms | 14.56 ms |  21.79 ms | 731.5 ms |
-| MSTest | 659.7 ms | 13.13 ms |  32.46 ms | 648.9 ms |
+Benchmarks with issues:
+  Benchmarks.TUnit_AOT: DefaultJob
 
 
 
@@ -221,12 +204,16 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   779.0 ms | 15.36 ms | 21.54 ms |
-| NUnit  | 1,304.9 ms |  8.77 ms |  7.77 ms |
-| xUnit  | 1,285.8 ms | 10.50 ms |  9.82 ms |
-| MSTest | 1,156.0 ms |  7.88 ms |  6.15 ms |
+| Method    | Mean       | Error    | StdDev   |
+|---------- |-----------:|---------:|---------:|
+| TUnit_AOT |         NA |       NA |       NA |
+| TUnit     |   772.3 ms | 15.07 ms | 20.12 ms |
+| NUnit     | 1,323.5 ms | 15.15 ms | 14.17 ms |
+| xUnit     | 1,325.7 ms | 21.68 ms | 19.22 ms |
+| MSTest    | 1,218.9 ms | 23.19 ms | 21.70 ms |
+
+Benchmarks with issues:
+  Benchmarks.TUnit_AOT: DefaultJob
 
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times
@@ -243,12 +230,16 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   879.2 ms | 17.56 ms | 37.80 ms |
-| NUnit  | 6,537.1 ms | 19.71 ms | 18.44 ms |
-| xUnit  | 6,550.0 ms | 27.93 ms | 26.13 ms |
-| MSTest | 6,479.4 ms | 26.10 ms | 23.13 ms |
+| Method    | Mean       | Error    | StdDev   |
+|---------- |-----------:|---------:|---------:|
+| TUnit_AOT |         NA |       NA |       NA |
+| TUnit     |   879.8 ms | 17.51 ms | 31.57 ms |
+| NUnit     | 6,543.6 ms | 15.19 ms | 14.21 ms |
+| xUnit     | 6,565.6 ms | 22.21 ms | 19.69 ms |
+| MSTest    | 6,494.1 ms | 26.36 ms | 24.65 ms |
+
+Benchmarks with issues:
+  Benchmarks.TUnit_AOT: DefaultJob
 
 
 
@@ -264,32 +255,15 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   846.6 ms | 16.84 ms | 23.61 ms |
-| NUnit  | 7,489.9 ms | 13.69 ms | 12.80 ms |
-| xUnit  | 7,475.9 ms | 24.41 ms | 22.83 ms |
-| MSTest | 7,426.7 ms | 20.98 ms | 19.62 ms |
+| Method    | Mean       | Error    | StdDev   |
+|---------- |-----------:|---------:|---------:|
+| TUnit_AOT |         NA |       NA |       NA |
+| TUnit     |   821.7 ms | 16.40 ms | 22.99 ms |
+| NUnit     | 7,486.7 ms | 22.52 ms | 21.06 ms |
+| xUnit     | 7,475.0 ms | 14.45 ms | 12.81 ms |
+| MSTest    | 7,435.6 ms | 22.24 ms | 20.80 ms |
 
-
-
-#### macos-latest
-
-```
-
-BenchmarkDotNet v0.14.0, macOS Sonoma 14.6.1 (23G93) [Darwin 23.6.0]
-Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
-.NET SDK 8.0.401
-  [Host]     : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
-  DefaultJob : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
-
-
-```
-| Method | Mean        | Error     | StdDev    |
-|------- |------------:|----------:|----------:|
-| TUnit  |    602.3 ms |  22.12 ms |  65.23 ms |
-| NUnit  | 14,004.1 ms | 279.40 ms | 589.35 ms |
-| xUnit  | 14,424.8 ms | 281.98 ms | 422.06 ms |
-| MSTest | 14,217.9 ms | 279.26 ms | 321.59 ms |
+Benchmarks with issues:
+  Benchmarks.TUnit_AOT: DefaultJob
 
 
