@@ -17,6 +17,15 @@ public class Benchmarks
     
     private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
 
+    [GlobalSetup]
+    public void Setup()
+    {
+        foreach (var file in new DirectoryInfo(TUnitPath).EnumerateFiles("*", SearchOption.AllDirectories))
+        {
+            Console.WriteLine($"Found file: {file.FullName}");
+        }
+    }
+    
     [Benchmark]
     public async Task TUnit_AOT()
     {
