@@ -28,15 +28,6 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Fast',
-    Svg: require('@site/static/img/fast.svg').default,
-    description: (
-      <>
-        .
-      </>
-    ),
-  },
-  {
     title: 'Fast & Source Generated',
     Svg: require('@site/static/img/fast.svg').default,
     description: (
