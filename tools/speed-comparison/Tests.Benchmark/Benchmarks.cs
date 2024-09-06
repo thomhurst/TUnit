@@ -96,9 +96,9 @@ public class Benchmarks
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return "TUnit.TestProject.exe";
+            return "TUnitTimer.exe";
         }
 
-        return "TUnit.TestProject";
+        return "TUnitTimer";
     }
 }
