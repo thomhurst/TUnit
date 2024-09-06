@@ -179,13 +179,13 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method    | Mean       | Error    | StdDev   | Median     |
-|---------- |-----------:|---------:|---------:|-----------:|
-| TUnit_AOT |         NA |       NA |       NA |         NA |
-| TUnit     |   817.4 ms | 16.24 ms | 38.27 ms |   803.2 ms |
-| NUnit     | 1,387.9 ms | 24.14 ms | 22.58 ms | 1,388.2 ms |
-| xUnit     | 1,382.9 ms | 17.91 ms | 15.88 ms | 1,381.4 ms |
-| MSTest    | 1,254.2 ms | 24.68 ms | 29.39 ms | 1,251.3 ms |
+| Method    | Mean       | Error    | StdDev   |
+|---------- |-----------:|---------:|---------:|
+| TUnit_AOT |         NA |       NA |       NA |
+| TUnit     |   808.7 ms | 15.92 ms | 31.78 ms |
+| NUnit     | 1,384.4 ms | 13.66 ms | 12.77 ms |
+| xUnit     | 1,371.3 ms | 20.06 ms | 18.76 ms |
+| MSTest    | 1,241.7 ms | 23.74 ms | 25.40 ms |
 
 Benchmarks with issues:
   Benchmarks.TUnit_AOT: DefaultJob
@@ -207,10 +207,10 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 | Method    | Mean       | Error    | StdDev   |
 |---------- |-----------:|---------:|---------:|
 | TUnit_AOT |         NA |       NA |       NA |
-| TUnit     |   772.3 ms | 15.07 ms | 20.12 ms |
-| NUnit     | 1,323.5 ms | 15.15 ms | 14.17 ms |
-| xUnit     | 1,325.7 ms | 21.68 ms | 19.22 ms |
-| MSTest    | 1,218.9 ms | 23.19 ms | 21.70 ms |
+| TUnit     |   802.7 ms | 16.04 ms | 30.90 ms |
+| NUnit     | 1,339.3 ms | 22.69 ms | 21.23 ms |
+| xUnit     | 1,339.8 ms | 18.47 ms | 16.38 ms |
+| MSTest    | 1,198.1 ms | 12.53 ms | 11.72 ms |
 
 Benchmarks with issues:
   Benchmarks.TUnit_AOT: DefaultJob
@@ -230,13 +230,13 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method    | Mean       | Error    | StdDev   |
-|---------- |-----------:|---------:|---------:|
-| TUnit_AOT |         NA |       NA |       NA |
-| TUnit     |   879.8 ms | 17.51 ms | 31.57 ms |
-| NUnit     | 6,543.6 ms | 15.19 ms | 14.21 ms |
-| xUnit     | 6,565.6 ms | 22.21 ms | 19.69 ms |
-| MSTest    | 6,494.1 ms | 26.36 ms | 24.65 ms |
+| Method    | Mean       | Error    | StdDev   | Median     |
+|---------- |-----------:|---------:|---------:|-----------:|
+| TUnit_AOT |         NA |       NA |       NA |         NA |
+| TUnit     |   865.9 ms | 17.30 ms | 35.73 ms |   851.7 ms |
+| NUnit     | 6,535.1 ms | 26.09 ms | 24.41 ms | 6,532.5 ms |
+| xUnit     | 6,523.2 ms | 15.00 ms | 14.03 ms | 6,521.4 ms |
+| MSTest    | 6,481.3 ms | 16.88 ms | 15.79 ms | 6,479.8 ms |
 
 Benchmarks with issues:
   Benchmarks.TUnit_AOT: DefaultJob
@@ -258,10 +258,10 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 | Method    | Mean       | Error    | StdDev   |
 |---------- |-----------:|---------:|---------:|
 | TUnit_AOT |         NA |       NA |       NA |
-| TUnit     |   821.7 ms | 16.40 ms | 22.99 ms |
-| NUnit     | 7,486.7 ms | 22.52 ms | 21.06 ms |
-| xUnit     | 7,475.0 ms | 14.45 ms | 12.81 ms |
-| MSTest    | 7,435.6 ms | 22.24 ms | 20.80 ms |
+| TUnit     |   848.7 ms | 16.76 ms | 26.09 ms |
+| NUnit     | 7,531.1 ms | 17.42 ms | 16.29 ms |
+| xUnit     | 7,521.9 ms | 19.41 ms | 18.16 ms |
+| MSTest    | 7,473.2 ms | 16.10 ms | 15.06 ms |
 
 Benchmarks with issues:
   Benchmarks.TUnit_AOT: DefaultJob
