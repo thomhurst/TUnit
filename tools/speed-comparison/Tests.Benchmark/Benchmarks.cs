@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
+using CliWrap;
+using CliWrap.Buffered;
 using Process = System.Diagnostics.Process;
 
 namespace Tests.Benchmark;
@@ -18,46 +20,46 @@ public class Benchmarks
     [Benchmark]
     public async Task TUnit_AOT()
     {
-        await Process.Start(new ProcessStartInfo(GetExecutableFileName(), $"--treenode-filter /*/*/{ClassName}/*")
-        {
-            WorkingDirectory = Path.Combine(TUnitPath, "aot-publish"),
-        })!.WaitForExitAsync();
+        await Cli.Wrap(GetExecutableFileName())
+            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithWorkingDirectory(Path.Combine(TUnitPath, "aot-publish"))
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
     public async Task TUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"run --no-build -c Release --treenode-filter /*/*/{ClassName}/*")
-        {
-            WorkingDirectory = TUnitPath,
-        })!.WaitForExitAsync();
+        await Cli.Wrap("dotnet")
+            .WithArguments(["run", "--no-build", "-c", "Release", "--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithWorkingDirectory(TUnitPath)
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
     public async Task NUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
-        {
-            WorkingDirectory = NUnitPath,
-        })!.WaitForExitAsync();
+        await Cli.Wrap("dotnet")
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithWorkingDirectory(NUnitPath)
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
     public async Task xUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
-        {
-            WorkingDirectory = xUnitPath,
-        })!.WaitForExitAsync();
+        await Cli.Wrap("dotnet")
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithWorkingDirectory(xUnitPath)
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
     public async Task MSTest()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
-        {
-            WorkingDirectory = MSTestPath,
-        })!.WaitForExitAsync();
+        await Cli.Wrap("dotnet")
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithWorkingDirectory(MSTestPath)
+            .ExecuteBufferedAsync();
     }
 
     private static string GetProjectPath(string name)

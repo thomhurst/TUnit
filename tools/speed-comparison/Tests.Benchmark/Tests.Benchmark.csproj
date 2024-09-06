@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="BenchmarkDotNet" />
+      <PackageReference Include="CliWrap" />
     </ItemGroup>
 
 </Project>
