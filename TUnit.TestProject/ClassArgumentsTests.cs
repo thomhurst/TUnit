@@ -12,11 +12,13 @@ public class ClassArgumentsTests(
     [Test]
     public void Without_Timeout()
     {
+        Console.Write($@"{value} {number}");
     }
     
     [Test, Timeout(30_000)]
     public void With_Timeout(CancellationToken cancellationToken)
     {
+        Console.Write($@"{value} {number}");
     }
 
     public static (string, int) MyMethod()
