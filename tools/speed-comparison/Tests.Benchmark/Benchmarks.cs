@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
 using Process = System.Diagnostics.Process;
 
@@ -15,6 +16,15 @@ public class Benchmarks
     private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
 
     [Benchmark]
+    public async Task TUnit_AOT()
+    {
+        await Process.Start(new ProcessStartInfo(GetExecutableFileName(), $"--treenode-filter /*/*/{ClassName}/*")
+        {
+            WorkingDirectory = Path.Combine(TUnitPath, "bin", "Release", "net8.0", GetPlatformFolder(), "publish"),
+        })!.WaitForExitAsync();
+    }
+
+    [Benchmark]
     public async Task TUnit()
     {
         await Process.Start(new ProcessStartInfo("dotnet", $"run --no-build -c Release --treenode-filter /*/*/{ClassName}/*")
@@ -22,7 +32,7 @@ public class Benchmarks
             WorkingDirectory = TUnitPath,
         })!.WaitForExitAsync();
     }
-    
+
     [Benchmark]
     public async Task NUnit()
     {
@@ -40,7 +50,7 @@ public class Benchmarks
             WorkingDirectory = xUnitPath,
         })!.WaitForExitAsync();
     }
-    
+
     [Benchmark]
     public async Task MSTest()
     {
@@ -49,7 +59,7 @@ public class Benchmarks
             WorkingDirectory = MSTestPath,
         })!.WaitForExitAsync();
     }
-    
+
     private static string GetProjectPath(string name)
     {
         var folder = new DirectoryInfo(Environment.CurrentDirectory);
@@ -60,5 +70,35 @@ public class Benchmarks
         }
         
         return Path.Combine(folder.FullName, name, name);
+    }
+
+    private string GetPlatformFolder()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "win-x64";
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return "linux-x64";
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return "osx-x64";
+        }
+        
+        throw new NotImplementedException();
+    }
+
+    private string GetExecutableFileName()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "TUnit.TestProject.exe";
+        }
+
+        return "TUnit.TestProject";
     }
 }
