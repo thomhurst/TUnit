@@ -86,15 +86,12 @@ internal class SingleTestExecutor : IDataProducer
 
             try
             {
+                TestContext.TestContexts.Value = testContext;
+
                 await AssemblyHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly,
                     testContext);
                 await ClassHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType, testContext);
-                await ExecuteWithRetries(test, cleanUpExceptions);
-            }
-            catch (Exception exception)
-            {
-                cleanUpExceptions.Add(exception);
-                throw;
+                await ExecuteWithRetries(test);
             }
             finally
             {
@@ -115,8 +112,6 @@ internal class SingleTestExecutor : IDataProducer
                     await context.MessageBus.PublishAsync(this, new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(), artifact.File, artifact.DisplayName, artifact.Description));
                 }
             }
-
-            ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
             
             var timingProperty = GetTimingProperty(testContext);
             
@@ -184,11 +179,19 @@ internal class SingleTestExecutor : IDataProducer
         }
         finally
         {
+            await TestHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
+            
+            await RunHelpers.RunValueTaskSafelyAsync(() => _disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
+
+            TestContext.TestContexts.Value = null;
+            
             testContext.TaskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
 
             using var lockHandle = await _consoleStandardOutLock.WaitAsync();
             
             await Dispose(testContext);
+            
+            ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
         }
     }
 
@@ -296,15 +299,14 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private Task RunTest(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions,
-        CancellationToken cancellationToken)
+    private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
-        return _testInvoker.Invoke(discoveredTest, cleanUpExceptions, cancellationToken);
+        return _testInvoker.Invoke(discoveredTest, cancellationToken);
     }
 
     private readonly AsyncSemaphore _consoleStandardOutLock = new(1);
 
-    private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest)
     {
         var testInformation = discoveredTest.TestContext.TestDetails;
         var retryCount = testInformation.RetryLimit;
@@ -316,7 +318,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             try
             {
-                await ExecuteCore(discoveredTest, cleanUpExceptions);
+                await ExecuteCore(discoveredTest);
                 break;
             }
             catch (Exception e)
@@ -354,14 +356,14 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async ValueTask ExecuteCore(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async ValueTask ExecuteCore(DiscoveredTest discoveredTest)
     {
         if (_cancellationTokenSource.IsCancellationRequested)
         {
             return;
         }
         
-        await ExecuteTestMethodWithTimeout(discoveredTest, cleanUpExceptions);
+        await ExecuteTestMethodWithTimeout(discoveredTest);
     }
 
     private async ValueTask WaitForDependsOnTests(DiscoveredTest testContext, ITestExecutionFilter? filter,
@@ -432,17 +434,17 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest)
     {
         var testDetails = discoveredTest.TestDetails;
         
         if (testDetails.Timeout == null || testDetails.Timeout.Value == default)
         {
-            await RunTest(discoveredTest, cleanUpExceptions, EngineCancellationToken.Token);
+            await RunTest(discoveredTest, EngineCancellationToken.Token);
             return;
         }
 
-        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, cleanUpExceptions, token), testDetails.Timeout);
+        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout);
     }
 
 

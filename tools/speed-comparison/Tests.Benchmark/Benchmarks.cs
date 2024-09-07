@@ -37,7 +37,7 @@ public class Benchmarks
         await Cli.Wrap(Path.Combine(TUnitPath, "aot-publish", GetExecutableFileName()))
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
-            .ExecuteBufferedAsync();
+            .ExecuteAsync();
     }
 
     [Benchmark]
@@ -47,7 +47,7 @@ public class Benchmarks
             .WithArguments(["run", "--no-build", "-c", "Release", "--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithWorkingDirectory(TUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
-            .ExecuteBufferedAsync();
+            .ExecuteAsync();
     }
 
     [Benchmark]
@@ -57,7 +57,7 @@ public class Benchmarks
             .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithWorkingDirectory(NUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
-            .ExecuteBufferedAsync();
+            .ExecuteAsync();
     }
 
     [Benchmark]
@@ -67,7 +67,7 @@ public class Benchmarks
             .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithWorkingDirectory(xUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
-            .ExecuteBufferedAsync();
+            .ExecuteAsync();
     }
 
     [Benchmark]
@@ -77,7 +77,7 @@ public class Benchmarks
             .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithWorkingDirectory(MSTestPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
-            .ExecuteBufferedAsync();
+            .ExecuteAsync();
     }
 
     private static string GetProjectPath(string name)

@@ -9,6 +9,14 @@ namespace TUnit.TestProject;
 public class ParallelLimiterTests
 {
     private static readonly ConcurrentBag<DateTimeRange> TestDateTimeRanges = [];
+    
+    [After(Test)]
+    public async Task After()
+    {
+        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.TestStart!.Value.DateTime, TestContext.Current.Result!.End.DateTime));
+
+        await AssertOverlaps();
+    }
 
     [Test, Repeat(3)]
     public async Task Parallel_Test1()
