@@ -165,7 +165,7 @@ It aims to build upon the useful features of both while trying to address any pa
 
 ## Benchmark
 
-### Scenario: A single test that completes instantly
+### Scenario: A single test that completes instantly (including spawning a new process and initialising tne test framework)
 
 #### macos-latest
 
@@ -232,7 +232,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 | MSTest    | 1,218.99 ms | 21.754 ms | 18.166 ms | 1,216.28 ms |
 
 
-### Scenario: A test that takes 50ms to execute, repeated 100 times
+### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising tne test framework)
 
 #### ubuntu-latest
 
