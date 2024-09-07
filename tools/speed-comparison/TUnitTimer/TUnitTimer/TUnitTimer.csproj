@@ -13,5 +13,10 @@
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SingleFile)' == true">
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
   
 </Project>
