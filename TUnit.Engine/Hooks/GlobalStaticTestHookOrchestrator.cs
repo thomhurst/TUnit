@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Hooks;
@@ -25,21 +26,35 @@ public static class GlobalStaticTestHookOrchestrator
     
     public static void RegisterBeforeHook(StaticHookMethod<TestContext> staticMethod)
     {
-        SetUps.Add((staticMethod.Name, staticMethod.Order, context =>
+        SetUps.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(staticMethod, context.InternalDiscoveredTest).ExecuteBeforeTestHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(staticMethod, context.InternalDiscoveredTest).ExecuteBeforeTestHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new BeforeTestException($"Error executing BeforeEvery(Test) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
     public static void RegisterAfterHook(StaticHookMethod<TestContext> staticMethod)
     {
-        CleanUps.Add((staticMethod.Name, staticMethod.Order, context =>
+        CleanUps.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
-            
-            return RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(staticMethod, context.InternalDiscoveredTest).ExecuteAfterTestHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(staticMethod, context.InternalDiscoveredTest).ExecuteAfterTestHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new AfterTestException($"Error executing AfterEvery(Test) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
@@ -57,27 +72,41 @@ public static class GlobalStaticTestHookOrchestrator
         foreach (var cleanUp in CleanUps.OrderBy(x => x.Order))
         {
             await Timings.Record("Global Static Test Hook Clean Up: " + cleanUp.Name, discoveredTest.TestContext,
-                () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(discoveredTest.TestContext), cleanUpExceptions));
+                () => RunHelpers.RunSafelyAsync(async () => await cleanUp.Action(discoveredTest.TestContext), cleanUpExceptions));
         }
     }
     
     public static void RegisterBeforeHook(StaticHookMethod<ClassHookContext> staticMethod)
     {
-        ClassSetUps.Add((staticMethod.Name, staticMethod.Order, context =>
+        ClassSetUps.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new BeforeClassException($"Error executing Before(Class) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
     public static void RegisterAfterHook(StaticHookMethod<ClassHookContext> staticMethod)
     {
-        ClassCleanUps.Add((staticMethod.Name, staticMethod.Order, context =>
+        ClassCleanUps.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
-            
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new AfterClassException($"Error executing After(Class) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
@@ -101,21 +130,35 @@ public static class GlobalStaticTestHookOrchestrator
     
     public static void RegisterBeforeHook(StaticHookMethod<AssemblyHookContext> staticMethod)
     {
-        AssemblySetUps.Add((staticMethod.Name, staticMethod.Order, context =>
+        AssemblySetUps.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new BeforeAssemblyException($"Error executing Before(Assembly) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
     public static void RegisterAfterHook(StaticHookMethod<AssemblyHookContext> staticMethod)
     {
-        AssemblyCleanUps.Add((staticMethod.Name, staticMethod.Order, context =>
+        AssemblyCleanUps.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
-            
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new AfterAssemblyException($"Error executing After(Assembly) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
@@ -140,21 +183,35 @@ public static class GlobalStaticTestHookOrchestrator
     
     public static void RegisterBeforeHook(StaticHookMethod<BeforeTestDiscoveryContext> staticMethod)
     {
-        BeforeTestDiscovery.Add((staticMethod.Name, staticMethod.Order, context =>
+        BeforeTestDiscovery.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeTestDiscoveryHook(staticMethod.MethodInfo, () => staticMethod.Body(context, token)), timeout);
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeTestDiscoveryHook(staticMethod.MethodInfo, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new BeforeTestDiscoveryException($"Error executing Before(TestDiscovery) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
     public static void RegisterAfterHook(StaticHookMethod<TestDiscoveryContext> staticMethod)
     {
-        AfterTestDiscovery.Add((staticMethod.Name, staticMethod.Order, context =>
+        AfterTestDiscovery.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
-            
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterTestDiscoveryHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterTestDiscoveryHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new AfterTestDiscoveryException($"Error executing After(TestDiscovery) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
@@ -180,21 +237,35 @@ public static class GlobalStaticTestHookOrchestrator
     
     public static void RegisterBeforeHook(StaticHookMethod<TestSessionContext> staticMethod)
     {
-        BeforeTestSession.Add((staticMethod.Name, staticMethod.Order, context =>
+        BeforeTestSession.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
 
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeTestSessionHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeTestSessionHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new BeforeTestSessionException($"Error executing Before(TestSession) method: {staticMethod.Name}", e);
+            }
         }));
     }
 
     public static void RegisterAfterHook(StaticHookMethod<TestSessionContext> staticMethod)
     {
-        AfterTestSession.Add((staticMethod.Name, staticMethod.Order, context =>
+        AfterTestSession.Add((staticMethod.Name, staticMethod.Order, async context =>
         {
             var timeout = staticMethod.Timeout;
-            
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterTestSessionHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+
+            try
+            {
+                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterTestSessionHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+            }
+            catch (Exception e)
+            {
+                throw new AfterTestSessionException($"Error executing After(TestSession) method: {staticMethod.Name}", e);
+            }
         }));
     }
 

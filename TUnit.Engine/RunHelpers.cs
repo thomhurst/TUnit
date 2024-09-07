@@ -69,7 +69,7 @@ internal static class RunHelpers
         }
     }
     
-    public static async Task RunSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
+    public static async Task RunValueTaskSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
     {
         try
         {

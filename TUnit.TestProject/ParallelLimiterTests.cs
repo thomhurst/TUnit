@@ -9,41 +9,29 @@ namespace TUnit.TestProject;
 public class ParallelLimiterTests
 {
     private static readonly ConcurrentBag<DateTimeRange> TestDateTimeRanges = [];
+    
+    [After(Test)]
+    public void After()
+    {
+        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.TestStart!.Value.DateTime, TestContext.Current.Result!.End.DateTime));
+    }
 
     [Test, Repeat(3)]
     public async Task Parallel_Test1()
     {
-        var start = DateTime.Now;
-
         await Task.Delay(500);
-        
-        var end = DateTime.Now;
-        
-        TestDateTimeRanges.Add(new DateTimeRange(start, end));
     }
     
     [Test, Repeat(3)]
     public async Task Parallel_Test2()
     {
-        var start = DateTime.Now;
-
         await Task.Delay(500);
-        
-        var end = DateTime.Now;
-        
-        TestDateTimeRanges.Add(new DateTimeRange(start, end));
     }
     
     [Test, Repeat(3)]
     public async Task Parallel_Test3()
     {
-        var start = DateTime.Now;
-
         await Task.Delay(500);
-        
-        var end = DateTime.Now;
-        
-        TestDateTimeRanges.Add(new DateTimeRange(start, end));
     }
     
     [After(Class)]
