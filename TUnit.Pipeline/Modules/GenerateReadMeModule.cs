@@ -56,7 +56,7 @@ public class GenerateReadMeModule : Module<File>
         {
             var className = groupedArtifacts.Key;
 
-            fileContents.AppendLine($"### Scenario: {GetScenario(className)}");
+            fileContents.AppendLine($"### Scenario: {GetScenario(className)} (including spawning a new process and initialising tne test framework)");
 
             await groupedArtifacts.ForEachAsync(async artifact =>
             {
