@@ -41,6 +41,10 @@ jobs:
         run: dotnet publish TUnitTimer.csproj -c Release --output aot-publish --property:Aot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
         working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
           
+      - name: Build TUnit Single File
+        run: dotnet publish TUnitTimer.csproj -c Release --output singlefile-publish --property:SingleFile=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
+
       - name: Build TUnit
         run: dotnet build -c Release
         working-directory: "tools/speed-comparison/TUnitTimer"
