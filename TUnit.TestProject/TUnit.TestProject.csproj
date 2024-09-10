@@ -24,6 +24,7 @@
   <PropertyGroup Condition="'$(SingleFile)' == true">
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
   </PropertyGroup>
   
   <ItemGroup>
