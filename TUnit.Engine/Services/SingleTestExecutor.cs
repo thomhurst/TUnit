@@ -25,6 +25,8 @@ internal class SingleTestExecutor : IDataProducer
     private readonly ParallelLimitProvider _parallelLimitProvider;
     private readonly TUnitLogger _logger;
 
+    private readonly object _testStartLock = new();
+
     public SingleTestExecutor(
         IExtension extension,
         Disposer disposer,
@@ -43,17 +45,25 @@ internal class SingleTestExecutor : IDataProducer
         _logger = logger;
     }
 
-    public async Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
+    public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
+        bool isStartedAsDependencyForAnotherTest)
     {
-        if (test.IsStarted)
+        lock (_testStartLock)
         {
-            await test.TestContext.TestTask;
-            return;
-        }
+            if (test.IsStarted)
+            {
+                return test.TestContext.TestTask;
+            }
 
-        using var _ = await WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
+            test.IsStarted = true;
+        }
         
-        test.IsStarted = true;
+        return ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest);
+    }
+
+    private async Task ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
+    {
+        using var _ = await WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
         
         var testContext = test.TestContext;
         var timings = testContext.Timings;
