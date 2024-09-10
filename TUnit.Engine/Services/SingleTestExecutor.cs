@@ -24,9 +24,7 @@ internal class SingleTestExecutor : IDataProducer
     private readonly ExplicitFilterService _explicitFilterService;
     private readonly ParallelLimitProvider _parallelLimitProvider;
     private readonly TUnitLogger _logger;
-
-    private readonly object _testStartLock = new();
-
+    
     public SingleTestExecutor(
         IExtension extension,
         Disposer disposer,
@@ -48,7 +46,7 @@ internal class SingleTestExecutor : IDataProducer
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
         bool isStartedAsDependencyForAnotherTest)
     {
-        lock (_testStartLock)
+        lock (test)
         {
             if (test.IsStarted)
             {
