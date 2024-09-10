@@ -39,15 +39,6 @@ public class Benchmarks
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
     }
-    
-    [Benchmark]
-    public async Task TUnit_SingleFile()
-    {
-        await Cli.Wrap(Path.Combine(TUnitPath, "singlefile-publish", GetExecutableFileName()))
-            .WithArguments(["--treenode-filter", $"/*/*/{ClassName}/*"])
-            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
-            .ExecuteAsync();
-    }
 
     [Benchmark]
     public async Task TUnit()
