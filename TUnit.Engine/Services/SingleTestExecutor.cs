@@ -209,7 +209,7 @@ internal class SingleTestExecutor : IDataProducer
                 ComputerName = Environment.MachineName,
                 Exception = e,
                 Status = Status.Failed,
-                Output = testContext.GetTestOutput()
+                Output = $"{testContext.GetTestErrorOutput()}{Environment.NewLine}{testContext.GetTestOutput()}"
             };
         }
     }
@@ -221,9 +221,7 @@ internal class SingleTestExecutor : IDataProducer
         await RunHelpers.RunValueTaskSafelyAsync(() => _disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
 
         TestContext.TestContexts.Value = null;
-            
-        testContext.TaskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
-
+        
         using var lockHandle = await _consoleStandardOutLock.WaitAsync();
             
         await Dispose(testContext);
