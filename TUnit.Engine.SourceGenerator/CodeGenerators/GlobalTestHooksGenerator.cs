@@ -80,6 +80,8 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
                 HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute(),
                 HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(HookExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
+                FilePath = contextAttribute.ConstructorArguments[1].Value?.ToString() ?? string.Empty,
+                LineNumber = contextAttribute.ConstructorArguments[2].Value as int? ?? 0,
             };
         }
     }

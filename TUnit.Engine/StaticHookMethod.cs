@@ -8,10 +8,18 @@ namespace TUnit.Engine;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public record StaticHookMethod<T>
+public record StaticHookMethod<T> : StaticHookMethod
+{
+    public required Func<T, CancellationToken, Task> Body { get; init; }
+}
+
+#if !DEBUG
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+#endif
+public record StaticHookMethod
 {
     public required MethodInfo MethodInfo { get; init; }
-    public required Func<T, CancellationToken, Task> Body { get; init; }
+    
     private string? _name;
     public string Name =>  _name ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
     public Type ClassType => MethodInfo.ReflectedType!;
@@ -29,4 +37,8 @@ public record StaticHookMethod<T>
     public required IHookExecutor HookExecutor { get; init; }
     
     public required int Order { get; init; }
+    
+    public required string FilePath { get; init; }
+    
+    public required int LineNumber { get; init; }
 }

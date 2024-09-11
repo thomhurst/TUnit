@@ -23,6 +23,8 @@ internal class SingleTestExecutor : IDataProducer
     private readonly TestInvoker _testInvoker;
     private readonly ExplicitFilterService _explicitFilterService;
     private readonly ParallelLimitProvider _parallelLimitProvider;
+    private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
+    private readonly ClassHookOrchestrator _classHookOrchestrator;
     private readonly TUnitLogger _logger;
     
     public SingleTestExecutor(
@@ -32,6 +34,8 @@ internal class SingleTestExecutor : IDataProducer
         TestInvoker testInvoker,
         ExplicitFilterService explicitFilterService,
         ParallelLimitProvider parallelLimitProvider,
+        AssemblyHookOrchestrator assemblyHookOrchestrator,
+        ClassHookOrchestrator classHookOrchestrator,
         TUnitLogger logger)
     {
         _extension = extension;
@@ -40,6 +44,8 @@ internal class SingleTestExecutor : IDataProducer
         _testInvoker = testInvoker;
         _explicitFilterService = explicitFilterService;
         _parallelLimitProvider = parallelLimitProvider;
+        _assemblyHookOrchestrator = assemblyHookOrchestrator;
+        _classHookOrchestrator = classHookOrchestrator;
         _logger = logger;
     }
 
@@ -96,9 +102,9 @@ internal class SingleTestExecutor : IDataProducer
             {
                 TestContext.TestContexts.Value = testContext;
 
-                await AssemblyHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly,
+                await _assemblyHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType.Assembly,
                     testContext);
-                await ClassHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType, testContext);
+                await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType, testContext);
                 await ExecuteWithRetries(test);
             }
             finally
@@ -112,8 +118,8 @@ internal class SingleTestExecutor : IDataProducer
                             cleanUpExceptions));
                 }
                 
-                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
-                await AssemblyHookOrchestrator.ExecuteCleanups(test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
+                await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context, test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
+                await _assemblyHookOrchestrator.ExecuteCleanups(context, test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
 
                 foreach (var artifact in testContext.Artifacts)
                 {

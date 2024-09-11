@@ -10,6 +10,10 @@ public record HooksDataModel
     public required Core.HookType HookLevel { get; init; }
     public required string? HookExecutor { get; init; }
     
+    public required string FilePath { get; init; }
+    
+    public required int LineNumber { get; init; }
+    
     public required int Order { get; init; }
 
     public virtual bool Equals(HooksDataModel? other)

@@ -2,6 +2,7 @@
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
@@ -36,6 +37,10 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<OnEndExecutor>()
             .AddSingleton<TUnitLogger>(_ => new TUnitLogger(extension, frameworkServiceProvider.GetOutputDevice(), frameworkServiceProvider.GetLoggerFactory()))
             .AddSingleton<TUnitInitializer>()
-            .AddSingleton<ParallelLimitProvider>();
+            .AddSingleton<ParallelLimitProvider>()
+            .AddSingleton<AssemblyHookOrchestrator>()
+            .AddSingleton<ClassHookOrchestrator>()
+            .AddSingleton<GlobalStaticTestHookOrchestrator>()
+            .AddSingleton<HookMessagePublisher>();
     }
 }
