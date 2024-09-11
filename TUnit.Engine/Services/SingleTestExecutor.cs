@@ -138,6 +138,8 @@ internal class SingleTestExecutor : IDataProducer
             }
 
             ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
+            
+            testContext.TaskCompletionSource.SetResult(null);
 
             var timingProperty = GetTimingProperty(testContext);
 
@@ -148,9 +150,7 @@ internal class SingleTestExecutor : IDataProducer
                     .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
                     .WithProperty(timingProperty)
             ));
-
-            testContext.TaskCompletionSource.SetResult(null);
-
+            
             testContext.Result = new TestResult
             {
                 TestContext = testContext,
@@ -165,6 +165,8 @@ internal class SingleTestExecutor : IDataProducer
         }
         catch (SkipTestException skipTestException)
         {
+            testContext.TaskCompletionSource.SetException(skipTestException);
+
             await _logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
@@ -175,9 +177,7 @@ internal class SingleTestExecutor : IDataProducer
                 ));
 
             var now = DateTimeOffset.Now;
-
-            testContext.TaskCompletionSource.SetException(skipTestException);
-
+            
             testContext.Result = new TestResult
             {
                 Duration = TimeSpan.Zero,
@@ -190,6 +190,8 @@ internal class SingleTestExecutor : IDataProducer
         }
         catch (Exception e)
         {
+            testContext.TaskCompletionSource.SetException(e);
+
             var timingProperty = GetTimingProperty(testContext);
             
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode()
@@ -198,8 +200,6 @@ internal class SingleTestExecutor : IDataProducer
                 .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
                 .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
                 .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
-
-            testContext.TaskCompletionSource.SetException(e);
             
             testContext.Result = new TestResult
             {
@@ -212,6 +212,9 @@ internal class SingleTestExecutor : IDataProducer
                 Output = $"{testContext.GetTestErrorOutput()}{Environment.NewLine}{testContext.GetTestOutput()}"
             };
         }
+        
+        // Will only set if not already set - Last resort incase something weird happened
+        testContext.TaskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
     }
 
     private async Task DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
