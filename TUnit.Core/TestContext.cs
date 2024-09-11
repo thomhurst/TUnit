@@ -12,7 +12,8 @@ public partial class TestContext : IDisposable
     
     public DateTimeOffset? TestStart { get; internal set; }
     
-    public StringWriter Out { get; } = new();
+    public StringWriter OutputWriter { get; } = new();
+    public StringWriter ErrorOutputWriter { get; } = new();
     
     public Task TestTask => TaskCompletionSource.Task;
 
@@ -28,7 +29,12 @@ public partial class TestContext : IDisposable
 
     public string GetTestOutput()
     {
-        return Out.ToString().Trim();
+        return OutputWriter.ToString().Trim();
+    }
+    
+    public string GetTestErrorOutput()
+    {
+        return ErrorOutputWriter.ToString().Trim();
     }
     
     public void AddArtifact(Artifact artifact)

@@ -12,6 +12,7 @@ using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine.Services;
 
@@ -143,6 +144,8 @@ internal class SingleTestExecutor : IDataProducer
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
                 test.ToTestNode()
                     .WithProperty(PassedTestNodeStateProperty.CachedInstance)
+                    .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
+                    .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
                     .WithProperty(timingProperty)
             ));
 
@@ -165,7 +168,11 @@ internal class SingleTestExecutor : IDataProducer
             await _logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
-                test.ToTestNode().WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
+                test.ToTestNode()
+                    .WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))
+                    .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
+                    .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                ));
 
             var now = DateTimeOffset.Now;
 
@@ -188,6 +195,8 @@ internal class SingleTestExecutor : IDataProducer
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode()
                 .WithProperty(GetFailureStateProperty(testContext, e, timingProperty.GlobalTiming.Duration))
                 .WithProperty(timingProperty)
+                .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
+                .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
                 .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
 
             testContext.TaskCompletionSource.SetException(e);

@@ -11,7 +11,7 @@ internal class StandardOutConsoleInterceptor : ConsoleInterceptor
 
     public static TextWriter DefaultOut { get; }
 
-    protected override StringWriter RedirectedOut => TestContext.Current?.Out!;
+    protected override StringWriter RedirectedOut => TestContext.Current?.OutputWriter!;
 
     static StandardOutConsoleInterceptor()
     {
