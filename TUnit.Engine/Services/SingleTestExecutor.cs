@@ -82,16 +82,16 @@ internal class SingleTestExecutor : IDataProducer
         await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
 
         var cleanUpExceptions = new List<Exception>();
-        
+
         try
         {
             await WaitForDependsOnTests(test, filter, context);
-            
+
             if (!_explicitFilterService.CanRun(test.TestDetails, filter))
             {
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
             }
-            
+
             foreach (var beforeTestAttribute in test.BeforeTestAttributes)
             {
                 await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
@@ -102,38 +102,50 @@ internal class SingleTestExecutor : IDataProducer
             {
                 TestContext.TestContexts.Value = testContext;
 
-                await _assemblyHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType.Assembly,
+                await _assemblyHookOrchestrator.ExecuteBeforeHooks(context,
+                    test.TestContext.TestDetails.ClassType.Assembly,
                     testContext);
-                await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType, testContext);
+                await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType,
+                    testContext);
                 await ExecuteWithRetries(test);
             }
             finally
             {
                 await DecrementSharedData(test);
-                
+
                 foreach (var afterTestAttribute in test.AfterTestAttributes)
                 {
                     await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
                         () => RunHelpers.RunSafelyAsync(() => afterTestAttribute.OnAfterTest(testContext),
                             cleanUpExceptions));
                 }
-                
-                await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context, test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
-                await _assemblyHookOrchestrator.ExecuteCleanups(context, test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
+
+                await DisposeTest(testContext, cleanUpExceptions);
+
+                await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context,
+                    test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
+
+                await _assemblyHookOrchestrator.ExecuteCleanups(context,
+                    test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
 
                 foreach (var artifact in testContext.Artifacts)
                 {
-                    await context.MessageBus.PublishAsync(this, new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(), artifact.File, artifact.DisplayName, artifact.Description));
+                    await context.MessageBus.PublishAsync(this,
+                        new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(), artifact.File,
+                            artifact.DisplayName, artifact.Description));
                 }
             }
-            
+
+            ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
+
             var timingProperty = GetTimingProperty(testContext);
-            
-            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode()
+
+            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
+                test.ToTestNode()
                     .WithProperty(PassedTestNodeStateProperty.CachedInstance)
                     .WithProperty(timingProperty)
             ));
-            
+
             testContext.TaskCompletionSource.SetResult(null);
 
             testContext.Result = new TestResult
@@ -151,14 +163,14 @@ internal class SingleTestExecutor : IDataProducer
         catch (SkipTestException skipTestException)
         {
             await _logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
-            
-            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, 
+
+            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
                 test.ToTestNode().WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
 
             var now = DateTimeOffset.Now;
-            
+
             testContext.TaskCompletionSource.SetException(skipTestException);
-                
+
             testContext.Result = new TestResult
             {
                 Duration = TimeSpan.Zero,
@@ -191,22 +203,21 @@ internal class SingleTestExecutor : IDataProducer
                 Output = testContext.GetTestOutput()
             };
         }
-        finally
-        {
-            await TestHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
-            
-            await RunHelpers.RunValueTaskSafelyAsync(() => _disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
+    }
 
-            TestContext.TestContexts.Value = null;
+    private async Task DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
+    {
+        await TestHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
             
-            testContext.TaskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
+        await RunHelpers.RunValueTaskSafelyAsync(() => _disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
 
-            using var lockHandle = await _consoleStandardOutLock.WaitAsync();
+        TestContext.TestContexts.Value = null;
             
-            await Dispose(testContext);
+        testContext.TaskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
+
+        using var lockHandle = await _consoleStandardOutLock.WaitAsync();
             
-            ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
-        }
+        await Dispose(testContext);
     }
 
     private async Task<IDisposable> WaitForParallelLimiter(DiscoveredTest test, bool isStartedAsDependencyForAnotherTest)
