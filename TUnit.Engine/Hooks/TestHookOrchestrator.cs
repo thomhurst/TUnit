@@ -70,7 +70,7 @@ public static class TestHookOrchestrator
 
             foreach (var setUp in setUpsForType.OrderBy(x => x.Order))
             {
-                await Timings.Record("Test Hook Set Up: " + setUp.Name, discoveredTest.TestContext, () => setUp.Action(classInstance, discoveredTest));
+                await Timings.Record($"Test Hook Set Up: {setUp.Name}", discoveredTest.TestContext, () => setUp.Action(classInstance, discoveredTest));
             }
         }
     }
@@ -90,7 +90,7 @@ public static class TestHookOrchestrator
 
             foreach (var cleanUp in cleanUpsForType.OrderBy(x => x.Order))
             {
-                await Timings.Record("Test Hook Clean Up: " + cleanUp.Name, testContext.TestContext, () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(classInstance, testContext),
+                await Timings.Record($"Test Hook Clean Up: {cleanUp.Name}", testContext.TestContext, () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(classInstance, testContext),
                     cleanUpExceptions));
             }
         }

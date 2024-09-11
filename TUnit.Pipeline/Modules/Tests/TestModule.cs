@@ -174,8 +174,27 @@ public abstract class TestModule : Module<TestResult>
 
         var parsedTrx = new TrxParser().ParseTrxContents(trxFileContents);
 
-        var parsedResult = new TestResult(parsedTrx);
+        var unitTestResults = parsedTrx.UnitTestResults.Where(x => 
+                !x.TestName!.Contains("Before Class: ")
+                && !x.TestName.Contains("After Class: ")
+                && !x.TestName.Contains("Before Assembly: ")
+                && !x.TestName.Contains("After Assembly: "))
+            .ToList();
 
+        var parsedResult = new TestResult(
+            new DotNetTestResult(unitTestResults,
+                new ResultSummary(parsedTrx.ResultSummary.Outcome,
+                    new Counters(
+                        unitTestResults.Count,
+                        unitTestResults.Count(x => x.Outcome != TestOutcome.NotExecuted),
+                        unitTestResults.Count(x => x.Outcome == TestOutcome.Passed),
+                        unitTestResults.Count(x => x.Outcome == TestOutcome.Failed),
+                        0,0,0,0,0,0,0,0,0,0,0,0
+                    )
+                )
+            )
+        );
+        
         try
         {
             assertions.ForEach(x => x.Invoke(parsedResult));

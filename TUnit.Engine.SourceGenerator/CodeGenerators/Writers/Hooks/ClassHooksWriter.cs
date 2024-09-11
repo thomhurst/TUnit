@@ -36,26 +36,30 @@ internal static class ClassHooksWriter
         if (hookLocationType == HookLocationType.Before)
         {
             sourceBuilder.WriteLine(
-                $$"""
-                  ClassHookOrchestrator.RegisterBeforeHook(typeof({{model.FullyQualifiedTypeName}}), new StaticHookMethod<ClassHookContext>
-                  		{ 
-                             MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
-                             HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
-                             Order = {{model.Order}},
-                  		});
-                  """);
+                $$$"""
+                   ClassHookOrchestrator.RegisterBeforeHook(typeof({{{model.FullyQualifiedTypeName}}}), new StaticHookMethod<ClassHookContext>
+                   		{ 
+                              MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
+                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),
+                              HookExecutor = {{{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}}},
+                              Order = {{{model.Order}}},
+                              FilePath = @"{{{model.FilePath}}}",
+                              LineNumber = {{{model.LineNumber}}},
+                   		});
+                   """);
         }
         else if (hookLocationType == HookLocationType.After)
         {
             sourceBuilder.WriteLine(
-                $$"""
-                 ClassHookOrchestrator.RegisterAfterHook(typeof({{model.FullyQualifiedTypeName}}), new StaticHookMethod<ClassHookContext>
+                $$$"""
+                 ClassHookOrchestrator.RegisterAfterHook(typeof({{{model.FullyQualifiedTypeName}}}), new StaticHookMethod<ClassHookContext>
                  		{ 
-                             MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model)}})),
-                             HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
-                             Order = {{model.Order}},
+                             MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
+                             Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),
+                             HookExecutor = {{{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}}},
+                             Order = {{{model.Order}}},
+                             FilePath = @"{{{model.FilePath}}}",
+                             LineNumber = {{{model.LineNumber}}},
                  		});
                  """);
         }

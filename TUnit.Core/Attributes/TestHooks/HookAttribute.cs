@@ -2,7 +2,7 @@
 
 public class HookAttribute : TUnitAttribute
 {
-    internal HookAttribute(HookType hookType)
+    internal HookAttribute(HookType hookType, string file, int line)
     {
         if (!Enum.IsDefined(typeof(HookType), hookType))
         {

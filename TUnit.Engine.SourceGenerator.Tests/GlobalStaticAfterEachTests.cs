@@ -21,7 +21,9 @@ internal class GlobalStaticAfterEachTests : TestsBase<GlobalTestHooksGenerator>
 	            MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1).GetMethod("AfterAll1", 0, [typeof(global::TUnit.Core.TestContext)]),
 	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase1.AfterAll1(context)),
 	            HookExecutor = DefaultExecutor.Instance,
-	                Order = 0,
+	            Order = 0,
+	            FilePath = @"{}", 
+	            LineNumber = 5,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -32,7 +34,9 @@ internal class GlobalStaticAfterEachTests : TestsBase<GlobalTestHooksGenerator>
 	            MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2).GetMethod("AfterAll2", 0, [typeof(global::TUnit.Core.TestContext)]),
 	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase2.AfterAll2(context)),
 	            HookExecutor = DefaultExecutor.Instance,
-	                Order = 0,
+	            Order = 0,
+	            FilePath = @"{}", 
+	            LineNumber = 20,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -43,7 +47,9 @@ internal class GlobalStaticAfterEachTests : TestsBase<GlobalTestHooksGenerator>
 	            MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3).GetMethod("AfterAll3", 0, [typeof(global::TUnit.Core.TestContext)]),
 	            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase3.AfterAll3(context)),
 	            HookExecutor = DefaultExecutor.Instance,
-	                Order = 0,
+	            Order = 0,
+	            FilePath = @"{}", 
+	            LineNumber = 35,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -55,6 +61,8 @@ internal class GlobalStaticAfterEachTests : TestsBase<GlobalTestHooksGenerator>
 		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context)),
 		            HookExecutor = DefaultExecutor.Instance,
 		            Order = 0,
+		            FilePath = @"{}", 
+		            LineNumber = 50,
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -66,6 +74,8 @@ internal class GlobalStaticAfterEachTests : TestsBase<GlobalTestHooksGenerator>
 		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context, cancellationToken)),
 		            HookExecutor = DefaultExecutor.Instance,
 		            Order = 0,
+		            FilePath = @"{}", 
+		            LineNumber = 56,
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -77,6 +87,8 @@ internal class GlobalStaticAfterEachTests : TestsBase<GlobalTestHooksGenerator>
 		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context)),
 		            HookExecutor = DefaultExecutor.Instance,
 		            Order = 0,
+		            FilePath = @"{}", 
+		            LineNumber = 62,
 		            });
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -88,6 +100,8 @@ internal class GlobalStaticAfterEachTests : TestsBase<GlobalTestHooksGenerator>
 		            Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context, cancellationToken)),
 		            HookExecutor = DefaultExecutor.Instance,
 		            Order = 0,
+		            FilePath = @"{}", 
+		            LineNumber = 68,
 		            });
 		            """.IgnoreWhitespaceFormatting()));
         });

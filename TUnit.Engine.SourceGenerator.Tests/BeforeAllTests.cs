@@ -22,6 +22,8 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 	                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base1.BeforeAll1()),
 	                HookExecutor = DefaultExecutor.Instance,
 	                Order = 0,
+	                FilePath = @"", 
+	                LineNumber = 5,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -33,6 +35,8 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 	                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base2.BeforeAll2()),
 	                HookExecutor = DefaultExecutor.Instance,
 	                Order = 0,
+	                FilePath = @"", 
+	                LineNumber = 20,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -44,6 +48,8 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 	                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.Base3.BeforeAll3()),
 	                HookExecutor = DefaultExecutor.Instance,
 	                Order = 0,
+	                FilePath = @"", 
+	                LineNumber = 35,
 	            });
 	            """.IgnoreWhitespaceFormatting()));
             
@@ -55,6 +61,8 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 		                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUp()),
 		                       HookExecutor = DefaultExecutor.Instance,
 		                       Order = 0,
+		                       FilePath = @"", 
+		                       LineNumber = 50,
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -66,6 +74,8 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 		                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUpWithContext(context)),
 		                       HookExecutor = DefaultExecutor.Instance,
 		                       Order = 0,
+		                       FilePath = @"", 
+		                       LineNumber = 56,
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -77,6 +87,8 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 		                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUp(cancellationToken)),
 		                       HookExecutor = DefaultExecutor.Instance,
 		                       Order = 0,
+		                       FilePath = @"", 
+		                       LineNumber = 62,
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
             
@@ -88,6 +100,8 @@ internal class BeforeAllTests : TestsBase<TestHooksGenerator>
 		                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.SetupTests.BeforeAllSetUpWithContext(context, cancellationToken)),
 		                       HookExecutor = DefaultExecutor.Instance,
 		                       Order = 0,
+		                       FilePath = @"", 
+		                       LineNumber = 68,
 		            		});
 		            """.IgnoreWhitespaceFormatting()));
         });

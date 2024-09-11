@@ -21,6 +21,8 @@ internal class TestDiscoveryHookTests : TestsBase<GlobalTestHooksGenerator>
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 5,
+                               FilePath = @"", 
+                               LineNumber = 5,
                     		});
                     """.IgnoreWhitespaceFormatting()
             ));
@@ -33,6 +35,8 @@ internal class TestDiscoveryHookTests : TestsBase<GlobalTestHooksGenerator>
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 0,
+                               FilePath = @"{}", 
+                               LineNumber = 10,
                     		});
                     """.IgnoreWhitespaceFormatting()
             ));

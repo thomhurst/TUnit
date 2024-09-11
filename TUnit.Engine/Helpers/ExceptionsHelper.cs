@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 
 namespace TUnit.Engine.Helpers;
 
@@ -9,7 +10,7 @@ internal static class ExceptionsHelper
     {
         if (exceptions.Count == 1)
         {
-            throw exceptions[0];
+            ExceptionDispatchInfo.Throw(exceptions[0]);
         }
 
         if (exceptions.Count > 1)
