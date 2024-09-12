@@ -30,6 +30,7 @@ public class HookMessagePublisher : IDataProducer
         {
             end = DateTime.UtcNow;
             await PublishAsync(context, displayName, hookMethod, start, end, new FailedTestNodeStateProperty(e));
+            throw;
         }
     }
 
