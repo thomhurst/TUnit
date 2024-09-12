@@ -93,17 +93,17 @@ internal class SingleTestExecutor : IDataProducer
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
             }
 
-            foreach (var beforeTestAttribute in test.BeforeTestAttributes)
-            {
-                await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
-                    () => beforeTestAttribute.OnBeforeTest(new BeforeTestContext(testContext.InternalDiscoveredTest)));
-            }
-
             try
             {
                 await ExecuteBeforeHooks(test, context, testContext);
 
                 TestContext.TestContexts.Value = testContext;
+                
+                foreach (var beforeTestAttribute in test.BeforeTestAttributes)
+                {
+                    await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
+                        () => beforeTestAttribute.OnBeforeTest(new BeforeTestContext(testContext.InternalDiscoveredTest)));
+                }
                 
                 await ExecuteWithRetries(test);
             }
