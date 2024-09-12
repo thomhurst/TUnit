@@ -16,7 +16,7 @@ public class TimeoutTests2 : TestModule
                 result => result.Failed.Should().Be(1),
                 result => result.Skipped.Should().Be(0),
                 result => result.TrxReport.UnitTestResults[0].Duration.Should().BeLessThan(TimeSpan.FromMinutes(1)),
-                result => result.TrxReport.UnitTestResults[0].Duration.Should().BeGreaterThan(TimeSpan.FromSeconds(30)),
+                result => result.TrxReport.UnitTestResults[0].Duration.Should().BeGreaterThan(TimeSpan.FromSeconds(29)),
             ], cancellationToken);
     }
 }

@@ -14,11 +14,6 @@ internal static class RunHelpers
         var taskCompletionSource = new TaskCompletionSource();
 
         var task = taskDelegate(cancellationToken);
-        
-        if (timeout != null)
-        {
-            cancellationTokenSource.CancelAfter(timeout.Value);
-        }
 
         _ = task.ContinueWith(async t =>
         {
@@ -52,6 +47,11 @@ internal static class RunHelpers
                     taskCompletionSource.TrySetCanceled();
                 }
             });
+        }
+        
+        if (timeout != null)
+        {
+            cancellationTokenSource.CancelAfter(timeout.Value);
         }
 
         await taskCompletionSource.Task;
