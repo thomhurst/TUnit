@@ -8,17 +8,17 @@ internal static class RunHelpers
     internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan? timeout)
     {
         using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
-        
-        if (timeout != null)
-        {
-            cancellationTokenSource.CancelAfter(timeout.Value);
-        }
 
         var cancellationToken = cancellationTokenSource.Token;
         
         var taskCompletionSource = new TaskCompletionSource();
 
         var task = taskDelegate(cancellationToken);
+        
+        if (timeout != null)
+        {
+            cancellationTokenSource.CancelAfter(timeout.Value);
+        }
 
         _ = task.ContinueWith(async t =>
         {
