@@ -73,13 +73,13 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             {
                 _initializer.Initialize();
 
-                await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(context, new BeforeTestDiscoveryContext());
+                await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
                 
                 var discoveredTests = _testDiscover.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken);
 
                 var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
                 
-                await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(context, new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
+                await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
 
                 switch (context.Request)
                 {
@@ -103,11 +103,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                         var testSessionContext = new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
                         
-                        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(context, testSessionContext);
+                        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
                     
                         await _testsExecutor.ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
                         
-                        await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(context, testSessionContext);
+                        await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
 
                         foreach (var artifact in testSessionContext.Artifacts)
                         {

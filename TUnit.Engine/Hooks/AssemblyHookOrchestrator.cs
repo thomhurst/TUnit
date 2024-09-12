@@ -88,7 +88,7 @@ public class AssemblyHookOrchestrator
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones first
-        await _globalStaticTestHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context, testContext.InternalDiscoveredTest);
+        await _globalStaticTestHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context);
             
         foreach (var setUp in SetUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.HookMethod.Order))
         {
@@ -96,8 +96,7 @@ public class AssemblyHookOrchestrator
             // So we await the same Task to ensure it's finished first
             // and also gives the benefit of rethrowing the same exception if it failed
             await _hookMessagePublisher.Push(executeRequestContext, $"Before Assembly: {setUp.Name}", setUp.HookMethod, () => setUp.Action.Value);
-
-            await Timings.Record("Class Hook Set Up: " + setUp.Name, testContext, () => setUp.Action.Value);        }
+        }
     }
 
     internal async Task ExecuteCleanups(ExecuteRequestContext executeRequestContext, Assembly assembly, TestContext testContext, List<Exception> cleanUpExceptions)
@@ -115,6 +114,6 @@ public class AssemblyHookOrchestrator
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones last
-        await _globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, testContext.InternalDiscoveredTest, cleanUpExceptions);
+        await _globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
     }
 }

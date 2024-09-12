@@ -69,12 +69,12 @@ public class ClassHookOrchestrator
         }
     }
     
-    public async Task ExecuteBeforeHooks(ExecuteRequestContext executeRequestContext, Type testClassType, TestContext testContext)
+    public async Task ExecuteBeforeHooks(ExecuteRequestContext executeRequestContext, Type testClassType)
     {
         var context = GetClassHookContext(testClassType);
         
         // Run Global Hooks First
-        await _globalStaticTestHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context, testContext.InternalDiscoveredTest);
+        await _globalStaticTestHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context);
             
         // Reverse so base types are first - We'll run those ones first
         var typesIncludingBase = GetTypesIncludingBase(testClassType)
@@ -84,7 +84,7 @@ public class ClassHookOrchestrator
         {
             if (!SetUps.TryGetValue(type, out var setUpsForType))
             {
-                return;
+                continue;
             }
 
             foreach (var setUp in setUpsForType.OrderBy(x => x.HookMethod.Order))
@@ -92,13 +92,12 @@ public class ClassHookOrchestrator
                 // As these are lazy we should always get the same Task
                 // So we await the same Task to ensure it's finished first
                 // and also gives the benefit of rethrowing the same exception if it failed
-                await Timings.Record("Class Hook Set Up: " + setUp.Name, testContext, () => setUp.Action.Value);
+                await _hookMessagePublisher.Push(executeRequestContext, $"Before Class: {setUp.Name}", setUp.HookMethod, () => setUp.Action.Value);
             }
         }
     }
     
     public async Task ExecuteCleanUpsIfLastInstance(ExecuteRequestContext executeRequestContext, Type testClassType,
-        TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
         var typesIncludingBase = GetTypesIncludingBase(testClassType);
@@ -115,7 +114,7 @@ public class ClassHookOrchestrator
             
             if (!CleanUps.TryGetValue(type, out var cleanUpsForType))
             {
-                return;
+                continue;
             }
 
             foreach (var cleanUp in cleanUpsForType.OrderBy(x => x.HookMethod.Order))
@@ -126,7 +125,7 @@ public class ClassHookOrchestrator
             var context = GetClassHookContext(testClassType);
         
             // Run Global Hooks Last
-            await _globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, testContext.InternalDiscoveredTest, cleanUpExceptions);
+            await _globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
         }
     }
 

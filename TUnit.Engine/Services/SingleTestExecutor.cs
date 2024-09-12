@@ -220,10 +220,9 @@ internal class SingleTestExecutor : IDataProducer
                 test.TestContext.TestDetails.ClassType.Assembly,
                 testContext);
 
-            await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType,
-                testContext);
+            await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType);
         }
-        catch (Exception e) when (e is BeforeClassException or BeforeAssemblyException)
+        catch (Exception e)
         {
             throw new SkipTestException($"Skipped due to failing Before Hook {e.GetType().Name}: {e.Message}");
         }
@@ -235,7 +234,7 @@ internal class SingleTestExecutor : IDataProducer
         try
         {
             await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context,
-                test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
+                test.TestContext.TestDetails.ClassType, cleanUpExceptions);
 
             await _assemblyHookOrchestrator.ExecuteCleanups(context,
                 test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
