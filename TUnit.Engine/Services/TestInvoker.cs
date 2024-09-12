@@ -6,13 +6,6 @@ namespace TUnit.Engine.Services;
 
 internal class TestInvoker
 {
-    private readonly Disposer _disposer;
-
-    public TestInvoker(Disposer disposer)
-    {
-        _disposer = disposer;
-    }
-    
     public async Task Invoke(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
         await TestHookOrchestrator.ExecuteBeforeHooks(discoveredTest.TestContext.TestDetails.ClassInstance!, discoveredTest);

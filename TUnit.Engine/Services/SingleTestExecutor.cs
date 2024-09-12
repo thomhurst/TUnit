@@ -93,21 +93,18 @@ internal class SingleTestExecutor : IDataProducer
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
             }
 
-            foreach (var beforeTestAttribute in test.BeforeTestAttributes)
-            {
-                await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
-                    () => beforeTestAttribute.OnBeforeTest(new BeforeTestContext(testContext.InternalDiscoveredTest)));
-            }
-
             try
             {
-                TestContext.TestContexts.Value = testContext;
+                await ExecuteBeforeHooks(test, context, testContext);
 
-                await _assemblyHookOrchestrator.ExecuteBeforeHooks(context,
-                    test.TestContext.TestDetails.ClassType.Assembly,
-                    testContext);
-                await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType,
-                    testContext);
+                TestContext.TestContexts.Value = testContext;
+                
+                foreach (var beforeTestAttribute in test.BeforeTestAttributes)
+                {
+                    await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
+                        () => beforeTestAttribute.OnBeforeTest(new BeforeTestContext(testContext.InternalDiscoveredTest)));
+                }
+                
                 await ExecuteWithRetries(test);
             }
             finally
@@ -123,11 +120,9 @@ internal class SingleTestExecutor : IDataProducer
 
                 await DisposeTest(testContext, cleanUpExceptions);
 
-                await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context,
-                    test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
-
-                await _assemblyHookOrchestrator.ExecuteCleanups(context,
-                    test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
+                TestContext.TestContexts.Value = null;
+                
+                await ExecuteAfterHooks(test, context, testContext, cleanUpExceptions);
 
                 foreach (var artifact in testContext.Artifacts)
                 {
@@ -217,13 +212,44 @@ internal class SingleTestExecutor : IDataProducer
         testContext.TaskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
     }
 
+    private async Task ExecuteBeforeHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext)
+    {
+        try
+        {
+            await _assemblyHookOrchestrator.ExecuteBeforeHooks(context,
+                test.TestContext.TestDetails.ClassType.Assembly,
+                testContext);
+
+            await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType);
+        }
+        catch (Exception e)
+        {
+            throw new SkipTestException($"Skipped due to failing Before Hook {e.GetType().Name}: {e.Message}");
+        }
+    }
+
+    private async Task ExecuteAfterHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
+        List<Exception> cleanUpExceptions)
+    {
+        try
+        {
+            await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context,
+                test.TestContext.TestDetails.ClassType, cleanUpExceptions);
+
+            await _assemblyHookOrchestrator.ExecuteCleanups(context,
+                test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
+        }
+        catch
+        {
+            // Ignored - Will be counted as its own test failure - We don't need to bind it to this test
+        }
+    }
+
     private async Task DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
     {
         await TestHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
             
         await RunHelpers.RunValueTaskSafelyAsync(() => _disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
-
-        TestContext.TestContexts.Value = null;
         
         using var lockHandle = await _consoleStandardOutLock.WaitAsync();
             
