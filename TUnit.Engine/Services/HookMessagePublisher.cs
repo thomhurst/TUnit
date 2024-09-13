@@ -34,9 +34,6 @@ public class HookMessagePublisher(IExtension extension) : IDataProducer
 
     public async Task Push(ExecuteRequestContext context, string displayName, StaticHookMethod hookMethod, Func<Task> func)
     {
-        return;
-        
-        // TODO:
         await PublishAsync(context, displayName, hookMethod, DateTimeOffset.Now, DateTimeOffset.Now, InProgressTestNodeStateProperty.CachedInstance);
 
         var start = DateTimeOffset.Now;
