@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Engine.CommandLineProviders;
 
