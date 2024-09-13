@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-public partial class TestContext : IDisposable
+public partial class TestContext
 {
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
@@ -29,20 +29,16 @@ public partial class TestContext : IDisposable
 
     public string GetTestOutput()
     {
-        return OutputWriter.ToString().Trim();
+        return OutputWriter.GetStringBuilder().ToString().Trim();
     }
     
     public string GetTestErrorOutput()
     {
-        return ErrorOutputWriter.ToString().Trim();
+        return ErrorOutputWriter.GetStringBuilder().ToString().Trim();
     }
     
     public void AddArtifact(Artifact artifact)
     {
         Artifacts.Add(artifact);
-    }
-
-    public void Dispose()
-    {
     }
 }

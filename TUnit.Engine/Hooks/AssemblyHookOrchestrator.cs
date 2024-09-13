@@ -3,7 +3,6 @@ using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
 using TUnit.Engine.Data;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
@@ -11,21 +10,32 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public class AssemblyHookOrchestrator
+public class AssemblyHookOrchestrator(
+    HookMessagePublisher hookMessagePublisher,
+    GlobalStaticTestHookOrchestrator globalStaticTestHookOrchestrator)
 {
     private static readonly ConcurrentDictionary<Assembly, AssemblyHookContext> AssemblyHookContexts = new();
     
-    private static readonly GetOnlyDictionary<Assembly, List<(string Name, StaticHookMethod HookMethod, Lazy<Task> Action)>> SetUps = new();
+    private static readonly GetOnlyDictionary<Assembly, List<(string Name, StaticHookMethod HookMethod, LazyHook<ExecuteRequestContext, HookMessagePublisher> Action)>> SetUps = new();
     private static readonly GetOnlyDictionary<Assembly, List<(string Name, StaticHookMethod HookMethod, Func<Task> Action)>> CleanUps = new();
 
-    private readonly HookMessagePublisher _hookMessagePublisher;
-    private readonly GlobalStaticTestHookOrchestrator _globalStaticTestHookOrchestrator;
-
-    public AssemblyHookOrchestrator(HookMessagePublisher hookMessagePublisher,
-        GlobalStaticTestHookOrchestrator globalStaticTestHookOrchestrator)
+    public async Task DiscoverHooks(ExecuteRequestContext context)
     {
-        _hookMessagePublisher = hookMessagePublisher;
-        _globalStaticTestHookOrchestrator = globalStaticTestHookOrchestrator;
+        foreach (var list in SetUps.Values)
+        {
+            foreach (var (name, hookMethod, _) in list)
+            {
+                await hookMessagePublisher.Discover(context, $"Before Assembly: {name}", hookMethod);
+            }
+        }
+
+        foreach (var list in CleanUps.Values)
+        {
+            foreach (var (name, hookMethod, _) in list)
+            {
+                await hookMessagePublisher.Discover(context, $"After Assembly: {name}", hookMethod);
+            }
+        }
     }
     
     public static void RegisterBeforeHook(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
@@ -60,7 +70,7 @@ public class AssemblyHookOrchestrator
         assemblyHookContext.TestClasses.Add(classHookContext);
     }
 
-    private static AssemblyHookContext GetAssemblyHookContext(Assembly assembly)
+    internal static AssemblyHookContext GetAssemblyHookContext(Assembly assembly)
     {
         lock (assembly)
         {
@@ -71,15 +81,19 @@ public class AssemblyHookOrchestrator
         }
     }
 
-    private static Lazy<Task> Convert(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
+    private static LazyHook<ExecuteRequestContext, HookMessagePublisher> Convert(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
-        return new Lazy<Task>(() =>
+        return new LazyHook<ExecuteRequestContext, HookMessagePublisher>(async (executeRequestContext, hookPublisher) =>
         {
             var context = GetAssemblyHookContext(assembly);
             
             var timeout = staticMethod.Timeout;
-            
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+
+            await hookPublisher.Push(executeRequestContext, $"Before Class: {staticMethod.Name}", staticMethod, () =>
+                RunHelpers.RunWithTimeoutAsync(
+                    token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo, context,
+                        () => staticMethod.Body(context, token)), timeout)
+            );
         });
     }
 
@@ -88,14 +102,14 @@ public class AssemblyHookOrchestrator
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones first
-        await _globalStaticTestHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context);
+        await globalStaticTestHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context);
             
         foreach (var setUp in SetUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.HookMethod.Order))
         {
             // As these are lazy we should always get the same Task
             // So we await the same Task to ensure it's finished first
             // and also gives the benefit of rethrowing the same exception if it failed
-            await _hookMessagePublisher.Push(executeRequestContext, $"Before Assembly: {setUp.Name}", setUp.HookMethod, () => setUp.Action.Value);
+            await setUp.Action.Value(executeRequestContext, hookMessagePublisher); 
         }
     }
 
@@ -108,12 +122,12 @@ public class AssemblyHookOrchestrator
         
         foreach (var cleanUp in CleanUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.HookMethod.Order))
         {
-            await _hookMessagePublisher.Push(executeRequestContext, $"After Assembly: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
+            await hookMessagePublisher.Push(executeRequestContext, $"After Assembly: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
         }
         
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones last
-        await _globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
+        await globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
     }
 }

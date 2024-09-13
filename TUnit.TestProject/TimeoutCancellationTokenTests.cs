@@ -13,7 +13,7 @@ public class TimeoutCancellationTokenTests
     }
     
     [Test]
-    [Timeout(30_000)]
+    [Timeout(5_000)]
     [Category("Blah")]
     public async Task BasicTest(CancellationToken cancellationToken)
     {
@@ -21,7 +21,7 @@ public class TimeoutCancellationTokenTests
     }
     
     [Test]
-    [ThirtySecondTimeout]
+    [FiveSecondTimeout]
     public async Task InheritedTimeoutAttribute(CancellationToken cancellationToken)
     {
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
@@ -29,7 +29,7 @@ public class TimeoutCancellationTokenTests
 
     [Test]
     [Arguments(1)]
-    [Timeout(30_000)]
+    [Timeout(5_000)]
     public async Task DataTest(int value, CancellationToken cancellationToken)
     {
         await Assert.That(value).Is.EqualTo(1);
@@ -37,7 +37,7 @@ public class TimeoutCancellationTokenTests
     }
 
     [MethodDataSource(nameof(DataSource))]
-    [Timeout(30_000)]
+    [Timeout(5_000)]
     [Test]
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
@@ -46,7 +46,7 @@ public class TimeoutCancellationTokenTests
     }
     
     [Test]
-    [Timeout(30_000)]
+    [Timeout(5_000)]
     [Category("Blah")]
     public async Task MatrixTest(
         [Matrix(1, 2, 3)] int value, 
@@ -61,9 +61,9 @@ public class TimeoutCancellationTokenTests
         return 1;
     }
     
-    public class ThirtySecondTimeout : TimeoutAttribute
+    public class FiveSecondTimeout : TimeoutAttribute
     {
-        public ThirtySecondTimeout() : base(30_000)
+        public FiveSecondTimeout() : base(5_000)
         {
         }
     }

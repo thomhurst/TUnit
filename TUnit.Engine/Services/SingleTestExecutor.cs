@@ -84,6 +84,8 @@ internal class SingleTestExecutor : IDataProducer
 
         var cleanUpExceptions = new List<Exception>();
 
+        DateTimeOffset start = DateTimeOffset.Now;
+        
         try
         {
             await WaitForDependsOnTests(test, filter, context);
@@ -93,11 +95,13 @@ internal class SingleTestExecutor : IDataProducer
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
             }
 
+            start = DateTimeOffset.Now;
+            
             try
             {
                 await ExecuteBeforeHooks(test, context, testContext);
 
-                TestContext.TestContexts.Value = testContext;
+                TestContext.Current = testContext;
                 
                 foreach (var beforeTestAttribute in test.BeforeTestAttributes)
                 {
@@ -120,7 +124,7 @@ internal class SingleTestExecutor : IDataProducer
 
                 await DisposeTest(testContext, cleanUpExceptions);
 
-                TestContext.TestContexts.Value = null;
+                TestContext.Current = null;
                 
                 await ExecuteAfterHooks(test, context, testContext, cleanUpExceptions);
 
@@ -136,7 +140,7 @@ internal class SingleTestExecutor : IDataProducer
             
             testContext.TaskCompletionSource.SetResult(null);
 
-            var timingProperty = GetTimingProperty(testContext);
+            var timingProperty = GetTimingProperty(testContext, start);
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
                 test.ToTestNode()
@@ -187,7 +191,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             testContext.TaskCompletionSource.SetException(e);
 
-            var timingProperty = GetTimingProperty(testContext);
+            var timingProperty = GetTimingProperty(testContext, start);
             
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode()
                 .WithProperty(GetFailureStateProperty(testContext, e, timingProperty.GlobalTiming.Duration))
@@ -266,19 +270,16 @@ internal class SingleTestExecutor : IDataProducer
         return NoOpDisposable.Instance;
     }
 
-    private static TimingProperty GetTimingProperty(TestContext testContext)
+    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
     {
+        var end = DateTimeOffset.Now;
+
         lock (testContext.Timings)
         {
-            var now = DateTimeOffset.Now;
-
-            var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? now;
-            var end = testContext.Timings.MaxBy(x => x.End)?.End ?? now;
-
             var stepTimings = testContext.Timings.Select(x =>
                 new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
 
-            return new TimingProperty(new TimingInfo(start, end, end - start), [..stepTimings]);
+            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [..stepTimings]);
         }
     }
 
