@@ -84,6 +84,8 @@ internal class SingleTestExecutor : IDataProducer
 
         var cleanUpExceptions = new List<Exception>();
 
+        DateTimeOffset start = DateTimeOffset.Now;
+        
         try
         {
             await WaitForDependsOnTests(test, filter, context);
@@ -93,6 +95,8 @@ internal class SingleTestExecutor : IDataProducer
                 throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
             }
 
+            start = DateTimeOffset.Now;
+            
             try
             {
                 await ExecuteBeforeHooks(test, context, testContext);
@@ -136,7 +140,7 @@ internal class SingleTestExecutor : IDataProducer
             
             testContext.TaskCompletionSource.SetResult(null);
 
-            var timingProperty = GetTimingProperty(testContext);
+            var timingProperty = GetTimingProperty(testContext, start);
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
                 test.ToTestNode()
@@ -187,7 +191,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             testContext.TaskCompletionSource.SetException(e);
 
-            var timingProperty = GetTimingProperty(testContext);
+            var timingProperty = GetTimingProperty(testContext, start);
             
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode()
                 .WithProperty(GetFailureStateProperty(testContext, e, timingProperty.GlobalTiming.Duration))
@@ -266,13 +270,13 @@ internal class SingleTestExecutor : IDataProducer
         return NoOpDisposable.Instance;
     }
 
-    private static TimingProperty GetTimingProperty(TestContext testContext)
+    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset fallbackStart)
     {
         lock (testContext.Timings)
         {
             var now = DateTimeOffset.Now;
 
-            var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? now;
+            var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? fallbackStart;
             var end = testContext.Timings.MaxBy(x => x.End)?.End ?? now;
 
             var stepTimings = testContext.Timings.Select(x =>
