@@ -89,7 +89,7 @@ public class AssemblyHookOrchestrator(
             
             var timeout = staticMethod.Timeout;
 
-            await hookPublisher.Push(executeRequestContext, $"Before Class: {staticMethod.Name}", staticMethod, () =>
+            await hookPublisher.Push(executeRequestContext, $"Before Assembly: {staticMethod.Name}", staticMethod, () =>
                 RunHelpers.RunWithTimeoutAsync(
                     token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo, context,
                         () => staticMethod.Body(context, token)), timeout)
