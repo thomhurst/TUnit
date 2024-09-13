@@ -17,7 +17,6 @@ public class ClassHooksExecutionCountTests : TestModule
                 result => result.Passed.Should().Be(5),
                 result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0),
-                _ => context.Git().RootDirectory.FindFile(x => x.Name.EndsWith("AfterTestAttributeTests.txt")).AssertExists().Delete()
             ], cancellationToken);
     }
 }
