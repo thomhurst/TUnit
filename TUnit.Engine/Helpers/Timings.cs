@@ -11,20 +11,15 @@ internal static class Timings
         try
         {
             await action();
+        }
+        finally
+        {
+            var end = DateTimeOffset.Now;
             
             lock (context.Timings)
             {
-                context.Timings.Add(new Timing(name, start, DateTimeOffset.Now));
+                context.Timings.Add(new Timing(name, start, end));
             }
-        }
-        catch
-        {
-            lock (context.Timings)
-            {
-                context.Timings.Add(new Timing(name, start, DateTimeOffset.Now));
-            }
-
-            throw;
         }
     }  
 }
