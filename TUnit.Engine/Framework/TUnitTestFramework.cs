@@ -24,6 +24,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly TestsExecutor _testsExecutor;
     private readonly TUnitInitializer _initializer;
     private readonly OnEndExecutor _onEndExecutor;
+    private readonly GlobalStaticTestHookOrchestrator _globalStaticTestHookOrchestrator;
+    private readonly ClassHookOrchestrator _classHookOrchestrator;
+    private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
@@ -39,6 +42,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
         _logger = _serviceProvider.GetRequiredService<TUnitLogger>();
         _testDiscover = _serviceProvider.GetRequiredService<TUnitTestDiscoverer>();
+        _globalStaticTestHookOrchestrator = _serviceProvider.GetRequiredService<GlobalStaticTestHookOrchestrator>();
+        _classHookOrchestrator = _serviceProvider.GetRequiredService<ClassHookOrchestrator>();
+        _assemblyHookOrchestrator = _serviceProvider.GetRequiredService<AssemblyHookOrchestrator>();
         _testsExecutor = _serviceProvider.GetRequiredService<TestsExecutor>();
         _initializer = _serviceProvider.GetRequiredService<TUnitInitializer>();
         _onEndExecutor = _serviceProvider.GetRequiredService<OnEndExecutor>();

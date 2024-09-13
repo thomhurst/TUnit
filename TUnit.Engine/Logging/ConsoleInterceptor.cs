@@ -13,8 +13,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     protected abstract StringWriter? RedirectedOut { get; }
 
-    private TextWriter? _outputWriter;
-    private TextWriter? OutputWriter => _outputWriter ??= !commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput) ? new DualTextWriter(GetOriginalOut(), RedirectedOut) : RedirectedOut;
+    private TextWriter? OutputWriter => !commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput) ? new DualTextWriter(GetOriginalOut(), RedirectedOut) : RedirectedOut;
     
     private protected abstract TextWriter GetOriginalOut();
     

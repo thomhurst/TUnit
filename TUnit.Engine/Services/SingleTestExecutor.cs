@@ -97,7 +97,7 @@ internal class SingleTestExecutor : IDataProducer
             {
                 await ExecuteBeforeHooks(test, context, testContext);
 
-                TestContext.TestContexts.Value = testContext;
+                TestContext.Current = testContext;
                 
                 foreach (var beforeTestAttribute in test.BeforeTestAttributes)
                 {
@@ -120,7 +120,7 @@ internal class SingleTestExecutor : IDataProducer
 
                 await DisposeTest(testContext, cleanUpExceptions);
 
-                TestContext.TestContexts.Value = null;
+                TestContext.Current = null;
                 
                 await ExecuteAfterHooks(test, context, testContext, cleanUpExceptions);
 
