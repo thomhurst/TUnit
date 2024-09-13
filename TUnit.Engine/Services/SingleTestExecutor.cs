@@ -245,6 +245,8 @@ internal class SingleTestExecutor : IDataProducer
         }
         catch
         {
+            // TODO: remove throw and make hooks their own entities
+            throw;
             // Ignored - Will be counted as its own test failure - We don't need to bind it to this test
         }
     }
