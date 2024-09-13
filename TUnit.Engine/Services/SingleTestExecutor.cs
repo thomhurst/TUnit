@@ -270,19 +270,16 @@ internal class SingleTestExecutor : IDataProducer
         return NoOpDisposable.Instance;
     }
 
-    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset fallbackStart)
+    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
     {
+        var end = DateTimeOffset.Now;
+
         lock (testContext.Timings)
         {
-            var now = DateTimeOffset.Now;
-
-            var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? fallbackStart;
-            var end = testContext.Timings.MaxBy(x => x.End)?.End ?? now;
-
             var stepTimings = testContext.Timings.Select(x =>
                 new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
 
-            return new TimingProperty(new TimingInfo(start, end, end - start), [..stepTimings]);
+            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [..stepTimings]);
         }
     }
 
