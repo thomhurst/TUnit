@@ -5,9 +5,9 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.ClassMember;
 
-public class Member<TActualRootType, TPropertyType, TAnd, TOr>(Connector<TActualRootType, TAnd, TOr> connector, AssertionBuilder<TActualRootType> assertionBuilder, Expression<Func<TActualRootType, TPropertyType>> selector)
-    where TAnd : And<TActualRootType, TAnd, TOr>, IAnd<TAnd, TActualRootType, TAnd, TOr>
-    where TOr : Or<TActualRootType, TAnd, TOr>, IOr<TOr, TActualRootType, TAnd, TOr>
+public class Member<TActualRootType, TPropertyType, TAnd, TOr>(Connector<TActualRootType, TAnd, TOr> connector, AssertionBuilder<TActualRootType, TAnd, TOr> assertionBuilder, Expression<Func<TActualRootType, TPropertyType>> selector)
+    where TAnd : IAnd<TActualRootType, TAnd, TOr>
+    where TOr : IOr<TActualRootType, TAnd, TOr>
 {
     public BaseAssertCondition<TActualRootType, TAnd, TOr> EqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {

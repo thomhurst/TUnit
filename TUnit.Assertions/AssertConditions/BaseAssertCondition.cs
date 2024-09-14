@@ -19,10 +19,10 @@ public abstract class BaseAssertCondition
 }
 
 public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
-    protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
+    protected internal AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
     
     protected string GetAssertionExpression()
     {
@@ -39,7 +39,7 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
             : assertionExpression;
     }
 
-    internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
+    internal BaseAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder)
     {
         AssertionBuilder = assertionBuilder;
         

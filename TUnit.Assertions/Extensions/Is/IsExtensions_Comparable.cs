@@ -10,8 +10,8 @@ public static partial class IsExtensions
 {
     public static BaseAssertCondition<TActual, TAnd, TOr> GreaterThan<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : IComparable<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
     {
         return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
@@ -22,8 +22,8 @@ public static partial class IsExtensions
     
     public static BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : IComparable<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
     {
         return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
@@ -34,8 +34,8 @@ public static partial class IsExtensions
     
     public static BaseAssertCondition<TActual, TAnd, TOr> LessThan<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : IComparable<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
     {
         return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
@@ -46,8 +46,8 @@ public static partial class IsExtensions
     
     public static BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : IComparable<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
     {
         return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
@@ -58,8 +58,8 @@ public static partial class IsExtensions
     
     public static BaseAssertCondition<TActual, TAnd, TOr> Between<TActual, TAnd, TOr>(this Is<TActual, TAnd, TOr> @is, TActual lowerBound, TActual upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
         where TActual : IComparable<TActual>
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
     {
         return AssertionConditionCombiner.Combine(@is, new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(@is.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, _) =>
             {

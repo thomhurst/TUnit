@@ -6,12 +6,12 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, object, TAnd, TOr>
     where TActual : IEnumerable
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
-    public EnumerableDistinctItemsAssertCondition(AssertionBuilder<TActual> assertionBuilder, TInner expected,
+    public EnumerableDistinctItemsAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TInner expected,
         IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
     {
         _equalityComparer = equalityComparer;

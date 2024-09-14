@@ -5,14 +5,16 @@ using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class ValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
+public class ValueDelegateAssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr> 
+    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly Func<TActual> _function;
     
-    public Does<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Does => new(this, ConnectorType.None, null);
-    public Is<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Is => new(this, ConnectorType.None, null);
-    public Has<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Has => new(this, ConnectorType.None, null);
-    public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(this, ConnectorType.None, null);
+    public Does<TActual, TAnd, TOr> Does => new(this, ConnectorType.None, null);
+    public Is<TActual, TAnd, TOr> Is => new(this, ConnectorType.None, null);
+    public Has<TActual, TAnd, TOr> Has => new(this, ConnectorType.None, null);
+    public Throws<TActual, TAnd, TOr> Throws => new(this, ConnectorType.None, null);
 
     internal ValueDelegateAssertionBuilder(Func<TActual> function, string expressionBuilder) : base(expressionBuilder)
     {
@@ -26,19 +28,19 @@ public class ValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
         return Task.FromResult(assertionData);
     }
     
-    public ValueDelegateAssertionBuilder<TActual> WithMessage(AssertionMessageValueDelegate<TActual> message)
+    public ValueDelegateAssertionBuilder<TActual, TAnd, TOr> WithMessage(AssertionMessageValueDelegate<TActual> message)
     {
         AssertionMessage = message;
         return this;
     }
         
-    public ValueDelegateAssertionBuilder<TActual> WithMessage(Func<TActual?, Exception?, string> message)
+    public ValueDelegateAssertionBuilder<TActual, TAnd, TOr> WithMessage(Func<TActual?, Exception?, string> message)
     {
         AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
         return this;
     }
     
-    public ValueDelegateAssertionBuilder<TActual> WithMessage(Func<string> message)
+    public ValueDelegateAssertionBuilder<TActual, TAnd, TOr> WithMessage(Func<string> message)
     {
         AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
         return this;

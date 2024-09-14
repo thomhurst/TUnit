@@ -5,10 +5,10 @@ using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.ClassMember;
 
-public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(AssertionBuilder<TRootObjectType> assertionBuilder, Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
+public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(AssertionBuilder<TRootObjectType, TAnd, TOr> assertionBuilder, Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
     : AssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(assertionBuilder,  expected)
-    where TAnd : And<TRootObjectType, TAnd, TOr>, IAnd<TAnd, TRootObjectType, TAnd, TOr>
-    where TOr : Or<TRootObjectType, TAnd, TOr>, IOr<TOr, TRootObjectType, TAnd, TOr>
+    where TAnd : IAnd<TRootObjectType, TAnd, TOr>
+    where TOr : IOr<TRootObjectType, TAnd, TOr>
 {
     protected override string DefaultMessage => $"""
                                                  {typeof(TRootObjectType).Name}.{ExpressionHelpers.GetName(propertySelector)}:

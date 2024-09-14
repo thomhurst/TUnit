@@ -1,8 +1,7 @@
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueAnd<TActual> 
-    : And<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IValueAssertions<TActual, ValueAnd<TActual>, ValueOr<TActual>>, 
-        IAnd<ValueAnd<TActual>, TActual, ValueAnd<TActual>, ValueOr<TActual>>
+    : And<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IValueAssertions<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IAnd<TActual, ValueAnd<TActual>, ValueOr<TActual>>
 {
     public ValueAnd(BaseAssertCondition<TActual, ValueAnd<TActual>, ValueOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
     {

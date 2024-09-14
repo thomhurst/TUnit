@@ -6,8 +6,8 @@ using TUnit.Assertions.AssertConditions.Operators;
 namespace TUnit.Assertions;
 
 public abstract class Connector<TActual, TAnd, TOr>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
     protected internal ConnectorType ConnectorType { get; }
     

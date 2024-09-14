@@ -5,8 +5,8 @@ using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AsyncValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual>
-{
+public class AsyncValueDelegateAssertionBuilder<TActual> : AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> 
+ {
     private readonly Func<Task<TActual>> _function;
     
     public Does<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> Does => new(this, ConnectorType.None, null);

@@ -1,9 +1,7 @@
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class DelegateAnd<TActual> 
-    : And<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, 
-        IDelegateAssertions<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, 
-        IAnd<DelegateAnd<TActual>, TActual, DelegateAnd<TActual>, DelegateOr<TActual>>
+    : And<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IDelegateAssertions<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IAnd<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>
 {
     public DelegateAnd(BaseAssertCondition<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
     {

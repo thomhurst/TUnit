@@ -6,12 +6,12 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions;
 
 public class Throws<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
-    protected AssertionBuilder<TActual> AssertionBuilder { get; }
+    protected AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
 
-    public Throws(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+    public Throws(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder
             .AppendConnector(connectorType)

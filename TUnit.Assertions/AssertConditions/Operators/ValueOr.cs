@@ -1,10 +1,7 @@
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueOr<TActual> 
-    : Or<TActual, ValueAnd<TActual>, ValueOr<TActual>>, 
-        IValueAssertions<TActual, ValueAnd<TActual>, ValueOr<TActual>>, 
-        IOr<ValueOr<TActual>, TActual, ValueAnd<TActual>, ValueOr<TActual>>
-    
+    : Or<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IValueAssertions<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IOr<TActual, ValueAnd<TActual>, ValueOr<TActual>>
 {
     public ValueOr(BaseAssertCondition<TActual, ValueAnd<TActual>, ValueOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
     {

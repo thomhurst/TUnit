@@ -1,11 +1,8 @@
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueDelegateOr<TActual> 
-    : Or<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, 
-        IValueAssertions<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, 
-        IDelegateAssertions<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, 
-        IOr<ValueDelegateOr<TActual>, TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
-{
+    : Or<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IDelegateAssertions<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IOr<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
+ {
     public ValueDelegateOr(BaseAssertCondition<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
     {
     }

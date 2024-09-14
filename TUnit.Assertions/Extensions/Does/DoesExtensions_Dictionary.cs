@@ -11,8 +11,8 @@ public static partial class DoesExtensions
 {
     public static BaseAssertCondition<TDictionary, TAnd, TOr> ContainKey<TDictionary, TKey, TAnd, TOr>(this Does<TDictionary, TAnd, TOr> does, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TDictionary : IDictionary
-        where TAnd : And<TDictionary, TAnd, TOr>, IAnd<TAnd, TDictionary, TAnd, TOr>
-        where TOr : Or<TDictionary, TAnd, TOr>, IOr<TOr, TDictionary, TAnd, TOr>
+        where TAnd : And<TDictionary, TAnd, TOr>, IAnd<TDictionary, TAnd, TOr>
+        where TOr : Or<TDictionary, TAnd, TOr>, IOr<TDictionary, TAnd, TOr>
     {
         return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<TDictionary, TKey, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
@@ -27,8 +27,8 @@ public static partial class DoesExtensions
     
     public static BaseAssertCondition<TDictionary, TAnd, TOr> ContainValue<TDictionary, TValue, TAnd, TOr>(this Does<TDictionary, TAnd, TOr> does, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TDictionary : IDictionary
-        where TAnd : And<TDictionary, TAnd, TOr>, IAnd<TAnd, TDictionary, TAnd, TOr>
-        where TOr : Or<TDictionary, TAnd, TOr>, IOr<TOr, TDictionary, TAnd, TOr>
+        where TAnd : And<TDictionary, TAnd, TOr>, IAnd<TDictionary, TAnd, TOr>
+        where TOr : Or<TDictionary, TAnd, TOr>, IOr<TDictionary, TAnd, TOr>
     {
         return AssertionConditionCombiner.Combine(does, new DelegateAssertCondition<TDictionary, TValue, TAnd, TOr>(
             does.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),

@@ -5,7 +5,7 @@ using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?>
+public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>
 {
     private readonly Func<Task> _function;
     
