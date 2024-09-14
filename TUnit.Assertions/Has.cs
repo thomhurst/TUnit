@@ -19,6 +19,4 @@ public class Has<TRootObject, TAnd, TOr> : Connector<TRootObject, TAnd, TOr>
             .AppendConnector(connectorType)
             .AppendExpression("Has");
     }
-
-    public Member<TRootObject, TPropertyType, TAnd, TOr> Member<TPropertyType>(Expression<Func<TRootObject, TPropertyType>> selector, [CallerArgumentExpression("selector")] string expression = "") => new(this, AssertionBuilder.AppendCallerMethod(expression), selector);
 }

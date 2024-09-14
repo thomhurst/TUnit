@@ -18,6 +18,6 @@ public class InstanceData
     [Test]
     public async Task Test2()
     {
-        await Assert.That(_value).Is.EqualTo(99);
+        await Assert.That(_value).IsEqualTo(99);
     }
 }

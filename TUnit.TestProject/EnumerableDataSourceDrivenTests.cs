@@ -9,14 +9,14 @@ public class EnumerableDataSourceDrivenTests
     [EnumerableMethodDataSource(nameof(SomeMethod))]
     public async Task DataSource_Method(int value)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
     
     [Test]
     [EnumerableMethodDataSource(nameof(SomeMethod), DisposeAfterTest = false)]
     public async Task DataSource_Method2(int value)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
     
     public static IEnumerable<int> SomeMethod() => [1,2,3,4,5];

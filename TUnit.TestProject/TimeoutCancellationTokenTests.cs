@@ -32,7 +32,7 @@ public class TimeoutCancellationTokenTests
     [Timeout(5_000)]
     public async Task DataTest(int value, CancellationToken cancellationToken)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
@@ -41,7 +41,7 @@ public class TimeoutCancellationTokenTests
     [Test]
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
     
@@ -52,7 +52,7 @@ public class TimeoutCancellationTokenTests
         [Matrix(1, 2, 3)] int value, 
         CancellationToken cancellationToken)
     {
-        await Assert.That(value).Is.EqualTo(1).Or.Is.EqualTo(2).Or.Is.EqualTo(3);
+        await Assert.That(value).IsEqualTo(1).Or.IsEqualTo(2).Or.IsEqualTo(3);
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 

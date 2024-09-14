@@ -41,7 +41,7 @@ public class NotInParallelTests
             await Assert.That(TestDateTimeRanges
                 .Except([testDateTimeRange])
                 .Any(x => x.Overlap(testDateTimeRange)))
-                .Is.False();
+                .IsFalse();
         }
     }
 

@@ -13,17 +13,17 @@ public class CustomPropertyTests
     [MethodProperty]
     public async Task Test()
     {
-        await Assert.That(GetDictionary()).Does.ContainKey("ClassProperty");
-        await Assert.That(GetDictionary()).Does.ContainValue("ClassPropertyValue");
+        await Assert.That(GetDictionary()).ContainsKey("ClassProperty");
+        await Assert.That(GetDictionary()).ContainsValue("ClassPropertyValue");
         
-        await Assert.That(GetDictionary()).Does.ContainKey("ClassProperty2");
-        await Assert.That(GetDictionary()).Does.ContainValue("ClassPropertyValue2");
+        await Assert.That(GetDictionary()).ContainsKey("ClassProperty2");
+        await Assert.That(GetDictionary()).ContainsValue("ClassPropertyValue2");
         
-        await Assert.That(GetDictionary()).Does.ContainKey("MethodProperty");
-        await Assert.That(GetDictionary()).Does.ContainValue("MethodPropertyValue");
+        await Assert.That(GetDictionary()).ContainsKey("MethodProperty");
+        await Assert.That(GetDictionary()).ContainsValue("MethodPropertyValue");
         
-        await Assert.That(GetDictionary()).Does.ContainKey("MethodProperty2");
-        await Assert.That(GetDictionary()).Does.ContainValue("MethodPropertyValue2");
+        await Assert.That(GetDictionary()).ContainsKey("MethodProperty2");
+        await Assert.That(GetDictionary()).ContainsValue("MethodPropertyValue2");
     }
 
     private static ImmutableDictionary<string, string> GetDictionary()

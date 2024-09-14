@@ -1,3 +1,5 @@
+using TUnit.Assertions.Extensions;
+
 namespace TUnit.Assertions.UnitTests;
 
 
@@ -13,7 +15,7 @@ public class MemberTests
             Flag = false
         };
 
-        await TUnitAssert.That(myClass).Has.Member(x => x.Number).EqualTo(123);
+        await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(123);
     }
     
     [Test]
@@ -26,10 +28,10 @@ public class MemberTests
             Flag = false
         };
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).Has.Member(x => x.Number).EqualTo(1));
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
         NUnitAssert.That(exception, Has.Message.EqualTo(
             """
-            Assert.That(myClass).Has.Member(x => x.Number).EqualTo(1)
+            Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
             MyClass.Number:
                 Expected: 1
                 Received: 123
@@ -47,10 +49,10 @@ public class MemberTests
             Flag = false
         };
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).Has.Member(x => x.Nested.Nested.Nested.Number).EqualTo(1));
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1));
         NUnitAssert.That(exception, Has.Message.EqualTo(
             """
-            Assert.That(myClass).Has.Member(x => x.Nested.Nested.Nested.Number).EqualTo(1)
+            Assert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1)
             MyClass.Number:
                 Expected: 1
                 Received: 123
@@ -63,10 +65,10 @@ public class MemberTests
     {
         MyClass myClass = null!;
 
-        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).Has.Member(x => x.Number).EqualTo(1));
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
         NUnitAssert.That(exception, Has.Message.EqualTo(
             """
-            Assert.That(myClass).Has.Member(x => x.Number).EqualTo(1)
+            Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
             MyClass.Number:
                 Expected: 1
                 Received: Object `MyClass` was null

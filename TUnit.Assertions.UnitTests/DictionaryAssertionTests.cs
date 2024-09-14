@@ -34,6 +34,6 @@ public class DictionaryAssertionTests
             ["Blah"] = []
         };
         
-        await TUnitAssert.That(dictionary).Does.ContainKey("blah", StringComparer.InvariantCultureIgnoreCase);
+        await TUnitAssert.That(dictionary).ContainsKey("blah", StringComparer.InvariantCultureIgnoreCase);
     }
 }

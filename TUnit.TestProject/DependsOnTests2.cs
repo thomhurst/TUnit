@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Throws;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.TestProject;
@@ -27,12 +28,12 @@ public class DependsOnTests2
     [Test]
     public async Task Test3()
     {
-        await Assert.That(() => TestContext.Current!.GetTests(nameof(Test1))).Throws.Exception().With.Message.EqualTo("Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?");
+        await Assert.That(() => TestContext.Current!.GetTests(nameof(Test1))).ThrowsException().With.Message.EqualTo("Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?");
     }
 
     [After(Class)]
     public static async Task AssertStartTimes()
     {
-        await Assert.That(_test2Start).Is.GreaterThanOrEqualTo(_test1Start.AddSeconds(5));
+        await Assert.That(_test2Start).IsGreaterThanOrEqualTo(_test1Start.AddSeconds(5));
     }
 }

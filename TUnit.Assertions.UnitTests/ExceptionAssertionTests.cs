@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.UnitTests;
+﻿using TUnit.Assertions.Extensions.Throws;
+
+namespace TUnit.Assertions.UnitTests;
 
 public class ExceptionAssertionTests
 {

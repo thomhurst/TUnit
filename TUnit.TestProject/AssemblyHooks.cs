@@ -17,7 +17,7 @@ public abstract class AssemblyHooks
     [Before(Assembly)]
     public static async Task BeforeHook2(AssemblyHookContext context)
     {
-        await Assert.That(context.TestCount).Is.Positive();
+        await Assert.That(context.TestCount).IsPositive();
     }
     
     [Before(Assembly), Timeout(30_000)]
@@ -29,19 +29,19 @@ public abstract class AssemblyHooks
     [Before(Assembly), Timeout(30_000)]
     public static async Task BeforeHook4(AssemblyHookContext context, CancellationToken cancellationToken)
     {
-        await Assert.That(context.TestCount).Is.Positive();
+        await Assert.That(context.TestCount).IsPositive();
     }
     
     [After(Assembly)]
     public static async Task AfterHook1()
     {
-        await Assert.That(_beforeHook1Calls).Is.EqualTo(1);
+        await Assert.That(_beforeHook1Calls).IsEqualTo(1);
     }
     
     [After(Assembly)]
     public static async Task AfterHook2(AssemblyHookContext context)
     {
-        await Assert.That(context.TestCount).Is.Positive();
+        await Assert.That(context.TestCount).IsPositive();
     }
     
     [After(Assembly), Timeout(30_000)]
@@ -53,6 +53,6 @@ public abstract class AssemblyHooks
     [After(Assembly), Timeout(30_000)]
     public static async Task AfterHook4(AssemblyHookContext context, CancellationToken cancellationToken)
     {
-        await Assert.That(context.TestCount).Is.Positive();
+        await Assert.That(context.TestCount).IsPositive();
     }
 }

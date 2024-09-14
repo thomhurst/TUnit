@@ -59,7 +59,7 @@ public class AssertMultipleTests
             }
         });
 
-        NUnitAssert.That(assertionException!.Message, IsEqualTo("""
+        NUnitAssert.That(assertionException!.Message, Is.EqualTo("""
                                                                 Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
                                                                 Expected: 2
                                                                 Received: 1
@@ -132,7 +132,7 @@ public class AssertMultipleTests
         var assertionException2 = (TUnitAssertionException)aggregateException.InnerExceptions[1];
         var assertionException3 = (TUnitAssertionException)aggregateException.InnerExceptions[2];
         
-        NUnitAssert.That(assertionException1.Message, IsEqualTo("""
+        NUnitAssert.That(assertionException1.Message, Is.EqualTo("""
                                                                  Assert.That(1).IsEqualTo(2)
                                                                  Expected: 2
                                                                  Received: 1
@@ -146,7 +146,7 @@ public class AssertMultipleTests
                                                                  Received: 3
                                                                  """));
         
-        NUnitAssert.That(assertionException2.Message, IsEqualTo("""
+        NUnitAssert.That(assertionException2.Message, Is.EqualTo("""
                                                                  Assert.That(4).IsEqualTo(5)
                                                                  Expected: 5
                                                                  Received: 4
@@ -156,7 +156,7 @@ public class AssertMultipleTests
                                                                  Received: 5
                                                                  """));
         
-        NUnitAssert.That(assertionException3.Message, IsEqualTo("""
+        NUnitAssert.That(assertionException3.Message, Is.EqualTo("""
                                                                  Assert.That(6).IsEqualTo(7)
                                                                  Expected: 7
                                                                  Received: 6

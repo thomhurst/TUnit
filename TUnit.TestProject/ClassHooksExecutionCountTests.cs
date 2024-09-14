@@ -16,7 +16,7 @@ public class ClassHooksExecutionCountTests
     [After(Class)]
     public static async Task AfterClass()
     {
-        await Assert.That(_beforeClassCalls).Is.EqualTo(1);
+        await Assert.That(_beforeClassCalls).IsEqualTo(1);
     }
 
     [Test]

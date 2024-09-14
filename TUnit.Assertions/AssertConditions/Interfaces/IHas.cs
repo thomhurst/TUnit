@@ -9,9 +9,4 @@ public interface IHas<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
     internal Has<TActual, TAnd, TOr> Has();
-    
-    public Member<TActual, TPropertyType, TAnd, TOr> HasMember<TPropertyType>(Expression<Func<TActual, TPropertyType>> selector)
-    {
-        return Has().Member(selector);
-    }
 }

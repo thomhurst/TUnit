@@ -44,7 +44,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                                 [Test]
                                 public async Task Test()
                                 {
-                                    await Assert.That(1).Is.Positive().And.Is.EqualTo(1);
+                                    await Assert.That(1).IsPositive().And.Is.EqualTo(1);
                                 }
                             }
                             """;
@@ -67,7 +67,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                                 [Test]
                                 public async Task Test()
                                 {
-                                    await Assert.That(1).Is.Positive().Or.Is.EqualTo(1);
+                                    await Assert.That(1).IsPositive().Or.Is.EqualTo(1);
                                 }
                             }
                             """;
@@ -115,7 +115,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                                 [Test]
                                 public void Test()
                                 {
-                                    {|#0:Assert.That(1).Is.Positive().And.Equals(1)|};
+                                    {|#0:Assert.That(1).IsPositive().And.Equals(1)|};
                                 }
                             }
                             """;
@@ -141,7 +141,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                                 [Test]
                                 public void Test()
                                 {
-                                    {|#0:Assert.That(1).Is.Positive().Or.Equals(1)|};
+                                    {|#0:Assert.That(1).IsPositive().Or.Equals(1)|};
                                 }
                             }
                             """;

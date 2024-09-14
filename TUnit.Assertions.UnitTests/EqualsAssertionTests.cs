@@ -9,7 +9,7 @@ public class EqualsAssertionTests
     {
         var one = "1";
         NUnitAssert.That(async () =>
-                await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsTypeOf<string>(),
+                await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsTypeOf(typeof(string)),
             Throws.Exception.Message.Contain("Assert.That(one).IsEqualTo(\"2\", StringComparison.Ordinal).And.IsNotEqualTo(\"1\").And.Is.TypeOf(System.String")
         );
     }

@@ -40,7 +40,7 @@ public class ParallelLimiterTests
         var start = TestDateTimeRanges.MinBy(x => x.Start)!.Start;
         var end = TestDateTimeRanges.MaxBy(x => x.End)!.End;
 
-        await Assert.That(end - start).Is.GreaterThan(TimeSpan.FromMilliseconds(1500));
+        await Assert.That(end - start).IsGreaterThan(TimeSpan.FromMilliseconds(1500));
     }
 
     private class DateTimeRange

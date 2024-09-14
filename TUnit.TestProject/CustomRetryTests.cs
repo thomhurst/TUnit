@@ -44,10 +44,10 @@ public class CustomRetryTests
     [Test, NotInParallel(nameof(CustomRetryTests), Order = 2)]
     public async Task AssertCounts()
     {
-        await Assert.That(RetryCount1).Is.EqualTo(2);
-        await Assert.That(RetryCount2).Is.EqualTo(1);
-        await Assert.That(RetryCount3).Is.EqualTo(4);
-        await Assert.That(RetryCount4).Is.EqualTo(1);
+        await Assert.That(RetryCount1).IsEqualTo(2);
+        await Assert.That(RetryCount2).IsEqualTo(1);
+        await Assert.That(RetryCount3).IsEqualTo(4);
+        await Assert.That(RetryCount4).IsEqualTo(1);
     }
 
     public class RetryOperationCancelledExceptionAttribute : RetryAttribute
