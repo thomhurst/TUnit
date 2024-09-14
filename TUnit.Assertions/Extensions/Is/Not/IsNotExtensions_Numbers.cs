@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class IsNotExtensions
 {
-    public static BaseAssertCondition<TActual, TAnd, TOr> Zero<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot)
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotZero<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot)
         where TActual : INumber<TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
@@ -18,7 +18,7 @@ public static partial class IsNotExtensions
         return AssertionConditionCombiner.Combine(isNot, new NotEqualsAssertCondition<TActual, TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethod(null), TActual.Zero));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> GreaterThan<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") where TActual : INumber<TActual>
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotGreaterThan<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") where TActual : INumber<TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
@@ -35,7 +35,7 @@ public static partial class IsNotExtensions
             (value, _) => $"{value} was greater than {expected}"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotGreaterThanOrEqualTo<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
@@ -53,7 +53,7 @@ public static partial class IsNotExtensions
             (value, _) => $"{value} was greater than or equal to {expected}"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> LessThan<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotLessThan<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
@@ -71,7 +71,7 @@ public static partial class IsNotExtensions
             (value, _) => $"{value} was less than {expected}"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotLessThanOrEqualTo<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
@@ -89,7 +89,7 @@ public static partial class IsNotExtensions
             (value, _) => $"{value} was less than or equal to {expected}"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Even<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotEven<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
         where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
@@ -107,7 +107,7 @@ public static partial class IsNotExtensions
             (value, _) => $"{value} was even"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Odd<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotOdd<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
         where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
@@ -125,7 +125,7 @@ public static partial class IsNotExtensions
             (value, _) => $"{value} was odd"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Negative<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotNegative<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
         where TActual : INumber<TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
@@ -143,7 +143,7 @@ public static partial class IsNotExtensions
             (value, _) => $"{value} was negative"));
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Positive<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
+    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotPositive<TActual, TAnd, TOr>(this IsNot<TActual, TAnd, TOr> isNot) 
         where TActual : INumber<TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>

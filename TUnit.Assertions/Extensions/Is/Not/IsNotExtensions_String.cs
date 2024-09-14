@@ -9,21 +9,21 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class IsNotExtensions
 {
-    public static BaseAssertCondition<string, TAnd, TOr> EqualTo<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static BaseAssertCondition<string, TAnd, TOr> IsNotEqualTo<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
     {
-        return EqualTo(isNot, expected, StringComparison.Ordinal, doNotPopulateThisValue);
+        return IsNotEqualTo(isNot, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> EqualTo<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+    public static BaseAssertCondition<string, TAnd, TOr> IsNotEqualTo<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
         where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
     {
         return AssertionConditionCombiner.Combine(isNot, new StringNotEqualsAssertCondition<TAnd, TOr>(isNot.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Empty<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
+    public static BaseAssertCondition<string, TAnd, TOr> IsNotEmpty<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
         where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
     {
@@ -33,7 +33,7 @@ public static partial class IsNotExtensions
             (s, _) => $"'{s}' is empty"));
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> NullOrEmpty<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
+    public static BaseAssertCondition<string, TAnd, TOr> IsNotNullOrEmpty<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
         where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
     {
@@ -43,7 +43,7 @@ public static partial class IsNotExtensions
             (s, _) => $"'{s}' is null or empty"));
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> NullOrWhitespace<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
+    public static BaseAssertCondition<string, TAnd, TOr> IsNotNullOrWhitespace<TAnd, TOr>(this IsNot<string, TAnd, TOr> isNot)
         where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
     {
