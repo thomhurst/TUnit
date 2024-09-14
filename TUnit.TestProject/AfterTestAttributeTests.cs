@@ -12,7 +12,7 @@ public class AfterTestAttributeTests
     [WriteFileAfterTest]
     public async Task Test()
     {
-        await Assert.That(File.Exists(Filename)).Is.False();
+        await Assert.That(File.Exists(Filename)).IsFalse();
     }
 
     public class WriteFileAfterTestAttribute : Attribute, IAfterTestAttribute

@@ -5,13 +5,13 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsException<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly Func<Exception?, Exception?> _exceptionSelector;
-    protected AssertionBuilder<TActual> AssertionBuilder { get; }
+    protected AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
     
-    public ThrowsException(AssertionBuilder<TActual> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "") : base(connectorType, otherAssertCondition)
+    public ThrowsException(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "") : base(connectorType, otherAssertCondition)
     {
         _exceptionSelector = exceptionSelector;
         AssertionBuilder = assertionBuilder
@@ -34,4 +34,6 @@ public class ThrowsException<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             (_, exception, _, _) => action(_exceptionSelector(exception)),
             (_, exception) => messageFactory(_exceptionSelector(exception))
         ));
+
+    public TaskAwaiter GetAwaiter() => OfAnyType().GetAwaiter();
 }

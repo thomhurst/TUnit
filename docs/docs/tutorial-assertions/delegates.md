@@ -13,7 +13,7 @@ TUnit can execute your delegates for you, and this allows you to assert on the d
         await Assert.That(() =>
         {
             // Do something here
-        }).Throws.Nothing();
+        }).ThrowsNothing();
     }
 
     // or
@@ -24,7 +24,7 @@ TUnit can execute your delegates for you, and this allows you to assert on the d
         await Assert.That(() =>
         {
             // Do something here
-        }).Throws.Exception().OfType<ArgumentNullException>();
+        }).ThrowsException().OfType<ArgumentNullException>();
     }
 
     // or 

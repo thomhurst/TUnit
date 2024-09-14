@@ -1,15 +1,18 @@
 ﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class DelegateAssertionBuilder : AssertionBuilder<object?>
-{
+public class DelegateAssertionBuilder 
+    : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
+        IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>
+   {
     private readonly Action _action;
-    
-    public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
+
+    Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>.Throws() => new(this, ConnectorType.None, null);
 
     internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(expressionBuilder)
     {

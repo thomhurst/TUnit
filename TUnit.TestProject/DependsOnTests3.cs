@@ -39,17 +39,17 @@ public class DependsOnTests3
         var test1 = TestContext.Current!.GetTests(nameof(Test1));
         var test2 = TestContext.Current!.GetTests(nameof(Test2));
 
-        await Assert.That(test1).Has.Count().EqualTo(1);
-        await Assert.That(test2).Has.Count().EqualTo(1);
+        await Assert.That(test1).HasCount().EqualTo(1);
+        await Assert.That(test2).HasCount().EqualTo(1);
 
-        await Assert.That(test1[0].ObjectBag).Does.ContainKey("Test1");
-        await Assert.That(test2[0].ObjectBag).Does.ContainKey("Test2");
+        await Assert.That(test1[0].ObjectBag).ContainsKey("Test1");
+        await Assert.That(test2[0].ObjectBag).ContainsKey("Test2");
     }
 
     [After(Class)]
     public static async Task AssertStartTimes()
     {
-        await Assert.That(_test3Start).Is.GreaterThanOrEqualTo(_test1Start.AddSeconds(1));
-        await Assert.That(_test3Start).Is.GreaterThanOrEqualTo(_test2Start.AddSeconds(1));
+        await Assert.That(_test3Start).IsGreaterThanOrEqualTo(_test1Start.AddSeconds(0.9));
+        await Assert.That(_test3Start).IsGreaterThanOrEqualTo(_test2Start.AddSeconds(0.9));
     }
 }

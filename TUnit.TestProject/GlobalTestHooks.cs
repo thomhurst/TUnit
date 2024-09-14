@@ -43,8 +43,8 @@ public class GlobalTestHooksTests
     [Test]
     public async Task SetUpTest1()
     {
-        await Assert.That(TestContext.Current?.ObjectBag).Has.Count().EqualTo(1);
-        await Assert.That(TestContext.Current?.ObjectBag.First().Key).Is.EqualTo("SetUpCustomTestNameProperty");
-        await Assert.That(TestContext.Current?.ObjectBag.First().Value).Is.EqualTo("SetUpTest1");
+        await Assert.That(TestContext.Current?.ObjectBag).HasCount().EqualTo(1);
+        await Assert.That(TestContext.Current?.ObjectBag.First().Key).IsEqualTo("SetUpCustomTestNameProperty");
+        await Assert.That(TestContext.Current?.ObjectBag.First().Value).IsEqualTo("SetUpTest1");
     }
 }

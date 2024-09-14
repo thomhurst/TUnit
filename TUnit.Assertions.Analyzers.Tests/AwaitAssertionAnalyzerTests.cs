@@ -20,7 +20,7 @@ public class AwaitAssertionAnalyzerTests
                                 public async Task MyTest()
                                 {
                                     var one = 1;
-                                    {|#0:Assert.That(one)|}.Is.EqualTo(1);
+                                    {|#0:Assert.That(one)|}.IsEqualTo(1);
                                 }
 
                             }
@@ -46,7 +46,7 @@ public class AwaitAssertionAnalyzerTests
                                 public async Task MyTest()
                                 {
                                     var one = 1;
-                                    {|#0:Assert.That<long>(one)|}.Is.EqualTo(1);
+                                    {|#0:Assert.That<long>(one)|}.IsEqualTo(1);
                                 }
 
                             }
@@ -103,8 +103,8 @@ public class AwaitAssertionAnalyzerTests
                             
                                     await using (Assert.Multiple())
                                     {
-                                        await Assert.That(list).Is.EquivalentTo(new[] { 1, 2, 3, 4, 5 });
-                                        await Assert.That(list).Has.Count().EqualTo(5);
+                                        await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                        await Assert.That(list).HasCount().EqualTo(5);
                                     }
                                 }
                                 

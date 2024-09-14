@@ -115,19 +115,19 @@ public class SetupTests : Base3
     [Test]
     public async Task TestServerResponse1()
     {
-        await Assert.That(_response?.StatusCode).Is.Not.Null().And.Is.EqualTo(HttpStatusCode.OK);
+        await Assert.That(_response?.StatusCode).IsNotNull().And.IsEqualTo(HttpStatusCode.OK);
         
         await Assert.That(await _response!.Content.ReadAsStringAsync())
-            .Is.EqualTo("Hello TestServerResponse1!");
+            .IsEqualTo("Hello TestServerResponse1!");
     }
     
     [Test]
     public async Task TestServerResponse2()
     {
-        await Assert.That(_response?.StatusCode).Is.Not.Null()
-            .And.Is.EqualTo(HttpStatusCode.OK);
+        await Assert.That(_response?.StatusCode).IsNotNull()
+            .And.IsEqualTo(HttpStatusCode.OK);
 
         await Assert.That(await _response!.Content.ReadAsStringAsync())
-            .Is.EqualTo("Hello TestServerResponse2!");
+            .IsEqualTo("Hello TestServerResponse2!");
     }
 }

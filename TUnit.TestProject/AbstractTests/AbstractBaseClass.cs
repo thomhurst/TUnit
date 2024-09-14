@@ -10,7 +10,7 @@ public abstract class AbstractBaseClass
     {
         var name = GetName();
 
-        await Assert.That(name).Is.EqualTo(GetType().Name, StringComparison.Ordinal);
+        await Assert.That(name).IsEqualTo(GetType().Name, StringComparison.Ordinal);
     }
 
     protected abstract string GetName();

@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Throws;
 
 namespace TUnit.TestProject;
 
@@ -13,7 +14,7 @@ public class Tests
     {
         Console.WriteLine("Blah!");
 
-        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah!", StringComparison.Ordinal);
+        await Assert.That(TestContext.Current?.GetTestOutput()).IsEqualTo("Blah!", StringComparison.Ordinal);
     }
     
     [Test]
@@ -21,7 +22,7 @@ public class Tests
     public async Task Test1()
     {
         var value = "1";
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).IsEqualTo("1");
     }
     
     [Test]
@@ -29,7 +30,7 @@ public class Tests
     public async Task LessThan()
     {
         int value = 1;
-        await Assert.That(value).Is.LessThan(2);
+        await Assert.That(value).IsLessThan(2);
     }
 
     [Test]
@@ -37,7 +38,7 @@ public class Tests
     public async Task Test2()
     {
         var value = "2";
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).IsEqualTo("1");
     }
 
     [Test]
@@ -46,7 +47,7 @@ public class Tests
     {
         await Task.Yield();
         var value = "1";
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).IsEqualTo("1");
     }
 
     [Test]
@@ -55,7 +56,7 @@ public class Tests
     {
         await Task.Yield();
         var value = "2";
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).IsEqualTo("1");
     }
 
     [Test]
@@ -67,7 +68,7 @@ public class Tests
     [Category("Fail")]
     public async Task ParameterisedTests1(string value)
     {
-        await Assert.That(value).Is.EqualTo("1").And.Has.Length().EqualTo(1);
+        await Assert.That(value).IsEqualTo("1").And.HasLength().EqualTo(1);
     }
 
     [Test]
@@ -80,7 +81,7 @@ public class Tests
     public async Task ParameterisedTests2(string value)
     {
         await Task.Yield();
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).IsEqualTo("1");
     }
 
     [Test, Skip("Reason1")]
@@ -88,7 +89,7 @@ public class Tests
     public async Task Skip1()
     {
         var value = "1";
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).IsEqualTo("1");
     }
 
     [Test, Skip("Reason2")]
@@ -97,7 +98,7 @@ public class Tests
     {
         await Task.Yield();
         var value = "1";
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).IsEqualTo("1");
     }
     
     [Test, CustomSkip]
@@ -106,7 +107,7 @@ public class Tests
     {
         await Task.Yield();
         var value = "1";
-        await Assert.That(value).Is.EqualTo("1");
+        await Assert.That(value).IsEqualTo("1");
     }
 
     [Test]
@@ -114,7 +115,7 @@ public class Tests
     [Category("Pass")]
     public async Task TestDataSource1(int value)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
 
     [Test]
@@ -123,7 +124,7 @@ public class Tests
     public async Task TestDataSource2(int value)
     {
         await Task.Yield();
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
 
     [Test]
@@ -131,7 +132,7 @@ public class Tests
     [Category("Fail")]
     public async Task TestDataSource3(int value)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
 
     [Test]
@@ -140,7 +141,7 @@ public class Tests
     public async Task TestDataSource4(int value)
     {
         await Task.Yield();
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
 
     [Test]
@@ -148,7 +149,7 @@ public class Tests
     [Category("Pass")]
     public async Task TestDataSource5(int value)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
 
     [Test]
@@ -157,7 +158,7 @@ public class Tests
     public async Task TestDataSource6(int value)
     {
         await Task.Yield();
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
     
     [Test]
@@ -165,7 +166,7 @@ public class Tests
     [Category("Pass")]
     public async Task TestDataSource_Wrong(int value)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
     
     [Test]
@@ -173,7 +174,7 @@ public class Tests
     [Category("Fail")]
     public async Task TestDataSource7(int value)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
 
     [Test]
@@ -182,28 +183,28 @@ public class Tests
     public async Task TestDataSource8(int value)
     {
         await Task.Yield();
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
     }
 
     [Test]
     [Category("Pass")]
     public async Task TestContext1()
     {
-        await Assert.That(TestContext.Current?.TestDetails.TestName).Is.EqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current?.TestDetails.TestName).IsEqualTo(nameof(TestContext1));
     }
 
     [Test]
     [Category("Fail")]
     public async Task TestContext2()
     {
-        await Assert.That(TestContext.Current?.TestDetails.TestName).Is.EqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current?.TestDetails.TestName).IsEqualTo(nameof(TestContext1));
     }
 
     [Test]
     [Category("Fail")]
     public async Task Throws1()
     {
-        await Assert.That(() => new string([])).Throws.Exception().OfAnyType();
+        await Assert.That(() => new string([])).ThrowsException().OfAnyType();
     }
 
     [Test]
@@ -213,14 +214,14 @@ public class Tests
         await Assert.That(async () =>
         {
             await Task.Yield();
-        }).Throws.Exception().OfAnyType();
+        }).ThrowsException().OfAnyType();
     }
 
     [Test]
     [Category("Pass")]
     public async Task Throws3()
     {
-        await Assert.That(() => throw new ApplicationException()).Throws.Exception().OfAnyType();
+        await Assert.That(() => throw new ApplicationException()).ThrowsException().OfAnyType();
     }
 
     [Test]
@@ -231,7 +232,7 @@ public class Tests
         {
             await Task.Yield();
             return true;
-        }).Throws.Nothing();
+        }).ThrowsNothing();
     }
 
     [Test, Timeout(500)]
@@ -245,14 +246,14 @@ public class Tests
     [Category("Pass")]
     public async Task String_And_Condition()
     {
-        await Assert.That("1").Is.EqualTo("1").And.Has.Length().EqualTo(1);
+        await Assert.That("1").IsEqualTo("1").And.HasLength().EqualTo(1);
     }
 
     [Test]
     [Category("Fail")]
     public async Task String_And_Condition2()
     {
-        await Assert.That("1").Is.EqualTo("2").And.Has.Length().EqualTo(2);
+        await Assert.That("1").IsEqualTo("2").And.HasLength().EqualTo(2);
     }
 
     [Test]
@@ -260,7 +261,7 @@ public class Tests
     public async Task Count1()
     {
         var list = new List<int> { 1, 2, 3 };
-        await Assert.That(list).Is.EquivalentTo([1, 2, 3]).And.Has.Count().EqualTo(3);
+        await Assert.That(list).IsEquivalentTo([1, 2, 3]).And.HasCount().EqualTo(3);
     }
     
     [Test]
@@ -268,7 +269,7 @@ public class Tests
     public async Task Single()
     {
         var list = new List<int> { 1 };
-        await Assert.That(list).Has.SingleItem();
+        await Assert.That(list).HasSingleItem();
     }
     
     [Test]
@@ -276,7 +277,7 @@ public class Tests
     public async Task DistinctItems()
     {
         var list = new List<int> { 1, 2, 3, 4, 5 };
-        await Assert.That(list).Has.DistinctItems();
+        await Assert.That(list).HasDistinctItems();
     }
     
     [Test]
@@ -284,7 +285,7 @@ public class Tests
     public async Task Enumerable_NotEmpty()
     {
         var list = new List<int> { 1, 2, 3 };
-        await Assert.That(list).Is.Not.Empty();
+        await Assert.That(list).IsNotEmpty();
     }
 
     [Test]
@@ -292,7 +293,7 @@ public class Tests
     public async Task Count2()
     {
         var list = new List<int> { 1, 2, 3 };
-        await Assert.That(list).Is.EquivalentTo([1, 2, 3, 4, 5]).And.Has.Count().EqualTo(5);
+        await Assert.That(list).IsEquivalentTo([1, 2, 3, 4, 5]).And.HasCount().EqualTo(5);
     }
     
     [Test]
@@ -302,8 +303,8 @@ public class Tests
         
         await using (Assert.Multiple())
         {
-            await Assert.That(list).Is.EquivalentTo([1, 2, 3, 4, 5]);
-            await Assert.That(list).Has.Count().EqualTo(5);
+            await Assert.That(list).IsEquivalentTo([1, 2, 3, 4, 5]);
+            await Assert.That(list).HasCount().EqualTo(5);
         }
     }
     
@@ -313,8 +314,8 @@ public class Tests
         string? item = null;
 
         await Assert.That(item)
-            .Is.Not.Null()
-            .And.Is.Not.Empty();
+            .IsNotNull()
+            .And.IsNotEmpty();
     }
     
     [Test]
@@ -322,7 +323,7 @@ public class Tests
     {
         var item = "";
 
-        await Assert.That(item).Is.Not.Null().And.Is.Not.Empty();
+        await Assert.That(item).IsNotNull().And.IsNotEmpty();
     }
 
     [Test]
@@ -333,8 +334,8 @@ public class Tests
         
         await using (Assert.Multiple())
         {
-            await Assert.That(one).Is.Null().Or.Is.Empty();
-            await Assert.That(two).Is.EqualTo("Foo bar").Or.Is.Null();
+            await Assert.That(one).IsNull().Or.IsEmpty();
+            await Assert.That(two).IsEqualTo("Foo bar").Or.IsNull();
         }
     }
 
@@ -373,27 +374,27 @@ public class Tests
     public async Task Long_String_Not_Equals()
     {
         await Assert.That("ABCDEFGHIJKLMNOOPQRSTUVWXYZ")
-            .Is.EqualTo("ABCDEFGHIJKLMNOPQRSTUVWXYZ", StringComparison.Ordinal);
+            .IsEqualTo("ABCDEFGHIJKLMNOPQRSTUVWXYZ", StringComparison.Ordinal);
     }
     
     [Test]
     public async Task Short_String_Not_Equals()
     {
         await Assert.That("ABCCDE")
-            .Is.EqualTo("ABCDE", StringComparison.Ordinal);
+            .IsEqualTo("ABCDE", StringComparison.Ordinal);
     }
 
     // [MethodDataSource(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]
     // public async Task TestDataSourceEnumerable(int value)
     // {
-    //     await Assert.That(value).Is.EqualTo(1);
+    //     await Assert.That(value).IsEqualTo(1);
     // }
     
     // [MethodDataSource(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
     // [Category("Fail")]
     // public async Task TestDataSourceFailingEnumerable(int value)
     // {
-    //     await Assert.That(value).Is.EqualTo(1);
+    //     await Assert.That(value).IsEqualTo(1);
     // }
 
     // [Arguments]

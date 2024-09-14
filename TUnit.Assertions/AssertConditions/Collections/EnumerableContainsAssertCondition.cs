@@ -5,12 +5,12 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, TInner, TAnd, TOr>
     where TActual : IEnumerable<TInner>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
-    public EnumerableContainsAssertCondition(AssertionBuilder<TActual> assertionBuilder, TInner expected, IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
+    public EnumerableContainsAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TInner expected, IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
     {
         _equalityComparer = equalityComparer;
     }

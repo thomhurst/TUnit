@@ -15,8 +15,8 @@ Every condition must pass when using `And`s:
         var result = Add(1, 2);
         
         await Assert.That(result)
-            .Is.Not.Null()
-            .And.Is.Positive()
-            .And.Is.EqualTo(3);
+            .IsNotNull()
+            .And.IsPositive()
+            .And.IsEqualTo(3);
     }
 ```

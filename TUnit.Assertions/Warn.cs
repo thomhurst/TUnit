@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;
@@ -8,9 +9,11 @@ namespace TUnit.Assertions;
 
 internal static class Warn
 {
-    public static ValueAssertionBuilder<TActual> Unless<TActual>(TActual value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static ValueAssertionBuilder<TActual, TAnd, TOr> Unless<TActual, TAnd, TOr>(TActual value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "") 
+        where TAnd : IAnd<TActual, TAnd, TOr> 
+        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new ValueAssertionBuilder<TActual>(value, doNotPopulateThisValue);
+        return new ValueAssertionBuilder<TActual, TAnd, TOr>(value, doNotPopulateThisValue);
     }
     
     public static DelegateAssertionBuilder Unless(Action value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
@@ -18,9 +21,11 @@ internal static class Warn
         return new DelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static ValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<TActual> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static ValueDelegateAssertionBuilder<TActual, TAnd, TOr> Unless<TActual, TAnd, TOr>(Func<TActual> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+        where TAnd : IAnd<TActual, TAnd, TOr> 
+        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new ValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
+        return new ValueDelegateAssertionBuilder<TActual, TAnd, TOr>(value, doNotPopulateThisValue);
     }
     
     public static AsyncDelegateAssertionBuilder Unless(Func<Task> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")

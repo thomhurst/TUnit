@@ -6,10 +6,10 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableCountNotEqualToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, int, TAnd, TOr>
     where TActual : IEnumerable
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
-    public EnumerableCountNotEqualToAssertCondition(AssertionBuilder<TActual> assertionBuilder, int expected) : base(assertionBuilder, expected)
+    public EnumerableCountNotEqualToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, int expected) : base(assertionBuilder, expected)
     {
     }
 

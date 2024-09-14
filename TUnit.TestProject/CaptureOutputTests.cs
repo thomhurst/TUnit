@@ -20,8 +20,8 @@ public class CaptureOutputTests
 
         await using (Assert.Multiple())
         {
-            await Assert.That(TestContext.Current!.TestDetails.TestName).Is.EqualTo("Test");
-            await Assert.That(TestContext.Current!.GetTestOutput()).Is.EqualTo("Blah1");
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah1");
         }
     }
 
@@ -32,8 +32,8 @@ public class CaptureOutputTests
 
         await using (Assert.Multiple())
         {
-            await Assert.That(TestContext.Current!.TestDetails.TestName).Is.EqualTo("Test2");
-            await Assert.That(TestContext.Current!.GetTestOutput()).Is.EqualTo("Blah2");
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test2");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah2");
         }
     }
             
@@ -44,8 +44,8 @@ public class CaptureOutputTests
 
         await using (Assert.Multiple())
         {
-            await Assert.That(TestContext.Current!.TestDetails.TestName).Is.EqualTo("Test3");
-            await Assert.That(TestContext.Current!.GetTestOutput()).Is.EqualTo("Blah3");
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test3");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah3");
         }
     }
         
@@ -56,8 +56,8 @@ public class CaptureOutputTests
 
         await using (Assert.Multiple())
         {
-            await Assert.That(TestContext.Current!.TestDetails.TestName).Is.EqualTo("Test4");
-            await Assert.That(TestContext.Current!.GetTestOutput()).Is.EqualTo("Blah4");
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test4");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah4");
         }
     }
         
@@ -68,8 +68,8 @@ public class CaptureOutputTests
 
         await using (Assert.Multiple())
         {
-            await Assert.That(TestContext.Current!.TestDetails.TestName).Is.EqualTo("Test5");
-            await Assert.That(TestContext.Current!.GetTestOutput()).Is.EqualTo("Blah5");
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test5");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah5");
         }
     }
 

@@ -1,15 +1,18 @@
 ﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AsyncDelegateAssertionBuilder : AssertionBuilder<object?>
+public class AsyncDelegateAssertionBuilder 
+    : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
+        IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>
 {
     private readonly Func<Task> _function;
-    
-    public Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> Throws => new(this, ConnectorType.None, null);
+
+    Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>.Throws() => new(this, ConnectorType.None, null);
 
     internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(expressionBuilder)
     {

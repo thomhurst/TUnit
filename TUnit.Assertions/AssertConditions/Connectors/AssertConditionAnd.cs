@@ -3,8 +3,8 @@
 namespace TUnit.Assertions.AssertConditions.Connectors;
 
 internal class AssertConditionAnd<TActual, TAnd, TOr> : BaseAssertCondition<TActual, TAnd, TOr>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly BaseAssertCondition<TActual, TAnd, TOr> _condition1;
     private readonly BaseAssertCondition<TActual, TAnd, TOr> _condition2;

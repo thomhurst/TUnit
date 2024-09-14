@@ -23,8 +23,8 @@ public class ClassDataSourceDrivenTestsSharedKeyed2
     [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public async Task DataSource_Class(SomeAsyncDisposableClass value)
     {
-        await Assert.That(_someAsyncDisposableClass.IsDisposed).Is.False();
-        await Assert.That(value.IsDisposed).Is.False();
+        await Assert.That(_someAsyncDisposableClass.IsDisposed).IsFalse();
+        await Assert.That(value.IsDisposed).IsFalse();
         MethodLevels.Add(value);
     }
 
@@ -32,25 +32,25 @@ public class ClassDataSourceDrivenTestsSharedKeyed2
     [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public async Task DataSource_Class_Generic(SomeAsyncDisposableClass value)
     {
-        await Assert.That(_someAsyncDisposableClass.IsDisposed).Is.False();
-        await Assert.That(value.IsDisposed).Is.False();
+        await Assert.That(_someAsyncDisposableClass.IsDisposed).IsFalse();
+        await Assert.That(value.IsDisposed).IsFalse();
         MethodLevels.Add(value);
     }
 
     [After(Class)]
     public static async Task AssertAfter()
     {
-        await Assert.That(ClassLevels).Is.Not.Empty();
-        await Assert.That(MethodLevels).Is.Not.Empty();
+        await Assert.That(ClassLevels).IsNotEmpty();
+        await Assert.That(MethodLevels).IsNotEmpty();
 
         foreach (var classLevel in ClassLevels)
         {
-            await Assert.That(classLevel.IsDisposed).Is.True();
+            await Assert.That(classLevel.IsDisposed).IsTrue();
         }
         
         foreach (var methodLevel in MethodLevels)
         {
-            await Assert.That(methodLevel.IsDisposed).Is.True();
+            await Assert.That(methodLevel.IsDisposed).IsTrue();
         }
     }
 }

@@ -10,7 +10,7 @@ public abstract class GenericTests<T>
     [Test]
     public async Task Test()
     {
-        await Assert.That(GetData()).Is.Positive();
+        await Assert.That(GetData()).IsPositive();
     }
 
     [Test]
