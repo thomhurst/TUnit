@@ -33,7 +33,7 @@ internal static class Warn
         return new AsyncDelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static AsyncValueDelegateAssertionBuilder<TActual> Unless<TActual, TAnd, TOr>(Func<Task<TActual>> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static AsyncValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
     {
         return new AsyncValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
