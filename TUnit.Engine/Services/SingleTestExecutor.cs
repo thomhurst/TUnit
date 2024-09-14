@@ -138,8 +138,6 @@ internal class SingleTestExecutor : IDataProducer
 
             ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
             
-            testContext.TaskCompletionSource.SetResult(null);
-
             var timingProperty = GetTimingProperty(testContext, start);
 
             await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
@@ -161,6 +159,8 @@ internal class SingleTestExecutor : IDataProducer
                 Status = Status.Passed,
                 Output = testContext.GetTestOutput()
             };
+            
+            testContext.TaskCompletionSource.SetResult(null);
         }
         catch (SkipTestException skipTestException)
         {
