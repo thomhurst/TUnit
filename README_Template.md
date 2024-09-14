@@ -53,11 +53,8 @@ For Rider, it is not yet supported. I believe they are working on it so we just 
     {
         var value = "Hello world!";
 
-        await Assert.That(value)
-            .Is.Not.Null
-            .And.Does.StartWith("H")
-            .And.Has.Count().EqualTo(12)
-            .And.Is.EqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
+        await Assert.That(value).IsNotNull()
+                .And.IsEqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
     }
 ```
 

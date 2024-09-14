@@ -14,6 +14,6 @@ So this wouldn't compile, because we're comparing an `int` and a `string`:
     [Test]
     public async Task MyTest()
     {
-        await Assert.That(1).Is.EqualTo("1");
+        await Assert.That(1).IsEqualTo("1");
     }
 ```
