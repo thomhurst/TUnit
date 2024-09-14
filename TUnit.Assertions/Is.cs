@@ -18,6 +18,4 @@ public class Is<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         AssertionBuilder = assertionBuilder
             .AppendConnector(connectorType);
     }
-    
-    public IsNot<TActual, TAnd, TOr> Not => new(AssertionBuilder, ConnectorType, OtherAssertCondition);
 }

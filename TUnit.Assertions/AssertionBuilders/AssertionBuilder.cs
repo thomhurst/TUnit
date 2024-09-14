@@ -44,6 +44,11 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : Connector<TActual, 
         {
             return this;
         }
+
+        if (ExpressionBuilder?.ToString().EndsWith($".{connectorType}") == true)
+        {
+            return this;
+        }
         
         return AppendExpression(connectorType.ToString());
     }
