@@ -21,7 +21,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                                 [Test]
                                 public async Task Test()
                                 {
-                                    await Assert.That(1).Is.EqualTo(1);
+                                    await Assert.That(1).IsEqualTo(1);
                                 }
                             }
                             """;
@@ -44,7 +44,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                                 [Test]
                                 public async Task Test()
                                 {
-                                    await Assert.That(1).IsPositive().And.Is.EqualTo(1);
+                                    await Assert.That(1).IsPositive().And.IsEqualTo(1);
                                 }
                             }
                             """;
@@ -67,7 +67,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                                 [Test]
                                 public async Task Test()
                                 {
-                                    await Assert.That(1).IsPositive().Or.Is.EqualTo(1);
+                                    await Assert.That(1).IsPositive().Or.IsEqualTo(1);
                                 }
                             }
                             """;
