@@ -10,7 +10,8 @@ internal static class SymbolExtensions
         WellKnown.AttributeFullyQualifiedClasses.ClassDataSource,
         WellKnown.AttributeFullyQualifiedClasses.MethodDataSource,
         WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource,
-        WellKnown.AttributeFullyQualifiedClasses.Arguments
+        WellKnown.AttributeFullyQualifiedClasses.Arguments,
+        WellKnown.AttributeFullyQualifiedClasses.ClassConstructor
     ];
     
     public static bool HasDataDrivenAttributes(this ISymbol symbol)

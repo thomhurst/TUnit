@@ -41,7 +41,7 @@ internal static class GenericTestInvocationWriter
         }
         
         sourceBuilder.WriteLine(
-            $"var resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.ClassVariables.ToCommaSeparatedString()}));");
+            $"var resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => {ConstructClass(testSourceDataModel)});");
 
         sourceBuilder.WriteLine();
         
@@ -98,6 +98,12 @@ internal static class GenericTestInvocationWriter
 
             sourceBuilder.WriteLine("}");
         }
+    }
+
+    private static string ConstructClass(TestSourceDataModel testSourceDataModel)
+    {
+        return testSourceDataModel.ClassConstructorCommand
+               ?? $"new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.ClassVariables.ToCommaSeparatedString()})";
     }
 
     private static string GetTestExecutor(string? testExecutor)

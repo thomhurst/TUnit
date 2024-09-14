@@ -55,6 +55,11 @@ internal static class ArgumentsRetriever
             {
                 yield return ClassDataSourceRetriever.ParseClassData(namedTypeSymbol, dataAttribute, index);
             }
+            
+            if (name == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix)
+            {
+                yield return ClassConstructorRetriever.Parse(namedTypeSymbol, dataAttribute, index);
+            }
         }
     }
 
