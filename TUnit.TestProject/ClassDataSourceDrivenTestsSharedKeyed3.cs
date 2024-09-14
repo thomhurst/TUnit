@@ -40,8 +40,8 @@ public class ClassDataSourceDrivenTestsSharedKeyed3
     [After(Class)]
     public static async Task AssertAfter()
     {
-        await Assert.That(ClassLevels).Is.Not.Empty();
-        await Assert.That(MethodLevels).Is.Not.Empty();
+        await Assert.That(ClassLevels).IsNotEmpty();
+        await Assert.That(MethodLevels).IsNotEmpty();
 
         foreach (var classLevel in ClassLevels)
         {

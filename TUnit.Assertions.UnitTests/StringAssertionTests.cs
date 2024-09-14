@@ -9,28 +9,28 @@ public class StringAssertionTests
     public void NullOrEmpty_String()
     {
         var str = "Hello";
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).Is.NullOrEmpty());
+        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNullOrEmpty());
     }
     
     [Test]
     public void NullOrEmpty_Whitespace()
     {
         var str = " ";
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).Is.NullOrEmpty());
+        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(str).IsNullOrEmpty());
     }
     
     [Test]
     public void NullOrEmpty_Null()
     {
         string? str = null;
-        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).Is.NullOrEmpty());
+        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).IsNullOrEmpty());
     }
     
     [Test]
     public void NullOrEmpty_Empty()
     {
         var str = "";
-        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).Is.NullOrEmpty());
+        NUnitAssert.DoesNotThrowAsync(async () => await TUnitAssert.That(str).IsNullOrEmpty());
     }
     
     [Test]

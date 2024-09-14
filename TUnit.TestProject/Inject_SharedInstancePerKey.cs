@@ -30,7 +30,7 @@ public class InjectSharedPerKey1
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>
@@ -50,7 +50,7 @@ public class InjectSharedPerKey1
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>
@@ -70,7 +70,7 @@ public class InjectSharedPerKey1
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>
@@ -101,7 +101,7 @@ public class InjectSharedPerKey2
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>
@@ -121,7 +121,7 @@ public class InjectSharedPerKey2
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>
@@ -141,7 +141,7 @@ public class InjectSharedPerKey2
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>
@@ -172,7 +172,7 @@ public class InjectSharedPerKey3
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>
@@ -192,7 +192,7 @@ public class InjectSharedPerKey3
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>
@@ -212,7 +212,7 @@ public class InjectSharedPerKey3
         
         foreach (var (key, value) in SharedInjectedKeyedContainer.InstancesPerKey.Where(x => x.Key != TestContext.Current!.TestDetails.TestName))
         {
-            await Assert.That(list!).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(list!).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         list = SharedInjectedKeyedContainer.InstancesPerKey.GetOrAdd(TestContext.Current!.TestDetails.TestName, _ =>

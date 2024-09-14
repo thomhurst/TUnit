@@ -284,7 +284,7 @@ public class Tests
     public async Task Enumerable_NotEmpty()
     {
         var list = new List<int> { 1, 2, 3 };
-        await Assert.That(list).Is.Not.Empty();
+        await Assert.That(list).IsNotEmpty();
     }
 
     [Test]
@@ -313,8 +313,8 @@ public class Tests
         string? item = null;
 
         await Assert.That(item)
-            .Is.Not.Null()
-            .And.Is.Not.Empty();
+            .IsNotNull()
+            .And.IsNotEmpty();
     }
     
     [Test]
@@ -322,7 +322,7 @@ public class Tests
     {
         var item = "";
 
-        await Assert.That(item).Is.Not.Null().And.Is.Not.Empty();
+        await Assert.That(item).IsNotNull().And.IsNotEmpty();
     }
 
     [Test]

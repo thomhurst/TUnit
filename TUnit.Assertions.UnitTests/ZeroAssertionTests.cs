@@ -37,7 +37,7 @@ public class ZeroAssertionTests
     public void Long_Bad()
     {
         long zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That(zero).Is.Not.EqualTo(1));
+        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That(zero).IsNotEqualTo(1));
     }
     
     [Test]

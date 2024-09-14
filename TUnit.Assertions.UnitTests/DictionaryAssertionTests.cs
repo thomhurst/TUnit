@@ -12,7 +12,7 @@ public class DictionaryAssertionTests
             ["Blah"] = []
         };
         
-        await TUnitAssert.That(dictionary).Does.ContainKey("Blah");
+        await TUnitAssert.That(dictionary).ContainsKey("Blah");
     }
     
     [Test]
@@ -23,7 +23,7 @@ public class DictionaryAssertionTests
             ["Blah"] = []
         };
         
-        await TUnitAssert.That(dictionary).Does.Not.ContainKey("blah");
+        await TUnitAssert.That(dictionary).DoesNotContainKey("blah");
     }
     
     [Test]
