@@ -22,6 +22,7 @@ internal static class WellKnown
         public static readonly string MethodDataSource = GetTypeName(typeof(MethodDataSourceAttribute));
         public static readonly string ClassDataSource = GetTypeName(typeof(ClassDataSourceAttribute<>));
         public static readonly string EnumerableMethodDataSource = GetTypeName(typeof(EnumerableMethodDataSourceAttribute));
+        public static readonly string ClassConstructor = GetTypeName(typeof(ClassConstructorAttribute));
 
         public static readonly string TestContext = GetTypeName(typeof(TestContext));
         public static readonly string ClassHookContext = GetTypeName(typeof(ClassHookContext));

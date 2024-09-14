@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
@@ -12,7 +13,8 @@ internal class ReferencesHelper
                 // add your app/lib specifics, e.g.:
                 MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Assertions.Assert).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Core.TestAttribute).Assembly.Location)
+                MetadataReference.CreateFromFile(typeof(Core.TestAttribute).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(ServiceProvider).Assembly.Location)
             ])
             .ToList();
 }

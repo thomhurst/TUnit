@@ -16,6 +16,8 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName EnumerableMethodDataAttribute = typeof(EnumerableMethodDataSourceAttribute);
     public static readonly FullyQualifiedTypeName ClassDataSourceAttribute = typeof(ClassDataSourceAttribute<>);
     public static readonly FullyQualifiedTypeName MatrixAttribute = typeof(MatrixAttribute);
+    public static readonly FullyQualifiedTypeName ClassConstructorAttribute = typeof(ClassConstructorAttribute);
+
     
     // Metadata
     public static readonly FullyQualifiedTypeName TimeoutAttribute = typeof(TimeoutAttribute);
