@@ -1,3 +1,5 @@
+using TUnit.Assertions.AssertConditions.Interfaces;
+
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class DelegateAnd<TActual> 
@@ -6,8 +8,8 @@ public class DelegateAnd<TActual>
     public DelegateAnd(BaseAssertCondition<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
     {
     }
-    
-    public Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> Throws => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
+
+    Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> IThrows<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>.Throws() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
 
     public static DelegateAnd<TActual> Create(BaseAssertCondition<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> otherAssertCondition)
     {

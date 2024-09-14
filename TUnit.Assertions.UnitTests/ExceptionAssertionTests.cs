@@ -6,7 +6,7 @@ public class ExceptionAssertionTests
     public async Task Assertion_Message_Has_Correct_doNotPopulateThisValue2()
     {
         await TUnitAssert.That(InnerExceptionThrower.Throw)
-            .Throws.Exception()
+            .ThrowsException()
             .With.InnerException
             .With.InnerException
             .With.InnerException

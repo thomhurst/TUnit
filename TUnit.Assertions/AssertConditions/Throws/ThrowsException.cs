@@ -34,4 +34,6 @@ public class ThrowsException<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
             (_, exception, _, _) => action(_exceptionSelector(exception)),
             (_, exception) => messageFactory(_exceptionSelector(exception))
         ));
+
+    public TaskAwaiter GetAwaiter() => OfAnyType().GetAwaiter();
 }
