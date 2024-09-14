@@ -53,11 +53,8 @@ For Rider, it is not yet supported. I believe they are working on it so we just 
     {
         var value = "Hello world!";
 
-        await Assert.That(value)
-            .Is.Not.Null
-            .And.Does.StartWith("H")
-            .And.Has.Count().EqualTo(12)
-            .And.Is.EqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
+        await Assert.That(value).IsNotNull()
+                .And.IsEqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
     }
 ```
 
@@ -184,11 +181,11 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 ```
 | Method    | Mean      | Error     | StdDev    |
 |---------- |----------:|----------:|----------:|
-| TUnit_AOT |  78.57 ms |  0.560 ms |  0.468 ms |
-| TUnit     | 426.02 ms |  8.309 ms | 11.093 ms |
-| NUnit     | 700.37 ms | 13.490 ms | 16.059 ms |
-| xUnit     | 680.67 ms |  8.634 ms |  8.077 ms |
-| MSTest    | 623.30 ms | 12.416 ms | 16.996 ms |
+| TUnit_AOT |  86.81 ms |  1.736 ms |  3.130 ms |
+| TUnit     | 455.02 ms |  8.913 ms |  8.337 ms |
+| NUnit     | 755.77 ms | 14.917 ms | 27.276 ms |
+| xUnit     | 738.30 ms | 14.714 ms | 16.944 ms |
+| MSTest    | 682.57 ms | 13.085 ms | 16.548 ms |
 
 
 
@@ -206,11 +203,11 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    48.40 ms |  0.960 ms |  2.693 ms |
-| TUnit     |   788.98 ms | 15.708 ms | 27.096 ms |
-| NUnit     | 1,367.66 ms | 24.412 ms | 21.641 ms |
-| xUnit     | 1,344.60 ms | 17.264 ms | 15.304 ms |
-| MSTest    | 1,206.49 ms | 18.053 ms | 16.887 ms |
+| TUnit_AOT |    46.31 ms |  1.221 ms |  3.599 ms |
+| TUnit     |   798.88 ms | 15.914 ms | 35.595 ms |
+| NUnit     | 1,354.17 ms | 12.860 ms | 12.029 ms |
+| xUnit     | 1,338.34 ms | 17.334 ms | 15.366 ms |
+| MSTest    | 1,217.88 ms | 20.128 ms | 18.828 ms |
 
 
 
@@ -218,7 +215,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ```
 
-BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2700) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 8.0.401
   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
@@ -226,13 +223,13 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    92.34 ms |  1.839 ms |  2.044 ms |
-| TUnit     |   794.09 ms | 15.753 ms | 21.030 ms |
-| NUnit     | 1,343.22 ms | 13.430 ms | 12.562 ms |
-| xUnit     | 1,323.64 ms | 14.313 ms | 13.389 ms |
-| MSTest    | 1,200.69 ms | 12.740 ms | 11.917 ms |
+| Method    | Mean        | Error     | StdDev    | Median      |
+|---------- |------------:|----------:|----------:|------------:|
+| TUnit_AOT |    79.29 ms |  1.553 ms |  1.662 ms |    78.08 ms |
+| TUnit     |   761.40 ms | 15.035 ms | 20.580 ms |   755.02 ms |
+| NUnit     | 1,294.91 ms | 16.558 ms | 15.489 ms | 1,288.66 ms |
+| xUnit     | 1,260.15 ms |  4.977 ms |  4.412 ms | 1,260.05 ms |
+| MSTest    | 1,149.18 ms | 11.463 ms | 10.722 ms | 1,149.92 ms |
 
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
@@ -251,11 +248,11 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    82.83 ms |  1.654 ms |  4.527 ms |
-| TUnit     |   870.57 ms | 17.245 ms | 34.041 ms |
-| NUnit     | 6,611.39 ms | 38.417 ms | 35.936 ms |
-| xUnit     | 6,532.58 ms | 15.585 ms | 13.815 ms |
-| MSTest    | 6,498.24 ms | 15.289 ms | 12.767 ms |
+| TUnit_AOT |    89.03 ms |  1.835 ms |  5.411 ms |
+| TUnit     |   886.43 ms | 17.662 ms | 35.678 ms |
+| NUnit     | 6,607.74 ms | 33.446 ms | 31.286 ms |
+| xUnit     | 6,557.06 ms | 17.609 ms | 16.471 ms |
+| MSTest    | 6,512.18 ms | 23.078 ms | 21.587 ms |
 
 
 
@@ -263,7 +260,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ```
 
-BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2700) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 8.0.401
   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
@@ -271,13 +268,13 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method    | Mean       | Error    | StdDev   |
-|---------- |-----------:|---------:|---------:|
-| TUnit_AOT |   132.5 ms |  2.62 ms |  7.49 ms |
-| TUnit     |   834.3 ms | 16.55 ms | 22.10 ms |
-| NUnit     | 7,508.5 ms | 21.96 ms | 20.54 ms |
-| xUnit     | 7,487.3 ms | 17.86 ms | 16.71 ms |
-| MSTest    | 7,455.3 ms | 12.86 ms | 11.40 ms |
+| Method    | Mean       | Error    | StdDev   | Median     |
+|---------- |-----------:|---------:|---------:|-----------:|
+| TUnit_AOT |   130.8 ms |  2.72 ms |  8.03 ms |   132.6 ms |
+| TUnit     |   826.1 ms | 16.21 ms | 17.34 ms |   812.5 ms |
+| NUnit     | 7,487.1 ms |  5.73 ms |  4.47 ms | 7,487.7 ms |
+| xUnit     | 7,467.8 ms | 19.65 ms | 18.38 ms | 7,470.7 ms |
+| MSTest    | 7,431.3 ms |  8.83 ms |  7.83 ms | 7,433.0 ms |
 
 
 
@@ -293,13 +290,13 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 
 
 ```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    245.5 ms |  12.20 ms |  35.77 ms |
-| TUnit     |    565.3 ms |  23.29 ms |  68.66 ms |
-| NUnit     | 14,420.0 ms | 282.34 ms | 530.31 ms |
-| xUnit     | 14,337.0 ms | 283.82 ms | 622.99 ms |
-| MSTest    | 14,323.7 ms | 279.62 ms | 409.87 ms |
+| Method    | Mean        | Error     | StdDev    | Median      |
+|---------- |------------:|----------:|----------:|------------:|
+| TUnit_AOT |    246.0 ms |  16.74 ms |  49.36 ms |    250.3 ms |
+| TUnit     |    581.5 ms |  21.57 ms |  63.61 ms |    600.4 ms |
+| NUnit     | 13,999.8 ms | 279.70 ms | 558.60 ms | 14,012.9 ms |
+| xUnit     | 14,399.8 ms | 280.52 ms | 476.34 ms | 14,311.4 ms |
+| MSTest    | 14,262.0 ms | 281.61 ms | 485.76 ms | 14,454.4 ms |
 
 
 
