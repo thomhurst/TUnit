@@ -108,7 +108,7 @@ internal static class GenericTestInvocationWriter
 
     private static string GetClassConstructor(TestSourceDataModel testSourceDataModel)
     {
-        return testSourceDataModel.ClassConstructorType == null ? string.Empty : "classConstructor";
+        return testSourceDataModel.ClassConstructorType == null ? "null" : "classConstructor";
     }
 
     private static string ConstructClass(TestSourceDataModel testSourceDataModel)
