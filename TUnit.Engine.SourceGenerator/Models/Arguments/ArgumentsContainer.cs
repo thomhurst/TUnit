@@ -8,10 +8,10 @@ internal record ArgumentsContainer
     public required AttributeData? DataAttribute { get; init; }
     public required bool IsEnumerableData { get; init; }
     public required int? DataAttributeIndex { get; init; }
-    public string? ConstructorCommand { get; init; }
+    public string? ClassConstructorType { get; init; }
 
     public bool HasData()
     {
-        return ConstructorCommand != null || Arguments.Any();
+        return ClassConstructorType != null || Arguments.Any();
     }
 }

@@ -124,6 +124,10 @@ internal class SingleTestExecutor : IDataProducer
 
                 await DisposeTest(testContext, cleanUpExceptions);
 
+                await RunHelpers.RunSafelyAsync(
+                    () => test.ClassConstructor?.DisposeAsync(test.TestDetails.ClassInstance) ?? Task.CompletedTask,
+                    cleanUpExceptions);
+
                 TestContext.Current = null;
                 
                 await ExecuteAfterHooks(test, context, testContext, cleanUpExceptions);
@@ -392,7 +396,7 @@ internal class SingleTestExecutor : IDataProducer
                 }
 
                 await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying... (attempt {i + 1})");
-                discoveredTest.ResetTestInstance();
+                await discoveredTest.ResetTestInstance();
                 discoveredTest.TestContext.CurrentRetryAttempt++;
             }
         }

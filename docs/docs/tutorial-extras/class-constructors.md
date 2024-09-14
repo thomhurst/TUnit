@@ -1,10 +1,22 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using Microsoft.Extensions.DependencyInjection;
-using TUnit.Core.Interfaces;
-using TUnit.TestProject.Dummy;
+---
+sidebar_position: 13
+---
 
-namespace TUnit.TestProject;
+# Class Constructor Helpers
+
+Some test suites might be more complex than others, and a user may want control over 'newing' up their test classes.
+This control is given to you by the `[ClassConstructorAttribute<T>]` - Where `T` is a class that implements `IClassConstructor`.
+
+This interface is very generic so you have freedom to construct and dispose as you please.
+
+By giving the freedom of how classes are created, we can tap into things like Dependency Injection.
+
+Here's an example of that using the Microsoft.Extensions.DependencyInjection library
+
+```csharp
+using TUnit.Core;
+
+namespace MyTestProject;
 
 public class DependencyInjectionClassConstructor : IClassConstructor
 {
@@ -43,7 +55,20 @@ public class DependencyInjectionClassConstructor : IClassConstructor
     private static IServiceProvider CreateServiceProvider()
     {
         return new ServiceCollection()
-            .AddTransient<SomeAsyncDisposableClass>()
+            .AddSingleton<SomeClass1>()
+            .AddSingleton<SomeClass2>()
+            .AddTransient<SomeClass3>()
             .BuildServiceProvider();
     }
 }
+
+[ClassConstructor<DependencyInjectionClassConstructor>]
+public class MyTestClass(SomeClass1 someClass1, SomeClass2 someClass2, SomeClass3 someClass3)
+{
+    [Test]
+    public async Task Test()
+    {
+        // ...
+    }
+}
+```

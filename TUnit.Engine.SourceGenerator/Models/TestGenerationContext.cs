@@ -20,5 +20,5 @@ internal record TestGenerationContext
     
     public required bool HasEnumerableTestMethodData { get; init; }
     public required bool HasEnumerableClassMethodData { get; init; }
-    public required string? ClassConstructorCommand { get; set; }
+    public required string? ClassConstructorType { get; set; }
 }

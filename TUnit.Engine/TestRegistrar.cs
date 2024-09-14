@@ -55,7 +55,7 @@ public static class TestRegistrar
 			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = testMetadata.TestFilePath,
 			TestLineNumber = testMetadata.TestLineNumber,
-			ParallelLimit = testMetadata.ParallelLimit
+			ParallelLimit = testMetadata.ParallelLimit,
 		};
 
 		var testContext = new TestContext(testDetails);
@@ -69,6 +69,7 @@ public static class TestRegistrar
 			AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),
 			TestBody = (classInstance, cancellationToken) => testMetadata.TestMethodFactory(classInstance, cancellationToken),
 			TestExecutor = testMetadata.TestExecutor,
+			ClassConstructor = testMetadata.ClassConstructor
 		};
 
 		testContext.InternalDiscoveredTest = unInvokedTest;
@@ -162,6 +163,8 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     public required TestData[] InternalTestMethodArguments { internal get; init; }
     
     public required ITestExecutor TestExecutor { get; init; }
+
+    public required IClassConstructor? ClassConstructor { get; init; }
     
     public required IParallelLimit? ParallelLimit { get; init; }
     

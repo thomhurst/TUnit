@@ -78,7 +78,7 @@ internal record TestSourceDataModel
     public required string? TestExecutor { get; init; }
     public required string? ParallelLimit { get; init; }
     public required string[] AttributeTypes { get; init; }
-    public required string? ClassConstructorCommand { get; set; }
+    public required string? ClassConstructorType { get; init; }
 
     public string MethodVariablesWithCancellationToken()
     {

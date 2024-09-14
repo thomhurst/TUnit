@@ -14,8 +14,7 @@ internal class ClassConstructorRetriever
             Arguments = [],
             DataAttribute = dataAttribute,
             DataAttributeIndex = index,
-            ConstructorCommand =
-                $"new {type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}().Create<{namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}>()",
+            ClassConstructorType = type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             IsEnumerableData = false
         };
     }
