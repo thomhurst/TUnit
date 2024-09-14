@@ -25,6 +25,8 @@ internal class ClassConstructorTest : TestsBase<TestsGenerator>
         generatedFiles =>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
-            Assert.That(generatedFiles[0], Does.Contain("var resettableClassFactory = new ResettableLazy<global::TUnit.TestProject.ClassConstructorTest>(() => new global::TUnit.TestProject.DependencyInjectionClassConstructor().Create<global::TUnit.TestProject.ClassConstructorTest>());"));
+            Assert.That(generatedFiles[0], Does.Contain("var classConstructor = new global::TUnit.TestProject.DependencyInjectionClassConstructor();"));
+            Assert.That(generatedFiles[0], Does.Contain("var resettableClassFactory = new ResettableLazy<global::TUnit.TestProject.ClassConstructorTest>(() => classConstructor.Create<global::TUnit.TestProject.ClassConstructorTest>());"));
+            Assert.That(generatedFiles[0], Does.Contain("ClassConstructor = classConstructor,"));
         });
 }

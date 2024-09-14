@@ -81,7 +81,7 @@ internal static class TestSourceDataModelRetriever
                     HasEnumerableClassMethodData = false,
                     ClassDataAttributeIndex = null,
                     TestDataAttributeIndex = testArguments.DataAttributeIndex,
-                    ClassConstructorCommand = null
+                    ClassConstructorType = null
                 });
         }
     }
@@ -106,7 +106,7 @@ internal static class TestSourceDataModelRetriever
                 HasEnumerableClassMethodData = classArguments.IsEnumerableData,
                 TestDataAttributeIndex = testArguments.DataAttributeIndex,
                 ClassDataAttributeIndex = classArguments.DataAttributeIndex, 
-                ClassConstructorCommand = classArguments.ConstructorCommand
+                ClassConstructorType = classArguments.ClassConstructorType
             });
         }
     }
@@ -147,7 +147,7 @@ internal static class TestSourceDataModelRetriever
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(TestExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(ParallelLimiterAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             AttributeTypes = allAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(), 
-            ClassConstructorCommand = testGenerationContext.ClassConstructorCommand
+            ClassConstructorType = testGenerationContext.ClassConstructorType
         };
     }
 
