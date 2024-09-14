@@ -16,7 +16,6 @@ public class Has<TRootObject, TAnd, TOr> : Connector<TRootObject, TAnd, TOr>
     public Has(AssertionBuilder<TRootObject, TAnd, TOr> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TRootObject, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder
-            .AppendConnector(connectorType)
-            .AppendExpression("Has");
+            .AppendConnector(connectorType);
     }
 }

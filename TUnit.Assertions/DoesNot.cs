@@ -12,6 +12,6 @@ public class DoesNot<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     
     public DoesNot(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
-        AssertionBuilder = assertionBuilder.AppendExpression("Not");
+        AssertionBuilder = assertionBuilder;
     }
 }
