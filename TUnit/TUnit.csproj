@@ -19,11 +19,4 @@
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
-        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </ProjectReference>
-    </ItemGroup>
-
 </Project>

@@ -31,10 +31,6 @@
     <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
-    <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </ProjectReference>
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
   </ItemGroup>
 </Project>

@@ -21,6 +21,8 @@
             <DisplayName>TUnit</DisplayName>
             <TypeFullName>TUnit.Engine.Framework.TestingPlatformBuilderHook</TypeFullName>
         </TestingPlatformBuilderHook>
+
+        <None Include="$(OutputPath)/TUnit.Engine.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
 </Project>
