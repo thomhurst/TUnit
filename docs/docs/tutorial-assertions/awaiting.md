@@ -17,7 +17,7 @@ This will error:
     {
         var result = Add(1, 2);
 
-        Assert.That(result).Is.EqualTo(3);
+        Assert.That(result).IsEqualTo(3);
     }
 ```
 
@@ -29,7 +29,7 @@ This won't:
     {
         var result = Add(1, 2);
 
-        await Assert.That(result).Is.EqualTo(3);
+        await Assert.That(result).IsEqualTo(3);
     }
 ```
 
@@ -46,8 +46,8 @@ The only time an assertion doesn't have to be awaited is when it's within an `As
 
         await Assert.Multiple(() =>
         {
-            Assert.That(result).Is.Positive();
-            Assert.That(result).Is.EqualTo(3);
+            Assert.That(result).IsPositive();
+            Assert.That(result).IsEqualTo(3);
         });
     }
 ```

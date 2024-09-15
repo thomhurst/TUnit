@@ -3,10 +3,10 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder<TActual> assertionBuilder, TActual expected)
+public class EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TActual expected)
     : AssertCondition<TActual, TActual, TAnd, TOr>(assertionBuilder, expected)
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
     protected override string DefaultMessage => $"""
                                                  Expected: {ExpectedValue}

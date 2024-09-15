@@ -1,5 +1,4 @@
-﻿using System.Collections.Frozen;
-using Microsoft.Testing.Platform.Requests;
+﻿using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 
 namespace TUnit.Engine.Services;

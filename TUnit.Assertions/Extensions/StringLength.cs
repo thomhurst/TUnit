@@ -6,12 +6,12 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.Extensions;
 
 public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
-    where TAnd : And<string, TAnd, TOr>, IAnd<TAnd, string, TAnd, TOr>
-    where TOr : Or<string, TAnd, TOr>, IOr<TOr, string, TAnd, TOr>
+    where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
+    where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
 {
-    protected AssertionBuilder<string> AssertionBuilder { get; }
+    protected AssertionBuilder<string, TAnd, TOr> AssertionBuilder { get; }
 
-    public StringLength(AssertionBuilder<string> assertionBuilder, ConnectorType connectorType,
+    public StringLength(AssertionBuilder<string, TAnd, TOr> assertionBuilder, ConnectorType connectorType,
         BaseAssertCondition<string, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder.AppendExpression("Length");

@@ -19,7 +19,7 @@ public class ConstantInAssertThatAnalyzerTests
 
                                 public async Task MyTest()
                                 {
-                                    await {|#0:Assert.That(1)|}.Is.EqualTo(1);
+                                    await {|#0:Assert.That(1)|}.IsEqualTo(1);
                                 }
 
                             }
@@ -46,7 +46,7 @@ public class ConstantInAssertThatAnalyzerTests
                                 public async Task MyTest()
                                 {
                                     var one = 1;
-                                    await Assert.That(one).Is.EqualTo(1);
+                                    await Assert.That(one).IsEqualTo(1);
                                 }
 
                             }

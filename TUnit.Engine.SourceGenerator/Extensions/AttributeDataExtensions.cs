@@ -10,6 +10,7 @@ public static class AttributeDataExtensions
         WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix,
+        WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix,
     ];
     
     public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)

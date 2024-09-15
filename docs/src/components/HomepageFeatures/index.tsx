@@ -28,11 +28,11 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Fast',
+    title: 'Fast & Source Generated',
     Svg: require('@site/static/img/fast.svg').default,
     description: (
       <>
-        TUnit is source generated and built on top of the new Microsoft Testing Platform. This means that it is fast and efficient.
+        TUnit generates source code for your tests, enabling you to create your test applications using Native AOT or as Single File applications. Combined with being built on top of the new Microsoft Testing Platform, this makes it fast and efficient.
       </>
     ),
   },

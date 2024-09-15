@@ -20,7 +20,7 @@ internal static class TestSourceDataModelRetriever
         
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
         
-        var classArgumentsContainers = ArgumentsRetriever.GetArguments(namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes(), namedTypeSymbol, VariableNames.ClassArg).ToArray();
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes().Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, VariableNames.ClassArg).ToArray();
         var testArgumentsContainers = ArgumentsRetriever.GetArguments(methodSymbol.Parameters, methodSymbol.GetAttributes(), namedTypeSymbol, VariableNames.MethodArg);
         
         var repeatCount =
@@ -43,7 +43,7 @@ internal static class TestSourceDataModelRetriever
     private static IEnumerable<TestSourceDataModel> GenerateTestSourceDataModels(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol,
         ArgumentsContainer classArguments, int runCount, AttributeData testAttribute, ArgumentsContainer testArguments)
     {
-        if (!classArguments.Arguments.Any())
+        if (!classArguments.HasData())
         {
             foreach (var testSourceDataModel in GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, runCount, testAttribute,
                          testArguments))
@@ -81,6 +81,7 @@ internal static class TestSourceDataModelRetriever
                     HasEnumerableClassMethodData = false,
                     ClassDataAttributeIndex = null,
                     TestDataAttributeIndex = testArguments.DataAttributeIndex,
+                    ClassConstructorType = null
                 });
         }
     }
@@ -105,6 +106,7 @@ internal static class TestSourceDataModelRetriever
                 HasEnumerableClassMethodData = classArguments.IsEnumerableData,
                 TestDataAttributeIndex = testArguments.DataAttributeIndex,
                 ClassDataAttributeIndex = classArguments.DataAttributeIndex, 
+                ClassConstructorType = classArguments.ClassConstructorType
             });
         }
     }
@@ -145,6 +147,7 @@ internal static class TestSourceDataModelRetriever
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(TestExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(ParallelLimiterAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             AttributeTypes = allAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(), 
+            ClassConstructorType = testGenerationContext.ClassConstructorType
         };
     }
 

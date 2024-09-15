@@ -8,11 +8,6 @@ internal static class RunHelpers
     internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan? timeout)
     {
         using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
-        
-        if (timeout != null)
-        {
-            cancellationTokenSource.CancelAfter(timeout.Value);
-        }
 
         var cancellationToken = cancellationTokenSource.Token;
         
@@ -53,6 +48,11 @@ internal static class RunHelpers
                 }
             });
         }
+        
+        if (timeout != null)
+        {
+            cancellationTokenSource.CancelAfter(timeout.Value);
+        }
 
         await taskCompletionSource.Task;
     }
@@ -69,7 +69,7 @@ internal static class RunHelpers
         }
     }
     
-    public static async Task RunSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
+    public static async Task RunValueTaskSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
     {
         try
         {

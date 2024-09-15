@@ -4,10 +4,10 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsAnythingAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, Exception, TAnd, TOr>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
-    public ThrowsAnythingAssertCondition(AssertionBuilder<TActual> assertionBuilder,
+    public ThrowsAnythingAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder,
         Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, default)
     {
     }

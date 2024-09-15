@@ -1,0 +1,4 @@
+root = true
+
+[*.{cs,vb}]
+dotnet_diagnostic.TUnitAssertions0003.severity=silent

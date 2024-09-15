@@ -7,7 +7,6 @@ public class TimeoutTests4 : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
-        var start = DateTime.UtcNow;
         return await RunTestsWithFilter(context, 
             "/*/*/TimeoutCancellationTokenTests/DataSourceTest",
             [
@@ -16,8 +15,8 @@ public class TimeoutTests4 : TestModule
                 result => result.Passed.Should().Be(0),
                 result => result.Failed.Should().Be(1),
                 result => result.Skipped.Should().Be(0),
-                _ => (DateTime.UtcNow - start).Should().BeLessThan(TimeSpan.FromMinutes(1)),
-                _ => (DateTime.UtcNow - start).Should().BeGreaterThan(TimeSpan.FromSeconds(30)),
+                result => result.TrxReport.UnitTestResults[0].Duration.Should().BeLessThan(TimeSpan.FromMinutes(1)),
+                result => result.TrxReport.UnitTestResults[0].Duration.Should().BeGreaterThan(TimeSpan.FromSeconds(4)),
             ], cancellationToken);
     }
 }

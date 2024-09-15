@@ -4,13 +4,13 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, string, TAnd, TOr>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly StringComparison _stringComparison;
     private readonly Func<Exception?, Exception?> _exceptionSelector;
 
-    public ThrowsWithMessageEqualToAssertCondition(AssertionBuilder<TActual> assertionBuilder, string expected,
+    public ThrowsWithMessageEqualToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, string expected,
         StringComparison stringComparison, Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, expected)
     {
         _stringComparison = stringComparison;

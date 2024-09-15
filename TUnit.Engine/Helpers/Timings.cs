@@ -15,7 +15,11 @@ internal static class Timings
         finally
         {
             var end = DateTimeOffset.Now;
-            context.Timings.Add(new Timing(name, start, end));
+            
+            lock (context.Timings)
+            {
+                context.Timings.Add(new Timing(name, start, end));
+            }
         }
     }  
 }

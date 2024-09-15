@@ -3,16 +3,15 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
-using Semaphores;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
-using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine.Services;
 
@@ -24,8 +23,10 @@ internal class SingleTestExecutor : IDataProducer
     private readonly TestInvoker _testInvoker;
     private readonly ExplicitFilterService _explicitFilterService;
     private readonly ParallelLimitProvider _parallelLimitProvider;
+    private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
+    private readonly ClassHookOrchestrator _classHookOrchestrator;
     private readonly TUnitLogger _logger;
-
+    
     public SingleTestExecutor(
         IExtension extension,
         Disposer disposer,
@@ -33,6 +34,8 @@ internal class SingleTestExecutor : IDataProducer
         TestInvoker testInvoker,
         ExplicitFilterService explicitFilterService,
         ParallelLimitProvider parallelLimitProvider,
+        AssemblyHookOrchestrator assemblyHookOrchestrator,
+        ClassHookOrchestrator classHookOrchestrator,
         TUnitLogger logger)
     {
         _extension = extension;
@@ -41,179 +44,278 @@ internal class SingleTestExecutor : IDataProducer
         _testInvoker = testInvoker;
         _explicitFilterService = explicitFilterService;
         _parallelLimitProvider = parallelLimitProvider;
+        _assemblyHookOrchestrator = assemblyHookOrchestrator;
+        _classHookOrchestrator = classHookOrchestrator;
         _logger = logger;
     }
 
-    public async Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
+    public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
+        bool isStartedAsDependencyForAnotherTest)
     {
-        if (test.IsStarted)
+        lock (test)
         {
-            await test.TestContext.TestTask;
-            return;
-        }
+            if (test.IsStarted)
+            {
+                return test.TestContext.TestTask;
+            }
 
-        using var _ = await WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
-        
-        test.IsStarted = true;
-        
-        var testContext = test.TestContext;
-        var timings = testContext.Timings;
-
-        if (_cancellationTokenSource.IsCancellationRequested)
-        {
-            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode().WithProperty(new CancelledTestNodeStateProperty())));
-            testContext.TaskCompletionSource.SetCanceled();
-            return;
+            test.IsStarted = true;
         }
         
-        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
+        return ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest);
+    }
 
-        var cleanUpExceptions = new List<Exception>();
+    private async Task ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
+    {
+        var semaphore = WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
+
+        if (semaphore != null)
+        {
+            await semaphore.WaitAsync();
+        }
         
         try
         {
-            await WaitForDependsOnTests(test, filter, context);
-            
-            if (!_explicitFilterService.CanRun(test.TestDetails, filter))
+            var testContext = test.TestContext;
+            var timings = testContext.Timings;
+
+            if (_cancellationTokenSource.IsCancellationRequested)
             {
-                throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
+                await context.MessageBus.PublishAsync(this,
+                    new TestNodeUpdateMessage(context.Request.Session.SessionUid,
+                        test.ToTestNode().WithProperty(new CancelledTestNodeStateProperty())));
+                testContext.TaskCompletionSource.SetCanceled();
+                return;
             }
-            
-            foreach (var beforeTestAttribute in test.BeforeTestAttributes)
-            {
-                await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
-                    () => beforeTestAttribute.OnBeforeTest(new BeforeTestContext(testContext.InternalDiscoveredTest)));
-            }
+
+            await context.MessageBus.PublishAsync(this,
+                new TestNodeUpdateMessage(context.Request.Session.SessionUid,
+                    test.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
+
+            var cleanUpExceptions = new List<Exception>();
+
+            DateTimeOffset start = DateTimeOffset.Now;
 
             try
             {
-                await AssemblyHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly,
-                    testContext);
-                await ClassHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType, testContext);
-                await ExecuteWithRetries(test, cleanUpExceptions);
-            }
-            catch (Exception exception)
-            {
-                cleanUpExceptions.Add(exception);
-                throw;
-            }
-            finally
-            {
-                await DecrementSharedData(test);
-                
-                foreach (var afterTestAttribute in test.AfterTestAttributes)
+                await WaitForDependsOnTests(test, filter, context);
+
+                if (!_explicitFilterService.CanRun(test.TestDetails, filter))
                 {
-                    await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
-                        () => RunHelpers.RunSafelyAsync(() => afterTestAttribute.OnAfterTest(testContext),
-                            cleanUpExceptions));
+                    throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
                 }
-                
-                await ClassHookOrchestrator.ExecuteCleanUpsIfLastInstance(test.TestContext.TestDetails.ClassType, testContext, cleanUpExceptions);
-                await AssemblyHookOrchestrator.ExecuteCleanups(test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
 
-                foreach (var artifact in testContext.Artifacts)
+                start = DateTimeOffset.Now;
+
+                try
                 {
-                    await context.MessageBus.PublishAsync(this, new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(), artifact.File, artifact.DisplayName, artifact.Description));
+                    await ExecuteBeforeHooks(test, context, testContext);
+
+                    TestContext.Current = testContext;
+
+                    foreach (var beforeTestAttribute in test.BeforeTestAttributes)
+                    {
+                        await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
+                            () => beforeTestAttribute.OnBeforeTest(
+                                new BeforeTestContext(testContext.InternalDiscoveredTest)));
+                    }
+
+                    await ExecuteWithRetries(test);
                 }
+                finally
+                {
+                    await DecrementSharedData(test);
+
+                    foreach (var afterTestAttribute in test.AfterTestAttributes)
+                    {
+                        await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
+                            () => RunHelpers.RunSafelyAsync(() => afterTestAttribute.OnAfterTest(testContext),
+                                cleanUpExceptions));
+                    }
+
+                    await DisposeTest(testContext, cleanUpExceptions);
+
+                    await RunHelpers.RunSafelyAsync(
+                        () => test.ClassConstructor?.DisposeAsync(test.TestDetails.ClassInstance) ?? Task.CompletedTask,
+                        cleanUpExceptions);
+
+                    TestContext.Current = null;
+
+                    await ExecuteAfterHooks(test, context, testContext, cleanUpExceptions);
+
+                    foreach (var artifact in testContext.Artifacts)
+                    {
+                        await context.MessageBus.PublishAsync(this,
+                            new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(),
+                                artifact.File,
+                                artifact.DisplayName, artifact.Description));
+                    }
+                }
+
+                ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
+
+                var timingProperty = GetTimingProperty(testContext, start);
+
+                await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+                    context.Request.Session.SessionUid,
+                    test.ToTestNode()
+                        .WithProperty(PassedTestNodeStateProperty.CachedInstance)
+                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                        .WithProperty(timingProperty)
+                ));
+
+                testContext.Result = new TestResult
+                {
+                    TestContext = testContext,
+                    Duration = timingProperty.GlobalTiming.Duration,
+                    Start = timingProperty.GlobalTiming.StartTime,
+                    End = timingProperty.GlobalTiming.EndTime,
+                    ComputerName = Environment.MachineName,
+                    Exception = null,
+                    Status = Status.Passed,
+                    Output = testContext.GetTestOutput()
+                };
+
+                testContext.TaskCompletionSource.SetResult(null);
+            }
+            catch (SkipTestException skipTestException)
+            {
+                testContext.TaskCompletionSource.SetException(skipTestException);
+
+                await _logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
+
+                await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+                    context.Request.Session.SessionUid,
+                    test.ToTestNode()
+                        .WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))
+                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                ));
+
+                var now = DateTimeOffset.Now;
+
+                testContext.Result = new TestResult
+                {
+                    Duration = TimeSpan.Zero,
+                    Start = timings.MinBy(x => x.Start)?.Start ?? now,
+                    End = timings.MinBy(x => x.End)?.End ?? timings.MinBy(x => x.Start)?.Start ?? now,
+                    ComputerName = Environment.MachineName,
+                    Exception = null,
+                    Status = Status.Skipped,
+                };
+            }
+            catch (Exception e)
+            {
+                testContext.TaskCompletionSource.SetException(e);
+
+                var timingProperty = GetTimingProperty(testContext, start);
+
+                await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+                    context.Request.Session.SessionUid, test.ToTestNode()
+                        .WithProperty(GetFailureStateProperty(testContext, e, timingProperty.GlobalTiming.Duration))
+                        .WithProperty(timingProperty)
+                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                        .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
+
+                testContext.Result = new TestResult
+                {
+                    Duration = timingProperty.GlobalTiming.Duration,
+                    Start = timingProperty.GlobalTiming.StartTime,
+                    End = timingProperty.GlobalTiming.EndTime,
+                    ComputerName = Environment.MachineName,
+                    Exception = e,
+                    Status = Status.Failed,
+                    Output = $"{testContext.GetTestErrorOutput()}{Environment.NewLine}{testContext.GetTestOutput()}"
+                };
             }
 
-            ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
-            
-            var timingProperty = GetTimingProperty(testContext);
-            
-            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode()
-                    .WithProperty(PassedTestNodeStateProperty.CachedInstance)
-                    .WithProperty(timingProperty)
-            ));
-            
-            testContext.TaskCompletionSource.SetResult(null);
-
-            testContext.Result = new TestResult
-            {
-                TestContext = testContext,
-                Duration = timingProperty.GlobalTiming.Duration,
-                Start = timingProperty.GlobalTiming.StartTime,
-                End = timingProperty.GlobalTiming.EndTime,
-                ComputerName = Environment.MachineName,
-                Exception = null,
-                Status = Status.Passed,
-                Output = testContext.GetTestOutput()
-            };
-        }
-        catch (SkipTestException skipTestException)
-        {
-            await _logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
-            
-            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, 
-                test.ToTestNode().WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))));
-
-            var now = DateTimeOffset.Now;
-            
-            testContext.TaskCompletionSource.SetException(skipTestException);
-                
-            testContext.Result = new TestResult
-            {
-                Duration = TimeSpan.Zero,
-                Start = timings.MinBy(x => x.Start)?.Start ?? now,
-                End = timings.MinBy(x => x.End)?.End ?? timings.MinBy(x => x.Start)?.Start ?? now,
-                ComputerName = Environment.MachineName,
-                Exception = null,
-                Status = Status.Skipped,
-            };
-        }
-        catch (Exception e)
-        {
-            var timingProperty = GetTimingProperty(testContext);
-            
-            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid, test.ToTestNode()
-                .WithProperty(GetFailureStateProperty(testContext, e, timingProperty.GlobalTiming.Duration))
-                .WithProperty(timingProperty)
-                .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
-
-            testContext.TaskCompletionSource.SetException(e);
-            
-            testContext.Result = new TestResult
-            {
-                Duration = timingProperty.GlobalTiming.Duration,
-                Start = timingProperty.GlobalTiming.StartTime,
-                End = timingProperty.GlobalTiming.EndTime,
-                ComputerName = Environment.MachineName,
-                Exception = e,
-                Status = Status.Failed,
-                Output = testContext.GetTestOutput()
-            };
+            // Will only set if not already set - Last resort incase something weird happened
+            testContext.TaskCompletionSource.TrySetException(
+                new Exception("Unknown error setting TaskCompletionSource"));
         }
         finally
         {
-            testContext.TaskCompletionSource.TrySetException(new Exception("Unknown error setting TaskCompletionSource"));
-
-            using var lockHandle = await _consoleStandardOutLock.WaitAsync();
-            
-            await Dispose(testContext);
+            if (semaphore != null)
+            {
+                semaphore.Dispose();
+            }
         }
     }
 
-    private async Task<IDisposable> WaitForParallelLimiter(DiscoveredTest test, bool isStartedAsDependencyForAnotherTest)
+    private async Task ExecuteBeforeHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext)
+    {
+        try
+        {
+            await _assemblyHookOrchestrator.ExecuteBeforeHooks(context,
+                test.TestContext.TestDetails.ClassType.Assembly,
+                testContext);
+
+            await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType);
+        }
+        catch (Exception e)
+        {
+            throw new SkipTestException($"Skipped due to failing Before Hook {e.GetType().Name}: {e.Message}");
+        }
+    }
+
+    private async Task ExecuteAfterHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
+        List<Exception> cleanUpExceptions)
+    {
+        try
+        {
+            await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context,
+                test.TestContext.TestDetails.ClassType, cleanUpExceptions);
+
+            await _assemblyHookOrchestrator.ExecuteCleanups(context,
+                test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
+        }
+        catch
+        {
+            // Ignored - Will be counted as its own test failure - We don't need to bind it to this test
+        }
+    }
+
+    private async Task DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
+    {
+        await TestHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
+            
+        await RunHelpers.RunValueTaskSafelyAsync(() => _disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
+        
+        await _consoleStandardOutLock.WaitAsync();
+
+        try
+        {
+            await Dispose(testContext);
+        }
+        finally
+        {
+            _consoleStandardOutLock.Release();
+        }
+    }
+
+    private SemaphoreSlim? WaitForParallelLimiter(DiscoveredTest test, bool isStartedAsDependencyForAnotherTest)
     {
         if (test.TestDetails.ParallelLimit is { } parallelLimit && !isStartedAsDependencyForAnotherTest)
         {
-            return await _parallelLimitProvider.GetLock(parallelLimit).WaitAsync();
+            return _parallelLimitProvider.GetLock(parallelLimit);
         }
 
-        return NoOpDisposable.Instance;
+        return null;
     }
 
-    private static TimingProperty GetTimingProperty(TestContext testContext)
+    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
     {
-        var now = DateTimeOffset.Now;
+        var end = DateTimeOffset.Now;
 
-        var start = testContext.Timings.MinBy(x => x.Start)?.Start ?? now;
-        var end = testContext.Timings.MaxBy(x => x.End)?.End ?? now;
+        lock (testContext.Timings)
+        {
+            var stepTimings = testContext.Timings.Select(x =>
+                new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
 
-        var stepTimings = testContext.Timings.Select(x =>
-            new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
-        
-        return new TimingProperty(new TimingInfo(start, end, end - start), [..stepTimings]);
+            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [..stepTimings]);
+        }
     }
 
     private static IProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
@@ -294,15 +396,14 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private Task RunTest(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions,
-        CancellationToken cancellationToken)
+    private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
-        return _testInvoker.Invoke(discoveredTest, cleanUpExceptions, cancellationToken);
+        return _testInvoker.Invoke(discoveredTest, cancellationToken);
     }
 
-    private readonly AsyncSemaphore _consoleStandardOutLock = new(1);
+    private readonly SemaphoreSlim _consoleStandardOutLock = new(1, 1);
 
-    private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest)
     {
         var testInformation = discoveredTest.TestContext.TestDetails;
         var retryCount = testInformation.RetryLimit;
@@ -314,7 +415,7 @@ internal class SingleTestExecutor : IDataProducer
         {
             try
             {
-                await ExecuteCore(discoveredTest, cleanUpExceptions);
+                await ExecuteCore(discoveredTest);
                 break;
             }
             catch (Exception e)
@@ -326,7 +427,7 @@ internal class SingleTestExecutor : IDataProducer
                 }
 
                 await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying... (attempt {i + 1})");
-                discoveredTest.ResetTestInstance();
+                await discoveredTest.ResetTestInstance();
                 discoveredTest.TestContext.CurrentRetryAttempt++;
             }
         }
@@ -352,14 +453,14 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async ValueTask ExecuteCore(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async ValueTask ExecuteCore(DiscoveredTest discoveredTest)
     {
         if (_cancellationTokenSource.IsCancellationRequested)
         {
             return;
         }
         
-        await ExecuteTestMethodWithTimeout(discoveredTest, cleanUpExceptions);
+        await ExecuteTestMethodWithTimeout(discoveredTest);
     }
 
     private async ValueTask WaitForDependsOnTests(DiscoveredTest testContext, ITestExecutionFilter? filter,
@@ -430,17 +531,17 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest)
     {
         var testDetails = discoveredTest.TestDetails;
         
         if (testDetails.Timeout == null || testDetails.Timeout.Value == default)
         {
-            await RunTest(discoveredTest, cleanUpExceptions, EngineCancellationToken.Token);
+            await RunTest(discoveredTest, EngineCancellationToken.Token);
             return;
         }
 
-        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, cleanUpExceptions, token), testDetails.Timeout);
+        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout);
     }
 
 

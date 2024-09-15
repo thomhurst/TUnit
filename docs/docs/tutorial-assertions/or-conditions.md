@@ -19,8 +19,8 @@ When using this, only one condition needs to pass:
         var result = Add(randomValue1, randomValue2);
 
         await Assert.That(result)
-            .Is.EqualTo(2)
-            .Or.Is.EqualTo(3)
-            .Or.Is.EqualTo(4);
+            .IsEqualTo(2)
+            .Or.IsEqualTo(3)
+            .Or.IsEqualTo(4);
     }
 ```

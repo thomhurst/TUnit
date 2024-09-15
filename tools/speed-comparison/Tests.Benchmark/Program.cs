@@ -5,6 +5,7 @@ BenchmarkRunner.Run<Benchmarks>();
 
 var output = new DirectoryInfo(Environment.CurrentDirectory)
     .GetFiles("*.md", SearchOption.AllDirectories)
+    .OrderBy(x => x.Name)
     .First();
 
 var file = Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY");

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Exceptions;
 
@@ -68,7 +69,7 @@ internal class AssertionScope : IAsyncDisposable
         
         if (_exceptions.Count == 1)
         {
-            throw _exceptions[0];
+            ExceptionDispatchInfo.Throw(_exceptions[0]);
         }
 
         if (_exceptions.Count > 1)

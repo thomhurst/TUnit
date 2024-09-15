@@ -9,9 +9,8 @@ public class EqualsAssertionTests
     {
         var one = "1";
         NUnitAssert.That(async () =>
-                await TUnitAssert.That(one).Is.EqualTo("2", StringComparison.Ordinal).And.Is.Not.EqualTo("1").And.Is
-                    .TypeOf<string>(),
-            Throws.Exception.Message.Contain("Assert.That(one).Is.EqualTo(\"2\", StringComparison.Ordinal).And.Is.Not.EqualTo(\"1\").And.Is.TypeOf(System.String")
+                await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsTypeOf(typeof(string)),
+            Throws.Exception.Message.Contain("Assert.That(one).IsEqualTo(\"2\", StringComparison.Ordinal).And.IsNotEqualTo(\"1\", StringComparison.Ordinal).And.IsTypeOf(System.String)")
         );
     }
     
@@ -19,34 +18,34 @@ public class EqualsAssertionTests
     public async Task Long()
     {
         long zero = 0;
-        await TUnitAssert.That(zero).Is.EqualTo(0);
+        await TUnitAssert.That(zero).IsEqualTo(0);
     }
     
     [Test]
     public async Task Short()
     {
         short zero = 0;
-        await TUnitAssert.That<long>(zero).Is.EqualTo(0);
+        await TUnitAssert.That<long>(zero).IsEqualTo(0);
     }
     
     [Test]
     public void Int_Bad()
     {
         int zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).Is.EqualTo(0));
+        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
     }
     
     [Test]
     public void Long_Bad()
     {
         long zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(zero).Is.EqualTo(0));
+        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(zero).IsEqualTo(0));
     }
     
     [Test]
     public void Short_Bad()
     {
         short zero = 1;
-        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).Is.EqualTo(0));
+        NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
     }
 }

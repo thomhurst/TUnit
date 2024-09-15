@@ -1,6 +1,9 @@
 # TUnit
 
-A modern, flexible and fast testing framework for .NET 8 and up.
+A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Trimmed Single File application support included!
+
+
+[![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) ![Nuget](https://img.shields.io/nuget/dt/TUnit) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit) 
 
 ## Documentation
 
@@ -8,22 +11,24 @@ See here: <https://thomhurst.github.io/TUnit/>
 
 ## IDE
 
-TUnit is built on top of newer Microsoft.Testing.Platform libraries, as opposed to older legacy VSTest libraries. As of July 2024, IDEs do not fully support this testing platform yet.
+TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the older VSTest platform. As of September 2024, IDEs do not fully support this testing platform yet.
 
-Visual Studio Preview versions can run the new tests by enabling the new testing platform server mode, within Visual Studio preview/experimental features. You will have to opt in to this manually.
+Visual Studio 17.10 onwards can run the new tests by enabling the new testing platform server mode, within Visual Studio preview/experimental features. You will have to opt in to this manually.
 
 For Rider, it is not yet supported. I believe they are working on it so we just have to wait for now.
 
-`dotnet` CLI - Fully supported. Tests should be runnable with both `dotnet test` or `dotnet run`. `dotnet run` should give you a better experience and make it simpler to pass in test flags!
+`dotnet` CLI - Fully supported. Tests should be runnable with `dotnet test`, `dotnet run`, `dotnet exec` or executing an executable directly. See the docs for more information!
 
 ## Features
 
+- Native AOT / Trimmed Single File application support
 - Source generated tests
+- Dependency injection support ([See here](https://thomhurst.github.io/TUnit/docs/tutorial-extras/class-constructors))
 - Full async support
 - Parallel by default, with mechanisms to:
     - Run specific tests completely on their own
     - Run specific tests not in parallel with other specific tests
-    - Limit the a parallel limit on a per-test, class or assembly level
+    - Limit the parallel limit on a per-test, class or assembly level
 - Test ordering (if running not in parallel)
 - Tests can depend on other tests to form chains, useful for if one test depends on state from another action
 - Easy to read assertions
@@ -49,11 +54,8 @@ For Rider, it is not yet supported. I believe they are working on it so we just 
     {
         var value = "Hello world!";
 
-        await Assert.That(value)
-            .Is.Not.Null
-            .And.Does.StartWith("H")
-            .And.Has.Count().EqualTo(12)
-            .And.Is.EqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
+        await Assert.That(value).IsNotNull()
+                .And.IsEqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
     }
 ```
 
@@ -158,13 +160,13 @@ or with more complex test orchestration needs
 
 TUnit is inspired by NUnit and xUnit - two of the most popular testing frameworks for .NET.
 
-It aims to build upon the useful features of both while trying to address any pain points that they may have. You may have experienced these, or you may have not even known about them.
+It aims to build upon the useful features of both while trying to address any pain points that they may have.
 
 [Read more here](https://thomhurst.github.io/TUnit/docs/comparison/framework-differences)
 
 ## Benchmark
 
-### Scenario: A single test that completes instantly
+### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
 
 #### macos-latest
 
@@ -178,12 +180,35 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 
 
 ```
-| Method | Mean     | Error   | StdDev  |
-|------- |---------:|--------:|--------:|
-| TUnit  | 423.6 ms | 6.38 ms | 5.33 ms |
-| NUnit  | 689.0 ms | 9.52 ms | 7.43 ms |
-| xUnit  | 675.1 ms | 6.66 ms | 5.20 ms |
-| MSTest | 617.2 ms | 8.94 ms | 9.94 ms |
+| Method    | Mean      | Error    | StdDev   |
+|---------- |----------:|---------:|---------:|
+| TUnit_AOT |  75.53 ms | 0.650 ms | 0.577 ms |
+| TUnit     | 411.42 ms | 7.939 ms | 8.153 ms |
+| NUnit     | 692.60 ms | 9.464 ms | 8.852 ms |
+| xUnit     | 675.36 ms | 5.769 ms | 5.397 ms |
+| MSTest    | 616.13 ms | 5.473 ms | 4.852 ms |
+
+
+
+#### windows-latest
+
+```
+
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2700) (Hyper-V)
+AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 8.0.401
+  [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+  DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+
+```
+| Method    | Mean        | Error     | StdDev    |
+|---------- |------------:|----------:|----------:|
+| TUnit_AOT |    78.70 ms |  1.527 ms |  1.697 ms |
+| TUnit     |   749.00 ms | 14.568 ms | 21.354 ms |
+| NUnit     | 1,289.48 ms | 11.867 ms | 11.100 ms |
+| xUnit     | 1,268.87 ms |  9.112 ms |  8.523 ms |
+| MSTest    | 1,149.60 ms |  8.799 ms |  8.231 ms |
 
 
 
@@ -199,36 +224,16 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   823.5 ms | 16.26 ms | 33.59 ms |
-| NUnit  | 1,380.5 ms | 26.19 ms | 25.72 ms |
-| xUnit  | 1,356.9 ms | 23.00 ms | 21.51 ms |
-| MSTest | 1,224.1 ms | 16.92 ms | 15.82 ms |
+| Method    | Mean        | Error     | StdDev    | Median      |
+|---------- |------------:|----------:|----------:|------------:|
+| TUnit_AOT |    46.36 ms |  1.016 ms |  2.996 ms |    46.51 ms |
+| TUnit     |   797.48 ms | 15.784 ms | 37.513 ms |   782.29 ms |
+| NUnit     | 1,368.92 ms | 16.410 ms | 14.547 ms | 1,369.28 ms |
+| xUnit     | 1,364.23 ms | 13.131 ms | 11.640 ms | 1,365.45 ms |
+| MSTest    | 1,232.98 ms | 19.399 ms | 17.197 ms | 1,236.15 ms |
 
 
-
-#### windows-latest
-
-```
-
-BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
-AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 8.0.401
-  [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-  DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-
-
-```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   759.2 ms | 15.06 ms | 21.59 ms |
-| NUnit  | 1,262.1 ms |  8.68 ms |  8.12 ms |
-| xUnit  | 1,243.7 ms |  7.51 ms |  7.03 ms |
-| MSTest | 1,121.5 ms | 12.19 ms | 11.40 ms |
-
-
-### Scenario: A test that takes 50ms to execute, repeated 100 times
+### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
 
 #### ubuntu-latest
 
@@ -242,12 +247,13 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   902.4 ms | 17.93 ms | 35.40 ms |
-| NUnit  | 6,618.9 ms | 23.68 ms | 20.99 ms |
-| xUnit  | 6,565.6 ms | 33.21 ms | 31.07 ms |
-| MSTest | 6,513.6 ms | 30.48 ms | 28.52 ms |
+| Method    | Mean        | Error     | StdDev    |
+|---------- |------------:|----------:|----------:|
+| TUnit_AOT |    86.27 ms |  1.685 ms |  4.005 ms |
+| TUnit     |   844.84 ms | 16.841 ms | 34.402 ms |
+| NUnit     | 6,567.37 ms | 16.486 ms | 14.614 ms |
+| xUnit     | 6,537.96 ms | 19.481 ms | 18.223 ms |
+| MSTest    | 6,476.00 ms | 13.726 ms | 11.462 ms |
 
 
 
@@ -255,7 +261,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ```
 
-BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2700) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 8.0.401
   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
@@ -263,12 +269,13 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method | Mean       | Error    | StdDev   |
-|------- |-----------:|---------:|---------:|
-| TUnit  |   889.7 ms | 17.76 ms | 26.59 ms |
-| NUnit  | 7,551.3 ms | 28.36 ms | 26.52 ms |
-| xUnit  | 7,523.6 ms | 29.90 ms | 27.97 ms |
-| MSTest | 7,444.6 ms | 29.64 ms | 26.28 ms |
+| Method    | Mean       | Error    | StdDev   |
+|---------- |-----------:|---------:|---------:|
+| TUnit_AOT |   136.0 ms |  2.71 ms |  5.71 ms |
+| TUnit     |   835.9 ms | 16.62 ms | 19.78 ms |
+| NUnit     | 7,540.2 ms | 12.64 ms | 11.82 ms |
+| xUnit     | 7,528.9 ms | 21.05 ms | 19.69 ms |
+| MSTest    | 7,486.3 ms | 11.22 ms |  9.95 ms |
 
 
 
@@ -284,12 +291,13 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 
 
 ```
-| Method | Mean        | Error     | StdDev    |
-|------- |------------:|----------:|----------:|
-| TUnit  |    785.9 ms |  28.11 ms |  82.89 ms |
-| NUnit  | 14,083.2 ms | 277.38 ms | 507.21 ms |
-| xUnit  | 14,199.6 ms | 282.67 ms | 649.48 ms |
-| MSTest | 14,053.4 ms | 280.06 ms | 287.60 ms |
+| Method    | Mean        | Error     | StdDev    | Median      |
+|---------- |------------:|----------:|----------:|------------:|
+| TUnit_AOT |    249.3 ms |  11.94 ms |  35.20 ms |    247.2 ms |
+| TUnit     |    594.0 ms |  21.69 ms |  63.96 ms |    617.5 ms |
+| NUnit     | 14,152.8 ms | 281.54 ms | 521.85 ms | 14,147.8 ms |
+| xUnit     | 14,384.9 ms | 284.92 ms | 520.99 ms | 14,479.0 ms |
+| MSTest    | 14,243.3 ms | 279.82 ms | 539.11 ms | 14,154.6 ms |
 
 
 

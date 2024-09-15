@@ -39,9 +39,14 @@ internal static class GenericTestInvocationWriter
         {
             sourceBuilder.WriteLine();
         }
+
+        if (testSourceDataModel.ClassConstructorType != null)
+        {
+            sourceBuilder.WriteLine($"var classConstructor = new {testSourceDataModel.ClassConstructorType}();");
+        }
         
         sourceBuilder.WriteLine(
-            $"var resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.ClassVariables.ToCommaSeparatedString()}));");
+            $"var resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => {ConstructClass(testSourceDataModel)});");
 
         sourceBuilder.WriteLine();
         
@@ -80,6 +85,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
         sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
         sourceBuilder.WriteLine($"TestExecutor = {GetTestExecutor(testSourceDataModel.TestExecutor)},");
+        sourceBuilder.WriteLine($"ClassConstructor = { GetClassConstructor(testSourceDataModel) },");
         sourceBuilder.WriteLine($"ParallelLimit = {GetParallelLimit(testSourceDataModel.ParallelLimit)},");
         sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
@@ -98,6 +104,21 @@ internal static class GenericTestInvocationWriter
 
             sourceBuilder.WriteLine("}");
         }
+    }
+
+    private static string GetClassConstructor(TestSourceDataModel testSourceDataModel)
+    {
+        return testSourceDataModel.ClassConstructorType == null ? "null" : "classConstructor";
+    }
+
+    private static string ConstructClass(TestSourceDataModel testSourceDataModel)
+    {
+        if (testSourceDataModel.ClassConstructorType != null)
+        {
+            return $"classConstructor.Create<{testSourceDataModel.FullyQualifiedTypeName}>()";
+        }
+        
+        return $"new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.ClassVariables.ToCommaSeparatedString()})";
     }
 
     private static string GetTestExecutor(string? testExecutor)

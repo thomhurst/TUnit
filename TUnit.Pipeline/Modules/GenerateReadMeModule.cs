@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using EnumerableAsyncProcessor.Extensions;
-using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.Extensions;
@@ -57,7 +56,7 @@ public class GenerateReadMeModule : Module<File>
         {
             var className = groupedArtifacts.Key;
 
-            fileContents.AppendLine($"### Scenario: {GetScenario(className)}");
+            fileContents.AppendLine($"### Scenario: {GetScenario(className)} (including spawning a new process and initialising the test framework)");
 
             await groupedArtifacts.ForEachAsync(async artifact =>
             {

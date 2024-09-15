@@ -5,10 +5,10 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Generic;
 
 public class EquivalentToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, TActual, TAnd, TOr>
-    where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-    where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
 {
-    public EquivalentToAssertCondition(AssertionBuilder<TActual> assertionBuilder, TActual expected) : base(assertionBuilder, expected)
+    public EquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TActual expected) : base(assertionBuilder, expected)
     {
     }
 

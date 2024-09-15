@@ -25,13 +25,13 @@ public class InjectSharedPerType1
     {
         if (SharedInjectedTypesContainer.TestClass1Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass1Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).HasSingleItem();
     }
     
     [Test, Repeat(5)]
@@ -39,13 +39,13 @@ public class InjectSharedPerType1
     {
         if (SharedInjectedTypesContainer.TestClass1Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass1Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).HasSingleItem();
     }
     
     [Test, Repeat(5)]
@@ -53,13 +53,13 @@ public class InjectSharedPerType1
     {
         if (SharedInjectedTypesContainer.TestClass1Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass1Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).HasSingleItem();
     }
 }
 
@@ -78,13 +78,13 @@ public class InjectSharedPerType2
     {
         if (SharedInjectedTypesContainer.TestClass2Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass2Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).HasSingleItem();
     }
     
     [Test, Repeat(5)]
@@ -92,13 +92,13 @@ public class InjectSharedPerType2
     {
         if (SharedInjectedTypesContainer.TestClass2Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass2Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).HasSingleItem();
     }
     
     [Test, Repeat(5)]
@@ -106,13 +106,13 @@ public class InjectSharedPerType2
     {
         if (SharedInjectedTypesContainer.TestClass2Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Not.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).DoesNotContain(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass2Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).HasSingleItem();
     }
 }
 
@@ -131,13 +131,13 @@ public class InjectSharedPerType3
     {
         if (SharedInjectedTypesContainer.TestClass3Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Contains(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass3Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).HasSingleItem();
     }
     
     [Test, Repeat(5)]
@@ -145,13 +145,13 @@ public class InjectSharedPerType3
     {
         if (SharedInjectedTypesContainer.TestClass3Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Contains(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass3Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).HasSingleItem();
     }
     
     [Test, Repeat(5)]
@@ -159,12 +159,12 @@ public class InjectSharedPerType3
     {
         if (SharedInjectedTypesContainer.TestClass3Instances.Any())
         {
-            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).Does.Not.Contain(_dummyReferenceTypeClass);
-            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Does.Contain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass1Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass2Instances).DoesNotContain(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedTypesContainer.TestClass3Instances).Contains(_dummyReferenceTypeClass);
         }
 
         SharedInjectedTypesContainer.TestClass3Instances.Add(_dummyReferenceTypeClass);
-        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).Has.SingleItem();
+        await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).HasSingleItem();
     }
 }

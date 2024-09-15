@@ -10,31 +10,31 @@ public class AsyncTaskTests
     [Test]
     public async Task Func_Task_Is_Callable()
     {
-        await TUnitAssert.That(() => Task.FromResult("Hello")).Is.Not.NullOrEmpty().And.Is.EqualTo("Hello");
+        await TUnitAssert.That(() => Task.FromResult("Hello")).IsNotNullOrEmpty().And.IsEqualTo("Hello");
     }
     
     [Test]
     public async Task Func_Awaited_Task_Is_Callable()
     {
-        await TUnitAssert.That(async () => await Task.FromResult("Hello")).Is.Not.NullOrEmpty().And.Is.EqualTo("Hello");
+        await TUnitAssert.That(async () => await Task.FromResult("Hello")).IsNotNullOrEmpty().And.IsEqualTo("Hello");
     }
     
     [Test]
     public async Task Func_Awaited_ValueTask_Is_Callable()
     {
-        await TUnitAssert.That(async () => await ValueTask.FromResult("Hello")).Is.Not.NullOrEmpty().And.Is.EqualTo("Hello");
+        await TUnitAssert.That(async () => await ValueTask.FromResult("Hello")).IsNotNullOrEmpty().And.IsEqualTo("Hello");
     }
     
     [Test]
     public async Task ValueTask_Is_Callable()
     {
-        await TUnitAssert.That(ValueTask.FromResult("Hello")).Is.Not.NullOrEmpty().And.Is.EqualTo("Hello");
+        await TUnitAssert.That(ValueTask.FromResult("Hello")).IsNotNullOrEmpty().And.IsEqualTo("Hello");
     }
     
     [Test]
     public async Task Task_Is_Callable()
     {
-        await TUnitAssert.That(Task.FromResult("Hello")).Is.Not.NullOrEmpty().And.Is.EqualTo("Hello");
+        await TUnitAssert.That(Task.FromResult("Hello")).IsNotNullOrEmpty().And.IsEqualTo("Hello");
     }
     
     [Test]

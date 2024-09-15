@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
   </PropertyGroup>
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncSemaphore" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="ModularPipelines.DotNet" />
     <PackageReference Include="ModularPipelines.Git" />

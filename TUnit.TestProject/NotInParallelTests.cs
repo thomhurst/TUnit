@@ -8,46 +8,30 @@ public class NotInParallelTests
 {
     private static readonly ConcurrentBag<DateTimeRange> TestDateTimeRanges = [];
 
+    [After(Test)]
+    public async Task TestOverlaps()
+    {
+        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.TestStart!.Value.DateTime, TestContext.Current.Result!.End.DateTime));
+
+        await AssertNoOverlaps();
+    }
+    
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test1()
     {
-        var start = DateTime.Now;
-
         await Task.Delay(500);
-        
-        var end = DateTime.Now;
-        
-        TestDateTimeRanges.Add(new DateTimeRange(start, end));
-
-        await AssertNoOverlaps();
     }
     
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test2()
     {
-        var start = DateTime.Now;
-
         await Task.Delay(500);
-        
-        var end = DateTime.Now;
-        
-        TestDateTimeRanges.Add(new DateTimeRange(start, end));
-
-        await AssertNoOverlaps();
     }
     
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test3()
     {
-        var start = DateTime.Now;
-
         await Task.Delay(500);
-        
-        var end = DateTime.Now;
-        
-        TestDateTimeRanges.Add(new DateTimeRange(start, end));
-
-        await AssertNoOverlaps();
     }
 
     private async Task AssertNoOverlaps()
@@ -57,7 +41,7 @@ public class NotInParallelTests
             await Assert.That(TestDateTimeRanges
                 .Except([testDateTimeRange])
                 .Any(x => x.Overlap(testDateTimeRange)))
-                .Is.False();
+                .IsFalse();
         }
     }
 

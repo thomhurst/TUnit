@@ -13,32 +13,32 @@ public class AssertMultipleTests
         {
             await using (TUnitAssert.Multiple())
             {
-                await TUnitAssert.That(1).Is.EqualTo(2);
-                await TUnitAssert.That(2).Is.EqualTo(3);
-                await TUnitAssert.That(3).Is.EqualTo(4);
-                await TUnitAssert.That(4).Is.EqualTo(5);
-                await TUnitAssert.That(5).Is.EqualTo(6);
+                await TUnitAssert.That(1).IsEqualTo(2);
+                await TUnitAssert.That(2).IsEqualTo(3);
+                await TUnitAssert.That(3).IsEqualTo(4);
+                await TUnitAssert.That(4).IsEqualTo(5);
+                await TUnitAssert.That(5).IsEqualTo(6);
             }
         });
 
         NUnitAssert.That(assertionException!.Message, Is.EqualTo("""
-                                                                Assert.That(1).Is.EqualTo(2)
+                                                                Assert.That(1).IsEqualTo(2)
                                                                 Expected: 2
                                                                 Received: 1
                                                                 
-                                                                Assert.That(2).Is.EqualTo(3)
+                                                                Assert.That(2).IsEqualTo(3)
                                                                 Expected: 3
                                                                 Received: 2
                                                                 
-                                                                Assert.That(3).Is.EqualTo(4)
+                                                                Assert.That(3).IsEqualTo(4)
                                                                 Expected: 4
                                                                 Received: 3
                                                                 
-                                                                Assert.That(4).Is.EqualTo(5)
+                                                                Assert.That(4).IsEqualTo(5)
                                                                 Expected: 5
                                                                 Received: 4
                                                                 
-                                                                Assert.That(5).Is.EqualTo(6)
+                                                                Assert.That(5).IsEqualTo(6)
                                                                 Expected: 6
                                                                 Received: 5
                                                                 """));
@@ -51,46 +51,46 @@ public class AssertMultipleTests
         {
             await using (TUnitAssert.Multiple())
             {
-                await TUnitAssert.That(1).Is.EqualTo(2).Or.Is.EqualTo(3);
-                await TUnitAssert.That(2).Is.EqualTo(3).And.Is.EqualTo(4);
-                await TUnitAssert.That(3).Is.EqualTo(4).Or.Is.EqualTo(5);
-                await TUnitAssert.That(4).Is.EqualTo(5).And.Is.EqualTo(6);
-                await TUnitAssert.That(5).Is.EqualTo(6).Or.Is.EqualTo(7);
+                await TUnitAssert.That(1).IsEqualTo(2).Or.IsEqualTo(3);
+                await TUnitAssert.That(2).IsEqualTo(3).And.IsEqualTo(4);
+                await TUnitAssert.That(3).IsEqualTo(4).Or.IsEqualTo(5);
+                await TUnitAssert.That(4).IsEqualTo(5).And.IsEqualTo(6);
+                await TUnitAssert.That(5).IsEqualTo(6).Or.IsEqualTo(7);
             }
         });
 
         NUnitAssert.That(assertionException!.Message, Is.EqualTo("""
-                                                                Assert.That(1).Is.EqualTo(2).Or.Is.EqualTo(3)
+                                                                Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
                                                                 Expected: 2
                                                                 Received: 1
                                                                  &
                                                                 Expected: 3
                                                                 Received: 1
                                                                 
-                                                                Assert.That(2).Is.EqualTo(3).And.Is.EqualTo(4)
+                                                                Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
                                                                 Expected: 3
                                                                 Received: 2
                                                                 
-                                                                Assert.That(2).Is.EqualTo(3).And.Is.EqualTo(4)
+                                                                Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
                                                                 Expected: 4
                                                                 Received: 2
                                                                 
-                                                                Assert.That(3).Is.EqualTo(4).Or.Is.EqualTo(5)
+                                                                Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
                                                                 Expected: 4
                                                                 Received: 3
                                                                  &
                                                                 Expected: 5
                                                                 Received: 3
                                                                 
-                                                                Assert.That(4).Is.EqualTo(5).And.Is.EqualTo(6)
+                                                                Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
                                                                 Expected: 5
                                                                 Received: 4
                                                                 
-                                                                Assert.That(4).Is.EqualTo(5).And.Is.EqualTo(6)
+                                                                Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
                                                                 Expected: 6
                                                                 Received: 4
                                                                 
-                                                                Assert.That(5).Is.EqualTo(6).Or.Is.EqualTo(7)
+                                                                Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
                                                                 Expected: 6
                                                                 Received: 5
                                                                  &
@@ -106,19 +106,19 @@ public class AssertMultipleTests
         {
             await using (TUnitAssert.Multiple())
             {
-                await TUnitAssert.That(1).Is.EqualTo(2);
-                await TUnitAssert.That(2).Is.EqualTo(3);
-                await TUnitAssert.That(3).Is.EqualTo(4);
+                await TUnitAssert.That(1).IsEqualTo(2);
+                await TUnitAssert.That(2).IsEqualTo(3);
+                await TUnitAssert.That(3).IsEqualTo(4);
 
                 await using (TUnitAssert.Multiple())
                 {
-                    await TUnitAssert.That(4).Is.EqualTo(5);
-                    await TUnitAssert.That(5).Is.EqualTo(6);
+                    await TUnitAssert.That(4).IsEqualTo(5);
+                    await TUnitAssert.That(5).IsEqualTo(6);
                     
                     await using (TUnitAssert.Multiple())
                     {
-                        await TUnitAssert.That(6).Is.EqualTo(7);
-                        await TUnitAssert.That(7).Is.EqualTo(8);
+                        await TUnitAssert.That(6).IsEqualTo(7);
+                        await TUnitAssert.That(7).IsEqualTo(8);
                     }
                 }
             }
@@ -133,35 +133,35 @@ public class AssertMultipleTests
         var assertionException3 = (TUnitAssertionException)aggregateException.InnerExceptions[2];
         
         NUnitAssert.That(assertionException1.Message, Is.EqualTo("""
-                                                                 Assert.That(1).Is.EqualTo(2)
+                                                                 Assert.That(1).IsEqualTo(2)
                                                                  Expected: 2
                                                                  Received: 1
 
-                                                                 Assert.That(2).Is.EqualTo(3)
+                                                                 Assert.That(2).IsEqualTo(3)
                                                                  Expected: 3
                                                                  Received: 2
 
-                                                                 Assert.That(3).Is.EqualTo(4)
+                                                                 Assert.That(3).IsEqualTo(4)
                                                                  Expected: 4
                                                                  Received: 3
                                                                  """));
         
         NUnitAssert.That(assertionException2.Message, Is.EqualTo("""
-                                                                 Assert.That(4).Is.EqualTo(5)
+                                                                 Assert.That(4).IsEqualTo(5)
                                                                  Expected: 5
                                                                  Received: 4
 
-                                                                 Assert.That(5).Is.EqualTo(6)
+                                                                 Assert.That(5).IsEqualTo(6)
                                                                  Expected: 6
                                                                  Received: 5
                                                                  """));
         
         NUnitAssert.That(assertionException3.Message, Is.EqualTo("""
-                                                                 Assert.That(6).Is.EqualTo(7)
+                                                                 Assert.That(6).IsEqualTo(7)
                                                                  Expected: 7
                                                                  Received: 6
 
-                                                                 Assert.That(7).Is.EqualTo(8)
+                                                                 Assert.That(7).IsEqualTo(8)
                                                                  Expected: 8
                                                                  Received: 7
                                                                  """));

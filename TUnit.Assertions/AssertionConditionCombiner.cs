@@ -16,15 +16,15 @@ public class AssertionConditionCombiner
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public static BaseAssertCondition<TActual, TAnd, TOr> Combine<TActual, TAnd, TOr>(Connector<TActual, TAnd, TOr> connector, BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
     {
         return Combine(connector.OtherAssertCondition, connector.ConnectorType, assertCondition);
     }
     
     public static BaseAssertCondition<TActual, TAnd, TOr> Combine<TActual, TAnd, TOr>(BaseAssertCondition<TActual, TAnd, TOr>? initialAssertCondition, ConnectorType? connectorType, BaseAssertCondition<TActual, TAnd, TOr> assertConditionToAppend)
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TAnd, TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TOr, TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
     {
         if (connectorType is null or ConnectorType.None)
         {

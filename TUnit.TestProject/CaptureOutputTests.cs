@@ -12,21 +12,29 @@ public class CaptureOutputTests
     {
         _myClass = new MyClass();
     }
-    
+
     [Test]
     public async Task Test()
     {
         _myClass.DoSomething(1);
 
-        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah1");
+        await using (Assert.Multiple())
+        {
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah1");
+        }
     }
-    
+
     [Test]
     public async Task Test2()
     {
         _myClass.DoSomething(2);
 
-        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah2");
+        await using (Assert.Multiple())
+        {
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test2");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah2");
+        }
     }
             
     [Test]
@@ -34,7 +42,11 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(3);
 
-        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah3");
+        await using (Assert.Multiple())
+        {
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test3");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah3");
+        }
     }
         
     [Test]
@@ -42,7 +54,11 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(4);
 
-        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah4");
+        await using (Assert.Multiple())
+        {
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test4");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah4");
+        }
     }
         
     [Test]
@@ -50,7 +66,20 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(5);
 
-        await Assert.That(TestContext.Current?.GetTestOutput()).Is.EqualTo("Blah5");
+        await using (Assert.Multiple())
+        {
+            await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test5");
+            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah5");
+        }
+    }
+
+    [After(Class)]
+    public static void Log(ClassHookContext context)
+    {
+        foreach (var test in context.Tests)
+        {
+            Console.WriteLine(@$"Test {test.TestDetails.TestId} has output: {test.GetTestOutput()}");
+        }
     }
     
     private class MyClass

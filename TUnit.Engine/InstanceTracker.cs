@@ -23,7 +23,7 @@ internal static class InstanceTracker
         {
             var assembly = classType.Assembly;
             var count = PerAssembly.GetOrAdd(assembly, _ => 0);
-            PerAssembly[assembly] = count - 1;
+            PerAssembly[assembly] = count + 1;
         }
     }
 
@@ -34,8 +34,13 @@ internal static class InstanceTracker
             var count = PerClassType[type];
             var newCount = count - 1;
             PerClassType[type] = newCount;
+            
+            if (newCount < 0)
+            {
+                throw new Exception($"Remaining tests has gone below 0 for Type {type}");
+            }
 
-            return newCount <= 0;
+            return newCount == 0;
         }
     }
     
@@ -47,7 +52,12 @@ internal static class InstanceTracker
             var newCount = count - 1;
             PerAssembly[assembly] = newCount;
 
-            return newCount <= 0;
+            if (newCount < 0)
+            {
+                throw new Exception("Remaining tests has gone below 0");
+            }
+
+            return newCount == 0;
         }
     }
 

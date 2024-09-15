@@ -1,20 +1,23 @@
 ﻿using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Extensions.Numbers;
 
 namespace TUnit.TestProject;
 
 public abstract class AssemblyHooks
 {
+    private static int _beforeHook1Calls;
+    
     [Before(Assembly)]
     public static void BeforeHook1()
     {
-        // Dummy method
+        _beforeHook1Calls++;
     }
     
     [Before(Assembly)]
     public static async Task BeforeHook2(AssemblyHookContext context)
     {
-        await Assert.That(context.TestCount).Is.Positive();
+        await Assert.That(context.TestCount).IsPositive();
     }
     
     [Before(Assembly), Timeout(30_000)]
@@ -26,19 +29,19 @@ public abstract class AssemblyHooks
     [Before(Assembly), Timeout(30_000)]
     public static async Task BeforeHook4(AssemblyHookContext context, CancellationToken cancellationToken)
     {
-        await Assert.That(context.TestCount).Is.Positive();
+        await Assert.That(context.TestCount).IsPositive();
     }
     
     [After(Assembly)]
-    public static void AfterHook1()
+    public static async Task AfterHook1()
     {
-        // Dummy method
+        await Assert.That(_beforeHook1Calls).IsEqualTo(1);
     }
     
     [After(Assembly)]
     public static async Task AfterHook2(AssemblyHookContext context)
     {
-        await Assert.That(context.TestCount).Is.Positive();
+        await Assert.That(context.TestCount).IsPositive();
     }
     
     [After(Assembly), Timeout(30_000)]
@@ -50,6 +53,6 @@ public abstract class AssemblyHooks
     [After(Assembly), Timeout(30_000)]
     public static async Task AfterHook4(AssemblyHookContext context, CancellationToken cancellationToken)
     {
-        await Assert.That(context.TestCount).Is.Positive();
+        await Assert.That(context.TestCount).IsPositive();
     }
 }

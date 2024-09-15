@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
@@ -21,6 +22,7 @@ namespace TUnit.Pipeline.Modules.Tests;
 [NotInParallel("Unit Tests")]
 [ParallelLimiter<ProcessorParallelLimit>]
 [DependsOn<PublishAOTModule>]
+[DependsOn<PublishSingleFileModule>]
 public abstract class TestModule : Module<TestResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
@@ -34,29 +36,37 @@ public abstract class TestModule : Module<TestResult>
 
     protected Task<TestResult?> RunTestsWithFilter(IPipelineContext context, string filter,
         List<Action<TestResult>> assertions,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        [CallerArgumentExpression("assertions")] string assertionExpression = "")
     {
-        return RunTestsWithFilter(context, filter, assertions, new RunOptions(), cancellationToken);
+        return RunTestsWithFilter(context, filter, assertions, new RunOptions(), cancellationToken, assertionExpression);
     }
 
     protected async Task<TestResult?> RunTestsWithFilter(IPipelineContext context, string filter,
-        List<Action<TestResult>> assertions, RunOptions runOptions, CancellationToken cancellationToken = default)
+        List<Action<TestResult>> assertions, RunOptions runOptions, CancellationToken cancellationToken = default,
+        [CallerArgumentExpression("assertions")] string assertionExpression = "")
     {
         await SubModule("WithoutAot", async () =>
         {
-            await RunWithoutAot(context, filter, assertions, runOptions, cancellationToken);
+            await RunWithoutAot(context, filter, assertions, runOptions, cancellationToken, assertionExpression);
         });
 
         await SubModule("Aot", async () =>
         {
-            await RunWithAot(context, filter, assertions, runOptions, cancellationToken);
+            await RunWithAot(context, filter, assertions, runOptions, cancellationToken, assertionExpression);
         });
 
+        await SubModule("SingleFile", async () =>
+        {
+            await RunWithSingleFile(context, filter, assertions, runOptions, cancellationToken, assertionExpression);
+        });
+        
         return null;
     }
 
-    private static async Task RunWithoutAot(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
-        CancellationToken cancellationToken)
+    private static async Task RunWithoutAot(IPipelineContext context, string filter,
+        List<Action<TestResult>> assertions, RunOptions runOptions,
+        CancellationToken cancellationToken, string assertionExpression)
     {
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
@@ -82,21 +92,19 @@ public abstract class TestModule : Module<TestResult>
             throw new Exception("Unknown error running tests");
         }
 
-        await AssertTrx(context, assertions, cancellationToken, trxFilename);
+        await AssertTrx(context, assertions, cancellationToken, trxFilename, assertionExpression);
     }
     
-    private static async Task RunWithAot(IPipelineContext context, string filter, List<Action<TestResult>> assertions, RunOptions runOptions,
-        CancellationToken cancellationToken)
+    private static async Task RunWithAot(IPipelineContext context, string filter, List<Action<TestResult>> assertions,
+        RunOptions runOptions,
+        CancellationToken cancellationToken, string assertionExpression)
     {
-        var folder = context.Git().RootDirectory.AssertExists()
-            .GetFolder("TUnit.TestProject")
-            .GetFolder("bin")
-            .GetFolder("Release")
-            .GetFolder("net8.0")
-            .GetFolder(GetFolder())
-            .GetFolder("publish");
-        
-        var files = folder.ListFiles().ToArray();
+        var files = context.Git().RootDirectory
+            .AssertExists()
+            .FindFolder(x => x.Name == "TESTPROJECT_AOT")
+            .AssertExists()
+            .GetFiles(_ => true)
+            .ToArray();
 
         var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
                      ?? files.First(x => x.Name == "TUnit.TestProject.exe");
@@ -117,11 +125,45 @@ public abstract class TestModule : Module<TestResult>
             ]
         }, cancellationToken);
 
-        await AssertTrx(context, assertions, cancellationToken, trxFilename);
+        await AssertTrx(context, assertions, cancellationToken, trxFilename, assertionExpression);
+    }
+    
+    private static async Task RunWithSingleFile(IPipelineContext context, string filter,
+        List<Action<TestResult>> assertions, RunOptions runOptions,
+        CancellationToken cancellationToken, string assertionExpression)
+    {
+        var files = context.Git().RootDirectory
+            .AssertExists()
+            .FindFolder(x => x.Name == "TESTPROJECT_SINGLEFILE")
+            .AssertExists()
+            .GetFiles(_ => true)
+            .ToArray();
+        
+        var aotApp = files.FirstOrDefault(x => x.Name == "TUnit.TestProject") 
+                     ?? files.First(x => x.Name == "TUnit.TestProject.exe");
+        
+        var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
+        
+        var result = await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions(aotApp)
+        {
+            ThrowOnNonZeroExitCode = false,
+            CommandLogging = runOptions.CommandLogging,
+            Arguments =
+            [
+                "--treenode-filter", filter, 
+                "--report-trx", "--report-trx-filename", trxFilename,
+                // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
+                "--timeout", "5m",
+                ..runOptions.AdditionalArguments
+            ]
+        }, cancellationToken);
+
+        await AssertTrx(context, assertions, cancellationToken, trxFilename, assertionExpression);
     }
 
-    private static async Task AssertTrx(IPipelineContext context, List<Action<TestResult>> assertions, CancellationToken cancellationToken,
-        string trxFilename)
+    private static async Task AssertTrx(IPipelineContext context, List<Action<TestResult>> assertions,
+        CancellationToken cancellationToken,
+        string trxFilename, string assertionExpression)
     {
         var trxFileContents = await context.Git()
             .RootDirectory
@@ -132,8 +174,27 @@ public abstract class TestModule : Module<TestResult>
 
         var parsedTrx = new TrxParser().ParseTrxContents(trxFileContents);
 
-        var parsedResult = new TestResult(parsedTrx);
+        var unitTestResults = parsedTrx.UnitTestResults.Where(x => 
+                !x.TestName!.Contains("Before Class: ")
+                && !x.TestName.Contains("After Class: ")
+                && !x.TestName.Contains("Before Assembly: ")
+                && !x.TestName.Contains("After Assembly: "))
+            .ToList();
 
+        var parsedResult = new TestResult(
+            new DotNetTestResult(unitTestResults,
+                new ResultSummary(parsedTrx.ResultSummary.Outcome,
+                    new Counters(
+                        unitTestResults.Count,
+                        unitTestResults.Count(x => x.Outcome != TestOutcome.NotExecuted),
+                        unitTestResults.Count(x => x.Outcome == TestOutcome.Passed),
+                        unitTestResults.Count(x => x.Outcome == TestOutcome.Failed),
+                        0,0,0,0,0,0,0,0,0,0,0,0
+                    )
+                )
+            )
+        );
+        
         try
         {
             assertions.ForEach(x => x.Invoke(parsedResult));
@@ -142,6 +203,8 @@ public abstract class TestModule : Module<TestResult>
         {
             throw new Exception($"""
                                  Error asserting results
+                                 
+                                 Expression: {assertionExpression}
 
                                  Trx file: {JsonSerializer.Serialize(parsedResult, JsonSerializerOptions)}
                                  Raw Trx file: {trxFileContents}

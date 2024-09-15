@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
+using CliWrap;
+using CliWrap.Buffered;
 using Process = System.Diagnostics.Process;
 
 namespace Tests.Benchmark;
@@ -7,6 +10,8 @@ namespace Tests.Benchmark;
 [MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
+    private Stream _outputStream;
+    
     private static readonly string TUnitPath = GetProjectPath("TUnitTimer");
     private static readonly string NUnitPath = GetProjectPath("NUnitTimer");
     private static readonly string xUnitPath = GetProjectPath("xUnitTimer");
@@ -14,42 +19,67 @@ public class Benchmarks
     
     private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
 
-    [Benchmark]
-    public async Task TUnit()
+    [GlobalSetup]
+    public void GetOutputStream()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"run --no-build -c Release --treenode-filter /*/*/{ClassName}/*")
-        {
-            WorkingDirectory = TUnitPath,
-        })!.WaitForExitAsync();
+        _outputStream = Console.OpenStandardOutput();
+    }
+
+    [GlobalCleanup]
+    public async Task FlushStream()
+    {
+        await _outputStream.FlushAsync();
     }
     
     [Benchmark]
+    public async Task TUnit_AOT()
+    {
+        await Cli.Wrap(Path.Combine(TUnitPath, "aot-publish", GetExecutableFileName()))
+            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
+    }
+
+    [Benchmark]
+    public async Task TUnit()
+    {
+        await Cli.Wrap("dotnet")
+            .WithArguments(["run", "--no-build", "-c", "Release", "--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithWorkingDirectory(TUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
+    }
+
+    [Benchmark]
     public async Task NUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
-        {
-            WorkingDirectory = NUnitPath,
-        })!.WaitForExitAsync();
+        await Cli.Wrap("dotnet")
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithWorkingDirectory(NUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
     }
 
     [Benchmark]
     public async Task xUnit()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
-        {
-            WorkingDirectory = xUnitPath,
-        })!.WaitForExitAsync();
+        await Cli.Wrap("dotnet")
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithWorkingDirectory(xUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
     }
-    
+
     [Benchmark]
     public async Task MSTest()
     {
-        await Process.Start(new ProcessStartInfo("dotnet", $"test --no-build -c Release --filter FullyQualifiedName~{ClassName}")
-        {
-            WorkingDirectory = MSTestPath,
-        })!.WaitForExitAsync();
+        await Cli.Wrap("dotnet")
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithWorkingDirectory(MSTestPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
     }
-    
+
     private static string GetProjectPath(string name)
     {
         var folder = new DirectoryInfo(Environment.CurrentDirectory);
@@ -60,5 +90,35 @@ public class Benchmarks
         }
         
         return Path.Combine(folder.FullName, name, name);
+    }
+
+    private string GetPlatformFolder()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "win-x64";
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return "linux-x64";
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return "osx-x64";
+        }
+        
+        throw new NotImplementedException();
+    }
+
+    private string GetExecutableFileName()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "TUnitTimer.exe";
+        }
+
+        return "TUnitTimer";
     }
 }

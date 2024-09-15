@@ -13,7 +13,7 @@ public class TimeoutCancellationTokenTests
     }
     
     [Test]
-    [Timeout(30_000)]
+    [Timeout(5_000)]
     [Category("Blah")]
     public async Task BasicTest(CancellationToken cancellationToken)
     {
@@ -21,7 +21,7 @@ public class TimeoutCancellationTokenTests
     }
     
     [Test]
-    [ThirtySecondTimeout]
+    [FiveSecondTimeout]
     public async Task InheritedTimeoutAttribute(CancellationToken cancellationToken)
     {
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
@@ -29,30 +29,30 @@ public class TimeoutCancellationTokenTests
 
     [Test]
     [Arguments(1)]
-    [Timeout(30_000)]
+    [Timeout(5_000)]
     public async Task DataTest(int value, CancellationToken cancellationToken)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
     [MethodDataSource(nameof(DataSource))]
-    [Timeout(30_000)]
+    [Timeout(5_000)]
     [Test]
     public async Task DataSourceTest(int value, CancellationToken cancellationToken)
     {
-        await Assert.That(value).Is.EqualTo(1);
+        await Assert.That(value).IsEqualTo(1);
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
     
     [Test]
-    [Timeout(30_000)]
+    [Timeout(5_000)]
     [Category("Blah")]
     public async Task MatrixTest(
         [Matrix(1, 2, 3)] int value, 
         CancellationToken cancellationToken)
     {
-        await Assert.That(value).Is.EqualTo(1).Or.Is.EqualTo(2).Or.Is.EqualTo(3);
+        await Assert.That(value).IsEqualTo(1).Or.IsEqualTo(2).Or.IsEqualTo(3);
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
@@ -61,9 +61,9 @@ public class TimeoutCancellationTokenTests
         return 1;
     }
     
-    public class ThirtySecondTimeout : TimeoutAttribute
+    public class FiveSecondTimeout : TimeoutAttribute
     {
-        public ThirtySecondTimeout() : base(30_000)
+        public FiveSecondTimeout() : base(5_000)
         {
         }
     }

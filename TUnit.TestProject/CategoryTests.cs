@@ -12,13 +12,13 @@ public class CategoryTests
     [MethodCategory]
     public async Task Test()
     {
-        await Assert.That(GetDictionary()).Does.Contain("ClassCategory");
+        await Assert.That(GetDictionary()).Contains("ClassCategory");
         
-        await Assert.That(GetDictionary()).Does.Contain("ClassCategory2");
+        await Assert.That(GetDictionary()).Contains("ClassCategory2");
         
-        await Assert.That(GetDictionary()).Does.Contain("MethodCategory");
+        await Assert.That(GetDictionary()).Contains("MethodCategory");
         
-        await Assert.That(GetDictionary()).Does.Contain("MethodCategory2");
+        await Assert.That(GetDictionary()).Contains("MethodCategory2");
     }
 
     private static IEnumerable<string> GetDictionary()

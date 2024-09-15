@@ -22,6 +22,9 @@ jobs:
         class: [RepeatTests, BasicTest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
+    concurrency: 
+      group: "speed-comparison-${{matrix.os}}-${{matrix.class}}"
+      cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v4
@@ -33,11 +36,19 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      - name: Build TUnit AOT
+        run: dotnet publish TUnitTimer.csproj -c Release --output aot-publish --property:Aot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
           
+      - name: Build TUnit Single File
+        run: dotnet publish TUnitTimer.csproj -c Release --output singlefile-publish --property:SingleFile=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
+
       - name: Build TUnit
         run: dotnet build -c Release
         working-directory: "tools/speed-comparison/TUnitTimer"
-                  
+ 
       - name: Build xUnit
         run: dotnet build -c Release
         working-directory: "tools/speed-comparison/xUnitTimer"
@@ -51,7 +62,7 @@ jobs:
         working-directory: "tools/speed-comparison/MSTestTimer"
       
       - name: Run Benchmark
-        run: dotnet run -c Release
+        run: ${{ matrix.os != 'windows-latest' && 'sudo -E ' || '' }}dotnet run -c Release
         working-directory: "tools/speed-comparison/Tests.Benchmark"
         env:
           CLASS_NAME: ${{ matrix.class }}

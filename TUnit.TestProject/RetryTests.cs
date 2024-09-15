@@ -36,8 +36,8 @@ public class RetryTests
     [Test, NotInParallel(nameof(RetryTests), Order = 2)]
     public async Task AssertCounts()
     {
-        await Assert.That(RetryCount1).Is.EqualTo(2);
-        await Assert.That(RetryCount2).Is.EqualTo(3);
-        await Assert.That(RetryCount3).Is.EqualTo(4);
+        await Assert.That(RetryCount1).IsEqualTo(2);
+        await Assert.That(RetryCount2).IsEqualTo(3);
+        await Assert.That(RetryCount3).IsEqualTo(4);
     }
 }
