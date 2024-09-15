@@ -13,10 +13,5 @@
       <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
       <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
     </ItemGroup>
-    
-    <ItemGroup Condition="'$(IsPackTarget)' != 'true'">
-        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj"
-                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-    </ItemGroup>
 
 </Project>
