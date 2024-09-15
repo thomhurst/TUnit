@@ -9,7 +9,6 @@
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncSemaphore" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="ModularPipelines.DotNet" />
     <PackageReference Include="ModularPipelines.Git" />
