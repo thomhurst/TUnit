@@ -6,7 +6,10 @@ public class ResettableLazy<
 #if NET8_0_OR_GREATER
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
 #endif
-    T> : IAsyncDisposable
+    T> 
+#if NET8_0_OR_GREATER
+    : IAsyncDisposable
+#endif
 {
     private readonly Func<T> _factory;
 
