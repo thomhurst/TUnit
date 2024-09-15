@@ -4,5 +4,21 @@
     <ItemGroup Condition="'$(TUnitImplicitUsings)' == 'true'">
         <Using Include="TUnit.Core" />
     </ItemGroup>
+    
+    <UsingTask TaskName="TUnit.Engine.MSBuild.GetCommandLineArgs" 
+               AssemblyFile="$(OutputPath)\TUnit.Engine.dll"/>
 
+    <Target Name="CommandArgs" BeforeTargets="Build">
+        <GetCommandLineArgs>
+            <Output TaskParameter="CommandLineArgs" ItemName="CommandLineArg" />
+        </GetCommandLineArgs>
+    </Target>
+    
+    <PropertyGroup>
+        <CommandLineArgs>@(CommandLineArg, ' ')</CommandLineArgs>
+    </PropertyGroup>
+    
+    <ItemGroup Condition="$(CommandLineArgs.Contains('--coverage'))">
+        <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.12.4"/>
+    </ItemGroup>
 </Project>
