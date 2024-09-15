@@ -20,7 +20,7 @@ internal static class TestSourceDataModelRetriever
         
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
         
-        var classArgumentsContainers = ArgumentsRetriever.GetArguments(namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes(), namedTypeSymbol, VariableNames.ClassArg).ToArray();
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes().Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, VariableNames.ClassArg).ToArray();
         var testArgumentsContainers = ArgumentsRetriever.GetArguments(methodSymbol.Parameters, methodSymbol.GetAttributes(), namedTypeSymbol, VariableNames.MethodArg);
         
         var repeatCount =

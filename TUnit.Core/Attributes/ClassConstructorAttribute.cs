@@ -10,7 +10,7 @@ public abstract class ClassConstructorAttribute : TUnitAttribute
     }
 }
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class)]
 public sealed class ClassConstructorAttribute<T> : ClassConstructorAttribute where T : IClassConstructor, new()
 {
     public override Type ClassConstructorType { get; } = typeof(T);
