@@ -20,7 +20,7 @@ namespace MyTestProject;
 
 public class DependencyInjectionClassConstructor : IClassConstructor
 {
-    private readonly IServiceProvider _serviceProvider = CreateServiceProvider();
+    private static readonly IServiceProvider _serviceProvider = CreateServiceProvider();
     
     private static readonly ConditionalWeakTable<object, IServiceScope> Scopes = new();
 
