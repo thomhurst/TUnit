@@ -23,6 +23,7 @@ For Rider, it is not yet supported. I believe they are working on it so we just 
 
 - Native AOT / Trimmed Single File application support
 - Source generated tests
+- Dependency injection support ([See here](https://thomhurst.github.io/TUnit/docs/tutorial-extras/class-constructors))
 - Full async support
 - Parallel by default, with mechanisms to:
     - Run specific tests completely on their own
