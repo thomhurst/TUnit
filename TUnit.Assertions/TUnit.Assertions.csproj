@@ -7,7 +7,7 @@
     <ItemGroup>
         <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-        <None Include="$(OutputPath)/TUnit.Assertions.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+        <None Include="$(OutputPath)/../../../../TUnit.Assertions.Analyzers/bin/$(Configuration)/netstandard2.0/TUnit.Assertions.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
 <ItemGroup>
