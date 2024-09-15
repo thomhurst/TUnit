@@ -23,7 +23,7 @@ public class ClassDataSourceDrivenTests2
         // Dummy method
     }
 
-    public class Base {}
-    public class Derived1 : Base {}
-    public class Derived2 : Base {}
+    public class Base;
+    public class Derived1 : Base;
+    public class Derived2 : Base;
 }

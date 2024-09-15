@@ -27,7 +27,9 @@ internal class DiscoveredTest<
     
     public override async Task ResetTestInstance()
     {
+#if NET8_0_OR_GREATER
         await _resettableLazyTestClassFactory.ResetLazy();
+#endif
     }
 }
 

@@ -6,7 +6,10 @@ public class ResettableLazy<
 #if NET8_0_OR_GREATER
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
 #endif
-    T> : IAsyncDisposable
+    T> 
+#if NET8_0_OR_GREATER
+    : IAsyncDisposable
+#endif
 {
     private readonly Func<T> _factory;
 
@@ -20,13 +23,14 @@ public class ResettableLazy<
         _lazy = new Lazy<T>(factory);
     }
 
+#if NET8_0_OR_GREATER
     public async Task ResetLazy()
     {
         await DisposeAsync();
         
         _lazy = new Lazy<T>(_factory);
     }
-
+    
     public async ValueTask DisposeAsync()
     {
         if (_lazy.IsValueCreated)
@@ -40,4 +44,5 @@ public class ResettableLazy<
             disposable.Dispose();
         }
     }
+#endif
 }

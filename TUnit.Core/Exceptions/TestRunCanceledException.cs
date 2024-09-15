@@ -1,6 +1,3 @@
 ﻿namespace TUnit.Core.Exceptions;
 
-public class TestRunCanceledException : TUnitException
-{
-    
-}
+public class TestRunCanceledException : TUnitException;
