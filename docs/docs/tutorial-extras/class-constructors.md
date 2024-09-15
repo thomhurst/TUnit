@@ -48,7 +48,7 @@ public class DependencyInjectionClassConstructor : IClassConstructor
         
         if (t != null && Scopes.TryGetValue(t, out var scope))
         {
-            if (scope is IAsyncDisposable)
+            if (scope is IAsyncDisposable asyncScope)
             {
                 await asyncScope.DisposeAsync();
             }
