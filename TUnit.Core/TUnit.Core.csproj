@@ -20,5 +20,6 @@
     </PackageReference>
 
     <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 </Project>
