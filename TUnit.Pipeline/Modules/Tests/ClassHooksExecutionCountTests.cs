@@ -1,7 +1,5 @@
 ﻿using FluentAssertions;
 using ModularPipelines.Context;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
