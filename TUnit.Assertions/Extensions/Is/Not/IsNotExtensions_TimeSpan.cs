@@ -14,14 +14,14 @@ public static partial class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new NotEqualsAssertCondition<TimeSpan, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(null), TimeSpan.Zero));
+        return AssertionConditionCombiner.Combine(isNot.AssertionConnector, new NotEqualsAssertCondition<TimeSpan, TAnd, TOr>(isNot.AssertionConnector.AssertionBuilder.AppendCallerMethod(null), TimeSpan.Zero));
     }
     
     public static BaseAssertCondition<TimeSpan, TAnd, TOr> IsNotGreaterThan<TAnd, TOr>(this IIs<TimeSpan, TAnd, TOr> isNot, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) => value <= expected,
+        return AssertionConditionCombiner.Combine(isNot.AssertionConnector, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) => value <= expected,
             (value, _) => $"{value} was greater than {expected}"));
     }
     
@@ -29,7 +29,7 @@ public static partial class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(isNot.AssertionConnector, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value < expected;
             },
@@ -40,7 +40,7 @@ public static partial class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(isNot.AssertionConnector, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
@@ -51,7 +51,7 @@ public static partial class IsNotExtensions
         where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
         where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(isNot.AssertionConnector, new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(isNot.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value > expected;
             },

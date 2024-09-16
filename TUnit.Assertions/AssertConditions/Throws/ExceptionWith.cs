@@ -11,7 +11,7 @@ public class ExceptionWith<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     private readonly Func<Exception?, Exception?> _exceptionSelector;
     protected AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
     
-    public ExceptionWith(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "") : base(connectorType, otherAssertCondition)
+    public ExceptionWith(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ChainType chainType, BaseAssertCondition<TActual>? otherAssertCondition, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "") : base(chainType, otherAssertCondition)
     {
         _exceptionSelector = exceptionSelector;
         AssertionBuilder = assertionBuilder
@@ -19,8 +19,8 @@ public class ExceptionWith<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
     }
 
     public ExceptionWithMessage<TActual, TAnd, TOr> Message =>
-        new(AssertionBuilder, ConnectorType, OtherAssertCondition, _exceptionSelector);
+        new(AssertionBuilder, ChainType, OtherAssertCondition, _exceptionSelector);
     
     public ThrowsException<TActual, TAnd, TOr> InnerException =>
-        new(AssertionBuilder, ConnectorType, OtherAssertCondition, e => _exceptionSelector(e)?.InnerException);
+        new(AssertionBuilder, ChainType, OtherAssertCondition, e => _exceptionSelector(e)?.InnerException);
 }

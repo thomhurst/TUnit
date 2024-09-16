@@ -11,8 +11,8 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
 {
     protected AssertionBuilder<string, TAnd, TOr> AssertionBuilder { get; }
 
-    public StringLength(AssertionBuilder<string, TAnd, TOr> assertionBuilder, ConnectorType connectorType,
-        BaseAssertCondition<string, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+    public StringLength(AssertionBuilder<string, TAnd, TOr> assertionBuilder, ChainType chainType,
+        BaseAssertCondition<string, TAnd, TOr>? otherAssertCondition) : base(chainType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder.AppendExpression("Length");
     }

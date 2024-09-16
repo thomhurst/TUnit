@@ -5,18 +5,21 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesNotExtensions
 {
-    public static BaseAssertCondition<TDictionary, TAnd, TOr> DoesNotContainKey<TDictionary, TKey, TAnd, TOr>(this IDoes<TDictionary, TAnd, TOr> does, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static TAssertionBuilder DoesNotContainKey<TAssertionBuilder, TDictionary, TKey, TAnd, TOr>(this TAssertionBuilder assertionBuilder, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+        where TAssertionBuilder : IChainableAssertionBuilder<TAssertionBuilder, AssertionBuilder<TDictionary, TAnd, TOr>, TDictionary, TAnd, TOr>
         where TDictionary : IDictionary
         where TAnd : And<TDictionary, TAnd, TOr>, IAnd<TDictionary, TAnd, TOr>
         where TOr : Or<TDictionary, TAnd, TOr>, IOr<TDictionary, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(does.DoesNot(), new DelegateAssertCondition<TDictionary, TKey, TAnd, TOr>(
-            does.DoesNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
+        
+        return assertionBuilder.WithAssertion<TAssertionBuilder>(new DelegateAssertCondition<TDictionary, TKey, TAnd, TOr>(
+            assertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
             expected,
             (actual, _, _, _) =>
             {
@@ -31,8 +34,8 @@ public static partial class DoesNotExtensions
         where TAnd : And<TDictionary, TAnd, TOr>, IAnd<TDictionary, TAnd, TOr>
         where TOr : Or<TDictionary, TAnd, TOr>, IOr<TDictionary, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(does.DoesNot(), new DelegateAssertCondition<TDictionary, TValue, TAnd, TOr>(
-            does.DoesNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
+        return AssertionConditionCombiner.Combine(does.AssertionConnector, new DelegateAssertCondition<TDictionary, TValue, TAnd, TOr>(
+            does.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
             expected,
             (actual, _, _, _) =>
             {

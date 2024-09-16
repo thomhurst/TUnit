@@ -13,13 +13,13 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
 {
     protected internal AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
 
-    public EnumerableCount(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType,
-        BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+    public EnumerableCount(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ChainType chainType,
+        BaseAssertCondition<TActual>? otherAssertCondition) : base(chainType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder.AppendExpression("Count");
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<TActual> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (enumerable, expected, _, self) =>
             {
@@ -36,7 +36,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Empty =>
+    public BaseAssertCondition<TActual> Empty =>
         Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
@@ -51,7 +51,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {0}")
         );
     
-    public BaseAssertCondition<TActual, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<TActual> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(
             AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
@@ -71,7 +71,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<TActual> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (enumerable, expected, _, self) =>
             {
@@ -88,7 +88,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<TActual> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (enumerable, expected, _, self) =>
             {
@@ -105,7 +105,7 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         );
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<TActual> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (enumerable, expected, _, self) =>
             {
@@ -122,12 +122,12 @@ public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
         );
     }
     
-    public BaseAssertCondition<TActual, TAnd, TOr> Negative() => LessThan(0);
+    public BaseAssertCondition<TActual> Negative() => LessThan(0);
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualToZero() => EqualTo(0);
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualToOne() => EqualTo(1);
+    public BaseAssertCondition<TActual> EqualToZero() => EqualTo(0);
+    public BaseAssertCondition<TActual> EqualToOne() => EqualTo(1);
     
-    public BaseAssertCondition<TActual, TAnd, TOr> Positive() => GreaterThan(0);
+    public BaseAssertCondition<TActual> Positive() => GreaterThan(0);
 
 
     private int GetCount(TActual? actualValue)

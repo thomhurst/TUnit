@@ -13,7 +13,7 @@ public static partial class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<DateTimeOffset, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, _) =>
             {
                 return value >= lowerBound && value <= upperBound;
             },
@@ -24,7 +24,7 @@ public static partial class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<DateTimeOffset, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value > expected;
             },
@@ -35,7 +35,7 @@ public static partial class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<DateTimeOffset, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
@@ -46,7 +46,7 @@ public static partial class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<DateTimeOffset, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value < expected;
             },
@@ -57,7 +57,7 @@ public static partial class IsExtensions
         where TAnd : And<DateTimeOffset, TAnd, TOr>, IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : Or<DateTimeOffset, TAnd, TOr>, IOr<DateTimeOffset, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value <= expected;
             },

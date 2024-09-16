@@ -31,7 +31,7 @@ public class MemberTests
         var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
         NUnitAssert.That(exception, Has.Message.EqualTo(
             """
-            Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
+            AssertAsync.That(myClass).HasMember(x => x.Number).EqualTo(1)
             MyClass.Number:
                 Expected: 1
                 Received: 123
@@ -52,7 +52,7 @@ public class MemberTests
         var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1));
         NUnitAssert.That(exception, Has.Message.EqualTo(
             """
-            Assert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1)
+            AssertAsync.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1)
             MyClass.Number:
                 Expected: 1
                 Received: 123
@@ -68,7 +68,7 @@ public class MemberTests
         var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
         NUnitAssert.That(exception, Has.Message.EqualTo(
             """
-            Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
+            AssertAsync.That(myClass).HasMember(x => x.Number).EqualTo(1)
             MyClass.Number:
                 Expected: 1
                 Received: Object `MyClass` was null

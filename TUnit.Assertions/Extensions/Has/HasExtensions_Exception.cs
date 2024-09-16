@@ -12,6 +12,6 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new ExceptionMessage<TActual, TAnd, TOr>(has.Has().AssertionBuilder.AppendCallerMethod(null), has.Has().ConnectorType, has.Has().OtherAssertCondition);
+        return new ExceptionMessage<TActual, TAnd, TOr>(has.AssertionConnector.AssertionBuilder.AppendCallerMethod(null), has.AssertionConnector.ChainType, has.AssertionConnector.OtherAssertCondition);
     }
 }

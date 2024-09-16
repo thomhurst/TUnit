@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertConditions;
 
-public enum ConnectorType
+public enum ChainType
 {
     None,
     And,

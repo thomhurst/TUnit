@@ -13,13 +13,13 @@ public static partial class IsExtensions
         where TAnd : And<bool, TAnd, TOr>, IAnd<bool, TAnd, TOr>
         where TOr : Or<bool, TAnd, TOr>, IOr<bool, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new EqualsAssertCondition<bool, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(null), true));
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new EqualsAssertCondition<bool, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(null), true));
     }
     
     public static BaseAssertCondition<bool, TAnd, TOr> IsFalse<TAnd, TOr>(this IIs<bool, TAnd, TOr> @is)
         where TAnd : And<bool, TAnd, TOr>, IAnd<bool, TAnd, TOr>
         where TOr : Or<bool, TAnd, TOr>, IOr<bool, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new EqualsAssertCondition<bool, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(null), false));
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new EqualsAssertCondition<bool, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(null), false));
     }
 }

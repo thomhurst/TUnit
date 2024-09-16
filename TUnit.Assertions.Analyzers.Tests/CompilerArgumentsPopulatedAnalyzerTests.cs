@@ -19,7 +19,7 @@ public class CompilerArgumentsPopulatedAnalyzerTests
                             
                                 public async Task MyTest()
                                 {
-                                    await Assert.That(1, {|#0:"expression"|}).IsEqualTo(1);
+                                    await AssertAsync.That(1, {|#0:"expression"|}).IsEqualTo(1);
                                 }
 
                             }
@@ -44,7 +44,7 @@ public class CompilerArgumentsPopulatedAnalyzerTests
                             
                                 public async Task MyTest()
                                 {
-                                    await Assert.That(1).IsEqualTo(1);
+                                    await AssertAsync.That(1).IsEqualTo(1);
                                 }
 
                             }

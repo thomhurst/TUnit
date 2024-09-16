@@ -8,22 +8,16 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class AsyncDelegateAssertionBuilder 
     : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
+        IOutputsChain<NoneAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>, object?, DelegateAnd<object?>, DelegateOr<object?>>, 
         IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>
 {
     private readonly Func<Task> _function;
 
-    Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>.Throws() => new(this, ConnectorType.None, null);
+    AssertionConnector<object?, DelegateAnd<object?>, DelegateOr<object?>> IAssertionConnector<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionConnector => new(this, ChainType.Or);
 
-    internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(expressionBuilder)
+    internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(function.AsAssertionData, expressionBuilder)
     {
         _function = function;
-    }
-
-    protected internal override async Task<AssertionData<object?>> GetAssertionData()
-    {
-        var exception = await _function.InvokeAndGetExceptionAsync();
-        
-        return new AssertionData<object?>(null, exception);
     }
     
     public AsyncDelegateAssertionBuilder WithMessage(AssertionMessageDelegate message)
@@ -42,5 +36,11 @@ public class AsyncDelegateAssertionBuilder
     {
         AssertionMessage = (AssertionMessageDelegate) message;
         return this;
+    }
+
+    public static NoneAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> Create(Func<Task<AssertionData<object?>>> assertionDataDelegate, AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> assertionBuilder)
+    {
+        return new NoneAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>(assertionDataDelegate,
+            assertionBuilder);
     }
 }

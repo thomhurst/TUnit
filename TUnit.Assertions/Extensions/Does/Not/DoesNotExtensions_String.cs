@@ -21,7 +21,7 @@ public static partial class DoesNotExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(doesNot.DoesNot(), new StringNotContainsAssertCondition<TAnd, TOr>(doesNot.DoesNot().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
+        return AssertionConditionCombiner.Combine(doesNot.AssertionConnector, new StringNotContainsAssertCondition<TAnd, TOr>(doesNot.AssertionConnector.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
     }
     
     public static BaseAssertCondition<string, TAnd, TOr> DoesNotStartWith<TAnd, TOr>(this IDoes<string, TAnd, TOr> doesNot, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -35,8 +35,8 @@ public static partial class DoesNotExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(doesNot.DoesNot(), new DelegateAssertCondition<string, string, TAnd, TOr>(
-            doesNot.DoesNot().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
+        return AssertionConditionCombiner.Combine(doesNot.AssertionConnector, new DelegateAssertCondition<string, string, TAnd, TOr>(
+            doesNot.AssertionConnector.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
             (actual, _, _, _) =>
             {
@@ -58,8 +58,8 @@ public static partial class DoesNotExtensions
         where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
         where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(doesNot.DoesNot(), new DelegateAssertCondition<string, string, TAnd, TOr>(
-            doesNot.DoesNot().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
+        return AssertionConditionCombiner.Combine(doesNot.AssertionConnector, new DelegateAssertCondition<string, string, TAnd, TOr>(
+            doesNot.AssertionConnector.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
             expected,
             (actual, _, _, _) =>
             {

@@ -1,22 +1,26 @@
 using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueAnd<TActual> 
     : And<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IValueAssertions<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IAnd<TActual, ValueAnd<TActual>, ValueOr<TActual>>
 {
-    public ValueAnd(BaseAssertCondition<TActual, ValueAnd<TActual>, ValueOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
+    private readonly IAssertionResultProvider<TActual> _assertionResultProvider;
+    private readonly AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> _assertionBuilder;
+
+    public ValueAnd(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
+        AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> assertionBuilder)
     {
+        _assertionResultProvider = assertionResultProvider;
+        _assertionBuilder = assertionBuilder;
     }
 
-    Is<TActual, ValueAnd<TActual>, ValueOr<TActual>> IIs<TActual, ValueAnd<TActual>, ValueOr<TActual>>.Is() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    IsNot<TActual, ValueAnd<TActual>, ValueOr<TActual>> IIs<TActual, ValueAnd<TActual>, ValueOr<TActual>>.IsNot() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    Has<TActual, ValueAnd<TActual>, ValueOr<TActual>> IHas<TActual, ValueAnd<TActual>, ValueOr<TActual>>.Has() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    Does<TActual, ValueAnd<TActual>, ValueOr<TActual>> IDoes<TActual, ValueAnd<TActual>, ValueOr<TActual>>.Does() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    DoesNot<TActual, ValueAnd<TActual>, ValueOr<TActual>> IDoes<TActual, ValueAnd<TActual>, ValueOr<TActual>>.DoesNot() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    
-    public static ValueAnd<TActual> Create(BaseAssertCondition<TActual, ValueAnd<TActual>, ValueOr<TActual>> otherAssertCondition)
+    AssertionConnector<TActual, ValueAnd<TActual>, ValueOr<TActual>> IAssertionConnector<TActual, ValueAnd<TActual>, ValueOr<TActual>>.AssertionConnector => new(_assertionBuilder, ChainType.Or);
+  
+    public static ValueAnd<TActual> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
+        AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> assertionBuilder)
     {
-        return new ValueAnd<TActual>(otherAssertCondition);
+        return new ValueAnd<TActual>(assertionResultProvider, assertionBuilder);
     }
 }

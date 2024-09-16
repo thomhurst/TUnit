@@ -11,30 +11,30 @@ public class ExceptionWithMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd,
     private readonly Func<Exception?, Exception?> _exceptionSelector;
     protected AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
     
-    public ExceptionWithMessage(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType,
-        BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition, Func<Exception?, Exception?> exceptionSelector) : base(connectorType, otherAssertCondition)
+    public ExceptionWithMessage(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ChainType chainType,
+        BaseAssertCondition<TActual>? otherAssertCondition, Func<Exception?, Exception?> exceptionSelector) : base(chainType, otherAssertCondition)
     {
         _exceptionSelector = exceptionSelector;
         AssertionBuilder = assertionBuilder
             .AppendExpression("Message");
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<TActual> EqualTo(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return EqualTo(expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+    public BaseAssertCondition<TActual> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
         return Combine(new ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison, _exceptionSelector));
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Containing(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<TActual> Containing(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Containing(expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Containing(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+    public BaseAssertCondition<TActual> Containing(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
         return Combine(new ThrowsWithMessageContainingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison, _exceptionSelector));
     }

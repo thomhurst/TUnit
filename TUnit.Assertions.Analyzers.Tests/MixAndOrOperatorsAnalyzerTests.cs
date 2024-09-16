@@ -19,7 +19,7 @@ public class MixAndOrOperatorsAnalyzerTests
 
                                 public async Task MyTest()
                                 {
-                                    {|#0:await Assert.That(1).IsEqualTo(1).And.IsNotEqualTo(2).Or.IsEqualTo(3)|};
+                                    {|#0:await AssertAsync.That(1).IsEqualTo(1).And.IsNotEqualTo(2).Or.IsEqualTo(3)|};
                                 }
 
                             }
@@ -46,7 +46,7 @@ public class MixAndOrOperatorsAnalyzerTests
                                 public async Task MyTest()
                                 {
                                     var one = 1;
-                                    await Assert.That(one).IsEqualTo(1).And.IsNotEqualTo(2);
+                                    await AssertAsync.That(one).IsEqualTo(1).And.IsNotEqualTo(2);
                                 }
 
                             }

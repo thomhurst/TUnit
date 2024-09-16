@@ -13,7 +13,7 @@ public static partial class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value > expected;
             },
@@ -24,7 +24,7 @@ public static partial class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
@@ -35,7 +35,7 @@ public static partial class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value < expected;
             },
@@ -46,7 +46,7 @@ public static partial class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value <= expected;
             },
@@ -57,7 +57,7 @@ public static partial class IsExtensions
         where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
         where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, _) =>
+        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, _) =>
             {
                 return value >= lowerBound && value <= upperBound;
             },

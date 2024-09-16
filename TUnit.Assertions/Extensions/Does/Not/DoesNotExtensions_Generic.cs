@@ -8,11 +8,11 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesNotExtensions
 {
-    public static BaseAssertCondition<TActual, TAnd, TOr> DoesNotContain<TActual, TInner, TAnd, TOr>(this IDoes<TActual, TAnd, TOr> doesNot, TInner expected, IEqualityComparer<TInner?>? equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static BaseAssertCondition<TActual> DoesNotContain<TActual, TInner, TAnd, TOr>(this IDoes<TActual, TAnd, TOr> doesNot, TInner expected, IEqualityComparer<TInner?>? equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : IEnumerable<TInner>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(doesNot.DoesNot(), new EnumerableNotContainsAssertCondition<TActual, TInner, TAnd, TOr>(doesNot.DoesNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, equalityComparer));
+        return AssertionConditionCombiner.Combine(doesNot.AssertionConnector, new EnumerableNotContainsAssertCondition<TActual, TInner, TAnd, TOr>(doesNot.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, equalityComparer));
     }
 }

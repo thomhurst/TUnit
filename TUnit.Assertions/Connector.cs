@@ -9,27 +9,11 @@ public abstract class Connector<TActual, TAnd, TOr>
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    protected internal ConnectorType ConnectorType { get; }
-    
-    protected internal BaseAssertCondition<TActual, TAnd, TOr>? OtherAssertCondition { get; }
+    protected internal ChainType ChainType { get; }
 
-    protected Connector(ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition)
+    protected Connector(ChainType chainType)
     {
-        ConnectorType = connectorType;
-        OtherAssertCondition = otherAssertCondition;
-    }
-
-    /// <summary>
-    /// This method is responsible for combining assert conditions with other assert conditions
-    /// if we are in the context of using `And` / `Or` operators.
-    /// This should be called to wrap every condition to ensure they operate correctly with and/or conditions
-    /// </summary>
-    /// <param name="assertCondition"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    protected BaseAssertCondition<TActual, TAnd, TOr> Combine(BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
-    {
-        return AssertionConditionCombiner.Combine(OtherAssertCondition, ConnectorType, assertCondition);
+        ChainType = chainType;
     }
 
     [Obsolete("This is a base `object` method that should not be called.", true)]

@@ -15,29 +15,29 @@ public class AssertionConditionCombiner
     /// <param name="assertCondition"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public static BaseAssertCondition<TActual, TAnd, TOr> Combine<TActual, TAnd, TOr>(Connector<TActual, TAnd, TOr> connector, BaseAssertCondition<TActual, TAnd, TOr> assertCondition)
+    public static BaseAssertCondition<TActual> Combine<TActual, TAnd, TOr>(Connector<TActual, TAnd, TOr> connector, BaseAssertCondition<TActual> assertCondition)
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return Combine(connector.OtherAssertCondition, connector.ConnectorType, assertCondition);
+        return Combine(connector.OtherAssertCondition, connector.ChainType, assertCondition);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> Combine<TActual, TAnd, TOr>(BaseAssertCondition<TActual, TAnd, TOr>? initialAssertCondition, ConnectorType? connectorType, BaseAssertCondition<TActual, TAnd, TOr> assertConditionToAppend)
+    public static BaseAssertCondition<TActual> Combine<TActual, TAnd, TOr>(BaseAssertCondition<TActual>? initialAssertCondition, ChainType? connectorType, BaseAssertCondition<TActual> assertConditionToAppend)
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        if (connectorType is null or ConnectorType.None)
+        if (connectorType is null or ChainType.None)
         {
             assertConditionToAppend.IsWrapped = true;
             return assertConditionToAppend;
         }
         
-        if (connectorType == ConnectorType.And)
+        if (connectorType == ChainType.And)
         {
             return new AssertConditionAnd<TActual, TAnd, TOr>(initialAssertCondition!, assertConditionToAppend);
         }
 
-        if (connectorType == ConnectorType.Or)
+        if (connectorType == ChainType.Or)
         {
             return new AssertConditionOr<TActual, TAnd, TOr>(initialAssertCondition!, assertConditionToAppend);
         }

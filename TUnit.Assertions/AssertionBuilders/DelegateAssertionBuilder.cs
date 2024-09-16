@@ -8,22 +8,13 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class DelegateAssertionBuilder 
     : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
+        IOutputsChain<NoneAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>, object?, DelegateAnd<object?>, DelegateOr<object?>>,
         IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>
    {
-    private readonly Action _action;
+    AssertionConnector<object?, DelegateAnd<object?>, DelegateOr<object?>> IAssertionConnector<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionConnector => new(this, ChainType.Or);
 
-    Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>.Throws() => new(this, ConnectorType.None, null);
-
-    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(expressionBuilder)
+    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(action.AsAssertionData, expressionBuilder)
     {
-        _action = action;
-    }
-
-    protected internal override Task<AssertionData<object?>> GetAssertionData()
-    {
-        var exception = _action.InvokeAndGetException();
-        
-        return Task.FromResult(new AssertionData<object?>(null, exception));
     }
 
     public DelegateAssertionBuilder WithMessage(AssertionMessageDelegate message)
@@ -43,4 +34,10 @@ public class DelegateAssertionBuilder
         AssertionMessage = (AssertionMessageDelegate) message;
         return this;
     }
-}
+
+    public static NoneAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> Create(Func<Task<AssertionData<object?>>> assertionDataDelegate, AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> assertionBuilder)
+    {
+        return new NoneAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>(assertionDataDelegate,
+            assertionBuilder);
+    }
+   }

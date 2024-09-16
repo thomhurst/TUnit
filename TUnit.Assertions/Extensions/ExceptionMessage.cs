@@ -12,18 +12,18 @@ public class ExceptionMessage<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr
 {
     protected internal AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
 
-    public ExceptionMessage(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType,
-        BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+    public ExceptionMessage(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ChainType chainType,
+        BaseAssertCondition<TActual>? otherAssertCondition) : base(chainType, otherAssertCondition)
     {
         AssertionBuilder = assertionBuilder.AppendExpression("Message");
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<TActual> EqualTo(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return EqualTo(expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+    public BaseAssertCondition<TActual> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
         return Combine(new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, (actual, _, _, _) =>
             {

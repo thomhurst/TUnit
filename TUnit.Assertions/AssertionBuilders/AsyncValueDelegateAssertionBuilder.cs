@@ -8,30 +8,16 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class AsyncValueDelegateAssertionBuilder<TActual> 
     : AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
+        IOutputsChain<NoneAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
         IIs<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
         IHas<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
         IDoes<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
         IThrows<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
  {
-    private readonly Func<Task<TActual>> _function;
+    AssertionConnector<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IAssertionConnector<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.AssertionConnector => new(this, ChainType.Or);
 
-    Does<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IDoes<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.Does() => new(this, ConnectorType.None, null);
-    DoesNot<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IDoes<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.DoesNot() => new(this, ConnectorType.None, null);
-    Is<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IIs<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.Is() => new(this, ConnectorType.None, null);
-    IsNot<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IIs<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.IsNot() => new(this, ConnectorType.None, null);
-    Has<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IHas<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.Has() => new(this, ConnectorType.None, null);
-    Throws<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IThrows<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.Throws() => new(this, ConnectorType.None, null);
-
-    internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(expressionBuilder)
+    internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(function.AsAssertionData, expressionBuilder)
     {
-        _function = function;
-    }
-
-    protected internal override async Task<AssertionData<TActual>> GetAssertionData()
-    {
-        var assertionData = await _function.InvokeAndGetExceptionAsync();
-        
-        return assertionData;
     }
     
     public AsyncValueDelegateAssertionBuilder<TActual> WithMessage(AssertionMessageValueDelegate<TActual> message)
@@ -51,4 +37,10 @@ public class AsyncValueDelegateAssertionBuilder<TActual>
         AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
         return this;
     }
-}
+
+    public static NoneAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
+    {
+        return new NoneAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>(
+            assertionDataDelegate, assertionBuilder);
+    }
+ }

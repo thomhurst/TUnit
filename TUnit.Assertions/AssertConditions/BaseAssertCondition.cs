@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
@@ -8,7 +8,6 @@ namespace TUnit.Assertions.AssertConditions;
 public abstract class BaseAssertCondition
 {
     protected internal virtual string? Message { get; }
-    internal abstract Task<bool> AssertAsync();
 
     protected internal virtual string GetExtraMessage()
     {
@@ -16,13 +15,18 @@ public abstract class BaseAssertCondition
     }
     
     internal bool IsWrapped { get; set; }
+
+    public abstract Task<bool> AssertAsync();
 }
 
-public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
-    protected internal AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
+    public override async Task<bool> AssertAsync()
+    {
+        return Assert(await AssertionBuilder.AssertionDataDelegate());
+    }
+
+    protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
     
     protected string GetAssertionExpression()
     {
@@ -39,30 +43,22 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
             : assertionExpression;
     }
 
-    internal BaseAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder)
+    internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
     {
         AssertionBuilder = assertionBuilder;
         
-        And = TAnd.Create(this);
-        Or = TOr.Create(this);
+        AssertionBuilder.Assertions.Add(this);
     }
-    
-    public TaskAwaiter GetAwaiter()
+
+    internal void AssertAndThrow(AssertionData<TActual> assertionData)
     {
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
         
         if (currentAssertionScope != null)
         {
             currentAssertionScope.Add(this);
-            return Task.CompletedTask.GetAwaiter();
+            return;
         }
-        
-        return AssertAndThrowAsync().GetAwaiter();
-    }
-
-    internal async Task AssertAndThrowAsync()
-    {
-        var assertionData = await AssertionBuilder.GetAssertionData();
         
         if (!Assert(assertionData.Result, assertionData.Exception))
         {
@@ -75,22 +71,19 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
             );
         }
     }
-    
-    internal override async Task<bool> AssertAsync()
-    {
-        try
-        {
-            var assertionData = await AssertionBuilder.GetAssertionData();
 
-            return Assert(assertionData.Result, assertionData.Exception);
-        }
-        catch (Exception e)
-        {
-            throw new AssertionException($"""
-                                          {GetAssertionExpression()}
-                                          {e.Message}
-                                          """, e);
-        }
+    internal TOutput ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(TAssertionBuilder assertionBuilder)
+        where TAssertionBuilder : AssertionBuilder<TActual, TAnd, TOr>, IOutputsChain<TOutput, TActual, TAnd, TOr>
+        where TOutput : InvokableAssertionBuilder<TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
+    {
+        return assertionBuilder.WithAssertion<TAssertionBuilder, TOutput>(this);
+    }
+    
+    internal bool Assert(AssertionData<TActual> assertionData)
+    {
+        return Assert(assertionData.Result, assertionData.Exception);
     }
 
     protected TActual? ActualValue { get; private set; }
@@ -107,7 +100,7 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
 
     private Func<TActual?, Exception?, string>? MessageFactory { get; set; }
     
-    public BaseAssertCondition<TActual, TAnd, TOr> WithMessage(Func<TActual?, Exception?, string> messageFactory)
+    public BaseAssertCondition<TActual> WithMessage(Func<TActual?, Exception?, string> messageFactory)
     {
         MessageFactory = messageFactory;
         return this;
@@ -129,7 +122,4 @@ public abstract class BaseAssertCondition<TActual, TAnd, TOr> : BaseAssertCondit
     }
 
     protected internal abstract bool Passes(TActual? actualValue, Exception? exception);
-
-    public TAnd And { get; }
-    public TOr Or { get; }
 }

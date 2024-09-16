@@ -1,18 +1,26 @@
 using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class DelegateOr<TActual> 
     : Or<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IDelegateAssertions<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IOr<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>
 {
-    public DelegateOr(BaseAssertCondition<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
+    private readonly IAssertionResultProvider<TActual> _assertionResultProvider;
+    private readonly AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> _assertionBuilder;
+
+    public DelegateOr(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
+        AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> assertionBuilder)
     {
+        _assertionResultProvider = assertionResultProvider;
+        _assertionBuilder = assertionBuilder;
     }
 
-    Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> IThrows<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>.Throws() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.Or, OtherAssertCondition);
+    AssertionConnector<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> IAssertionConnector<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>.AssertionConnector => new(_assertionBuilder, ChainType.Or);
     
-    public static DelegateOr<TActual> Create(BaseAssertCondition<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> otherAssertCondition)
+    public static DelegateOr<TActual> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
+        AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> assertionBuilder)
     {
-        return new DelegateOr<TActual>(otherAssertCondition);
+        return new DelegateOr<TActual>(assertionResultProvider, assertionBuilder);
     }
 }
