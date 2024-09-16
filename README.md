@@ -188,7 +188,6 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 | Build_MSTest | 1.454 s | 0.0276 s | 0.0258 s |
 
 
-### Scenario: Building the test project
 
 #### macos-latest
 
@@ -210,7 +209,6 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 | Build_MSTest | 964.8 ms | 26.88 ms | 78.83 ms |
 
 
-### Scenario: Building the test project
 
 #### windows-latest
 
@@ -255,7 +253,6 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 | MSTest    | 1,218.13 ms | 12.264 ms | 11.472 ms |
 
 
-### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
 
 #### windows-latest
 
@@ -278,7 +275,6 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 | MSTest    | 1,142.96 ms |  4.846 ms |  4.295 ms |
 
 
-### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
 
 #### macos-latest
 
@@ -324,7 +320,6 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 | MSTest    | 6,519.74 ms | 35.108 ms | 32.840 ms |
 
 
-### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
 
 #### windows-latest
 
@@ -347,7 +342,6 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 | MSTest    | 7,423.7 ms | 11.34 ms | 10.61 ms |
 
 
-### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
 
 #### macos-latest
 
