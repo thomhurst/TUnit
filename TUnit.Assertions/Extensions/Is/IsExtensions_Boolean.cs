@@ -1,25 +1,31 @@
 ﻿#nullable disable
 
-using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static BaseAssertCondition<bool, TAnd, TOr> IsTrue<TAnd, TOr>(this IIs<bool, TAnd, TOr> @is)
-        where TAnd : And<bool, TAnd, TOr>, IAnd<bool, TAnd, TOr>
-        where TOr : Or<bool, TAnd, TOr>, IOr<bool, TAnd, TOr>
+    public static TOutput IsTrue<TAssertionBuilder, TOutput, TAnd, TOr>(this TAssertionBuilder assertionBuilder)
+        where TAnd : IAnd<bool, TAnd, TOr>
+        where TOr : IOr<bool, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<bool, TAnd, TOr>, IOutputsChain<TOutput, bool>
+        where TOutput : InvokableAssertionBuilder<bool, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new EqualsAssertCondition<bool, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(null), true));
+        return new EqualsAssertCondition<bool, TAnd, TOr>(assertionBuilder.AppendCallerMethod(null), true)
+            .ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(assertionBuilder);
     }
     
-    public static BaseAssertCondition<bool, TAnd, TOr> IsFalse<TAnd, TOr>(this IIs<bool, TAnd, TOr> @is)
-        where TAnd : And<bool, TAnd, TOr>, IAnd<bool, TAnd, TOr>
-        where TOr : Or<bool, TAnd, TOr>, IOr<bool, TAnd, TOr>
+    public static TOutput IsFalse<TAssertionBuilder, TOutput, TAnd, TOr>(this TAssertionBuilder assertionBuilder)
+        where TAnd : IAnd<bool, TAnd, TOr>
+        where TOr : IOr<bool, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<bool, TAnd, TOr>, IOutputsChain<TOutput, bool>
+        where TOutput : InvokableAssertionBuilder<bool, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new EqualsAssertCondition<bool, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(null), false));
+        return new EqualsAssertCondition<bool, TAnd, TOr>(assertionBuilder.AppendCallerMethod(null), false)
+            .ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(assertionBuilder);
     }
 }

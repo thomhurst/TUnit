@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
+﻿using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
@@ -11,7 +10,7 @@ public class AndAssertionBuilder<TActual, TAnd, TOr> : InvokableAssertionBuilder
 {
     public TAnd And { get; }
     
-    internal AndAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(assertionDataDelegate, ChainType.And)
+    internal AndAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(assertionDataDelegate)
     {
         Assertions.AddRange(assertionBuilder.Assertions);
         

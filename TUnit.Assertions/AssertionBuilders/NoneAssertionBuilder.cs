@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Operators;
+﻿using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
@@ -10,7 +9,7 @@ public class NoneAssertionBuilder<TActual, TAnd, TOr> : InvokableAssertionBuilde
     public TAnd And { get; }
     public TOr Or { get; }
     
-    internal NoneAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(assertionDataDelegate, ChainType.None)
+    internal NoneAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(assertionDataDelegate)
     {
         Assertions.AddRange(assertionBuilder.Assertions);
 

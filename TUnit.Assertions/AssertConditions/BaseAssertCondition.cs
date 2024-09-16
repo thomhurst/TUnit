@@ -73,7 +73,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     }
 
     internal TOutput ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(TAssertionBuilder assertionBuilder)
-        where TAssertionBuilder : AssertionBuilder<TActual, TAnd, TOr>, IOutputsChain<TOutput, TActual, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<TActual, TAnd, TOr>, IOutputsChain<TOutput, TActual>
         where TOutput : InvokableAssertionBuilder<TActual, TAnd, TOr>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>

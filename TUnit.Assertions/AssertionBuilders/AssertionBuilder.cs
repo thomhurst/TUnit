@@ -11,10 +11,9 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public abstract class AssertionBuilder<TActual>
 {
-    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, ChainType chainType)
+    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate)
     {
         AssertionDataDelegate = assertionDataDelegate;
-        ChainType = chainType;
     }
     
     internal StringBuilder? ExpressionBuilder { get; init; }
@@ -22,7 +21,6 @@ public abstract class AssertionBuilder<TActual>
     public AssertionMessage? AssertionMessage { get; protected set; }
     
     public Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
-    protected ChainType ChainType { get; set; }
     
     internal readonly List<BaseAssertCondition<TActual>> Assertions = new();
 }
@@ -31,11 +29,11 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, ChainType chainType) : base(assertionDataDelegate, chainType)
+    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate) : base(assertionDataDelegate)
     {
     }
 
-    protected AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actual) : base(assertionDataDelegate, ChainType.None)
+    protected AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actual) : base(assertionDataDelegate)
     {
         if (string.IsNullOrEmpty(actual))
         {
@@ -86,10 +84,12 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
     }
 
     public TOutput WithAssertion<TAssertionBuilder, TOutput>(BaseAssertCondition<TActual> assertCondition)
-        where TAssertionBuilder : IOutputsChain<TOutput, TActual, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<TActual, TAnd, TOr>, IOutputsChain<TOutput, TActual>
         where TOutput : InvokableAssertionBuilder<TActual, TAnd, TOr>
     {
-        return TAssertionBuilder.Create(AssertionDataDelegate, this);
+        var builder = TAssertionBuilder.Create(AssertionDataDelegate, this);
+        builder.Assertions.Add(assertCondition);
+        return builder;
     }
     
     [Obsolete("This is a base `object` method that should not be called.", true)]

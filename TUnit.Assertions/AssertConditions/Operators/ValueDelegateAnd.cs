@@ -22,5 +22,5 @@ public class ValueDelegateAnd<TActual>
         return new ValueDelegateAnd<TActual>(assertionResultProvider, assertionBuilder);
     }
 
-    AssertionConnector<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IAssertionConnector<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.AssertionConnector => new(_assertionBuilder, ChainType.Or);
+    AssertionConnector<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IAssertionBuilderProvider<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.AssertionConnector => new(_assertionBuilder, ChainType.Or);
 }

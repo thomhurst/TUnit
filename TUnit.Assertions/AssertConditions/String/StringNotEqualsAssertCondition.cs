@@ -4,8 +4,8 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.String;
 
 public class StringNotEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, string, TAnd, TOr>
-    where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-    where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    where TAnd : IAnd<string, TAnd, TOr>
+    where TOr : IOr<string, TAnd, TOr>
 {
     private readonly StringComparison _stringComparison;
     

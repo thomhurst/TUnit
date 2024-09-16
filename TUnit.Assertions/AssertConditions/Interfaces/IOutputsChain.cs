@@ -3,10 +3,8 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Interfaces;
 
-public interface IOutputsChain<TAssertionBuilder, TActual, TAnd, TOr> 
-    where TAssertionBuilder : AssertionBuilder<TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr> 
-    where TOr : IOr<TActual, TAnd, TOr>
+public interface IOutputsChain<out TAssertionBuilder, TActual> 
+    where TAssertionBuilder : AssertionBuilder<TActual>
 {
-    public static abstract TAssertionBuilder Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual, TAnd, TOr> assertionBuilder);
+    public static abstract TAssertionBuilder Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder);
 }

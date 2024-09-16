@@ -5,21 +5,20 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
-public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
-    where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-    where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+public class StringLength<TAnd, TOr>
+    where TAnd : IAnd<string, TAnd, TOr>
+    where TOr : IOr<string, TAnd, TOr>
 {
     protected AssertionBuilder<string, TAnd, TOr> AssertionBuilder { get; }
 
-    public StringLength(AssertionBuilder<string, TAnd, TOr> assertionBuilder, ChainType chainType,
-        BaseAssertCondition<string, TAnd, TOr>? otherAssertCondition) : base(chainType, otherAssertCondition)
+    public StringLength(AssertionBuilder<string, TAnd, TOr> assertionBuilder)
     {
         AssertionBuilder = assertionBuilder.AppendExpression("Length");
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<string> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (actual, _, _, self) =>
+        return new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (actual, _, _, self) =>
             {
                 if (actual is null)
                 {
@@ -30,11 +29,10 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
                 return actual.Length == expected;
             },
             (@string, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}")
-        );
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}");
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> Zero =>
+    public BaseAssertCondition<string> Zero =>
         Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (@string, _, _, self) =>
             {
                 if (@string is null)
@@ -49,7 +47,7 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}")
         );
 
-    public BaseAssertCondition<string, TAnd, TOr> Positive =>
+    public BaseAssertCondition<string> Positive =>
         Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), default, (@string, _, _, self) =>
             {
                 if (@string is null)
@@ -65,9 +63,9 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
         ));
 
 
-    public BaseAssertCondition<string, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<string> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(
+        return new DelegateAssertCondition<string, int, TAnd, TOr>(
             AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
             expected,
             (@string, _, _, self) =>
@@ -81,13 +79,12 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
                 return @string.Length > expected;
             },
             (@string, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than {expected}")
-        );
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than {expected}");
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<string> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -98,13 +95,12 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
                 return @string.Length >= expected;
             },
             (@string, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than or equal to {expected}")
-        );
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than or equal to {expected}");
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<string> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -115,13 +111,12 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
                 return @string.Length < expected;
             },
             (@string, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than {expected}")
-        );
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than {expected}");
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public BaseAssertCondition<string> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -132,7 +127,6 @@ public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
                 return @string.Length <= expected;
             },
             (@string, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than or equal to {expected}")
-        );
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than or equal to {expected}");
     }
 }

@@ -9,9 +9,9 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class DelegateAssertionBuilder 
     : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
         IOutputsChain<NoneAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>, object?, DelegateAnd<object?>, DelegateOr<object?>>,
-        IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>
+        IDelegateAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>
    {
-    AssertionConnector<object?, DelegateAnd<object?>, DelegateOr<object?>> IAssertionConnector<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionConnector => new(this, ChainType.Or);
+    AssertionConnector<object?, DelegateAnd<object?>, DelegateOr<object?>> IAssertionBuilderProvider<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionConnector => new(this, ChainType.Or);
 
     internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(action.AsAssertionData, expressionBuilder)
     {

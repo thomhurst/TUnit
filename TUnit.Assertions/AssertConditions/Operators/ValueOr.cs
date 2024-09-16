@@ -16,7 +16,7 @@ public class ValueOr<TActual>
         _assertionBuilder = assertionBuilder;
     }
 
-    AssertionConnector<TActual, ValueAnd<TActual>, ValueOr<TActual>> IAssertionConnector<TActual, ValueAnd<TActual>, ValueOr<TActual>>.AssertionConnector => new(_assertionBuilder, ChainType.Or);
+    AssertionConnector<TActual, ValueAnd<TActual>, ValueOr<TActual>> IAssertionBuilderProvider<TActual, ValueAnd<TActual>, ValueOr<TActual>>.AssertionConnector => new(_assertionBuilder, ChainType.Or);
   
     public static ValueOr<TActual> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
         AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> assertionBuilder)

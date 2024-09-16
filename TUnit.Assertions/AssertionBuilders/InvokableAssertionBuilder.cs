@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
@@ -8,7 +7,7 @@ public abstract class InvokableAssertionBuilder<TActual, TAnd, TOr>  : Assertion
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    protected InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, ChainType chainType) : base(assertionDataDelegate, chainType)
+    protected InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate) : base(assertionDataDelegate)
     {
     }
 

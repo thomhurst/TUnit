@@ -4,70 +4,83 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static BaseAssertCondition<DateOnly, TAnd, TOr> IsGreaterThan<TAnd, TOr>(this IIs<DateOnly, TAnd, TOr> @is, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
-        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
-        where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
+    public static TOutput IsGreaterThan<TAssertionBuilder, TOutput, TAnd, TOr>(this TAssertionBuilder assertionBuilder, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+        where TAnd : IAnd<DateOnly, TAnd, TOr>
+        where TOr : IOr<DateOnly, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<DateOnly, TAnd, TOr>, IOutputsChain<TOutput, DateOnly>
+        where TOutput : InvokableAssertionBuilder<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(assertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value > expected;
             },
-            (value, _) => $"{value} was not greater than {expected}"));
-    }
+            (value, _) => $"{value} was not greater than {expected}")
+            .ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(assertionBuilder); }
     
-    public static BaseAssertCondition<DateOnly, TAnd, TOr> IsGreaterThanOrEqualTo<TAnd, TOr>(this IIs<DateOnly, TAnd, TOr> @is, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
-        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
-        where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
+    public static TOutput IsGreaterThanOrEqualTo<TAssertionBuilder, TOutput, TAnd, TOr>(this TAssertionBuilder assertionBuilder, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+        where TAnd : IAnd<DateOnly, TAnd, TOr>
+        where TOr : IOr<DateOnly, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<DateOnly, TAnd, TOr>, IOutputsChain<TOutput, DateOnly>
+        where TOutput : InvokableAssertionBuilder<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(assertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
-            (value, _) => $"{value} was not greater than or equal to {expected}"));
-    }
+            (value, _) => $"{value} was not greater than or equal to {expected}")
+            .ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(assertionBuilder); }
     
-    public static BaseAssertCondition<DateOnly, TAnd, TOr> IsLessThan<TAnd, TOr>(this IIs<DateOnly, TAnd, TOr> @is, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
-        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
-        where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
+    public static TOutput IsLessThan<TAssertionBuilder, TOutput, TAnd, TOr>(this TAssertionBuilder assertionBuilder, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+        where TAnd : IAnd<DateOnly, TAnd, TOr>
+        where TOr : IOr<DateOnly, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<DateOnly, TAnd, TOr>, IOutputsChain<TOutput, DateOnly>
+        where TOutput : InvokableAssertionBuilder<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(assertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value < expected;
             },
-            (value, _) => $"{value} was not less than {expected}"));
-    }
+            (value, _) => $"{value} was not less than {expected}")
+            .ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(assertionBuilder); }
     
-    public static BaseAssertCondition<DateOnly, TAnd, TOr> IsLessThanOrEqualTo<TAnd, TOr>(this IIs<DateOnly, TAnd, TOr> @is, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
-        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
-        where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
+    public static TOutput IsLessThanOrEqualTo<TAssertionBuilder, TOutput, TAnd, TOr>(this TAssertionBuilder assertionBuilder, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+        where TAnd : IAnd<DateOnly, TAnd, TOr>
+        where TOr : IOr<DateOnly, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<DateOnly, TAnd, TOr>, IOutputsChain<TOutput, DateOnly>
+        where TOutput : InvokableAssertionBuilder<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(assertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
             {
                 return value <= expected;
             },
-            (value, _) => $"{value} was not less than or equal to {expected}"));
-    }
+            (value, _) => $"{value} was not less than or equal to {expected}")
+            .ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(assertionBuilder); }
     
-    public static BaseAssertCondition<DateOnly, TAnd, TOr> IsBetween<TAnd, TOr>(this IIs<DateOnly, TAnd, TOr> @is, DateOnly lowerBound, DateOnly upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
-        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
-        where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
+    public static TOutput IsBetween<TAssertionBuilder, TOutput, TAnd, TOr>(this TAssertionBuilder assertionBuilder, DateOnly lowerBound, DateOnly upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
+        where TAnd : IAnd<DateOnly, TAnd, TOr>
+        where TOr : IOr<DateOnly, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<DateOnly, TAnd, TOr>, IOutputsChain<TOutput, DateOnly>
+        where TOutput : InvokableAssertionBuilder<DateOnly, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.AssertionConnector, new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(@is.AssertionConnector.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateOnly, DateOnly, TAnd, TOr>(assertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, _) =>
             {
                 return value >= lowerBound && value <= upperBound;
             },
-            (value, _) => $"{value} was not between {lowerBound} and {upperBound}"));
-    }
+            (value, _) => $"{value} was not between {lowerBound} and {upperBound}")
+            .ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(assertionBuilder); }
     
-    public static BaseAssertCondition<DateOnly, TAnd, TOr> IsEqualToWithTolerance<TAnd, TOr>(this IIs<DateOnly, TAnd, TOr> @is, DateOnly expected, int daysTolerance, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("daysTolerance")] string doNotPopulateThisValue2 = "")
-        where TAnd : And<DateOnly, TAnd, TOr>, IAnd<DateOnly, TAnd, TOr>
-        where TOr : Or<DateOnly, TAnd, TOr>, IOr<DateOnly, TAnd, TOr>
+    public static TOutput IsEqualToWithTolerance<TAssertionBuilder, TOutput, TAnd, TOr>(this TAssertionBuilder assertionBuilder, DateOnly expected, int daysTolerance, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("daysTolerance")] string doNotPopulateThisValue2 = "")
+        where TAnd : IAnd<DateOnly, TAnd, TOr>
+        where TOr : IOr<DateOnly, TAnd, TOr>
+        where TAssertionBuilder : AssertionBuilder<DateOnly, TAnd, TOr>, IOutputsChain<TOutput, DateOnly>
+        where TOutput : InvokableAssertionBuilder<DateOnly, TAnd, TOr>
     {
-        return IsBetween(@is, expected.AddDays(-daysTolerance), expected.AddDays(daysTolerance), doNotPopulateThisValue1, doNotPopulateThisValue2);
+        return IsBetween<TAssertionBuilder, TOutput, TAnd, TOr>(assertionBuilder, expected.AddDays(-daysTolerance), expected.AddDays(daysTolerance), doNotPopulateThisValue1, doNotPopulateThisValue2);
     }
 }
