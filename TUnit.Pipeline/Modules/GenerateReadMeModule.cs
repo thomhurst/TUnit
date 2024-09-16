@@ -57,7 +57,7 @@ public class GenerateReadMeModule : Module<File>
         {
             await groupedArtifacts.ForEachAsync(async artifact =>
             {
-                var operatingSystem = artifact.Name.Split("_")[1];
+                var operatingSystem = artifact.Name.Split("_")[0];
 
                 var stream = await context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
                     context.GitHub().RepositoryInfo.Owner,
