@@ -14,7 +14,7 @@ on:
         required: true
 
 jobs:
-  modularpipeline:
+  run-time-benchmarks:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
     strategy: 
       matrix:
@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     concurrency: 
-      group: "speed-comparison-${{matrix.os}}-${{matrix.class}}"
+      group: "speed-comparison-run-time-${{matrix.os}}-${{matrix.class}}"
       cancel-in-progress: true
 
     steps:
@@ -71,6 +71,40 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: markdown_${{ matrix.os }}_${{ matrix.class }}
+          name: markdown_run_time_${{ matrix.os }}_${{ matrix.class }}
+          path: |
+            **/BenchmarkDotNet.Artifacts/**
+  build-time-benchmarks:
+    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
+    strategy: 
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        category: [Runtime, Build]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    concurrency: 
+      group: "speed-comparison-build-time-${{matrix.os}}-${{matrix.category}}"
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Run Benchmark
+        run: ${{ matrix.os != 'windows-latest' && 'sudo -E ' || '' }}dotnet run -c Release --category=${{ matrix.category }}
+        working-directory: "tools/speed-comparison/Tests.Benchmark"
+
+      - name: Upload Markdown
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: markdown_build_time_${{ matrix.os }}_${{ matrix.category }}
           path: |
             **/BenchmarkDotNet.Artifacts/**
