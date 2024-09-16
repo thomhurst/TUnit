@@ -1,30 +1,21 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
 using CliWrap;
-using CliWrap.Buffered;
-using Process = System.Diagnostics.Process;
 
 namespace Tests.Benchmark;
 
 [MarkdownExporterAttribute.GitHub]
 public class Benchmarks
 {
-    private Stream _outputStream;
-    
+    private readonly Stream _outputStream = Console.OpenStandardOutput();
+
     private static readonly string TUnitPath = GetProjectPath("TUnitTimer");
     private static readonly string NUnitPath = GetProjectPath("NUnitTimer");
     private static readonly string xUnitPath = GetProjectPath("xUnitTimer");
     private static readonly string MSTestPath = GetProjectPath("MSTestTimer");
     
     private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
-
-    [GlobalSetup]
-    public void GetOutputStream()
-    {
-        _outputStream = Console.OpenStandardOutput();
-    }
-
+    
     [GlobalCleanup]
     public async Task FlushStream()
     {
@@ -32,6 +23,7 @@ public class Benchmarks
     }
     
     [Benchmark]
+    [BenchmarkCategory("Runtime")]
     public async Task TUnit_AOT()
     {
         await Cli.Wrap(Path.Combine(TUnitPath, "aot-publish", GetExecutableFileName()))
@@ -41,6 +33,7 @@ public class Benchmarks
     }
 
     [Benchmark]
+    [BenchmarkCategory("Runtime")]
     public async Task TUnit()
     {
         await Cli.Wrap("dotnet")
@@ -51,6 +44,7 @@ public class Benchmarks
     }
 
     [Benchmark]
+    [BenchmarkCategory("Runtime")]
     public async Task NUnit()
     {
         await Cli.Wrap("dotnet")
@@ -61,6 +55,7 @@ public class Benchmarks
     }
 
     [Benchmark]
+    [BenchmarkCategory("Runtime")]
     public async Task xUnit()
     {
         await Cli.Wrap("dotnet")
@@ -71,10 +66,55 @@ public class Benchmarks
     }
 
     [Benchmark]
+    [BenchmarkCategory("Runtime")]
     public async Task MSTest()
     {
         await Cli.Wrap("dotnet")
             .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithWorkingDirectory(MSTestPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
+    }
+    
+    [Benchmark]
+    [BenchmarkCategory("Build")]
+    public async Task Build_TUnit()
+    {
+        await Cli.Wrap("dotnet")
+            .WithArguments(["build", "--no-incremental", "-c", "Release"])
+            .WithWorkingDirectory(TUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
+    }
+    
+    [Benchmark]
+    [BenchmarkCategory("Build")]
+    public async Task Build_NUnit()
+    {
+        await Cli.Wrap("dotnet")
+            .WithArguments(["build", "--no-incremental", "-c", "Release"])
+            .WithWorkingDirectory(NUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
+    }
+    
+    [Benchmark]
+    [BenchmarkCategory("Build")]
+    public async Task Build_xUnit()
+    {
+        await Cli.Wrap("dotnet")
+            .WithArguments(["build", "--no-incremental", "-c", "Release"])
+            .WithWorkingDirectory(xUnitPath)
+            .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
+            .ExecuteAsync();
+    }
+    
+    [Benchmark]
+    [BenchmarkCategory("Build")]
+    public async Task Build_MSTest()
+    {
+        await Cli.Wrap("dotnet")
+            .WithArguments(["build", "--no-incremental", "-c", "Release"])
             .WithWorkingDirectory(MSTestPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
