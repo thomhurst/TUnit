@@ -180,15 +180,16 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 
 
 ```
-| Method    | Mean      | Error     | StdDev    |
-|---------- |----------:|----------:|----------:|
-| TUnit_AOT |  77.88 ms |  0.529 ms |  0.442 ms |
-| TUnit     | 401.81 ms |  7.849 ms | 11.748 ms |
-| NUnit     | 696.69 ms | 13.021 ms | 11.543 ms |
-| xUnit     | 681.84 ms |  5.443 ms |  4.545 ms |
-| MSTest    | 613.03 ms |  5.736 ms |  5.366 ms |
+| Method    | Mean      | Error    | StdDev   |
+|---------- |----------:|---------:|---------:|
+| TUnit_AOT |  75.16 ms | 0.536 ms | 0.448 ms |
+| TUnit     | 416.82 ms | 8.195 ms | 7.666 ms |
+| NUnit     | 689.54 ms | 6.649 ms | 5.191 ms |
+| xUnit     | 678.26 ms | 5.343 ms | 4.462 ms |
+| MSTest    | 610.80 ms | 8.258 ms | 7.725 ms |
 
 
+### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
 
 #### ubuntu-latest
 
@@ -202,15 +203,16 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method    | Mean        | Error     | StdDev    | Median      |
-|---------- |------------:|----------:|----------:|------------:|
-| TUnit_AOT |    47.50 ms |  0.947 ms |  1.956 ms |    47.47 ms |
-| TUnit     |   784.03 ms | 15.595 ms | 35.200 ms |   768.83 ms |
-| NUnit     | 1,354.97 ms | 21.437 ms | 20.052 ms | 1,355.52 ms |
-| xUnit     | 1,330.91 ms | 13.002 ms | 11.526 ms | 1,330.81 ms |
-| MSTest    | 1,207.41 ms | 17.531 ms | 16.398 ms | 1,206.17 ms |
+| Method    | Mean        | Error     | StdDev    |
+|---------- |------------:|----------:|----------:|
+| TUnit_AOT |    46.26 ms |  0.957 ms |  2.822 ms |
+| TUnit     |   799.44 ms | 15.931 ms | 37.238 ms |
+| NUnit     | 1,363.64 ms | 18.945 ms | 16.794 ms |
+| xUnit     | 1,345.48 ms | 14.739 ms | 13.787 ms |
+| MSTest    | 1,215.68 ms | 19.906 ms | 17.646 ms |
 
 
+### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
 
 #### windows-latest
 
@@ -226,11 +228,11 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    82.11 ms |  1.600 ms |  2.584 ms |
-| TUnit     |   778.25 ms | 15.324 ms | 19.925 ms |
-| NUnit     | 1,347.15 ms | 16.001 ms | 14.967 ms |
-| xUnit     | 1,338.00 ms |  9.902 ms |  8.778 ms |
-| MSTest    | 1,208.57 ms |  7.056 ms |  5.892 ms |
+| TUnit_AOT |    77.58 ms |  1.244 ms |  1.039 ms |
+| TUnit     |   746.42 ms | 14.685 ms | 20.101 ms |
+| NUnit     | 1,280.22 ms | 10.746 ms | 10.052 ms |
+| xUnit     | 1,262.60 ms |  4.400 ms |  3.674 ms |
+| MSTest    | 1,144.95 ms | 12.610 ms | 11.179 ms |
 
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
@@ -247,15 +249,16 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    86.46 ms |  1.726 ms |  4.331 ms |
-| TUnit     |   841.77 ms | 16.628 ms | 35.793 ms |
-| NUnit     | 6,518.11 ms | 16.586 ms | 14.703 ms |
-| xUnit     | 6,528.29 ms | 20.310 ms | 18.998 ms |
-| MSTest    | 6,469.30 ms | 12.803 ms | 11.350 ms |
+| Method    | Mean        | Error     | StdDev    | Median      |
+|---------- |------------:|----------:|----------:|------------:|
+| TUnit_AOT |    90.32 ms |  1.792 ms |  5.026 ms |    89.82 ms |
+| TUnit     |   840.04 ms | 15.899 ms | 35.232 ms |   825.35 ms |
+| NUnit     | 6,560.62 ms | 31.289 ms | 27.737 ms | 6,562.15 ms |
+| xUnit     | 6,585.16 ms | 33.051 ms | 30.916 ms | 6,585.98 ms |
+| MSTest    | 6,511.09 ms | 30.913 ms | 28.916 ms | 6,512.81 ms |
 
 
+### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
 
 #### windows-latest
 
@@ -271,13 +274,14 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 ```
 | Method    | Mean       | Error    | StdDev   |
 |---------- |-----------:|---------:|---------:|
-| TUnit_AOT |   134.8 ms |  2.67 ms |  6.55 ms |
-| TUnit     |   824.0 ms | 16.40 ms | 20.74 ms |
-| NUnit     | 7,522.5 ms | 31.59 ms | 29.55 ms |
-| xUnit     | 7,500.1 ms | 23.44 ms | 21.92 ms |
-| MSTest    | 7,457.1 ms | 11.13 ms |  9.87 ms |
+| TUnit_AOT |   134.9 ms |  2.67 ms |  5.75 ms |
+| TUnit     |   823.3 ms | 16.41 ms | 21.90 ms |
+| NUnit     | 7,501.3 ms | 14.89 ms | 13.20 ms |
+| xUnit     | 7,500.3 ms | 15.18 ms | 14.20 ms |
+| MSTest    | 7,503.9 ms | 27.39 ms | 25.62 ms |
 
 
+### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
 
 #### macos-latest
 
@@ -293,11 +297,11 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    245.9 ms |  13.58 ms |  40.05 ms |
-| TUnit     |    544.1 ms |  20.72 ms |  61.09 ms |
-| NUnit     | 14,343.1 ms | 285.16 ms | 350.20 ms |
-| xUnit     | 14,541.4 ms | 290.76 ms | 573.93 ms |
-| MSTest    | 14,189.3 ms | 279.04 ms | 473.83 ms |
+| TUnit_AOT |    241.6 ms |  14.01 ms |  41.09 ms |
+| TUnit     |    572.6 ms |  21.56 ms |  63.57 ms |
+| NUnit     | 14,235.8 ms | 283.05 ms | 517.57 ms |
+| xUnit     | 14,405.2 ms | 287.45 ms | 612.58 ms |
+| MSTest    | 14,343.3 ms | 283.33 ms | 347.95 ms |
 
 
 
