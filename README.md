@@ -168,7 +168,7 @@ It aims to build upon the useful features of both while trying to address any pa
 
 ### Scenario: Building the test project
 
-#### markdown
+#### ubuntu-latest
 
 ```
 
@@ -190,7 +190,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ### Scenario: Building the test project
 
-#### markdown
+#### windows-latest
 
 ```
 
@@ -212,7 +212,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ### Scenario: Building the test project
 
-#### markdown
+#### macos-latest
 
 ```
 
@@ -234,7 +234,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 
 ### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
 
-#### markdown
+#### macos-latest
 
 ```
 
@@ -257,7 +257,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 
 ### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
 
-#### markdown
+#### windows-latest
 
 ```
 
@@ -280,7 +280,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
 
-#### markdown
+#### ubuntu-latest
 
 ```
 
@@ -303,7 +303,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
 
-#### markdown
+#### ubuntu-latest
 
 ```
 
@@ -326,7 +326,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
 
-#### markdown
+#### windows-latest
 
 ```
 
@@ -349,7 +349,7 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
 
-#### markdown
+#### macos-latest
 
 ```
 
