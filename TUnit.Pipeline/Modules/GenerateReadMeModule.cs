@@ -19,6 +19,7 @@ namespace TUnit.Pipeline.Modules;
 [SkipIfDependabot]
 public class GenerateReadMeModule : Module<File>
 {
+    private readonly object _stringBuilderLock = new();
     protected override async Task<File?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var template = await context.Git()
@@ -52,12 +53,8 @@ public class GenerateReadMeModule : Module<File>
         var fileContents = new StringBuilder();
 
         // Grouping is by Scenario
-        await artifacts.Artifacts.GroupBy(x => x.Name.Split("_")[2]).ForEachAsync(async groupedArtifacts =>
+        await artifacts.Artifacts.GroupBy(x => x.Name.Split("_", 2)[1]).ForEachAsync(async groupedArtifacts =>
         {
-            var className = groupedArtifacts.Key;
-
-            fileContents.AppendLine($"### Scenario: {GetScenario(className)} (including spawning a new process and initialising the test framework)");
-
             await groupedArtifacts.ForEachAsync(async artifact =>
             {
                 var operatingSystem = artifact.Name.Split("_")[1];
@@ -77,11 +74,15 @@ public class GenerateReadMeModule : Module<File>
 
                 var contents = await markdownFile.ReadAsync(cancellationToken);
 
-                fileContents.AppendLine();
-                fileContents.AppendLine($"#### {operatingSystem}");
-                fileContents.AppendLine();
-                fileContents.AppendLine(contents);
-                fileContents.AppendLine();
+                lock (_stringBuilderLock)
+                {
+                    fileContents.AppendLine($"### Scenario: {GetScenario(groupedArtifacts.Key)}");
+                    fileContents.AppendLine();
+                    fileContents.AppendLine($"#### {operatingSystem}");
+                    fileContents.AppendLine();
+                    fileContents.AppendLine(contents);
+                    fileContents.AppendLine();
+                }
             }, cancellationToken: cancellationToken).ProcessOneAtATime();
         }, cancellationToken: cancellationToken).ProcessOneAtATime();
 
@@ -97,13 +98,18 @@ public class GenerateReadMeModule : Module<File>
         return readme;
     }
 
-    private string GetScenario(string className)
+    private string GetScenario(string fileName)
     {
-        return className switch
+        if (fileName.Contains("build_time"))
         {
-            "BasicTest" => "A single test that completes instantly",
-            "RepeatTests" => "A test that takes 50ms to execute, repeated 100 times",
-            _ => throw new ArgumentException($"Unknown class name: {className}", nameof(className))
+            return "Building the test project";
+        }
+        
+        return fileName.Split("_").Last() switch
+        {
+            "BasicTest" => "A single test that completes instantly (including spawning a new process and initialising the test framework)",
+            "RepeatTests" => "A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)",
+            _ => throw new ArgumentException($"Unknown class name: {fileName}", nameof(fileName))
         };
     }
 }

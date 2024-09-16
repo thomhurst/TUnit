@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: markdown_run_time_${{ matrix.os }}_${{ matrix.class }}
+          name: ${{ matrix.os }}_markdown_run_time_${{ matrix.class }}
           path: |
             **/BenchmarkDotNet.Artifacts/**
   build-time-benchmarks:
@@ -106,6 +106,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: markdown_build_time_${{ matrix.os }}
+          name: ${{ matrix.os }}_markdown_build_time
           path: |
             **/BenchmarkDotNet.Artifacts/**
