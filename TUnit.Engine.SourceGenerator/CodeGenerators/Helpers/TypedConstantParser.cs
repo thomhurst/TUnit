@@ -16,6 +16,41 @@ internal static class TypedConstantParser
             return $"({(type ?? constructorArgument.Type)!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({constructorArgument.Value})";
         }
         
+        if (constructorArgument.Type?.SpecialType == SpecialType.System_Single)
+        {
+            return $"{constructorArgument.Value}F";
+        }
+        
+        if (constructorArgument.Type?.SpecialType == SpecialType.System_Int64)
+        {
+            return $"{constructorArgument.Value}L";
+        }
+        
+        if (constructorArgument.Type?.SpecialType == SpecialType.System_Double)
+        {
+            return $"{constructorArgument.Value}D";
+        }
+        
+        if (constructorArgument.Type?.SpecialType == SpecialType.System_Decimal)
+        {
+            return $"{constructorArgument.Value}M";
+        }
+
+        if (constructorArgument.Type?.SpecialType == SpecialType.System_UInt32)
+        {
+            return $"{constructorArgument.Value}U";
+        }
+        
+        if (constructorArgument.Type?.SpecialType == SpecialType.System_UInt64)
+        {
+            return $"{constructorArgument.Value}UL";
+        }
+        
+        if (constructorArgument.Type?.SpecialType == SpecialType.System_Decimal)
+        {
+            return $"{constructorArgument.Value}M";
+        }
+        
         if (constructorArgument.Kind is TypedConstantKind.Primitive)
         {
             return $"{constructorArgument.Value}";

@@ -81,8 +81,8 @@ public class GenerateReadMeModule : Module<File>
                 fileContents.AppendLine();
                 fileContents.AppendLine(contents);
                 fileContents.AppendLine();
-            }, cancellationToken: cancellationToken).ProcessOneAtATime();
-        }, cancellationToken: cancellationToken).ProcessOneAtATime();
+            }
+        }
 
         var newContents = template.Replace("${{ BENCHMARK }}", fileContents.ToString());
 
