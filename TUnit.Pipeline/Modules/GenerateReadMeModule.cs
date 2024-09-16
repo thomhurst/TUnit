@@ -53,9 +53,11 @@ public class GenerateReadMeModule : Module<File>
         var fileContents = new StringBuilder();
 
         // Grouping is by Scenario
-        await artifacts.Artifacts.GroupBy(x => x.Name.Split("_", 2)[1]).ForEachAsync(async groupedArtifacts =>
+        foreach (var groupedArtifacts in artifacts.Artifacts.GroupBy(x => x.Name.Split("_", 2)[1]).OrderBy(x => x.Key))
         {
-            await groupedArtifacts.ForEachAsync(async artifact =>
+            fileContents.AppendLine($"### Scenario: {GetScenario(groupedArtifacts.Key)}");
+
+            foreach (var artifact in groupedArtifacts)
             {
                 var operatingSystem = artifact.Name.Split("_")[0];
 
@@ -74,15 +76,11 @@ public class GenerateReadMeModule : Module<File>
 
                 var contents = await markdownFile.ReadAsync(cancellationToken);
 
-                lock (_stringBuilderLock)
-                {
-                    fileContents.AppendLine($"### Scenario: {GetScenario(groupedArtifacts.Key)}");
-                    fileContents.AppendLine();
-                    fileContents.AppendLine($"#### {operatingSystem}");
-                    fileContents.AppendLine();
-                    fileContents.AppendLine(contents);
-                    fileContents.AppendLine();
-                }
+                fileContents.AppendLine();
+                fileContents.AppendLine($"#### {operatingSystem}");
+                fileContents.AppendLine();
+                fileContents.AppendLine(contents);
+                fileContents.AppendLine();
             }, cancellationToken: cancellationToken).ProcessOneAtATime();
         }, cancellationToken: cancellationToken).ProcessOneAtATime();
 
