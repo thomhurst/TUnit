@@ -34,7 +34,7 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         if(propertyReferenceOperation.Property.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) !=
-            "global::TUnit.Assertions.AssertConditions.BaseAssertCondition")
+            "global::TUnit.Assertions.AssertionBuilders.InvokableAssertionBuilder")
         {
             return;
         }

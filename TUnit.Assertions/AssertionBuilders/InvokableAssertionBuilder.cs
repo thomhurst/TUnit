@@ -57,6 +57,7 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
     }
 
     public TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
+    
     public string? GetExpression()
     {
         return ExpressionBuilder?.ToString();
