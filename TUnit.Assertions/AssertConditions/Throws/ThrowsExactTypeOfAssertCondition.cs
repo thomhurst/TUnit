@@ -16,7 +16,7 @@ public class ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr> : A
     {
         if (exception is null)
         {
-            WithMessage((_, _, actualExpression) => "Exception is null");
+            WithMessage((_, _, _) => "Exception is null");
             return false;
         }
         

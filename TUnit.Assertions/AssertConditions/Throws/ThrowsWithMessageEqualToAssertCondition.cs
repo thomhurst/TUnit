@@ -23,7 +23,7 @@ public class ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr> : Asser
 
         if (exception is null)
         {
-            WithMessage((_, _, actualExpression) => "Exception is null");
+            WithMessage((_, _, _) => "Exception is null");
             return false;
         }
         

@@ -16,7 +16,7 @@ public class ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr> : As
     {
         if (exception is null)
         {
-            WithMessage((_, _, actualExpression) => "Exception is null");
+            WithMessage((_, _, _) => "Exception is null");
             return false;
         }        
         

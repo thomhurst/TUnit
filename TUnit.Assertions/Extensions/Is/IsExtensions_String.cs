@@ -35,7 +35,7 @@ public static partial class IsExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, actualExpression) => "Actual string is null");
+                    self.WithMessage((_, _, _) => "Actual string is null");
                     return false;
                 }
                 

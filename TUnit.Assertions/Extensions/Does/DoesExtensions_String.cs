@@ -43,7 +43,7 @@ public static partial class DoesExtensions
             {
                 if (actual is null)
                 {
-                    self.WithMessage((_, _, actualExpression) => "Actual string is null");
+                    self.WithMessage((_, _, _) => "Actual string is null");
                     return false;
                 }
                 
@@ -58,7 +58,7 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return EndWiths(valueSource, expected, StringComparison.Ordinal);
+        return EndWiths(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> EndWiths<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")

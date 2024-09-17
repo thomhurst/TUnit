@@ -17,13 +17,13 @@ public class StringContainsAssertCondition<TAnd, TOr> : AssertCondition<string, 
     {
         if (actualValue is null)
         {
-            WithMessage((_, _, actualExpression) => "Actual string is null");
+            WithMessage((_, _, _) => "Actual string is null");
             return false;
         }
         
         if (ExpectedValue is null)
         {
-            WithMessage((_, _, actualExpression) => "Expected string is null");
+            WithMessage((_, _, _) => "Expected string is null");
             return false;
         }
         

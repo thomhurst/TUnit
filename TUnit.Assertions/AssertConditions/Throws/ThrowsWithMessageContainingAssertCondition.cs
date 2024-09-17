@@ -24,13 +24,13 @@ public class ThrowsWithMessageContainingAssertCondition<TActual, TAnd, TOr> : As
         
         if (exception is null)
         {
-            WithMessage((_, _, actualExpression) => "Exception is null");
+            WithMessage((_, _, _) => "Exception is null");
             return false;
         }
         
         if (ExpectedValue is null)
         {
-            WithMessage((_, _, actualExpression) => "Expected message is null");
+            WithMessage((_, _, _) => "Expected message is null");
             return false;
         }
         

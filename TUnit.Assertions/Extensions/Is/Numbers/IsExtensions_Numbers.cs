@@ -74,7 +74,7 @@ public static partial class IsExtensions
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _, actualExpression) =>
+                        self.WithMessage((_, _, _) =>
                             $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
@@ -96,7 +96,7 @@ public static partial class IsExtensions
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _, actualExpression) =>
+                        self.WithMessage((_, _, _) =>
                             $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
@@ -118,7 +118,7 @@ public static partial class IsExtensions
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _, actualExpression) =>
+                        self.WithMessage((_, _, _) =>
                             $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
@@ -139,7 +139,7 @@ public static partial class IsExtensions
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _, actualExpression) =>
+                        self.WithMessage((_, _, _) =>
                             $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
@@ -159,7 +159,7 @@ public static partial class IsExtensions
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _, actualExpression) =>
+                        self.WithMessage((_, _, _) =>
                             $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
@@ -180,7 +180,7 @@ public static partial class IsExtensions
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _, actualExpression) =>
+                        self.WithMessage((_, _, _) =>
                             $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
@@ -201,7 +201,7 @@ public static partial class IsExtensions
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _, actualExpression) =>
+                        self.WithMessage((_, _, _) =>
                             $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
