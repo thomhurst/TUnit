@@ -20,7 +20,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<TActual, int, TAnd, TOr>(expected, (enumerable, expected, _, self) =>
+        return new DelegateAssertCondition<TActual, int>(expected, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
                 {
@@ -36,7 +36,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
     }
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> Empty =>
-        new DelegateAssertCondition<TActual, int, TAnd, TOr>(0, (enumerable, expected, _, self) =>
+        new DelegateAssertCondition<TActual, int>(0, (enumerable, expected, _, self) =>
                 {
                     if (enumerable is null)
                     {
@@ -52,7 +52,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
     
     public InvokableAssertionBuilder<TActual, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<TActual, int, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<TActual, int>(expected,
             (enumerable, _, _, self) =>
             {
                 if (enumerable is null)
@@ -70,7 +70,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<TActual, int, TAnd, TOr>(expected, (enumerable, expected, _, self) =>
+        return new DelegateAssertCondition<TActual, int>(expected, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
                 {
@@ -87,7 +87,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<TActual, int, TAnd, TOr>(expected, (enumerable, expected, _, self) =>
+        return new DelegateAssertCondition<TActual, int>(expected, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
                 {
@@ -104,7 +104,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<TActual, int, TAnd, TOr>(expected, (enumerable, expected, _, self) =>
+        return new DelegateAssertCondition<TActual, int>(expected, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
                 {

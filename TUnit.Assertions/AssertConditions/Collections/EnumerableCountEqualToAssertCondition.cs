@@ -1,12 +1,9 @@
 ﻿using System.Collections;
-using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, int, TAnd, TOr>
+public class EnumerableCountEqualToAssertCondition<TActual> : AssertCondition<TActual, int>
     where TActual : IEnumerable
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
 {
     public EnumerableCountEqualToAssertCondition(int expected) : base(expected)
     {

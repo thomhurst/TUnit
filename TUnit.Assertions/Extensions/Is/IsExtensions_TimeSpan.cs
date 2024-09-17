@@ -15,7 +15,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value >= lowerBound && value <= upperBound;
             },
@@ -26,7 +26,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan,TimeSpan,TAnd,TOr>(expected,
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(expected,
             (actual, _, _, _) =>
             {
                 return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
@@ -38,7 +38,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new EqualsAssertCondition<TimeSpan, TAnd, TOr>(TimeSpan.Zero)
+        return new EqualsAssertCondition<TimeSpan>(TimeSpan.Zero)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
@@ -46,7 +46,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value > expected;
             },
@@ -57,7 +57,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
@@ -68,7 +68,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value < expected;
             },
@@ -79,7 +79,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value <= expected;
             },

@@ -15,7 +15,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, _) =>
             {
                 return value.CompareTo(expected) > 0;
             },
@@ -27,7 +27,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, _) =>
             {
                 return value.CompareTo(expected) >= 0;
             },
@@ -39,7 +39,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, _) =>
             {
                 return value.CompareTo(expected) < 0;
             },
@@ -51,7 +51,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, _) =>
             {
                 return value.CompareTo(expected) <= 0;
             },
@@ -63,7 +63,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, _) =>
             {
                 return value.CompareTo(lowerBound) >= 0 && value.CompareTo(upperBound) <= 0;
             },

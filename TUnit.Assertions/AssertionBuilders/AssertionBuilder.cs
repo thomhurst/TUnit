@@ -96,12 +96,12 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
 
         if (this is IOrAssertionBuilder)
         {
-            assertCondition = new OrAssertCondition<TActual, TAnd, TOr>(builder.Assertions.Pop(), assertCondition);
+            assertCondition = new OrAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition);
         }
         
         if (this is IAndAssertionBuilder)
         {
-            assertCondition = new AndAssertCondition<TActual, TAnd, TOr>(builder.Assertions.Pop(), assertCondition);
+            assertCondition = new AndAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition);
         }
         
         builder.Assertions.Push(assertCondition);

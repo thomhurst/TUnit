@@ -20,7 +20,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<TActual, TActual>(expected,
                 (actual, _, _, _) =>
                 {
                     ArgumentNullException.ThrowIfNull(actual);
@@ -38,7 +38,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new EqualsAssertCondition<TActual, TAnd, TOr>(TActual.Zero)
+        return new EqualsAssertCondition<TActual>(TActual.Zero)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
 
@@ -48,7 +48,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(expected, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(expected, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -70,7 +70,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -92,7 +92,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -114,7 +114,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -135,7 +135,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -156,7 +156,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -176,7 +176,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -197,7 +197,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -218,7 +218,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {

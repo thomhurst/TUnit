@@ -15,7 +15,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new NotNullAssertCondition<TActual, TAnd, TOr>()
+        return new NotNullAssertCondition<TActual>()
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
@@ -23,7 +23,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new NotEqualsAssertCondition<TActual, TAnd, TOr>(expected)
+        return new NotEqualsAssertCondition<TActual>(expected)
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
 
@@ -31,7 +31,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>()
+        return new NotTypeOfAssertCondition<TActual, TExpected>()
             .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]);
     }
 
@@ -39,7 +39,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(default,
+        return new DelegateAssertCondition<TActual, TExpected>(default,
             (value, _, _, _) => !value!.GetType().IsAssignableTo(typeof(TExpected)),
             (actual, _, _) => $"{actual?.GetType()} is assignable to {typeof(TExpected).Name}")
             .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]);
@@ -49,7 +49,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(default,
+        return new DelegateAssertCondition<TActual, TExpected>(default,
             (value, _, _, _) => !value!.GetType().IsAssignableFrom(typeof(TExpected)),
             (actual, _, _) => $"{actual?.GetType()} is assignable from {typeof(TExpected).Name}")
             .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]);

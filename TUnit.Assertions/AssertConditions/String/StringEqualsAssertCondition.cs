@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.AssertConditions.String;
 
-public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, string, TAnd, TOr>
+public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, string>
     where TAnd : IAnd<string, TAnd, TOr>
     where TOr : IOr<string, TAnd, TOr>
 {

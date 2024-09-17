@@ -11,13 +11,13 @@ public class Member<TActualRootType, TPropertyType, TAnd, TOr>(AssertionBuilder<
 {
     public InvokableAssertionBuilder<TActualRootType, TAnd, TOr> EqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new PropertyEqualsAssertCondition<TActualRootType, TPropertyType, TAnd, TOr>(selector, expected, true)
+        return new PropertyEqualsAssertCondition<TActualRootType, TPropertyType>(selector, expected, true)
             .ChainedTo(assertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<TActualRootType, TAnd, TOr> NotEqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new PropertyEqualsAssertCondition<TActualRootType, TPropertyType, TAnd, TOr>(selector, expected, false)
+        return new PropertyEqualsAssertCondition<TActualRootType, TPropertyType>(selector, expected, false)
             .ChainedTo(assertionBuilder, [doNotPopulateThisValue]);
     }
 }

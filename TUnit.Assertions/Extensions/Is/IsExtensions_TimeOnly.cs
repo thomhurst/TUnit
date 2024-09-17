@@ -14,7 +14,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeOnly, TimeOnly>(default, (value, _, _, _) =>
             {
                 return value > expected;
             },
@@ -25,7 +25,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeOnly, TimeOnly>(default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
@@ -36,7 +36,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeOnly, TimeOnly>(default, (value, _, _, _) =>
             {
                 return value < expected;
             },
@@ -47,7 +47,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeOnly, TimeOnly>(default, (value, _, _, _) =>
             {
                 return value <= expected;
             },
@@ -58,7 +58,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeOnly, TimeOnly, TAnd, TOr>(default, (value, _, _, _) => value >= lowerBound && value <= upperBound,
+        return new DelegateAssertCondition<TimeOnly, TimeOnly>(default, (value, _, _, _) => value >= lowerBound && value <= upperBound,
             (value, _, _) => $"{value} was not between {lowerBound} and {upperBound}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]); }
     

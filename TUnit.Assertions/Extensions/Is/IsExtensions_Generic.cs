@@ -15,7 +15,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EqualsAssertCondition<TActual, TAnd, TOr>(expected)
+        return new EqualsAssertCondition<TActual>(expected)
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
     }
     
@@ -23,7 +23,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<object, TAnd, TOr>
         where TOr : IOr<object, TAnd, TOr>
     {
-        return new EquivalentToAssertCondition<object, TAnd, TOr>(expected)
+        return new EquivalentToAssertCondition<object>(expected)
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
     }
     
@@ -31,7 +31,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<object, TAnd, TOr>
         where TOr : IOr<object, TAnd, TOr>
     {
-        return new SameReferenceAssertCondition<object, object, TAnd,TOr>(expected)
+        return new SameReferenceAssertCondition<object, object>(expected)
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
     }
     
@@ -39,14 +39,14 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new NullAssertCondition<TActual, TAnd, TOr>()
+        return new NullAssertCondition<TActual>()
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsTypeOf<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, Type type) where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new TypeOfAssertCondition<TActual, TAnd, TOr>(type)
+        return new TypeOfAssertCondition<TActual>(type)
             .ChainedTo(valueSource.AssertionBuilder, [type.Name]);
     }
 
@@ -54,7 +54,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(default,
+        return new DelegateAssertCondition<TActual, TExpected>(default,
             (value, _, _, _) => value!.GetType().IsAssignableTo(typeof(TExpected)),
             (actual, _, _) => $"{actual?.GetType()} is not assignable to {typeof(TExpected).Name}")
             .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]); }
@@ -64,7 +64,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(default,
+        return new DelegateAssertCondition<TActual, TExpected>(default,
             (value, _, _, _) => value!.GetType().IsAssignableFrom(typeof(TExpected)),
             (actual, _, _) => $"{actual?.GetType()} is not assignable from {typeof(TExpected).Name}")
             .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]); }

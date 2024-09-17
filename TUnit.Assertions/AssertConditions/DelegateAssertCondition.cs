@@ -1,15 +1,11 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
+﻿namespace TUnit.Assertions.AssertConditions;
 
-namespace TUnit.Assertions.AssertConditions;
-
-public class DelegateAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCondition<TActual, TExpected, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class DelegateAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
 {
-    private readonly Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected, TAnd, TOr>, bool> _condition;
+    private readonly Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected>, bool> _condition;
 
     public DelegateAssertCondition(TExpected? expected, 
-        Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected, TAnd, TOr>, bool> condition,
+        Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected>, bool> condition,
         Func<TActual?, Exception?, string?, string> defaultMessageFactory) : base(expected)
     {
         _condition = condition;

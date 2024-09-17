@@ -16,7 +16,7 @@ public static partial class DoesExtensions
         where TAnd : IAnd<TDictionary, TAnd, TOr>
         where TOr : IOr<TDictionary, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TDictionary, TKey, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<TDictionary, TKey>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
@@ -31,7 +31,7 @@ public static partial class DoesExtensions
         where TAnd : IAnd<TDictionary, TAnd, TOr>
         where TOr : IOr<TDictionary, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TDictionary, TValue, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<TDictionary, TValue>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);

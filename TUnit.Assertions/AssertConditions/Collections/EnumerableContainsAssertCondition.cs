@@ -1,11 +1,7 @@
-using TUnit.Assertions.AssertConditions.Operators;
-
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, TInner, TAnd, TOr>
+public class EnumerableContainsAssertCondition<TActual, TInner> : AssertCondition<TActual, TInner>
     where TActual : IEnumerable<TInner>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 

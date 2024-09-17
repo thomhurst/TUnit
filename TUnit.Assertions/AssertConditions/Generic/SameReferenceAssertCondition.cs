@@ -1,10 +1,6 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
+﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-namespace TUnit.Assertions.AssertConditions.Generic;
-
-public class SameReferenceAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCondition<TActual, TExpected, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class SameReferenceAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
 {
 
     public SameReferenceAssertCondition(TExpected expected) : base(expected)

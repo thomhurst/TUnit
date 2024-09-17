@@ -1,10 +1,6 @@
-using TUnit.Assertions.AssertConditions.Operators;
-
 namespace TUnit.Assertions.AssertConditions;
 
-public class NotNullAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class NotNullAssertCondition<TActual> : AssertCondition<TActual, TActual>
 {
     public NotNullAssertCondition() : base(default)
     {

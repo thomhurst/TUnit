@@ -15,7 +15,7 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(1)
+        return new EnumerableCountEqualToAssertCondition<TActual>(1)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
@@ -24,7 +24,7 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableDistinctItemsAssertCondition<TActual, object, TAnd, TOr>(default,
+        return new EnumerableDistinctItemsAssertCondition<TActual, object>(default,
             null)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
@@ -34,7 +34,7 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr>(default,
+        return new EnumerableDistinctItemsAssertCondition<TActual, TInner>(default,
             equalityComparer)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }

@@ -13,7 +13,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<bool, TAnd, TOr>
         where TOr : IOr<bool, TAnd, TOr>
     {
-        return new EqualsAssertCondition<bool, TAnd, TOr>(false)
+        return new EqualsAssertCondition<bool>(false)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
@@ -21,7 +21,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<bool, TAnd, TOr>
         where TOr : IOr<bool, TAnd, TOr>
     {
-        return new EqualsAssertCondition<bool, TAnd, TOr>(true)
+        return new EqualsAssertCondition<bool>(true)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
 }

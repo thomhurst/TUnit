@@ -1,12 +1,9 @@
 using System.Collections;
-using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, object, TAnd, TOr>
+public class EnumerableDistinctItemsAssertCondition<TActual, TInner> : AssertCondition<TActual, object>
     where TActual : IEnumerable
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 

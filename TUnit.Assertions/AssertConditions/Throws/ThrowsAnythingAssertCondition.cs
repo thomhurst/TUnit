@@ -1,11 +1,7 @@
-using TUnit.Assertions.AssertConditions.Operators;
-
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsAnythingAssertCondition<TActual, TAnd, TOr>()
-    : AssertCondition<TActual, Exception, TAnd, TOr>(default)
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class ThrowsAnythingAssertCondition<TActual>()
+    : AssertCondition<TActual, Exception>(default)
 {
     protected override string DefaultMessage => "Nothing was thrown";
 

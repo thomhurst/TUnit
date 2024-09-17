@@ -21,18 +21,18 @@ public class ThrowsException<TActual, TAnd, TOr>
     public ExceptionWith<TActual, TAnd, TOr> With => new(AssertionBuilder, _exceptionSelector);
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> OfAnyType() =>
-        new ThrowsAnythingAssertCondition<TActual, TAnd, TOr>()
+        new ThrowsAnythingAssertCondition<TActual>()
             .ChainedTo(AssertionBuilder, []);
 
-    public InvokableAssertionBuilder<TActual, TAnd, TOr> OfType<TExpected>() => new ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>()
+    public InvokableAssertionBuilder<TActual, TAnd, TOr> OfType<TExpected>() => new ThrowsExactTypeOfAssertCondition<TActual, TExpected>()
         .ChainedTo(AssertionBuilder, [typeof(TExpected).Name]);
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> SubClassOf<TExpected>() =>
-        new ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr>()
+        new ThrowsSubClassOfAssertCondition<TActual, TExpected>()
             .ChainedTo(AssertionBuilder, [typeof(TExpected).Name]);
     
     public InvokableAssertionBuilder<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(default,
+        new DelegateAssertCondition<TActual,Exception>(default,
             (_, exception, _, _) => action(_exceptionSelector(exception)),
             (_, exception, _) => messageFactory(_exceptionSelector(exception))
         ).ChainedTo(AssertionBuilder, [expectedExpression]);

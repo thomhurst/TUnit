@@ -1,10 +1,6 @@
-using TUnit.Assertions.AssertConditions.Operators;
-
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCondition<TActual, TExpected, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class ThrowsExactTypeOfAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
 {
     public ThrowsExactTypeOfAssertCondition() : base(default)
     {

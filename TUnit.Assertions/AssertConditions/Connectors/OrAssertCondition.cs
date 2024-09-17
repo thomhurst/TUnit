@@ -1,10 +1,6 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
+﻿namespace TUnit.Assertions.AssertConditions.Connectors;
 
-namespace TUnit.Assertions.AssertConditions.Connectors;
-
-internal class OrAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition<TActual>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
 {
     private readonly BaseAssertCondition<TActual> _condition1;
     private readonly BaseAssertCondition<TActual> _condition2;

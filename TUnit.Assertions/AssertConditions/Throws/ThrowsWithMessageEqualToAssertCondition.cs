@@ -1,10 +1,6 @@
-using TUnit.Assertions.AssertConditions.Operators;
-
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, string, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class ThrowsWithMessageEqualToAssertCondition<TActual> : AssertCondition<TActual, string>
 {
     private readonly StringComparison _stringComparison;
     private readonly Func<Exception?, Exception?> _exceptionSelector;

@@ -16,7 +16,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableNotEquivalentToAssertCondition<TActual, TInner, TAnd, TOr>(expected, equalityComparer)
+        return new EnumerableNotEquivalentToAssertCondition<TActual, TInner>(expected, equalityComparer)
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
     
@@ -25,7 +25,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableCountNotEqualToAssertCondition<TActual, TAnd, TOr>(0)
+        return new EnumerableCountNotEqualToAssertCondition<TActual>(0)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
 }

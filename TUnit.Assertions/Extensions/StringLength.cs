@@ -18,7 +18,7 @@ public class StringLength<TAnd, TOr>
 
     public InvokableAssertionBuilder<string, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<string, int, TAnd, TOr>(expected, (actual, _, _, self) =>
+        return new DelegateAssertCondition<string, int>(expected, (actual, _, _, self) =>
             {
                 if (actual is null)
                 {
@@ -34,7 +34,7 @@ public class StringLength<TAnd, TOr>
     }
 
     public InvokableAssertionBuilder<string, TAnd, TOr> Zero =>
-        new DelegateAssertCondition<string, int, TAnd, TOr>(0,
+        new DelegateAssertCondition<string, int>(0,
                 (@string, _, _, self) =>
                 {
                     if (@string is null)
@@ -50,7 +50,7 @@ public class StringLength<TAnd, TOr>
             .ChainedTo(AssertionBuilder, []);
 
     public InvokableAssertionBuilder<string, TAnd, TOr> Positive =>
-        new DelegateAssertCondition<string, int, TAnd, TOr>(default, (@string, _, _, self) =>
+        new DelegateAssertCondition<string, int>(default, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -67,7 +67,7 @@ public class StringLength<TAnd, TOr>
 
     public InvokableAssertionBuilder<string, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<string, int, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<string, int>(expected,
             (@string, _, _, self) =>
             {
                 if (@string is null)
@@ -85,7 +85,7 @@ public class StringLength<TAnd, TOr>
 
     public InvokableAssertionBuilder<string, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<string, int, TAnd, TOr>(expected, (@string, _, _, self) =>
+        return new DelegateAssertCondition<string, int>(expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -102,7 +102,7 @@ public class StringLength<TAnd, TOr>
 
     public InvokableAssertionBuilder<string, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<string, int, TAnd, TOr>(expected, (@string, _, _, self) =>
+        return new DelegateAssertCondition<string, int>(expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
@@ -119,7 +119,7 @@ public class StringLength<TAnd, TOr>
 
     public InvokableAssertionBuilder<string, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return new DelegateAssertCondition<string, int, TAnd, TOr>(expected, (@string, _, _, self) =>
+        return new DelegateAssertCondition<string, int>(expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {

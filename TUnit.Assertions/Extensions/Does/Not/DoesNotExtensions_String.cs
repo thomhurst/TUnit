@@ -37,7 +37,7 @@ public static partial class DoesNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, string, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<string, string>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
@@ -59,7 +59,7 @@ public static partial class DoesNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, string, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<string, string>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);

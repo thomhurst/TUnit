@@ -14,7 +14,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : IOr<DateTimeOffset, TAnd, TOr>
     {
-        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset>(default, (value, _, _, _) =>
             {
                 return value >= lowerBound && value <= upperBound;
             },
@@ -25,7 +25,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : IOr<DateTimeOffset, TAnd, TOr>
     {
-        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset>(default, (value, _, _, _) =>
             {
                 return value > expected;
             },
@@ -36,7 +36,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : IOr<DateTimeOffset, TAnd, TOr>
     {
-        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset>(default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
@@ -47,7 +47,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : IOr<DateTimeOffset, TAnd, TOr>
     {
-        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset>(default, (value, _, _, _) =>
             {
                 return value < expected;
             },
@@ -58,7 +58,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<DateTimeOffset, TAnd, TOr>
         where TOr : IOr<DateTimeOffset, TAnd, TOr>
     {
-        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<DateTimeOffset, DateTimeOffset>(default, (value, _, _, _) =>
             {
                 return value <= expected;
             },

@@ -15,7 +15,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new NotEqualsAssertCondition<TimeSpan, TAnd, TOr>(TimeSpan.Zero)
+        return new NotEqualsAssertCondition<TimeSpan>(TimeSpan.Zero)
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
@@ -23,7 +23,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) => value <= expected,
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) => value <= expected,
             (value, _, _) => $"{value} was greater than {expected}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
@@ -32,7 +32,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value < expected;
             },
@@ -44,7 +44,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
@@ -56,7 +56,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value > expected;
             },

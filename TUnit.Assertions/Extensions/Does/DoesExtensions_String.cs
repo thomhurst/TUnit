@@ -38,7 +38,7 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, string, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<string, string>(expected,
             (actual, _, _, self) =>
             {
                 if (actual is null)
@@ -65,7 +65,7 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, string, TAnd, TOr>(expected,
+        return new DelegateAssertCondition<string, string>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
@@ -86,7 +86,7 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, Regex, TAnd, TOr>(regex,
+        return new DelegateAssertCondition<string, Regex>(regex,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);

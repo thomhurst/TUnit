@@ -1,11 +1,8 @@
 using System.Collections;
-using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EquivalentToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class EquivalentToAssertCondition<TActual> : AssertCondition<TActual, TActual>
 {
     public EquivalentToAssertCondition(TActual expected) : base(expected)
     {

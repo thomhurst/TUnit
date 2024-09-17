@@ -30,7 +30,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, int,TAnd,TOr>(0,
+        return new DelegateAssertCondition<string, int>(0,
             (value, _, _, _) => value != string.Empty,
             (s, _, _) => $"'{s}' is empty")
             .ChainedTo(valueSource.AssertionBuilder, []);
@@ -40,7 +40,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, int, TAnd,TOr>(0,
+        return new DelegateAssertCondition<string, int>(0,
             (value, _, _, _) => !string.IsNullOrEmpty(value),
             (s, _, _) => $"'{s}' is null or empty")
             .ChainedTo(valueSource.AssertionBuilder, []);
@@ -50,7 +50,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, int,TAnd,TOr>(0,
+        return new DelegateAssertCondition<string, int>(0,
             (value, _, _, _) => !string.IsNullOrWhiteSpace(value),
             (s, _, _) => $"'{s}' is null or whitespace")
             .ChainedTo(valueSource.AssertionBuilder, []);

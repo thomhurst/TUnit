@@ -25,7 +25,7 @@ public class ExceptionWithMessage<TActual, TAnd, TOr>
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return new ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr>(expected, stringComparison, _exceptionSelector)
+        return new ThrowsWithMessageEqualToAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
             .ChainedTo(AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 
@@ -36,7 +36,7 @@ public class ExceptionWithMessage<TActual, TAnd, TOr>
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> Containing(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return new ThrowsWithMessageContainingAssertCondition<TActual, TAnd, TOr>(expected, stringComparison, _exceptionSelector)
+        return new ThrowsWithMessageContainingAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
             .ChainedTo(AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 }

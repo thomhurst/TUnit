@@ -1,11 +1,7 @@
-using TUnit.Assertions.AssertConditions.Operators;
-
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>()
-    : AssertCondition<TActual, TExpected, TAnd, TOr>(default)
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class NotTypeOfAssertCondition<TActual, TExpected>()
+    : AssertCondition<TActual, TExpected>(default)
 {
     protected override string DefaultMessage => $"{ActualValue} is {typeof(TExpected).Name}";
 

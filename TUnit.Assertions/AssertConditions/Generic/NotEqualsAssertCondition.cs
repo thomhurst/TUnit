@@ -1,11 +1,7 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
+﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-namespace TUnit.Assertions.AssertConditions.Generic;
-
-public class NotEqualsAssertCondition<TActual, TAnd, TOr>(TActual expected)
-    : AssertCondition<TActual, TActual, TAnd, TOr>(expected)
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class NotEqualsAssertCondition<TActual>(TActual expected)
+    : AssertCondition<TActual, TActual>(expected)
 {
     protected override string DefaultMessage => $"{ActualValue} equals {ExpectedValue}";
 

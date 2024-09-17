@@ -1,10 +1,6 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
+﻿namespace TUnit.Assertions.AssertConditions.Throws;
 
-namespace TUnit.Assertions.AssertConditions.Throws;
-
-public class ThrowsNothingAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class ThrowsNothingAssertCondition<TActual> : AssertCondition<TActual, TActual>
 {
     public ThrowsNothingAssertCondition() : base(default)
     {
