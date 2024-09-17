@@ -30,9 +30,9 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     
     internal bool Assert(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
-        ActualValue ??= actualValue;
-        Exception ??= exception;
-        RawActualExpression ??= rawValueExpression;
+        ActualValue = actualValue;
+        Exception = exception;
+        RawActualExpression = rawValueExpression;
         
         return Passes(actualValue, exception);
     }

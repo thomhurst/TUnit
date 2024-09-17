@@ -1,7 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EqualsAssertCondition<TActual>(TActual expected)
-    : AssertCondition<TActual, TActual>(expected)
+public class EqualsAssertCondition<TActual>(TActual expected) : AssertCondition<TActual, TActual>(expected)
 {
     protected internal override string GetFailureMessage() => $"""
                                                  Expected: {ExpectedValue}
