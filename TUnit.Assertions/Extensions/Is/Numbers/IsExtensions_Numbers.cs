@@ -128,10 +128,10 @@ public static partial class IsExtensions
                 (value, _, _) => $"{value} was not less than or equal to {expected}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
-
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsEven<TActual, TAnd, TOr>(
-        this IValueSource<TActual, TAnd, TOr> valueSource)
-        where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
+    
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsDivisibleBy<TActual, TAnd, TOr>(
+        this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+        where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
@@ -144,14 +144,35 @@ public static partial class IsExtensions
                         return false;
                     }
 
-                    return value % 2 == 0;
+                    return value % expected == TActual.Zero;
+                },
+                (value, _, _) => $"{value} was not divisible by {expected}")
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
+    }
+
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsEven<TActual, TAnd, TOr>(
+        this IValueSource<TActual, TAnd, TOr> valueSource)
+        where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
+    {
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+                {
+                    if (value is null)
+                    {
+                        self.WithMessage((_, _, _) =>
+                            $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                        return false;
+                    }
+
+                    return value % (TActual.One + TActual.One) == TActual.Zero;
                 },
                 (value, _, _) => $"{value} was not even")
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsOdd<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource)
-        where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
+        where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
@@ -164,7 +185,7 @@ public static partial class IsExtensions
                         return false;
                     }
 
-                    return value % 2 != 0;
+                    return value % (TActual.One + TActual.One) != TActual.Zero;
                 },
                 (value, _, _) => $"{value} was not odd")
             .ChainedTo(valueSource.AssertionBuilder, []);

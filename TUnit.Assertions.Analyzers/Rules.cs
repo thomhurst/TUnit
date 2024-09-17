@@ -7,7 +7,7 @@ internal static class Rules
     private const string UsageCategory = "Usage";
 
     public static readonly DiagnosticDescriptor MixAndOrConditionsAssertion =
-        CreateDescriptor("TUnitAssertions0001", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnitAssertions0001", UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor AwaitAssertion =
         CreateDescriptor("TUnitAssertions0002", UsageCategory, DiagnosticSeverity.Error);

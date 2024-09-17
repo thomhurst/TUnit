@@ -21,6 +21,27 @@ public static partial class IsNotExtensions
             .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotDivisibleBy<TActual, TAnd, TOr>(
+        this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+        where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr>
+    {
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
+                {
+                    if (value is null)
+                    {
+                        self.WithMessage((_, _, _) =>
+                            $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                        return false;
+                    }
+
+                    return value % expected != TActual.Zero;
+                },
+                (value, _, _) => $"{value} was not divisible by {expected}")
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
+    }
+    
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotGreaterThan<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") where TActual : INumber<TActual>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
