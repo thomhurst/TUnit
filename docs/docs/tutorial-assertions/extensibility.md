@@ -10,7 +10,7 @@ In TUnit, there are two types of things we can assert on:
 - Values
 - Delegates
 
-Values is what you'd guess, some basic return value, such as a `string` or `int`.
+Values is what you'd guess, some return value, such as a `string` or `int` or even a complex class.
 
 Delegates are bits of code that haven't executed yet - Instead they are passed into the assertion builder, and the TUnit assertion library will execute it. If it throws, then there will be an `Exception` object we can check in our assertion.
 
@@ -24,7 +24,7 @@ So to create a custom assertion:
 2. Override the method: 
    `private protected override bool Passes(TActual? actualValue, Exception? exception)`
 
-   If this method returns a bool, then your assertion has passed, if it hasn't, then your exception will throw.
+   If this method returns true, then your assertion has passed, if it returns false, then your exception will throw with the failure message that you specify.
 
    To access `TExpected` here, it's an accessible property called `ExpectedValue`
 
@@ -32,7 +32,7 @@ So to create a custom assertion:
 
    The `TActual` object will be populated if a value was passed into `Assert.That(...)`, or a delegate with a return value was executed successfully.
 
-3. Override the `GetFailureMessage` method to return a message when the assertion fails.
+3. Override the `GetFailureMessage` method to return a message when the assertion fails. While you're inside the `Passes()` method you can also set an `OverriddenMessage` string property that will take priority instead. This can be useful if you want to change the failure message dynamically. For example, the default is 'Expected x but received y' - But if one of the values is null, we want to change the message to 'No expected value was passed into the assertion'.
 
 4. Create the extension method!
    This is where things can start to look daunting because of the generic constraints, but this allows chaining assertions together.
