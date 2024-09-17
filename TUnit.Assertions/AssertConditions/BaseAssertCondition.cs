@@ -20,7 +20,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return assertionBuilder.AppendCallerMethodWithMultipleExpressions(argumentExpressions).WithAssertion(this);
+        return assertionBuilder.AppendExpression($"{caller}({string.Join(", ", argumentExpressions)})").WithAssertion(this);
     }
     
     internal bool Assert(AssertionData<TActual> assertionData)
