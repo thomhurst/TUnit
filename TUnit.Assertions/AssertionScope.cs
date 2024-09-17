@@ -1,7 +1,9 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
 
@@ -29,18 +31,14 @@ internal class AssertionScope : IAsyncDisposable
     {
         SetCurrentAssertionScope(_parent);
         
-        var failed = new List<BaseAssertCondition>();
+        var failed = new ConcurrentDictionary<IInvokableAssertionBuilder, List<BaseAssertCondition>>();
         
         foreach (var assertionBuilder in _assertionBuilders)
         {
             await foreach (var failedAssertion in assertionBuilder.GetFailures())
             {
-                if (Debugger.IsAttached)
-                {
-                    throw new AssertionException(failedAssertion.Message?.Trim());
-                }
-                
-                failed.Add(failedAssertion);
+                var list = failed.GetOrAdd(assertionBuilder, []);
+                list.Add(failedAssertion);
             }
         }
         
@@ -51,7 +49,13 @@ internal class AssertionScope : IAsyncDisposable
         
         if (failed.Any())
         {
-            var assertionException = new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Select(x => x.Message?.Trim())));
+            var assertionException = new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Reverse().Select(x =>
+            {
+                return $"""
+                       {x.Key.GetExpression()}
+                       {string.Join(Environment.NewLine, x.Value.Select(e =>  e.Message?.Trim()))}
+                       """;
+            })));
             
             if (_parent != null)
             {

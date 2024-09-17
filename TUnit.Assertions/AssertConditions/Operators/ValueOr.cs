@@ -23,5 +23,5 @@ public class ValueOr<TActual>
         return new ValueOr<TActual>(assertionDataDelegate, assertionBuilder);
     }
     
-    AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> ISource<TActual, ValueAnd<TActual>, ValueOr<TActual>>.AssertionBuilder => new OrAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>(_assertionBuilder);
+    AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> ISource<TActual, ValueAnd<TActual>, ValueOr<TActual>>.AssertionBuilder => new OrAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>(_assertionBuilder.AppendConnector(ChainType.Or));
 }

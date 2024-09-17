@@ -5,7 +5,7 @@ using TUnit.Assertions.Extensions.Throws;
 
 namespace TUnit.TestProject;
 
-[SuppressMessage("Usage", "TUnitAssertions0005:AssertAsync.That(...) should not be used with a constant value")]
+[SuppressMessage("Usage", "TUnitAssertions0005:Assert.That(...) should not be used with a constant value")]
 public class Tests
 {
     [Test]
@@ -387,14 +387,14 @@ public class Tests
     // [MethodDataSource(typeof(TestDataSources), nameof(TestDataSources.OneEnumerable))]
     // public async Task TestDataSourceEnumerable(int value)
     // {
-    //     await AssertAsync.That(value).IsEqualTo(1);
+    //     await Assert.That(value).IsEqualTo(1);
     // }
     
     // [MethodDataSource(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
     // [Category("Fail")]
     // public async Task TestDataSourceFailingEnumerable(int value)
     // {
-    //     await AssertAsync.That(value).IsEqualTo(1);
+    //     await Assert.That(value).IsEqualTo(1);
     // }
 
     // [Arguments]

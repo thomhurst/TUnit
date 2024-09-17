@@ -10,6 +10,7 @@ public interface IInvokableAssertionBuilder
     Task ProcessAssertionsAsync();
     IAsyncEnumerable<BaseAssertCondition> GetFailures();
     TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
+    string? GetExpression();
 }
 
 public class InvokableAssertionBuilder<TActual, TAnd, TOr> : 
@@ -43,7 +44,7 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
             {
                 throw new AssertionException(
                     $"""
-                     {ExpressionBuilder}
+                     {GetExpression()}
                      {assertion.Message}
                      """
                 );
@@ -65,4 +66,8 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
     }
 
     public TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
+    public string? GetExpression()
+    {
+        return ExpressionBuilder?.ToString();
+    }
 }

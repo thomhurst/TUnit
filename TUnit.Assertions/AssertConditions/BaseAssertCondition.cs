@@ -51,6 +51,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         ActualValue = actualValue;
         Exception = exception;
         RawActualExpression = rawValueExpression;
+        
         return Passes(actualValue, exception, rawValueExpression);
     }
 
