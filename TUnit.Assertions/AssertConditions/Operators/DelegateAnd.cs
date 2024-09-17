@@ -1,9 +1,11 @@
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class DelegateAnd<TActual> 
-    : And<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IAnd<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>
+    : And<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IAnd<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>,
+        IDelegateSource<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>
 {
     private readonly Func<Task<AssertionData<TActual>>> _assertionDataDelegate;
     private readonly AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> _assertionBuilder;
@@ -19,4 +21,6 @@ public class DelegateAnd<TActual>
     {
         return new DelegateAnd<TActual>(assertionDataDelegate, assertionBuilder);
     }
+    
+    AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> ISource<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>.AssertionBuilder => _assertionBuilder;
 }

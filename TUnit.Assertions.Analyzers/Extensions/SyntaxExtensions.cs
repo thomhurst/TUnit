@@ -4,14 +4,14 @@ namespace TUnit.Assertions.Analyzers.Extensions;
 
 public static class SyntaxExtensions
 {
-    public static IEnumerable<AssertionBuilder<TActual, TAnd, TOr>> GetAllAncestorSyntaxesOfType<AssertionBuilder<TActual, TAnd, TOr>>(this SyntaxNode input) 
-        where AssertionBuilder<TActual, TAnd, TOr> : SyntaxNode
+    public static IEnumerable<TOutput> GetAllAncestorSyntaxesOfType<TOutput>(this SyntaxNode input) 
+        where TOutput : SyntaxNode
     {
         var parent = input.Parent;
         
         while (parent != null)
         {
-            if (parent is AssertionBuilder<TActual, TAnd, TOr> output)
+            if (parent is TOutput output)
             {
                 yield return output;
             }
@@ -20,17 +20,17 @@ public static class SyntaxExtensions
         }
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr>? GetAncestorSyntaxOfType<AssertionBuilder<TActual, TAnd, TOr>>(this SyntaxNode input) 
-        where AssertionBuilder<TActual, TAnd, TOr> : SyntaxNode
+    public static TOutput? GetAncestorSyntaxOfType<TOutput>(this SyntaxNode input) 
+        where TOutput : SyntaxNode
     {
         var parent = input.Parent;
         
-        while (parent != null && parent is not AssertionBuilder<TActual, TAnd, TOr>)
+        while (parent != null && parent is not TOutput)
         {
             parent = parent.Parent;
         }
 
-        return parent as AssertionBuilder<TActual, TAnd, TOr>;
+        return parent as TOutput;
     }
         
     public static IEnumerable<IOperation> GetAncestorOperations(this IOperation operation) 

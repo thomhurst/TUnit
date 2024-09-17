@@ -16,7 +16,7 @@ public class StringLength<TAnd, TOr>
         AssertionBuilder = assertionBuilder.AppendExpression("Length");
     }
 
-    public BaseAssertCondition<string> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableAssertionBuilder<string, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (actual, _, _, self) =>
             {
@@ -29,22 +29,25 @@ public class StringLength<TAnd, TOr>
                 return actual.Length == expected;
             },
             (@string, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}");
+                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}")
+            .ChainedTo(AssertionBuilder);
     }
 
     public InvokableAssertionBuilder<string, TAnd, TOr> Zero =>
-        new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (@string, _, _, self) =>
-            {
-                if (@string is null)
+        new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0,
+                (@string, _, _, self) =>
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
-                    return false;
-                }
-                
-                return @string.Length == 0;
-            },
-            (@string, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}").ChainedTo(AssertionBuilder);
+                    if (@string is null)
+                    {
+                        self.WithMessage((_, _) => "Actual string is null");
+                        return false;
+                    }
+
+                    return @string.Length == 0;
+                },
+                (@string, _) =>
+                    $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}")
+            .ChainedTo(AssertionBuilder);
 
     public InvokableAssertionBuilder<string, TAnd, TOr> Positive =>
         new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), default, (@string, _, _, self) =>

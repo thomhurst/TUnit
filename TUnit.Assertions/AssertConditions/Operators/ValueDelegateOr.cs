@@ -1,9 +1,12 @@
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueDelegateOr<TActual> 
-    : Or<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IOr<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
+    : Or<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IOr<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
+        IDelegateSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
+        IValueSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
  {
      private readonly Func<Task<AssertionData<TActual>>> _assertionDataDelegate;
      private readonly AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> _assertionBuilder;
@@ -21,4 +24,7 @@ public class ValueDelegateOr<TActual>
     {
         return new ValueDelegateOr<TActual>(assertionDataDelegate, assertionBuilder);
     }
-}
+    
+    AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
+        ISource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.AssertionBuilder => _assertionBuilder;
+ }
