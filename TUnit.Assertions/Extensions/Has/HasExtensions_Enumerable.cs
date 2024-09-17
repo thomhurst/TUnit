@@ -44,6 +44,6 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableCount<TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null));
+        return new EnumerableCount<TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod([]));
     }
 }

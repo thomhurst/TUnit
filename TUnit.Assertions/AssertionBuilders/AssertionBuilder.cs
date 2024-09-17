@@ -86,12 +86,7 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
         return AppendExpression(chainType.ToString());
     }
     
-    internal AssertionBuilder<TActual, TAnd, TOr> AppendCallerMethod(string? expression, [CallerMemberName] string methodName = "")
-    {
-        return AppendCallerMethodWithMultipleExpressions([expression], methodName);
-    }
-    
-    internal AssertionBuilder<TActual, TAnd, TOr> AppendCallerMethodWithMultipleExpressions(string?[] expressions, [CallerMemberName] string methodName = "")
+    internal AssertionBuilder<TActual, TAnd, TOr> AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
     {
         if (string.IsNullOrEmpty(methodName))
         {

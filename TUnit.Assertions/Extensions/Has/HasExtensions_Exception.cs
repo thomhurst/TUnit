@@ -12,6 +12,6 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new ExceptionMessage<TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null));
+        return new ExceptionMessage<TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod([]));
     }
 }

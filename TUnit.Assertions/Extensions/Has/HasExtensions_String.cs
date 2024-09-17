@@ -11,6 +11,6 @@ public static partial class HasExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new StringLength<TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null));
+        return new StringLength<TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod([]));
     }
 }
