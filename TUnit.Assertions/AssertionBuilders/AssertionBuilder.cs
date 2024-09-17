@@ -11,12 +11,14 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public abstract class AssertionBuilder<TActual>
 {
-    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression, AssertionMessage? assertionMessage, StringBuilder? expressionBuilder)
+    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression,
+        AssertionMessage? assertionMessage, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions)
     {
         AssertionDataDelegate = assertionDataDelegate;
         RawActualExpression = rawActualExpression;
         AssertionMessage = assertionMessage;
         ExpressionBuilder = expressionBuilder;
+        Assertions = assertions;
     }
     
     public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression)
@@ -49,7 +51,8 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression, AssertionMessage? assertionMessage, StringBuilder? expressionBuilder) : base(assertionDataDelegate, rawActualExpression, assertionMessage, expressionBuilder)
+    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression,
+        AssertionMessage? assertionMessage, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions) : base(assertionDataDelegate, rawActualExpression, assertionMessage, expressionBuilder, assertions)
     {
     }
 

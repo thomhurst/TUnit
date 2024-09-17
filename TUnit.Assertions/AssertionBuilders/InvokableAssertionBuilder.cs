@@ -19,13 +19,8 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
     public TAnd And { get; }
     public TOr Or { get; }
     
-    internal InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionDataDelegate, assertionBuilder.RawActualExpression!, assertionBuilder.AssertionMessage, assertionBuilder.ExpressionBuilder)
+    internal InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionDataDelegate, assertionBuilder.RawActualExpression!, assertionBuilder.AssertionMessage, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
     {
-        foreach (var assertion in assertionBuilder.Assertions)
-        {
-            Assertions.Push(assertion);
-        }
-
         And = TAnd.Create(assertionDataDelegate, this);
         Or = TOr.Create(assertionDataDelegate, this);
     }
