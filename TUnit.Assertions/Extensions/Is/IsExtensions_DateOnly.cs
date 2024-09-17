@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static InvokableAssertionBuilder<DateOnly, TAnd, TOr> IsGreaterThan<TAnd, TOr>(this IValueSource<DateOnly, TAnd, TOr> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableAssertionBuilder<DateOnly, TAnd, TOr> IsAfter<TAnd, TOr>(this IValueSource<DateOnly, TAnd, TOr> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : IAnd<DateOnly, TAnd, TOr>
         where TOr : IOr<DateOnly, TAnd, TOr>
     {
@@ -21,7 +21,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value} was not greater than {expected}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<DateOnly, TAnd, TOr> IsGreaterThanOrEqualTo<TAnd, TOr>(this IValueSource<DateOnly, TAnd, TOr> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<DateOnly, TAnd, TOr> IsAfterOrEqualTo<TAnd, TOr>(this IValueSource<DateOnly, TAnd, TOr> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<DateOnly, TAnd, TOr>
         where TOr : IOr<DateOnly, TAnd, TOr>
     {
@@ -32,7 +32,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value} was not greater than or equal to {expected}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<DateOnly, TAnd, TOr> IsLessThan<TAnd, TOr>(this IValueSource<DateOnly, TAnd, TOr> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<DateOnly, TAnd, TOr> IsBefore<TAnd, TOr>(this IValueSource<DateOnly, TAnd, TOr> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<DateOnly, TAnd, TOr>
         where TOr : IOr<DateOnly, TAnd, TOr>
     {
@@ -43,7 +43,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value} was not less than {expected}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<DateOnly, TAnd, TOr> IsLessThanOrEqualTo<TAnd, TOr>(this IValueSource<DateOnly, TAnd, TOr> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<DateOnly, TAnd, TOr> IsBeforeOrEqualTo<TAnd, TOr>(this IValueSource<DateOnly, TAnd, TOr> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<DateOnly, TAnd, TOr>
         where TOr : IOr<DateOnly, TAnd, TOr>
     {

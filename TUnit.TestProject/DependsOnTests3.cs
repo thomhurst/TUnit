@@ -49,7 +49,7 @@ public class DependsOnTests3
     [After(Class)]
     public static async Task AssertStartTimes()
     {
-        await Assert.That(_test3Start).IsGreaterThanOrEqualTo(_test1Start.AddSeconds(0.9));
-        await Assert.That(_test3Start).IsGreaterThanOrEqualTo(_test2Start.AddSeconds(0.9));
+        await Assert.That(_test3Start).IsAfterOrEqualTo(_test1Start.AddSeconds(0.9));
+        await Assert.That(_test3Start).IsAfterOrEqualTo(_test2Start.AddSeconds(0.9));
     }
 }

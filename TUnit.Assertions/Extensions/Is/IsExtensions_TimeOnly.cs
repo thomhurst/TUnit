@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static InvokableAssertionBuilder<TimeOnly, TAnd, TOr> IsGreaterThan<TAnd, TOr>(this IValueSource<TimeOnly, TAnd, TOr> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableAssertionBuilder<TimeOnly, TAnd, TOr> IsAfter<TAnd, TOr>(this IValueSource<TimeOnly, TAnd, TOr> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {
@@ -21,7 +21,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<TimeOnly, TAnd, TOr> IsGreaterThanOrEqualTo<TAnd, TOr>(this IValueSource<TimeOnly, TAnd, TOr> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<TimeOnly, TAnd, TOr> IsAfterOrEqualTo<TAnd, TOr>(this IValueSource<TimeOnly, TAnd, TOr> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {
@@ -32,7 +32,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<TimeOnly, TAnd, TOr> IsLessThan<TAnd, TOr>(this IValueSource<TimeOnly, TAnd, TOr> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<TimeOnly, TAnd, TOr> IsBefore<TAnd, TOr>(this IValueSource<TimeOnly, TAnd, TOr> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {
@@ -43,7 +43,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<TimeOnly, TAnd, TOr> IsLessThanOrEqualTo<TAnd, TOr>(this IValueSource<TimeOnly, TAnd, TOr> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<TimeOnly, TAnd, TOr> IsBeforeOrEqualTo<TAnd, TOr>(this IValueSource<TimeOnly, TAnd, TOr> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<TimeOnly, TAnd, TOr>
         where TOr : IOr<TimeOnly, TAnd, TOr>
     {

@@ -49,13 +49,16 @@ For Rider, it is not yet supported. I believe they are working on it so we just 
 ## Example test
 
 ```csharp
+    private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
+    private static readonly TimeOnly Noon = TimeOnly.FromTimeSpan(TimeSpan.FromHours(12));
+    
     [Test]
-    public async Task Test1()
+    public async Task IsMorning()
     {
-        var value = "Hello world!";
+        var time = GetTime();
 
-        await Assert.That(value).IsNotNull()
-                .And.IsEqualTo("hello world!", StringComparison.InvariantCultureIgnoreCase);
+        await Assert.That(time).IsAfterOrEqualTo(Midnight)
+            .And.IsBefore(Noon);
     }
 ```
 

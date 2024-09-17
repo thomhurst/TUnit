@@ -21,7 +21,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not between {lowerBound.ToLongStringWithMilliseconds()} and {upperBound.ToLongStringWithMilliseconds()}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]); }
     
-    public static InvokableAssertionBuilder<DateTime, TAnd, TOr> IsGreaterThan<TAnd, TOr>(this IValueSource<DateTime, TAnd, TOr> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableAssertionBuilder<DateTime, TAnd, TOr> IsAfter<TAnd, TOr>(this IValueSource<DateTime, TAnd, TOr> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : IAnd<DateTime, TAnd, TOr>
         where TOr : IOr<DateTime, TAnd, TOr>
     {
@@ -32,7 +32,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<DateTime, TAnd, TOr> IsGreaterThanOrEqualTo<TAnd, TOr>(this IValueSource<DateTime, TAnd, TOr> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<DateTime, TAnd, TOr> IsAfterOrEqualTo<TAnd, TOr>(this IValueSource<DateTime, TAnd, TOr> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<DateTime, TAnd, TOr>
         where TOr : IOr<DateTime, TAnd, TOr>
     {
@@ -43,7 +43,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<DateTime, TAnd, TOr> IsLessThan<TAnd, TOr>(this IValueSource<DateTime, TAnd, TOr> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<DateTime, TAnd, TOr> IsBefore<TAnd, TOr>(this IValueSource<DateTime, TAnd, TOr> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<DateTime, TAnd, TOr>
         where TOr : IOr<DateTime, TAnd, TOr>
     {
@@ -54,7 +54,7 @@ public static partial class IsExtensions
             (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}")
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static InvokableAssertionBuilder<DateTime, TAnd, TOr> IsLessThanOrEqualTo<TAnd, TOr>(this IValueSource<DateTime, TAnd, TOr> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableAssertionBuilder<DateTime, TAnd, TOr> IsBeforeOrEqualTo<TAnd, TOr>(this IValueSource<DateTime, TAnd, TOr> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TAnd : IAnd<DateTime, TAnd, TOr>
         where TOr : IOr<DateTime, TAnd, TOr>
     {
