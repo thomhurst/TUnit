@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.5.2">
 <title data-rh="true">Extensibility / Custom Assertions | TUnit</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://thomhurst.github.io/TUnit/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://thomhurst.github.io/TUnit/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://thomhurst.github.io/TUnit/docs/tutorial-assertions/extensibility"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Extensibility / Custom Assertions | TUnit"><meta data-rh="true" name="description" content="The TUnit Assertions can be easily extended so that you can create your own assertions."><meta data-rh="true" property="og:description" content="The TUnit Assertions can be easily extended so that you can create your own assertions."><link data-rh="true" rel="icon" href="/TUnit/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://thomhurst.github.io/TUnit/docs/tutorial-assertions/extensibility"><link data-rh="true" rel="alternate" href="https://thomhurst.github.io/TUnit/docs/tutorial-assertions/extensibility" hreflang="en"><link data-rh="true" rel="alternate" href="https://thomhurst.github.io/TUnit/docs/tutorial-assertions/extensibility" hreflang="x-default"><link rel="stylesheet" href="/TUnit/assets/css/styles.cfc899bb.css">
-<script src="/TUnit/assets/js/runtime~main.f09899fe.js" defer="defer"></script>
+<script src="/TUnit/assets/js/runtime~main.574d5de9.js" defer="defer"></script>
 <script src="/TUnit/assets/js/main.91081e84.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -15,7 +15,7 @@
 <li>Values</li>
 <li>Delegates</li>
 </ul>
-<p>Values is what you&#x27;d guess, some basic return value, such as a <code>string</code> or <code>int</code>.</p>
+<p>Values is what you&#x27;d guess, some return value, such as a <code>string</code> or <code>int</code> or even a complex class.</p>
 <p>Delegates are bits of code that haven&#x27;t executed yet - Instead they are passed into the assertion builder, and the TUnit assertion library will execute it. If it throws, then there will be an <code>Exception</code> object we can check in our assertion.</p>
 <p>So to create a custom assertion:</p>
 <ol>
@@ -27,13 +27,13 @@
 <li>
 <p>Override the method:
 <code>private protected override bool Passes(TActual? actualValue, Exception? exception)</code></p>
-<p>If this method returns a bool, then your assertion has passed, if it hasn&#x27;t, then your exception will throw.</p>
+<p>If this method returns true, then your assertion has passed, if it returns false, then your exception will throw with the failure message that you specify.</p>
 <p>To access <code>TExpected</code> here, it&#x27;s an accessible property called <code>ExpectedValue</code></p>
 <p>The <code>Exception</code> object will be populated if your assertion is a Delegate type and the delegate threw.</p>
 <p>The <code>TActual</code> object will be populated if a value was passed into <code>Assert.That(...)</code>, or a delegate with a return value was executed successfully.</p>
 </li>
 <li>
-<p>Override the <code>GetFailureMessage</code> method to return a message when the assertion fails.</p>
+<p>Override the <code>GetFailureMessage</code> method to return a message when the assertion fails. While you&#x27;re inside the <code>Passes()</code> method you can also set an <code>OverriddenMessage</code> string property that will take priority instead. This can be useful if you want to change the failure message dynamically. For example, the default is &#x27;Expected x but received y&#x27; - But if one of the values is null, we want to change the message to &#x27;No expected value was passed into the assertion&#x27;.</p>
 </li>
 <li>
 <p>Create the extension method!
