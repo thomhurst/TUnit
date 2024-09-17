@@ -1,4 +1,3 @@
-using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
@@ -72,13 +71,11 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         }
     }
 
-    internal TOutput ChainedTo<TAssertionBuilder, TOutput, TAnd, TOr>(TAssertionBuilder assertionBuilder)
-        where TAssertionBuilder : AssertionBuilder<TActual, TAnd, TOr>, IOutputsChain<TOutput, TActual>
-        where TOutput : InvokableAssertionBuilder<TActual, TAnd, TOr>
+    internal InvokableAssertionBuilder<TActual, TAnd, TOr> ChainedTo<TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder)
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return assertionBuilder.WithAssertion<TAssertionBuilder, TOutput>(this);
+        return assertionBuilder.WithAssertion(this);
     }
     
     internal bool Assert(AssertionData<TActual> assertionData)

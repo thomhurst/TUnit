@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
+﻿using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Messages;
@@ -9,7 +8,6 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class ValueAssertionBuilder<TActual> 
     : AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>,
-        IOutputsChain<NoneAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>, TActual>,
         IValueAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>
 {
     internal ValueAssertionBuilder(TActual value, string expressionBuilder) : base(value.AsAssertionData(), expressionBuilder)
@@ -34,8 +32,8 @@ public class ValueAssertionBuilder<TActual>
         return this;
     }
 
-    public static NoneAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder)
+    public static InvokableAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder)
     {
-        return new NoneAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>(assertionDataDelegate, (AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>)assertionBuilder);
+        return new InvokableAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>(assertionDataDelegate, (AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>)assertionBuilder);
     }
 }

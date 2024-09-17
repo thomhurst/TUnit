@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Messages;
 
@@ -83,11 +82,9 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
         return AppendExpression($"{methodName}({string.Join(", ", expressions)})");
     }
 
-    public TOutput WithAssertion<TAssertionBuilder, TOutput>(BaseAssertCondition<TActual> assertCondition)
-        where TAssertionBuilder : AssertionBuilder<TActual, TAnd, TOr>, IOutputsChain<TOutput, TActual>
-        where TOutput : InvokableAssertionBuilder<TActual, TAnd, TOr>
+    public InvokableAssertionBuilder<TActual, TAnd, TOr> WithAssertion(BaseAssertCondition<TActual> assertCondition)
     {
-        var builder = TAssertionBuilder.Create(AssertionDataDelegate, this);
+        var builder = new InvokableAssertionBuilder<TActual, TAnd, TOr>(assertCondition.AssertionBuilder.AssertionDataDelegate, assertCondition.AssertionBuilder);
         builder.Assertions.Add(assertCondition);
         return builder;
     }

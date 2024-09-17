@@ -4,7 +4,7 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ExceptionWith<TActual, TAnd, TOr>>
+public class ExceptionWith<TActual, TAnd, TOr>
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
@@ -21,6 +21,5 @@ public class ExceptionWith<TActual, TAnd, TOr>>
     public ExceptionWithMessage<TActual, TAnd, TOr> Message =>
         new(AssertionBuilder, _exceptionSelector);
     
-    public ThrowsException<TActual, TAnd, TOr> InnerException =>
-        new(AssertionBuilder, ChainType, OtherAssertCondition, e => _exceptionSelector(e)?.InnerException);
+    public ThrowsException<TActual, TAnd, TOr> InnerException => new(AssertionBuilder, e => _exceptionSelector(e)?.InnerException);
 }

@@ -1,26 +1,24 @@
-using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueOr<TActual> 
-    : Or<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IValueAssertions<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IOr<TActual, ValueAnd<TActual>, ValueOr<TActual>>
+    : Or<TActual, ValueAnd<TActual>, ValueOr<TActual>>, 
+        IValueAssertions<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IOr<TActual, ValueAnd<TActual>, ValueOr<TActual>> where TOutputs : AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IInvokableAssertionBuilder
 {
-    private readonly IAssertionResultProvider<TActual> _assertionResultProvider;
+    private readonly Func<Task<AssertionData<TActual>>> _assertionDataDelegate;
     private readonly AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> _assertionBuilder;
 
     public ValueOr(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
         AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> assertionBuilder)
     {
-        _assertionResultProvider = assertionResultProvider;
+        _assertionDataDelegate = assertionDataDelegate;
         _assertionBuilder = assertionBuilder;
     }
-
-    AssertionConnector<TActual, ValueAnd<TActual>, ValueOr<TActual>> IAssertionBuilderProvider<TActual, ValueAnd<TActual>, ValueOr<TActual>>.AssertionConnector => new(_assertionBuilder, ChainType.Or);
-  
+    
     public static ValueOr<TActual> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
         AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> assertionBuilder)
     {
-        return new ValueOr<TActual>(assertionResultProvider, assertionBuilder);
+        return new ValueOr<TActual>(assertionDataDelegate, assertionBuilder);
     }
 }
