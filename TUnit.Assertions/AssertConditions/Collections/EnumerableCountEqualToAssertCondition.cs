@@ -9,13 +9,13 @@ public class EnumerableCountEqualToAssertCondition<TActual> : AssertCondition<TA
     {
     }
 
-    protected override string DefaultMessage => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
+    protected internal override string GetFailureMessage() => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
     
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {
-            WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
+            OverriddenMessage = $"{RawActualExpression ?? typeof(TActual).Name} is null";
             return false;
         }
         

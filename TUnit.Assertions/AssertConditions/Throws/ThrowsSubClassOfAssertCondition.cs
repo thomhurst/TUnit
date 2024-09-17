@@ -6,13 +6,13 @@ public class ThrowsSubClassOfAssertCondition<TActual, TExpected> : AssertConditi
     {
     }
     
-    protected override string DefaultMessage => $"A {Exception?.GetType().Name} was thrown instead of subclass of {typeof(TExpected).Name}";
+    protected internal override string GetFailureMessage() => $"A {Exception?.GetType().Name} was thrown instead of subclass of {typeof(TExpected).Name}";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (exception is null)
         {
-            WithMessage((_, _, _) => "Exception is null");
+            OverriddenMessage = "Exception is null";
             return false;
         }        
         

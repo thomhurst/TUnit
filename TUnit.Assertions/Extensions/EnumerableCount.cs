@@ -24,7 +24,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.RawActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
 
@@ -40,7 +40,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
                 {
                     if (enumerable is null)
                     {
-                        self.WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
+                        self.OverriddenMessage = $"{self.RawActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
                 
@@ -57,7 +57,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.RawActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -74,7 +74,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.RawActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -91,7 +91,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.RawActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -108,7 +108,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.RawActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 

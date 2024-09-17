@@ -8,13 +8,13 @@ public class EquivalentToAssertCondition<TActual> : AssertCondition<TActual, TAc
     {
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                                 The two items were not equivalent
                                                    Actual: {ActualValue}
                                                    Expected: {ExpectedValue}
                                                 """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null && ExpectedValue is null)
         {

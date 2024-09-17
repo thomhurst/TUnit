@@ -3,18 +3,20 @@
 public class DelegateAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
 {
     private readonly Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected>, bool> _condition;
+    private readonly Func<TActual?, Exception?, string?, string> _defaultMessageFactory;
 
     public DelegateAssertCondition(TExpected? expected, 
         Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected>, bool> condition,
         Func<TActual?, Exception?, string?, string> defaultMessageFactory) : base(expected)
     {
         _condition = condition;
-        WithMessage(defaultMessageFactory);
+        _defaultMessageFactory = defaultMessageFactory;
     }
 
-    protected override string DefaultMessage => string.Empty;
+    protected internal override string GetFailureMessage() =>
+        _defaultMessageFactory(ActualValue, Exception, RawActualExpression);
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return _condition(actualValue, ExpectedValue, exception, this);
     }

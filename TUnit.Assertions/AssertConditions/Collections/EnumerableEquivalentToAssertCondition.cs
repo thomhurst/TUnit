@@ -10,13 +10,13 @@ public class EnumerableEquivalentToAssertCondition<TActual, TInner> : AssertCond
         _equalityComparer = equalityComparer;
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                                 The two Enumerables were not equivalent
                                                    Actual: {(ActualValue != null ? string.Join(',', ActualValue) : null)}
                                                    Expected: {(ExpectedValue != null ? string.Join(',', ExpectedValue) : null)}
                                                 """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null && ExpectedValue is null)
         {

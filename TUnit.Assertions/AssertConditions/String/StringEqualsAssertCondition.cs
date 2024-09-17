@@ -13,17 +13,17 @@ public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, st
         _stringComparison = stringComparison;
     }
     
-    protected internal override bool Passes(string? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(string? actualValue, Exception? exception)
     {
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                               Expected: "{ExpectedValue}"
                                               Received: "{ActualValue}"
                                               """;
 
-    protected internal override string GetExtraMessage()
+    protected internal virtual string GetExtraMessage()
     {
         var longest = Math.Max(ActualValue?.Length ?? 0, ExpectedValue?.Length ?? 0);
 

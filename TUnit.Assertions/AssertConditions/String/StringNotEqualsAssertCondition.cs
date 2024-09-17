@@ -13,12 +13,12 @@ public class StringNotEqualsAssertCondition<TAnd, TOr> : AssertCondition<string,
         _stringComparison = stringComparison;
     }
     
-    protected internal override bool Passes(string? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(string? actualValue, Exception? exception)
     {
         return !string.Equals(actualValue, ExpectedValue, _stringComparison);
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                               "{ActualValue}" is equal to "{ExpectedValue}"
                                               """;
 }

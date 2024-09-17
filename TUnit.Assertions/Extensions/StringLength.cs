@@ -22,7 +22,7 @@ public class StringLength<TAnd, TOr>
             {
                 if (actual is null)
                 {
-                    self.WithMessage((_, _, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
@@ -39,7 +39,7 @@ public class StringLength<TAnd, TOr>
                 {
                     if (@string is null)
                     {
-                        self.WithMessage((_, _, _) => "Actual string is null");
+                        self.OverriddenMessage = "Actual string is null";
                         return false;
                     }
 
@@ -54,7 +54,7 @@ public class StringLength<TAnd, TOr>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
@@ -72,7 +72,7 @@ public class StringLength<TAnd, TOr>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
@@ -89,7 +89,7 @@ public class StringLength<TAnd, TOr>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
@@ -106,7 +106,7 @@ public class StringLength<TAnd, TOr>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
@@ -123,7 +123,7 @@ public class StringLength<TAnd, TOr>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 

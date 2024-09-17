@@ -14,30 +14,25 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
         _condition2 = condition2;
     }
 
-    protected internal override string Message
+    protected internal override string GetFailureMessage()
     {
-        get
+        var messages = new List<string>(2);
+            
+        if (!_condition1.Assert(ActualValue, Exception, RawActualExpression))
         {
-            var messages = new List<string>(2);
-            
-            if (!_condition1.Assert(ActualValue, Exception, RawActualExpression))
-            {
-                messages.Add(_condition1.Message);
-            }
-            
-            if (!_condition2.Assert(ActualValue, Exception, RawActualExpression))
-            {
-                messages.Add(_condition2.Message);
-            }
-
-            return string.Join($"{Environment.NewLine} and{Environment.NewLine}", messages);
+            messages.Add(_condition1.OverriddenMessage ?? _condition1.GetFailureMessage());
         }
-    }
+            
+        if (!_condition2.Assert(ActualValue, Exception, RawActualExpression))
+        {
+            messages.Add(_condition2.OverriddenMessage ?? _condition2.GetFailureMessage());
+        }
 
-    protected override string DefaultMessage => string.Empty;
+        return string.Join($"{Environment.NewLine} and{Environment.NewLine}", messages);
+    }
     
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
-        return _condition1.Assert(actualValue, exception, rawValueExpression) && _condition2.Assert(actualValue, exception, rawValueExpression);
+        return _condition1.Assert(actualValue, exception, RawActualExpression) && _condition2.Assert(actualValue, exception, RawActualExpression);
     }
 }

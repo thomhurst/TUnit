@@ -12,21 +12,21 @@ public class ThrowsWithMessageContainingAssertCondition<TActual> : AssertConditi
         _exceptionSelector = exceptionSelector;
     }
     
-    protected override string DefaultMessage => $"Message '{_exceptionSelector(Exception)?.Message}' did not contain '{ExpectedValue}'";
+    protected internal override string GetFailureMessage() => $"Message '{_exceptionSelector(Exception)?.Message}' did not contain '{ExpectedValue}'";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? rootException, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? rootException)
     {
         var exception = _exceptionSelector(rootException);
         
         if (exception is null)
         {
-            WithMessage((_, _, _) => "Exception is null");
+            OverriddenMessage = "Exception is null";
             return false;
         }
         
         if (ExpectedValue is null)
         {
-            WithMessage((_, _, _) => "Expected message is null");
+            OverriddenMessage = "Expected message is null";
             return false;
         }
         

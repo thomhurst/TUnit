@@ -10,12 +10,12 @@ public class EnumerableNotEquivalentToAssertCondition<TActual, TInner> : AssertC
         _equalityComparer = equalityComparer;
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                                 The two Enumerables were equivalent
                                                    {string.Join(',', ActualValue ?? Enumerable.Empty<TInner>())}
                                                 """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null && ExpectedValue is null)
         {

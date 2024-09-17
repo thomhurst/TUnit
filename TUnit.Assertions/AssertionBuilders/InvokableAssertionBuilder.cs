@@ -36,7 +36,7 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
                 throw new AssertionException(
                     $"""
                      {GetExpression()}
-                     {assertion.Message}
+                     {assertion.OverriddenMessage ?? assertion.GetFailureMessage()}
                      """
                 );
             }

@@ -11,15 +11,15 @@ public class ThrowsWithMessageEqualToAssertCondition<TActual> : AssertCondition<
         _exceptionSelector = exceptionSelector;
     }
     
-    protected override string DefaultMessage => $"Message was {_exceptionSelector(Exception)?.Message} instead of {ExpectedValue}";
+    protected internal override string GetFailureMessage() => $"Message was {_exceptionSelector(Exception)?.Message} instead of {ExpectedValue}";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? rootException, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? rootException)
     {
         var exception = _exceptionSelector(rootException);
 
         if (exception is null)
         {
-            WithMessage((_, _, _) => "Exception is null");
+            OverriddenMessage = "Exception is null";
             return false;
         }
         

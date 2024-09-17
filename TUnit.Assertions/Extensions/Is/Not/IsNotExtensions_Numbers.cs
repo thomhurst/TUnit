@@ -31,8 +31,7 @@ public static partial class IsNotExtensions
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _, _) =>
-                            $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                        self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
 
@@ -50,7 +49,7 @@ public static partial class IsNotExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, _) => $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
 
@@ -69,7 +68,7 @@ public static partial class IsNotExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, _) => $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -88,7 +87,7 @@ public static partial class IsNotExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, _) => $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -107,7 +106,7 @@ public static partial class IsNotExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, _) => $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -126,7 +125,7 @@ public static partial class IsNotExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, _) => $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -145,7 +144,7 @@ public static partial class IsNotExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, _) => $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -164,7 +163,7 @@ public static partial class IsNotExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, _) => $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -183,7 +182,7 @@ public static partial class IsNotExtensions
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _, _) => $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 

@@ -6,12 +6,8 @@ namespace TUnit.Assertions.AssertConditions;
 
 public abstract class BaseAssertCondition
 {
-    protected internal virtual string? Message { get; }
-
-    protected internal virtual string GetExtraMessage()
-    {
-        return string.Empty;
-    }
+    protected internal string? OverriddenMessage { get; set; }
+    protected internal abstract string GetFailureMessage();
 }
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
@@ -30,31 +26,16 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 
     protected TActual? ActualValue { get; private set; }
     protected Exception? Exception { get; private set; }
-    protected string? RawActualExpression { get; private set; }
-
-
-    protected internal override string Message =>
-        $"{MessageFactory?.Invoke(ActualValue, Exception, RawActualExpression) ?? DefaultMessage}{GetExtraMessage()}";
-
-
-    private Func<TActual?, Exception?, string?, string>? MessageFactory { get; set; }
-    
-    public BaseAssertCondition<TActual> WithMessage(Func<TActual?, Exception?, string?, string> messageFactory)
-    {
-        MessageFactory = messageFactory;
-        return this;
-    }
-    
-    protected abstract string DefaultMessage { get; }
+    protected internal string? RawActualExpression { get; internal set; }
     
     internal bool Assert(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
-        ActualValue = actualValue;
-        Exception = exception;
-        RawActualExpression = rawValueExpression;
+        ActualValue ??= actualValue;
+        Exception ??= exception;
+        RawActualExpression ??= rawValueExpression;
         
-        return Passes(actualValue, exception, rawValueExpression);
+        return Passes(actualValue, exception);
     }
 
-    protected internal abstract bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression);
+    private protected abstract bool Passes(TActual? actualValue, Exception? exception);
 }

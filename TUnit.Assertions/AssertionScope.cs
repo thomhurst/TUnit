@@ -53,7 +53,7 @@ internal class AssertionScope : IAsyncDisposable
             {
                 return $"""
                        {x.Item1.GetExpression()}
-                       {string.Join(Environment.NewLine, x.Item2.Select(e =>  e.Message?.Trim()))}
+                       {string.Join(Environment.NewLine, x.Item2.Select(e =>  e.OverriddenMessage ?? e.GetFailureMessage()?.Trim()))}
                        """;
             })));
             

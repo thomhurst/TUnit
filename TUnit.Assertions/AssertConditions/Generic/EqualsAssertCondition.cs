@@ -3,12 +3,12 @@
 public class EqualsAssertCondition<TActual>(TActual expected)
     : AssertCondition<TActual, TActual>(expected)
 {
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                                  Expected: {ExpectedValue}
                                                  Received: {ActualValue}
                                                  """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is IEquatable<TActual> equatable)
         {

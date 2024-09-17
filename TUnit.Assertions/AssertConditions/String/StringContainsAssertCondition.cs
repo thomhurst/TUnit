@@ -13,24 +13,24 @@ public class StringContainsAssertCondition<TAnd, TOr> : AssertCondition<string, 
         _stringComparison = stringComparison;
     }
     
-    protected internal override bool Passes(string? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(string? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {
-            WithMessage((_, _, _) => "Actual string is null");
+            OverriddenMessage = "Actual string is null";
             return false;
         }
         
         if (ExpectedValue is null)
         {
-            WithMessage((_, _, _) => "Expected string is null");
+            OverriddenMessage = "Expected string is null";
             return false;
         }
         
         return actualValue.Contains(ExpectedValue, _stringComparison);
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                               Expected "{ActualValue}" to contain "{ExpectedValue}"
                                               """;
 }

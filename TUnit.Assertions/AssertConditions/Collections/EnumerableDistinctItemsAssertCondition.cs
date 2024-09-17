@@ -13,13 +13,13 @@ public class EnumerableDistinctItemsAssertCondition<TActual, TInner> : AssertCon
         _equalityComparer = equalityComparer;
     }
 
-    protected override string DefaultMessage => "Duplicate items found in the collection";
+    protected internal override string GetFailureMessage() => "Duplicate items found in the collection";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {
-            WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
+            OverriddenMessage = $"{RawActualExpression ?? typeof(TActual).Name} is null";
             return false;
         }
 

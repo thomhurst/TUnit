@@ -6,8 +6,8 @@ public class NullAssertCondition<TActual> : AssertCondition<TActual, TActual>
     {
     }
 
-    protected override string DefaultMessage => $"{ActualValue} is not null";
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    protected internal override string GetFailureMessage() => $"{ActualValue} is not null";
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return actualValue is null;
     }

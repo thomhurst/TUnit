@@ -43,7 +43,7 @@ public static partial class DoesExtensions
             {
                 if (actual is null)
                 {
-                    self.WithMessage((_, _, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 

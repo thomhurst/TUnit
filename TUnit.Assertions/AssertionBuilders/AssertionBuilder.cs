@@ -64,7 +64,7 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
         }
     }
     
-    internal AssertionBuilder<TActual, TAnd, TOr> AppendExpression(string expression)
+    public AssertionBuilder<TActual, TAnd, TOr> AppendExpression(string expression)
     {
         ExpressionBuilder?.Append($".{expression}");
         return this;

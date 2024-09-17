@@ -6,8 +6,8 @@ public class NotNullAssertCondition<TActual> : AssertCondition<TActual, TActual>
     {
     }
 
-    protected override string DefaultMessage => $"Member for {RawActualExpression ?? typeof(TActual).Name} was null";
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    protected internal override string GetFailureMessage() => $"Member for {RawActualExpression ?? typeof(TActual).Name} was null";
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return actualValue is not null;
     }

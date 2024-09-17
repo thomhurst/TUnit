@@ -6,9 +6,9 @@ public class ThrowsNothingAssertCondition<TActual> : AssertCondition<TActual, TA
     {
     }
     
-    protected override string DefaultMessage => $"A {Exception?.GetType().Name} was thrown";
+    protected internal override string GetFailureMessage() => $"A {Exception?.GetType().Name} was thrown";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return exception is null;
     }

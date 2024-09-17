@@ -7,9 +7,9 @@ public class SameReferenceAssertCondition<TActual, TExpected> : AssertCondition<
     {
     }
 
-    protected override string DefaultMessage => "The two objects are different references.";
+    protected internal override string GetFailureMessage() => "The two objects are different references.";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return ReferenceEquals(actualValue, ExpectedValue);
     }
