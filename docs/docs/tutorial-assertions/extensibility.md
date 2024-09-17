@@ -41,4 +41,18 @@ So to create a custom assertion:
 
    Your return type for the extension method should be `InvokableAssertionBuilder<string, TAnd, TOr>`
 
-   And then finally, you just new up your custom assert condition class, and then call the extension method `ChainedTo(source.AssertionBuilder)` on it, which will add it to our assertion builder. You don't have to worry what that's doing behind the scenes, it's just building rules that can chain together. 
+   And then finally, you just new up your custom assert condition class, and then call the extension method `ChainedTo(source.AssertionBuilder, [...argumentExpression])` on it, which will add it to our assertion builder. You don't have to worry what that's doing behind the scenes, it's just building rules that can chain together. 
+
+   The argument expression array allows you to pass in `[CallerArgumentExpression]` values so that your assertion errors show you the code executed to give clear exception messages.
+
+   Here's a fully fledged assertion in action:
+
+   ```csharp
+public static InvokableAssertionBuilder<string, TAnd, TOr> Contains<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+        where TAnd : IAnd<string, TAnd, TOr>
+        where TOr : IOr<string, TAnd, TOr>
+    {
+        return new StringContainsAssertCondition<TAnd, TOr>(expected, stringComparison)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+   ```
