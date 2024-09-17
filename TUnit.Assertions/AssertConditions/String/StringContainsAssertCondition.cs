@@ -7,13 +7,13 @@ public class StringContainsAssertCondition(string expected, StringComparison str
     {
         if (actualValue is null)
         {
-            OverriddenMessage = "Actual string is null";
+            OverriddenMessage = $"{ActualExpression ?? "Actual"} string is null";
             return false;
         }
         
         if (ExpectedValue is null)
         {
-            OverriddenMessage = "Expected string is null";
+            OverriddenMessage = "No expected value given";
             return false;
         }
         

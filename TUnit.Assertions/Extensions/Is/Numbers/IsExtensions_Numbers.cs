@@ -52,7 +52,7 @@ public static partial class IsExtensions
                 {
                     if (value is null)
                     {
-                        self.OverriddenMessage = $"{self.RawActualExpression ?? typeof(TActual).Name} is null";
+                        self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
 

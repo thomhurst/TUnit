@@ -19,7 +19,7 @@ public class EnumerableDistinctItemsAssertCondition<TActual, TInner> : AssertCon
     {
         if (actualValue is null)
         {
-            OverriddenMessage = $"{RawActualExpression ?? typeof(TActual).Name} is null";
+            OverriddenMessage = $"{ActualExpression ?? typeof(TActual).Name} is null";
             return false;
         }
 

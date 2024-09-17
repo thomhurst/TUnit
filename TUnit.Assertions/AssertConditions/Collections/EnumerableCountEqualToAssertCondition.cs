@@ -15,7 +15,7 @@ public class EnumerableCountEqualToAssertCondition<TActual> : AssertCondition<TA
     {
         if (actualValue is null)
         {
-            OverriddenMessage = $"{RawActualExpression ?? typeof(TActual).Name} is null";
+            OverriddenMessage = $"{ActualExpression ?? typeof(TActual).Name} is null";
             return false;
         }
         

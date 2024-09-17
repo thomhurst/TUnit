@@ -18,12 +18,12 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
     {
         var messages = new List<string>(2);
             
-        if (!_condition1.Assert(ActualValue, Exception, RawActualExpression))
+        if (!_condition1.Assert(ActualValue, Exception, ActualExpression))
         {
             messages.Add(_condition1.OverriddenMessage ?? _condition1.GetFailureMessage());
         }
             
-        if (!_condition2.Assert(ActualValue, Exception, RawActualExpression))
+        if (!_condition2.Assert(ActualValue, Exception, ActualExpression))
         {
             messages.Add(_condition2.OverriddenMessage ?? _condition2.GetFailureMessage());
         }
@@ -33,6 +33,6 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
     
     private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
-        return _condition1.Assert(actualValue, exception, RawActualExpression) && _condition2.Assert(actualValue, exception, RawActualExpression);
+        return _condition1.Assert(actualValue, exception, ActualExpression) && _condition2.Assert(actualValue, exception, ActualExpression);
     }
 }
