@@ -1,22 +1,18 @@
 using System.Linq.Expressions;
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.ClassMember;
 
-public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(AssertionBuilder<TRootObjectType, TAnd, TOr> assertionBuilder, Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
-    : AssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(assertionBuilder,  expected)
-    where TAnd : IAnd<TRootObjectType, TAnd, TOr>
-    where TOr : IOr<TRootObjectType, TAnd, TOr>
+public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType>(Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
+    : AssertCondition<TRootObjectType, TPropertyType>(expected)
 {
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                                  {typeof(TRootObjectType).Name}.{ExpressionHelpers.GetName(propertySelector)}:
                                                      Expected: {ExpectedValue}
                                                      Received: { GetPropertyValue(ActualValue)?.ToString() ?? $"Object `{typeof(TRootObjectType).Name}` was null" }
                                                  """;
 
-    protected internal override bool Passes(TRootObjectType? actualValue, Exception? exception)
+    private protected override bool Passes(TRootObjectType? actualValue, Exception? exception)
     {
         var propertyValue = GetPropertyValue(actualValue);
         

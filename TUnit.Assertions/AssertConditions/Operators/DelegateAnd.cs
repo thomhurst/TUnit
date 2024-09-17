@@ -1,18 +1,23 @@
 using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class DelegateAnd<TActual> 
-    : And<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IDelegateAssertions<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IAnd<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>
+    : And<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>, IAnd<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>,
+        IDelegateSource<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>
 {
-    public DelegateAnd(BaseAssertCondition<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
+    private readonly AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> _assertionBuilder;
+
+    public DelegateAnd(AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> assertionBuilder)
     {
+        _assertionBuilder = assertionBuilder;
     }
 
-    Throws<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> IThrows<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>.Throws() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-
-    public static DelegateAnd<TActual> Create(BaseAssertCondition<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> otherAssertCondition)
+    public static DelegateAnd<TActual> Create(AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> assertionBuilder)
     {
-        return new DelegateAnd<TActual>(otherAssertCondition);
+        return new DelegateAnd<TActual>(assertionBuilder);
     }
+    
+    AssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>> ISource<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>.AssertionBuilder => new AndAssertionBuilder<TActual, DelegateAnd<TActual>, DelegateOr<TActual>>(_assertionBuilder);
 }

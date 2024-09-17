@@ -3,62 +3,84 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public abstract class AssertionBuilder<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public abstract class AssertionBuilder<TActual>
 {
-    internal StringBuilder? ExpressionBuilder { get; }
-    internal string? RawActualExpression { get; }
-    public AssertionMessage? AssertionMessage { get; protected set; }
-
-    protected AssertionBuilder(string actual) : base(ConnectorType.None, null)
+    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions)
     {
-        if (string.IsNullOrEmpty(actual))
+        AssertionDataDelegate = assertionDataDelegate;
+        ActualExpression = actualExpression;
+        ExpressionBuilder = expressionBuilder;
+        Assertions = assertions;
+    }
+    
+    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression)
+    {
+        AssertionDataDelegate = assertionDataDelegate;
+        ActualExpression = actualExpression;
+        
+        if (string.IsNullOrEmpty(actualExpression))
         {
-            RawActualExpression = null;
+            ActualExpression = null;
             ExpressionBuilder = null;
         }
         else
         {
-            RawActualExpression = actual;
+            ActualExpression = actualExpression;
+            ExpressionBuilder = new StringBuilder($"Assert.That({actualExpression})");
+        }
+    }
+    
+    internal StringBuilder? ExpressionBuilder { get; init; }
+    internal string? ActualExpression { get; init; }
+    public Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
+    
+    internal readonly Stack<BaseAssertCondition<TActual>> Assertions = new();
+}
+
+public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TActual>
+    where TAnd : IAnd<TActual, TAnd, TOr>
+    where TOr : IOr<TActual, TAnd, TOr>
+{
+    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions) : base(assertionDataDelegate, actualExpression, expressionBuilder, assertions)
+    {
+    }
+
+    protected AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actual) : base(assertionDataDelegate, actual)
+    {
+        if (string.IsNullOrEmpty(actual))
+        {
+            ActualExpression = null;
+            ExpressionBuilder = null;
+        }
+        else
+        {
+            ActualExpression = actual;
             ExpressionBuilder = new StringBuilder($"Assert.That({actual})");
         }
     }
-
-    protected internal abstract Task<AssertionData<TActual>> GetAssertionData();
-
-    internal AssertionBuilder<TActual, TAnd, TOr> AppendExpression(string expression)
+    
+    public AssertionBuilder<TActual, TAnd, TOr> AppendExpression(string expression)
     {
         ExpressionBuilder?.Append($".{expression}");
         return this;
     }
     
-    internal AssertionBuilder<TActual, TAnd, TOr> AppendConnector(ConnectorType connectorType)
+    internal AssertionBuilder<TActual, TAnd, TOr> AppendConnector(ChainType chainType)
     {
-        if (connectorType == ConnectorType.None)
-        {
-            return this;
-        }
-
-        if (ExpressionBuilder?.ToString().EndsWith($".{connectorType}") == true)
+        if (chainType == ChainType.None)
         {
             return this;
         }
         
-        return AppendExpression(connectorType.ToString());
+        return AppendExpression(chainType.ToString());
     }
     
-    internal AssertionBuilder<TActual, TAnd, TOr> AppendCallerMethod(string? expression, [CallerMemberName] string methodName = "")
-    {
-        return AppendCallerMethodWithMultipleExpressions([expression], methodName);
-    }
-    
-    internal AssertionBuilder<TActual, TAnd, TOr> AppendCallerMethodWithMultipleExpressions(string?[] expressions, [CallerMemberName] string methodName = "")
+    internal AssertionBuilder<TActual, TAnd, TOr> AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
     {
         if (string.IsNullOrEmpty(methodName))
         {
@@ -66,6 +88,24 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : Connector<TActual, 
         }
 
         return AppendExpression($"{methodName}({string.Join(", ", expressions)})");
+    }
+
+    public InvokableAssertionBuilder<TActual, TAnd, TOr> WithAssertion(BaseAssertCondition<TActual> assertCondition)
+    {
+        var builder = new InvokableAssertionBuilder<TActual, TAnd, TOr>(AssertionDataDelegate, this);
+
+        if (this is IOrAssertionBuilder)
+        {
+            assertCondition = new OrAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition);
+        }
+        
+        if (this is IAndAssertionBuilder)
+        {
+            assertCondition = new AndAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition);
+        }
+        
+        builder.Assertions.Push(assertCondition);
+        return builder;
     }
     
     [Obsolete("This is a base `object` method that should not be called.", true)]

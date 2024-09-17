@@ -1,27 +1,22 @@
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
-
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, IEnumerable<TInner>, TAnd, TOr>
+public class EnumerableEquivalentToAssertCondition<TActual, TInner> : AssertCondition<TActual, IEnumerable<TInner>>
     where TActual : IEnumerable<TInner>?
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
-    public EnumerableEquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, IEnumerable<TInner> expected, IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
+    public EnumerableEquivalentToAssertCondition(IEnumerable<TInner> expected, IEqualityComparer<TInner?>? equalityComparer) : base(expected)
     {
         _equalityComparer = equalityComparer;
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                                 The two Enumerables were not equivalent
                                                    Actual: {(ActualValue != null ? string.Join(',', ActualValue) : null)}
                                                    Expected: {(ExpectedValue != null ? string.Join(',', ExpectedValue) : null)}
                                                 """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null && ExpectedValue is null)
         {

@@ -1,10 +1,11 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Interfaces;
 
-public interface IThrows<TActual, TAnd, TOr>
+public interface ISource<TActual, TAnd, TOr> 
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    internal Throws<TActual, TAnd, TOr> Throws();
+    AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
 }

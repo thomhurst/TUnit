@@ -1,46 +1,24 @@
-﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
+﻿using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class DelegateAssertionBuilder 
+public class DelegateAssertionBuilder
     : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
-        IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>
-   {
-    private readonly Action _action;
-
-    Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>.Throws() => new(this, ConnectorType.None, null);
-
-    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(expressionBuilder)
+        IDelegateSource<object?, DelegateAnd<object?>, DelegateOr<object?>>
+{
+    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(action.AsAssertionData(expressionBuilder), expressionBuilder)
     {
-        _action = action;
     }
 
-    protected internal override Task<AssertionData<object?>> GetAssertionData()
+    public static InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> Create(
+        Func<Task<AssertionData<object?>>> assertionDataDelegate,
+        AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> assertionBuilder)
     {
-        var exception = _action.InvokeAndGetException();
-        
-        return Task.FromResult(new AssertionData<object?>(null, exception));
+        return new InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>(assertionDataDelegate,
+            assertionBuilder);
     }
 
-    public DelegateAssertionBuilder WithMessage(AssertionMessageDelegate message)
-    {
-        AssertionMessage = message;
-        return this;
-    }
-                
-    public DelegateAssertionBuilder WithMessage(Func<Exception?, string> message)
-    {
-        AssertionMessage = (AssertionMessageDelegate) message;
-        return this;
-    }
-    
-    public DelegateAssertionBuilder WithMessage(Func<string> message)
-    {
-        AssertionMessage = (AssertionMessageDelegate) message;
-        return this;
-    }
+    AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> ISource<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionBuilder => this;
 }

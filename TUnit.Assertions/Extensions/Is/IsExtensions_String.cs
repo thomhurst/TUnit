@@ -5,61 +5,60 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static BaseAssertCondition<string, TAnd, TOr> IsEqualTo<TAnd, TOr>(this IIs<string, TAnd, TOr> @is, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableAssertionBuilder<string, TAnd, TOr> IsEqualTo<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+        where TAnd : IAnd<string, TAnd, TOr>
+        where TOr : IOr<string, TAnd, TOr>
     {
-        return IsEqualTo(@is, expected, StringComparison.Ordinal, doNotPopulateThisValue1);
+        return IsEqualTo(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue1);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> IsEqualTo<TAnd, TOr>(this IIs<string, TAnd, TOr> @is, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableAssertionBuilder<string, TAnd, TOr> IsEqualTo<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+        where TAnd : IAnd<string, TAnd, TOr>
+        where TOr : IOr<string, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new StringEqualsAssertCondition<TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
+        return new StringEqualsAssertCondition<TAnd, TOr>(expected, stringComparison)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> IsEmpty<TAnd, TOr>(this IIs<string, TAnd, TOr> @is)
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableAssertionBuilder<string, TAnd, TOr> IsEmpty<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
+        where TAnd : IAnd<string, TAnd, TOr>
+        where TOr : IOr<string, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<string, int,TAnd,TOr>(
-            @is.Is().AssertionBuilder.AppendCallerMethod(null), 0,
+        return new DelegateAssertCondition<string, int>(0,
             (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
                 return value == string.Empty;
             },
-            (s, _) => $"'{s}' was not empty"));
-    }
+            (s, _, _) => $"'{s}' was not empty")
+            .ChainedTo(valueSource.AssertionBuilder, []); }
     
-    public static BaseAssertCondition<string, TAnd, TOr> IsNullOrEmpty<TAnd, TOr>(this IIs<string, TAnd, TOr> @is)
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableAssertionBuilder<string, TAnd, TOr> IsNullOrEmpty<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
+        where TAnd : IAnd<string, TAnd, TOr>
+        where TOr : IOr<string, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<string, int,TAnd,TOr>(
-            @is.Is().AssertionBuilder.AppendCallerMethod(null), 0,
+        return new DelegateAssertCondition<string, int>(0,
             (value, _, _, _) => string.IsNullOrEmpty(value),
-            (s, _) => $"'{s}' is not null or empty"));
-    }
+            (s, _, _) => $"'{s}' is not null or empty")
+            .ChainedTo(valueSource.AssertionBuilder, []); }
     
-    public static BaseAssertCondition<string, TAnd, TOr> IsNullOrWhitespace<TAnd, TOr>(this IIs<string, TAnd, TOr> @is)
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableAssertionBuilder<string, TAnd, TOr> IsNullOrWhitespace<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
+        where TAnd : IAnd<string, TAnd, TOr>
+        where TOr : IOr<string, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<string, int,TAnd,TOr>(
-            @is.Is().AssertionBuilder.AppendCallerMethod(null), 0,
+        return new DelegateAssertCondition<string, int>(0,
             (value, _, _, _) => string.IsNullOrWhiteSpace(value),
-            (s, _) => $"'{s}' is not null or whitespace"));
-    }
+            (s, _, _) => $"'{s}' is not null or whitespace")
+            .ChainedTo(valueSource.AssertionBuilder, []); }
 }

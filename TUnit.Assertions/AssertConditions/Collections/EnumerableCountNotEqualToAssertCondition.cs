@@ -1,25 +1,21 @@
 ﻿using System.Collections;
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableCountNotEqualToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, int, TAnd, TOr>
+public class EnumerableCountNotEqualToAssertCondition<TActual> : AssertCondition<TActual, int>
     where TActual : IEnumerable
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
 {
-    public EnumerableCountNotEqualToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, int expected) : base(assertionBuilder, expected)
+    public EnumerableCountNotEqualToAssertCondition(int expected) : base(expected)
     {
     }
 
-    protected override string DefaultMessage => $"Count is {ExpectedValue}";
+    protected internal override string GetFailureMessage() => $"Count is {ExpectedValue}";
     
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {
-            WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+            OverriddenMessage = $"{RawActualExpression ?? typeof(TActual).Name} is null";
             return false;
         }
         

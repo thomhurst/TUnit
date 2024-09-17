@@ -1,46 +1,22 @@
-﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
+﻿using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 public class AsyncDelegateAssertionBuilder 
     : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
-        IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>
+        IDelegateSource<object?, DelegateAnd<object?>, DelegateOr<object?>>
 {
-    private readonly Func<Task> _function;
-
-    Throws<object?, DelegateAnd<object?>, DelegateOr<object?>> IThrows<object?, DelegateAnd<object?>, DelegateOr<object?>>.Throws() => new(this, ConnectorType.None, null);
-
-    internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(expressionBuilder)
+    internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {
-        _function = function;
     }
 
-    protected internal override async Task<AssertionData<object?>> GetAssertionData()
+    public static InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> Create(Func<Task<AssertionData<object?>>> assertionDataDelegate, AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> assertionBuilder)
     {
-        var exception = await _function.InvokeAndGetExceptionAsync();
-        
-        return new AssertionData<object?>(null, exception);
+        return new InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>(assertionDataDelegate,
+            assertionBuilder);
     }
     
-    public AsyncDelegateAssertionBuilder WithMessage(AssertionMessageDelegate message)
-    {
-        AssertionMessage = message;
-        return this;
-    }
-                    
-    public AsyncDelegateAssertionBuilder WithMessage(Func<Exception?, string> message)
-    {
-        AssertionMessage = (AssertionMessageDelegate) message;
-        return this;
-    }
-    
-    public AsyncDelegateAssertionBuilder WithMessage(Func<string> message)
-    {
-        AssertionMessage = (AssertionMessageDelegate) message;
-        return this;
-    }
+    AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> ISource<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionBuilder => this;
 }

@@ -63,37 +63,35 @@ public class AssertMultipleTests
                                                                 Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
                                                                 Expected: 2
                                                                 Received: 1
-                                                                 &
+                                                                 or
                                                                 Expected: 3
                                                                 Received: 1
                                                                 
                                                                 Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
                                                                 Expected: 3
                                                                 Received: 2
-                                                                
-                                                                Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
+                                                                 and
                                                                 Expected: 4
                                                                 Received: 2
                                                                 
                                                                 Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
                                                                 Expected: 4
                                                                 Received: 3
-                                                                 &
+                                                                 or
                                                                 Expected: 5
                                                                 Received: 3
                                                                 
                                                                 Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
                                                                 Expected: 5
                                                                 Received: 4
-                                                                
-                                                                Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
+                                                                 and
                                                                 Expected: 6
                                                                 Received: 4
                                                                 
                                                                 Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
                                                                 Expected: 6
                                                                 Received: 5
-                                                                 &
+                                                                 or
                                                                 Expected: 7
                                                                 Received: 5
                                                                 """));

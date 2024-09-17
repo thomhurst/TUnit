@@ -5,84 +5,84 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static BaseAssertCondition<TimeSpan, TAnd, TOr> IsBetween<TAnd, TOr>(this IIs<TimeSpan, TAnd, TOr> @is, TimeSpan lowerBound, TimeSpan upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
-        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
-        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
+    public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsBetween<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan lowerBound, TimeSpan upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
+        where TAnd : IAnd<TimeSpan, TAnd, TOr>
+        where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value >= lowerBound && value <= upperBound;
             },
-            (value, _) => $"{value} was not between {lowerBound} and {upperBound}"));
-    }
+            (value, _, _) => $"{value} was not between {lowerBound} and {upperBound}")
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]); }
     
-    public static BaseAssertCondition<TimeSpan, TAnd, TOr> IsEqualToWithTolerance<TAnd, TOr>(this IIs<TimeSpan, TAnd, TOr> @is, TimeSpan expected, TimeSpan tolerance, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("tolerance")] string doNotPopulateThisValue2 = "")
-        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
-        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
+    public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsEqualToWithTolerance<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, TimeSpan tolerance, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("tolerance")] string doNotPopulateThisValue2 = "")
+        where TAnd : IAnd<TimeSpan, TAnd, TOr>
+        where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<TimeSpan,TimeSpan,TAnd,TOr>(
-            @is.Is().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
-            expected,
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(expected,
             (actual, _, _, _) =>
             {
                 return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
             },
-            (timeSpan, _) => $"{timeSpan} is not between {timeSpan.Subtract(tolerance)} and {timeSpan.Add(tolerance)}"));
+            (timeSpan, _, _) => $"{timeSpan} is not between {timeSpan.Subtract(tolerance)} and {timeSpan.Add(tolerance)}")
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]); }
+    
+    public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsZero<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource)
+        where TAnd : IAnd<TimeSpan, TAnd, TOr>
+        where TOr : IOr<TimeSpan, TAnd, TOr>
+    {
+        return new EqualsAssertCondition<TimeSpan>(TimeSpan.Zero)
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
-    public static BaseAssertCondition<TimeSpan, TAnd, TOr> IsZero<TAnd, TOr>(this IIs<TimeSpan, TAnd, TOr> @is)
-        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
-        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
+    public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsGreaterThan<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+        where TAnd : IAnd<TimeSpan, TAnd, TOr>
+        where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new EqualsAssertCondition<TimeSpan, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(null), TimeSpan.Zero));
-    }
-    
-    public static BaseAssertCondition<TimeSpan, TAnd, TOr> IsGreaterThan<TAnd, TOr>(this IIs<TimeSpan, TAnd, TOr> @is, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
-        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
-        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
-    {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value > expected;
             },
-            (value, _) => $"{value} was not greater than {expected}"));
-    }
+            (value, _, _) => $"{value} was not greater than {expected}")
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static BaseAssertCondition<TimeSpan, TAnd, TOr> IsGreaterThanOrEqualTo<TAnd, TOr>(this IIs<TimeSpan, TAnd, TOr> @is, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
-        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
-        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
+    public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsGreaterThanOrEqualTo<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+        where TAnd : IAnd<TimeSpan, TAnd, TOr>
+        where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
-            (value, _) => $"{value} was not greater than or equal to {expected}"));
-    }
+            (value, _, _) => $"{value} was not greater than or equal to {expected}")
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static BaseAssertCondition<TimeSpan, TAnd, TOr> IsLessThan<TAnd, TOr>(this IIs<TimeSpan, TAnd, TOr> @is, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
-        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
-        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
+    public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsLessThan<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+        where TAnd : IAnd<TimeSpan, TAnd, TOr>
+        where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value < expected;
             },
-            (value, _) => $"{value} was not less than {expected}"));
-    }
+            (value, _, _) => $"{value} was not less than {expected}")
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
     
-    public static BaseAssertCondition<TimeSpan, TAnd, TOr> IsLessThanOrEqualTo<TAnd, TOr>(this IIs<TimeSpan, TAnd, TOr> @is, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
-        where TAnd : And<TimeSpan, TAnd, TOr>, IAnd<TimeSpan, TAnd, TOr>
-        where TOr : Or<TimeSpan, TAnd, TOr>, IOr<TimeSpan, TAnd, TOr>
+    public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsLessThanOrEqualTo<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+        where TAnd : IAnd<TimeSpan, TAnd, TOr>
+        where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
             {
                 return value <= expected;
             },
-            (value, _) => $"{value} was not less than or equal to {expected}"));
-    }
+            (value, _, _) => $"{value} was not less than or equal to {expected}")
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]); }
 }

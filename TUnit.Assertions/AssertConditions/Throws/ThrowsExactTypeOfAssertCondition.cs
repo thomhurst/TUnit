@@ -1,24 +1,18 @@
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
-
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCondition<TActual, TExpected, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class ThrowsExactTypeOfAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
 {
-    public ThrowsExactTypeOfAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder,
-        Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, default)
+    public ThrowsExactTypeOfAssertCondition() : base(default)
     {
     }
     
-    protected override string DefaultMessage => $"A {Exception?.GetType().Name} was thrown instead of {typeof(TExpected).Name}";
+    protected internal override string GetFailureMessage() => $"A {Exception?.GetType().Name} was thrown instead of {typeof(TExpected).Name}";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    private protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (exception is null)
         {
-            WithMessage((_, _) => "Exception is null");
+            OverriddenMessage = "Exception is null";
             return false;
         }
         

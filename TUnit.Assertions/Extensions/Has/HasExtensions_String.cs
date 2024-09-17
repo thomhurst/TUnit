@@ -7,10 +7,10 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static StringLength<TAnd, TOr> HasLength<TAnd, TOr>(this IHas<string, TAnd, TOr> has)
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static StringLength<TAnd, TOr> HasLength<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
+        where TAnd : IAnd<string, TAnd, TOr>
+        where TOr : IOr<string, TAnd, TOr>
     {
-        return new StringLength<TAnd, TOr>(has.Has().AssertionBuilder.AppendCallerMethod(null), has.Has().ConnectorType, has.Has().OtherAssertCondition);
+        return new StringLength<TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod([]));
     }
 }

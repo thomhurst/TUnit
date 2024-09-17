@@ -1,30 +1,30 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.String;
 
-public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, string, TAnd, TOr>
-    where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-    where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, string>
+    where TAnd : IAnd<string, TAnd, TOr>
+    where TOr : IOr<string, TAnd, TOr>
 {
     private readonly StringComparison _stringComparison;
     
-    public StringEqualsAssertCondition(AssertionBuilder<string, TAnd, TOr> assertionBuilder, string expected, StringComparison stringComparison) : base(assertionBuilder, expected)
+    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : base(expected)
     {
         _stringComparison = stringComparison;
     }
     
-    protected internal override bool Passes(string? actualValue, Exception? exception)
+    private protected override bool Passes(string? actualValue, Exception? exception)
     {
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                               Expected: "{ExpectedValue}"
                                               Received: "{ActualValue}"
+                                              {GetLocation()}
                                               """;
 
-    protected internal override string GetExtraMessage()
+    private string GetLocation()
     {
         var longest = Math.Max(ActualValue?.Length ?? 0, ExpectedValue?.Length ?? 0);
 

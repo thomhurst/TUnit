@@ -1,18 +1,19 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesNotExtensions
 {
-    public static BaseAssertCondition<TActual, TAnd, TOr> DoesNotContain<TActual, TInner, TAnd, TOr>(this IDoes<TActual, TAnd, TOr> doesNot, TInner expected, IEqualityComparer<TInner?>? equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> DoesNotContain<TActual, TInner, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, TInner expected, IEqualityComparer<TInner?>? equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : IEnumerable<TInner>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(doesNot.DoesNot(), new EnumerableNotContainsAssertCondition<TActual, TInner, TAnd, TOr>(doesNot.DoesNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, equalityComparer));
+        return new EnumerableNotContainsAssertCondition<TActual, TInner>(expected, equalityComparer)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
 }

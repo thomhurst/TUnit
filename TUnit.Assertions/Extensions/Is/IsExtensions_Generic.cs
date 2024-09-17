@@ -5,67 +5,67 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsEqualTo<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> @is, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsEqualTo<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
         where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new EqualsAssertCondition<TActual, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue1), expected));
+        return new EqualsAssertCondition<TActual>(expected)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
     }
     
-    public static BaseAssertCondition<object, TAnd, TOr> IsEquivalentTo<TAnd, TOr>(this IIs<object, TAnd, TOr> @is, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
-        where TAnd : And<object, TAnd, TOr>, IAnd<object, TAnd, TOr>
-        where TOr : Or<object, TAnd, TOr>, IOr<object, TAnd, TOr>
+    public static InvokableAssertionBuilder<object, TAnd, TOr> IsEquivalentTo<TAnd, TOr>(this IValueSource<object, TAnd, TOr> valueSource, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+        where TAnd : IAnd<object, TAnd, TOr>
+        where TOr : IOr<object, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new EquivalentToAssertCondition<object, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue1), expected));
+        return new EquivalentToAssertCondition<object>(expected)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
     }
     
-    public static BaseAssertCondition<object, TAnd, TOr> IsSameReference<TAnd, TOr>(this IIs<object, TAnd, TOr> @is, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
-        where TAnd : And<object, TAnd, TOr>, IAnd<object, TAnd, TOr>
-        where TOr : Or<object, TAnd, TOr>, IOr<object, TAnd, TOr>
+    public static InvokableAssertionBuilder<object, TAnd, TOr> IsSameReference<TAnd, TOr>(this IValueSource<object, TAnd, TOr> valueSource, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+        where TAnd : IAnd<object, TAnd, TOr>
+        where TOr : IOr<object, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new SameReferenceAssertCondition<object, object, TAnd,TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue1), expected));
+        return new SameReferenceAssertCondition<object, object>(expected)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNull<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> @is)
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TActual, TAnd, TOr>
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNull<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource)
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new NullAssertCondition<TActual, TAnd, TOr>(@is.Is().AssertionBuilder.AppendCallerMethod(string.Empty)));
+        return new NullAssertCondition<TActual>()
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
 
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsTypeOf<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> @is, Type type) where TAnd : And<TActual, TAnd, TOr>, IAnd<TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TActual, TAnd, TOr>
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsTypeOf<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, Type type) where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), 
-            new TypeOfAssertCondition<TActual, TAnd, TOr>(
-                @is.Is().AssertionBuilder.AppendCallerMethod(type.FullName), type));
+        return new TypeOfAssertCondition<TActual>(type)
+            .ChainedTo(valueSource.AssertionBuilder, [type.Name]);
     }
 
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsAssignableTo<TActual, TExpected, TAnd, TOr>(this IIs<TActual, TAnd, TOr> @is) 
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TActual, TAnd, TOr>
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableTo<TActual, TExpected, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(
-            @is.Is().AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
-            default,
+        return new DelegateAssertCondition<TActual, TExpected>(default,
             (value, _, _, _) => value!.GetType().IsAssignableTo(typeof(TExpected)),
-            (actual, _) => $"{actual?.GetType()} is not assignable to {typeof(TExpected).Name}"));
-    }
+            (actual, _, _) => $"{actual?.GetType()} is not assignable to {typeof(TExpected).Name}")
+            .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]); }
 
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsAssignableFrom<TActual, TExpected, TAnd, TOr>(this IIs<TActual, TAnd, TOr> @is) 
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableFrom<TActual, TExpected, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
         where TExpected : TActual
-        where TAnd : And<TActual, TAnd, TOr>, IAnd<TActual, TAnd, TOr>
-        where TOr : Or<TActual, TAnd, TOr>, IOr<TActual, TAnd, TOr>
+        where TAnd : IAnd<TActual, TAnd, TOr>
+        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return AssertionConditionCombiner.Combine(@is.Is(), new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(
-            @is.Is().AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
-            default,
+        return new DelegateAssertCondition<TActual, TExpected>(default,
             (value, _, _, _) => value!.GetType().IsAssignableFrom(typeof(TExpected)),
-            (actual, _) => $"{actual?.GetType()} is not assignable from {typeof(TExpected).Name}"));
-    }
+            (actual, _, _) => $"{actual?.GetType()} is not assignable from {typeof(TExpected).Name}")
+            .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]); }
 }

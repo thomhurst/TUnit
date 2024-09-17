@@ -1,7 +1,7 @@
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions;
@@ -18,28 +18,30 @@ internal class AssertionScope : IAsyncDisposable
         SetCurrentAssertionScope(this);
     }
 
-    private readonly List<BaseAssertCondition> _assertConditions = [];
+    private readonly List<IInvokableAssertionBuilder> _assertionBuilders = [];
 
     public ValueTaskAwaiter GetAwaiter() => DisposeAsync().GetAwaiter();
 
-    internal void Add(BaseAssertCondition assertCondition) => _assertConditions.Add(assertCondition);
+    internal void Add(IInvokableAssertionBuilder assertionBuilder) => _assertionBuilders.Add(assertionBuilder);
 
     public async ValueTask DisposeAsync()
     {
         SetCurrentAssertionScope(_parent);
         
-        var failed = new List<BaseAssertCondition>();
+        var failed = new List<(IInvokableAssertionBuilder, List<BaseAssertCondition>)>();
         
-        foreach (var baseAssertCondition in _assertConditions)
+        foreach (var assertionBuilder in _assertionBuilders)
         {
-            if (!await baseAssertCondition.AssertAsync())
+            var list = new List<BaseAssertCondition>();
+            
+            await foreach (var failedAssertion in assertionBuilder.GetFailures())
             {
-                if (Debugger.IsAttached)
-                {
-                    throw new AssertionException(baseAssertCondition.Message?.Trim());
-                }
-                
-                failed.Add(baseAssertCondition);
+                list.Add(failedAssertion);
+            }
+
+            if (list.Count != 0)
+            {
+                failed.Add((assertionBuilder, list));
             }
         }
         
@@ -50,7 +52,13 @@ internal class AssertionScope : IAsyncDisposable
         
         if (failed.Any())
         {
-            var assertionException = new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Select(x => x.Message?.Trim())));
+            var assertionException = new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Select(x =>
+            {
+                return $"""
+                       {x.Item1.GetExpression()}
+                       {string.Join(Environment.NewLine, x.Item2.Select(e =>  e.OverriddenMessage ?? e.GetFailureMessage()?.Trim()))}
+                       """;
+            })));
             
             if (_parent != null)
             {
