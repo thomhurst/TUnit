@@ -5,43 +5,38 @@ using System.Text;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 public abstract class AssertionBuilder<TActual>
 {
-    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression,
-        AssertionMessage? assertionMessage, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions)
+    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions)
     {
         AssertionDataDelegate = assertionDataDelegate;
-        RawActualExpression = rawActualExpression;
-        AssertionMessage = assertionMessage;
+        ActualExpression = actualExpression;
         ExpressionBuilder = expressionBuilder;
         Assertions = assertions;
     }
     
-    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression)
+    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression)
     {
         AssertionDataDelegate = assertionDataDelegate;
-        RawActualExpression = rawActualExpression;
+        ActualExpression = actualExpression;
         
-        if (string.IsNullOrEmpty(rawActualExpression))
+        if (string.IsNullOrEmpty(actualExpression))
         {
-            RawActualExpression = null;
+            ActualExpression = null;
             ExpressionBuilder = null;
         }
         else
         {
-            RawActualExpression = rawActualExpression;
-            ExpressionBuilder = new StringBuilder($"Assert.That({rawActualExpression})");
+            ActualExpression = actualExpression;
+            ExpressionBuilder = new StringBuilder($"Assert.That({actualExpression})");
         }
     }
     
     internal StringBuilder? ExpressionBuilder { get; init; }
-    internal string? RawActualExpression { get; init; }
-    public AssertionMessage? AssertionMessage { get; }
-    
+    internal string? ActualExpression { get; init; }
     public Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
     
     internal readonly Stack<BaseAssertCondition<TActual>> Assertions = new();
@@ -51,8 +46,7 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression,
-        AssertionMessage? assertionMessage, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions) : base(assertionDataDelegate, rawActualExpression, assertionMessage, expressionBuilder, assertions)
+    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions) : base(assertionDataDelegate, actualExpression, expressionBuilder, assertions)
     {
     }
 
@@ -60,12 +54,12 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
     {
         if (string.IsNullOrEmpty(actual))
         {
-            RawActualExpression = null;
+            ActualExpression = null;
             ExpressionBuilder = null;
         }
         else
         {
-            RawActualExpression = actual;
+            ActualExpression = actual;
             ExpressionBuilder = new StringBuilder($"Assert.That({actual})");
         }
     }
