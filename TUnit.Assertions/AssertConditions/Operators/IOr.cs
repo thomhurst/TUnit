@@ -6,5 +6,5 @@ public interface IOr<TActual, TAnd, TOr>
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public static abstract TOr Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual, TAnd, TOr> assertionBuilder);
+    public static abstract TOr Create(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder);
 }

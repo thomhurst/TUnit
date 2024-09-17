@@ -5,25 +5,16 @@ using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public interface IInvokableAssertionBuilder
-{
-    Task ProcessAssertionsAsync();
-    IAsyncEnumerable<BaseAssertCondition> GetFailures();
-    TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
-    string? GetExpression();
-}
-
 public class InvokableAssertionBuilder<TActual, TAnd, TOr> : 
-    AssertionBuilder<TActual, TAnd, TOr>, IInvokableAssertionBuilder where TAnd : IAnd<TActual, TAnd, TOr> 
+    AssertionBuilder<TActual, TAnd, TOr>, IInvokableAssertionBuilder 
+    where TAnd : IAnd<TActual, TAnd, TOr> 
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    private readonly Func<Task<AssertionData<TActual>>> _assertionDataDelegate;
-    public TAnd And => TAnd.Create(_assertionDataDelegate, AppendConnector(ChainType.And));
-    public TOr Or => TOr.Create(_assertionDataDelegate, AppendConnector(ChainType.Or));
+    public TAnd And => TAnd.Create(AppendConnector(ChainType.And));
+    public TOr Or => TOr.Create(AppendConnector(ChainType.Or));
     
     internal InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionDataDelegate, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
     {
-        _assertionDataDelegate = assertionDataDelegate;
     }
 
     public async Task ProcessAssertionsAsync()

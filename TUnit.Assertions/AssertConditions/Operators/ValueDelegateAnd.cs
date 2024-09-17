@@ -8,20 +8,16 @@ public class ValueDelegateAnd<TActual>
         IDelegateSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
         IValueSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
 {
-    private readonly Func<Task<AssertionData<TActual>>> _assertionDataDelegate;
     private readonly AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> _assertionBuilder;
 
-    public ValueDelegateAnd(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
-        AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
+    public ValueDelegateAnd(AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
     {
-        _assertionDataDelegate = assertionDataDelegate;
         _assertionBuilder = assertionBuilder;
     }
     
-    public static ValueDelegateAnd<TActual> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
-        AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
+    public static ValueDelegateAnd<TActual> Create(AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
     {
-        return new ValueDelegateAnd<TActual>(assertionDataDelegate, assertionBuilder);
+        return new ValueDelegateAnd<TActual>(assertionBuilder);
     }
 
     AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
