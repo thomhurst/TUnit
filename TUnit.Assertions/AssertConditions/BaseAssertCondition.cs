@@ -13,8 +13,6 @@ public abstract class BaseAssertCondition
         return string.Empty;
     }
     
-    internal bool IsWrapped { get; set; }
-
     public abstract Task<bool> AssertAsync();
 }
 
@@ -45,8 +43,6 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
     {
         AssertionBuilder = assertionBuilder;
-        
-        AssertionBuilder.Assertions.Add(this);
     }
 
     internal void AssertAndThrow(AssertionData<TActual> assertionData)
@@ -107,12 +103,6 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     
     internal bool Assert(TActual? actualValue, Exception? exception)
     {
-        if (!IsWrapped)
-        {
-            throw new ArgumentException(
-                $"{GetType().Name} isn't configured properly. It won't work with 'And' / 'Or' conditions. Call `AssertConditionCombiner.Combine(...)` to properly configure it.");
-        }
-        
         ActualValue = actualValue;
         Exception = exception;
         return Passes(actualValue, exception);

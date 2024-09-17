@@ -13,7 +13,10 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
     
     internal InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionDataDelegate)
     {
-        Assertions.AddRange(assertionBuilder.Assertions);
+        foreach (var assertion in assertionBuilder.Assertions)
+        {
+            Assertions.Push(assertion);
+        }
 
         And = TAnd.Create(assertionDataDelegate, this);
         Or = TOr.Create(assertionDataDelegate, this);

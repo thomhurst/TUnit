@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Messages;
 
@@ -21,7 +22,7 @@ public abstract class AssertionBuilder<TActual>
     
     public Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
     
-    internal readonly List<BaseAssertCondition<TActual>> Assertions = new();
+    internal readonly Stack<BaseAssertCondition<TActual>> Assertions = new();
 }
 
 public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TActual>
@@ -85,7 +86,18 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
     public InvokableAssertionBuilder<TActual, TAnd, TOr> WithAssertion(BaseAssertCondition<TActual> assertCondition)
     {
         var builder = new InvokableAssertionBuilder<TActual, TAnd, TOr>(assertCondition.AssertionBuilder.AssertionDataDelegate, assertCondition.AssertionBuilder);
-        builder.Assertions.Add(assertCondition);
+
+        if (this is IOrAssertionBuilder)
+        {
+            assertCondition = new OrAssertCondition<TActual, TAnd, TOr>(builder.Assertions.Pop(), assertCondition);
+        }
+        
+        if (this is IAndAssertionBuilder)
+        {
+            assertCondition = new AndAssertCondition<TActual, TAnd, TOr>(builder.Assertions.Pop(), assertCondition);
+        }
+        
+        builder.Assertions.Push(assertCondition);
         return builder;
     }
     
