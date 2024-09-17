@@ -37,7 +37,7 @@ So to create a custom assertion:
 4. Create the extension method!
    This is where things can start to look daunting because of the generic constraints, but this allows chaining assertions together.
 
-   You need to create an extension off of either `IValueSource<TActual, TAnd, TOr>` or `IDelegateSource<TActual, TAnd, TOr>` - Depending on what you're planning to write an assertion for.
+   You need to create an extension off of either `IValueSource<TActual, TAnd, TOr>` or `IDelegateSource<TActual, TAnd, TOr>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
 
    Your return type for the extension method should be `InvokableAssertionBuilder<string, TAnd, TOr>`
 
@@ -45,9 +45,9 @@ So to create a custom assertion:
 
    The argument expression array allows you to pass in `[CallerArgumentExpression]` values so that your assertion errors show you the code executed to give clear exception messages.
 
-   Here's a fully fledged assertion in action:
+Here's a fully fledged assertion in action:
 
-   ```csharp
+```csharp
 public static InvokableAssertionBuilder<string, TAnd, TOr> Contains<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
@@ -55,4 +55,4 @@ public static InvokableAssertionBuilder<string, TAnd, TOr> Contains<TAnd, TOr>(t
         return new StringContainsAssertCondition<TAnd, TOr>(expected, stringComparison)
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
-   ```
+```
