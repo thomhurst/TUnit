@@ -17,13 +17,13 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
     AssertionBuilder<TActual, TAnd, TOr>, IInvokableAssertionBuilder where TAnd : IAnd<TActual, TAnd, TOr> 
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public TAnd And { get; }
-    public TOr Or { get; }
+    private readonly Func<Task<AssertionData<TActual>>> _assertionDataDelegate;
+    public TAnd And => TAnd.Create(_assertionDataDelegate, AppendConnector(ChainType.And));
+    public TOr Or => TOr.Create(_assertionDataDelegate, AppendConnector(ChainType.Or));
     
     internal InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionDataDelegate, assertionBuilder.RawActualExpression!, assertionBuilder.AssertionMessage, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
     {
-        And = TAnd.Create(assertionDataDelegate, this);
-        Or = TOr.Create(assertionDataDelegate, this);
+        _assertionDataDelegate = assertionDataDelegate;
     }
 
     public async Task ProcessAssertionsAsync()
