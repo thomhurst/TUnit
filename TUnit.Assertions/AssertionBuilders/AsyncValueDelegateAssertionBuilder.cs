@@ -7,8 +7,8 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class AsyncValueDelegateAssertionBuilder<TActual> 
     : AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
-        IValueAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
-        IDelegateAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
+        IDelegateSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
+        IValueSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
  {
     internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(function.AsAssertionData, expressionBuilder)
     {
@@ -37,4 +37,6 @@ public class AsyncValueDelegateAssertionBuilder<TActual>
         return new InvokableAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>(
             assertionDataDelegate, assertionBuilder);
     }
+    
+    AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> ISource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.AssertionBuilder => this;
  }

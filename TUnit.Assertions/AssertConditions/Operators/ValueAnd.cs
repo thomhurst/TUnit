@@ -3,8 +3,7 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueAnd<TActual> 
-    : And<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IValueAssertions<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IAnd<TActual, ValueAnd<TActual>, ValueOr<TActual>>
-    where TOutputs : AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IInvokableAssertionBuilder
+    : And<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IAnd<TActual, ValueAnd<TActual>, ValueOr<TActual>>
 {
     private readonly Func<Task<AssertionData<TActual>>> _assertionDataDelegate;
     private readonly AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> _assertionBuilder;

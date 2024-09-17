@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
+﻿using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.AssertionBuilders;
 
@@ -14,7 +13,7 @@ public static class ThrowsExtensions
         return new(delegateAssertionBuilder, exception => exception);
     }
     
-    public static AssertionBuilder<TActual, TAnd, TOr> ThrowsNothing<TActual, TAnd, TOr>(this AssertionBuilder<TActual, TAnd, TOr> delegateAssertionBuilder)
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> ThrowsNothing<TActual, TAnd, TOr>(this AssertionBuilder<TActual, TAnd, TOr> delegateAssertionBuilder)
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {

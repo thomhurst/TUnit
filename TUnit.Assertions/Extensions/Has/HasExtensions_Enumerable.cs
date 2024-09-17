@@ -2,6 +2,7 @@
 
 using System.Collections;
 using TUnit.Assertions.AssertConditions.Collections;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 
@@ -9,46 +10,46 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static AssertionBuilder<TActual, TAnd, TOr> HasSingleItem<TActual, TAnd, TOr>(this AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, IEqualityComparer equalityComparer = null) 
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> HasSingleItem<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, IEqualityComparer equalityComparer = null) 
         where TActual : IEnumerable
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
         return new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(
-            assertionBuilder.AppendCallerMethod(null),
+            valueSource.AssertionBuilder.AppendCallerMethod(null),
             1)
-            .ChainedTo(assertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder);
     }
     
-    public static AssertionBuilder<TActual, TAnd, TOr> HasDistinctItems<TActual, TAnd, TOr>(this AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) 
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> HasDistinctItems<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
         where TActual : IEnumerable
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
         return new EnumerableDistinctItemsAssertCondition<TActual, object, TAnd, TOr>(
-            assertionBuilder.AppendCallerMethod(null),
+            valueSource.AssertionBuilder.AppendCallerMethod(null),
             default,
             null)
-            .ChainedTo(assertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder);
     }
     
-    public static AssertionBuilder<TActual, TAnd, TOr> HasDistinctItems<TActual, TInner, TAnd, TOr>(this AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, IEqualityComparer<TInner> equalityComparer) 
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> HasDistinctItems<TActual, TInner, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, IEqualityComparer<TInner> equalityComparer) 
         where TActual : IEnumerable<TInner>
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
         return new EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr>(
-            assertionBuilder.AppendCallerMethod(null),
+            valueSource.AssertionBuilder.AppendCallerMethod(null),
             default,
             equalityComparer)
-            .ChainedTo(assertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder);
     }
     
-    public static EnumerableCount<TActual, TAnd, TOr> HasCount<TActual, TAnd, TOr>(this AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) 
+    public static EnumerableCount<TActual, TAnd, TOr> HasCount<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
         where TActual : IEnumerable
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableCount<TActual, TAnd, TOr>((AssertionBuilder<TActual, TAnd, TOr>)assertionBuilder.AppendCallerMethod(null));
+        return new EnumerableCount<TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null));
     }
 }

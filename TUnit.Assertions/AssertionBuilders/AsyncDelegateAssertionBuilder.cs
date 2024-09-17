@@ -6,8 +6,8 @@ using TUnit.Assertions.Messages;
 namespace TUnit.Assertions.AssertionBuilders;
 
 public class AsyncDelegateAssertionBuilder 
-    : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>, 
-        IDelegateAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>
+    : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
+        IDelegateSource<object?, DelegateAnd<object?>, DelegateOr<object?>>
 {
     internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(function.AsAssertionData, expressionBuilder)
     {
@@ -36,4 +36,6 @@ public class AsyncDelegateAssertionBuilder
         return new InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>(assertionDataDelegate,
             assertionBuilder);
     }
+    
+    AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> ISource<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionBuilder => this;
 }

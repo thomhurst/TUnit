@@ -20,7 +20,7 @@ public static class SyntaxExtensions
         }
     }
     
-    public static AssertionBuilder<TActual, TAnd, TOr>? GetAncestorSyntaxOfType<AssertionBuilder<TActual, TAnd, TOr>>(this SyntaxNode input) 
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr>? GetAncestorSyntaxOfType<AssertionBuilder<TActual, TAnd, TOr>>(this SyntaxNode input) 
         where AssertionBuilder<TActual, TAnd, TOr> : SyntaxNode
     {
         var parent = input.Parent;

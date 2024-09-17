@@ -3,23 +3,21 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueDelegateAnd<TActual> 
-    : And<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IValueAssertions<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IDelegateAssertions<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IAnd<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
+    : And<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IAnd<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
 {
-    private readonly IAssertionResultProvider<TActual> _assertionResultProvider;
-    private readonly AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> _assertionBuilder;
+    private readonly Func<Task<AssertionData<TActual>>> _assertionDataDelegate;
+    private readonly AssertionBuilder<TActual> _assertionBuilder;
 
     public ValueDelegateAnd(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
-        AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
+        AssertionBuilder<TActual> assertionBuilder)
     {
-        _assertionResultProvider = assertionResultProvider;
+        _assertionDataDelegate = assertionDataDelegate;
         _assertionBuilder = assertionBuilder;
     }
     
     public static ValueDelegateAnd<TActual> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate,
         AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
     {
-        return new ValueDelegateAnd<TActual>(assertionResultProvider, assertionBuilder);
+        return new ValueDelegateAnd<TActual>(assertionDataDelegate, assertionBuilder);
     }
-
-    AssertionConnector<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IAssertionBuilderProvider<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.AssertionConnector => new(_assertionBuilder, ChainType.Or);
 }

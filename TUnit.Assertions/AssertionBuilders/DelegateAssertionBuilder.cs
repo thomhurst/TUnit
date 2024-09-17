@@ -5,11 +5,12 @@ using TUnit.Assertions.Messages;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class DelegateAssertionBuilder 
+public class DelegateAssertionBuilder
     : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
-        IDelegateAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>
-   {
-    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(action.AsAssertionData, expressionBuilder)
+        IDelegateSource<object?, DelegateAnd<object?>, DelegateOr<object?>>
+{
+    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(action.AsAssertionData,
+        expressionBuilder)
     {
     }
 
@@ -18,22 +19,26 @@ public class DelegateAssertionBuilder
         AssertionMessage = message;
         return this;
     }
-                
+
     public DelegateAssertionBuilder WithMessage(Func<Exception?, string> message)
     {
-        AssertionMessage = (AssertionMessageDelegate) message;
-        return this;
-    }
-    
-    public DelegateAssertionBuilder WithMessage(Func<string> message)
-    {
-        AssertionMessage = (AssertionMessageDelegate) message;
+        AssertionMessage = (AssertionMessageDelegate)message;
         return this;
     }
 
-    public static InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> Create(Func<Task<AssertionData<object?>>> assertionDataDelegate, AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> assertionBuilder)
+    public DelegateAssertionBuilder WithMessage(Func<string> message)
+    {
+        AssertionMessage = (AssertionMessageDelegate)message;
+        return this;
+    }
+
+    public static InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> Create(
+        Func<Task<AssertionData<object?>>> assertionDataDelegate,
+        AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> assertionBuilder)
     {
         return new InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>(assertionDataDelegate,
             assertionBuilder);
     }
-   }
+
+    AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> ISource<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionBuilder => this;
+}
