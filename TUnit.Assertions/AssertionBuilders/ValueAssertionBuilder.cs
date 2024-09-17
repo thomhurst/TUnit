@@ -13,24 +13,6 @@ public class ValueAssertionBuilder<TActual>
     internal ValueAssertionBuilder(TActual value, string expressionBuilder) : base(value.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
-    
-    public ValueAssertionBuilder<TActual> WithMessage(AssertionMessageValue<TActual> message)
-    {
-        AssertionMessage = message;
-        return this;
-    }
-    
-    public ValueAssertionBuilder<TActual> WithMessage(Func<TActual?, string> message)
-    {
-        AssertionMessage = (AssertionMessageValue<TActual>) message;
-        return this;
-    }
-    
-    public ValueAssertionBuilder<TActual> WithMessage(Func<string> message)
-    {
-        AssertionMessage = (AssertionMessageValue<TActual>) message;
-        return this;
-    }
 
     public static InvokableAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder)
     {

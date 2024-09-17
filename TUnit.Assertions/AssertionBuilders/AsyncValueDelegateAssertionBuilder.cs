@@ -14,24 +14,6 @@ public class AsyncValueDelegateAssertionBuilder<TActual>
     {
     }
     
-    public AsyncValueDelegateAssertionBuilder<TActual> WithMessage(AssertionMessageValueDelegate<TActual> message)
-    {
-        AssertionMessage = message;
-        return this;
-    }
-            
-    public AsyncValueDelegateAssertionBuilder<TActual> WithMessage(Func<TActual?, Exception?, string> message)
-    {
-        AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
-        return this;
-    }
-    
-    public AsyncValueDelegateAssertionBuilder<TActual> WithMessage(Func<string> message)
-    {
-        AssertionMessage = (AssertionMessageValueDelegate<TActual>) message;
-        return this;
-    }
-
     public static InvokableAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
     {
         return new InvokableAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>(

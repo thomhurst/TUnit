@@ -40,7 +40,7 @@ public abstract class AssertionBuilder<TActual>
     
     internal StringBuilder? ExpressionBuilder { get; init; }
     internal string? RawActualExpression { get; init; }
-    public AssertionMessage? AssertionMessage { get; protected set; }
+    public AssertionMessage? AssertionMessage { get; }
     
     public Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
     

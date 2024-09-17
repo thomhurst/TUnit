@@ -13,24 +13,6 @@ public class DelegateAssertionBuilder
     {
     }
 
-    public DelegateAssertionBuilder WithMessage(AssertionMessageDelegate message)
-    {
-        AssertionMessage = message;
-        return this;
-    }
-
-    public DelegateAssertionBuilder WithMessage(Func<Exception?, string> message)
-    {
-        AssertionMessage = (AssertionMessageDelegate)message;
-        return this;
-    }
-
-    public DelegateAssertionBuilder WithMessage(Func<string> message)
-    {
-        AssertionMessage = (AssertionMessageDelegate)message;
-        return this;
-    }
-
     public static InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> Create(
         Func<Task<AssertionData<object?>>> assertionDataDelegate,
         AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> assertionBuilder)
