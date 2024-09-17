@@ -7,7 +7,7 @@ public class StringContainsAssertCondition(string expected, StringComparison str
     {
         if (actualValue is null)
         {
-            OverriddenMessage = $"{ActualExpression ?? "Actual"} string is null";
+            OverriddenMessage = $"{ActualExpression ?? "Actual string"} is null";
             return false;
         }
         
