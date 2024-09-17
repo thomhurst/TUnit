@@ -39,7 +39,7 @@ So to create a custom assertion:
 
    You need to create an extension off of either `IValueSource<TActual, TAnd, TOr>` or `IDelegateSource<TActual, TAnd, TOr>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
 
-   Your return type for the extension method should be `InvokableAssertionBuilder<string, TAnd, TOr>`
+   Your return type for the extension method should be `InvokableAssertionBuilder<TActual, TAnd, TOr>`
 
    And then finally, you just new up your custom assert condition class, and then call the extension method `ChainedTo(source.AssertionBuilder, [...argumentExpression])` on it, which will add it to our assertion builder. You don't have to worry what that's doing behind the scenes, it's just building rules that can chain together. 
 
