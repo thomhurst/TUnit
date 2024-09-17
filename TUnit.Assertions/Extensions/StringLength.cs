@@ -30,7 +30,7 @@ public class StringLength<TAnd, TOr>
             },
             (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<string, TAnd, TOr> Zero =>
@@ -47,7 +47,7 @@ public class StringLength<TAnd, TOr>
                 },
                 (@string, _, _) =>
                     $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, []);
 
     public InvokableAssertionBuilder<string, TAnd, TOr> Positive =>
         new DelegateAssertCondition<string, int, TAnd, TOr>(default, (@string, _, _, self) =>
@@ -62,7 +62,7 @@ public class StringLength<TAnd, TOr>
             },
             (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to empty"
-        ).ChainedTo(AssertionBuilder);
+        ).ChainedTo(AssertionBuilder, []);
 
 
     public InvokableAssertionBuilder<string, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -80,7 +80,7 @@ public class StringLength<TAnd, TOr>
             },
             (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<string, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -97,7 +97,7 @@ public class StringLength<TAnd, TOr>
             },
             (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than or equal to {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<string, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -114,7 +114,7 @@ public class StringLength<TAnd, TOr>
             },
             (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be less than {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<string, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -131,6 +131,6 @@ public class StringLength<TAnd, TOr>
             },
             (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be less than or equal to {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 }

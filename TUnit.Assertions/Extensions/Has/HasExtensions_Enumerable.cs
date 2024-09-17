@@ -15,10 +15,8 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(null),
-            1)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(1)
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> HasDistinctItems<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
@@ -26,11 +24,9 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableDistinctItemsAssertCondition<TActual, object, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(null),
-            default,
+        return new EnumerableDistinctItemsAssertCondition<TActual, object, TAnd, TOr>(default,
             null)
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> HasDistinctItems<TActual, TInner, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, IEqualityComparer<TInner> equalityComparer) 
@@ -38,11 +34,9 @@ public static partial class HasExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(null),
-            default,
+        return new EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr>(default,
             equalityComparer)
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
     public static EnumerableCount<TActual, TAnd, TOr> HasCount<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 

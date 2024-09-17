@@ -15,8 +15,8 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new NotEqualsAssertCondition<TimeSpan, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null), TimeSpan.Zero)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new NotEqualsAssertCondition<TimeSpan, TAnd, TOr>(TimeSpan.Zero)
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
     public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsNotGreaterThan<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -25,7 +25,7 @@ public static partial class IsNotExtensions
     {
         return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) => value <= expected,
             (value, _, _) => $"{value} was greater than {expected}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
     
     public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsNotGreaterThanOrEqualTo<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -37,7 +37,7 @@ public static partial class IsNotExtensions
                 return value < expected;
             },
             (value, _, _) => $"{value} was greater than or equal to {expected}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
     
     public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsNotLessThan<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -49,7 +49,7 @@ public static partial class IsNotExtensions
                 return value >= expected;
             },
             (value, _, _) => $"{value} was less than {expected}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
     
     public static InvokableAssertionBuilder<TimeSpan, TAnd, TOr> IsNotLessThanOrEqualTo<TAnd, TOr>(this IValueSource<TimeSpan, TAnd, TOr> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -61,6 +61,6 @@ public static partial class IsNotExtensions
                 return value > expected;
             },
             (value, _, _) => $"{value} was less than or equal to {expected}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
 }

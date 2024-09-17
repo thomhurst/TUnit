@@ -1,5 +1,4 @@
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -7,7 +6,7 @@ public class NullAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, 
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public NullAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(default)
+    public NullAssertCondition() : base(default)
     {
     }
 

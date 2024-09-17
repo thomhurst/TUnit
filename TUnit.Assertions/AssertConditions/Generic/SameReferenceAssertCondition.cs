@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
@@ -8,7 +7,7 @@ public class SameReferenceAssertCondition<TActual, TExpected, TAnd, TOr> : Asser
     where TOr : IOr<TActual, TAnd, TOr>
 {
 
-    public SameReferenceAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TExpected expected) : base(expected)
+    public SameReferenceAssertCondition(TExpected expected) : base(expected)
     {
     }
 

@@ -1,5 +1,4 @@
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
@@ -10,7 +9,7 @@ public class ThrowsWithMessageContainingAssertCondition<TActual, TAnd, TOr> : As
     private readonly StringComparison _stringComparison;
     private readonly Func<Exception?, Exception?> _exceptionSelector;
 
-    public ThrowsWithMessageContainingAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, string expected,
+    public ThrowsWithMessageContainingAssertCondition(string expected,
         StringComparison stringComparison, Func<Exception?, Exception?> exceptionSelector) : base(expected)
     {
         _stringComparison = stringComparison;

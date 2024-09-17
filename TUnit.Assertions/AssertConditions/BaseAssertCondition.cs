@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 
@@ -15,11 +16,11 @@ public abstract class BaseAssertCondition
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
-    internal InvokableAssertionBuilder<TActual, TAnd, TOr> ChainedTo<TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder)
+    internal InvokableAssertionBuilder<TActual, TAnd, TOr> ChainedTo<TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, string[] argumentExpressions, [CallerMemberName] string caller = "")
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return assertionBuilder.WithAssertion(this);
+        return assertionBuilder.AppendCallerMethodWithMultipleExpressions(argumentExpressions).WithAssertion(this);
     }
     
     internal bool Assert(AssertionData<TActual> assertionData)

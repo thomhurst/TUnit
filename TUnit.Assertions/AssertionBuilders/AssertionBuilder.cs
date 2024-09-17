@@ -82,11 +82,6 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
         {
             return this;
         }
-
-        if (ExpressionBuilder?.ToString().EndsWith($".{chainType}") == true)
-        {
-            return this;
-        }
         
         return AppendExpression(chainType.ToString());
     }

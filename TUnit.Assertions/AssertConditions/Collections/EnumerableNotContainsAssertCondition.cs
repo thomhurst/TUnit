@@ -1,5 +1,4 @@
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
@@ -10,7 +9,7 @@ public class EnumerableNotContainsAssertCondition<TActual, TInner, TAnd, TOr> : 
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
-    public EnumerableNotContainsAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TInner expected, IEqualityComparer<TInner?>? equalityComparer) : base(expected)
+    public EnumerableNotContainsAssertCondition(TInner expected, IEqualityComparer<TInner?>? equalityComparer) : base(expected)
     {
         _equalityComparer = equalityComparer;
     }

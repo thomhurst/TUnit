@@ -18,8 +18,7 @@ public static class ThrowsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new ThrowsNothingAssertCondition<TActual, TAnd, TOr>(
-                delegateSource.AssertionBuilder.AppendCallerMethod(string.Empty))
-            .ChainedTo(delegateSource.AssertionBuilder);
+        return new ThrowsNothingAssertCondition<TActual, TAnd, TOr>()
+            .ChainedTo(delegateSource.AssertionBuilder, []);
     }
 }

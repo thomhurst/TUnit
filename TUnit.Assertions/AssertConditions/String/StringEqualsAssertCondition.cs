@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.String;
 
@@ -9,7 +8,7 @@ public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, st
 {
     private readonly StringComparison _stringComparison;
     
-    public StringEqualsAssertCondition(AssertionBuilder<string, TAnd, TOr> assertionBuilder, string expected, StringComparison stringComparison) : base(expected)
+    public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : base(expected)
     {
         _stringComparison = stringComparison;
     }

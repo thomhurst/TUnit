@@ -1,17 +1,12 @@
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsAnythingAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, Exception, TAnd, TOr>
+public class ThrowsAnythingAssertCondition<TActual, TAnd, TOr>()
+    : AssertCondition<TActual, Exception, TAnd, TOr>(default)
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public ThrowsAnythingAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder,
-        Func<Exception?, Exception?> exceptionSelector) : base(default)
-    {
-    }
-    
     protected override string DefaultMessage => "Nothing was thrown";
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)

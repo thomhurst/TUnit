@@ -1,9 +1,8 @@
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder)
+public class NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>()
     : AssertCondition<TActual, TExpected, TAnd, TOr>(default)
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>

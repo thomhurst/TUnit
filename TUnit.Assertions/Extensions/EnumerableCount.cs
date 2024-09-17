@@ -32,7 +32,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             },
             (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> Empty =>
@@ -48,7 +48,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
                 },
                 (enumerable, _, _) =>
                     $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {0}")
-        .ChainedTo(AssertionBuilder);
+        .ChainedTo(AssertionBuilder, []);
     
     public InvokableAssertionBuilder<TActual, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
@@ -65,7 +65,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             },
             (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -82,7 +82,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             },
             (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than or equal to {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -99,7 +99,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             },
             (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -116,7 +116,7 @@ public class EnumerableCount<TActual, TAnd, TOr>
             },
             (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than or equal to {expected}")
-            .ChainedTo(AssertionBuilder);
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue]);
     }
     
     public InvokableAssertionBuilder<TActual, TAnd, TOr> Negative() => LessThan(0);

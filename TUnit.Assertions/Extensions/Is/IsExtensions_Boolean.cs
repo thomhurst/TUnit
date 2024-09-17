@@ -13,15 +13,15 @@ public static partial class IsExtensions
         where TAnd : IAnd<bool, TAnd, TOr>
         where TOr : IOr<bool, TAnd, TOr>
     {
-        return new EqualsAssertCondition<bool, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null), true)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new EqualsAssertCondition<bool, TAnd, TOr>(true)
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
     
     public static InvokableAssertionBuilder<bool, TAnd, TOr> IsFalse<TAnd, TOr>(this IValueSource<bool, TAnd, TOr> valueSource)
         where TAnd : IAnd<bool, TAnd, TOr>
         where TOr : IOr<bool, TAnd, TOr>
     {
-        return new EqualsAssertCondition<bool, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null), false)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new EqualsAssertCondition<bool, TAnd, TOr>(false)
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
 }

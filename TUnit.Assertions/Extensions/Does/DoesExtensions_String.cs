@@ -23,8 +23,8 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new StringContainsAssertCondition<TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new StringContainsAssertCondition<TAnd, TOr>(expected, stringComparison)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> StartsWith<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -50,7 +50,7 @@ public static partial class DoesExtensions
                 return actual.StartsWith(expected, stringComparison);
             },
             (actual, _, _) => $"\"{actual}\" does not start with \"{expected}\"")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
         
@@ -72,7 +72,7 @@ public static partial class DoesExtensions
                 return actual.EndsWith(expected, stringComparison);
             },
             (actual, _, _) => $"\"{actual}\" does not end with \"{expected}\"")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> Matches<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string regex, [CallerArgumentExpression("regex")] string expression = "")
@@ -93,6 +93,6 @@ public static partial class DoesExtensions
                 return regex.IsMatch(actual);
             },
             (actual, _, _) => $"The regex \"{regex}\" does not match with \"{actual}\"")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [expression]);
     }
 }

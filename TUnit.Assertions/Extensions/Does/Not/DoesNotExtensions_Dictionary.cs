@@ -23,7 +23,7 @@ public static partial class DoesNotExtensions
                 return !actual.Keys.Cast<TKey>().Contains(expected, equalityComparer);
             },
             (_, _, _) => $"The key \"{expected}\" was found in the dictionary")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
     
     public static InvokableAssertionBuilder<TDictionary, TAnd, TOr> DoesNotContainValue<TDictionary, TValue, TAnd, TOr>(this IValueSource<TDictionary, TAnd, TOr> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -38,6 +38,6 @@ public static partial class DoesNotExtensions
                 return !actual.Values.Cast<TValue>().Contains(expected, equalityComparer);
             },
             (_, _, _) => $"The value \"{expected}\" was found in the dictionary")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
 }

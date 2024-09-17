@@ -22,8 +22,8 @@ public static partial class DoesNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new StringNotContainsAssertCondition<TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new StringNotContainsAssertCondition<TAnd, TOr>(expected, stringComparison)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> DoesNotStartWith<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -44,7 +44,7 @@ public static partial class DoesNotExtensions
                 return !actual.StartsWith(expected, stringComparison);
             },
             (actual, _, _) => $"\"{actual}\" does start with \"{expected}\"")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
         
@@ -66,6 +66,6 @@ public static partial class DoesNotExtensions
                 return !actual.EndsWith(expected, stringComparison);
             },
             (actual, _, _) => $"\"{actual}\" does end with \"{expected}\"")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 }

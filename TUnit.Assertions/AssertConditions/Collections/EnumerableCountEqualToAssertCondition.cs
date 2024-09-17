@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
@@ -9,7 +8,7 @@ public class EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr> : AssertC
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public EnumerableCountEqualToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, int expected) : base(expected)
+    public EnumerableCountEqualToAssertCondition(int expected) : base(expected)
     {
     }
 

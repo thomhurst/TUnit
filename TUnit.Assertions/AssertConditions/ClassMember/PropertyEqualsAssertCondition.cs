@@ -1,11 +1,10 @@
 using System.Linq.Expressions;
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.ClassMember;
 
-public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(AssertionBuilder<TRootObjectType, TAnd, TOr> assertionBuilder, Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
+public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
     : AssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(expected)
     where TAnd : IAnd<TRootObjectType, TAnd, TOr>
     where TOr : IOr<TRootObjectType, TAnd, TOr>

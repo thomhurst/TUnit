@@ -21,21 +21,21 @@ public class ThrowsException<TActual, TAnd, TOr>
     public ExceptionWith<TActual, TAnd, TOr> With => new(AssertionBuilder, _exceptionSelector);
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> OfAnyType() =>
-        new ThrowsAnythingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), _exceptionSelector)
-            .ChainedTo(AssertionBuilder);
+        new ThrowsAnythingAssertCondition<TActual, TAnd, TOr>()
+            .ChainedTo(AssertionBuilder, []);
 
-    public InvokableAssertionBuilder<TActual, TAnd, TOr> OfType<TExpected>() => new ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector)
-        .ChainedTo(AssertionBuilder);
+    public InvokableAssertionBuilder<TActual, TAnd, TOr> OfType<TExpected>() => new ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>()
+        .ChainedTo(AssertionBuilder, [typeof(TExpected).Name]);
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> SubClassOf<TExpected>() =>
-        new ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector)
-            .ChainedTo(AssertionBuilder);
+        new ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr>()
+            .ChainedTo(AssertionBuilder, [typeof(TExpected).Name]);
     
     public InvokableAssertionBuilder<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
         new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(default,
             (_, exception, _, _) => action(_exceptionSelector(exception)),
             (_, exception, _) => messageFactory(_exceptionSelector(exception))
-        ).ChainedTo(AssertionBuilder);
+        ).ChainedTo(AssertionBuilder, [expectedExpression]);
 
     public TaskAwaiter GetAwaiter() => OfAnyType().GetAwaiter();
 }

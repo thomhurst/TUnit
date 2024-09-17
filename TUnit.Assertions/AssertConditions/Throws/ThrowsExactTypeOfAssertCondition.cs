@@ -1,5 +1,4 @@
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
@@ -7,8 +6,7 @@ public class ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr> : A
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public ThrowsExactTypeOfAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder,
-        Func<Exception?, Exception?> exceptionSelector) : base(default)
+    public ThrowsExactTypeOfAssertCondition() : base(default)
     {
     }
     

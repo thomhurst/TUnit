@@ -22,8 +22,8 @@ public static partial class IsExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new StringEqualsAssertCondition<TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new StringEqualsAssertCondition<TAnd, TOr>(expected, stringComparison)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> IsEmpty<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
@@ -42,7 +42,7 @@ public static partial class IsExtensions
                 return value == string.Empty;
             },
             (s, _, _) => $"'{s}' was not empty")
-            .ChainedTo(valueSource.AssertionBuilder); }
+            .ChainedTo(valueSource.AssertionBuilder, []); }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> IsNullOrEmpty<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
         where TAnd : IAnd<string, TAnd, TOr>
@@ -51,7 +51,7 @@ public static partial class IsExtensions
         return new DelegateAssertCondition<string, int,TAnd,TOr>(0,
             (value, _, _, _) => string.IsNullOrEmpty(value),
             (s, _, _) => $"'{s}' is not null or empty")
-            .ChainedTo(valueSource.AssertionBuilder); }
+            .ChainedTo(valueSource.AssertionBuilder, []); }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> IsNullOrWhitespace<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
         where TAnd : IAnd<string, TAnd, TOr>
@@ -60,5 +60,5 @@ public static partial class IsExtensions
         return new DelegateAssertCondition<string, int,TAnd,TOr>(0,
             (value, _, _, _) => string.IsNullOrWhiteSpace(value),
             (s, _, _) => $"'{s}' is not null or whitespace")
-            .ChainedTo(valueSource.AssertionBuilder); }
+            .ChainedTo(valueSource.AssertionBuilder, []); }
 }

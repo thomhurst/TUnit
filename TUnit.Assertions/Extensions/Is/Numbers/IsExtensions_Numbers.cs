@@ -29,7 +29,7 @@ public static partial class IsExtensions
                     return actual <= expected + tolerance && actual >= expected - tolerance;
                 },
                 (number, _, _) => $"{number} is not between {number! - tolerance} and {number! + tolerance}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsZero<TActual, TAnd, TOr>(
@@ -38,8 +38,8 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new EqualsAssertCondition<TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null), TActual.Zero)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new EqualsAssertCondition<TActual, TAnd, TOr>(TActual.Zero)
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsGreaterThan<TActual, TAnd, TOr>(
@@ -53,14 +53,14 @@ public static partial class IsExtensions
                     if (value is null)
                     {
                         self.WithMessage((_, _, actualExpression) =>
-                            $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                            $"{actualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value > expected;
                 },
                 (value, _, _) => $"{value} was not greater than {expected}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsGreaterThanOrEqualTo<TActual, TAnd, TOr>(
@@ -82,7 +82,7 @@ public static partial class IsExtensions
                     return value >= expected;
                 },
                 (value, _, _) => $"{value} was not greater than or equal to {expected}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsLessThan<TActual, TAnd, TOr>(
@@ -104,7 +104,7 @@ public static partial class IsExtensions
                     return value < expected;
                 },
                 (value, _, _) => $"{value} was not less than {expected}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsLessThanOrEqualTo<TActual, TAnd, TOr>(
@@ -126,7 +126,7 @@ public static partial class IsExtensions
                     return value <= expected;
                 },
                 (value, _, _) => $"{value} was not less than or equal to {expected}")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsEven<TActual, TAnd, TOr>(
@@ -147,7 +147,7 @@ public static partial class IsExtensions
                     return value % 2 == 0;
                 },
                 (value, _, _) => $"{value} was not even")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsOdd<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource)
@@ -167,7 +167,7 @@ public static partial class IsExtensions
                     return value % 2 != 0;
                 },
                 (value, _, _) => $"{value} was not odd")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNegative<TActual, TAnd, TOr>(
@@ -188,7 +188,7 @@ public static partial class IsExtensions
                     return value < TActual.Zero;
                 },
                 (value, _, _) => $"{value} was not negative")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsPositive<TActual, TAnd, TOr>(
@@ -209,6 +209,6 @@ public static partial class IsExtensions
                     return value > TActual.Zero;
                 },
                 (value, _, _) => $"{value} was not positive")
-            .ChainedTo(valueSource.AssertionBuilder);
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
 }

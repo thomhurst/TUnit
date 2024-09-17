@@ -1,6 +1,5 @@
 using System.Collections;
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
@@ -11,7 +10,7 @@ public class EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr> 
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
-    public EnumerableDistinctItemsAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TInner expected,
+    public EnumerableDistinctItemsAssertCondition(TInner expected,
         IEqualityComparer<TInner?>? equalityComparer) : base(expected)
     {
         _equalityComparer = equalityComparer;

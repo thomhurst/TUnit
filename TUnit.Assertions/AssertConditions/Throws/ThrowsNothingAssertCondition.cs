@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
@@ -7,7 +6,7 @@ public class ThrowsNothingAssertCondition<TActual, TAnd, TOr> : AssertCondition<
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public ThrowsNothingAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(default)
+    public ThrowsNothingAssertCondition() : base(default)
     {
     }
     

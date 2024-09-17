@@ -16,8 +16,8 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, equalityComparer)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr>(expected, equalityComparer)
+            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
     }
     
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsEmpty<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource)
@@ -25,7 +25,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null), 0)
-            .ChainedTo(valueSource.AssertionBuilder);
+        return new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(0)
+            .ChainedTo(valueSource.AssertionBuilder, []);
     }
 }
