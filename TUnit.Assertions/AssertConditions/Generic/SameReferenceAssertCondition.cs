@@ -8,13 +8,13 @@ public class SameReferenceAssertCondition<TActual, TExpected, TAnd, TOr> : Asser
     where TOr : IOr<TActual, TAnd, TOr>
 {
 
-    public SameReferenceAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TExpected expected) : base(assertionBuilder, expected)
+    public SameReferenceAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TExpected expected) : base(expected)
     {
     }
 
     protected override string DefaultMessage => "The two objects are different references.";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         return ReferenceEquals(actualValue, ExpectedValue);
     }

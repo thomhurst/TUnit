@@ -10,7 +10,7 @@ public class EnumerableNotEquivalentToAssertCondition<TActual, TInner, TAnd, TOr
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
-    public EnumerableNotEquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, IEnumerable<TInner> expected, IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
+    public EnumerableNotEquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, IEnumerable<TInner> expected, IEqualityComparer<TInner?>? equalityComparer) : base(expected)
     {
         _equalityComparer = equalityComparer;
     }
@@ -20,7 +20,7 @@ public class EnumerableNotEquivalentToAssertCondition<TActual, TInner, TAnd, TOr
                                                    {string.Join(',', ActualValue ?? Enumerable.Empty<TInner>())}
                                                 """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         if (actualValue is null && ExpectedValue is null)
         {

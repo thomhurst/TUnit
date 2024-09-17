@@ -6,7 +6,7 @@ using TUnit.Assertions.Helpers;
 namespace TUnit.Assertions.AssertConditions.ClassMember;
 
 public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(AssertionBuilder<TRootObjectType, TAnd, TOr> assertionBuilder, Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
-    : AssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(assertionBuilder,  expected)
+    : AssertCondition<TRootObjectType, TPropertyType, TAnd, TOr>(expected)
     where TAnd : IAnd<TRootObjectType, TAnd, TOr>
     where TOr : IOr<TRootObjectType, TAnd, TOr>
 {
@@ -16,7 +16,8 @@ public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType, TAnd,
                                                      Received: { GetPropertyValue(ActualValue)?.ToString() ?? $"Object `{typeof(TRootObjectType).Name}` was null" }
                                                  """;
 
-    protected internal override bool Passes(TRootObjectType? actualValue, Exception? exception)
+    protected internal override bool Passes(TRootObjectType? actualValue, Exception? exception,
+        string? rawValueExpression)
     {
         var propertyValue = GetPropertyValue(actualValue);
         

@@ -2,65 +2,77 @@
 
 internal static class DelegateExtensions
 {
-    public static Task<AssertionData<object?>> AsAssertionData(this Action action)
+    public static Func<Task<AssertionData<object?>>> AsAssertionData(this Action action, string? actualExpression)
     {
-        try
+        return () =>
         {
-            action();
-            return Task.FromResult<AssertionData<object?>>((null, null));
-        }
-        catch (Exception e)
-        {
-            return Task.FromResult<AssertionData<object?>>((null, e));
-        }
+            try
+            {
+                action();
+                return Task.FromResult<AssertionData<object?>>((null, null, actualExpression));
+            }
+            catch (Exception e)
+            {
+                return Task.FromResult<AssertionData<object?>>((null, e, actualExpression));
+            }
+        };
     }
     
-    public static async Task<AssertionData<object?>> AsAssertionData(this Func<Task> action)
+    public static  Func<Task<AssertionData<object?>>> AsAssertionData(this Func<Task> action, string? actualExpression)
     {
-        try
+        return async () =>
         {
-            await action();
-            return (null, null);
-        }
-        catch (Exception e)
-        {
-            return (null, e);
-        }
+            try
+            {
+                await action();
+                return (null, null, actualExpression);
+            }
+            catch (Exception e)
+            {
+                return (null, e, actualExpression);
+            }
+        };
     }
     
-    public static async Task<AssertionData<T>> AsAssertionData<T>(this Func<Task<T>> action)
+    public static Func<Task<AssertionData<T>>> AsAssertionData<T>(this Func<Task<T>> action, string? actualExpression)
     {
-        try
+        return async () =>
         {
-            return (await action(), null);
-        }
-        catch (Exception e)
-        {
-            return (default, e);
-        }
+            try
+            {
+                return (await action(), null, actualExpression);
+            }
+            catch (Exception e)
+            {
+                return (default, e, actualExpression);
+            }
+        };
     }
     
-    public static Task<AssertionData<T>> AsAssertionData<T>(this Func<T> action)
+    public static Func<Task<AssertionData<T>>> AsAssertionData<T>(this Func<T> action, string? actualExpression)
     {
-        try
+        return () =>
         {
-            return Task.FromResult<AssertionData<T>>((action(), null));
-        }
-        catch (Exception e)
-        {
-            return Task.FromResult<AssertionData<T>>((default, e));
-        }
+            try
+            {
+                return Task.FromResult<AssertionData<T>>((action(), null, actualExpression));
+            }
+            catch (Exception e)
+            {
+                return Task.FromResult<AssertionData<T>>((default, e, actualExpression));
+            }
+        };
     }
     
-    public static Func<Task<AssertionData<T>>> AsAssertionData<T>(this T t)
+    public static Func<Task<AssertionData<T>>> AsAssertionData<T>(this T t, string? actualExpression)
     {
         try
         {
-            return () => Task.FromResult<AssertionData<T>>((t, null));
+            return () => Task.FromResult<AssertionData<T>>((t, null, actualExpression));
         }
         catch (Exception e)
         {
-            return () => Task.FromResult<AssertionData<T>>((default, e));
+            return () => Task.FromResult<AssertionData<T>>((default, e, actualExpression));
         }
     }
 }

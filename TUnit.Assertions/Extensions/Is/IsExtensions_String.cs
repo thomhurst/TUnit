@@ -30,38 +30,35 @@ public static partial class IsExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, int,TAnd,TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(null), 0,
+        return new DelegateAssertCondition<string, int,TAnd,TOr>(0,
             (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.WithMessage((_, _, actualExpression) => "Actual string is null");
                     return false;
                 }
                 
                 return value == string.Empty;
             },
-            (s, _) => $"'{s}' was not empty")
+            (s, _, _) => $"'{s}' was not empty")
             .ChainedTo(valueSource.AssertionBuilder); }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> IsNullOrEmpty<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, int,TAnd,TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(null), 0,
+        return new DelegateAssertCondition<string, int,TAnd,TOr>(0,
             (value, _, _, _) => string.IsNullOrEmpty(value),
-            (s, _) => $"'{s}' is not null or empty")
+            (s, _, _) => $"'{s}' is not null or empty")
             .ChainedTo(valueSource.AssertionBuilder); }
     
     public static InvokableAssertionBuilder<string, TAnd, TOr> IsNullOrWhitespace<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource)
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, int,TAnd,TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(null), 0,
+        return new DelegateAssertCondition<string, int,TAnd,TOr>(0,
             (value, _, _, _) => string.IsNullOrWhiteSpace(value),
-            (s, _) => $"'{s}' is not null or whitespace")
+            (s, _, _) => $"'{s}' is not null or whitespace")
             .ChainedTo(valueSource.AssertionBuilder); }
 }

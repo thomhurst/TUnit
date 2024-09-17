@@ -8,17 +8,17 @@ public class ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr> : A
     where TOr : IOr<TActual, TAnd, TOr>
 {
     public ThrowsExactTypeOfAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder,
-        Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, default)
+        Func<Exception?, Exception?> exceptionSelector) : base(default)
     {
     }
     
     protected override string DefaultMessage => $"A {Exception?.GetType().Name} was thrown instead of {typeof(TExpected).Name}";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         if (exception is null)
         {
-            WithMessage((_, _) => "Exception is null");
+            WithMessage((_, _, actualExpression) => "Exception is null");
             return false;
         }
         

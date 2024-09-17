@@ -11,7 +11,7 @@ public class ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr> : Asser
     private readonly Func<Exception?, Exception?> _exceptionSelector;
 
     public ThrowsWithMessageEqualToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, string expected,
-        StringComparison stringComparison, Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, expected)
+        StringComparison stringComparison, Func<Exception?, Exception?> exceptionSelector) : base(expected)
     {
         _stringComparison = stringComparison;
         _exceptionSelector = exceptionSelector;
@@ -19,13 +19,13 @@ public class ThrowsWithMessageEqualToAssertCondition<TActual, TAnd, TOr> : Asser
     
     protected override string DefaultMessage => $"Message was {_exceptionSelector(Exception)?.Message} instead of {ExpectedValue}";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? rootException)
+    protected internal override bool Passes(TActual? actualValue, Exception? rootException, string? rawValueExpression)
     {
         var exception = _exceptionSelector(rootException);
 
         if (exception is null)
         {
-            WithMessage((_, _) => "Exception is null");
+            WithMessage((_, _, actualExpression) => "Exception is null");
             return false;
         }
         

@@ -7,12 +7,12 @@ public class NotNullAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActua
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public NotNullAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(assertionBuilder, default)
+    public NotNullAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(default)
     {
     }
 
-    protected override string DefaultMessage => $"Member for {AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} was null";
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected override string DefaultMessage => $"Member for {RawActualExpression ?? typeof(TActual).Name} was null";
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         return actualValue is not null;
     }

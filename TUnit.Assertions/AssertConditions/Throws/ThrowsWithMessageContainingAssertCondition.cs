@@ -11,7 +11,7 @@ public class ThrowsWithMessageContainingAssertCondition<TActual, TAnd, TOr> : As
     private readonly Func<Exception?, Exception?> _exceptionSelector;
 
     public ThrowsWithMessageContainingAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, string expected,
-        StringComparison stringComparison, Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, expected)
+        StringComparison stringComparison, Func<Exception?, Exception?> exceptionSelector) : base(expected)
     {
         _stringComparison = stringComparison;
         _exceptionSelector = exceptionSelector;
@@ -19,19 +19,19 @@ public class ThrowsWithMessageContainingAssertCondition<TActual, TAnd, TOr> : As
     
     protected override string DefaultMessage => $"Message '{_exceptionSelector(Exception)?.Message}' did not contain '{ExpectedValue}'";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? rootException)
+    protected internal override bool Passes(TActual? actualValue, Exception? rootException, string? rawValueExpression)
     {
         var exception = _exceptionSelector(rootException);
         
         if (exception is null)
         {
-            WithMessage((_, _) => "Exception is null");
+            WithMessage((_, _, actualExpression) => "Exception is null");
             return false;
         }
         
         if (ExpectedValue is null)
         {
-            WithMessage((_, _) => "Expected message is null");
+            WithMessage((_, _, actualExpression) => "Expected message is null");
             return false;
         }
         

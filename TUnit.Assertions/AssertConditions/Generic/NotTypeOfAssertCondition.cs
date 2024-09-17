@@ -4,13 +4,13 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Generic;
 
 public class NotTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder)
-    : AssertCondition<TActual, TExpected, TAnd, TOr>(assertionBuilder, default)
+    : AssertCondition<TActual, TExpected, TAnd, TOr>(default)
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
     protected override string DefaultMessage => $"{ActualValue} is {typeof(TExpected).Name}";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         return actualValue?.GetType() != typeof(TExpected);
     }

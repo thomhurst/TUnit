@@ -20,11 +20,7 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(
-                valueSource.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([
-                    doNotPopulateThisValue1, doNotPopulateThisValue2
-                ]),
-                expected,
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(expected,
                 (actual, _, _, _) =>
                 {
                     ArgumentNullException.ThrowIfNull(actual);
@@ -32,7 +28,7 @@ public static partial class IsExtensions
 
                     return actual <= expected + tolerance && actual >= expected - tolerance;
                 },
-                (number, _) => $"{number} is not between {number! - tolerance} and {number! + tolerance}")
+                (number, _, _) => $"{number} is not between {number! - tolerance} and {number! + tolerance}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 
@@ -52,19 +48,18 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(
-                valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(expected, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _) =>
+                        self.WithMessage((_, _, actualExpression) =>
                             $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value > expected;
                 },
-                (value, _) => $"{value} was not greater than {expected}")
+                (value, _, _) => $"{value} was not greater than {expected}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 
@@ -75,19 +70,18 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(
-                valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _) =>
+                        self.WithMessage((_, _, actualExpression) =>
                             $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value >= expected;
                 },
-                (value, _) => $"{value} was not greater than or equal to {expected}")
+                (value, _, _) => $"{value} was not greater than or equal to {expected}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 
@@ -98,19 +92,18 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(
-                valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _) =>
+                        self.WithMessage((_, _, actualExpression) =>
                             $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value < expected;
                 },
-                (value, _) => $"{value} was not less than {expected}")
+                (value, _, _) => $"{value} was not less than {expected}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 
@@ -121,19 +114,18 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(
-                valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _) =>
+                        self.WithMessage((_, _, actualExpression) =>
                             $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value <= expected;
                 },
-                (value, _) => $"{value} was not less than or equal to {expected}")
+                (value, _, _) => $"{value} was not less than or equal to {expected}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 
@@ -143,19 +135,18 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null),
-                default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _) =>
+                        self.WithMessage((_, _, actualExpression) =>
                             $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value % 2 == 0;
                 },
-                (value, _) => $"{value} was not even")
+                (value, _, _) => $"{value} was not even")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 
@@ -164,19 +155,18 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null),
-                default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _) =>
+                        self.WithMessage((_, _, actualExpression) =>
                             $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value % 2 != 0;
                 },
-                (value, _) => $"{value} was not odd")
+                (value, _, _) => $"{value} was not odd")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 
@@ -186,19 +176,18 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null),
-                default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _) =>
+                        self.WithMessage((_, _, actualExpression) =>
                             $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value < TActual.Zero;
                 },
-                (value, _) => $"{value} was not negative")
+                (value, _, _) => $"{value} was not negative")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 
@@ -208,19 +197,18 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(null),
-                default, (value, _, _, self) =>
+        return new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
-                        self.WithMessage((_, _) =>
+                        self.WithMessage((_, _, actualExpression) =>
                             $"{valueSource.AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
                         return false;
                     }
 
                     return value > TActual.Zero;
                 },
-                (value, _) => $"{value} was not positive")
+                (value, _, _) => $"{value} was not positive")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 }

@@ -24,12 +24,12 @@ public class ExceptionMessage<TActual, TAnd, TOr>
 
     public BaseAssertCondition<TActual> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return new DelegateAssertCondition<TActual, string, TAnd, TOr>(AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, (actual, _, _, _) =>
+        return new DelegateAssertCondition<TActual, string, TAnd, TOr>(expected, (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return string.Equals(actual.Message, expected, stringComparison);
             },
-            (_, actual) =>
+            (_, actual, _) =>
                 $"Exception had a message of '{actual?.Message}' instead of '{expected}'");
     }
 }

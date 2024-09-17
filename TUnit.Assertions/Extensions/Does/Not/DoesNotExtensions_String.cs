@@ -37,15 +37,13 @@ public static partial class DoesNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, string, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
-            expected,
+        return new DelegateAssertCondition<string, string, TAnd, TOr>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.StartsWith(expected, stringComparison);
             },
-            (actual, _) => $"\"{actual}\" does start with \"{expected}\"")
+            (actual, _, _) => $"\"{actual}\" does start with \"{expected}\"")
             .ChainedTo(valueSource.AssertionBuilder);
     }
     
@@ -61,15 +59,13 @@ public static partial class DoesNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, string, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
-            expected,
+        return new DelegateAssertCondition<string, string, TAnd, TOr>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.EndsWith(expected, stringComparison);
             },
-            (actual, _) => $"\"{actual}\" does end with \"{expected}\"")
+            (actual, _, _) => $"\"{actual}\" does end with \"{expected}\"")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 }

@@ -9,17 +9,17 @@ public class EnumerableCountNotEqualToAssertCondition<TActual, TAnd, TOr> : Asse
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public EnumerableCountNotEqualToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, int expected) : base(assertionBuilder, expected)
+    public EnumerableCountNotEqualToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, int expected) : base(expected)
     {
     }
 
     protected override string DefaultMessage => $"Count is {ExpectedValue}";
     
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         if (actualValue is null)
         {
-            WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+            WithMessage((_, _, actualExpression) => $"{actualExpression ?? typeof(TActual).Name} is null");
             return false;
         }
         

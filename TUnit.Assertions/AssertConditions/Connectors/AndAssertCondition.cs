@@ -9,7 +9,7 @@ internal class AndAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition<TAct
     private readonly BaseAssertCondition<TActual> _condition1;
     private readonly BaseAssertCondition<TActual> _condition2;
 
-    public AndAssertCondition(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2) : base(condition1.AssertionBuilder)
+    public AndAssertCondition(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2)
     {
         ArgumentNullException.ThrowIfNull(condition1);
         ArgumentNullException.ThrowIfNull(condition2);
@@ -24,12 +24,12 @@ internal class AndAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition<TAct
         {
             var messages = new List<string>(2);
             
-            if (!_condition1.Assert(ActualValue, Exception))
+            if (!_condition1.Assert(ActualValue, Exception, RawActualExpression))
             {
                 messages.Add(_condition1.Message);
             }
             
-            if (!_condition2.Assert(ActualValue, Exception))
+            if (!_condition2.Assert(ActualValue, Exception, RawActualExpression))
             {
                 messages.Add(_condition2.Message);
             }
@@ -40,8 +40,8 @@ internal class AndAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition<TAct
 
     protected override string DefaultMessage => string.Empty;
     
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
-        return _condition1.Assert(actualValue, exception) && _condition2.Assert(actualValue, exception);
+        return _condition1.Assert(actualValue, exception, rawValueExpression) && _condition2.Assert(actualValue, exception, rawValueExpression);
     }
 }

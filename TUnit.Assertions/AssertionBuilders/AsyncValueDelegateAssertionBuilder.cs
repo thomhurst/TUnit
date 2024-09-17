@@ -10,7 +10,7 @@ public class AsyncValueDelegateAssertionBuilder<TActual>
         IDelegateSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
         IValueSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
  {
-    internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(function.AsAssertionData, expressionBuilder)
+    internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
     

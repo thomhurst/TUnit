@@ -11,9 +11,29 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public abstract class AssertionBuilder<TActual>
 {
-    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate)
+    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression, AssertionMessage? assertionMessage, StringBuilder? expressionBuilder)
     {
         AssertionDataDelegate = assertionDataDelegate;
+        RawActualExpression = rawActualExpression;
+        AssertionMessage = assertionMessage;
+        ExpressionBuilder = expressionBuilder;
+    }
+    
+    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression)
+    {
+        AssertionDataDelegate = assertionDataDelegate;
+        RawActualExpression = rawActualExpression;
+        
+        if (string.IsNullOrEmpty(rawActualExpression))
+        {
+            RawActualExpression = null;
+            ExpressionBuilder = null;
+        }
+        else
+        {
+            RawActualExpression = rawActualExpression;
+            ExpressionBuilder = new StringBuilder($"Assert.That({rawActualExpression})");
+        }
     }
     
     internal StringBuilder? ExpressionBuilder { get; init; }
@@ -29,11 +49,11 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate) : base(assertionDataDelegate)
+    internal AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string rawActualExpression, AssertionMessage? assertionMessage, StringBuilder? expressionBuilder) : base(assertionDataDelegate, rawActualExpression, assertionMessage, expressionBuilder)
     {
     }
 
-    protected AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actual) : base(assertionDataDelegate)
+    protected AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actual) : base(assertionDataDelegate, actual)
     {
         if (string.IsNullOrEmpty(actual))
         {
@@ -43,7 +63,7 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
         else
         {
             RawActualExpression = actual;
-            ExpressionBuilder = new StringBuilder($"AssertAsync.That({actual})");
+            ExpressionBuilder = new StringBuilder($"Assert.That({actual})");
         }
     }
     
@@ -85,7 +105,7 @@ public abstract class AssertionBuilder<TActual, TAnd, TOr> : AssertionBuilder<TA
 
     public InvokableAssertionBuilder<TActual, TAnd, TOr> WithAssertion(BaseAssertCondition<TActual> assertCondition)
     {
-        var builder = new InvokableAssertionBuilder<TActual, TAnd, TOr>(assertCondition.AssertionBuilder.AssertionDataDelegate, assertCondition.AssertionBuilder);
+        var builder = new InvokableAssertionBuilder<TActual, TAnd, TOr>(AssertionDataDelegate, this);
 
         if (this is IOrAssertionBuilder)
         {

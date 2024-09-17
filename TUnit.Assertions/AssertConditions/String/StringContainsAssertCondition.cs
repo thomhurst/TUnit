@@ -9,22 +9,22 @@ public class StringContainsAssertCondition<TAnd, TOr> : AssertCondition<string, 
 {
     private readonly StringComparison _stringComparison;
     
-    public StringContainsAssertCondition(AssertionBuilder<string, TAnd, TOr> assertionBuilder, string expected, StringComparison stringComparison) : base(assertionBuilder, expected)
+    public StringContainsAssertCondition(AssertionBuilder<string, TAnd, TOr> assertionBuilder, string expected, StringComparison stringComparison) : base(expected)
     {
         _stringComparison = stringComparison;
     }
     
-    protected internal override bool Passes(string? actualValue, Exception? exception)
+    protected internal override bool Passes(string? actualValue, Exception? exception, string? rawValueExpression)
     {
         if (actualValue is null)
         {
-            WithMessage((_, _) => "Actual string is null");
+            WithMessage((_, _, actualExpression) => "Actual string is null");
             return false;
         }
         
         if (ExpectedValue is null)
         {
-            WithMessage((_, _) => "Expected string is null");
+            WithMessage((_, _, actualExpression) => "Expected string is null");
             return false;
         }
         

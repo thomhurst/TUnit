@@ -1,6 +1,5 @@
 using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -12,61 +11,10 @@ public abstract class BaseAssertCondition
     {
         return string.Empty;
     }
-    
-    public abstract Task<bool> AssertAsync();
 }
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
-    public override async Task<bool> AssertAsync()
-    {
-        return Assert(await AssertionBuilder.AssertionDataDelegate());
-    }
-
-    protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
-    
-    protected string GetAssertionExpression()
-    {
-        var assertionExpression = AssertionBuilder.ExpressionBuilder?.ToString();
-        
-        if (assertionExpression?.TrimStart('"').TrimEnd('"')
-            == ActualValue?.ToString())
-        {
-            return string.Empty;
-        }
-        
-        return string.IsNullOrEmpty(assertionExpression)
-            ? string.Empty
-            : assertionExpression;
-    }
-
-    internal BaseAssertCondition(AssertionBuilder<TActual> assertionBuilder)
-    {
-        AssertionBuilder = assertionBuilder;
-    }
-
-    internal void AssertAndThrow(AssertionData<TActual> assertionData)
-    {
-        var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
-        
-        if (currentAssertionScope != null)
-        {
-            currentAssertionScope.Add(this);
-            return;
-        }
-        
-        if (!Assert(assertionData.Result, assertionData.Exception))
-        {
-            throw new AssertionException(
-                $"""
-                 {AssertionBuilder.AssertionMessage?.GetValue(assertionData.Result, assertionData.Exception)}
-                 
-                 {Message}
-                 """.Trim()
-            );
-        }
-    }
-
     internal InvokableAssertionBuilder<TActual, TAnd, TOr> ChainedTo<TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder)
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr>
@@ -76,24 +24,21 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     
     internal bool Assert(AssertionData<TActual> assertionData)
     {
-        return Assert(assertionData.Result, assertionData.Exception);
+        return Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
     }
 
     protected TActual? ActualValue { get; private set; }
     protected Exception? Exception { get; private set; }
+    protected string? RawActualExpression { get; private set; }
 
 
     protected internal override string Message =>
-        $"""
-         {GetAssertionExpression()}
-         {MessageFactory?.Invoke(ActualValue, Exception) ?? DefaultMessage}{GetExtraMessage()}
-         
-         """;
+        $"{MessageFactory?.Invoke(ActualValue, Exception, RawActualExpression) ?? DefaultMessage}{GetExtraMessage()}";
 
 
-    private Func<TActual?, Exception?, string>? MessageFactory { get; set; }
+    private Func<TActual?, Exception?, string?, string>? MessageFactory { get; set; }
     
-    public BaseAssertCondition<TActual> WithMessage(Func<TActual?, Exception?, string> messageFactory)
+    public BaseAssertCondition<TActual> WithMessage(Func<TActual?, Exception?, string?, string> messageFactory)
     {
         MessageFactory = messageFactory;
         return this;
@@ -101,12 +46,13 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     
     protected abstract string DefaultMessage { get; }
     
-    internal bool Assert(TActual? actualValue, Exception? exception)
+    internal bool Assert(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         ActualValue = actualValue;
         Exception = exception;
-        return Passes(actualValue, exception);
+        RawActualExpression = rawValueExpression;
+        return Passes(actualValue, exception, rawValueExpression);
     }
 
-    protected internal abstract bool Passes(TActual? actualValue, Exception? exception);
+    protected internal abstract bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression);
 }

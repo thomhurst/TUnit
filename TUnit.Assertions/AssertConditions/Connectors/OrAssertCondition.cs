@@ -9,7 +9,7 @@ internal class OrAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition<TActu
     private readonly BaseAssertCondition<TActual> _condition1;
     private readonly BaseAssertCondition<TActual> _condition2;
 
-    public OrAssertCondition(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2) : base(condition1.AssertionBuilder)
+    public OrAssertCondition(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2)
     {
         ArgumentNullException.ThrowIfNull(condition1);
         ArgumentNullException.ThrowIfNull(condition2);
@@ -18,11 +18,11 @@ internal class OrAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition<TActu
         _condition2 = condition2;
     }
 
-    protected internal override string Message => $"{_condition1.Message} &{_condition2.Message.Replace(_condition2.AssertionBuilder.ExpressionBuilder?.ToString() ?? string.Empty, string.Empty)}";
+    protected internal override string Message => $"{_condition1.Message} or {_condition2.Message}";
     protected override string DefaultMessage => string.Empty;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
-        return _condition1.Assert(actualValue, exception) || _condition2.Assert(actualValue, exception);
+        return _condition1.Assert(actualValue, exception, rawValueExpression) || _condition2.Assert(actualValue, exception, rawValueExpression);
     }
 }

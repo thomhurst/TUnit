@@ -8,13 +8,13 @@ public class ThrowsAnythingAssertCondition<TActual, TAnd, TOr> : AssertCondition
     where TOr : IOr<TActual, TAnd, TOr>
 {
     public ThrowsAnythingAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder,
-        Func<Exception?, Exception?> exceptionSelector) : base(assertionBuilder, default)
+        Func<Exception?, Exception?> exceptionSelector) : base(default)
     {
     }
     
     protected override string DefaultMessage => "Nothing was thrown";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         return exception != null;
     }

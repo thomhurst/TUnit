@@ -4,7 +4,7 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Generic;
 
 public class EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TActual expected)
-    : AssertCondition<TActual, TActual, TAnd, TOr>(assertionBuilder, expected)
+    : AssertCondition<TActual, TActual, TAnd, TOr>(expected)
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
@@ -13,7 +13,7 @@ public class EqualsAssertCondition<TActual, TAnd, TOr>(AssertionBuilder<TActual,
                                                  Received: {ActualValue}
                                                  """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         if (actualValue is IEquatable<TActual> equatable)
         {

@@ -23,8 +23,8 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) => value <= expected,
-            (value, _) => $"{value} was greater than {expected}")
+        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) => value <= expected,
+            (value, _, _) => $"{value} was greater than {expected}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
     
@@ -32,11 +32,11 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
             {
                 return value < expected;
             },
-            (value, _) => $"{value} was greater than or equal to {expected}")
+            (value, _, _) => $"{value} was greater than or equal to {expected}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
     
@@ -44,11 +44,11 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
             {
                 return value >= expected;
             },
-            (value, _) => $"{value} was less than {expected}")
+            (value, _, _) => $"{value} was less than {expected}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
     
@@ -56,11 +56,11 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<TimeSpan, TAnd, TOr>
         where TOr : IOr<TimeSpan, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(valueSource.AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, _) =>
+        return new DelegateAssertCondition<TimeSpan, TimeSpan, TAnd, TOr>(default, (value, _, _, _) =>
             {
                 return value > expected;
             },
-            (value, _) => $"{value} was less than or equal to {expected}")
+            (value, _, _) => $"{value} was less than or equal to {expected}")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 }

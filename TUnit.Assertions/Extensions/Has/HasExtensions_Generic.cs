@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.ClassMember;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 

@@ -10,7 +10,7 @@ public class ValueAssertionBuilder<TActual>
     : AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>,
         IValueSource<TActual, ValueAnd<TActual>, ValueOr<TActual>>
 {
-    internal ValueAssertionBuilder(TActual value, string expressionBuilder) : base(value.AsAssertionData(), expressionBuilder)
+    internal ValueAssertionBuilder(TActual value, string expressionBuilder) : base(value.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
     

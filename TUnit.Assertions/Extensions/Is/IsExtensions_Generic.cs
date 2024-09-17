@@ -55,11 +55,9 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
-            default,
+        return new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(default,
             (value, _, _, _) => value!.GetType().IsAssignableTo(typeof(TExpected)),
-            (actual, _) => $"{actual?.GetType()} is not assignable to {typeof(TExpected).Name}")
+            (actual, _, _) => $"{actual?.GetType()} is not assignable to {typeof(TExpected).Name}")
             .ChainedTo(valueSource.AssertionBuilder); }
 
     public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableFrom<TActual, TExpected, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
@@ -67,10 +65,8 @@ public static partial class IsExtensions
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName),
-            default,
+        return new DelegateAssertCondition<TActual, TExpected, TAnd, TOr>(default,
             (value, _, _, _) => value!.GetType().IsAssignableFrom(typeof(TExpected)),
-            (actual, _) => $"{actual?.GetType()} is not assignable from {typeof(TExpected).Name}")
+            (actual, _, _) => $"{actual?.GetType()} is not assignable from {typeof(TExpected).Name}")
             .ChainedTo(valueSource.AssertionBuilder); }
 }

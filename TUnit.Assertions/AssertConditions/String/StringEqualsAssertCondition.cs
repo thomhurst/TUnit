@@ -9,12 +9,12 @@ public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, st
 {
     private readonly StringComparison _stringComparison;
     
-    public StringEqualsAssertCondition(AssertionBuilder<string, TAnd, TOr> assertionBuilder, string expected, StringComparison stringComparison) : base(assertionBuilder, expected)
+    public StringEqualsAssertCondition(AssertionBuilder<string, TAnd, TOr> assertionBuilder, string expected, StringComparison stringComparison) : base(expected)
     {
         _stringComparison = stringComparison;
     }
     
-    protected internal override bool Passes(string? actualValue, Exception? exception)
+    protected internal override bool Passes(string? actualValue, Exception? exception, string? rawValueExpression)
     {
         return string.Equals(actualValue, ExpectedValue, _stringComparison);
     }

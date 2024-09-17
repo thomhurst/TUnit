@@ -8,7 +8,7 @@ public class EquivalentToAssertCondition<TActual, TAnd, TOr> : AssertCondition<T
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    public EquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TActual expected) : base(assertionBuilder, expected)
+    public EquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TActual expected) : base(expected)
     {
     }
 
@@ -18,7 +18,7 @@ public class EquivalentToAssertCondition<TActual, TAnd, TOr> : AssertCondition<T
                                                    Expected: {ExpectedValue}
                                                 """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         if (actualValue is null && ExpectedValue is null)
         {

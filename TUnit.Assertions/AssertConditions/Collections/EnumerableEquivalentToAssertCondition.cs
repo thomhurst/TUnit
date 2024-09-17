@@ -10,7 +10,7 @@ public class EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr> :
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
-    public EnumerableEquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, IEnumerable<TInner> expected, IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
+    public EnumerableEquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, IEnumerable<TInner> expected, IEqualityComparer<TInner?>? equalityComparer) : base(expected)
     {
         _equalityComparer = equalityComparer;
     }
@@ -21,7 +21,7 @@ public class EnumerableEquivalentToAssertCondition<TActual, TInner, TAnd, TOr> :
                                                    Expected: {(ExpectedValue != null ? string.Join(',', ExpectedValue) : null)}
                                                 """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         if (actualValue is null && ExpectedValue is null)
         {

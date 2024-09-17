@@ -38,20 +38,18 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, string, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
-            expected,
+        return new DelegateAssertCondition<string, string, TAnd, TOr>(expected,
             (actual, _, _, self) =>
             {
                 if (actual is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.WithMessage((_, _, actualExpression) => "Actual string is null");
                     return false;
                 }
                 
                 return actual.StartsWith(expected, stringComparison);
             },
-            (actual, _) => $"\"{actual}\" does not start with \"{expected}\"")
+            (actual, _, _) => $"\"{actual}\" does not start with \"{expected}\"")
             .ChainedTo(valueSource.AssertionBuilder);
     }
     
@@ -67,15 +65,13 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, string, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
-            expected,
+        return new DelegateAssertCondition<string, string, TAnd, TOr>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.EndsWith(expected, stringComparison);
             },
-            (actual, _) => $"\"{actual}\" does not end with \"{expected}\"")
+            (actual, _, _) => $"\"{actual}\" does not end with \"{expected}\"")
             .ChainedTo(valueSource.AssertionBuilder);
     }
     
@@ -90,15 +86,13 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new DelegateAssertCondition<string, Regex, TAnd, TOr>(
-            valueSource.AssertionBuilder.AppendCallerMethod(expression), 
-            regex,
+        return new DelegateAssertCondition<string, Regex, TAnd, TOr>(regex,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return regex.IsMatch(actual);
             },
-            (actual, _) => $"The regex \"{regex}\" does not match with \"{actual}\"")
+            (actual, _, _) => $"The regex \"{regex}\" does not match with \"{actual}\"")
             .ChainedTo(valueSource.AssertionBuilder);
     }
 }

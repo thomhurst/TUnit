@@ -9,7 +9,7 @@ public class AsyncDelegateAssertionBuilder
     : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
         IDelegateSource<object?, DelegateAnd<object?>, DelegateOr<object?>>
 {
-    internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(function.AsAssertionData, expressionBuilder)
+    internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
     

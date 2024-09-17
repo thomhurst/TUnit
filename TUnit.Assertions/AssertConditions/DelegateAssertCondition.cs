@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -9,10 +8,9 @@ public class DelegateAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCond
 {
     private readonly Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected, TAnd, TOr>, bool> _condition;
 
-    public DelegateAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, 
-        TExpected? expected, 
+    public DelegateAssertCondition(TExpected? expected, 
         Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected, TAnd, TOr>, bool> condition,
-        Func<TActual?, Exception?, string> defaultMessageFactory) : base(assertionBuilder, expected)
+        Func<TActual?, Exception?, string?, string> defaultMessageFactory) : base(expected)
     {
         _condition = condition;
         WithMessage(defaultMessageFactory);
@@ -20,7 +18,7 @@ public class DelegateAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCond
 
     protected override string DefaultMessage => string.Empty;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
     {
         return _condition(actualValue, ExpectedValue, exception, this);
     }

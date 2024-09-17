@@ -32,10 +32,9 @@ public class ThrowsException<TActual, TAnd, TOr>
             .ChainedTo(AssertionBuilder);
     
     public InvokableAssertionBuilder<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression),
-            default,
+        new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(default,
             (_, exception, _, _) => action(_exceptionSelector(exception)),
-            (_, exception) => messageFactory(_exceptionSelector(exception))
+            (_, exception, _) => messageFactory(_exceptionSelector(exception))
         ).ChainedTo(AssertionBuilder);
 
     public TaskAwaiter GetAwaiter() => OfAnyType().GetAwaiter();

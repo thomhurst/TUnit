@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -9,7 +8,7 @@ public abstract class AssertCondition<TActual, TExpected, TAnd, TOr> : BaseAsser
 {
     internal TExpected? ExpectedValue { get; }
     
-    internal AssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TExpected? expected) : base(assertionBuilder)
+    internal AssertCondition(TExpected? expected)
     {
         ExpectedValue = expected;
     }

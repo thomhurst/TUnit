@@ -9,8 +9,7 @@ public class DelegateAssertionBuilder
     : AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>,
         IDelegateSource<object?, DelegateAnd<object?>, DelegateOr<object?>>
 {
-    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(action.AsAssertionData,
-        expressionBuilder)
+    internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(action.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
 
