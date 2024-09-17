@@ -87,7 +87,7 @@ internal class AssertionScope : IAsyncDisposable
 
     private void AddException(AssertionException exception)
     {
-        _exceptions.Add(exception);
+        _exceptions.Insert(0, exception);
     }
     
     internal static AssertionScope? GetCurrentAssertionScope()
