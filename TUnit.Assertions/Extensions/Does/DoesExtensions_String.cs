@@ -23,7 +23,7 @@ public static partial class DoesExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new StringContainsAssertCondition<TAnd, TOr>(expected, stringComparison)
+        return new StringContainsAssertCondition(expected, stringComparison)
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     

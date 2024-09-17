@@ -1,10 +1,6 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
+﻿namespace TUnit.Assertions.AssertConditions.String;
 
-namespace TUnit.Assertions.AssertConditions.String;
-
-public class StringNotEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, string>
-    where TAnd : IAnd<string, TAnd, TOr>
-    where TOr : IOr<string, TAnd, TOr>
+public class StringNotEqualsAssertCondition : AssertCondition<string, string>
 {
     private readonly StringComparison _stringComparison;
     

@@ -1,18 +1,8 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
+﻿namespace TUnit.Assertions.AssertConditions.String;
 
-namespace TUnit.Assertions.AssertConditions.String;
-
-public class StringContainsAssertCondition<TAnd, TOr> : AssertCondition<string, string>
-    where TAnd : IAnd<string, TAnd, TOr>
-    where TOr : IOr<string, TAnd, TOr>
+public class StringContainsAssertCondition(string expected, StringComparison stringComparison)
+    : AssertCondition<string, string>(expected)
 {
-    private readonly StringComparison _stringComparison;
-    
-    public StringContainsAssertCondition(string expected, StringComparison stringComparison) : base(expected)
-    {
-        _stringComparison = stringComparison;
-    }
-    
     private protected override bool Passes(string? actualValue, Exception? exception)
     {
         if (actualValue is null)
@@ -27,7 +17,7 @@ public class StringContainsAssertCondition<TAnd, TOr> : AssertCondition<string, 
             return false;
         }
         
-        return actualValue.Contains(ExpectedValue, _stringComparison);
+        return actualValue.Contains(ExpectedValue, stringComparison);
     }
 
     protected internal override string GetFailureMessage() => $"""

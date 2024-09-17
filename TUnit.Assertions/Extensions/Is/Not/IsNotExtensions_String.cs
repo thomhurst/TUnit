@@ -22,7 +22,7 @@ public static partial class IsNotExtensions
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new StringNotEqualsAssertCondition<TAnd, TOr>(expected, stringComparison)
+        return new StringNotEqualsAssertCondition(expected, stringComparison)
             .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
