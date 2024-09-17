@@ -38,7 +38,7 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
 
         var assertionData = await AssertionDataDelegate();
         
-        foreach (var assertion in Assertions)
+        foreach (var assertion in Assertions.Reverse())
         {
             if (!assertion.Assert(assertionData))
             {
@@ -56,7 +56,7 @@ public class InvokableAssertionBuilder<TActual, TAnd, TOr> :
     {
         var assertionData = await AssertionDataDelegate();
         
-        foreach (var assertion in Assertions)
+        foreach (var assertion in Assertions.Reverse())
         {
             if (!assertion.Assert(assertionData))
             {

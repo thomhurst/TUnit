@@ -1,9 +1,8 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
+using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
 
@@ -31,15 +30,18 @@ internal class AssertionScope : IAsyncDisposable
     {
         SetCurrentAssertionScope(_parent);
         
-        var failed = new ConcurrentDictionary<IInvokableAssertionBuilder, List<BaseAssertCondition>>();
+        var failed = new List<(IInvokableAssertionBuilder, List<BaseAssertCondition>)>();
         
         foreach (var assertionBuilder in _assertionBuilders)
         {
+            var list = new List<BaseAssertCondition>();
+            
             await foreach (var failedAssertion in assertionBuilder.GetFailures())
             {
-                var list = failed.GetOrAdd(assertionBuilder, []);
                 list.Add(failedAssertion);
             }
+            
+            failed.Add((assertionBuilder, list));
         }
         
         foreach (var exception in _exceptions)
@@ -49,11 +51,11 @@ internal class AssertionScope : IAsyncDisposable
         
         if (failed.Any())
         {
-            var assertionException = new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Reverse().Select(x =>
+            var assertionException = new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Select(x =>
             {
                 return $"""
-                       {x.Key.GetExpression()}
-                       {string.Join(Environment.NewLine, x.Value.Select(e =>  e.Message?.Trim()))}
+                       {x.Item1.GetExpression()}
+                       {string.Join(Environment.NewLine, x.Item2.Select(e =>  e.Message?.Trim()))}
                        """;
             })));
             
@@ -85,7 +87,7 @@ internal class AssertionScope : IAsyncDisposable
 
     private void AddException(AssertionException exception)
     {
-        _exceptions.Insert(0, exception);
+        _exceptions.Add(exception);
     }
     
     internal static AssertionScope? GetCurrentAssertionScope()
