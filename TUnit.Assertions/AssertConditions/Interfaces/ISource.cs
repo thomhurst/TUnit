@@ -7,5 +7,5 @@ public interface ISource<TActual, TAnd, TOr>
     where TAnd : IAnd<TActual, TAnd, TOr>
     where TOr : IOr<TActual, TAnd, TOr>
 {
-    internal AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
+    AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
 }
