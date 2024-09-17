@@ -34,7 +34,7 @@ internal class AndAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition<TAct
                 messages.Add(_condition2.Message);
             }
 
-            return string.Join($"{Environment.NewLine}", messages);
+            return string.Join($"{Environment.NewLine} and{Environment.NewLine}", messages);
         }
     }
 

@@ -70,8 +70,7 @@ public class AssertMultipleTests
                                                                 Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
                                                                 Expected: 3
                                                                 Received: 2
-                                                                
-                                                                Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
+                                                                 and
                                                                 Expected: 4
                                                                 Received: 2
                                                                 
@@ -85,8 +84,7 @@ public class AssertMultipleTests
                                                                 Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
                                                                 Expected: 5
                                                                 Received: 4
-                                                                
-                                                                Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
+                                                                 and
                                                                 Expected: 6
                                                                 Received: 4
                                                                 

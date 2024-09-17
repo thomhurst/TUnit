@@ -18,7 +18,7 @@ internal class OrAssertCondition<TActual, TAnd, TOr> : BaseAssertCondition<TActu
         _condition2 = condition2;
     }
 
-    protected internal override string Message => $"{_condition1.Message} or {_condition2.Message}";
+    protected internal override string Message => $"{_condition1.Message}{Environment.NewLine} or{Environment.NewLine}{_condition2.Message}";
     protected override string DefaultMessage => string.Empty;
 
     protected internal override bool Passes(TActual? actualValue, Exception? exception, string? rawValueExpression)
