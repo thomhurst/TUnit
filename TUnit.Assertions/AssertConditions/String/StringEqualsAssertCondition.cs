@@ -21,9 +21,10 @@ public class StringEqualsAssertCondition<TAnd, TOr> : AssertCondition<string, st
     protected internal override string GetFailureMessage() => $"""
                                               Expected: "{ExpectedValue}"
                                               Received: "{ActualValue}"
+                                              {GetLocation()}
                                               """;
 
-    protected internal virtual string GetExtraMessage()
+    private string GetLocation()
     {
         var longest = Math.Max(ActualValue?.Length ?? 0, ExpectedValue?.Length ?? 0);
 

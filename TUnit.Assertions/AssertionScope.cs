@@ -38,8 +38,11 @@ internal class AssertionScope : IAsyncDisposable
             {
                 list.Add(failedAssertion);
             }
-            
-            failed.Add((assertionBuilder, list));
+
+            if (list.Count != 0)
+            {
+                failed.Add((assertionBuilder, list));
+            }
         }
         
         foreach (var exception in _exceptions)
