@@ -74,7 +74,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         for (var i = 0; i < dependencyNames.Length; i++)
         {
             var name = dependencyNames.ElementAtOrDefault(i);
-            var parameterTypes = parameterTypesArray.ElementAtOrDefault(i);
+            var parameterTypes = parameterTypesArray.ElementAtOrDefault(i) ?? [];
 
             var foundDependency = methods.SingleOrDefault(x => x.Name == name)
                                   ?? methods.FirstOrDefault(x => x.Name == name && x.Parameters.Select(p => p.Type).SequenceEqual(parameterTypes, SymbolEqualityComparer.Default));
