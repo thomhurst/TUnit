@@ -34,6 +34,4 @@ public class MethodDataSourceAttribute : TUnitAttribute
         ClassProvidingDataSource = classProvidingDataSource;
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
-    
-    public bool UnfoldTuple { get; init; }
 }

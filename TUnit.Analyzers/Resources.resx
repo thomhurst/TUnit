@@ -199,13 +199,13 @@
         <value>`DataDrivenTest` must be paired with `Arguments` attributes.</value>
     </data>
     <data name="TUnit0021Description" xml:space="preserve">
-        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
+        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
     </data>
     <data name="TUnit0021MessageFormat" xml:space="preserve">
-        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
+        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
     </data>
     <data name="TUnit0021Title" xml:space="preserve">
-        <value>`DataSourceDrivenTest` must be paired with either `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attributes.</value>
+        <value>`DataSourceDrivenTest` must be paired with either `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attributes.</value>
     </data>
     <data name="TUnit0022Description" xml:space="preserve">
         <value>`MatrixTest` parameters must have `Matrix` attributes on them, or vice versa.</value>

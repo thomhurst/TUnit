@@ -49,7 +49,7 @@ internal class TestsGenerator : IIncrementalGenerator
             yield break;
         }
 
-        foreach (var testSourceDataModel in methodSymbol.ParseTestDatas(methodSymbol.ContainingType))
+        foreach (var testSourceDataModel in methodSymbol.ParseTestDatas(context, methodSymbol.ContainingType))
         {
             yield return testSourceDataModel;
         }

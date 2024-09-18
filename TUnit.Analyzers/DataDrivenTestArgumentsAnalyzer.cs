@@ -84,8 +84,8 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         
         for (var i = 0; i < methodParameterTypes.Count; i++)
         {
-            var methodParameterType = methodParameterTypes[i];
-            var attributeArgumentType = attributeTypesPassedIn[i];
+            var methodParameterType = methodParameterTypes.ElementAtOrDefault(i);
+            var attributeArgumentType = attributeTypesPassedIn.ElementAtOrDefault(i);
             
             if (attributeArgumentType is null &&
                 methodParameterType.NullableAnnotation == NullableAnnotation.NotAnnotated)

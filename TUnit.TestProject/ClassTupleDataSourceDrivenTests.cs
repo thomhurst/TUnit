@@ -1,6 +1,6 @@
 ﻿namespace TUnit.TestProject;
 
-[MethodDataSource(nameof(TupleMethod), UnfoldTuple = true)]
+[MethodDataSource(nameof(TupleMethod))]
 public class ClassTupleDataSourceDrivenTests
 {
     public ClassTupleDataSourceDrivenTests(int value, string value2, bool value3)
@@ -9,7 +9,7 @@ public class ClassTupleDataSourceDrivenTests
     }
     
     [Test]
-    [MethodDataSource(nameof(TupleMethod), UnfoldTuple = true)]
+    [MethodDataSource(nameof(TupleMethod))]
     public void DataSource_TupleMethod(int value, string value2, bool value3)
     {
         // Dummy method

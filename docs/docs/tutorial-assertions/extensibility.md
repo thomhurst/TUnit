@@ -39,10 +39,13 @@ So to create a custom assertion:
 
    You need to create an extension off of either `IValueSource<TActual, TAnd, TOr>` or `IDelegateSource<TActual, TAnd, TOr>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
 
+   TAnd & TOr have the following constraints:
+    - `where TAnd : IAnd<TActual, TAnd, TOr>`
+    - `where TOr : IOr<TActual, TAnd, TOr>`
+
    Your return type for the extension method should be `InvokableAssertionBuilder<TActual, TAnd, TOr>`
 
-   And then finally, you just new up your custom assert condition class, and then call the extension method `ChainedTo(source.AssertionBuilder, [...argumentExpression])` on it, which will add it to our assertion builder. You don't have to worry what that's doing behind the scenes, it's just building rules that can chain together. 
-
+   And then finally, you call `source.RegisterAssertion(assertCondition, [...callerExpressions])` - passing in your newed up your custom assert condition class. 
    The argument expression array allows you to pass in `[CallerArgumentExpression]` values so that your assertion errors show you the code executed to give clear exception messages.
 
 Here's a fully fledged assertion in action:
@@ -52,8 +55,10 @@ public static InvokableAssertionBuilder<string, TAnd, TOr> Contains<TAnd, TOr>(t
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return new StringContainsAssertCondition<TAnd, TOr>(expected, stringComparison)
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+        return valueSource.RegisterAssertion(
+            assertCondition: new StringEqualsAssertCondition(expected, stringComparison),
+            argumentExpressions: [doNotPopulateThisValue1, doNotPopulateThisValue2]
+            );
     }
 ```
 

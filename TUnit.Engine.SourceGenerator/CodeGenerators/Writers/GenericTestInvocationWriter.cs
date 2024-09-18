@@ -196,8 +196,8 @@ internal static class GenericTestInvocationWriter
 
         for (var index = 0; index < testSourceDataModel.MethodParameterNames.Length; index++)
         {
-            var methodParameterName = testSourceDataModel.MethodParameterNames[index];
-            displayName = displayName!.Replace($"${methodParameterName}", $"{{{args[index]}}}");
+            var methodParameterName = testSourceDataModel.MethodParameterNames.ElementAtOrDefault(index);
+            displayName = displayName!.Replace($"${methodParameterName}", $"{{{args.ElementAtOrDefault(index)}}}");
         }
 
         return displayName;

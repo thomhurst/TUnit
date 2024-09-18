@@ -3,8 +3,8 @@
 public class EnumerableTupleDataSourceDrivenTests
 {
     [Test]
-    [EnumerableMethodDataSource(nameof(TupleMethod), UnfoldTuple = true)]
-    [EnumerableMethodDataSource(nameof(NamedTupleMethod), UnfoldTuple = true)]
+    [MethodDataSource(nameof(TupleMethod))]
+    [MethodDataSource(nameof(NamedTupleMethod))]
     public void DataSource_TupleMethod(int value, string value2, bool value3)
     {
         // Dummy method

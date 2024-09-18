@@ -2,7 +2,7 @@
 
 internal record GloballySharedArgument : Argument
 {
-    public GloballySharedArgument(string type, string? invocation, bool isTuple = false) : base(type, invocation, isTuple)
+    public GloballySharedArgument(string type, string? invocation, bool isUnfoldableTuple = false) : base(type, invocation, isUnfoldableTuple)
     {
     }
 }

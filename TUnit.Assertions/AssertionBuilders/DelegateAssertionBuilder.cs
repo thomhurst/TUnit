@@ -12,13 +12,5 @@ public class DelegateAssertionBuilder
     {
     }
 
-    public static InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> Create(
-        Func<Task<AssertionData<object?>>> assertionDataDelegate,
-        AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> assertionBuilder)
-    {
-        return new InvokableAssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>>(assertionDataDelegate,
-            assertionBuilder);
-    }
-
     AssertionBuilder<object?, DelegateAnd<object?>, DelegateOr<object?>> ISource<object?, DelegateAnd<object?>, DelegateOr<object?>>.AssertionBuilder => this;
 }

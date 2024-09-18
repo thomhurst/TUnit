@@ -11,6 +11,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 internal static class TestSourceDataModelRetriever
 {
     public static IEnumerable<TestSourceDataModel> ParseTestDatas(this IMethodSymbol methodSymbol,
+        GeneratorAttributeSyntaxContext context,
         INamedTypeSymbol namedTypeSymbol)
     {
         if (methodSymbol.IsAbstract || namedTypeSymbol.IsAbstract || namedTypeSymbol.IsGenericType)
@@ -20,8 +21,8 @@ internal static class TestSourceDataModelRetriever
         
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
         
-        var classArgumentsContainers = ArgumentsRetriever.GetArguments(namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes().Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, VariableNames.ClassArg).ToArray();
-        var testArgumentsContainers = ArgumentsRetriever.GetArguments(methodSymbol.Parameters, methodSymbol.GetAttributes(), namedTypeSymbol, VariableNames.MethodArg);
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes().Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, VariableNames.ClassArg).ToArray();
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodSymbol.Parameters, methodSymbol.GetAttributes(), namedTypeSymbol, VariableNames.MethodArg);
         
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
@@ -165,7 +166,7 @@ internal static class TestSourceDataModelRetriever
     {
         for (var index = 0; index < arguments.Length; index++)
         {
-            var argument = arguments[index];
+            var argument = arguments.ElementAtOrDefault(index);
             var invocation = hasEnumerableData ? $"{prefix}Data" : argument.Invocation;
             var variableName = argument.TupleVariableNames != null
                 ? $"({string.Join(", ", argument.TupleVariableNames)})"

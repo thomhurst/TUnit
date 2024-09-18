@@ -27,9 +27,9 @@ public class PassFailTests
     [MethodDataSource(nameof(Data3))]
     [MethodDataSource(nameof(Data4))]
     [MethodDataSource(nameof(Data5))]
-    [EnumerableMethodDataSource(nameof(EnumerableData1))]
-    [EnumerableMethodDataSource(nameof(EnumerableData2))]
-    [EnumerableMethodDataSource(nameof(EnumerableData3))]
+    [MethodDataSource(nameof(EnumerableData1))]
+    [MethodDataSource(nameof(EnumerableData2))]
+    [MethodDataSource(nameof(EnumerableData3))]
     [Category("Pass")]
     public void Pass3(int value)
     {
@@ -71,9 +71,9 @@ public class PassFailTests
     [MethodDataSource(nameof(Data3))]
     [MethodDataSource(nameof(Data4))]
     [MethodDataSource(nameof(Data5))]
-    [EnumerableMethodDataSource(nameof(EnumerableData1))]
-    [EnumerableMethodDataSource(nameof(EnumerableData2))]
-    [EnumerableMethodDataSource(nameof(EnumerableData3))]
+    [MethodDataSource(nameof(EnumerableData1))]
+    [MethodDataSource(nameof(EnumerableData2))]
+    [MethodDataSource(nameof(EnumerableData3))]
     [Category("Fail")]
     public void Fail3(int value)
     {

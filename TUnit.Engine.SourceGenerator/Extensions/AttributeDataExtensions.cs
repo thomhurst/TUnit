@@ -8,7 +8,6 @@ public static class AttributeDataExtensions
     [
         WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix,
-        WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix,
     ];

@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace TUnit.Analyzers.Extensions;
 
@@ -37,5 +39,30 @@ public static class TypeExtensions
             .GetMembers()
             .OfType<IMethodSymbol>()
             .Any(x => x.IsTestMethod());
+    }
+    
+    public static bool IsEnumerable(this ITypeSymbol type, SymbolAnalysisContext context, [NotNullWhen(true)] out ITypeSymbol? innerType)
+    {
+        var enumerableT = context.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T).ConstructUnboundGenericType();
+
+        if (type is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol
+                .ConstructUnboundGenericType().Equals(enumerableT, SymbolEqualityComparer.Default))
+        {
+            innerType = namedTypeSymbol.TypeArguments.First();
+            return true;
+        }
+        
+        var enumerableInterface = type
+            .AllInterfaces
+            .FirstOrDefault(x => x.IsGenericType && x.ConstructUnboundGenericType().Equals(enumerableT, SymbolEqualityComparer.Default));
+
+        if (enumerableInterface != null)
+        {
+            innerType = enumerableInterface.TypeArguments.First();
+            return true;
+        }
+
+        innerType = null;
+        return false;
     }
 }

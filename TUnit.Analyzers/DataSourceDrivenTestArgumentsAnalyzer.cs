@@ -54,14 +54,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                      x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
                          == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
         {
-            CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, false, true);
-        }
-        
-        foreach (var dataSourceDrivenAttribute in attributes.Where(x => 
-                     x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) 
-                         == WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource))
-        {
-            CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, true, true);
+            CheckAttributeAgainstMethod(context, methodParameterTypes.ToImmutableArray(), dataSourceDrivenAttribute, methodSymbol.ContainingType, true);
         }
     }
     
@@ -77,13 +70,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                                                                         == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
         {
-            CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol, false, false);
-        }
-        
-        foreach (var dataSourceDrivenAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                                        == WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource))
-        {
-            CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol, true, false);
+            CheckAttributeAgainstMethod(context, namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, dataSourceDrivenAttribute, namedTypeSymbol, false);
         }
     }
 
@@ -91,7 +78,6 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         ImmutableArray<IParameterSymbol> parameters,
         AttributeData dataSourceDrivenAttribute,
         INamedTypeSymbol fallbackClassToSearchForDataSourceIn,
-        bool isExpectedEnumerable, 
         bool canBeInstanceMethod)
     {
         if (parameters.Length == 0)
@@ -103,25 +89,10 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             );
             return;
         }
-
-        var shouldUnfoldTuple = dataSourceDrivenAttribute.NamedArguments
-            .FirstOrDefault(x => x.Key == "UnfoldTuple")
-            .Value
-            .Value as bool? ?? false;
-        
-        if (parameters.Length > 1 && !shouldUnfoldTuple)
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.TooManyArgumentsInTestMethod,
-                    dataSourceDrivenAttribute.GetLocation())
-            );
-            return;
-        }
         
         var methodParameterTypes = parameters.Select(x => x.Type).ToList();
         
-        var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, fallbackClassToSearchForDataSourceIn);
+        var methodContainingTestData = FindMethodContainingTestData(dataSourceDrivenAttribute, fallbackClassToSearchForDataSourceIn);
         
         if (methodContainingTestData is null)
         {
@@ -172,49 +143,64 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             );
             return;
         }
-
-        var argumentType = methodContainingTestData.ReturnType;
-
-        if (isExpectedEnumerable 
-            && !argumentType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix).StartsWith("global::System.Collections.Generic.IEnumerable<"))
+        
+        if (!methodContainingTestData.ReturnType.IsEnumerable(context, out var testDataMethodNonEnumerableReturnType))
         {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.NotIEnumerable,
-                    dataSourceDrivenAttribute.GetLocation(),
-                    argumentType)
-            );
+            testDataMethodNonEnumerableReturnType = methodContainingTestData.ReturnType;
+        }
+        
+        if (context.Compilation.HasImplicitConversion(testDataMethodNonEnumerableReturnType, methodParameterTypes.FirstOrDefault()))
+        {
             return;
         }
 
-        if (isExpectedEnumerable)
+        if (testDataMethodNonEnumerableReturnType.IsTupleType)
         {
-            argumentType = ((INamedTypeSymbol)argumentType).TypeArguments.First();
-        }
-
-        if (argumentType.IsTupleType)
-        {
-            var namedTypeSymbol = (INamedTypeSymbol) argumentType;
+            var namedTypeSymbol = (INamedTypeSymbol) testDataMethodNonEnumerableReturnType;
             
             var returnTupleTypes = namedTypeSymbol.TupleUnderlyingType?.TypeArguments
                                   ?? namedTypeSymbol.TypeArguments;
-            
-            if (!methodParameterTypes.SequenceEqual(returnTupleTypes, SymbolEqualityComparer.Default))
+
+            if (returnTupleTypes.Length != parameters.WithoutTimeoutParameter().Count())
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
+                context.ReportDiagnostic(Diagnostic.Create(
                         Rules.WrongArgumentTypeTestDataSource,
                         dataSourceDrivenAttribute.GetLocation(),
-                        argumentType,
-                        FormatParametersToString(methodParameterTypes))
+                        string.Join(", ", returnTupleTypes.Select(x => x.ToDisplayString())),
+                        string.Join(", ", parameters.Select(x => x.Type.ToDisplayString()))
+                    )
                 );
+                return;
+            }
+            
+            for (var i = 0; i < methodParameterTypes.Count; i++)
+            {
+                var parameterType = methodParameterTypes.ElementAtOrDefault(i);
+                var argumentType = returnTupleTypes.ElementAtOrDefault(i);
+
+                if (!context.Compilation.HasImplicitConversion(argumentType, parameterType))
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            Rules.WrongArgumentTypeTestDataSource,
+                            dataSourceDrivenAttribute.GetLocation(),
+                            argumentType,
+                            parameterType)
+                    );
+                    return;
+                }
             }
             
             return;
         }
         
-        if (context.Compilation.HasImplicitConversion(argumentType, methodParameterTypes.ElementAt(0)))
+        if (parameters.WithoutTimeoutParameter().Count() > 1)
         {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TooManyArgumentsInTestMethod,
+                    dataSourceDrivenAttribute.GetLocation())
+            );
             return;
         }
         
@@ -222,7 +208,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                 Diagnostic.Create(
                     Rules.WrongArgumentTypeTestDataSource,
                     dataSourceDrivenAttribute.GetLocation(),
-                    argumentType,
+                    testDataMethodNonEnumerableReturnType,
                     FormatParametersToString(methodParameterTypes))
             );
     }
@@ -243,14 +229,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             $"({string.Join(", ", methodParameterTypes.Select(x => x.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)))})";
     }
 
-    private static ITypeSymbol CreateEnumerableOfType(SyntaxNodeAnalysisContext context, ITypeSymbol typeSymbol)
-    {
-        return context.SemanticModel.Compilation
-            .GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)
-            .Construct(typeSymbol);
-    }
-
-    private IMethodSymbol? FindMethodContainingTestData(SymbolAnalysisContext context, AttributeData dataSourceDrivenAttribute,
+    private IMethodSymbol? FindMethodContainingTestData(AttributeData dataSourceDrivenAttribute,
         INamedTypeSymbol classContainingTest)
     {
         if (dataSourceDrivenAttribute.ConstructorArguments.Length == 1)

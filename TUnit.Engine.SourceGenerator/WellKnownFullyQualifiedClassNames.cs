@@ -13,7 +13,6 @@ public static class WellKnownFullyQualifiedClassNames
     // Test Data Attributes
     public static readonly FullyQualifiedTypeName ArgumentsAttribute = typeof(ArgumentsAttribute);
     public static readonly FullyQualifiedTypeName MethodDataSourceAttribute = typeof(MethodDataSourceAttribute);
-    public static readonly FullyQualifiedTypeName EnumerableMethodDataAttribute = typeof(EnumerableMethodDataSourceAttribute);
     public static readonly FullyQualifiedTypeName ClassDataSourceAttribute = typeof(ClassDataSourceAttribute<>);
     public static readonly FullyQualifiedTypeName MatrixAttribute = typeof(MatrixAttribute);
     public static readonly FullyQualifiedTypeName ClassConstructorAttribute = typeof(ClassConstructorAttribute);
