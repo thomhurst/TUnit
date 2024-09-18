@@ -208,7 +208,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
         
         var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
             .WithLocation(0)
-            .WithArguments("(int, string, bool)", "(int, string)");
+            .WithArguments("int, string, bool", "int, string");
         
         await Verifier.VerifyAnalyzerAsync(text, expected);
     }
@@ -238,7 +238,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
         
         var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
             .WithLocation(0)
-            .WithArguments("(int, string, bool)", "(int, string, string)");
+            .WithArguments("int, string, bool", "int, string, string");
         
         await Verifier.VerifyAnalyzerAsync(text, expected);
     }

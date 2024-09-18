@@ -148,6 +148,11 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         {
             testDataMethodNonEnumerableReturnType = methodContainingTestData.ReturnType;
         }
+        
+        if (context.Compilation.HasImplicitConversion(testDataMethodNonEnumerableReturnType, methodParameterTypes.FirstOrDefault()))
+        {
+            return;
+        }
 
         if (testDataMethodNonEnumerableReturnType.IsTupleType)
         {
@@ -155,6 +160,17 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             
             var returnTupleTypes = namedTypeSymbol.TupleUnderlyingType?.TypeArguments
                                   ?? namedTypeSymbol.TypeArguments;
+
+            if (returnTupleTypes.Length != parameters.WithoutTimeoutParameter().Count())
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestDataSource,
+                        dataSourceDrivenAttribute.GetLocation(),
+                        string.Join(", ", returnTupleTypes.Select(x => x.ToDisplayString())),
+                        string.Join(", ", parameters.Select(x => x.Type.ToDisplayString()))
+                    )
+                );
+            }
             
             for (var i = 0; i < methodParameterTypes.Count; i++)
             {
@@ -173,11 +189,6 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                 }
             }
             
-            return;
-        }
-        
-        if (context.Compilation.HasImplicitConversion(testDataMethodNonEnumerableReturnType, methodParameterTypes.FirstOrDefault()))
-        {
             return;
         }
         
