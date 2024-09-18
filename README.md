@@ -23,7 +23,7 @@ Visual Studio 17.10 onwards can run the new tests by enabling the new testing pl
 Rider is supported. The "Enable Testing Platform support" option must be selected
 https://www.jetbrains.com/help/rider/Reference__Options__Tools__Unit_Testing__VSTest.html
 
-<img src="/rider.png" height="200px">
+<img src="/rider.png" height="400px">
 
 
 ## Features
