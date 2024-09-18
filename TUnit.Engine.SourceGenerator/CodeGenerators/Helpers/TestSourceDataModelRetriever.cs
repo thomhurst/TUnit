@@ -166,7 +166,7 @@ internal static class TestSourceDataModelRetriever
     {
         for (var index = 0; index < arguments.Length; index++)
         {
-            var argument = arguments[index];
+            var argument = arguments.ElementAtOrDefault(index);
             var invocation = hasEnumerableData ? $"{prefix}Data" : argument.Invocation;
             var variableName = argument.TupleVariableNames != null
                 ? $"({string.Join(", ", argument.TupleVariableNames)})"

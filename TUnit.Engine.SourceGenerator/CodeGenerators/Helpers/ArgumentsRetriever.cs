@@ -33,7 +33,7 @@ internal static class ArgumentsRetriever
 
         for (var index = 0; index < dataAttributes.Length; index++)
         {
-            var dataAttribute = dataAttributes[index];
+            var dataAttribute = dataAttributes.ElementAtOrDefault(index);
             var name = dataAttribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
 
             if (name == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)

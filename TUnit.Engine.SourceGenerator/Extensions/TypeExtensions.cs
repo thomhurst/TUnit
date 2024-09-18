@@ -106,8 +106,8 @@ internal static class TypeExtensions
 
             for (var index = 0; index < tupleTypes.Length; index++)
             {
-                var tupleType = tupleTypes[index];
-                var parameterType = parameterTypes[index];
+                var tupleType = tupleTypes.ElementAtOrDefault(index);
+                var parameterType = parameterTypes.ElementAtOrDefault(index);
 
                 if (!context.SemanticModel.Compilation.HasImplicitConversion(tupleType, parameterType))
                 {

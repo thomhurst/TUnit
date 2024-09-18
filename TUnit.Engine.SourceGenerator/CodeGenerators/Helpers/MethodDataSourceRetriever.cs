@@ -89,8 +89,8 @@ internal static class MethodDataSourceRetriever
     {
         for (var index = 0; index < tupleTypes.Length; index++)
         {
-            var tupleType = tupleTypes[index];
-            var parameterType = parameters[index].Type;
+            var tupleType = tupleTypes.ElementAtOrDefault(index);
+            var parameterType = parameters.ElementAtOrDefault(index)?.Type;
 
             if (!context.SemanticModel.Compilation.HasImplicitConversion(tupleType, parameterType))
             {

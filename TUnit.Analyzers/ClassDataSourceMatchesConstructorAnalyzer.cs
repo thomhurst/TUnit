@@ -69,14 +69,19 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                 innerType = dataSourceMethod.ReturnType;
             }
 
+            if (!context.Compilation.HasImplicitConversion(innerType, parameters.FirstOrDefault()?.Type))
+            {
+                return;
+            }
+
             if (innerType.IsTupleType && innerType is INamedTypeSymbol namedInnerType)
             {
                 var tupleTypes = namedInnerType.TupleUnderlyingType?.TypeArguments ?? namedInnerType.TypeArguments;
 
                 for (var index = 0; index < tupleTypes.Length; index++)
                 {
-                    var tupleType = tupleTypes[index];
-                    var parameterType = parameters[index].Type;
+                    var tupleType = tupleTypes.ElementAtOrDefault(index);
+                    var parameterType = parameters.WithoutTimeoutParameter().ElementAtOrDefault(index)?.Type;
 
                     if (!context.Compilation.HasImplicitConversion(tupleType, parameterType))
                     {
@@ -87,6 +92,17 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                         );
                     }
                 }
+
+                if (tupleTypes.Length != parameters.WithoutTimeoutParameter().Count())
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
+                            attributeData.GetLocation() ?? namedTypeSymbol.Locations.FirstOrDefault(),
+                            string.Join(", ", tupleTypes), string.Join(", ", parameters.Select(x => x.Type)))
+                    );
+                }
+                
+                return;
             }
 
             if (!context.Compilation.HasImplicitConversion(innerType, parameters.FirstOrDefault()?.Type))
