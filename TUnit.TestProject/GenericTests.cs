@@ -18,7 +18,7 @@ public abstract class GenericTests<T>
 
     [Test]
     [MethodDataSource(nameof(GetData))]
-    [EnumerableMethodDataSource(nameof(GetEnumerableData))]
+    [MethodDataSource(nameof(GetEnumerableData))]
     public async Task DataSourceDrivenTest(T t)
     {
         await Task.CompletedTask;

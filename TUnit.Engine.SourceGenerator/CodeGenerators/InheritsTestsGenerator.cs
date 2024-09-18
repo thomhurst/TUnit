@@ -54,7 +54,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
                 .Where(x => !x.IsAbstract)
                 .Where(x => x.MethodKind != MethodKind.Constructor)
                 .Where(x => x.IsTest())
-                .SelectMany(x => x.ParseTestDatas(namedTypeSymbol))
+                .SelectMany(x => x.ParseTestDatas(context, namedTypeSymbol))
         );
     }
 

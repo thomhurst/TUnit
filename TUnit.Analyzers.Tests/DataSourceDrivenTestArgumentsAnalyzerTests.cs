@@ -55,6 +55,32 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
+    public async Task DataDriven_Argument_Is_Not_Flagged_When_Enumerable_Inner_Type_Matches_Parameter_Type()
+    {
+        const string text = """
+                            using TUnit.Core;
+                            using System.Collections.Generic;
+
+                            public class MyClass
+                            {
+                                [MethodDataSource(nameof(Data))]
+                                public void MyTest(int value)
+                                {
+                                }
+                                
+                                public static IEnumerable<int> Data()
+                                {
+                                    yield return 1;
+                                    yield return 2;
+                                    yield return 3;
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [Test]
     public async Task DataDriven_Argument_Is_Flagged_When_Argument_Missing()
     {
         const string text = """
@@ -147,7 +173,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
                                   }
                                   
                                   {{GetTimeoutAttribute(includeTimeoutToken)}}
-                                  [MethodDataSource(nameof(Tuple), UnfoldTuple = true)]
+                                  [MethodDataSource(nameof(Tuple))]
                                   public void MyTest(int value, string value2, bool value3{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
                                   {
                                   }
@@ -173,7 +199,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
                          }
                          
                          {{GetTimeoutAttribute(includeTimeoutToken)}}
-                         [{|#0:MethodDataSource(nameof(Tuple), UnfoldTuple = true)|}]
+                         [{|#0:MethodDataSource(nameof(Tuple))|}]
                          public void MyTest(int value, string value2{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
                          {
                          }
@@ -203,7 +229,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
                                 }
                                 
                                 {{GetTimeoutAttribute(includeTimeoutToken)}}
-                                [{|#0:MethodDataSource(nameof(Tuple), UnfoldTuple = true)|}]
+                                [{|#0:MethodDataSource(nameof(Tuple))|}]
                                 public void MyTest(int value, string value2, string value3{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
                                 {
                                 }

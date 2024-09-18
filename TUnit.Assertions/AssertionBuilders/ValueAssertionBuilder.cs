@@ -13,10 +13,5 @@ public class ValueAssertionBuilder<TActual>
     {
     }
 
-    public static InvokableAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> Create(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder)
-    {
-        return new InvokableAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>(assertionDataDelegate, (AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>)assertionBuilder);
-    }
-
     AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> ISource<TActual, ValueAnd<TActual>, ValueOr<TActual>>.AssertionBuilder => this;
 }

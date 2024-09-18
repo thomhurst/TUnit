@@ -37,7 +37,7 @@ public class ClassDataSourceMatchesConstructorAnalyzerTests
                             using System.Collections.Generic;
                             using TUnit.Core;
 
-                            [EnumerableMethodDataSource(nameof(MyMethod))]
+                            [MethodDataSource(nameof(MyMethod))]
                             public class MyClass
                             {
                                 public MyClass(int value)

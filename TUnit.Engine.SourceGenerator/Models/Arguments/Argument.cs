@@ -2,15 +2,15 @@
 
 internal record Argument
 {
-    public Argument(string type, string? invocation, bool isTuple = false)
+    public Argument(string type, string? invocation, bool isUnfoldableTuple = false)
     {
         Type = type;
-        IsTuple = isTuple;
-        Invocation = MapValue(type, invocation, isTuple);
+        IsUnfoldableTuple = isUnfoldableTuple;
+        Invocation = MapValue(type, invocation, isUnfoldableTuple);
     }
 
     public string Type { get; }
-    public bool IsTuple { get; }
+    public bool IsUnfoldableTuple { get; }
     public string Invocation { get; }
     public string[]? TupleVariableNames { get; init; }
     public bool DisposeAfterTest { get; init; }

@@ -7,8 +7,8 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class ArgumentsRetriever
 {
-    public static IEnumerable<ArgumentsContainer> GetArguments(
-        ImmutableArray<IParameterSymbol> parameters, 
+    public static IEnumerable<ArgumentsContainer> GetArguments(GeneratorAttributeSyntaxContext context,
+        ImmutableArray<IParameterSymbol> parameters,
         ImmutableArray<AttributeData> dataAttributes,
         INamedTypeSymbol namedTypeSymbol,
         string argPrefix)
@@ -43,12 +43,7 @@ internal static class ArgumentsRetriever
             
             if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix)
             {
-                yield return MethodDataSourceRetriever.ParseMethodData(parameters, namedTypeSymbol, dataAttribute, argPrefix, index);
-            }
-            
-            if (name == WellKnownFullyQualifiedClassNames.EnumerableMethodDataAttribute.WithGlobalPrefix)
-            {
-                yield return MethodDataSourceRetriever.ParseEnumerableMethodData(parameters, namedTypeSymbol, dataAttribute, argPrefix, index);
+                yield return MethodDataSourceRetriever.ParseMethodData(context, parameters, namedTypeSymbol, dataAttribute, argPrefix, index);
             }
             
             if (name == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix)

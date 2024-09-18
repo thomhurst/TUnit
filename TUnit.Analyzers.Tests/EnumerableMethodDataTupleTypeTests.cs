@@ -15,7 +15,7 @@ public class EnumerableMethodDataTupleTypeTests
                             public class EnumerableTupleDataSourceDrivenTests
                             {
                                 [Test]
-                                [{|#0:EnumerableMethodDataSource(nameof(TupleMethod), UnfoldTuple = true)|}]
+                                [{|#0:EnumerableMethodDataSource(nameof(TupleMethod))|}]
                                 public void DataSource_TupleMethod(int value, string value2, bool value3, int va4)
                                 {
                                 }
@@ -47,7 +47,7 @@ public class EnumerableMethodDataTupleTypeTests
                             public class EnumerableTupleDataSourceDrivenTests
                             {
                                 [Test]
-                                [{|#0:EnumerableMethodDataSource(nameof(TupleMethod), UnfoldTuple = true)|}]
+                                [{|#0:EnumerableMethodDataSource(nameof(TupleMethod))|}]
                                 public void DataSource_TupleMethod(int value, string value2, bool value3)
                                 {
                                 }
