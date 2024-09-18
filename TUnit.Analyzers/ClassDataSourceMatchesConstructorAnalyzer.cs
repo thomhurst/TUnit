@@ -69,7 +69,7 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                 innerType = dataSourceMethod.ReturnType;
             }
 
-            if (!context.Compilation.HasImplicitConversion(innerType, parameters.FirstOrDefault()?.Type))
+            if (context.Compilation.HasImplicitConversion(innerType, parameters.FirstOrDefault()?.Type))
             {
                 return;
             }
