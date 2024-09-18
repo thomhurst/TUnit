@@ -212,4 +212,4 @@ public class MyTestClass
 ```
 
 ## ClassConstructorAttribute
-See [Class Constructor Helpers](class-constructors)
+See [Class Constructor Helpers](../tutorial-extras/class-constructors.md)
