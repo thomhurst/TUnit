@@ -92,7 +92,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
         
         var methodParameterTypes = parameters.Select(x => x.Type).ToList();
         
-        var methodContainingTestData = FindMethodContainingTestData(context, dataSourceDrivenAttribute, fallbackClassToSearchForDataSourceIn);
+        var methodContainingTestData = FindMethodContainingTestData(dataSourceDrivenAttribute, fallbackClassToSearchForDataSourceIn);
         
         if (methodContainingTestData is null)
         {
@@ -170,12 +170,13 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                         string.Join(", ", parameters.Select(x => x.Type.ToDisplayString()))
                     )
                 );
+                return;
             }
             
             for (var i = 0; i < methodParameterTypes.Count; i++)
             {
-                var parameterType = methodParameterTypes[i];
-                var argumentType = returnTupleTypes[i];
+                var parameterType = methodParameterTypes.ElementAtOrDefault(i);
+                var argumentType = returnTupleTypes.ElementAtOrDefault(i);
 
                 if (!context.Compilation.HasImplicitConversion(argumentType, parameterType))
                 {
@@ -183,9 +184,10 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
                         Diagnostic.Create(
                             Rules.WrongArgumentTypeTestDataSource,
                             dataSourceDrivenAttribute.GetLocation(),
-                            testDataMethodNonEnumerableReturnType,
-                            FormatParametersToString(methodParameterTypes))
+                            argumentType,
+                            parameterType)
                     );
+                    return;
                 }
             }
             
@@ -227,14 +229,7 @@ public class DataSourceDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyze
             $"({string.Join(", ", methodParameterTypes.Select(x => x.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)))})";
     }
 
-    private static ITypeSymbol CreateEnumerableOfType(SyntaxNodeAnalysisContext context, ITypeSymbol typeSymbol)
-    {
-        return context.SemanticModel.Compilation
-            .GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)
-            .Construct(typeSymbol);
-    }
-
-    private IMethodSymbol? FindMethodContainingTestData(SymbolAnalysisContext context, AttributeData dataSourceDrivenAttribute,
+    private IMethodSymbol? FindMethodContainingTestData(AttributeData dataSourceDrivenAttribute,
         INamedTypeSymbol classContainingTest)
     {
         if (dataSourceDrivenAttribute.ConstructorArguments.Length == 1)

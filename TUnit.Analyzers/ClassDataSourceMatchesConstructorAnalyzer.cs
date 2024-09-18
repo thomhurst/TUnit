@@ -89,9 +89,13 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                 }
             }
 
-            if (SymbolEqualityComparer.Default.Equals(innerType, parameters.FirstOrDefault()?.Type))
+            if (!context.Compilation.HasImplicitConversion(innerType, parameters.FirstOrDefault()?.Type))
             {
-                return;
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
+                        attributeData.GetLocation() ?? namedTypeSymbol.Locations.FirstOrDefault(),
+                        innerType, parameters.FirstOrDefault()?.Type)
+                );
             }
         }
         else if (attributeClass == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource)

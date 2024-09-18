@@ -600,7 +600,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to `DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa..
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must have a `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attribute, or vice versa..
         /// </summary>
         internal static string TUnit0021Description {
             get {
@@ -609,7 +609,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to `DataSourceDrivenTest` must have a `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attribute, or vice versa..
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must have a `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attribute, or vice versa..
         /// </summary>
         internal static string TUnit0021MessageFormat {
             get {
@@ -618,7 +618,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to `DataSourceDrivenTest` must be paired with either `MethodDataSource`, `EnumerableMethodDataSource` or `ClassDataSource` attributes..
+        ///   Looks up a localized string similar to `DataSourceDrivenTest` must be paired with either `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attributes..
         /// </summary>
         internal static string TUnit0021Title {
             get {
