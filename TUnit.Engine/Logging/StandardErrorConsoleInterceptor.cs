@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
@@ -11,7 +12,7 @@ internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
 
     public static TextWriter DefaultError { get; }
 
-    protected override StringWriter? RedirectedOut => TestContext.Current?.ErrorOutputWriter;
+    protected override StringWriter? RedirectedOut => Context.Current.ErrorOutputWriter;
     
     static StandardErrorConsoleInterceptor()
     {

@@ -1,12 +1,14 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Logging;
 
 public abstract class TUnitLogger
 {
     private readonly ConcurrentDictionary<string, List<string>> _values = new();
-    internal LogLevel RequestedLogLevel { get; set; }
+
+    protected abstract bool WriteToContext { get; }
 
     public void PushProperties(IDictionary<string, List<object>> dictionary)
     {
@@ -37,17 +39,8 @@ public abstract class TUnitLogger
         {
             return strValue;
         }
-
-        if (value.GetType().IsPrimitive)
-        {
-            return value.ToString() ?? "null";
-        }
-
-#if NET8_0_OR_GREATER
-        return System.Text.Json.JsonSerializer.Serialize(value) ?? "null";
-#endif
-
-        throw new NotImplementedException();
+        
+        return value.ToString() ?? "null";
     }
     
     private bool IsEnabled(LogLevel logLevel)
@@ -57,23 +50,23 @@ public abstract class TUnitLogger
             return false;
         }
         
-        return logLevel >= RequestedLogLevel;
+        return logLevel >= GlobalContext.LogLevel;
     }
     
-    protected abstract void Log(string message);
+    protected abstract void Log(IContext? currentContext, string message);
 
     public void LogTrace(string message)
     {
         if (IsEnabled(LogLevel.Trace))
         {
-            FormatAndLog(message, null);
+            FormatAndLog(message, null, LogLevel.Trace);
         }
     }
     public void LogTrace(string message, Exception exception)
     {
         if (IsEnabled(LogLevel.Trace))
         {
-            FormatAndLog(message, exception);
+            FormatAndLog(message, exception, LogLevel.Trace);
         }
     }
     
@@ -81,7 +74,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Debug))
         {
-            FormatAndLog(message, null);
+            FormatAndLog(message, null, LogLevel.Debug);
         }
     }
     
@@ -89,7 +82,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Debug))
         {
-            FormatAndLog(message, exception);
+            FormatAndLog(message, exception, LogLevel.Debug);
         }
     }
     
@@ -97,7 +90,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Information))
         {
-            FormatAndLog(message, null);
+            FormatAndLog(message, null, LogLevel.Information);
         }
     }
     
@@ -105,7 +98,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Information))
         {
-            FormatAndLog(message, exception);
+            FormatAndLog(message, exception, LogLevel.Information);
         }
     }
     
@@ -113,7 +106,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Warning))
         {
-            FormatAndLog(message, null);
+            FormatAndLog(message, null, LogLevel.Warning);
         }
     }
     
@@ -121,7 +114,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Warning))
         {
-            FormatAndLog(message, exception);
+            FormatAndLog(message, exception, LogLevel.Warning);
         }
     }
     
@@ -129,7 +122,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Error))
         {
-            FormatAndLog(message, null);
+            FormatAndLog(message, null, LogLevel.Error);
         }
     }
     
@@ -137,7 +130,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Error))
         {
-            FormatAndLog(message, exception);
+            FormatAndLog(message, exception, LogLevel.Error);
         }
     }
     
@@ -145,7 +138,7 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Critical))
         {
-            FormatAndLog(message, null);
+            FormatAndLog(message, null, LogLevel.Critical);
         }
     }
     
@@ -153,16 +146,11 @@ public abstract class TUnitLogger
     {
         if (IsEnabled(LogLevel.Critical))
         {
-            FormatAndLog(message, exception);
+            FormatAndLog(message, exception, LogLevel.Critical);
         }
     }
-
-    private void FormatAndLog(string message)
-    {
-        FormatAndLog(message, null);
-    }
     
-    internal void FormatAndLog(string message, Exception? exception)
+    internal void FormatAndLog(string message, Exception? exception, LogLevel logLevel)
     {
         var stringBuilder = new StringBuilder();
 
@@ -177,7 +165,7 @@ public abstract class TUnitLogger
 
         if (_values.Any())
         {
-            stringBuilder.AppendLine("--- Context ---");
+            stringBuilder.AppendLine("--- Properties ---");
             
             foreach (var keyValuePair in _values)
             {
@@ -192,6 +180,20 @@ public abstract class TUnitLogger
             }
         }
 
-        Log(stringBuilder.ToString());
+        var builtString = stringBuilder.ToString();
+        
+        var currentContext = Context.Current;
+
+#if NET8_0_OR_GREATER
+        if (WriteToContext)
+        {
+            var writer = logLevel >= LogLevel.Error
+                ? currentContext?.ErrorOutputWriter : currentContext?.OutputWriter;
+            
+            writer?.WriteLine(builtString);
+        }
+#endif
+        
+        Log(currentContext, builtString);
     }
 }

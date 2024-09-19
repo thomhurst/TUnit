@@ -1,9 +1,18 @@
 using System.Reflection;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 
 namespace TUnit.Core;
 
-public class AssemblyHookContext
+public class AssemblyHookContext : Context
 {
+    private static readonly AsyncLocal<AssemblyHookContext?> Contexts = new();
+    public static AssemblyHookContext? Current
+    {
+        get => Contexts.Value;
+        internal set => Contexts.Value = value;
+    }
+    
     internal AssemblyHookContext()
     {
     }

@@ -1,8 +1,13 @@
-﻿namespace TUnit.Core.Logging;
+﻿using TUnit.Core.Interfaces;
+
+namespace TUnit.Core.Logging;
 
 internal class DefaultLogger : TUnitLogger
 {
-    protected override void Log(string message)
+    // Console Interceptor automatically writes to the context so we don't want to duplicate!
+    protected override bool WriteToContext => false;
+
+    protected override void Log(IContext? currentContext, string message)
     {
         Console.WriteLine(message);
     }

@@ -4,18 +4,9 @@ namespace TUnit.Core.Interfaces;
 
 public interface IContext
 {
-    List<TUnitLogger> Loggers { get; }
-
-#if NET8_0_OR_GREATER
-    public TUnitLogger GetDefaultLogger()
-    {
-        return RegisterLogger(new DefaultLogger());
-    }
+    StringWriter OutputWriter { get; }
+    StringWriter ErrorOutputWriter { get; }
     
-    public TUnitLogger RegisterLogger(TUnitLogger logger)
-    {
-        Loggers.Add(logger);
-        return logger;
-    }
-#endif
+    TUnitLogger RegisterLogger(TUnitLogger logger);
+    TUnitLogger GetDefaultLogger();
 }

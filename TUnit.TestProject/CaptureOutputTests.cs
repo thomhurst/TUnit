@@ -21,7 +21,7 @@ public class CaptureOutputTests
         await using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test");
-            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah1");
+            await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah1");
         }
     }
 
@@ -33,7 +33,7 @@ public class CaptureOutputTests
         await using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test2");
-            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah2");
+            await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah2");
         }
     }
             
@@ -45,7 +45,7 @@ public class CaptureOutputTests
         await using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test3");
-            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah3");
+            await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah3");
         }
     }
         
@@ -57,7 +57,7 @@ public class CaptureOutputTests
         await using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test4");
-            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah4");
+            await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah4");
         }
     }
         
@@ -69,7 +69,7 @@ public class CaptureOutputTests
         await using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test5");
-            await Assert.That(TestContext.Current!.GetTestOutput()).IsEqualTo("Blah5");
+            await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah5");
         }
     }
 
@@ -78,7 +78,7 @@ public class CaptureOutputTests
     {
         foreach (var test in context.Tests)
         {
-            Console.WriteLine(@$"Test {test.TestDetails.TestId} has output: {test.GetTestOutput()}");
+            Console.WriteLine(@$"Test {test.TestDetails.TestId} has output: {test.GetStandardOutput()}");
         }
     }
     
