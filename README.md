@@ -11,7 +11,7 @@ See here: <https://thomhurst.github.io/TUnit/>
 
 ## IDE
 
-TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the older VSTest platform. As of September 2024, IDEs do not fully support this testing platform yet.
+TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the older VSTest platform. Because the infrastructure behind the scenes is new and different, you may need to enable some settings. This should just be a one time thing.
 
 ### Visual Studio
 
@@ -21,7 +21,7 @@ Visual Studio 17.10 onwards can run the new tests by enabling the new testing pl
 
 Rider is supported. The [Enable Testing Platform support](https://www.jetbrains.com/help/rider/Reference__Options__Tools__Unit_Testing__VSTest.html) option must be selected in Settings > Build, Execution, Deployment > Unit Testing > VSTest.
 
-<img src="/rider.png" height="300px">
+<img src="/docs/static/img/rider.png" height="300px">
 
 ### CLI
 `dotnet` CLI - Fully supported. Tests should be runnable with `dotnet test`, `dotnet run`, `dotnet exec` or executing an executable directly. See the docs for more information!
