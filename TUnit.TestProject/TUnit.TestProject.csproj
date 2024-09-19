@@ -15,27 +15,31 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Aot)' == true">
+  <PropertyGroup Condition="'$(Aot)' == 'true'">
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
     <WarningsAsErrors>true</WarningsAsErrors>
+    <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SingleFile)' == true">
+  <PropertyGroup Condition="'$(SingleFile)' == 'true'">
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
+    <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
   </PropertyGroup>
   
   <ItemGroup>
     <Using Include="TUnit.Core.HookType" Static="True" />
     <Using Include="TUnit.Core" />
   </ItemGroup>
+  <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
     <PackageReference Include="System.Text.Json" />
