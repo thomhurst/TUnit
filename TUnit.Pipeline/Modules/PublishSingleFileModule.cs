@@ -13,6 +13,8 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<PublishAOTModule>]
 public class PublishSingleFileModule : Module<CommandResult>
 {
+    public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
+    
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var testProject = context.Git().RootDirectory!.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();

@@ -14,7 +14,7 @@ public class Tests
     {
         Console.WriteLine("Blah!");
 
-        await Assert.That(TestContext.Current?.GetTestOutput()).IsEqualTo("Blah!", StringComparison.Ordinal);
+        await Assert.That(TestContext.Current?.GetStandardOutput()).IsEqualTo("Blah!", StringComparison.Ordinal);
     }
     
     [Test]
