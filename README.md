@@ -15,7 +15,7 @@ TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the
 
 ### Visual Studio
 
-Visual Studio 17.10 onwards can run the new tests by enabling the new testing platform server mode, within Visual Studio preview/experimental features. You will have to opt in to this manually.
+Visual Studio is supported.
 
 ### Rider
 
