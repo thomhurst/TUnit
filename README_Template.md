@@ -11,7 +11,7 @@ See here: <https://thomhurst.github.io/TUnit/>
 
 ## IDE
 
-TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the older VSTest platform. As of September 2024, IDEs do not fully support this testing platform yet.
+TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the older VSTest platform. Because the infrastructure behind the scenes is new and different, you may need to enable some settings. This should just be a one time thing.
 
 ### Visual Studio
 
