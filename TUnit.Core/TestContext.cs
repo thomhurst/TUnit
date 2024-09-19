@@ -1,6 +1,9 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 
-public partial class TestContext
+namespace TUnit.Core;
+
+public partial class TestContext : Context
 {
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
@@ -11,9 +14,6 @@ public partial class TestContext
     }
     
     public DateTimeOffset? TestStart { get; internal set; }
-    
-    public StringWriter OutputWriter { get; } = new();
-    public StringWriter ErrorOutputWriter { get; } = new();
     
     public Task TestTask => TaskCompletionSource.Task;
 
@@ -26,16 +26,6 @@ public partial class TestContext
     
     public TestResult? Result { get; internal set; }
     internal DiscoveredTest InternalDiscoveredTest { get; set; } = null!;
-
-    public string GetTestOutput()
-    {
-        return OutputWriter.GetStringBuilder().ToString().Trim();
-    }
-    
-    public string GetTestErrorOutput()
-    {
-        return ErrorOutputWriter.GetStringBuilder().ToString().Trim();
-    }
     
     public void AddArtifact(Artifact artifact)
     {

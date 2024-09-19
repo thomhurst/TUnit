@@ -160,8 +160,8 @@ internal class SingleTestExecutor : IDataProducer
                     context.Request.Session.SessionUid,
                     test.ToTestNode()
                         .WithProperty(PassedTestNodeStateProperty.CachedInstance)
-                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
                         .WithProperty(timingProperty)
                 ));
 
@@ -174,7 +174,7 @@ internal class SingleTestExecutor : IDataProducer
                     ComputerName = Environment.MachineName,
                     Exception = null,
                     Status = Status.Passed,
-                    Output = testContext.GetTestOutput()
+                    Output = testContext.GetStandardOutput()
                 };
 
                 testContext.TaskCompletionSource.SetResult(null);
@@ -189,8 +189,8 @@ internal class SingleTestExecutor : IDataProducer
                     context.Request.Session.SessionUid,
                     test.ToTestNode()
                         .WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))
-                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
                 ));
 
                 var now = DateTimeOffset.Now;
@@ -215,8 +215,8 @@ internal class SingleTestExecutor : IDataProducer
                     context.Request.Session.SessionUid, test.ToTestNode()
                         .WithProperty(GetFailureStateProperty(testContext, e, timingProperty.GlobalTiming.Duration))
                         .WithProperty(timingProperty)
-                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
                         .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
 
                 testContext.Result = new TestResult
@@ -227,7 +227,7 @@ internal class SingleTestExecutor : IDataProducer
                     ComputerName = Environment.MachineName,
                     Exception = e,
                     Status = Status.Failed,
-                    Output = $"{testContext.GetTestErrorOutput()}{Environment.NewLine}{testContext.GetTestOutput()}"
+                    Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}"
                 };
             }
 

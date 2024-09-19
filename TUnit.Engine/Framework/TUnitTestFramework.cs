@@ -24,6 +24,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly TestsExecutor _testsExecutor;
     private readonly TUnitInitializer _initializer;
     private readonly OnEndExecutor _onEndExecutor;
+    private readonly StandardOutConsoleInterceptor _standardOutInterceptor;
+    private readonly StandardErrorConsoleInterceptor _standardErrorInterceptor;
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
@@ -41,6 +43,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _testDiscover = _serviceProvider.GetRequiredService<TUnitTestDiscoverer>();
         _testsExecutor = _serviceProvider.GetRequiredService<TestsExecutor>();
         _initializer = _serviceProvider.GetRequiredService<TUnitInitializer>();
+        _standardOutInterceptor = _serviceProvider.GetRequiredService<StandardOutConsoleInterceptor>();
+        _standardErrorInterceptor = _serviceProvider.GetRequiredService<StandardErrorConsoleInterceptor>();
         _onEndExecutor = _serviceProvider.GetRequiredService<OnEndExecutor>();
     }
 
@@ -66,6 +70,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 #endif
         
         EngineCancellationToken.Initialise(context.CancellationToken);
+        
+        _standardOutInterceptor.Initialize();
+        _standardErrorInterceptor.Initialize();
         
         await using (_serviceProvider)
         {

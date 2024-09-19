@@ -16,8 +16,6 @@ internal class TestsExecutor
 
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly TestGrouper _testGrouper;
-    private readonly StandardOutConsoleInterceptor _standardOutConsoleInterceptor;
-    private readonly StandardErrorConsoleInterceptor _standardErrorConsoleInterceptor;
     private readonly TUnitLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
 
@@ -28,15 +26,11 @@ internal class TestsExecutor
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
         TestGrouper testGrouper,
-        StandardOutConsoleInterceptor standardOutConsoleInterceptor,
-        StandardErrorConsoleInterceptor standardErrorConsoleInterceptor,
         TUnitLogger logger,
         ICommandLineOptions commandLineOptions)
     {
         _singleTestExecutor = singleTestExecutor;
         _testGrouper = testGrouper;
-        _standardOutConsoleInterceptor = standardOutConsoleInterceptor;
-        _standardErrorConsoleInterceptor = standardErrorConsoleInterceptor;
         _logger = logger;
         _commandLineOptions = commandLineOptions;
 
@@ -45,9 +39,6 @@ internal class TestsExecutor
 
     public async Task ExecuteAsync(DiscoveredTest[] testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
     {
-        _standardOutConsoleInterceptor.Initialize();
-        _standardErrorConsoleInterceptor.Initialize();
-
         var tests = _testGrouper.OrganiseTests(testNodes);
 
         foreach (var test in tests.AllTests)

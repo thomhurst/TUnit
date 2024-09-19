@@ -1,7 +1,17 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 
-public class ClassHookContext
+namespace TUnit.Core;
+
+public class ClassHookContext : Context
 {
+    private static readonly AsyncLocal<ClassHookContext?> Contexts = new();
+    public new static ClassHookContext? Current
+    {
+        get => Contexts.Value;
+        internal set => Contexts.Value = value;
+    }
+    
     internal ClassHookContext()
     {
     }

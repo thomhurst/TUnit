@@ -111,6 +111,8 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
 
             try
             {
+                ClassHookContext.Current = classHookContext;
+                
                 await hookPublisher.Push(executeRequestContext, $"Before Class: {staticMethod.Name}",
                     staticMethod, () =>
                         RunHelpers.RunWithTimeoutAsync(
@@ -123,6 +125,10 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
             {
                 throw new BeforeClassException($"Error executing Before(Class) method: {staticMethod.Name}", e);
             }
+            finally
+            {
+                ClassHookContext.Current = null;
+            }
         })));
     }
 
@@ -134,11 +140,19 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
 
             try
             {
-                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+                ClassHookContext.Current = context;
+                
+                await RunHelpers.RunWithTimeoutAsync(
+                    token => staticMethod.HookExecutor.ExecuteAfterClassHook(staticMethod.MethodInfo, context,
+                        () => staticMethod.Body(context, token)), timeout);
             }
             catch (Exception e)
             {
                 throw new AfterClassException($"Error executing After(Class) method: {staticMethod.Name}", e);
+            }
+            finally
+            {
+                ClassHookContext.Current = null;
             }
         }));
     }
@@ -168,8 +182,10 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
 
             try
             {
+                AssemblyHookContext.Current = assemblyHookContext;
+                
                 await hookPublisher.Push(executeRequestContext, $"Before Assembly: {staticMethod.Name}",
-                    staticMethod, () => 
+                    staticMethod, () =>
                         RunHelpers.RunWithTimeoutAsync(
                             token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo,
                                 assemblyHookContext,
@@ -180,6 +196,10 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
             {
                 throw new BeforeAssemblyException($"Error executing Before(Assembly) method: {staticMethod.Name}",
                     e);
+            }
+            finally
+            {
+                AssemblyHookContext.Current = null;
             }
         })));
     }
@@ -192,11 +212,19 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
 
             try
             {
-                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+                AssemblyHookContext.Current = context;
+
+                await RunHelpers.RunWithTimeoutAsync(
+                    token => staticMethod.HookExecutor.ExecuteAfterAssemblyHook(staticMethod.MethodInfo, context,
+                        () => staticMethod.Body(context, token)), timeout);
             }
             catch (Exception e)
             {
                 throw new AfterAssemblyException($"Error executing After(Assembly) method: {staticMethod.Name}", e);
+            }
+            finally
+            {
+                AssemblyHookContext.Current = null;
             }
         }));
     }
@@ -205,7 +233,16 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
     {
         foreach (var setUp in AssemblySetUps.OrderBy(x => x.HookMethod.Order))
         {
-            await setUp.Action.Value(executeRequestContext, hookMessagePublisher);
+            try
+            {
+                AssemblyHookContext.Current = context;
+                
+                await setUp.Action.Value(executeRequestContext, hookMessagePublisher);
+            }
+            finally
+            {
+                AssemblyHookContext.Current = null;
+            }
         }
     }
 
@@ -214,7 +251,16 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
     {
         foreach (var cleanUp in AssemblyCleanUps.OrderBy(x => x.HookMethod.Order))
         {
-            await hookMessagePublisher.Push(executeRequestContext, $"After Assembly: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), cleanUpExceptions));
+            try
+            {
+                AssemblyHookContext.Current = context;
+                
+                await hookMessagePublisher.Push(executeRequestContext, $"After Assembly: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), cleanUpExceptions));
+            }
+            finally
+            {
+                AssemblyHookContext.Current = null;
+            }
         }
     }
     
@@ -226,11 +272,20 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
 
             try
             {
-                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteBeforeTestDiscoveryHook(staticMethod.MethodInfo, () => staticMethod.Body(context, token)), timeout);
+                BeforeTestDiscoveryContext.Current = context;
+                
+                await RunHelpers.RunWithTimeoutAsync(
+                    token => staticMethod.HookExecutor.ExecuteBeforeTestDiscoveryHook(staticMethod.MethodInfo,
+                        () => staticMethod.Body(context, token)), timeout);
             }
             catch (Exception e)
             {
-                throw new BeforeTestDiscoveryException($"Error executing Before(TestDiscovery) method: {staticMethod.Name}", e);
+                throw new BeforeTestDiscoveryException(
+                    $"Error executing Before(TestDiscovery) method: {staticMethod.Name}", e);
+            }
+            finally
+            {
+                BeforeTestDiscoveryContext.Current = null;
             }
         }));
     }
@@ -243,11 +298,20 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
 
             try
             {
-                await RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterTestDiscoveryHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+                TestDiscoveryContext.Current = context;
+                
+                await RunHelpers.RunWithTimeoutAsync(
+                    token => staticMethod.HookExecutor.ExecuteAfterTestDiscoveryHook(staticMethod.MethodInfo, context,
+                        () => staticMethod.Body(context, token)), timeout);
             }
             catch (Exception e)
             {
-                throw new AfterTestDiscoveryException($"Error executing After(TestDiscovery) method: {staticMethod.Name}", e);
+                throw new AfterTestDiscoveryException(
+                    $"Error executing After(TestDiscovery) method: {staticMethod.Name}", e);
+            }
+            finally
+            {
+                TestDiscoveryContext.Current = null;
             }
         }));
     }
@@ -256,7 +320,16 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
     {
         foreach (var setUp in BeforeTestDiscovery.OrderBy(x => x.HookMethod.Order))
         {
-            await setUp.Action(context);
+            BeforeTestDiscoveryContext.Current = context;
+
+            try
+            {
+                await setUp.Action(context);
+            }
+            finally
+            {
+                BeforeTestDiscoveryContext.Current = null;
+            }
         }
     }
 
@@ -266,7 +339,16 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
         
         foreach (var cleanUp in AfterTestDiscovery.OrderBy(x => x.HookMethod.Order))
         {
-            await RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), exceptions);
+            try
+            {
+                TestDiscoveryContext.Current = context;
+
+                await RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), exceptions);
+            }
+            finally
+            {
+                TestDiscoveryContext.Current = null;
+            }
         }
         
         ExceptionsHelper.ThrowIfAny(exceptions);
@@ -310,7 +392,16 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
     {
         foreach (var setUp in BeforeTestSession.OrderBy(x => x.HookMethod.Order))
         {
-            await setUp.Action(context);
+            try
+            {
+                TestSessionContext.Current = context;
+
+                await setUp.Action(context);
+            }
+            finally
+            {
+                TestSessionContext.Current = null;
+            }
         }
     }
 
@@ -320,7 +411,16 @@ public class GlobalStaticTestHookOrchestrator(HookMessagePublisher hookMessagePu
 
         foreach (var cleanUp in AfterTestSession.OrderBy(x => x.HookMethod.Order))
         {
-            await RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), exceptions);
+            try
+            {
+                TestSessionContext.Current = context;
+                
+                await RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), exceptions);
+            }
+            finally
+            {
+                TestSessionContext.Current = null;
+            }
         }
         
         ExceptionsHelper.ThrowIfAny(exceptions);
