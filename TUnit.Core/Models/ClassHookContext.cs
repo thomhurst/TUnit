@@ -6,7 +6,7 @@ namespace TUnit.Core;
 public class ClassHookContext : Context
 {
     private static readonly AsyncLocal<ClassHookContext?> Contexts = new();
-    public static ClassHookContext? Current
+    public new static ClassHookContext? Current
     {
         get => Contexts.Value;
         internal set => Contexts.Value = value;

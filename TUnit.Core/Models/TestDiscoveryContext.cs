@@ -6,7 +6,7 @@ namespace TUnit.Core;
 public class TestDiscoveryContext : Context
 {
     private static readonly AsyncLocal<TestDiscoveryContext?> Contexts = new();
-    public static TestDiscoveryContext? Current
+    public new static TestDiscoveryContext? Current
     {
         get => Contexts.Value;
         internal set => Contexts.Value = value;
