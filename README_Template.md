@@ -23,6 +23,15 @@ Rider is supported. The [Enable Testing Platform support](https://www.jetbrains.
 
 <img src="/docs/static/img/rider.png" height="300px">
 
+## VS Code
+Visual Studio Code is supported.
+
+- Install the extension Name: [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit)
+- Go to the C# Dev Kit extension's settings
+- Enable Dotnet > Test Window > Use Testing Platform Protocol
+
+<img src="/docs/static/img/visual-studio-code.png" height="300px">
+
 ### CLI
 `dotnet` CLI - Fully supported. Tests should be runnable with `dotnet test`, `dotnet run`, `dotnet exec` or executing an executable directly. See the docs for more information!
 

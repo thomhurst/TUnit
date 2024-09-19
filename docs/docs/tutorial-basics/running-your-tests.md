@@ -58,6 +58,17 @@ cd 'C:/Your/Test/Directory/bin/Release/net8.0/win-x64/publish'
 Visual Studio is supported.
 
 ## Rider
-Rider is supported. The [Enable Testing Platform support](https://www.jetbrains.com/help/rider/Reference__Options__Tools__Unit_Testing__VSTest.html) option must be selected in Settings > Build, Execution, Deployment > Unit Testing > VSTest.
+Rider is supported. 
+
+The [Enable Testing Platform support](https://www.jetbrains.com/help/rider/Reference__Options__Tools__Unit_Testing__VSTest.html) option must be selected in Settings > Build, Execution, Deployment > Unit Testing > VSTest.
 
 ![Rider Settings](../../static/img/rider.png)
+
+## VS Code
+Visual Studio Code is supported.
+
+- Install the extension Name: [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit)
+- Go to the C# Dev Kit extension's settings
+- Enable Dotnet > Test Window > Use Testing Platform Protocol
+
+![Visual Studio Code Settings](../../static/img/visual-studio-code.png)
