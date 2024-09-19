@@ -52,11 +52,12 @@ cd 'C:/Your/Test/Directory/bin/Release/net8.0/win-x64/publish'
 ./YourTestProject.exe --report-trx --coverage
 ```
 
-# IDE
-As of August 2024, IDE support is still in development
+# IDE Support
 
 ## Visual Studio
-If you install Visual Studio, you can navigate to the preview/experimental options and enable the testing server option. Restart Visual Studio, build your test project, and the test explorer should show your tests.
+Visual Studio is supported.
 
 ## Rider
-Not yet supported, but in development I believe.
+Rider is supported. The [Enable Testing Platform support](https://www.jetbrains.com/help/rider/Reference__Options__Tools__Unit_Testing__VSTest.html) option must be selected in Settings > Build, Execution, Deployment > Unit Testing > VSTest.
+
+![Rider Settings](../../static/img/rider.png)
