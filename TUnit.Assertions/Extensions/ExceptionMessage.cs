@@ -17,12 +17,12 @@ public class ExceptionMessage<TActual, TAnd, TOr>
         AssertionBuilder = assertionBuilder.AppendExpression("Message");
     }
 
-    public BaseAssertCondition<TActual> EqualTo(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableAssertionBuilder<TActual, TAnd, TOr> EqualTo(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return EqualTo(expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
 
-    public BaseAssertCondition<TActual> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+    public InvokableAssertionBuilder<TActual, TAnd, TOr> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
         return new DelegateAssertCondition<TActual, string>(expected, (actual, _, _, _) =>
             {
@@ -30,6 +30,7 @@ public class ExceptionMessage<TActual, TAnd, TOr>
                 return string.Equals(actual.Message, expected, stringComparison);
             },
             (_, actual, _) =>
-                $"Exception had a message of '{actual?.Message}' instead of '{expected}'");
+                $"Exception had a message of '{actual?.Message}' instead of '{expected}'")
+            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 }

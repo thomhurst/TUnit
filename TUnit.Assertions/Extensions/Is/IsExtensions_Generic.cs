@@ -50,22 +50,21 @@ public static partial class IsExtensions
             .ChainedTo(valueSource.AssertionBuilder, [type.Name]);
     }
 
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableTo<TActual, TExpected, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableTo<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, Type type) 
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TExpected>(default,
-            (value, _, _, _) => value!.GetType().IsAssignableTo(typeof(TExpected)),
-            (actual, _, _) => $"{actual?.GetType()} is not assignable to {typeof(TExpected).Name}")
-            .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]); }
+        return new DelegateAssertCondition<TActual, Type>(default,
+            (value, _, _, _) => value!.GetType().IsAssignableTo(type),
+            (actual, _, _) => $"{actual?.GetType()} is not assignable to {type.Name}")
+            .ChainedTo(valueSource.AssertionBuilder, [type.Name]); }
 
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableFrom<TActual, TExpected, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
-        where TExpected : TActual
+    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableFrom<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, Type type) 
         where TAnd : IAnd<TActual, TAnd, TOr>
         where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TExpected>(default,
-            (value, _, _, _) => value!.GetType().IsAssignableFrom(typeof(TExpected)),
-            (actual, _, _) => $"{actual?.GetType()} is not assignable from {typeof(TExpected).Name}")
-            .ChainedTo(valueSource.AssertionBuilder, [typeof(TExpected).Name]); }
+        return new DelegateAssertCondition<TActual, Type>(default,
+            (value, _, _, _) => value!.GetType().IsAssignableFrom(type),
+            (actual, _, _) => $"{actual?.GetType()} is not assignable from {type.Name}")
+            .ChainedTo(valueSource.AssertionBuilder, [type.Name]); }
 }
