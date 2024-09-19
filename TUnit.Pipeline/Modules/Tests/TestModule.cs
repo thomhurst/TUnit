@@ -210,9 +210,6 @@ public abstract class TestModule : Module<TestResult>
                                  Error asserting results
 
                                  Expression: {assertionExpression}
-
-                                 Trx file: {JsonSerializer.Serialize(parsedResult, JsonSerializerOptions)}
-                                 Raw Trx file: {trxFileContents}
                                  """, e);
         }
     }

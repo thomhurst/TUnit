@@ -9,6 +9,7 @@
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -27,7 +28,7 @@
     <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
-    <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
+    <NoWarn>IL2118</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>
