@@ -54,14 +54,14 @@ public static partial class DoesExtensions
     }
     
         
-    public static InvokableAssertionBuilder<string, TAnd, TOr> EndWiths<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableAssertionBuilder<string, TAnd, TOr> EndsWith<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
-        return EndWiths(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
+        return EndsWith(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static InvokableAssertionBuilder<string, TAnd, TOr> EndWiths<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+    public static InvokableAssertionBuilder<string, TAnd, TOr> EndsWith<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
         where TAnd : IAnd<string, TAnd, TOr>
         where TOr : IOr<string, TAnd, TOr>
     {
