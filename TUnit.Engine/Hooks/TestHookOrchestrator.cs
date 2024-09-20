@@ -65,7 +65,7 @@ public static class TestHookOrchestrator
         {
             if (!SetUps.TryGetValue(type, out var setUpsForType))
             {
-                return;
+                continue;
             }
 
             foreach (var setUp in setUpsForType.OrderBy(x => x.Order))
@@ -85,7 +85,7 @@ public static class TestHookOrchestrator
         {
             if (!CleanUps.TryGetValue(type, out var cleanUpsForType))
             {
-                return;
+                continue;
             }
 
             foreach (var cleanUp in cleanUpsForType.OrderBy(x => x.Order))

@@ -10,7 +10,6 @@ public class DefaultExecutor : GenericAbstractExecutor
     {
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected override Task ExecuteAsync(Func<Task> action)
     {
         return action();

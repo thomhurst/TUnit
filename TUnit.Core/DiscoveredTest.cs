@@ -29,6 +29,8 @@ internal class DiscoveredTest<
     {
 #if NET8_0_OR_GREATER
         await _resettableLazyTestClassFactory.ResetLazy();
+#else
+        await Task.CompletedTask;
 #endif
     }
 }
