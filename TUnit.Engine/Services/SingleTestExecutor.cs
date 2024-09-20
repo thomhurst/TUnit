@@ -468,46 +468,53 @@ internal class SingleTestExecutor : IDataProducer
     {
         foreach (var dependency in GetDependencies(testContext.TestDetails))
         {
-            AssertDoNotDependOnEachOther(testContext.TestContext, dependency.TestContext);
-            
+            AssertDoNotDependOnEachOther(testContext.TestContext, dependency.Test.TestContext);
+
             try
             {
-                await ExecuteTestAsync(dependency, filter, context, true);
+                await ExecuteTestAsync(dependency.Test, filter, context, true);
+            }
+            catch when (dependency.ProceedOnFailure)
+            {
+                // Ignore
             }
             catch (Exception e)
             {
-                throw new InconclusiveTestException($"A dependency has failed: {dependency.TestDetails.TestName}", e);
+                throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
             }
         }
     }
 
-    private IEnumerable<DiscoveredTest> GetDependencies(TestDetails testDetails)
+    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails testDetails)
     {
         return GetDependencies(testDetails, testDetails);
     }
 
-    private IEnumerable<DiscoveredTest> GetDependencies(TestDetails original, TestDetails testDetails)
+    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails)
     {
-        foreach (var dependency in testDetails.Attributes
-                     .OfType<DependsOnAttribute>()
-                     .SelectMany(dependsOnAttribute => TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
-                         dependsOnAttribute.ParameterTypes, testDetails.ClassType,
-                         testDetails.TestClassParameterTypes)))
+        foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
         {
-            yield return dependency;
+            var dependencies = TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
+                dependsOnAttribute.ParameterTypes, testDetails.ClassType,
+                testDetails.TestClassParameterTypes);
 
-            if (dependency.TestDetails.IsSameTest(original))
+            foreach (var dependency in dependencies)
             {
-                yield break;
-            }
-            
-            foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
-            {
-                yield return nestedDependency;
-                
-                if (nestedDependency.TestDetails.IsSameTest(original))
+                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
+
+                if (dependency.TestDetails.IsSameTest(original))
                 {
                     yield break;
+                }
+
+                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
+                {
+                    yield return nestedDependency;
+
+                    if (nestedDependency.Test.TestDetails.IsSameTest(original))
+                    {
+                        yield break;
+                    }
                 }
             }
         }
@@ -515,7 +522,7 @@ internal class SingleTestExecutor : IDataProducer
 
     private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
     {
-        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails).Select(x => x.TestContext)];
+        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails).Select(x => x.Test.TestContext)];
         
         foreach (var dependencyOfDependency in dependencies)
         {
