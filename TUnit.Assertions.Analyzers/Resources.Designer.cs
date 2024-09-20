@@ -213,7 +213,7 @@ namespace TUnit.Assertions.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Object `Equals` base method should not be called. Use `.Is.EqualTo(...)..
+        ///   Looks up a localized string similar to Object `Equals` base method should not be called. Use `.IsEqualTo(...)..
         /// </summary>
         internal static string TUnitAssertions0006Description {
             get {
@@ -222,7 +222,7 @@ namespace TUnit.Assertions.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Object `Equals` base method should not be called. Use `.Is.EqualTo(...).
+        ///   Looks up a localized string similar to Object `Equals` base method should not be called. Use `.IsEqualTo(...).
         /// </summary>
         internal static string TUnitAssertions0006MessageFormat {
             get {
