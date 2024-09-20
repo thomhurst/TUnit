@@ -8,7 +8,7 @@ public class BasicTestsHooksFromLibrary : TestModule
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "/*/*/BasicTestsHooksFromLibrary/*[one=yes]",
+            "/*/*/BasicTestsHooksFromLibrary/*",
             [
                 result => result.Successful.Should().BeTrue(),
                 result => result.Total.Should().Be(2),
