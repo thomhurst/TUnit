@@ -72,11 +72,11 @@ public async Task AddItemToBagForUser3()
 }
 
 [Test]
-[DependsOn(nameof(AddUser4)]
-[DependsOn(nameof(AddUser5)]
-[DependsOn(nameof(AddItemToBagForUser1)]
-[DependsOn(nameof(AddItemToBagForUser2)]
-[DependsOn(nameof(AddItemToBagForUser3)]
+[DependsOn(nameof(AddUser4))]
+[DependsOn(nameof(AddUser5))]
+[DependsOn(nameof(AddItemToBagForUser1))]
+[DependsOn(nameof(AddItemToBagForUser2))]
+[DependsOn(nameof(AddItemToBagForUser3))]
 public async Task AssertItemsInDatabase() 
 {
     ...
@@ -101,11 +101,30 @@ public async Task AddItemToBag()
 }
 
 [Test]
-[DependsOn(nameof(AddItemToBag)]
+[DependsOn(nameof(AddItemToBag))]
 public async Task DeleteItemFromBag() 
 {
     var addToBagTestContext = TestContext.Current!.GetTests(nameof(AddItemToBag)).First();
     var itemId = addToBagTestContext.ObjectBag["ItemId"];
     await DeleteFromBag(itemId);
+}
+```
+
+## Failures
+
+If your test depends on another test, by default, if that dependency fails, then your test that depends on it will not start. This can be bypassed by adding the property `ProceedOnFailure = true` to the `DependsOnAttribute`. Your test suite will still fail due to that test, but it allows you to proceed with other tests if you require it. For example, CRUD testing, and wanting to perform a delete after all your other tests, regardless of if they passed.
+
+```csharp
+[Test]
+public async Task Test1() 
+{
+    ...
+}
+
+[Test]
+[DependsOn(nameof(Test1), ProceedOnFailure = true)]
+public async Task Test2() 
+{
+    ...
 }
 ```
