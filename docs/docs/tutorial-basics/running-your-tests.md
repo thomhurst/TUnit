@@ -61,7 +61,7 @@ Visual Studio is supported on the Preview version currently.
 - Open Visual Studio and go to Tools > Manage Preview Features
 - Enable "Use testing platform server mode"
 
-<img src="/docs/static/img/visual-studio.png" height="300px">
+![Visual Studio Settings](../../static/img/visual-studio.png)
 
 ## Rider
 Rider is supported. 
