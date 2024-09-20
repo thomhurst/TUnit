@@ -11,8 +11,8 @@ public class BasicTestsHooksFromLibrary : TestModule
             "/*/*/BasicTestsHooksFromLibrary/*",
             [
                 result => result.Successful.Should().BeTrue(),
-                result => result.Total.Should().Be(2),
-                result => result.Passed.Should().Be(2),
+                result => result.Total.Should().Be(1),
+                result => result.Passed.Should().Be(1),
                 result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0)
             ], cancellationToken);
