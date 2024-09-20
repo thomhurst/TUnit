@@ -34,8 +34,14 @@ internal static class ArgumentsRetriever
         for (var index = 0; index < dataAttributes.Length; index++)
         {
             var dataAttribute = dataAttributes.ElementAtOrDefault(index);
+            
+            if (dataAttribute is null)
+            {
+                continue;
+            }
+            
             var name = dataAttribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-
+            
             if (name == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
             {
                 yield return DataDrivenArgumentsRetriever.ParseArguments(dataAttribute, parameters, index);
