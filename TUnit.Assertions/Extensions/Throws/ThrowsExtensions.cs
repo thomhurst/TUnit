@@ -8,7 +8,7 @@ public static class ThrowsExtensions
 {
     public static ThrowsException<TActual> ThrowsException<TActual>(this IDelegateSource<TActual> delegateSource)
     {
-        return new(delegateSource.AssertionBuilder, exception => exception);
+        return new(delegateSource, exception => exception);
     }
     
     public static InvokableDelegateAssertionBuilder<TActual> ThrowsNothing<TActual>(this IDelegateSource<TActual> delegateSource)

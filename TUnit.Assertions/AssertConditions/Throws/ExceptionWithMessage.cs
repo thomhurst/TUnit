@@ -1,17 +1,21 @@
 ﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ExceptionWithMessage<TActual>
 {
+    private readonly IDelegateSource<TActual> _delegateSource;
     private readonly Func<Exception?, Exception?> _exceptionSelector;
     protected AssertionBuilder<TActual> AssertionBuilder { get; }
     
-    public ExceptionWithMessage(AssertionBuilder<TActual> assertionBuilder, Func<Exception?, Exception?> exceptionSelector)
+    public ExceptionWithMessage(IDelegateSource<TActual> delegateSource, Func<Exception?, Exception?> exceptionSelector)
     {
+        _delegateSource = delegateSource;
         _exceptionSelector = exceptionSelector;
-        AssertionBuilder = assertionBuilder
+        AssertionBuilder = delegateSource.AssertionBuilder
             .AppendExpression("Message");
     }
 
@@ -22,8 +26,8 @@ public class ExceptionWithMessage<TActual>
 
     public InvokableDelegateAssertionBuilder<TActual> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return (InvokableDelegateAssertionBuilder<TActual>)new ThrowsWithMessageEqualToAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
-            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+        return _delegateSource.RegisterAssertion(new ThrowsWithMessageEqualToAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
+            , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 
     public InvokableDelegateAssertionBuilder<TActual> Containing(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -33,7 +37,7 @@ public class ExceptionWithMessage<TActual>
 
     public InvokableDelegateAssertionBuilder<TActual> Containing(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return (InvokableDelegateAssertionBuilder<TActual>)new ThrowsWithMessageContainingAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
-            .ChainedTo(AssertionBuilder, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+        return _delegateSource.RegisterAssertion(new ThrowsWithMessageContainingAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
+            , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 }
