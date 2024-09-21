@@ -8,7 +8,7 @@ By default, TUnit tests will run in parallel. This means there is no order and i
 
 However, if tests aren't running in parallel, they can absolutely be ordered, and this is necessary for some systems.
 
-To control ordering, there is an `Order` property on the `[NotInParallelAttribute]`.
+To control ordering, there is an `Order` property on the `[NotInParallel]` attribute.
 
 Orders will execute from smallest to largest. So 1 first, then 2, then 3, etc.
 
