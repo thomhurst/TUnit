@@ -8,8 +8,6 @@ namespace TUnit.Assertions.AssertConditions.ClassMember;
 
 public class Member<TActualRootType, TPropertyType>(IValueSource<TActualRootType> valueSource, Expression<Func<TActualRootType, TPropertyType>> selector)
 {
-    private readonly IValueSource<TActualRootType> _valueSource = valueSource;
-
     public InvokableValueAssertionBuilder<TActualRootType> EqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return valueSource.RegisterAssertion(new PropertyEqualsAssertCondition<TActualRootType, TPropertyType>(selector, expected, true)

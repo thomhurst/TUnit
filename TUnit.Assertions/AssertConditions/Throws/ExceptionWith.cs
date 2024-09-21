@@ -1,22 +1,25 @@
 ﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ExceptionWith<TActual>
 {
+    private readonly IDelegateSource<TActual> _delegateSource;
     private readonly Func<Exception?, Exception?> _exceptionSelector;
     protected AssertionBuilder<TActual> AssertionBuilder { get; }
     
-    public ExceptionWith(AssertionBuilder<TActual> assertionBuilder, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "")
+    public ExceptionWith(IDelegateSource<TActual> delegateSource, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "")
     {
+        _delegateSource = delegateSource;
         _exceptionSelector = exceptionSelector;
-        AssertionBuilder = assertionBuilder
+        AssertionBuilder = delegateSource.AssertionBuilder
             .AppendExpression(callerMemberName);
     }
 
     public ExceptionWithMessage<TActual> Message =>
-        new(AssertionBuilder, _exceptionSelector);
+        new(_delegateSource, _exceptionSelector);
     
-    public ThrowsException<TActual> InnerException => new(AssertionBuilder, e => _exceptionSelector(e)?.InnerException);
+    public ThrowsException<TActual> InnerException => new(_delegateSource, e => _exceptionSelector(e)?.InnerException);
 }

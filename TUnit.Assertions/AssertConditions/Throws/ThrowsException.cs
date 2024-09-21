@@ -19,7 +19,7 @@ public class ThrowsException<TActual>
             .AppendExpression(callerMemberName);
     }
 
-    public ExceptionWith<TActual> With => new(AssertionBuilder, _exceptionSelector);
+    public ExceptionWith<TActual> With => new(_delegateSource, _exceptionSelector);
 
     public InvokableDelegateAssertionBuilder<TActual> OfAnyType() =>
         _delegateSource.RegisterAssertion(new ThrowsAnythingAssertCondition<TActual>()

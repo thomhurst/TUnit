@@ -8,5 +8,8 @@ namespace TUnit.Assertions.Extensions;
 public static partial class HasExtensions
 {
     public static Member<TRootObject, TPropertyType> HasMember<TRootObject, TPropertyType>(this IValueSource<TRootObject> valueSource, Expression<Func<TRootObject, TPropertyType>> selector, [CallerArgumentExpression("selector")] string expression = "")
-         => new(valueSource.AssertionBuilder.AppendCallerMethod([expression]), selector);
+    {
+        valueSource.AssertionBuilder.AppendCallerMethod([expression]);
+        return new(valueSource, selector);
+    }
 }
