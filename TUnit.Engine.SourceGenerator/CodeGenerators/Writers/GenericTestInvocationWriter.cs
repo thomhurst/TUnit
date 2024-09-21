@@ -87,7 +87,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestExecutor = {GetTestExecutor(testSourceDataModel.TestExecutor)},");
         sourceBuilder.WriteLine($"ClassConstructor = { GetClassConstructor(testSourceDataModel) },");
         sourceBuilder.WriteLine($"ParallelLimit = {GetParallelLimit(testSourceDataModel.ParallelLimit)},");
-        sourceBuilder.WriteLine($"DisplayName = $\"{GetDisplayName(testSourceDataModel)}\",");
+        sourceBuilder.WriteLine($"DisplayName = $\"{DisplayNameWriter.GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine($"AttributeTypes = [ {string.Join(", ", testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})"))} ],");
@@ -169,49 +169,5 @@ internal static class GenericTestInvocationWriter
                     				DisposeAfterTest = {{arg.DisposeAfterTest.ToString().ToLower()}},
                 				}
                 """;
-    }
-
-    private static string GetDisplayName(TestSourceDataModel testSourceDataModel)
-    {
-        var customDisplayName = GetCustomDisplayName(testSourceDataModel);
-
-        if (!string.IsNullOrEmpty(customDisplayName))
-        {
-            return customDisplayName!;
-        }
-
-        return $"{testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}";
-    }
-
-    private static string? GetCustomDisplayName(TestSourceDataModel testSourceDataModel)
-    {
-        var displayName = testSourceDataModel.CustomDisplayName;
-
-        if (string.IsNullOrEmpty(displayName))
-        {
-            return null;
-        }
-        
-        var args = testSourceDataModel.MethodVariables;
-
-        for (var index = 0; index < testSourceDataModel.MethodParameterNames.Length; index++)
-        {
-            var methodParameterName = testSourceDataModel.MethodParameterNames.ElementAtOrDefault(index);
-            displayName = displayName!.Replace($"${methodParameterName}", $"{{{args.ElementAtOrDefault(index)}}}");
-        }
-
-        return displayName;
-    }
-
-    private static string GetMethodArgs(TestSourceDataModel testSourceDataModel)
-    {
-        if (!testSourceDataModel.MethodArguments.Any())
-        {
-            return string.Empty;
-        }
-
-        var args = testSourceDataModel.MethodVariables.Select(x => $"{{{x}}}");
-        
-        return $"({string.Join(", ", args)})";
     }
 }

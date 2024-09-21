@@ -13,7 +13,7 @@ internal static class FailedTestInitializationWriter
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
-        sourceBuilder.WriteLine($"DisplayName = \"{testSourceDataModel.MethodName}{GetMethodArgs(testSourceDataModel)}\",");
+        sourceBuilder.WriteLine($"DisplayName = \"{DisplayNameWriter.GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine("Exception = exception,");
@@ -29,7 +29,7 @@ internal static class FailedTestInitializationWriter
 
         return $"({string.Join(", ",
             testSourceDataModel.MethodArguments
-                .Select(x => x.Invocation)
+                .Select(x => x.Invocation.TrimStart('@'))
                 .Select(x => x.Replace("\"", "\\\""))
         )})";
     }

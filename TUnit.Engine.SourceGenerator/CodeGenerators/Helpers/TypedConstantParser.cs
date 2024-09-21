@@ -11,6 +11,11 @@ internal static class TypedConstantParser
             return null;
         }
 
+        if (constructorArgument.Type?.SpecialType is SpecialType.System_String or SpecialType.System_Char)
+        {
+            return $"{constructorArgument.Value?.ToString()?.Replace(@"\", @"\\")}";
+        }
+
         if (constructorArgument.Kind is TypedConstantKind.Enum || type?.TypeKind == TypeKind.Enum)
         {
             return $"({(type ?? constructorArgument.Type)!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({constructorArgument.Value})";
