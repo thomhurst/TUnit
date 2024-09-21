@@ -78,7 +78,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("namespace TUnit.Engine;");
             sourceBuilder.WriteLine();
-            sourceBuilder.WriteLine("[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
+            sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
             sourceBuilder.WriteLine($"file partial class {className}");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
