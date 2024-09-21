@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;

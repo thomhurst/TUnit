@@ -1,3 +1,5 @@
+using TUnit.Core.Enums;
+
 namespace TUnit.Core;
 
 public class GlobalContext : Context

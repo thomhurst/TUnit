@@ -2,6 +2,7 @@
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 using TUnit.Core;
+using TUnit.Core.Enums;
 
 namespace TUnit.Engine.CommandLineProviders;
 

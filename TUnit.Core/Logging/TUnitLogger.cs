@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
+using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Logging;
