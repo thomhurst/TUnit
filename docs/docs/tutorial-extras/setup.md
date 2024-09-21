@@ -48,7 +48,9 @@ public class MyTestClass
     public async Task Test()
     {
         await Assert.That(_value).IsEqualTo(99);
-        await Assert.That(_pingResponse?.StatusCode).IsNot.Null().And.IsEqualTo(HttpStatusCode.OK);
+        await Assert.That(_pingResponse?.StatusCode)
+            .IsNotNull()
+            .And.IsEqualTo(HttpStatusCode.OK);
     }
 }
 ```
