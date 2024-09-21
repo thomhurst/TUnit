@@ -5,29 +5,24 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsNotExtensions
 {
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotZero<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource)
+    public static InvokableValueAssertionBuilder<TActual> IsNotZero<TActual>(this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new NotEqualsAssertCondition<TActual>(TActual.Zero)
-            .ChainedTo(valueSource.AssertionBuilder, []);
+        return valueSource.RegisterAssertion(new NotEqualsAssertCondition<TActual>(TActual.Zero)
+            , []);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotDivisibleBy<TActual, TAnd, TOr>(
-        this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TActual> IsNotDivisibleBy<TActual>(
+        this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
                 {
                     if (value is null)
                     {
@@ -38,14 +33,12 @@ public static partial class IsNotExtensions
                     return value % expected != TActual.Zero;
                 },
                 (value, _, _) => $"{value} was not divisible by {expected}")
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
+            , [doNotPopulateThisValue]);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotGreaterThan<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
+    public static InvokableValueAssertionBuilder<TActual> IsNotGreaterThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") where TActual : INumber<TActual>
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
@@ -56,15 +49,13 @@ public static partial class IsNotExtensions
                 return value <= expected;
             },
             (value, _, _) => $"{value} was greater than {expected}")
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
+            , [doNotPopulateThisValue]);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotGreaterThanOrEqualTo<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<TActual> IsNotGreaterThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
@@ -75,15 +66,13 @@ public static partial class IsNotExtensions
                 return value < expected;
             },
             (value, _, _) => $"{value} was greater than or equal to {expected}")
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
+            , [doNotPopulateThisValue]);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotLessThan<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<TActual> IsNotLessThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
@@ -94,15 +83,13 @@ public static partial class IsNotExtensions
                 return value >= expected;
             },
             (value, _, _) => $"{value} was less than {expected}")
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
+            , [doNotPopulateThisValue]);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotLessThanOrEqualTo<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<TActual> IsNotLessThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
@@ -113,15 +100,13 @@ public static partial class IsNotExtensions
                 return value > expected;
             },
             (value, _, _) => $"{value} was less than or equal to {expected}")
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue]);
+            , [doNotPopulateThisValue]);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotEven<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
+    public static InvokableValueAssertionBuilder<TActual> IsNotEven<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
@@ -132,15 +117,13 @@ public static partial class IsNotExtensions
                 return value % 2 != 0;
             },
             (value, _, _) => $"{value} was even")
-            .ChainedTo(valueSource.AssertionBuilder, []);
+            , []);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotOdd<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
+    public static InvokableValueAssertionBuilder<TActual> IsNotOdd<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
@@ -151,15 +134,13 @@ public static partial class IsNotExtensions
                 return value % 2 == 0;
             },
             (value, _, _) => $"{value} was odd")
-            .ChainedTo(valueSource.AssertionBuilder, []);
+            , []);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotNegative<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
+    public static InvokableValueAssertionBuilder<TActual> IsNotNegative<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
@@ -170,15 +151,13 @@ public static partial class IsNotExtensions
                 return value >= TActual.Zero;
             },
             (value, _, _) => $"{value} was negative")
-            .ChainedTo(valueSource.AssertionBuilder, []);
+            , []);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNotPositive<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource) 
+    public static InvokableValueAssertionBuilder<TActual> IsNotPositive<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
@@ -189,6 +168,6 @@ public static partial class IsNotExtensions
                 return value <= TActual.Zero;
             },
             (value, _, _) => $"{value} was positive")
-            .ChainedTo(valueSource.AssertionBuilder, []);
+            , []);
     }
 }

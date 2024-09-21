@@ -2,26 +2,21 @@
 
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static InvokableAssertionBuilder<bool, TAnd, TOr> IsTrue<TAnd, TOr>(this IValueSource<bool, TAnd, TOr> valueSource)
-        where TAnd : IAnd<bool, TAnd, TOr>
-        where TOr : IOr<bool, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<bool> IsTrue(this IValueSource<bool> valueSource)
     {
-        return new EqualsAssertCondition<bool>(true)
-            .ChainedTo(valueSource.AssertionBuilder, []);
+        return valueSource.RegisterAssertion(new EqualsAssertCondition<bool>(true)
+            , []);
     }
     
-    public static InvokableAssertionBuilder<bool, TAnd, TOr> IsFalse<TAnd, TOr>(this IValueSource<bool, TAnd, TOr> valueSource)
-        where TAnd : IAnd<bool, TAnd, TOr>
-        where TOr : IOr<bool, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<bool> IsFalse(this IValueSource<bool> valueSource)
     {
-        return new EqualsAssertCondition<bool>(false)
-            .ChainedTo(valueSource.AssertionBuilder, []);
+        return valueSource.RegisterAssertion(new EqualsAssertCondition<bool>(false)
+            , []);
     }
 }

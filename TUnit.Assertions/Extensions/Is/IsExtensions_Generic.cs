@@ -4,67 +4,53 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsExtensions
 {
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsEqualTo<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
+    public static InvokableValueAssertionBuilder<TActual> IsEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        return new EqualsAssertCondition<TActual>(expected)
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
+        return valueSource.RegisterAssertion(new EqualsAssertCondition<TActual>(expected)
+            , [doNotPopulateThisValue1]);
     }
     
-    public static InvokableAssertionBuilder<object, TAnd, TOr> IsEquivalentTo<TAnd, TOr>(this IValueSource<object, TAnd, TOr> valueSource, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
-        where TAnd : IAnd<object, TAnd, TOr>
-        where TOr : IOr<object, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<object> IsEquivalentTo(this IValueSource<object> valueSource, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        return new EquivalentToAssertCondition<object>(expected)
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
+        return valueSource.RegisterAssertion(new EquivalentToAssertCondition<object>(expected)
+            , [doNotPopulateThisValue1]);
     }
     
-    public static InvokableAssertionBuilder<object, TAnd, TOr> IsSameReference<TAnd, TOr>(this IValueSource<object, TAnd, TOr> valueSource, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
-        where TAnd : IAnd<object, TAnd, TOr>
-        where TOr : IOr<object, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<object> IsSameReference(this IValueSource<object> valueSource, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        return new SameReferenceAssertCondition<object, object>(expected)
-            .ChainedTo(valueSource.AssertionBuilder, [doNotPopulateThisValue1]);
+        return valueSource.RegisterAssertion(new SameReferenceAssertCondition<object, object>(expected)
+            , [doNotPopulateThisValue1]);
     }
     
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsNull<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource)
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
+    public static InvokableValueAssertionBuilder<TActual> IsNull<TActual>(this IValueSource<TActual> valueSource)
     {
-        return new NullAssertCondition<TActual>()
-            .ChainedTo(valueSource.AssertionBuilder, []);
+        return valueSource.RegisterAssertion(new NullAssertCondition<TActual>()
+            , []);
     }
 
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsTypeOf<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, Type type) where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
+    public static InvokableValueAssertionBuilder<TActual> IsTypeOf<TActual>(this IValueSource<TActual> valueSource, Type type)  
     {
-        return new TypeOfAssertCondition<TActual>(type)
-            .ChainedTo(valueSource.AssertionBuilder, [type.Name]);
+        return valueSource.RegisterAssertion(new TypeOfAssertCondition<TActual>(type)
+            , [type.Name]);
     }
 
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableTo<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, Type type) 
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
+    public static InvokableValueAssertionBuilder<TActual> IsAssignableTo<TActual>(this IValueSource<TActual> valueSource, Type type) 
     {
-        return new DelegateAssertCondition<TActual, Type>(default,
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, Type>(default,
             (value, _, _, _) => value!.GetType().IsAssignableTo(type),
             (actual, _, _) => $"{actual?.GetType()} is not assignable to {type.Name}")
-            .ChainedTo(valueSource.AssertionBuilder, [type.Name]); }
+            , [type.Name]); }
 
-    public static InvokableAssertionBuilder<TActual, TAnd, TOr> IsAssignableFrom<TActual, TAnd, TOr>(this IValueSource<TActual, TAnd, TOr> valueSource, Type type) 
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr> 
+    public static InvokableValueAssertionBuilder<TActual> IsAssignableFrom<TActual>(this IValueSource<TActual> valueSource, Type type) 
     {
-        return new DelegateAssertCondition<TActual, Type>(default,
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, Type>(default,
             (value, _, _, _) => value!.GetType().IsAssignableFrom(type),
             (actual, _, _) => $"{actual?.GetType()} is not assignable from {type.Name}")
-            .ChainedTo(valueSource.AssertionBuilder, [type.Name]); }
+            , [type.Name]); }
 }

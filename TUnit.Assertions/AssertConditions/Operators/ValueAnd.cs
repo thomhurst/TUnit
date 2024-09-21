@@ -4,20 +4,19 @@ using TUnit.Assertions.AssertionBuilders;
 namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueAnd<TActual> 
-    : And<TActual, ValueAnd<TActual>, ValueOr<TActual>>, IAnd<TActual, ValueAnd<TActual>, ValueOr<TActual>>,
-        IValueSource<TActual, ValueAnd<TActual>, ValueOr<TActual>>
+    : IValueSource<TActual>
 {
-    private readonly AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> _assertionBuilder;
+    private readonly AssertionBuilder<TActual> _assertionBuilder;
 
-    public ValueAnd(AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> assertionBuilder)
+    public ValueAnd(AssertionBuilder<TActual> assertionBuilder)
     {
         _assertionBuilder = assertionBuilder;
     }
     
-    public static ValueAnd<TActual> Create(AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> assertionBuilder)
+    public static ValueAnd<TActual> Create(AssertionBuilder<TActual> assertionBuilder)
     {
         return new ValueAnd<TActual>(assertionBuilder);
     }
 
-    AssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> ISource<TActual, ValueAnd<TActual>, ValueOr<TActual>>.AssertionBuilder => new AndAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>(_assertionBuilder);
+    AssertionBuilder<TActual> ISource<TActual>.AssertionBuilder => new AndAssertionBuilder<TActual>(_assertionBuilder);
 }

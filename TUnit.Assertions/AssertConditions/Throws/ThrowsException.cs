@@ -1,41 +1,42 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsException<TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class ThrowsException<TActual>
 {
+    private readonly IDelegateSource<TActual> _delegateSource;
     private readonly Func<Exception?, Exception?> _exceptionSelector;
-    protected AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
+    protected AssertionBuilder<TActual> AssertionBuilder { get; }
     
-    public ThrowsException(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "")
+    public ThrowsException(IDelegateSource<TActual> delegateSource, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "")
     {
+        _delegateSource = delegateSource;
         _exceptionSelector = exceptionSelector;
-        AssertionBuilder = assertionBuilder
+        AssertionBuilder = delegateSource.AssertionBuilder
             .AppendExpression(callerMemberName);
     }
 
-    public ExceptionWith<TActual, TAnd, TOr> With => new(AssertionBuilder, _exceptionSelector);
+    public ExceptionWith<TActual> With => new(_delegateSource, _exceptionSelector);
 
-    public InvokableAssertionBuilder<TActual, TAnd, TOr> OfAnyType() =>
-        new ThrowsAnythingAssertCondition<TActual>()
-            .ChainedTo(AssertionBuilder, []);
+    public InvokableDelegateAssertionBuilder<TActual> OfAnyType() =>
+        _delegateSource.RegisterAssertion(new ThrowsAnythingAssertCondition<TActual>()
+            , []);
 
-    public InvokableAssertionBuilder<TActual, TAnd, TOr> OfType<TExpected>() => new ThrowsExactTypeOfAssertCondition<TActual, TExpected>()
-        .ChainedTo(AssertionBuilder, [typeof(TExpected).Name]);
+    public InvokableDelegateAssertionBuilder<TActual> OfType<TExpected>() => _delegateSource.RegisterAssertion(new ThrowsExactTypeOfAssertCondition<TActual, TExpected>()
+        , [typeof(TExpected).Name]);
 
-    public InvokableAssertionBuilder<TActual, TAnd, TOr> SubClassOf<TExpected>() =>
-        new ThrowsSubClassOfAssertCondition<TActual, TExpected>()
-            .ChainedTo(AssertionBuilder, [typeof(TExpected).Name]);
+    public InvokableDelegateAssertionBuilder<TActual> SubClassOf<TExpected>() =>
+        _delegateSource.RegisterAssertion(new ThrowsSubClassOfAssertCondition<TActual, TExpected>()
+            , [typeof(TExpected).Name]);
     
-    public InvokableAssertionBuilder<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        new DelegateAssertCondition<TActual,Exception>(default,
+    public InvokableDelegateAssertionBuilder<TActual> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
+        _delegateSource.RegisterAssertion(new DelegateAssertCondition<TActual,Exception>(default,
             (_, exception, _, _) => action(_exceptionSelector(exception)),
             (_, exception, _) => messageFactory(_exceptionSelector(exception))
-        ).ChainedTo(AssertionBuilder, [expectedExpression]);
+        ), [expectedExpression]);
 
     public TaskAwaiter GetAwaiter() => OfAnyType().GetAwaiter();
 }

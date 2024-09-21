@@ -35,15 +35,10 @@ So to create a custom assertion:
 3. Override the `GetFailureMessage` method to return a message when the assertion fails. While you're inside the `Passes()` method you can also set an `OverriddenMessage` string property that will take priority instead. This can be useful if you want to change the failure message dynamically. For example, the default is 'Expected x but received y' - But if one of the values is null, we want to change the message to 'No expected value was passed into the assertion'.
 
 4. Create the extension method!
-   This is where things can start to look daunting because of the generic constraints, but this allows chaining assertions together.
 
-   You need to create an extension off of either `IValueSource<TActual, TAnd, TOr>` or `IDelegateSource<TActual, TAnd, TOr>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
+   You need to create an extension off of either `IValueSource<TActual>` or `IDelegateSource<TActual>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
 
-   TAnd & TOr have the following constraints:
-    - `where TAnd : IAnd<TActual, TAnd, TOr>`
-    - `where TOr : IOr<TActual, TAnd, TOr>`
-
-   Your return type for the extension method should be `InvokableAssertionBuilder<TActual, TAnd, TOr>`
+   Your return type for the extension method should be `InvokableValueAssertionBuilder<TActual>` or `InvokableDelegateAssertionBuilder<TActual>` depending on what type your assertion is.
 
    And then finally, you call `source.RegisterAssertion(assertCondition, [...callerExpressions])` - passing in your newed up your custom assert condition class. 
    The argument expression array allows you to pass in `[CallerArgumentExpression]` values so that your assertion errors show you the code executed to give clear exception messages.
@@ -51,9 +46,9 @@ So to create a custom assertion:
 Here's a fully fledged assertion in action:
 
 ```csharp
-public static InvokableAssertionBuilder<string, TAnd, TOr> Contains<TAnd, TOr>(this IValueSource<string, TAnd, TOr> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
-        where TAnd : IAnd<string, TAnd, TOr>
-        where TOr : IOr<string, TAnd, TOr>
+public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+        where TAnd : IAnd<string>
+        where TOr : IOr<string>
     {
         return valueSource.RegisterAssertion(
             assertCondition: new StringEqualsAssertCondition(expected, stringComparison),
