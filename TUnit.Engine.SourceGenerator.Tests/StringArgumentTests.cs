@@ -27,7 +27,7 @@ internal class StringArgumentTests : TestsBase<TestsGenerator>
             
             Assert.That(generatedFiles[3], Does.Contain(
                 """
-                global::System.String methodArg0 = "    ";
+                global::System.String methodArg0 = " ";
                 """));
             
             Assert.That(generatedFiles[4], Does.Contain(
@@ -37,7 +37,7 @@ internal class StringArgumentTests : TestsBase<TestsGenerator>
             
             Assert.That(generatedFiles[5], Does.Contain(
                 """
-                global::System.String methodArg0 = "\\    ";
+                global::System.String methodArg0 = "\\ ";
                 """));
             
             Assert.That(generatedFiles[6], Does.Contain(
