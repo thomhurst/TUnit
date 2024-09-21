@@ -10,12 +10,12 @@ public static class SourceExtensions
     public static InvokableValueAssertionBuilder<TActual> RegisterAssertion<TActual>(this IValueSource<TActual> source,
         BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string caller = "")
     {
-        return (InvokableValueAssertionBuilder<TActual>) assertCondition.ChainedTo(source.AssertionBuilder, argumentExpressions, caller);
+        return new InvokableValueAssertionBuilder<TActual>(assertCondition.ChainedTo(source.AssertionBuilder, argumentExpressions, caller));
     }
     
     public static InvokableDelegateAssertionBuilder<TActual> RegisterAssertion<TActual>(this IDelegateSource<TActual> source,
         BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string caller = "")
     {
-        return (InvokableDelegateAssertionBuilder<TActual>) assertCondition.ChainedTo(source.AssertionBuilder, argumentExpressions, caller);
+        return new InvokableDelegateAssertionBuilder<TActual>(assertCondition.ChainedTo(source.AssertionBuilder, argumentExpressions, caller));
     }
 }
