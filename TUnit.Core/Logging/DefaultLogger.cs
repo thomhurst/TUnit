@@ -2,7 +2,7 @@
 
 namespace TUnit.Core.Logging;
 
-internal class DefaultLogger : TUnitLogger
+public class DefaultLogger : TUnitLogger
 {
     // Console Interceptor automatically writes to the context so we don't want to duplicate!
     protected override bool WriteToContext => false;

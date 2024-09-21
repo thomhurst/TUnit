@@ -5,6 +5,8 @@ public class DependsOnAttribute : TUnitAttribute
 {
     public string TestName { get; }
     public Type[] ParameterTypes { get; }
+    
+    public bool ProceedOnFailure { get; set; }
 
     public DependsOnAttribute(string testName) : this(testName, [])
     {

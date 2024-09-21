@@ -48,6 +48,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
     <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>

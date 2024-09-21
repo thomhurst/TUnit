@@ -68,7 +68,7 @@ internal class ConstraintKeysCollection : IReadOnlyList<string>, IEquatable<Cons
 
     public int Count => _constraintKeys.Count;
 
-    public string this[int index] => _constraintKeys.ElementAtOrDefault(index);
+    public string this[int index] => _constraintKeys[index];
 
     private sealed class ConstraintKeysCollectionEqualityComparer : IEqualityComparer<ConstraintKeysCollection>
     {

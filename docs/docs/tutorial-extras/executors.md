@@ -30,13 +30,13 @@ public class MyTestClass
     [TestExecutor<STAThreadExecutor>]
     public async Task With_STA()
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).Is.EqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEqualTo(ApartmentState.STA);
     }
     
     [Test]
     public async Task Without_STA()
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).Is.EqualTo(ApartmentState.MTA);
+        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEqualTo(ApartmentState.MTA);
     }
 }
 ```

@@ -46,7 +46,7 @@ public class MyTests
     public void MyTest1() { value = 99; }
 
     [Test, NotInParallel]
-    public async Task MyTest2() { await Assert.That(_value).Is.EqualTo(99); }
+    public async Task MyTest2() { await Assert.That(_value).IsEqualTo(99); }
 }
 ```
 
@@ -65,6 +65,6 @@ public class MyTests
     public void MyTest1() { value = 99; }
 
     [Test, NotInParallel]
-    public async Task MyTest2() { await Assert.That(_value).Is.EqualTo(99); }
+    public async Task MyTest2() { await Assert.That(_value).IsEqualTo(99); }
 }
 ```

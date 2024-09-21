@@ -45,7 +45,7 @@ public class MyTestClass
     {
         var result = Add(additionTestData.Value1, additionTestData.Value2);
 
-        await Assert.That(result).Is.EqualTo(additionTestData.ExpectedResult);
+        await Assert.That(result).IsEqualTo(additionTestData.ExpectedResult);
     }
 
     private int Add(int x, int y)
@@ -80,7 +80,7 @@ public class MyTestClass
     {
         var result = Add(value1, value2);
 
-        await Assert.That(result).Is.EqualTo(expectedResult);
+        await Assert.That(result).IsEqualTo(expectedResult);
     }
 
     private int Add(int x, int y)
@@ -121,7 +121,7 @@ public class MyTestClass
     {
         var result = Add(additionTestData.Value1, additionTestData.Value2);
 
-        await Assert.That(result).Is.EqualTo(additionTestData.ExpectedResult);
+        await Assert.That(result).IsEqualTo(additionTestData.ExpectedResult);
     }
 
     private int Add(int x, int y)
@@ -158,7 +158,7 @@ public class MyTestClass
     {
         var result = Add(value1, value2);
 
-        await Assert.That(result).Is.EqualTo(expectedResult);
+        await Assert.That(result).IsEqualTo(expectedResult);
     }
 
     private int Add(int x, int y)

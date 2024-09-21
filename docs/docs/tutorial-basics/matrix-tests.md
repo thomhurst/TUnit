@@ -30,7 +30,7 @@ public class MyTestClass
     {
         var result = Add(value1, value2);
 
-        await Assert.That(result).Is.Positive();
+        await Assert.That(result).IsPositive();
     }
 
     private int Add(int x, int y)

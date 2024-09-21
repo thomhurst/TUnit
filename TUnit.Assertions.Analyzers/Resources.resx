@@ -70,10 +70,10 @@
         <value>Assert.That(...) should not be used with a constant value</value>
     </data>
     <data name="TUnitAssertions0006Description" xml:space="preserve">
-        <value>Object `Equals` base method should not be called. Use `.Is.EqualTo(...).</value>
+        <value>Object `Equals` base method should not be called. Use `.IsEqualTo(...).</value>
     </data>
     <data name="TUnitAssertions0006MessageFormat" xml:space="preserve">
-        <value>Object `Equals` base method should not be called. Use `.Is.EqualTo(...)</value>
+        <value>Object `Equals` base method should not be called. Use `.IsEqualTo(...)</value>
     </data>
     <data name="TUnitAssertions0006Title" xml:space="preserve">
         <value>Object `Equals` base method should not be called</value>

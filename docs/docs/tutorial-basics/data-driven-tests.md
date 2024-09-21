@@ -33,7 +33,7 @@ public class MyTestClass
     {
         var result = Add(value1, value2);
 
-        await Assert.That(result).Is.EqualTo(expectedResult);
+        await Assert.That(result).IsEqualTo(expectedResult);
     }
 
     private int Add(int x, int y)
