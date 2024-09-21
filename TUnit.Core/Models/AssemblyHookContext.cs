@@ -1,6 +1,4 @@
 using System.Reflection;
-using TUnit.Core.Interfaces;
-using TUnit.Core.Logging;
 
 namespace TUnit.Core;
 

@@ -15,8 +15,6 @@ using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 using ModularPipelines.Options;
-using Polly;
-using Polly.Retry;
 
 namespace TUnit.Pipeline.Modules.Tests;
 

@@ -3,24 +3,21 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class ValueDelegateOr<TActual> 
-    : Or<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IOr<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
-        IDelegateSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>,
-        IValueSource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
+public class ValueDelegateOr<TActual> : IValueDelegateSource<TActual>
  {
-     private readonly AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> _assertionBuilder;
+     private readonly AssertionBuilder<TActual> _assertionBuilder;
 
-     public ValueDelegateOr(AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
+     public ValueDelegateOr(AssertionBuilder<TActual> assertionBuilder)
      {
          _assertionBuilder = assertionBuilder;
      }
     
      
-    public static ValueDelegateOr<TActual> Create(AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> assertionBuilder)
+    public static ValueDelegateOr<TActual> Create(AssertionBuilder<TActual> assertionBuilder)
     {
         return new ValueDelegateOr<TActual>(assertionBuilder);
     }
     
-    AssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
-        ISource<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.AssertionBuilder => new OrAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>(_assertionBuilder);
+    AssertionBuilder<TActual>
+        ISource<TActual>.AssertionBuilder => new OrAssertionBuilder<TActual>(_assertionBuilder);
  }

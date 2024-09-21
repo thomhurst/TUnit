@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using TUnit.Core;
 using TUnit.Core.Enums;
 
 namespace TUnit.Engine.Json;

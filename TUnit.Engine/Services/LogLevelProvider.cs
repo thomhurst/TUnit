@@ -1,5 +1,4 @@
 ﻿using Microsoft.Testing.Platform.CommandLine;
-using TUnit.Core;
 using TUnit.Core.Enums;
 
 namespace TUnit.Engine.Services;

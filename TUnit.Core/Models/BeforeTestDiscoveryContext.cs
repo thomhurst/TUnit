@@ -1,6 +1,3 @@
-using TUnit.Core.Interfaces;
-using TUnit.Core.Logging;
-
 namespace TUnit.Core;
 
 public class BeforeTestDiscoveryContext : Context

@@ -1,18 +1,12 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class InvokableAssertionBuilder<TActual, TAnd, TOr> : 
-    AssertionBuilder<TActual, TAnd, TOr>, IInvokableAssertionBuilder 
-    where TAnd : IAnd<TActual, TAnd, TOr> 
-    where TOr : IOr<TActual, TAnd, TOr>
+public class InvokableAssertionBuilder<TActual> : 
+    AssertionBuilder<TActual>, IInvokableAssertionBuilder 
 {
-    public TAnd And => TAnd.Create(AppendConnector(ChainType.And));
-    public TOr Or => TOr.Create(AppendConnector(ChainType.Or));
-    
     internal InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionDataDelegate, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
     {
     }

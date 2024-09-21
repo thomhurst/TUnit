@@ -1,7 +1,4 @@
-﻿using TUnit.Core.Interfaces;
-using TUnit.Core.Logging;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public class ClassHookContext : Context
 {
