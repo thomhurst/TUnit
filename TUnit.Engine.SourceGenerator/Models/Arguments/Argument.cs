@@ -31,7 +31,7 @@ internal record Argument
         
         if (type == "global::System.Char")
         {
-            return $"'{value.Replace(@"\", @"\\")}'";
+            return $"'{value}'";
         }
         
         if (type == "global::System.Boolean")
@@ -41,7 +41,7 @@ internal record Argument
         
         if (type == "global::System.String")
         {
-            return $"\"{value.Replace(@"\", @"\\")}\"";
+            return $"\"{value}\"";
         }
 
         return value;
