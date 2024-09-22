@@ -10,7 +10,6 @@ public class DebugAssertFailureTests
         FailingMethod();
     }
     
-    [Test]
     private void FailingMethod()
     {
         var @true = "true";
