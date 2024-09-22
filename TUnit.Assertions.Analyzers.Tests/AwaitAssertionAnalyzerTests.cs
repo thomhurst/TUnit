@@ -84,7 +84,7 @@ public class AwaitAssertionAnalyzerTests
     }
     
     [Test]
-    public async Task Assert_Multiple_Is_Not_Flagged_When_Await_Using()
+    public async Task Assert_Multiple_Is_Not_Flagged_When_Await_Using_With_Scope()
     {
         const string text = """
                             using System;
@@ -106,6 +106,36 @@ public class AwaitAssertionAnalyzerTests
                                         await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3, 4, 5 });
                                         await Assert.That(list).HasCount().EqualTo(5);
                                     }
+                                }
+                                
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [Test]
+    public async Task Assert_Multiple_Is_Not_Flagged_When_Await_Using_Without_Scope()
+    {
+        const string text = """
+                            using System;
+                            using System.Collections.Generic;
+                            using System.Threading.Tasks;
+                            using TUnit.Assertions;
+                            using TUnit.Assertions.Extensions;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                            
+                                public async Task MyTest()
+                                {
+                                    var list = new List<int> { 1, 2, 3 };
+                            
+                                    await using var _ = Assert.Multiple();
+                                    
+                                    await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                    await Assert.That(list).HasCount().EqualTo(5);
                                 }
                                 
                             }
