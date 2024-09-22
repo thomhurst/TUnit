@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using System.Collections.Concurrent;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -6,6 +7,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
@@ -27,6 +29,7 @@ internal class SingleTestExecutor : IDataProducer
     private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
     private readonly ClassHookOrchestrator _classHookOrchestrator;
     private readonly TUnitLogger _logger;
+    private readonly ConcurrentDictionary<object, Task> _asyncInitializers = new();
     
     public SingleTestExecutor(
         IExtension extension,
@@ -108,6 +111,8 @@ internal class SingleTestExecutor : IDataProducer
 
                 start = DateTimeOffset.Now;
 
+                await InitializeParameters(testContext);
+                
                 try
                 {
                     await ExecuteBeforeHooks(test, context, testContext);
@@ -242,6 +247,14 @@ internal class SingleTestExecutor : IDataProducer
             {
                 semaphore.Dispose();
             }
+        }
+    }
+
+    private async Task InitializeParameters(TestContext testContext)
+    {
+        foreach (var argument in testContext.TestDetails.TestClassArguments.OfType<IAsyncInitializer>())
+        {
+            await _asyncInitializers.GetOrAdd(argument, _ => argument.InitializeAsync());
         }
     }
 
