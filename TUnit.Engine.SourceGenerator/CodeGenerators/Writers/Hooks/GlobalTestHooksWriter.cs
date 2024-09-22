@@ -21,9 +21,6 @@ internal static class GlobalTestHooksWriter
         sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
         sourceBuilder.WriteLine("using global::TUnit.Core;");
         sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine.Helpers;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine.Hooks;");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("namespace TUnit.Engine;");
         sourceBuilder.WriteLine();
