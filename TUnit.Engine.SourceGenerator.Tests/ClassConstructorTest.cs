@@ -15,8 +15,7 @@ internal class ClassConstructorTest : TestsBase<TestsGenerator>
             [
                 Path.Combine(Git.RootDirectory.FullName,
                     "TUnit.TestProject",
-                    "Dummy",
-                    "SomeAsyncDisposableClass.cs"),
+                    "DummyReferenceTypeClass.cs"),
                 Path.Combine(Git.RootDirectory.FullName,
                     "TUnit.TestProject",
                     "DependencyInjectionClassConstructor.cs")
