@@ -43,6 +43,7 @@ public class DependencyInjectionClassConstructor : IClassConstructor
     private static IServiceProvider CreateServiceProvider()
     {
         return new ServiceCollection()
+            .AddTransient<DummyReferenceTypeClass>()
             .AddTransient<SomeAsyncDisposableClass>()
             .BuildServiceProvider();
     }

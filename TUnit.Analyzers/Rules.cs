@@ -73,7 +73,7 @@ internal static class Rules
         CreateDescriptor("TUnit0022", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor Dispose_Member_In_Cleanup =
-        CreateDescriptor("TUnit0023", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0023", UsageCategory, DiagnosticSeverity.Warning);
     
     public static readonly DiagnosticDescriptor Wrong_Category_Attribute =
         CreateDescriptor("TUnit0024", UsageCategory, DiagnosticSeverity.Error);
