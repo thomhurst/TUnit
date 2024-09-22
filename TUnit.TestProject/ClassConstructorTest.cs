@@ -1,6 +1,4 @@
-﻿using TUnit.TestProject.Dummy;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 [ClassConstructor<DependencyInjectionClassConstructor>]
 public class ClassConstructorTest(DummyReferenceTypeClass dummyReferenceTypeClass)
