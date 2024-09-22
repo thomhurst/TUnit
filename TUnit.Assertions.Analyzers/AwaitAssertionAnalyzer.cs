@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -37,9 +38,14 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
         
-        if(fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple"
-            && invocationOperation.Parent is not IUsingOperation)
+        if(fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple")
         {
+            if (invocationOperation.GetAncestorOperations()
+                .Any(x => x is IUsingOperation or IUsingDeclarationOperation))
+            {
+                return;
+            }
+            
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.DisposableUsingMultiple, context.Operation.Syntax.GetLocation())
             );
