@@ -1,4 +1,4 @@
-﻿namespace TUnit.Engine;
+﻿namespace TUnit.Core;
 
 public static class AsyncConvert
 {

@@ -18,7 +18,7 @@ public class ClassHookOrchestrator(
         {
             foreach (var (name, hookMethod, _) in list)
             {
-                await hookMessagePublisher.Discover(context, $"Before Class: {name}", hookMethod);
+                await hookMessagePublisher.Discover(context.Request.Session.SessionUid.Value, $"Before Class: {name}", hookMethod);
             }
         }
 
@@ -26,30 +26,9 @@ public class ClassHookOrchestrator(
         {
             foreach (var (name, hookMethod, _) in list)
             {
-                await hookMessagePublisher.Discover(context, $"After Class: {name}", hookMethod);
+                await hookMessagePublisher.Discover(context.Request.Session.SessionUid.Value, $"After Class: {name}", hookMethod);
             }
         }
-    }
-    
-    public static void RegisterBeforeHook(Type type, StaticHookMethod<ClassHookContext> staticMethod)
-    {
-        var taskFunctions = TestDictionary.ClassSetUps.GetOrAdd(type, _ => []);
-
-        taskFunctions.Add((staticMethod.Name, staticMethod, Convert(type, staticMethod)));
-    }
-    
-    public static void RegisterAfterHook(Type type, StaticHookMethod<ClassHookContext> staticMethod)
-    {
-        var taskFunctions = TestDictionary.ClassCleanUps.GetOrAdd(type, _ => []);
-
-        taskFunctions.Add((staticMethod.Name, staticMethod, () =>
-        {
-            var context = GetClassHookContext(type);
-            
-            var timeout = staticMethod.Timeout;
-
-            return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
-        }));
     }
 
     internal static ClassHookContext GetClassHookContext(Type type)
@@ -86,7 +65,7 @@ public class ClassHookOrchestrator(
                 // As these are lazy we should always get the same Task
                 // So we await the same Task to ensure it's finished first
                 // and also gives the benefit of rethrowing the same exception if it failed
-                await setUp.Action.Value(executeRequestContext, hookMessagePublisher);
+                await setUp.Action.Value(executeRequestContext.Request.Session.SessionUid.Value, hookMessagePublisher);
             }
         }
     }
@@ -113,7 +92,7 @@ public class ClassHookOrchestrator(
 
             foreach (var cleanUp in cleanUpsForType.OrderBy(x => x.HookMethod.Order))
             {
-                await hookMessagePublisher.Push(executeRequestContext, $"After Class: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
+                await hookMessagePublisher.Push(executeRequestContext.Request.Session.SessionUid.Value, $"After Class: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
             }
             
             var context = GetClassHookContext(testClassType);
@@ -142,20 +121,5 @@ public class ClassHookOrchestrator(
             yield return type;
             type = type.BaseType;
         }
-    }
-    
-    private static LazyHook<ExecuteRequestContext, HookMessagePublisher> Convert(Type type, StaticHookMethod<ClassHookContext> staticMethod)
-    {
-        return new LazyHook<ExecuteRequestContext, HookMessagePublisher>(async (executeRequestContext, hookPublisher) =>
-        {
-            var context = GetClassHookContext(type);
-            
-            var timeout = staticMethod.Timeout;
-            await hookPublisher.Push(executeRequestContext, $"Before Class: {staticMethod.Name}", staticMethod, () =>
-                RunHelpers.RunWithTimeoutAsync(
-                    token => staticMethod.HookExecutor.ExecuteBeforeClassHook(staticMethod.MethodInfo, context,
-                        () => staticMethod.Body(context, token)), timeout)
-            );
-        });
     }
 }

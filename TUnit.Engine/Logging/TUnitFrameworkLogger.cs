@@ -2,22 +2,23 @@
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
+using TUnit.Core.Logging;
 
 namespace TUnit.Engine.Logging;
 
-internal class TUnitLogger : IOutputDeviceDataProducer
+internal class TUnitFrameworkLogger : IOutputDeviceDataProducer, ITUnitFrameworkLogger
 {
     private readonly IExtension _extension;
     private readonly IOutputDevice _outputDevice;
-    private readonly ILogger<TUnitLogger> _logger;
+    private readonly ILogger<TUnitFrameworkLogger> _logger;
 
-    public static TUnitLogger? Instance { get; private set; }
+    public static TUnitFrameworkLogger? Instance { get; private set; }
 
-    public TUnitLogger(IExtension extension, IOutputDevice outputDevice, ILoggerFactory loggerFactory)
+    public TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILoggerFactory loggerFactory)
     {
         _extension = extension;
         _outputDevice = outputDevice;
-        _logger = loggerFactory.CreateLogger<TUnitLogger>();
+        _logger = loggerFactory.CreateLogger<TUnitFrameworkLogger>();
 
         Instance = this;
     }

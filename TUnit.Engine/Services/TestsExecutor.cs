@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
@@ -16,7 +17,7 @@ internal class TestsExecutor
 
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly TestGrouper _testGrouper;
-    private readonly TUnitLogger _logger;
+    private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
 
     private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
@@ -26,7 +27,7 @@ internal class TestsExecutor
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
         TestGrouper testGrouper,
-        TUnitLogger logger,
+        TUnitFrameworkLogger logger,
         ICommandLineOptions commandLineOptions)
     {
         _singleTestExecutor = singleTestExecutor;

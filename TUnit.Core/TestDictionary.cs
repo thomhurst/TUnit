@@ -1,11 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
-using TUnit.Core;
-using TUnit.Engine.Data;
-using TUnit.Engine.Services;
+using TUnit.Core.Data;
 
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -16,11 +13,11 @@ internal static class TestDictionary
     public static readonly Dictionary<string, FailedInitializationTest> FailedInitializationTests = new();
     
     public static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
-    public static readonly ConcurrentDictionary<Type, List<(string Name, StaticHookMethod HookMethod, LazyHook<ExecuteRequestContext, HookMessagePublisher> Action)>> ClassSetUps = new();
+    public static readonly ConcurrentDictionary<Type, List<(string Name, StaticHookMethod HookMethod, LazyHook<string, IHookMessagePublisher> Action)>> ClassSetUps = new();
     public static readonly ConcurrentDictionary<Type, List<(string Name, StaticHookMethod HookMethod, Func<Task> Action)>> ClassCleanUps = new();
     
     public static readonly ConcurrentDictionary<Assembly, AssemblyHookContext> AssemblyHookContexts = new();
-    public static readonly GetOnlyDictionary<Assembly, List<(string Name, StaticHookMethod HookMethod, LazyHook<ExecuteRequestContext, HookMessagePublisher> Action)>> AssemblySetUps = new();
+    public static readonly GetOnlyDictionary<Assembly, List<(string Name, StaticHookMethod HookMethod, LazyHook<string, IHookMessagePublisher> Action)>> AssemblySetUps = new();
     public static readonly GetOnlyDictionary<Assembly, List<(string Name, StaticHookMethod HookMethod, Func<Task> Action)>> AssemblyCleanUps = new();
 
     public static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, DiscoveredTest, Task> Action)>> TestSetUps = new();
@@ -29,10 +26,10 @@ internal static class TestDictionary
     public static readonly List<(string Name, StaticHookMethod HookMethod, Func<TestContext, Task> Action)> GlobalTestSetUps = [];
     public static readonly List<(string Name, StaticHookMethod HookMethod, Func<TestContext, Task> Action)> GlobalTestCleanUps = [];
 
-    public static readonly List<(string Name, StaticHookMethod HookMethod, LazyHook<ExecuteRequestContext, HookMessagePublisher> Action)> GlobalClassSetUps = [];
+    public static readonly List<(string Name, StaticHookMethod HookMethod, LazyHook<string, IHookMessagePublisher> Action)> GlobalClassSetUps = [];
     public static readonly List<(string Name, StaticHookMethod HookMethod, Func<ClassHookContext, Task> Action)> GlobalClassCleanUps = [];
     
-    public static readonly List<(string Name, StaticHookMethod HookMethod, LazyHook<ExecuteRequestContext, HookMessagePublisher> Action)> GlobalAssemblySetUps = [];
+    public static readonly List<(string Name, StaticHookMethod HookMethod, LazyHook<string, IHookMessagePublisher> Action)> GlobalAssemblySetUps = [];
     public static readonly List<(string Name, StaticHookMethod HookMethod, Func<AssemblyHookContext, Task> Action)> GlobalAssemblyCleanUps = [];
     
     public static readonly List<(string Name, StaticHookMethod HookMethod, Func<BeforeTestDiscoveryContext, Task> Action)> BeforeTestDiscovery = [];

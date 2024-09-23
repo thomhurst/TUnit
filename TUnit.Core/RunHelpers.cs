@@ -1,7 +1,7 @@
 ﻿using TUnit.Core.Exceptions;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 internal static class RunHelpers
 {

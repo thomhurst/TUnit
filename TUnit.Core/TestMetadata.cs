@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core;
 using TUnit.Core.Interfaces;
 
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>
 {

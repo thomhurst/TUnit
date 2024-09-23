@@ -10,44 +10,6 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class TestHookOrchestrator
 {
-    public static void RegisterBeforeHook<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
-    {
-        var taskFunctions = TestDictionary.TestSetUps.GetOrAdd(typeof(TClassType), _ => []);
-
-        taskFunctions.Add((instanceMethod.Name, instanceMethod.Order, async (classInstance, discoveredTest) =>
-        {
-            var timeout = instanceMethod.Timeout;
-
-            try
-            {
-                await RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(instanceMethod, discoveredTest).ExecuteBeforeTestHook(instanceMethod.MethodInfo, discoveredTest.TestContext, () => instanceMethod.Body((TClassType) classInstance, discoveredTest.TestContext, token)), timeout);
-            }
-            catch (Exception e)
-            {
-                throw new BeforeTestException($"Error executing Before(Test) method: {instanceMethod.Name}", e);
-            }
-        }));
-    }
-    
-    public static void RegisterAfterHook<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
-    {
-        var taskFunctions = TestDictionary.TestCleanUps.GetOrAdd(typeof(TClassType), _ => []);
-
-        taskFunctions.Add((instanceMethod.Name, instanceMethod.Order, async (classInstance, discoveredTest) =>
-        {
-            var timeout = instanceMethod.Timeout;
-
-            try
-            {
-                await RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(instanceMethod, discoveredTest).ExecuteAfterTestHook(instanceMethod.MethodInfo, discoveredTest.TestContext, () => instanceMethod.Body((TClassType) classInstance, discoveredTest.TestContext, token)), timeout);
-            }
-            catch (Exception e)
-            {
-                throw new AfterTestException($"Error executing After(Test) method: {instanceMethod.Name}", e);
-            }
-        }));
-    }
-
     internal static async Task ExecuteBeforeHooks(object classInstance, DiscoveredTest discoveredTest)
     {
         // Run Global Hooks First

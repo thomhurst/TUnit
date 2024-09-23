@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Services;
+using TUnit.Core;
+using TUnit.Core.Helpers;
+using TUnit.Core.Logging;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
@@ -35,12 +38,14 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<TestFilterService>(_ => new TestFilterService(frameworkServiceProvider.GetLoggerFactory()))
             .AddSingleton<ExplicitFilterService>()
             .AddSingleton<OnEndExecutor>()
-            .AddSingleton<TUnitLogger>(_ => new TUnitLogger(extension, frameworkServiceProvider.GetOutputDevice(), frameworkServiceProvider.GetLoggerFactory()))
+            .AddSingleton<TUnitFrameworkLogger>(_ => new TUnitFrameworkLogger(extension, frameworkServiceProvider.GetOutputDevice(), frameworkServiceProvider.GetLoggerFactory()))
             .AddSingleton<TUnitInitializer>()
             .AddSingleton<ParallelLimitProvider>()
             .AddSingleton<AssemblyHookOrchestrator>()
             .AddSingleton<ClassHookOrchestrator>()
             .AddSingleton<GlobalStaticTestHookOrchestrator>()
-            .AddSingleton<HookMessagePublisher>();
+            .AddSingleton<HookMessagePublisher>(x => new HookMessagePublisher(
+                ServiceProviderExtensions.GetRequiredService<IExtension>(x),
+                frameworkServiceProvider.GetMessageBus()));
     }
 }

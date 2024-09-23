@@ -1,12 +1,12 @@
-﻿using TUnit.Engine.Logging;
+﻿using TUnit.Core.Logging;
 
-namespace TUnit.Engine.Helpers;
+namespace TUnit.Core.Helpers;
 
 internal class Disposer
 {
-    private readonly TUnitLogger? _logger;
+    private readonly ITUnitFrameworkLogger? _logger;
 
-    public Disposer(TUnitLogger? logger)
+    public Disposer(ITUnitFrameworkLogger? logger)
     {
         _logger = logger;
     }

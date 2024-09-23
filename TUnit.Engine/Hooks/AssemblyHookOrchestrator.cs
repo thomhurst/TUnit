@@ -2,7 +2,6 @@
 using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
-using TUnit.Engine.Data;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
@@ -20,7 +19,7 @@ public class AssemblyHookOrchestrator(
         {
             foreach (var (name, hookMethod, _) in list)
             {
-                await hookMessagePublisher.Discover(context, $"Before Assembly: {name}", hookMethod);
+                await hookMessagePublisher.Discover(context.Request.Session.SessionUid.Value, $"Before Assembly: {name}", hookMethod);
             }
         }
 
@@ -28,7 +27,7 @@ public class AssemblyHookOrchestrator(
         {
             foreach (var (name, hookMethod, _) in list)
             {
-                await hookMessagePublisher.Discover(context, $"After Assembly: {name}", hookMethod);
+                await hookMessagePublisher.Discover(context.Request.Session.SessionUid.Value, $"After Assembly: {name}", hookMethod);
             }
         }
     }
@@ -46,9 +45,9 @@ public class AssemblyHookOrchestrator(
         }
     }
 
-    private static LazyHook<ExecuteRequestContext, HookMessagePublisher> Convert(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
+    private static LazyHook<string, IHookMessagePublisher> Convert(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
     {
-        return new LazyHook<ExecuteRequestContext, HookMessagePublisher>(async (executeRequestContext, hookPublisher) =>
+        return new LazyHook<string, IHookMessagePublisher>(async (executeRequestContext, hookPublisher) =>
         {
             var context = GetAssemblyHookContext(assembly);
             
@@ -74,7 +73,7 @@ public class AssemblyHookOrchestrator(
             // As these are lazy we should always get the same Task
             // So we await the same Task to ensure it's finished first
             // and also gives the benefit of rethrowing the same exception if it failed
-            await setUp.Action.Value(executeRequestContext, hookMessagePublisher); 
+            await setUp.Action.Value(executeRequestContext.Request.Session.SessionUid.Value, hookMessagePublisher); 
         }
     }
 
@@ -87,7 +86,7 @@ public class AssemblyHookOrchestrator(
         
         foreach (var cleanUp in TestDictionary.AssemblyCleanUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.HookMethod.Order))
         {
-            await hookMessagePublisher.Push(executeRequestContext, $"After Assembly: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
+            await hookMessagePublisher.Push(executeRequestContext.Request.Session.SessionUid.Value, $"After Assembly: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
         }
         
         var context = GetAssemblyHookContext(assembly);

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Hooks;
@@ -12,9 +13,9 @@ namespace TUnit.Engine.Services;
 internal class OnEndExecutor
 {
     private readonly ICommandLineOptions _commandLineOptions;
-    private readonly TUnitLogger _logger;
+    private readonly TUnitFrameworkLogger _logger;
 
-    public OnEndExecutor(ICommandLineOptions commandLineOptions, TUnitLogger logger)
+    public OnEndExecutor(ICommandLineOptions commandLineOptions, TUnitFrameworkLogger logger)
     {
         _commandLineOptions = commandLineOptions;
         _logger = logger;

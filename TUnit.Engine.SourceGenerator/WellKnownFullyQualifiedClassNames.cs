@@ -23,7 +23,6 @@ public static class WellKnownFullyQualifiedClassNames
  
     // Other
     public static readonly FullyQualifiedTypeName TestContext = "TUnit.Core.TestContext";
-    public static readonly FullyQualifiedTypeName CancellationToken = "TUnit.Core.CancellationToken";
     public static readonly FullyQualifiedTypeName AssemblyHookContext = "TUnit.Core.AssemblyHookContext";
     public static readonly FullyQualifiedTypeName ClassHookContext = "TUnit.Core.ClassHookContext";
     public static readonly FullyQualifiedTypeName TestSessionContext = "TUnit.Core.TestSessionContext";
@@ -35,4 +34,6 @@ public static class WellKnownFullyQualifiedClassNames
         
     public static readonly FullyQualifiedTypeName BeforeEveryAttribute = "TUnit.Core.BeforeEveryAttribute";
     public static readonly FullyQualifiedTypeName AfterEveryAttribute = "TUnit.Core.AfterEveryAttribute";
+    
+    public static readonly FullyQualifiedTypeName CancellationToken = "System.Threading.CancellationToken";
 }

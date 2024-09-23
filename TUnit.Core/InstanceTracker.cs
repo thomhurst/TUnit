@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 internal static class InstanceTracker
 {
