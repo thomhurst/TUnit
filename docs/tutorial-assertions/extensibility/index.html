@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.5.2">
 <title data-rh="true">Extensibility / Custom Assertions | TUnit</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://thomhurst.github.io/TUnit/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://thomhurst.github.io/TUnit/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://thomhurst.github.io/TUnit/docs/tutorial-assertions/extensibility"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Extensibility / Custom Assertions | TUnit"><meta data-rh="true" name="description" content="The TUnit Assertions can be easily extended so that you can create your own assertions."><meta data-rh="true" property="og:description" content="The TUnit Assertions can be easily extended so that you can create your own assertions."><link data-rh="true" rel="icon" href="/TUnit/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://thomhurst.github.io/TUnit/docs/tutorial-assertions/extensibility"><link data-rh="true" rel="alternate" href="https://thomhurst.github.io/TUnit/docs/tutorial-assertions/extensibility" hreflang="en"><link data-rh="true" rel="alternate" href="https://thomhurst.github.io/TUnit/docs/tutorial-assertions/extensibility" hreflang="x-default"><link rel="stylesheet" href="/TUnit/assets/css/styles.cfc899bb.css">
-<script src="/TUnit/assets/js/runtime~main.a1c244d1.js" defer="defer"></script>
+<script src="/TUnit/assets/js/runtime~main.d77908ca.js" defer="defer"></script>
 <script src="/TUnit/assets/js/main.91081e84.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -21,7 +21,7 @@
 <ol>
 <li>
 <p>Create a class that inherits from <code>AssertCondition&lt;TActual, TExpected&gt;</code>
-<code>TActual</code> will the the type of object that is being asserted. For example if I started with <code>Assert.That(&quot;Some text&quot;)</code> then <code>TActual</code> would be a <code>string</code> because that&#x27;s what we&#x27;re asserting on.</p>
+<code>TActual</code> will be the type of object that is being asserted. For example if I started with <code>Assert.That(&quot;Some text&quot;)</code> then <code>TActual</code> would be a <code>string</code> because that&#x27;s what we&#x27;re asserting on.</p>
 <p><code>TExpected</code> will be the data (if any) that you receive from your extension method, so you&#x27;ll be responsible for passing this in. You must pass it to the base class via the base constructor: <code>base(expectedValue)</code></p>
 </li>
 <li>
