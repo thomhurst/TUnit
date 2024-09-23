@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Data;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
@@ -20,10 +21,10 @@ public static class TestDataContainer
     
     private static Disposer Disposer => new(TUnitLogger.Instance);
     
-    public static T GetInstanceForType<T>(Type key, Func<T> func)
+    public static T GetInstanceForType<T>(Type key, Func<T> func) where T : class
     {
         var objectsForClass = InjectedSharedPerClassType.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
-        return (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
+        return  (T)objectsForClass.GetOrAdd(typeof(T), _ => func());
     }
 
     public static void IncrementGlobalUsage(Type type)
@@ -33,9 +34,9 @@ public static class TestDataContainer
         CountsPerGlobalType[type] = count + 1;
     }
     
-    public static T GetGlobalInstance<T>(Func<T> func)
+    public static T GetGlobalInstance<T>(Func<T> func) where T : class
     {
-        return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => func()!);
+        return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => func());
     }
 
     public static void IncrementKeyUsage(string key, Type type)
@@ -47,14 +48,11 @@ public static class TestDataContainer
         keysForType[key] = count + 1;
     }
 
-    public static T GetInstanceForKey<T>(string key, Func<T> func)
+    public static T GetInstanceForKey<T>(string key, Func<T> func) where T : class
     {
-        lock (Lock)
-        {
-            var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
+        var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
 
-            return (T)instancesForType.GetOrAdd(key, _ => func()!);
-        }
+        return  (T)instancesForType.GetOrAdd(key, _ => func());
     }
     
     internal static async Task OnLastInstance(Type testClassType)
