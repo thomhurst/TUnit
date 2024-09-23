@@ -70,7 +70,7 @@ internal static class GlobalTestHooksWriter
 
     private static string GetClassType(string hookType, HookLocationType hookLocationType)
     {
-        if (hookType == "TestDiscovery" && hookLocationType == HookLocationType.Before)
+        if (hookType == "TUnit.Core.HookType.TestDiscovery" && hookLocationType == HookLocationType.Before)
         {
             return "BeforeTestDiscoveryContext";
         }
