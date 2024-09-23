@@ -26,7 +26,12 @@ public class ForbidRedefiningAttributeUsageAnalyzer : ConcurrentDiagnosticAnalyz
             return;
         }
 
-        if (namedTypeSymbol.GetSelfAndBaseTypes().All(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) != "global::TUnit.Core.TUnitAttribute"))
+        if (!namedTypeSymbol.IsOrInherits("global::TUnit.Core.TUnitAttribute"))
+        {
+            return;
+        }
+
+        if (namedTypeSymbol.ContainingNamespace?.ToDisplayString().StartsWith("TUnit.Core") == true)
         {
             return;
         }

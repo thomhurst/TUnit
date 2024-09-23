@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;
@@ -37,8 +38,8 @@ public static class AttributeExtensions
                displayString == WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute;
     }
 
-    public static Core.HookType GetHookType(this AttributeData attributeData)
+    public static string GetHookType(this AttributeData attributeData)
     {
-        return (Core.HookType) Enum.ToObject(typeof(Core.HookType), attributeData.ConstructorArguments[0].Value!);
+        return attributeData.ConstructorArguments[0].ToCSharpString();
     }
 }

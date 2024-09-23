@@ -68,20 +68,20 @@ internal static class GlobalTestHooksWriter
         context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
     }
 
-    private static string GetClassType(Core.HookType hookType, HookLocationType hookLocationType)
+    private static string GetClassType(string hookType, HookLocationType hookLocationType)
     {
-        if (hookType == Core.HookType.TestDiscovery && hookLocationType == HookLocationType.Before)
+        if (hookType == "TestDiscovery" && hookLocationType == HookLocationType.Before)
         {
             return "BeforeTestDiscoveryContext";
         }
         
         return hookType switch
         {
-            Core.HookType.Test => "TestContext",
-            Core.HookType.Class => "ClassHookContext",
-            Core.HookType.Assembly => "AssemblyHookContext",
-            Core.HookType.TestSession => "TestSessionContext",
-            Core.HookType.TestDiscovery => "TestDiscoveryContext",
+            "TUnit.Core.HookType.Test" => "TestContext",
+            "TUnit.Core.HookType.Class" => "ClassHookContext",
+            "TUnit.Core.HookType.Assembly" => "AssemblyHookContext",
+            "TUnit.Core.HookType.TestSession" => "TestSessionContext",
+            "TUnit.Core.HookType.TestDiscovery" => "TestDiscoveryContext",
             _ => throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null)
         };
     }
@@ -92,12 +92,12 @@ internal static class GlobalTestHooksWriter
 
         var expectedType = model.HookLevel switch
         {
-            Core.HookType.Test => WellKnownFullyQualifiedClassNames.TestContext,
-            Core.HookType.Class => WellKnownFullyQualifiedClassNames.ClassHookContext,
-            Core.HookType.Assembly => WellKnownFullyQualifiedClassNames.AssemblyHookContext,
-            Core.HookType.TestSession => WellKnownFullyQualifiedClassNames.TestSessionContext,
-            Core.HookType.TestDiscovery when hookLocationType == HookLocationType.Before => WellKnownFullyQualifiedClassNames.BeforeTestDiscoveryContext,
-            Core.HookType.TestDiscovery when hookLocationType == HookLocationType.After => WellKnownFullyQualifiedClassNames.TestDiscoveryContext,
+            "TUnit.Core.HookType.Test" => WellKnownFullyQualifiedClassNames.TestContext,
+            "TUnit.Core.HookType.Class" => WellKnownFullyQualifiedClassNames.ClassHookContext,
+            "TUnit.Core.HookType.Assembly" => WellKnownFullyQualifiedClassNames.AssemblyHookContext,
+            "TUnit.Core.HookType.TestSession" => WellKnownFullyQualifiedClassNames.TestSessionContext,
+            "TUnit.Core.HookType.TestDiscovery" when hookLocationType == HookLocationType.Before => WellKnownFullyQualifiedClassNames.BeforeTestDiscoveryContext,
+            "TUnit.Core.HookType.TestDiscovery" when hookLocationType == HookLocationType.After => WellKnownFullyQualifiedClassNames.TestDiscoveryContext,
             _ => throw new ArgumentOutOfRangeException()
         };
         

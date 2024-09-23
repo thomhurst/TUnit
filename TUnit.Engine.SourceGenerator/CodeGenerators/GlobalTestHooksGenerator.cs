@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TUnit.Core.Executors;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
@@ -65,7 +65,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
 
         foreach (var contextAttribute in context.Attributes)
         {
-            var hookLevel = (Core.HookType) Enum.ToObject(typeof(Core.HookType), contextAttribute.ConstructorArguments[0].Value!);
+            var hookLevel = contextAttribute.ConstructorArguments[0].ToCSharpString();
 
             yield return new HooksDataModel
             {
@@ -78,7 +78,7 @@ internal class GlobalTestHooksGenerator : IIncrementalGenerator
                     .Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
                     .ToArray(),
                 HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute(),
-                HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(HookExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.HookExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
                 FilePath = contextAttribute.ConstructorArguments[1].Value?.ToString() ?? string.Empty,
                 LineNumber = contextAttribute.ConstructorArguments[2].Value as int? ?? 0,
