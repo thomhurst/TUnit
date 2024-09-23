@@ -56,8 +56,8 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         var expectedHookType = field.IsStatic
-            ? "Class"
-            : "Test";
+            ? "TUnit.Core.HookType.Class"
+            : "TUnit.Core.HookType.Test";
             
         var methodsRequiringDisposeCall = field.ContainingType.GetMembers()
             .Where(x => x.IsStatic == field.IsStatic)

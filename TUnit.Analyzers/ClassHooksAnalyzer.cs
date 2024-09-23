@@ -27,7 +27,7 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var onlyOnceAttributes = attributes
-                .Where(x => x.IsNonGlobalHook() && x.GetHookType() == "Class")
+                .Where(x => x.IsNonGlobalHook() && x.GetHookType() == "TUnit.Core.HookType.Class")
                 .ToList();
 
         if (!onlyOnceAttributes.Any())
