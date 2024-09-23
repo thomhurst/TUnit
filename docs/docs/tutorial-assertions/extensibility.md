@@ -17,7 +17,7 @@ Delegates are bits of code that haven't executed yet - Instead they are passed i
 So to create a custom assertion:
 
 1. Create a class that inherits from `AssertCondition<TActual, TExpected>`
-   `TActual` will the type of object that is being asserted. For example if I started with `Assert.That("Some text")` then `TActual` would be a `string` because that's what we're asserting on.
+   `TActual` will be the type of object that is being asserted. For example if I started with `Assert.That("Some text")` then `TActual` would be a `string` because that's what we're asserting on.
 
    `TExpected` will be the data (if any) that you receive from your extension method, so you'll be responsible for passing this in. You must pass it to the base class via the base constructor: `base(expectedValue)`
 
