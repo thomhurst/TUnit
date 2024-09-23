@@ -1,6 +1,5 @@
 ﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
-using TUnit.Core.Exceptions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 

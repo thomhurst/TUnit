@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
+﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
 using TUnit.Engine.Services;
 
