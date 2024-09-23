@@ -35,7 +35,7 @@ internal static class GlobalTestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$$"""
-                   GlobalStaticTestHookOrchestrator.RegisterBeforeHook(new StaticHookMethod<{{{GetClassType(model.HookLevel, hookLocationType)}}}>
+                   TestRegistrar.RegisterBeforeHook(new StaticHookMethod<{{{GetClassType(model.HookLevel, hookLocationType)}}}>
                    		{ 
                               MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model, hookLocationType)}}})),
@@ -50,7 +50,7 @@ internal static class GlobalTestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  GlobalStaticTestHookOrchestrator.RegisterAfterHook(new StaticHookMethod<{{GetClassType(model.HookLevel, hookLocationType)}}>
+                  TestRegistrar.RegisterAfterHook(new StaticHookMethod<{{GetClassType(model.HookLevel, hookLocationType)}}>
                   		{ 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model, hookLocationType)}})),

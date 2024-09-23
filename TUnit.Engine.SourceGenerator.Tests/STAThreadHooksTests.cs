@@ -12,10 +12,10 @@ internal class STAThreadHooksTests : TestsBase<TestHooksGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(2));
             
-            Assert.That(generatedFiles[0], Does.Contain("TestHookOrchestrator.RegisterBeforeHook"));
+            Assert.That(generatedFiles[0], Does.Contain("TestRegistrar.RegisterBeforeHook"));
             Assert.That(generatedFiles[0], Does.Contain("HookExecutor = new global::TUnit.Core.STAThreadExecutor(),"));
             
-            Assert.That(generatedFiles[1], Does.Contain("TestHookOrchestrator.RegisterAfterHook"));
+            Assert.That(generatedFiles[1], Does.Contain("TestRegistrar.RegisterAfterHook"));
             Assert.That(generatedFiles[1], Does.Contain("HookExecutor = new global::TUnit.Core.STAThreadExecutor(),"));
         });
 }

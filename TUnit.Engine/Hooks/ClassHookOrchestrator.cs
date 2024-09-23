@@ -12,14 +12,9 @@ public class ClassHookOrchestrator(
     HookMessagePublisher hookMessagePublisher,
     GlobalStaticTestHookOrchestrator globalStaticTestHookOrchestrator)
 {
-    private static readonly ConcurrentDictionary<Type, List<(string Name, StaticHookMethod HookMethod, LazyHook<ExecuteRequestContext, HookMessagePublisher> Action)>> SetUps = new();
-    private static readonly ConcurrentDictionary<Type, List<(string Name, StaticHookMethod HookMethod, Func<Task> Action)>> CleanUps = new();
-    
-    private static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
-
     public async Task DiscoverHooks(ExecuteRequestContext context)
     {
-        foreach (var (_, list) in SetUps)
+        foreach (var (_, list) in TestDictionary.ClassSetUps)
         {
             foreach (var (name, hookMethod, _) in list)
             {
@@ -27,7 +22,7 @@ public class ClassHookOrchestrator(
             }
         }
 
-        foreach (var (_, list) in CleanUps)
+        foreach (var (_, list) in TestDictionary.ClassCleanUps)
         {
             foreach (var (name, hookMethod, _) in list)
             {
@@ -38,14 +33,14 @@ public class ClassHookOrchestrator(
     
     public static void RegisterBeforeHook(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
-        var taskFunctions = SetUps.GetOrAdd(type, _ => []);
+        var taskFunctions = TestDictionary.ClassSetUps.GetOrAdd(type, _ => []);
 
         taskFunctions.Add((staticMethod.Name, staticMethod, Convert(type, staticMethod)));
     }
     
     public static void RegisterAfterHook(Type type, StaticHookMethod<ClassHookContext> staticMethod)
     {
-        var taskFunctions = CleanUps.GetOrAdd(type, _ => []);
+        var taskFunctions = TestDictionary.ClassCleanUps.GetOrAdd(type, _ => []);
 
         taskFunctions.Add((staticMethod.Name, staticMethod, () =>
         {
@@ -56,24 +51,12 @@ public class ClassHookOrchestrator(
             return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterClassHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
         }));
     }
-    
-    public static void RegisterTestContext(Type type, TestContext testContext)
-    {
-        var classHookContext = ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
-            {
-                ClassType = type
-            });
-
-        classHookContext.Tests.Add(testContext);
-        
-        AssemblyHookOrchestrator.RegisterTestContext(type.Assembly, classHookContext);
-    }
 
     internal static ClassHookContext GetClassHookContext(Type type)
     {
         lock (type)
         {
-            return ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
+            return TestDictionary.ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
             {
                 ClassType = type
             });
@@ -93,7 +76,7 @@ public class ClassHookOrchestrator(
 
         foreach (var type in typesIncludingBase)
         {
-            if (!SetUps.TryGetValue(type, out var setUpsForType))
+            if (!TestDictionary.ClassSetUps.TryGetValue(type, out var setUpsForType))
             {
                 continue;
             }
@@ -123,7 +106,7 @@ public class ClassHookOrchestrator(
 
             await TestDataContainer.OnLastInstance(testClassType);
             
-            if (!CleanUps.TryGetValue(type, out var cleanUpsForType))
+            if (!TestDictionary.ClassCleanUps.TryGetValue(type, out var cleanUpsForType))
             {
                 continue;
             }
@@ -142,7 +125,7 @@ public class ClassHookOrchestrator(
 
     public static IEnumerable<TestContext> GetTestsForType(Type type)
     {
-        var context = ClassHookContexts.GetOrAdd(type, new ClassHookContext
+        var context = TestDictionary.ClassHookContexts.GetOrAdd(type, new ClassHookContext
         {
             ClassType = type
         });

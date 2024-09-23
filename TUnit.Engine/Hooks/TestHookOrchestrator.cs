@@ -10,12 +10,9 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class TestHookOrchestrator
 {
-    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, DiscoveredTest, Task> Action)>> SetUps = new();
-    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, DiscoveredTest, Task> Action)>> CleanUps = new();
-    
     public static void RegisterBeforeHook<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
     {
-        var taskFunctions = SetUps.GetOrAdd(typeof(TClassType), _ => []);
+        var taskFunctions = TestDictionary.TestSetUps.GetOrAdd(typeof(TClassType), _ => []);
 
         taskFunctions.Add((instanceMethod.Name, instanceMethod.Order, async (classInstance, discoveredTest) =>
         {
@@ -34,7 +31,7 @@ public static class TestHookOrchestrator
     
     public static void RegisterAfterHook<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
     {
-        var taskFunctions = CleanUps.GetOrAdd(typeof(TClassType), _ => []);
+        var taskFunctions = TestDictionary.TestCleanUps.GetOrAdd(typeof(TClassType), _ => []);
 
         taskFunctions.Add((instanceMethod.Name, instanceMethod.Order, async (classInstance, discoveredTest) =>
         {
@@ -63,7 +60,7 @@ public static class TestHookOrchestrator
 
         foreach (var type in typesIncludingBase)
         {
-            if (!SetUps.TryGetValue(type, out var setUpsForType))
+            if (!TestDictionary.TestSetUps.TryGetValue(type, out var setUpsForType))
             {
                 continue;
             }
@@ -83,7 +80,7 @@ public static class TestHookOrchestrator
 
         foreach (var type in typesIncludingBase)
         {
-            if (!CleanUps.TryGetValue(type, out var cleanUpsForType))
+            if (!TestDictionary.TestCleanUps.TryGetValue(type, out var cleanUpsForType))
             {
                 continue;
             }

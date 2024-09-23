@@ -1,10 +1,12 @@
-﻿using System.Reflection;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Data;
 using TUnit.Engine.Hooks;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
 
@@ -101,13 +103,13 @@ public static class TestRegistrar
 		TestDictionary.RegisterFailedTest(testId, failedInitializationTest);
 	}
 	
-	public static void RegisterInstance(TestContext testContext)
+	internal static void RegisterInstance(TestContext testContext)
 	{
 		var classType = testContext.TestDetails.ClassType;
 		
 		InstanceTracker.Register(classType);
 		
-		ClassHookOrchestrator.RegisterTestContext(classType, testContext);
+		RegisterTestContext(classType, testContext);
 		
 		var testInformation = testContext.TestDetails;
         
@@ -137,37 +139,68 @@ public static class TestRegistrar
 			}
 		}
 	}
-}
+	
+	public static void RegisterBeforeHook(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
+	{
+		var setups = TestDictionary.AssemblySetUps.GetOrAdd(assembly, _ => []);
+		setups.Add((staticMethod.Name, staticMethod, new LazyHook<ExecuteRequestContext, HookMessagePublisher>(async (executeRequestContext, hookPublisher) =>
+		{
+			var context = GetAssemblyHookContext(assembly);
+            
+			var timeout = staticMethod.Timeout;
 
-public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>
-{
-    public required string TestId { get; init; }
-    public required string DisplayName { get; init; }
-    public required MethodInfo MethodInfo { get; init; }
-    
-    public required int RepeatLimit { get; init; }
-    public required int CurrentRepeatAttempt { get; init; }
-    
-    public required string TestFilePath { get; init; }
-    public required int TestLineNumber { get; init; }
+			await hookPublisher.Push(executeRequestContext, $"Before Assembly: {staticMethod.Name}", staticMethod, () =>
+				RunHelpers.RunWithTimeoutAsync(
+					token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo, context,
+						() => staticMethod.Body(context, token)), timeout)
+			);
+		})));
+	}
 
+	public static void RegisterAfterHook(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
+	{
+		var taskFunctions = TestDictionary.AssemblyCleanUps.GetOrAdd(assembly, _ => []);
 
-    public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
-    public required Func<TClassType, CancellationToken, Task> TestMethodFactory { get; init; }
-    
-    public required object?[] TestClassArguments { get; init; }
-    public required object?[] TestMethodArguments { get; init; }
-    
-    public required TestData[] InternalTestClassArguments { internal get; init; }
+		taskFunctions.Add((staticMethod.Name, staticMethod, () =>
+		{
+			var context = GetAssemblyHookContext(assembly);
+            
+			var timeout = staticMethod.Timeout;
 
-    public required TestData[] InternalTestMethodArguments { internal get; init; }
-    
-    public required ITestExecutor TestExecutor { get; init; }
+			return RunHelpers.RunWithTimeoutAsync(token => staticMethod.HookExecutor.ExecuteAfterAssemblyHook(staticMethod.MethodInfo, context, () => staticMethod.Body(context, token)), timeout);
+		}));
+	}
+	
+	internal static AssemblyHookContext GetAssemblyHookContext(Assembly assembly)
+	{
+		lock (assembly)
+		{
+			return TestDictionary.AssemblyHookContexts.GetOrAdd(assembly, _ => new AssemblyHookContext
+			{
+				Assembly = assembly
+			});
+		}
+	}
+	
+	private static void RegisterTestContext(Assembly assembly, ClassHookContext classHookContext)
+	{
+		var assemblyHookContext = TestDictionary.AssemblyHookContexts.GetOrAdd(assembly, _ => new AssemblyHookContext
+		{
+			Assembly = assembly
+		});
 
-    public required IClassConstructor? ClassConstructor { get; init; }
-    
-    public required IParallelLimit? ParallelLimit { get; init; }
-    
-    // Need to be referenced statically for AOT
-    public required Type[] AttributeTypes { get; init; }
+		assemblyHookContext.TestClasses.Add(classHookContext);
+	}
+	
+	private static void RegisterTestContext(Type type, TestContext testContext)
+	{
+		var classHookContext = TestDictionary.ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
+		{
+			ClassType = type
+		});
+
+		classHookContext.Tests.Add(testContext);
+        
+		RegisterTestContext(type.Assembly, classHookContext);
+	}
 }

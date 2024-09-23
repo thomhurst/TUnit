@@ -35,7 +35,7 @@ internal static class ClassHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$$"""
-                   ClassHookOrchestrator.RegisterBeforeHook(typeof({{{model.FullyQualifiedTypeName}}}), new StaticHookMethod<ClassHookContext>
+                   TestRegistrar.RegisterBeforeHook(typeof({{{model.FullyQualifiedTypeName}}}), new StaticHookMethod<ClassHookContext>
                    		{ 
                               MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),
@@ -50,7 +50,7 @@ internal static class ClassHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$$"""
-                 ClassHookOrchestrator.RegisterAfterHook(typeof({{{model.FullyQualifiedTypeName}}}), new StaticHookMethod<ClassHookContext>
+                 TestRegistrar.RegisterAfterHook(typeof({{{model.FullyQualifiedTypeName}}}), new StaticHookMethod<ClassHookContext>
                  		{ 
                              MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),
