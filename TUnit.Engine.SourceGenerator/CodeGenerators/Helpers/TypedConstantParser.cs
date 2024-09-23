@@ -6,6 +6,11 @@ internal static class TypedConstantParser
 {
     public static string? GetTypedConstantValue(TypedConstant constructorArgument, ITypeSymbol? type = null)
     {
+        if (constructorArgument.IsNull)
+        {
+            return "null";
+        }
+        
         if (constructorArgument.Kind == TypedConstantKind.Error)
         {
             return null;
