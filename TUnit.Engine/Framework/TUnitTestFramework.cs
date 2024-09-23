@@ -19,7 +19,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly IExtension _extension;
     private readonly ITestFrameworkCapabilities _capabilities;
     private readonly ServiceProvider _serviceProvider;
-    private readonly TUnitLogger _logger;
+    private readonly TUnitFrameworkLogger _logger;
     private readonly TUnitTestDiscoverer _testDiscover;
     private readonly TestsExecutor _testsExecutor;
     private readonly TUnitInitializer _initializer;
@@ -39,7 +39,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             .AddFromFrameworkServiceProvider(frameworkServiceProvider, extension)
             .BuildServiceProvider();
 
-        _logger = _serviceProvider.GetRequiredService<TUnitLogger>();
+        _logger = _serviceProvider.GetRequiredService<TUnitFrameworkLogger>();
         _testDiscover = _serviceProvider.GetRequiredService<TUnitTestDiscoverer>();
         _testsExecutor = _serviceProvider.GetRequiredService<TestsExecutor>();
         _initializer = _serviceProvider.GetRequiredService<TUnitInitializer>();

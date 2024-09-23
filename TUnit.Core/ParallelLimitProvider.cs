@@ -1,7 +1,7 @@
-﻿using TUnit.Core.Interfaces;
-using TUnit.Engine.Data;
+﻿using TUnit.Core.Data;
+using TUnit.Core.Interfaces;
 
-namespace TUnit.Engine.Services;
+namespace TUnit.Core;
 
 public class ParallelLimitProvider
 {

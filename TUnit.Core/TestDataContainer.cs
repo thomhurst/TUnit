@@ -1,10 +1,9 @@
 ﻿using System.Collections.Concurrent;
-using TUnit.Core.Interfaces;
-using TUnit.Engine.Data;
-using TUnit.Engine.Helpers;
-using TUnit.Engine.Logging;
+using TUnit.Core.Data;
+using TUnit.Core.Helpers;
+using TUnit.Core.Logging;
 
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -19,7 +18,7 @@ public static class TestDataContainer
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
     private static readonly ConcurrentDictionary<Type, int> CountsPerGlobalType = new();
     
-    private static Disposer Disposer => new(TUnitLogger.Instance);
+    private static Disposer Disposer => new(null as ITUnitFrameworkLogger);
     
     public static T GetInstanceForType<T>(Type key, Func<T> func) where T : class
     {

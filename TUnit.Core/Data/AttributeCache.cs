@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace TUnit.Engine.Data;
+namespace TUnit.Core.Data;
 
 internal static class AttributeCache
 {

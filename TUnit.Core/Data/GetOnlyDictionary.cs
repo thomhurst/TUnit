@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace TUnit.Engine.Data;
+namespace TUnit.Core.Data;
 
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

@@ -1,25 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
-    <EnableTrimAnalyzer Condition="'$(TargetFramework)' == 'netstandard2.0'">false</EnableTrimAnalyzer>
-  </PropertyGroup>
-  <ItemGroup>
-    <Content Include="TUnit.Core.props">
-      <Pack>true</Pack>
-      <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-    </Content>
-    <Content Include="TUnit.Core.targets">
-      <Pack>true</Pack>
-      <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="PolySharp">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <Content Include="TUnit.Core.props">
+            <Pack>true</Pack>
+            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        </Content>
+        <Content Include="TUnit.Core.targets">
+            <Pack>true</Pack>
+            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        </Content>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="PolySharp">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
 
-    <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="$(MSBuildProjectDirectory)\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-  </ItemGroup>
+        <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Engine.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Engine.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
 </Project>

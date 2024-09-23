@@ -21,11 +21,8 @@ internal static class TestHooksWriter
         sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
         sourceBuilder.WriteLine("using global::TUnit.Core;");
         sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine.Helpers;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine.Hooks;");
         sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine("namespace TUnit.Engine;");
+        sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
         sourceBuilder.WriteLine($"file partial class {className}");
@@ -38,7 +35,7 @@ internal static class TestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                  TestHookOrchestrator.RegisterBeforeHook<{{model.FullyQualifiedTypeName}}>(new InstanceHookMethod<{{model.FullyQualifiedTypeName}}>
+                  TestRegistrar.RegisterBeforeHook<{{model.FullyQualifiedTypeName}}>(new InstanceHookMethod<{{model.FullyQualifiedTypeName}}>
                   		{
                   		     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                   		     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}})),
@@ -51,7 +48,7 @@ internal static class TestHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$"""
-                 TestHookOrchestrator.RegisterAfterHook<{{model.FullyQualifiedTypeName}}>(new InstanceHookMethod<{{model.FullyQualifiedTypeName}}>
+                 TestRegistrar.RegisterAfterHook<{{model.FullyQualifiedTypeName}}>(new InstanceHookMethod<{{model.FullyQualifiedTypeName}}>
                  		{
                  		     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                  		     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}})),

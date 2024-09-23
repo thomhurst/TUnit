@@ -1,7 +1,6 @@
-﻿using TUnit.Core;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
-namespace TUnit.Engine.Hooks;
+namespace TUnit.Core;
 
 internal static class HookExecutorProvider
 {

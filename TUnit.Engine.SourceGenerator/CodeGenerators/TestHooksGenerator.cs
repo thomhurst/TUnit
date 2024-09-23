@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TUnit.Core;
-using TUnit.Core.Executors;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
@@ -33,19 +32,19 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == HookType.Test)
+                    if (model.HookLevel == "TUnit.Core.HookType.Test")
                     {
                         TestHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
-                    else if (model.HookLevel == HookType.Class)
+                    else if (model.HookLevel == "TUnit.Core.HookType.Class")
                     {
                         ClassHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
-                    else if (model.HookLevel == HookType.Assembly)
+                    else if (model.HookLevel == "TUnit.Core.HookType.Assembly")
                     {
                         AssemblyHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
-                    else if (model.HookLevel is HookType.TestDiscovery or HookType.TestSession)
+                    else if (model.HookLevel is "TestDiscovery" or "TestSession")
                     {
                         GlobalTestHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
@@ -57,19 +56,19 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var model in models)
                 {
-                    if (model.HookLevel == HookType.Test)
+                    if (model.HookLevel == "TUnit.Core.HookType.Test")
                     {
                         TestHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
-                    else if (model.HookLevel == HookType.Class)
+                    else if (model.HookLevel == "TUnit.Core.HookType.Class")
                     {
                         ClassHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
-                    else if (model.HookLevel == HookType.Assembly)
+                    else if (model.HookLevel == "TUnit.Core.HookType.Assembly")
                     {
                         AssemblyHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
-                    else if (model.HookLevel is HookType.TestDiscovery or HookType.TestSession)
+                    else if (model.HookLevel is "TestDiscovery" or "TestSession")
                     {
                         GlobalTestHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
@@ -91,7 +90,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
 
         foreach (var contextAttribute in context.Attributes)
         {
-            var hookLevel = (HookType) Enum.ToObject(typeof(HookType), contextAttribute.ConstructorArguments[0].Value!);
+            var hookLevel = contextAttribute.ConstructorArguments[0].ToCSharpString();
 
             yield return new HooksDataModel
             {
@@ -104,7 +103,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
                     .Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
                     .ToArray(),
                 HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute(),
-                HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::" + typeof(HookExecutorAttribute).FullName) == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.HookExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
                 FilePath = contextAttribute.ConstructorArguments[1].Value?.ToString() ?? string.Empty,
                 LineNumber = contextAttribute.ConstructorArguments[2].Value as int? ?? 0,

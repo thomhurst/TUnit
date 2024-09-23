@@ -23,6 +23,6 @@ internal class ParallelLimiterTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(12));
             
-            Assert.That(generatedFiles[0], Does.Contain("ParallelLimit = TUnit.Engine.Services.ParallelLimitProvider.GetParallelLimit<global::TUnit.TestProject.Dummy.ParallelLimit3>(),"));
+            Assert.That(generatedFiles[0], Does.Contain("ParallelLimit = TUnit.Core.ParallelLimitProvider.GetParallelLimit<global::TUnit.TestProject.Dummy.ParallelLimit3>(),"));
         });
 }

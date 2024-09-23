@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
@@ -28,7 +29,7 @@ internal class SingleTestExecutor : IDataProducer
     private readonly ParallelLimitProvider _parallelLimitProvider;
     private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
     private readonly ClassHookOrchestrator _classHookOrchestrator;
-    private readonly TUnitLogger _logger;
+    private readonly TUnitFrameworkLogger _logger;
     private readonly ConcurrentDictionary<object, Task> _asyncInitializers = new();
     
     public SingleTestExecutor(
@@ -40,7 +41,7 @@ internal class SingleTestExecutor : IDataProducer
         ParallelLimitProvider parallelLimitProvider,
         AssemblyHookOrchestrator assemblyHookOrchestrator,
         ClassHookOrchestrator classHookOrchestrator,
-        TUnitLogger logger)
+        TUnitFrameworkLogger logger)
     {
         _extension = extension;
         _disposer = disposer;

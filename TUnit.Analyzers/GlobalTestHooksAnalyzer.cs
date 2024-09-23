@@ -67,19 +67,19 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         
         foreach (var attributeData in globalHooks)
         {
-            if (attributeData.GetHookType() == Core.HookType.Test
+            if (attributeData.GetHookType() == "TUnit.Core.HookType.Test"
                 && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
             
-            if (attributeData.GetHookType() == Core.HookType.Class
+            if (attributeData.GetHookType() == "TUnit.Core.HookType.Class"
                 && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.ClassHookContext))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
             
-            if (attributeData.GetHookType() == Core.HookType.Assembly
+            if (attributeData.GetHookType() == "TUnit.Core.HookType.Assembly"
                 && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));

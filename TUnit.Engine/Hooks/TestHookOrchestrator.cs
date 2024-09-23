@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-using TUnit.Core;
-using TUnit.Core.Exceptions;
+﻿using TUnit.Core;
 using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Hooks;
@@ -10,47 +8,6 @@ namespace TUnit.Engine.Hooks;
 #endif
 public static class TestHookOrchestrator
 {
-    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, DiscoveredTest, Task> Action)>> SetUps = new();
-    private static readonly ConcurrentDictionary<Type, List<(string Name, int Order, Func<object, DiscoveredTest, Task> Action)>> CleanUps = new();
-    
-    public static void RegisterBeforeHook<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
-    {
-        var taskFunctions = SetUps.GetOrAdd(typeof(TClassType), _ => []);
-
-        taskFunctions.Add((instanceMethod.Name, instanceMethod.Order, async (classInstance, discoveredTest) =>
-        {
-            var timeout = instanceMethod.Timeout;
-
-            try
-            {
-                await RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(instanceMethod, discoveredTest).ExecuteBeforeTestHook(instanceMethod.MethodInfo, discoveredTest.TestContext, () => instanceMethod.Body((TClassType) classInstance, discoveredTest.TestContext, token)), timeout);
-            }
-            catch (Exception e)
-            {
-                throw new BeforeTestException($"Error executing Before(Test) method: {instanceMethod.Name}", e);
-            }
-        }));
-    }
-    
-    public static void RegisterAfterHook<TClassType>(InstanceHookMethod<TClassType> instanceMethod)
-    {
-        var taskFunctions = CleanUps.GetOrAdd(typeof(TClassType), _ => []);
-
-        taskFunctions.Add((instanceMethod.Name, instanceMethod.Order, async (classInstance, discoveredTest) =>
-        {
-            var timeout = instanceMethod.Timeout;
-
-            try
-            {
-                await RunHelpers.RunWithTimeoutAsync(token => HookExecutorProvider.GetHookExecutor(instanceMethod, discoveredTest).ExecuteAfterTestHook(instanceMethod.MethodInfo, discoveredTest.TestContext, () => instanceMethod.Body((TClassType) classInstance, discoveredTest.TestContext, token)), timeout);
-            }
-            catch (Exception e)
-            {
-                throw new AfterTestException($"Error executing After(Test) method: {instanceMethod.Name}", e);
-            }
-        }));
-    }
-
     internal static async Task ExecuteBeforeHooks(object classInstance, DiscoveredTest discoveredTest)
     {
         // Run Global Hooks First
@@ -63,7 +20,7 @@ public static class TestHookOrchestrator
 
         foreach (var type in typesIncludingBase)
         {
-            if (!SetUps.TryGetValue(type, out var setUpsForType))
+            if (!TestDictionary.TestSetUps.TryGetValue(type, out var setUpsForType))
             {
                 continue;
             }
@@ -83,7 +40,7 @@ public static class TestHookOrchestrator
 
         foreach (var type in typesIncludingBase)
         {
-            if (!CleanUps.TryGetValue(type, out var cleanUpsForType))
+            if (!TestDictionary.TestCleanUps.TryGetValue(type, out var cleanUpsForType))
             {
                 continue;
             }

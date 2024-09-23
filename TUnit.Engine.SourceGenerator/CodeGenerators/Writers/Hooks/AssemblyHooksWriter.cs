@@ -26,11 +26,8 @@ internal static class AssemblyHooksWriter
         sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
         sourceBuilder.WriteLine("using global::TUnit.Core;");
         sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine.Helpers;");
-        sourceBuilder.WriteLine("using global::TUnit.Engine.Hooks;");
         sourceBuilder.WriteLine();
-        sourceBuilder.WriteLine("namespace TUnit.Engine;");
+        sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
         sourceBuilder.WriteLine();
         sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
         sourceBuilder.WriteLine($"file partial class {className}");
@@ -43,7 +40,7 @@ internal static class AssemblyHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$$"""
-                   AssemblyHookOrchestrator.RegisterBeforeHook(typeof({{{model.FullyQualifiedTypeName}}}).Assembly, new StaticHookMethod<AssemblyHookContext>
+                   TestRegistrar.RegisterBeforeHook(typeof({{{model.FullyQualifiedTypeName}}}).Assembly, new StaticHookMethod<AssemblyHookContext>
                    		{ 
                               MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),
@@ -58,7 +55,7 @@ internal static class AssemblyHooksWriter
         {
             sourceBuilder.WriteLine(
                 $$$"""
-                   AssemblyHookOrchestrator.RegisterAfterHook(typeof({{{model.FullyQualifiedTypeName}}}).Assembly, new StaticHookMethod<AssemblyHookContext>
+                   TestRegistrar.RegisterAfterHook(typeof({{{model.FullyQualifiedTypeName}}}).Assembly, new StaticHookMethod<AssemblyHookContext>
                    		{ 
                              MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),

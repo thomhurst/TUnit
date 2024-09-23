@@ -12,9 +12,9 @@ namespace TUnit.Engine.Services;
 internal class OnEndExecutor
 {
     private readonly ICommandLineOptions _commandLineOptions;
-    private readonly TUnitLogger _logger;
+    private readonly TUnitFrameworkLogger _logger;
 
-    public OnEndExecutor(ICommandLineOptions commandLineOptions, TUnitLogger logger)
+    public OnEndExecutor(ICommandLineOptions commandLineOptions, TUnitFrameworkLogger logger)
     {
         _commandLineOptions = commandLineOptions;
         _logger = logger;

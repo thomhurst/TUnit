@@ -25,11 +25,6 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <None Include="$(MSBuildProjectDirectory)\..\TUnit.Engine.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Engine.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="$(MSBuildProjectDirectory)\..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-  </ItemGroup>
   <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
   </ItemGroup>

@@ -52,11 +52,13 @@ public class GenerateReadMeModule : Module<File>
         var fileContents = new StringBuilder();
 
         // Grouping is by Scenario
-        foreach (var groupedArtifacts in artifacts.Artifacts.GroupBy(x => x.Name.Split("_", 2)[1]).OrderBy(x => x.Key))
+        foreach (var groupedArtifacts in artifacts.Artifacts
+                     .OrderBy(x => x.Name)
+                     .GroupBy(x => x.Name.Split("_", 2)[1]))
         {
             fileContents.AppendLine($"### Scenario: {GetScenario(groupedArtifacts.Key)}");
 
-            foreach (var artifact in groupedArtifacts)
+            foreach (var artifact in groupedArtifacts.OrderBy(x => x.Name))
             {
                 var operatingSystem = artifact.Name.Split("_")[0];
 

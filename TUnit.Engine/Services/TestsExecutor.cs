@@ -16,7 +16,7 @@ internal class TestsExecutor
 
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly TestGrouper _testGrouper;
-    private readonly TUnitLogger _logger;
+    private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
 
     private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
@@ -26,7 +26,7 @@ internal class TestsExecutor
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
         TestGrouper testGrouper,
-        TUnitLogger logger,
+        TUnitFrameworkLogger logger,
         ICommandLineOptions commandLineOptions)
     {
         _singleTestExecutor = singleTestExecutor;

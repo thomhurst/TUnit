@@ -12,12 +12,5 @@ public record FullyQualifiedTypeName
     public string WithoutGlobalPrefix => _fullyQualifiedType;
     public string WithGlobalPrefix => $"global::{WithoutGlobalPrefix}";
     
-    public static implicit operator FullyQualifiedTypeName(Type type) => new(GetNameWithoutGenericArity(type));
-    
-    private static string GetNameWithoutGenericArity(Type t)
-    {
-        var name = t.FullName!;
-        var index = name.IndexOf('`');
-        return index == -1 ? name : name[..index];
-    }
+    public static implicit operator FullyQualifiedTypeName(string name) => new(name);
 }

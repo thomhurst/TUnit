@@ -15,7 +15,7 @@ internal class TestDiscoveryHookTests : TestsBase<GlobalTestHooksGenerator>
             
             Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
                 """
-                    		GlobalStaticTestHookOrchestrator.RegisterBeforeHook(new StaticHookMethod<BeforeTestDiscoveryContext>
+                    		TestRegistrar.RegisterBeforeHook(new StaticHookMethod<BeforeTestDiscoveryContext>
                     		{ 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
@@ -29,7 +29,7 @@ internal class TestDiscoveryHookTests : TestsBase<GlobalTestHooksGenerator>
             
             Assert.That(generatedFiles[1].IgnoreWhitespaceFormatting(), Does.Contain(
                 """
-                    		GlobalStaticTestHookOrchestrator.RegisterAfterHook(new StaticHookMethod<TestDiscoveryContext>
+                    		TestRegistrar.RegisterAfterHook(new StaticHookMethod<TestDiscoveryContext>
                     		{ 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
