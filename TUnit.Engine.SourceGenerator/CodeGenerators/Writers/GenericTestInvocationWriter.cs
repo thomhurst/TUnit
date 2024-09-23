@@ -138,7 +138,7 @@ internal static class GenericTestInvocationWriter
             return "null";
         }
 
-        return $"TUnit.Engine.Services.ParallelLimitProvider.GetParallelLimit<{parallelLimit}>()";
+        return $"TUnit.Core.ParallelLimitProvider.GetParallelLimit<{parallelLimit}>()";
     }
 
     private static string ToInjectedType(Argument arg, int index, string variablePrefix)
