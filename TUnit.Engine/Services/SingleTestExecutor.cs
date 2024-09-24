@@ -244,10 +244,7 @@ internal class SingleTestExecutor : IDataProducer
         }
         finally
         {
-            if (semaphore != null)
-            {
-                semaphore.Dispose();
-            }
+            semaphore?.Release();
         }
     }
 
