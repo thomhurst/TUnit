@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
@@ -196,7 +197,10 @@ public abstract class TestModule : Module<TestResult>
         
         try
         {
-            assertions.ForEach(x => x.Invoke(parsedResult));
+            using (new AssertionScope())
+            {
+                assertions.ForEach(x => x.Invoke(parsedResult));
+            }
         }
         catch (Exception e)
         {
