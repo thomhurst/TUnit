@@ -18,7 +18,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: '**/*.csproj'
+    projects: '**/TUnit.NugetTester.csproj'
     configuration: Debug
 
 - task: CmdLine@2
@@ -28,5 +28,5 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'test'
-    projects: '**/TUnit.TestProject.csproj'
+    projects: '**/TUnit.NugetTester.csproj'
     publishTestResults: false
