@@ -10,10 +10,21 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'custom'
+    custom: 'tool install --global dotnet-coverage'
+
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
     projects: '**/*.csproj'
+    configuration: Debug
+
+- task: CmdLine@2
+  inputs:
+    script: 'dotnet-coverage collect "dotnet test ./TUnit.TestProject/TUnit.TestProject.csproj --configuration Debug --no-build --framework net8.0" -f xml -o "wiremock-coverage-tunit.xml"'
 
 - task: DotNetCoreCLI@2
   inputs:
