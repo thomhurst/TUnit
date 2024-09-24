@@ -15,7 +15,8 @@ public class GetPackageProjectsModule : Module<List<File>>
             .Where(x => !x.Name.Contains("Pipeline"))
             .Where(x => !x.Name.Contains("Sample"))
             .Where(x => !x.Name.Contains("TestProject"))
-            .Where(x => !x.Name.Contains("Tests"))
+            .Where(x => !x.Name.Contains("Test"))
+            .Where(x => !x.Name.Contains("Timer"))
             .ToList()
             .AsTask<List<File>?>();
     }
