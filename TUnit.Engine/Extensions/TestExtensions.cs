@@ -22,7 +22,7 @@ internal static class TestExtensions
                 new TestMethodIdentifierProperty(
                     Namespace: testDetails.ClassType.Namespace!,
                     AssemblyFullName: testDetails.ClassType.Assembly.FullName!,
-                    TypeName: testDetails.ClassType.Name,
+                    TypeName: GetClassTypeName(testDetails),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
@@ -39,6 +39,32 @@ internal static class TestExtensions
         };
         
         return testNode;
+    }
+
+    private static string GetClassTypeName(TestDetails testDetails)
+    {
+        if (testDetails.TestClassArguments.Length == 0)
+        {
+            return testDetails.ClassType.Name;
+        }
+        
+        return
+            $"{testDetails.ClassType.Name}({string.Join(", ", testDetails.TestClassArguments.Select(GetConstantValue))})";
+    }
+
+    private static string GetConstantValue(object? o)
+    {
+        if (o is null)
+        {
+            return "null";
+        }
+        
+        if (o.GetType().IsEnum || o.GetType().IsPrimitive || o is string)
+        {
+            return o.ToString()!;
+        }
+
+        return o.GetType().Name;
     }
 
     public static TestNode WithProperty(this TestNode testNode, IProperty property)
