@@ -19,7 +19,7 @@ steps:
   inputs:
     command: 'build'
     projects: '**/TUnit.NugetTester.csproj'
-    configuration: Debug
+    arguments: '--configuration Debug --framework net8.0'
 
 - task: CmdLine@2
   inputs:

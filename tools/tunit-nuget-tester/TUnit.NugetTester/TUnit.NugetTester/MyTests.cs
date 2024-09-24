@@ -7,5 +7,6 @@ public class MyTests : TestBase
     [Test]
     public void Test()
     {
+        TestContext.Current!.GetDefaultLogger().LogInformation("Blah");
     }
 }
