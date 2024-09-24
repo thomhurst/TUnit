@@ -11,4 +11,8 @@
       <PackageReference Include="TUnit" VersionOverride="$(TUnitVersion)" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\TUnit.NugetTester.Library\TUnit.NugetTester.Library.csproj" />
+    </ItemGroup>
+
 </Project>

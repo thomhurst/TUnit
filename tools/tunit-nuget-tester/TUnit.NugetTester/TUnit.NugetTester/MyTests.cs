@@ -1,6 +1,8 @@
-﻿namespace TUnit.NugetTester;
+﻿using TUnit.NugetTester.Library;
 
-public class MyTests
+namespace TUnit.NugetTester;
+
+public class MyTests : TestBase
 {
     [Test]
     public void Test()
