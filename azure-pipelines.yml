@@ -11,10 +11,9 @@ variables:
 
 steps:
 
-- task: DotNetCoreCLI@2
+- task: CmdLine@2
   inputs:
-    command: 'custom'
-    custom: 'tool install --global dotnet-coverage'
+    script: 'dotnet tool install --global dotnet-coverage'
 
 - task: DotNetCoreCLI@2
   inputs:
