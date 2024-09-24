@@ -49,7 +49,7 @@ internal static class TestDictionary
         FailedInitializationTests[testId] = failedInitializationTest;
     }
     
-    internal static IEnumerable<DiscoveredTest> GetAllTests()
+    internal static IReadOnlyCollection<DiscoveredTest> GetAllTests()
     {
         return Tests.Values;
     }

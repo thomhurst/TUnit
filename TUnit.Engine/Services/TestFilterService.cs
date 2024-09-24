@@ -21,8 +21,12 @@ internal class TestFilterService
         if (testExecutionFilter is null or NopFilter)
 #pragma warning restore TPEXP
         {
+            _logger.LogTrace("No test filter found.");
+            
             return testNodes;
         }
+        
+        _logger.LogTrace($"Test filter is: {testExecutionFilter?.GetType().Name ?? "null"}");
 
         return testNodes.Where(x => MatchesTest(testExecutionFilter, x));
     }
