@@ -84,7 +84,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 
                 var discoveredTests = _testDiscover.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken);
 
-                var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
+                var failedToInitializeTests = _testDiscover.GetFailedToInitializeTests();
                 
                 await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
 

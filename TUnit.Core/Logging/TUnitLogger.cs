@@ -155,6 +155,7 @@ public abstract class TUnitLogger
     {
         var stringBuilder = new StringBuilder();
 
+        stringBuilder.Append($"{logLevel.ToString()}: ");
         stringBuilder.AppendLine(message);
         stringBuilder.AppendLine();
         
