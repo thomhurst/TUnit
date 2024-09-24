@@ -23,7 +23,7 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'dotnet-coverage collect "dotnet test ./TUnit.TestProject/TUnit.TestProject.csproj --configuration Debug --no-build --framework net8.0" -f xml -o "wiremock-coverage-tunit.xml"'
+    script: 'dotnet-coverage collect "dotnet test ./tools/tunit-nuget-tester/TUnit.NugetTester/TUnit.NugetTester/TUnit.NugetTester.csproj --configuration Debug --no-build --framework net8.0" -f xml -o "wiremock-coverage-tunit.xml"'
 
 - task: DotNetCoreCLI@2
   inputs:
