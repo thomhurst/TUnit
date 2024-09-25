@@ -12,7 +12,6 @@
   
   <ItemGroup>
     <PackageReference Include="EnumerableAsyncProcessor" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Platform" />
   </ItemGroup>
