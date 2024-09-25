@@ -185,16 +185,14 @@ public abstract class TUnitLogger
         var builtString = stringBuilder.ToString();
         
         var currentContext = Context.Current;
-
-#if NET8_0_OR_GREATER
+        
         if (WriteToContext)
         {
             var writer = logLevel >= LogLevel.Error
-                ? currentContext?.ErrorOutputWriter : currentContext?.OutputWriter;
+                ? currentContext.ErrorOutputWriter : currentContext.OutputWriter;
             
-            writer?.WriteLine(builtString);
+            writer.WriteLine(builtString);
         }
-#endif
         
         Log(currentContext, builtString);
     }

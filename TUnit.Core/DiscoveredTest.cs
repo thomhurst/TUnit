@@ -3,9 +3,7 @@
 namespace TUnit.Core;
 
 internal class DiscoveredTest<
-#if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)] 
-#endif
     TTestClass
     > : DiscoveredTest
 {
@@ -27,11 +25,7 @@ internal class DiscoveredTest<
     
     public override async Task ResetTestInstance()
     {
-#if NET8_0_OR_GREATER
         await _resettableLazyTestClassFactory.ResetLazy();
-#else
-        await Task.CompletedTask;
-#endif
     }
 }
 

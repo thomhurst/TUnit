@@ -31,13 +31,8 @@ public abstract class Context : IContext
         return ErrorOutputWriter.GetStringBuilder().ToString().Trim();
     }
     
-    public TUnitLogger RegisterLogger(TUnitLogger logger)
-    {
-        return logger;
-    }
-    
     public TUnitLogger GetDefaultLogger()
     {
-        return RegisterLogger(new DefaultLogger());
+        return new DefaultLogger();
     }
 }
