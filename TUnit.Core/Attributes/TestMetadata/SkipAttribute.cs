@@ -6,7 +6,7 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
 public class SkipAttribute : TUnitAttribute, IBeforeTestAttribute
 {
-    public string Reason { get; }
+    public string Reason { get; protected set; }
 
     public SkipAttribute(string reason)
     {

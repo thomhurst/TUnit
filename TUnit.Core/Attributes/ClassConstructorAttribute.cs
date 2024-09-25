@@ -13,12 +13,8 @@ public abstract class ClassConstructorAttribute : TUnitAttribute
 }
 
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class)]
-public sealed class ClassConstructorAttribute<
-#if NET8_0_OR_GREATER
-        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] 
-#endif
-    T
-> : ClassConstructorAttribute where T : IClassConstructor, new()
+public sealed class ClassConstructorAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> 
+    : ClassConstructorAttribute where T : IClassConstructor, new()
 {
     public override Type ClassConstructorType { get; } = typeof(T);
 }

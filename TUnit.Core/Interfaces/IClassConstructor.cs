@@ -4,10 +4,6 @@ namespace TUnit.Core.Interfaces;
 
 public interface IClassConstructor
 {
-    T Create<
-#if NET8_0_OR_GREATER
-        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] 
-#endif
-        T>() where T : class;
+    T Create<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : class;
     Task DisposeAsync<T>(T t);
 }

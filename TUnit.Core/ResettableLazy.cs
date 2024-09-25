@@ -2,14 +2,7 @@
 
 namespace TUnit.Core;
 
-public class ResettableLazy<
-#if NET8_0_OR_GREATER
-[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] 
-#endif
-    T> 
-#if NET8_0_OR_GREATER
-    : IAsyncDisposable
-#endif
+public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : IAsyncDisposable
 {
     private readonly Func<T> _factory;
 
@@ -22,8 +15,7 @@ public class ResettableLazy<
         _factory = factory;
         _lazy = new Lazy<T>(factory);
     }
-
-#if NET8_0_OR_GREATER
+    
     public async Task ResetLazy()
     {
         await DisposeAsync();
@@ -44,5 +36,4 @@ public class ResettableLazy<
             disposable.Dispose();
         }
     }
-#endif
 }
