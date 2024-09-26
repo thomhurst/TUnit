@@ -1,6 +1,8 @@
 # TUnit
 
-A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Trimmed Single File application support included! TUnit is designed to aid with all testing types:
+A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Trimmed Single File application support included! 
+
+TUnit is designed to aid with all testing types:
 - Unit
 - Integration
 - Acceptance
