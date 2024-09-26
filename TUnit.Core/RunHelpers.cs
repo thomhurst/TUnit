@@ -10,7 +10,7 @@ internal static class RunHelpers
         using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
 
         var cancellationToken = cancellationTokenSource.Token;
-        
+
         var taskCompletionSource = new TaskCompletionSource();
 
         var task = taskDelegate(cancellationToken);
@@ -28,9 +28,10 @@ internal static class RunHelpers
             }
         }, CancellationToken.None);
 
+        CancellationTokenRegistration? cancellationTokenRegistration = null;
         if (cancellationToken.CanBeCanceled)
         {
-            cancellationToken.Register(() =>
+            cancellationTokenRegistration = cancellationToken.Register(() =>
             {
                 if (EngineCancellationToken.Token.IsCancellationRequested)
                 {
@@ -44,19 +45,22 @@ internal static class RunHelpers
                 }
                 else
                 {
-                    taskCompletionSource.TrySetCanceled();
+                    taskCompletionSource.TrySetCanceled(cancellationToken);
                 }
             });
         }
-        
+
         if (timeout != null)
         {
             cancellationTokenSource.CancelAfter(timeout.Value);
         }
 
-        await taskCompletionSource.Task;
+        await using (cancellationTokenRegistration)
+        {
+            await taskCompletionSource.Task;
+        }
     }
-    
+
     public static async Task RunSafelyAsync(Func<Task> action, List<Exception> exceptions)
     {
         try
@@ -68,7 +72,7 @@ internal static class RunHelpers
             exceptions.Add(exception);
         }
     }
-    
+
     public static async Task RunValueTaskSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
     {
         try
