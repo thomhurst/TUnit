@@ -194,6 +194,17 @@ It aims to build upon the useful features of both while trying to address any pa
 
 [Read more here](https://thomhurst.github.io/TUnit/docs/comparison/framework-differences)
 
+## Prerelease
+
+You'll notice that version 1.0 isn't out yet. While this framework is mostly feature complete, I'm waiting for a few things:
+
+- Full Rider support for all features
+- Full VS support for all features
+- Open to feedback on existing features
+- Open to ideas on new features
+
+As such, the API may change. I'll try to limit this but it's a possibility.
+
 ## Benchmark
 
 ### Scenario: Building the test project
