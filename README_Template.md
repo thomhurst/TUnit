@@ -1,6 +1,10 @@
 # TUnit
 
-A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Trimmed Single File application support included!
+A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Trimmed Single File application support included! TUnit is designed to aid with all testing types:
+- Unit
+- Integration
+- Acceptance
+- and more!
 
 
 [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) ![Nuget](https://img.shields.io/nuget/dt/TUnit) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit) 
@@ -51,9 +55,8 @@ Visual Studio Code is supported.
     - Run specific tests completely on their own
     - Run specific tests not in parallel with other specific tests
     - Limit the parallel limit on a per-test, class or assembly level
-- Test ordering (if running not in parallel)
-- Tests can depend on other tests to form chains, useful for if one test depends on state from another action
-- Easy to read assertions
+- Tests can depend on other tests to form chains, useful for if one test depends on state from another action. While not recommended for unit tests, this can be useful in integration testing where state matters
+- Easy to read assertions - though you're also free to use whichever assertion library you like
 - Injectable test data via classes, methods, compile-time args, or matrices
 - Hooks before and after: 
     - TestDiscover
