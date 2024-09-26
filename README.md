@@ -1,8 +1,6 @@
 # TUnit
 
-A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Trimmed Single File application support included! 
-
-TUnit is designed to aid with all testing types:
+A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Trimmed Single File application support included! TUnit is designed to aid with all testing types:
 - Unit
 - Integration
 - Acceptance
@@ -193,16 +191,6 @@ TUnit is inspired by NUnit and xUnit - two of the most popular testing framework
 It aims to build upon the useful features of both while trying to address any pain points that they may have.
 
 [Read more here](https://thomhurst.github.io/TUnit/docs/comparison/framework-differences)
-
-## Prerelease
-
-You'll notice that version 1.0 isn't out yet. While this framework is mostly feature complete, I'm waiting for a few things:
-- Full Rider support for all features
-- Full VS support for all features
-- Open to feedback on existing features
-- Open to ideas on new features
-
-As such, the API may change. I'll try to limit this but it's a possibility.
 
 ## Benchmark
 
