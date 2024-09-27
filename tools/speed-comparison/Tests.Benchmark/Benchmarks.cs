@@ -32,7 +32,7 @@ public class Benchmarks
     public async Task TUnit_AOT()
     {
         await Cli.Wrap(Path.Combine(TUnitPath, $"aot-publish-{Framework}", GetExecutableFileName()))
-            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*", "--framework", Framework])
+            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
     }
