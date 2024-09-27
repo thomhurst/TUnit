@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     concurrency: 
-      group: "speed-comparison-run-time-${{matrix.os}}-${{matrix.class}}"
+      group: "speed-comparison-run-time-${{matrix.os}}-${{matrix.class}}-${{matrix.framework}}"
       cancel-in-progress: true
 
     steps:
@@ -85,7 +85,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     concurrency: 
-      group: "speed-comparison-build-time-${{matrix.os}}"
+      group: "speed-comparison-build-time-${{matrix.os}}-${{matrix.framework}}"
       cancel-in-progress: true
 
     steps:
