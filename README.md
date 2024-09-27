@@ -223,10 +223,10 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 ```
 | Method       | Mean     | Error    | StdDev   |
 |------------- |---------:|---------:|---------:|
-| Build_TUnit  | 925.9 ms | 24.37 ms | 70.31 ms |
-| Build_NUnit  | 783.4 ms | 15.58 ms | 28.09 ms |
-| Build_xUnit  | 765.3 ms | 13.24 ms | 11.74 ms |
-| Build_MSTest | 821.7 ms | 12.90 ms | 12.07 ms |
+| Build_TUnit  | 827.6 ms | 16.51 ms | 37.59 ms |
+| Build_NUnit  | 793.7 ms | 24.07 ms | 67.49 ms |
+| Build_xUnit  | 765.1 ms | 15.07 ms | 35.53 ms |
+| Build_MSTest | 753.3 ms |  9.69 ms |  8.59 ms |
 
 
 
@@ -244,10 +244,10 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 ```
 | Method       | Mean    | Error    | StdDev   |
 |------------- |--------:|---------:|---------:|
-| Build_TUnit  | 1.561 s | 0.0280 s | 0.0311 s |
-| Build_NUnit  | 1.432 s | 0.0282 s | 0.0325 s |
-| Build_xUnit  | 1.428 s | 0.0171 s | 0.0151 s |
-| Build_MSTest | 1.463 s | 0.0281 s | 0.0263 s |
+| Build_TUnit  | 1.513 s | 0.0299 s | 0.0293 s |
+| Build_NUnit  | 1.386 s | 0.0195 s | 0.0182 s |
+| Build_xUnit  | 1.399 s | 0.0221 s | 0.0207 s |
+| Build_MSTest | 1.414 s | 0.0269 s | 0.0276 s |
 
 
 
@@ -265,10 +265,10 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 ```
 | Method       | Mean    | Error    | StdDev   |
 |------------- |--------:|---------:|---------:|
-| Build_TUnit  | 1.390 s | 0.0222 s | 0.0197 s |
-| Build_NUnit  | 1.282 s | 0.0161 s | 0.0151 s |
-| Build_xUnit  | 1.285 s | 0.0148 s | 0.0123 s |
-| Build_MSTest | 1.302 s | 0.0092 s | 0.0077 s |
+| Build_TUnit  | 1.409 s | 0.0253 s | 0.0346 s |
+| Build_NUnit  | 1.315 s | 0.0262 s | 0.0269 s |
+| Build_xUnit  | 1.333 s | 0.0222 s | 0.0208 s |
+| Build_MSTest | 1.346 s | 0.0210 s | 0.0197 s |
 
 
 ### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
@@ -287,11 +287,11 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 ```
 | Method    | Mean      | Error     | StdDev    | Median    |
 |---------- |----------:|----------:|----------:|----------:|
-| TUnit_AOT |  82.34 ms |  1.434 ms |  2.356 ms |  82.81 ms |
-| TUnit     | 455.15 ms |  9.074 ms | 14.909 ms | 455.57 ms |
-| NUnit     | 744.26 ms | 12.068 ms | 10.698 ms | 743.67 ms |
-| xUnit     | 691.72 ms | 13.591 ms | 27.454 ms | 678.32 ms |
-| MSTest    | 615.77 ms |  6.186 ms |  5.166 ms | 616.53 ms |
+| TUnit_AOT |  73.61 ms |  1.424 ms |  2.709 ms |  72.44 ms |
+| TUnit     | 408.43 ms |  7.656 ms |  7.162 ms | 408.50 ms |
+| NUnit     | 700.88 ms | 11.464 ms | 10.163 ms | 698.17 ms |
+| xUnit     | 681.71 ms | 11.440 ms | 10.141 ms | 680.87 ms |
+| MSTest    | 618.92 ms |  6.635 ms |  5.180 ms | 620.42 ms |
 
 
 
@@ -307,13 +307,13 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method    | Mean        | Error     | StdDev    | Median      |
-|---------- |------------:|----------:|----------:|------------:|
-| TUnit_AOT |    47.94 ms |  0.953 ms |  1.512 ms |    48.75 ms |
-| TUnit     |   717.64 ms | 14.335 ms | 16.508 ms |   714.46 ms |
-| NUnit     | 1,309.44 ms | 13.574 ms | 12.697 ms | 1,306.91 ms |
-| xUnit     | 1,288.05 ms |  9.708 ms |  9.081 ms | 1,287.87 ms |
-| MSTest    | 1,155.48 ms |  9.304 ms |  8.248 ms | 1,154.25 ms |
+| Method    | Mean        | Error     | StdDev    |
+|---------- |------------:|----------:|----------:|
+| TUnit_AOT |    46.40 ms |  0.923 ms |  2.574 ms |
+| TUnit     |   727.09 ms | 14.243 ms | 16.403 ms |
+| NUnit     | 1,311.79 ms |  9.631 ms |  8.043 ms |
+| xUnit     | 1,306.00 ms | 17.970 ms | 16.809 ms |
+| MSTest    | 1,170.26 ms |  9.711 ms |  8.109 ms |
 
 
 
@@ -331,11 +331,11 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    79.86 ms |  1.569 ms |  2.200 ms |
-| TUnit     |   751.94 ms | 15.022 ms | 20.562 ms |
-| NUnit     | 1,325.78 ms | 10.821 ms | 10.122 ms |
-| xUnit     | 1,327.99 ms | 11.020 ms |  9.769 ms |
-| MSTest    | 1,193.90 ms | 10.217 ms |  8.531 ms |
+| TUnit_AOT |    77.60 ms |  1.225 ms |  0.957 ms |
+| TUnit     |   741.11 ms | 14.627 ms | 19.526 ms |
+| NUnit     | 1,309.73 ms | 16.954 ms | 15.859 ms |
+| xUnit     | 1,278.94 ms |  8.409 ms |  7.866 ms |
+| MSTest    | 1,157.60 ms |  4.754 ms |  3.970 ms |
 
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
@@ -354,11 +354,11 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    243.9 ms |  14.15 ms |  41.72 ms |
-| TUnit     |    713.2 ms |  32.44 ms |  92.54 ms |
-| NUnit     | 14,325.6 ms | 283.19 ms | 552.35 ms |
-| xUnit     | 14,398.0 ms | 285.19 ms | 491.94 ms |
-| MSTest    | 14,362.7 ms | 286.02 ms | 485.69 ms |
+| TUnit_AOT |    239.2 ms |  15.08 ms |  44.22 ms |
+| TUnit     |    571.1 ms |  24.09 ms |  71.02 ms |
+| NUnit     | 14,037.8 ms | 278.61 ms | 543.40 ms |
+| xUnit     | 14,491.1 ms | 288.88 ms | 609.35 ms |
+| MSTest    | 14,320.7 ms | 282.52 ms | 544.33 ms |
 
 
 
@@ -376,11 +376,11 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 ```
 | Method    | Mean        | Error     | StdDev    |
 |---------- |------------:|----------:|----------:|
-| TUnit_AOT |    89.08 ms |  1.905 ms |  5.616 ms |
-| TUnit     |   820.27 ms | 16.202 ms | 18.009 ms |
-| NUnit     | 6,339.74 ms | 32.586 ms | 30.481 ms |
-| xUnit     | 6,378.30 ms | 20.338 ms | 18.029 ms |
-| MSTest    | 6,291.00 ms | 14.048 ms | 12.453 ms |
+| TUnit_AOT |    86.20 ms |  1.930 ms |  5.690 ms |
+| TUnit     |   794.35 ms | 15.503 ms | 18.455 ms |
+| NUnit     | 6,318.54 ms | 17.745 ms | 15.730 ms |
+| xUnit     | 6,372.80 ms | 16.608 ms | 15.535 ms |
+| MSTest    | 6,304.72 ms | 12.107 ms | 11.324 ms |
 
 
 
@@ -396,13 +396,13 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 
 
 ```
-| Method    | Mean       | Error     | StdDev    |
-|---------- |-----------:|----------:|----------:|
-| TUnit_AOT |   133.1 ms |   2.65 ms |   6.69 ms |
-| TUnit     |   828.4 ms |  16.19 ms |  18.00 ms |
-| NUnit     | 8,858.6 ms |  27.82 ms |  26.02 ms |
-| xUnit     | 8,776.6 ms | 171.57 ms | 262.00 ms |
-| MSTest    | 8,703.5 ms | 172.24 ms | 292.47 ms |
+| Method    | Mean       | Error     | StdDev    | Median     |
+|---------- |-----------:|----------:|----------:|-----------:|
+| TUnit_AOT |   133.5 ms |   2.64 ms |   6.97 ms |   132.7 ms |
+| TUnit     |   805.6 ms |  15.91 ms |  23.82 ms |   804.5 ms |
+| NUnit     | 8,666.2 ms | 173.12 ms | 387.20 ms | 8,812.8 ms |
+| xUnit     | 8,752.0 ms | 166.60 ms | 216.62 ms | 8,792.3 ms |
+| MSTest    | 8,608.1 ms | 171.72 ms | 362.22 ms | 8,753.0 ms |
 
 
 
