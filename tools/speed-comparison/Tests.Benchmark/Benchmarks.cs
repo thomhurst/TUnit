@@ -1,10 +1,14 @@
 ﻿using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using CliWrap;
 
 namespace Tests.Benchmark;
 
 [MarkdownExporterAttribute.GitHub]
+[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net90)]
 public class Benchmarks
 {
     private readonly Stream _outputStream = Console.OpenStandardOutput();
@@ -15,6 +19,7 @@ public class Benchmarks
     private static readonly string MSTestPath = GetProjectPath("MSTestTimer");
     
     private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
+    private static readonly string Framework = Environment.GetEnvironmentVariable("FRAMEWORK")!;
     
     [GlobalCleanup]
     public async Task FlushStream()
@@ -26,8 +31,8 @@ public class Benchmarks
     [BenchmarkCategory("Runtime")]
     public async Task TUnit_AOT()
     {
-        await Cli.Wrap(Path.Combine(TUnitPath, "aot-publish", GetExecutableFileName()))
-            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
+        await Cli.Wrap(Path.Combine(TUnitPath, $"aot-publish-{Framework}", GetExecutableFileName()))
+            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*", "--framework", Framework])
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
     }
@@ -37,7 +42,7 @@ public class Benchmarks
     public async Task TUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["run", "--no-build", "-c", "Release", "--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithArguments(["run", "--no-build", "-c", "Release", "--treenode-filter",  $"/*/*/{ClassName}/*", "--framework", Framework])
             .WithWorkingDirectory(TUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
@@ -48,7 +53,7 @@ public class Benchmarks
     public async Task NUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
             .WithWorkingDirectory(NUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
@@ -59,7 +64,7 @@ public class Benchmarks
     public async Task xUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
             .WithWorkingDirectory(xUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
@@ -70,7 +75,7 @@ public class Benchmarks
     public async Task MSTest()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithArguments(["test", "--no-build", "-c", "Release", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
             .WithWorkingDirectory(MSTestPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
@@ -81,7 +86,7 @@ public class Benchmarks
     public async Task Build_TUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release"])
+            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
             .WithWorkingDirectory(TUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
@@ -92,7 +97,7 @@ public class Benchmarks
     public async Task Build_NUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release"])
+            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
             .WithWorkingDirectory(NUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
@@ -103,7 +108,7 @@ public class Benchmarks
     public async Task Build_xUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release"])
+            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
             .WithWorkingDirectory(xUnitPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
@@ -114,7 +119,7 @@ public class Benchmarks
     public async Task Build_MSTest()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release"])
+            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
             .WithWorkingDirectory(MSTestPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(_outputStream))
             .ExecuteAsync();
