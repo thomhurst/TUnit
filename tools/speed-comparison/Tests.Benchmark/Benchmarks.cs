@@ -9,6 +9,7 @@ namespace Tests.Benchmark;
 [MarkdownExporterAttribute.GitHub]
 [SimpleJob(RuntimeMoniker.Net80)]
 [SimpleJob(RuntimeMoniker.Net90)]
+[CategoriesColumn]
 public class Benchmarks
 {
     private readonly Stream _outputStream = Console.OpenStandardOutput();
