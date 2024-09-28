@@ -29,7 +29,10 @@ internal static class TypedConstantParser
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
         {
             var symbol = semanticModel.GetSymbolInfo(node);
-            if (symbol.Symbol!.Kind != SymbolKind.NamedType) return base.VisitIdentifierName(node);
+            if (symbol.Symbol!.Kind != SymbolKind.NamedType)
+            {
+                return base.VisitIdentifierName(node);
+            }
             return node.WithIdentifier(SyntaxFactory.Identifier(symbol.Symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)));
         }
 
