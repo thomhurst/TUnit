@@ -1,6 +1,6 @@
 namespace TUnit.Core;
 
-public class TestSessionContext : Context
+public class TestSessionContext : TestDiscoveryContext
 {
     private static readonly AsyncLocal<TestSessionContext?> Contexts = new();
     public new static TestSessionContext? Current
@@ -9,15 +9,9 @@ public class TestSessionContext : Context
         internal set => Contexts.Value = value;
     }
     
-    internal TestSessionContext(IEnumerable<AssemblyHookContext> assemblies)
+    internal TestSessionContext(IEnumerable<AssemblyHookContext> assemblies) : base(assemblies)
     {
-        Assemblies = assemblies;
     }
-
-    public IEnumerable<AssemblyHookContext> Assemblies { get; }
-    public IEnumerable<ClassHookContext> TestClasses => Assemblies.SelectMany(x => x.TestClasses);
-
-    public IEnumerable<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests);
 
     internal readonly List<Artifact> Artifacts = [];
 

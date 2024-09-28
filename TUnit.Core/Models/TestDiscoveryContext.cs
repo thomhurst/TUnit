@@ -9,12 +9,13 @@ public class TestDiscoveryContext : Context
         internal set => Contexts.Value = value;
     }
     
-    internal TestDiscoveryContext(IEnumerable<DiscoveredTest> discoveredTests)
+    internal TestDiscoveryContext(IEnumerable<AssemblyHookContext> assemblies)
     {
-        DiscoveredTests = discoveredTests;
+        Assemblies = assemblies;
     }
 
-    internal IEnumerable<DiscoveredTest> DiscoveredTests { get; }
+    public IEnumerable<AssemblyHookContext> Assemblies { get; }
+    public IEnumerable<ClassHookContext> TestClasses => Assemblies.SelectMany(x => x.TestClasses);
 
-    public IEnumerable<TestContext> AllTests => DiscoveredTests.Select(x => x.TestContext);
+    public IEnumerable<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests);
 }

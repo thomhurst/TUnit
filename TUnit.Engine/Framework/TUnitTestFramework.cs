@@ -60,11 +60,17 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
             await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
                 
-            var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken);
-
+            var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken); 
+            
             var failedToInitializeTests = _serviceProvider.TestDiscoverer.GetFailedToInitializeTests();
-                
-            await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(new TestDiscoveryContext(discoveredTests));
+
+            var organisedTests = _serviceProvider.TestGrouper.OrganiseTests(discoveredTests);
+            foreach (var test in organisedTests.AllTests)
+            {
+                TestRegistrar.RegisterInstance(test.TestContext);
+            }
+            
+            await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
 
             switch (context.Request)
             {
@@ -86,17 +92,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 case RunTestExecutionRequest runTestExecutionRequest:
                     await NotifyFailedTests(context, failedToInitializeTests, false);
 
-                    var tests = _serviceProvider.TestGrouper.OrganiseTests(discoveredTests);
-                    foreach (var test in tests.AllTests)
-                    {
-                        TestRegistrar.RegisterInstance(test.TestContext);
-                    }
-
                     var testSessionContext = new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
                         
                     await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
                     
-                    await _serviceProvider.TestsExecutor.ExecuteAsync(tests, runTestExecutionRequest.Filter, context);
+                    await _serviceProvider.TestsExecutor.ExecuteAsync(organisedTests, runTestExecutionRequest.Filter, context);
                         
                     await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
 
