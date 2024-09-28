@@ -15,7 +15,7 @@ internal class NullableByteArgumentTests : TestsBase<TestsGenerator>
 
             Assert.That(generatedFiles[0], Does.Contain(
                 """
-                global::System.Byte? methodArg0 = 1;
+                global::System.Byte? methodArg0 = (global::System.Byte)1;
                 """));
             
             Assert.That(generatedFiles[1], Does.Contain(
@@ -25,13 +25,13 @@ internal class NullableByteArgumentTests : TestsBase<TestsGenerator>
             
             Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
                 """
-                global::System.Byte methodArg0 = 1;
-                global::System.Byte? methodArg1 = 1;
+                global::System.Byte methodArg0 = (global::System.Byte)1;
+                global::System.Byte? methodArg1 = (global::System.Byte)1;
                 """.IgnoreWhitespaceFormatting()));
             
             Assert.That(generatedFiles[3].IgnoreWhitespaceFormatting(), Does.Contain(
                 """
-                global::System.Byte methodArg0 = 1;
+                global::System.Byte methodArg0 = (global::System.Byte)1;
                 global::System.Byte? methodArg1 = null;
                 """.IgnoreWhitespaceFormatting()));
         });

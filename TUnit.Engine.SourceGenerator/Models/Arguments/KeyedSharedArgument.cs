@@ -2,7 +2,7 @@
 
 internal record KeyedSharedArgument : Argument
 {
-    public KeyedSharedArgument(string type, string? invocation, bool isUnfoldableTuple = false) : base(type, invocation, isUnfoldableTuple)
+    public KeyedSharedArgument(string type, string? invocation) : base(type, invocation)
     {
     }
     

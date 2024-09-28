@@ -10,6 +10,12 @@ public class StringArgumentTests
     [Arguments("\\t")]
     [Arguments("\\\t")]
     [Arguments("\\\\t")]
+    [Arguments(
+        """
+        Hello
+        World
+        """
+    )]
     public void Normal(string s)
     {
         // Dummy method

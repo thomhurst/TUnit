@@ -38,8 +38,8 @@ internal class MatrixTests : TestsBase<TestsGenerator>
     private void AssertTestThree(string[] generatedFiles)
     {
         Assert.That(generatedFiles[72], Does.Contain("global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);"));
-        Assert.That(generatedFiles[73], Does.Contain("global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(0);"));
+        Assert.That(generatedFiles[73], Does.Contain("global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;"));
         Assert.That(generatedFiles[74], Does.Contain("global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);"));
-        Assert.That(generatedFiles[75], Does.Contain("global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(0);"));
+        Assert.That(generatedFiles[75], Does.Contain("global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;"));
     }
 }
