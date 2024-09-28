@@ -89,11 +89,11 @@ jobs:
     strategy: 
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        framework: [net8.0, net9.0]
+        # framework: [net8.0, net9.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     concurrency: 
-      group: "speed-comparison-build-time-${{matrix.os}}-${{matrix.framework}}"
+      group: "speed-comparison-build-time-${{matrix.os}}"
       cancel-in-progress: true
 
     steps:
@@ -110,8 +110,6 @@ jobs:
       - name: Run Benchmark
         run: ${{ matrix.os != 'windows-latest' && 'sudo -E ' || '' }}dotnet run -c Release --allCategories=Build --framework net9.0
         working-directory: "tools/speed-comparison/Tests.Benchmark"
-        env:
-          FRAMEWORK: ${{ matrix.framework }}
 
       - name: Upload Markdown
         uses: actions/upload-artifact@v4
