@@ -19,4 +19,8 @@ internal class NumberArgumentTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles[4], Does.Contain("global::System.UInt64 methodArg0 = 1UL;"));
             Assert.That(generatedFiles[5], Does.Contain("global::System.UInt32 methodArg0 = 1U;"));
         });
+
+    [Test]
+    [SetCulture("de-DE")]
+    public Task TestDE() => Test();
 }
