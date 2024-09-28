@@ -13,7 +13,7 @@ public class StringLength
     public StringLength(IValueSource<string> valueSource)
     {
         _valueSource = valueSource;
-        AssertionBuilder = valueSource.AssertionBuilder.AppendExpression("Length");
+        AssertionBuilder = valueSource.AssertionBuilder.AppendExpression("HasLength");
     }
 
     public InvokableValueAssertionBuilder<string> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")

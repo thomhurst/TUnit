@@ -6,10 +6,10 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static ExceptionMessage<TActual> HasMessage<TActual>(this IDelegateSource<TActual> delegateSource) 
+    public static ExceptionMessage<TActual> HasMessage<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : Exception
     {
-        delegateSource.AssertionBuilder.AppendCallerMethod([]);
-        return new ExceptionMessage<TActual>(delegateSource);
+        valueSource.AssertionBuilder.AppendCallerMethod([]);
+        return new ExceptionMessage<TActual>(valueSource);
     }
 }

@@ -15,7 +15,7 @@ public class EnumerableCount<TActual>
     public EnumerableCount(IValueSource<TActual> valueSource)
     {
         _valueSource = valueSource;
-        AssertionBuilder = valueSource.AssertionBuilder.AppendExpression("Count");
+        AssertionBuilder = valueSource.AssertionBuilder.AppendExpression("HasCount");
     }
 
     public InvokableValueAssertionBuilder<TActual> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
