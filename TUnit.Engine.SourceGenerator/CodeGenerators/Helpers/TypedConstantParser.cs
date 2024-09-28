@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Globalization;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
@@ -18,52 +19,52 @@ internal static class TypedConstantParser
 
         if (constructorArgument.Type?.SpecialType is SpecialType.System_String or SpecialType.System_Char)
         {
-            return $"{constructorArgument.Value?.ToString()?.Replace(@"\", @"\\")}";
+            return $"{ValueToString(constructorArgument.Value)?.Replace(@"\", @"\\")}";
         }
 
         if (constructorArgument.Kind is TypedConstantKind.Enum || type?.TypeKind == TypeKind.Enum)
         {
-            return $"({(type ?? constructorArgument.Type)!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({constructorArgument.Value})";
+            return $"({(type ?? constructorArgument.Type)!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({ValueToString(constructorArgument.Value)})";
         }
         
         if (constructorArgument.Type?.SpecialType == SpecialType.System_Single)
         {
-            return $"{constructorArgument.Value}F";
+            return $"{ValueToString(constructorArgument.Value)}F";
         }
         
         if (constructorArgument.Type?.SpecialType == SpecialType.System_Int64)
         {
-            return $"{constructorArgument.Value}L";
+            return $"{ValueToString(constructorArgument.Value)}L";
         }
         
         if (constructorArgument.Type?.SpecialType == SpecialType.System_Double)
         {
-            return $"{constructorArgument.Value}D";
+            return $"{ValueToString(constructorArgument.Value)}D";
         }
         
         if (constructorArgument.Type?.SpecialType == SpecialType.System_Decimal)
         {
-            return $"{constructorArgument.Value}M";
+            return $"{ValueToString(constructorArgument.Value)}M";
         }
 
         if (constructorArgument.Type?.SpecialType == SpecialType.System_UInt32)
         {
-            return $"{constructorArgument.Value}U";
+            return $"{ValueToString(constructorArgument.Value)}U";
         }
         
         if (constructorArgument.Type?.SpecialType == SpecialType.System_UInt64)
         {
-            return $"{constructorArgument.Value}UL";
+            return $"{ValueToString(constructorArgument.Value)}UL";
         }
         
         if (constructorArgument.Type?.SpecialType == SpecialType.System_Decimal)
         {
-            return $"{constructorArgument.Value}M";
+            return $"{ValueToString(constructorArgument.Value)}M";
         }
         
         if (constructorArgument.Kind is TypedConstantKind.Primitive)
         {
-            return $"{constructorArgument.Value}";
+            return $"{ValueToString(constructorArgument.Value)}";
         }
         
         if (constructorArgument.Kind is TypedConstantKind.Type)
@@ -98,5 +99,14 @@ internal static class TypedConstantParser
         }
         
         return typedConstant.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    }
+
+    private static string? ValueToString(object? value)
+    {
+        if (value is IFormattable formattable)
+        {
+            return formattable.ToString(null, CultureInfo.InvariantCulture);
+        }
+        return value?.ToString();
     }
 }
