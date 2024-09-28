@@ -102,7 +102,7 @@ internal static class MethodDataSourceRetriever
 
         return new Argument(
             dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            methodInvocation, isUnfoldableTuple: true)
+            methodInvocation)
         {
             TupleVariableNames = variableNames,
             DisposeAfterTest = disposeAfterTest

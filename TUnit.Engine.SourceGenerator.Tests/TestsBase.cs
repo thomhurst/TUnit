@@ -53,7 +53,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             )
             .AddReferences(ReferencesHelper.References)
             .AddSyntaxTrees(additionalSources.Select(x => CSharpSyntaxTree.ParseText(x)));
-        
+
         foreach (var error in compilation.GetDiagnostics().Where(x => x.Severity == DiagnosticSeverity.Error))
         {
             throw new Exception(
@@ -62,6 +62,12 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out _);
+
+        foreach (var error in newCompilation.GetDiagnostics().Where(x => x.Severity == DiagnosticSeverity.Error))
+        {
+            throw new Exception(
+                $"There was an error with the generator compilation.{Environment.NewLine}{Environment.NewLine}{error}");
+        }
 
         // Retrieve all files in the compilation.
         var generatedFiles = newCompilation.SyntaxTrees

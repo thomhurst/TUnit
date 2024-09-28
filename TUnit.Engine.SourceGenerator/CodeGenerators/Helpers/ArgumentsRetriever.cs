@@ -26,7 +26,7 @@ internal static class ArgumentsRetriever
             yield break;
         }
 
-        foreach (var argumentsContainer in MatrixRetriever.Parse(parameters))
+        foreach (var argumentsContainer in MatrixRetriever.Parse(context, parameters))
         {
             yield return argumentsContainer;
         }
@@ -44,7 +44,7 @@ internal static class ArgumentsRetriever
             
             if (name == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
             {
-                yield return DataDrivenArgumentsRetriever.ParseArguments(dataAttribute, parameters, index);
+                yield return DataDrivenArgumentsRetriever.ParseArguments(context, dataAttribute, parameters, index);
             }
             
             if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix)
