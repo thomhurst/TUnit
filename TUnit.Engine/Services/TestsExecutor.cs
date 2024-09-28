@@ -15,7 +15,6 @@ internal class TestsExecutor
     private int _currentlyExecutingTests;
 
     private readonly SingleTestExecutor _singleTestExecutor;
-    private readonly TestGrouper _testGrouper;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
 
@@ -25,27 +24,18 @@ internal class TestsExecutor
     private readonly int _maximumParallelTests;
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
-        TestGrouper testGrouper,
         TUnitFrameworkLogger logger,
         ICommandLineOptions commandLineOptions)
     {
         _singleTestExecutor = singleTestExecutor;
-        _testGrouper = testGrouper;
         _logger = logger;
         _commandLineOptions = commandLineOptions;
 
         _maximumParallelTests = GetParallelTestsLimit();
     }
 
-    public async Task ExecuteAsync(DiscoveredTest[] testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
+    public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter,  ExecuteRequestContext context)
     {
-        var tests = _testGrouper.OrganiseTests(testNodes);
-
-        foreach (var test in tests.AllTests)
-        {
-            TestRegistrar.RegisterInstance(test.TestContext);
-        }
-
         // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint
         await Task.WhenAll(
             ProcessParallelTests(tests.Parallel, filter, context),

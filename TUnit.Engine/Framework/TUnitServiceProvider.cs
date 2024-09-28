@@ -23,6 +23,7 @@ internal class TUnitServiceProvider : IAsyncDisposable
     public StandardOutConsoleInterceptor StandardOutConsoleInterceptor { get; }
     public StandardErrorConsoleInterceptor StandardErrorConsoleInterceptor { get; }
     public TUnitTestDiscoverer TestDiscoverer { get; }
+    public TestGrouper TestGrouper { get; }
     public TestsExecutor TestsExecutor { get; }
     public OnEndExecutor OnEndExecutor { get; }
 
@@ -49,7 +50,7 @@ internal class TUnitServiceProvider : IAsyncDisposable
         
         TestDiscoverer = new TUnitTestDiscoverer(testsLoader, testFilterService, LoggerFactory);
        
-        var testGrouper = new TestGrouper();
+        TestGrouper = new TestGrouper();
         var disposer = new Disposer(Logger);
         var cancellationTokenSource = EngineCancellationToken.CancellationTokenSource;
         var testInvoker = new TestInvoker();
@@ -63,7 +64,7 @@ internal class TUnitServiceProvider : IAsyncDisposable
         var singleTestExecutor = new SingleTestExecutor(extension, disposer, cancellationTokenSource, testInvoker,
             explicitFilterService, parallelLimitProvider, assemblyHookOrchestrator, classHookOrchestrator, Logger);
         
-        TestsExecutor = new TestsExecutor(singleTestExecutor, testGrouper, Logger, CommandLineOptions);
+        TestsExecutor = new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions);
         
         OnEndExecutor = new OnEndExecutor(CommandLineOptions, Logger);
     }
