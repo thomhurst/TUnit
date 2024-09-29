@@ -44,7 +44,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
                     {
                         AssemblyHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
-                    else if (model.HookLevel is "TestDiscovery" or "TestSession")
+                    else if (model.HookLevel is "TUnit.Core.HookType.TestDiscovery" or "TUnit.Core.HookType.TestSession")
                     {
                         GlobalTestHooksWriter.Execute(productionContext, model, HookLocationType.Before);
                     }
@@ -68,7 +68,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
                     {
                         AssemblyHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
-                    else if (model.HookLevel is "TestDiscovery" or "TestSession")
+                    else if (model.HookLevel is "TUnit.Core.HookType.TestDiscovery" or "TUnit.Core.HookType.TestSession")
                     {
                         GlobalTestHooksWriter.Execute(productionContext, model, HookLocationType.After);
                     }
