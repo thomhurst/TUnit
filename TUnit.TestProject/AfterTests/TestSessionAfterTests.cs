@@ -15,8 +15,16 @@ public class TestSessionAfterHooksTests
     [AfterEvery(TestSession)]
     public static async Task AfterEveryTestSession(TestSessionContext context)
     {
-        var firstTest = context.AllTests.First();
-        await Assert.That(firstTest.ObjectBag["AfterEveryTestSessionHit"]).IsEqualTo(true);
+        var test = context.AllTests.FirstOrDefault(x =>
+            x.TestDetails.TestName == nameof(TestSessionAfterTests.PepareForAfterSession));
+
+        if (test == null)
+        {
+            // This test might not have been executed due to filters, so the below exception would cause problems.
+            return;
+        }
+
+        await Assert.That(test.ObjectBag["AfterEveryTestSessionHit"]).IsEqualTo(true);
     }
 }
 
