@@ -53,15 +53,16 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
         _serviceProvider.StandardOutConsoleInterceptor.Initialize();
         _serviceProvider.StandardErrorConsoleInterceptor.Initialize();
-        
+
         try
         {
             _serviceProvider.Initializer.Initialize();
 
             await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
-                
-            var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken); 
-            
+
+            var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest,
+                context.CancellationToken);
+
             var failedToInitializeTests = _serviceProvider.TestDiscoverer.GetFailedToInitializeTests();
 
             var organisedTests = _serviceProvider.TestGrouper.OrganiseTests(discoveredTests);
@@ -69,8 +70,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             {
                 TestRegistrar.RegisterInstance(test.TestContext);
             }
-            
-            await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
+
+            await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
+                new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
 
             switch (context.Request)
             {
@@ -92,17 +94,21 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 case RunTestExecutionRequest runTestExecutionRequest:
                     await NotifyFailedTests(context, failedToInitializeTests, false);
 
-                    var testSessionContext = new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
-                        
+                    var testSessionContext =
+                        new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
+
                     await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
-                    
-                    await _serviceProvider.TestsExecutor.ExecuteAsync(organisedTests, runTestExecutionRequest.Filter, context);
-                        
+
+                    await _serviceProvider.TestsExecutor.ExecuteAsync(organisedTests, runTestExecutionRequest.Filter,
+                        context);
+
                     await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
 
                     foreach (var artifact in testSessionContext.Artifacts)
                     {
-                        await context.MessageBus.PublishAsync(this, new SessionFileArtifact(context.Request.Session.SessionUid, artifact.File, artifact.DisplayName, artifact.Description));
+                        await context.MessageBus.PublishAsync(this,
+                            new SessionFileArtifact(context.Request.Session.SessionUid, artifact.File,
+                                artifact.DisplayName, artifact.Description));
                     }
 
                     break;
@@ -110,9 +116,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
             }
         }
-        catch (Exception e) when (e is TaskCanceledException or OperationCanceledException && context.CancellationToken.IsCancellationRequested)
+        catch (Exception e) when (e is TaskCanceledException or OperationCanceledException &&
+                                  context.CancellationToken.IsCancellationRequested)
         {
             await _serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
+        }
+        catch (Exception e)
+        {
+            await _serviceProvider.Logger.LogErrorAsync(e);
         }
         finally
         {
