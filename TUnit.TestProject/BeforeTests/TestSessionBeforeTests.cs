@@ -13,8 +13,10 @@ public class TestSessionBeforeHooks
     }
 
     [BeforeEvery(TestSession)]
-    public static void BeforeEveryTestSession(TestSessionContext context)
+    public static async Task BeforeEveryTestSession(TestSessionContext context)
     {
+        await File.WriteAllTextAsync("TestSessionBeforeTests.txt", $"{context.AllTests.Count()} tests in session");
+
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(TestSessionBeforeTests.EnsureBeforeEveryTestSessionHit));
 

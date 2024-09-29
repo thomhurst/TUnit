@@ -9,10 +9,10 @@ public class TestDiscoveryBeforeTests
         await Task.CompletedTask;
     }
 
-    // TODO: What could make sense to test here? We dont have any kind of informations yet.
     [BeforeEvery(TestDiscovery)]
     public static async Task BeforeEveryTestDiscovery(BeforeTestDiscoveryContext context)
     {
-        await Task.CompletedTask;
+        await File.WriteAllTextAsync("TestDiscoveryBeforeTests.txt", $"Blah!");
+
     }
 }

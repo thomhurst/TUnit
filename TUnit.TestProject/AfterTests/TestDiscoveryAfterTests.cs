@@ -13,8 +13,10 @@ public class TestDiscoveryAfterHooks
     }
 
     [AfterEvery(TestDiscovery)]
-    public static void AfterEveryTestDiscovery(TestDiscoveryContext context)
+    public static async Task AfterEveryTestDiscovery(TestDiscoveryContext context)
     {
+        await File.WriteAllTextAsync("TestDiscoveryAfterTests.txt", $"{context.AllTests.Count()} tests found");
+        
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(TestDiscoveryAfterTests.EnsureAfterEveryTestDiscovoryHit));
 
