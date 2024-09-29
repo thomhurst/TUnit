@@ -8,6 +8,7 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Models;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
 
@@ -59,10 +60,16 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
             await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
                 
-            var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken);
-
+            var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken); 
+            
             var failedToInitializeTests = _serviceProvider.TestDiscoverer.GetFailedToInitializeTests();
-                
+
+            var organisedTests = _serviceProvider.TestGrouper.OrganiseTests(discoveredTests);
+            foreach (var test in organisedTests.AllTests)
+            {
+                TestRegistrar.RegisterInstance(test.TestContext);
+            }
+            
             await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
 
             switch (context.Request)
@@ -89,7 +96,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                         
                     await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
                     
-                    await _serviceProvider.TestsExecutor.ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
+                    await _serviceProvider.TestsExecutor.ExecuteAsync(organisedTests, runTestExecutionRequest.Filter, context);
                         
                     await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
 
