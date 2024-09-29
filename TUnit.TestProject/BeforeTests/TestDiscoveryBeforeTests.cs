@@ -12,7 +12,6 @@ public class TestDiscoveryBeforeTests
     [BeforeEvery(TestDiscovery)]
     public static async Task BeforeEveryTestDiscovery(BeforeTestDiscoveryContext context)
     {
-        await File.WriteAllTextAsync("TestDiscoveryBeforeTests.txt", $"Blah!");
-
+        await File.WriteAllTextAsync($"TestDiscoveryBeforeTests{Guid.NewGuid():N}.txt", $"Blah!");
     }
 }
