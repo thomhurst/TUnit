@@ -161,42 +161,43 @@ public abstract class TestModule : Module<TestResult>
         await AssertTrx(context, result, assertions, cancellationToken, trxFilename, assertionExpression);
     }
 
-    private static async Task AssertTrx(IPipelineContext context, CommandResult commandResult, List<Action<TestResult>> assertions,
+    private static async Task AssertTrx(IPipelineContext context, CommandResult commandResult,
+        List<Action<TestResult>> assertions,
         CancellationToken cancellationToken,
         string trxFilename, string assertionExpression)
     {
-        var trxFileContents = await context.Git()
-            .RootDirectory
-            .AssertExists()
-            .FindFile(x => x.Name == trxFilename)
-            .AssertExists($"TRX file not found: {trxFilename}")
-            .ReadAsync(cancellationToken);
-
-        var parsedTrx = new TrxParser().ParseTrxContents(trxFileContents);
-
-        var unitTestResults = parsedTrx.UnitTestResults.Where(x => 
-                !x.TestName!.Contains("Before Class: ")
-                && !x.TestName.Contains("After Class: ")
-                && !x.TestName.Contains("Before Assembly: ")
-                && !x.TestName.Contains("After Assembly: "))
-            .ToList();
-
-        var parsedResult = new TestResult(
-            new DotNetTestResult(unitTestResults,
-                new ResultSummary(parsedTrx.ResultSummary.Outcome,
-                    new Counters(
-                        unitTestResults.Count,
-                        unitTestResults.Count(x => x.Outcome != TestOutcome.NotExecuted),
-                        unitTestResults.Count(x => x.Outcome == TestOutcome.Passed),
-                        unitTestResults.Count(x => x.Outcome == TestOutcome.Failed),
-                        0,0,0,0,0,0,0,0,0,0,0,0
-                    )
-                )
-            )
-        );
-        
         try
         {
+            var trxFileContents = await context.Git()
+                .RootDirectory
+                .AssertExists()
+                .FindFile(x => x.Name == trxFilename)
+                .AssertExists($"TRX file not found: {trxFilename}")
+                .ReadAsync(cancellationToken);
+
+            var parsedTrx = new TrxParser().ParseTrxContents(trxFileContents);
+
+            var unitTestResults = parsedTrx.UnitTestResults.Where(x =>
+                    !x.TestName!.Contains("Before Class: ")
+                    && !x.TestName.Contains("After Class: ")
+                    && !x.TestName.Contains("Before Assembly: ")
+                    && !x.TestName.Contains("After Assembly: "))
+                .ToList();
+
+            var parsedResult = new TestResult(
+                new DotNetTestResult(unitTestResults,
+                    new ResultSummary(parsedTrx.ResultSummary.Outcome,
+                        new Counters(
+                            unitTestResults.Count,
+                            unitTestResults.Count(x => x.Outcome != TestOutcome.NotExecuted),
+                            unitTestResults.Count(x => x.Outcome == TestOutcome.Passed),
+                            unitTestResults.Count(x => x.Outcome == TestOutcome.Failed),
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                        )
+                    )
+                )
+            );
+
             using (new AssertionScope())
             {
                 assertions.ForEach(x => x.Invoke(parsedResult));
@@ -207,7 +208,7 @@ public abstract class TestModule : Module<TestResult>
             context.Logger.LogInformation("Command Input: {Input}", commandResult.CommandInput);
             context.Logger.LogInformation("Error: {Error}", commandResult.StandardError);
             context.Logger.LogInformation("Output: {Output}", commandResult.StandardOutput);
-            
+
             throw new Exception($"""
                                  Error asserting results
 
