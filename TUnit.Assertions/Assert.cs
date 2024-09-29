@@ -104,11 +104,11 @@ public static class Assert
         [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
         => ThrowsAsync<TException>(async () => await @delegate, doNotPopulateThisValue);
 
-    public static Exception ThrowsAsync(Action @delegate,
+    public static Exception Throws(Action @delegate,
         [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
-        => ThrowsAsync<Exception>(@delegate, doNotPopulateThisValue);
+        => Throws<Exception>(@delegate, doNotPopulateThisValue);
     
-    public static TException ThrowsAsync<TException>(Action @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
+    public static TException Throws<TException>(Action @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
     {
         try
         {
