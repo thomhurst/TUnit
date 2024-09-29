@@ -15,13 +15,16 @@ public class TestDiscoveryAfterHooks
     [AfterEvery(TestDiscovery)]
     public static void AfterEveryTestDiscovery(TestDiscoveryContext context)
     {
-        var firstTest = context.AllTests.First();
-        context.OutputWriter.WriteLine($"AfterEveryTestDiscovery: {firstTest.TestDetails.TestName}");
+        var test = context.AllTests.FirstOrDefault(x =>
+            x.TestDetails.TestName == nameof(TestDiscoveryAfterTests.EnsureAfterEveryTestDiscovoryHit));
 
-        foreach (var test in context.AllTests)
+        if (test == null)
         {
-            test.ObjectBag.Add("AfterEveryTestDiscoveryHit", true);
+            // This test might not have been executed due to filters, so the below exception would cause problems.
+            return;
         }
+
+        test.ObjectBag.Add("AfterEveryTestDiscoveryHit", true);
     }
 }
 

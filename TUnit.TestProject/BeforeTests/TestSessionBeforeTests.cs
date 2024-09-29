@@ -15,13 +15,16 @@ public class TestSessionBeforeHooks
     [BeforeEvery(TestSession)]
     public static void BeforeEveryTestSession(TestSessionContext context)
     {
-        var firstTest = context.AllTests.First();
-        context.OutputWriter.WriteLine($"BeforeEveryTestSession: {firstTest.TestDetails.TestName}");
+        var test = context.AllTests.FirstOrDefault(x =>
+            x.TestDetails.TestName == nameof(TestSessionBeforeTests.EnsureBeforeEveryTestSessionHit));
 
-        foreach (var test in context.AllTests)
+        if (test == null)
         {
-            test.ObjectBag.Add("BeforeEveryTestSession", true);
+            // This test might not have been executed due to filters, so the below exception would cause problems.
+            return;
         }
+
+        test.ObjectBag.Add("BeforeEveryTestSession", true);
     }
 }
 
