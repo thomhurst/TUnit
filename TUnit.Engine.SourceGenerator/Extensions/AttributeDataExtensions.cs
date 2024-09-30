@@ -10,6 +10,7 @@ public static class AttributeDataExtensions
         WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix,
+        WellKnownFullyQualifiedClassNames.DataSourceGeneratorAttribute.WithGlobalPrefix,
     ];
     
     public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)
@@ -31,9 +32,9 @@ public static class AttributeDataExtensions
     
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
     {
-        var displayString = attributeData?.GetFullyQualifiedAttributeTypeName();
+        var attributeClass = attributeData?.AttributeClass;
 
-        return DataSourceAttributes.Any(x => x == displayString);
+        return DataSourceAttributes.Any(x => attributeClass?.IsOrInherits(x) == true);
     }
     
     public static bool IsMatrixAttribute(this AttributeData? attributeData)

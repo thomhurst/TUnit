@@ -61,6 +61,11 @@ internal static class ArgumentsRetriever
             {
                 yield return ClassConstructorRetriever.Parse(namedTypeSymbol, dataAttribute, index);
             }
+            
+            if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+            {
+                yield return DataSourceGeneratorRetriever.Parse(context, parameters, namedTypeSymbol, dataAttribute, argPrefix, index);
+            }
         }
     }
 

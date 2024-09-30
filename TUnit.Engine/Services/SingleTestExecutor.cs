@@ -467,9 +467,14 @@ internal class SingleTestExecutor : IDataProducer
 
     private async ValueTask ExecuteCore(DiscoveredTest discoveredTest)
     {
+        if (EngineCancellationToken.Token.IsCancellationRequested)
+        {
+            throw new SkipTestException("The test session has been cancelled...");
+        }
+        
         if (_cancellationTokenSource.IsCancellationRequested)
         {
-            return;
+            throw new SkipTestException("The test has been cancelled...");
         }
         
         await ExecuteTestMethodWithTimeout(discoveredTest);

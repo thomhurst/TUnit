@@ -76,7 +76,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                     argumentsAttribute.GetLocation(),
-                    string.Join(", ", attributeTypesPassedIn.Select(x => x?.ToDisplayString()) ?? ImmutableArray<string>.Empty),
+                    string.Join(", ", attributeTypesPassedIn.Select(x => x?.ToDisplayString())),
                     string.Join(", ", methodParameterTypes.Select(x => x?.ToDisplayString())))
             );
             return;
@@ -88,7 +88,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             var attributeArgumentType = attributeTypesPassedIn.ElementAtOrDefault(i);
             
             if (attributeArgumentType is null &&
-                methodParameterType.NullableAnnotation == NullableAnnotation.NotAnnotated)
+                methodParameterType?.NullableAnnotation == NullableAnnotation.NotAnnotated)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.MethodParameterBadNullability,
@@ -109,23 +109,23 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         argumentsAttribute.GetLocation() ?? methodSymbol.Locations.FirstOrDefault(),
                         attributeArgumentType.ToDisplayString(),
-                        methodParameterType.ToDisplayString())
+                        methodParameterType?.ToDisplayString())
                 );
                 return;
             }
         }
     }
 
-    private bool IsEnumAndInteger(ITypeSymbol type1, ITypeSymbol? type2)
+    private bool IsEnumAndInteger(ITypeSymbol? type1, ITypeSymbol? type2)
     {
-        if (type1.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "int")
+        if (type1?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "int")
         {
             return type2?.TypeKind == TypeKind.Enum;
         }
         
         if (type2?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "int")
         {
-            return type1.TypeKind == TypeKind.Enum;
+            return type1?.TypeKind == TypeKind.Enum;
         }
 
         return false;
