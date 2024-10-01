@@ -14,7 +14,7 @@ public class EquivalentToAssertCondition<TActual> : AssertCondition<TActual, TAc
                                                    Expected: {ExpectedValue}
                                                 """;
 
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null && ExpectedValue is null)
         {

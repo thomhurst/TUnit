@@ -12,7 +12,7 @@ public class EnumerableNotContainsAssertCondition<TActual, TInner> : AssertCondi
 
     protected internal override string GetFailureMessage() => $"{ExpectedValue} was not in the collection";
 
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {

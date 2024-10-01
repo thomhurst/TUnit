@@ -31,7 +31,7 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
         return string.Join($"{Environment.NewLine} and{Environment.NewLine}", messages);
     }
     
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return _condition1.Assert(actualValue, exception, ActualExpression) && _condition2.Assert(actualValue, exception, ActualExpression);
     }

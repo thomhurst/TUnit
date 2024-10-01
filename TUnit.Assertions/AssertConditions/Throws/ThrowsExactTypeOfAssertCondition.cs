@@ -8,7 +8,7 @@ public class ThrowsExactTypeOfAssertCondition<TActual, TExpected> : AssertCondit
     
     protected internal override string GetFailureMessage() => $"A {Exception?.GetType().Name} was thrown instead of {typeof(TExpected).Name}";
 
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (exception is null)
         {

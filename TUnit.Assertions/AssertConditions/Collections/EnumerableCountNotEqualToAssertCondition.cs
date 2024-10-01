@@ -11,7 +11,7 @@ public class EnumerableCountNotEqualToAssertCondition<TActual> : AssertCondition
 
     protected internal override string GetFailureMessage() => $"Count is {ExpectedValue}";
     
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {

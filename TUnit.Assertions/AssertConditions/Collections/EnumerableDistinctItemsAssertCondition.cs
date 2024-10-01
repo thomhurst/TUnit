@@ -15,7 +15,7 @@ public class EnumerableDistinctItemsAssertCondition<TActual, TInner> : AssertCon
 
     protected internal override string GetFailureMessage() => "Duplicate items found in the collection";
 
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {

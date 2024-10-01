@@ -7,7 +7,7 @@ public class EqualsAssertCondition<TActual>(TActual expected) : AssertCondition<
                                                  Received: {ActualValue}
                                                  """;
 
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is IEquatable<TActual> equatable)
         {
