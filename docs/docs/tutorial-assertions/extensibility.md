@@ -47,8 +47,6 @@ Here's a fully fledged assertion in action:
 
 ```csharp
 public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
-        where TAnd : IAnd<string>
-        where TOr : IOr<string>
     {
         return valueSource.RegisterAssertion(
             assertCondition: new StringEqualsAssertCondition(expected, stringComparison),
