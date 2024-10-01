@@ -9,7 +9,7 @@ public class StringNotContainsAssertCondition : AssertCondition<string, string>
         _stringComparison = stringComparison;
     }
     
-    private protected override bool Passes(string? actualValue, Exception? exception)
+    protected override bool Passes(string? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {

@@ -16,7 +16,7 @@ public class DelegateAssertCondition<TActual, TExpected> : AssertCondition<TActu
     protected internal override string GetFailureMessage() =>
         _defaultMessageFactory(ActualValue, Exception, ActualExpression);
 
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return _condition(actualValue, ExpectedValue, exception, this);
     }

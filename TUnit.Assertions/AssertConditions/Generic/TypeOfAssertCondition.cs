@@ -5,7 +5,7 @@ public class TypeOfAssertCondition<TActual>(Type expectedType)
 {
     protected internal override string GetFailureMessage() => $"{ActualValue} is {ActualValue?.GetType().Name ?? "null"} instead of {expectedType.Name}";
 
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return actualValue?.GetType() == expectedType;
     }

@@ -13,7 +13,7 @@ public class ThrowsWithMessageEqualToAssertCondition<TActual> : AssertCondition<
     
     protected internal override string GetFailureMessage() => $"Message was {_exceptionSelector(Exception)?.Message} instead of {ExpectedValue}";
 
-    private protected override bool Passes(TActual? actualValue, Exception? rootException)
+    protected override bool Passes(TActual? actualValue, Exception? rootException)
     {
         var exception = _exceptionSelector(rootException);
 

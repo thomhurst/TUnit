@@ -3,7 +3,7 @@
 public class StringContainsAssertCondition(string expected, StringComparison stringComparison)
     : AssertCondition<string, string>(expected)
 {
-    private protected override bool Passes(string? actualValue, Exception? exception)
+    protected override bool Passes(string? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {
