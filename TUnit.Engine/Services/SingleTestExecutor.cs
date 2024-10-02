@@ -486,8 +486,6 @@ internal class SingleTestExecutor : IDataProducer
     {
         foreach (var dependency in GetDependencies(testContext.TestDetails))
         {
-            AssertDoNotDependOnEachOther(testContext.TestContext, dependency.Test.TestContext);
-
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, context, true);
@@ -518,40 +516,23 @@ internal class SingleTestExecutor : IDataProducer
 
             foreach (var dependency in dependencies)
             {
-                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
-
                 if (dependency.TestDetails.IsSameTest(original))
                 {
-                    yield break;
+                    throw new DependencyConflictException(dependency.TestDetails,
+                        dependencies.Select(x => x.TestDetails));
                 }
+
+                if (dependency.TestDetails.NotInParallelConstraintKeys != null)
+                {
+                    throw new DependsOnNotInParallelException(dependency.TestDetails.TestName);
+                }
+                
+                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
 
                 foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
                 {
                     yield return nestedDependency;
-
-                    if (nestedDependency.Test.TestDetails.IsSameTest(original))
-                    {
-                        yield break;
-                    }
                 }
-            }
-        }
-    }
-
-    private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
-    {
-        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails).Select(x => x.Test.TestContext)];
-        
-        foreach (var dependencyOfDependency in dependencies)
-        {
-            if (dependencyOfDependency.TestDetails.IsSameTest(testContext.TestDetails))
-            {
-                throw new DependencyConflictException(testContext.TestDetails, dependencies.Select(x => x.TestDetails));
-            }
-
-            if (dependencyOfDependency.TestDetails.NotInParallelConstraintKeys != null)
-            {
-                throw new DependsOnNotInParallelException(testContext.TestDetails.TestName);
             }
         }
     }
