@@ -1,17 +1,18 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using TUnit.Engine.SourceGenerator.CodeGenerators;
+using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record ArgumentsContainer
+internal abstract record ArgumentsContainer
 {
-    public required Argument[] Arguments { get; init; }
-    public required AttributeData? DataAttribute { get; init; }
-    public required bool IsEnumerableData { get; init; }
-    public required int? DataAttributeIndex { get; init; }
-    public string? ClassConstructorType { get; init; }
+    public required ArgumentsType ArgumentsType { get; init; }
+    public required bool DisposeAfterTest { get; init; }
+    public abstract void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter);
+    public abstract void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter);
+    public abstract string[] GenerateArgumentVariableNames();
+    public abstract string[] GetArgumentTypes();
 
-    public bool HasData()
-    {
-        return ClassConstructorType != null || Arguments.Any();
-    }
-}
+    protected string VariableNamePrefix => ArgumentsType == ArgumentsType.ClassConstructor
+        ? VariableNames.ClassArg
+        : VariableNames.MethodArg;
+};

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
-using TUnit.Core.Logging;
 
 namespace TUnit.Core;
 
@@ -17,8 +16,8 @@ public static class TestDataContainer
     private static readonly object Lock = new();
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
     private static readonly ConcurrentDictionary<Type, int> CountsPerGlobalType = new();
-    
-    private static Disposer Disposer => new(null as ITUnitFrameworkLogger);
+
+    private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);
     
     public static T GetInstanceForType<T>(Type key, Func<T> func) where T : class
     {

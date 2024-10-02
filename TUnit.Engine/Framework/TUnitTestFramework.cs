@@ -3,12 +3,14 @@ using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Engine.Hooks;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
-using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
 
@@ -24,8 +26,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         _extension = extension;
         _capabilities = capabilities;
-
+        
         _serviceProvider = new TUnitServiceProvider(extension, frameworkServiceProvider.GetMessageBus(), frameworkServiceProvider);
+        
+        GlobalContext.Current.GlobalLogger = _serviceProvider.Logger;
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();

@@ -37,6 +37,11 @@ internal class SourceCodeWriter : IDisposable
         }
     }
 
+    public void Write(string value)
+    {
+        _stringBuilder.Append(value);
+    }
+
     public override string ToString()
     {
         return _stringBuilder.ToString();

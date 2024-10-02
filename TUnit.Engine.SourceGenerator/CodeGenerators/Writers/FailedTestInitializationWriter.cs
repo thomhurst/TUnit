@@ -19,18 +19,4 @@ internal static class FailedTestInitializationWriter
         sourceBuilder.WriteLine("Exception = exception,");
         sourceBuilder.WriteLine("});");
     }
-
-    private static string GetMethodArgs(TestSourceDataModel testSourceDataModel)
-    {
-        if (!testSourceDataModel.MethodArguments.Any())
-        {
-            return string.Empty;
-        }
-
-        return $"({string.Join(", ",
-            testSourceDataModel.MethodArguments
-                .Select(x => x.Invocation.TrimStart('@'))
-                .Select(x => x.Replace("\"", "\\\""))
-        )})";
-    }
 }

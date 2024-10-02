@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
@@ -9,55 +10,38 @@ internal static class MethodDataSourceRetriever
 {
     public static ArgumentsContainer ParseMethodData(GeneratorAttributeSyntaxContext context,
         ImmutableArray<IParameterSymbol> parameters,
-        INamedTypeSymbol namedTypeSymbol, AttributeData attributeData, string argPrefix, int index)
+        INamedTypeSymbol namedTypeSymbol, AttributeData methodDataAttribute, ArgumentsType argumentsType, int index)
     {
-        var arguments = ParseMethodDataArguments(context, parameters, namedTypeSymbol, attributeData, argPrefix, out var isEnumerable);
-        
-        return new ArgumentsContainer
-        {
-            DataAttribute = attributeData,
-            DataAttributeIndex = index,
-            IsEnumerableData = isEnumerable,
-            Arguments = [arguments]
-        };
-    }
-
-    private static Argument ParseMethodDataArguments(GeneratorAttributeSyntaxContext context,
-        ImmutableArray<IParameterSymbol> parameters, INamedTypeSymbol namedTypeSymbol,
-        AttributeData methodDataAttribute, string argPrefix, out bool isEnumerable)
-    {
-        string methodInvocation;
+        string typeName;
         IMethodSymbol? dataSourceMethod;
         if (methodDataAttribute.ConstructorArguments.Length == 1)
         {
-            var typeContainingMethod =
+            typeName =
                 namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
 
             dataSourceMethod = namedTypeSymbol.GetMembers(methodDataAttribute.ConstructorArguments[0].Value!.ToString())
                 .OfType<IMethodSymbol>().First();
-
-            methodInvocation = dataSourceMethod.IsStatic
-                ? $"{typeContainingMethod}.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()"
-                : $"resettableClassFactory.Value.{methodDataAttribute.ConstructorArguments.SafeFirstOrDefault().Value!}()";
         }
         else
         {
             var typeContainingDataSourceMethod = (INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!;
-            var type = typeContainingDataSourceMethod.ToDisplayString(DisplayFormats
+            
+            typeName = typeContainingDataSourceMethod.ToDisplayString(DisplayFormats
                 .FullyQualifiedGenericWithGlobalPrefix);
-
-            methodInvocation = $"{type}.{methodDataAttribute.ConstructorArguments[1].Value!}()";
 
             dataSourceMethod = typeContainingDataSourceMethod
                 .GetMembers(methodDataAttribute.ConstructorArguments[1].Value!.ToString())
                 .OfType<IMethodSymbol>().First();
         }
 
+        var methodName = dataSourceMethod.Name;
+        var isStatic = dataSourceMethod.IsStatic;
+
         var disposeAfterTest =
             methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ??
             true;
 
-        isEnumerable = dataSourceMethod.ReturnType.EnumerableGenericTypeIs(context, parameters.Select(x => x.Type).ToImmutableArray(), out var innerType);
+        var isEnumerable = dataSourceMethod.ReturnType.EnumerableGenericTypeIs(context, parameters.Select(x => x.Type).ToImmutableArray(), out var innerType);
         
         if (!isEnumerable)
         {
@@ -69,43 +53,50 @@ internal static class MethodDataSourceRetriever
             var tupleTypes = typeSymbol.TupleUnderlyingType?.TypeArguments ??
                              typeSymbol.TypeArguments;
 
-            if (CheckTupleTypes(context, parameters, dataSourceMethod, tupleTypes, methodInvocation, argPrefix,
-                    disposeAfterTest) is {} result)
+            if (CheckTupleTypes(parameters, tupleTypes) is {} result)
             {
-                return result;
+                return new MethodDataSourceAttributeContainer
+                {
+                    TestClassTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                    ArgumentsType = argumentsType,
+                    Attribute = methodDataAttribute,
+                    AttributeIndex = index,
+                    IsEnumerableData = isEnumerable,
+                    IsStatic = isStatic,
+                    MethodName = methodName,
+                    TypeName = typeName,
+                    DisposeAfterTest = disposeAfterTest,
+                    MethodReturnType = dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                    TupleTypes = result.ToArray()
+                };
             }
-        }
-
-        return new Argument(dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), methodInvocation)
+        }        
+        
+        return new MethodDataSourceAttributeContainer
         {
-            DisposeAfterTest = disposeAfterTest
+            TestClassTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            ArgumentsType = argumentsType,
+            Attribute = methodDataAttribute,
+            AttributeIndex = index,
+            IsEnumerableData = isEnumerable,
+            IsStatic = isStatic,
+            MethodName = methodName,
+            TypeName = typeName,
+            DisposeAfterTest = disposeAfterTest,
+            MethodReturnType = dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            TupleTypes = [],
         };
     }
 
-    private static Argument? CheckTupleTypes(GeneratorAttributeSyntaxContext context,
-        ImmutableArray<IParameterSymbol> parameters,
-        IMethodSymbol dataSourceMethod, ImmutableArray<ITypeSymbol> tupleTypes, string methodInvocation, string argPrefix,
-        bool disposeAfterTest)
+    private static IEnumerable<string> CheckTupleTypes(ImmutableArray<IParameterSymbol> parameters, ImmutableArray<ITypeSymbol> tupleTypes)
     {
         for (var index = 0; index < tupleTypes.Length; index++)
         {
             var tupleType = tupleTypes.ElementAtOrDefault(index);
             var parameterType = parameters.ElementAtOrDefault(index)?.Type;
 
-            if (!context.SemanticModel.Compilation.HasImplicitConversion(tupleType, parameterType))
-            {
-                return null;
-            }
+            yield return tupleType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
+                ?? parameterType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)!;
         }
-        
-        var variableNames = parameters.Select((_, i) => $"{argPrefix}{i}").ToArray();
-
-        return new Argument(
-            dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            methodInvocation)
-        {
-            TupleVariableNames = variableNames,
-            DisposeAfterTest = disposeAfterTest
-        };
     }
 }

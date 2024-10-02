@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
@@ -9,7 +10,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 internal static class MatrixRetriever
 {
     // We return a List of a List. Inner List is for each test.
-    public static IEnumerable<ArgumentsContainer> Parse(GeneratorAttributeSyntaxContext context, ImmutableArray<IParameterSymbol> parameters)
+    public static IEnumerable<ArgumentsContainer> Parse(GeneratorAttributeSyntaxContext context, ImmutableArray<IParameterSymbol> parameters, ArgumentsType argumentsType)
     {
         if (parameters.IsDefaultOrEmpty || !parameters.HasMatrixAttribute())
         {
@@ -35,15 +36,21 @@ internal static class MatrixRetriever
 
         var attr = matrixAttributes.SafeFirstOrDefault();
 
+        if (attr is null)
+        {
+            return [];
+        }
+
         var index = 0;
         return GetMatrixArgumentsList(mappedToArgumentArrays)
             .Select(x => MapToArgumentEnumerable(context, x, parameters))
-            .Select(x => new ArgumentsContainer
+            .Select(x => new ArgumentsAttributeContainer
             {
-                DataAttribute = attr,
-                DataAttributeIndex = ++index,
-                IsEnumerableData = false,
-                Arguments = [.. x]
+                ArgumentsType = argumentsType,
+                Attribute = attr,
+                AttributeIndex = ++index,
+                Arguments = [.. x],
+                DisposeAfterTest = attr.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
             });
     }
     private static IEnumerable<Argument> MapToArgumentEnumerable(GeneratorAttributeSyntaxContext context, IEnumerable<(TypedConstant ArgumentConstant, AttributeArgumentSyntax ArgumentSyntax)> elements, ImmutableArray<IParameterSymbol> parameterSymbols)

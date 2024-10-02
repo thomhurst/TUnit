@@ -4,9 +4,9 @@ namespace TUnit.Core.Helpers;
 
 internal class Disposer
 {
-    private readonly ITUnitFrameworkLogger? _logger;
+    private readonly ILogger _logger;
 
-    public Disposer(ITUnitFrameworkLogger? logger)
+    public Disposer(ILogger logger)
     {
         _logger = logger;
     }

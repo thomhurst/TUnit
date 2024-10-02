@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
@@ -7,54 +8,29 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataSourceGeneratorRetriever
 {
-    public static ArgumentsContainer Parse(GeneratorAttributeSyntaxContext context,
-        ImmutableArray<IParameterSymbol> parameters,
-        INamedTypeSymbol namedTypeSymbol, AttributeData attributeData, string argPrefix, int index)
+    public static ArgumentsContainer Parse(ImmutableArray<IParameterSymbol> parameters,
+        INamedTypeSymbol namedTypeSymbol, AttributeData attributeData, ArgumentsType argumentsType, int index)
     {
-        var arguments = ParseMethodDataArguments(context, parameters, namedTypeSymbol, attributeData, argPrefix, out var isEnumerable);
-
-        return new ArgumentsContainer
+        return new GeneratedArgumentsContainer
         {
-            DataAttribute = attributeData,
-            DataAttributeIndex = index,
-            IsEnumerableData = true,
-            Arguments = [arguments]
+            ArgumentsType = argumentsType,
+            TestClassTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            AttributeDataGeneratorType = attributeData.AttributeClass!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            GenericArguments = GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass).TypeArguments.Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray(),
+            AttributeIndex = index,
+            DisposeAfterTest = attributeData.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
         };
     }
 
-    private static Argument ParseMethodDataArguments(GeneratorAttributeSyntaxContext context,
-        ImmutableArray<IParameterSymbol> parameters, INamedTypeSymbol namedTypeSymbol,
-        AttributeData methodDataAttribute, string argPrefix, out bool isEnumerable)
+    private static INamedTypeSymbol GetDataGeneratorAttributeBaseClass(ITypeSymbol attributeClass)
     {
-        return new Argument("",
-            $"methodInfo.GetCustomAttributes<{methodDataAttribute.AttributeClass!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)}>().Select(x => x.GenerateDataSources({string.Join(", ", parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)))}))");
-      
+        var selfAndBaseTypes = attributeClass.GetSelfAndBaseTypes();
+
+        return (INamedTypeSymbol) selfAndBaseTypes.First(HasGeneratorInterface);
     }
 
-    private static Argument? CheckTupleTypes(GeneratorAttributeSyntaxContext context,
-        ImmutableArray<IParameterSymbol> parameters,
-        IMethodSymbol dataSourceMethod, ImmutableArray<ITypeSymbol> tupleTypes, string methodInvocation, string argPrefix,
-        bool disposeAfterTest)
+    private static bool HasGeneratorInterface(ITypeSymbol t)
     {
-        for (var index = 0; index < tupleTypes.Length; index++)
-        {
-            var tupleType = tupleTypes.ElementAtOrDefault(index);
-            var parameterType = parameters.ElementAtOrDefault(index)?.Type;
-
-            if (!context.SemanticModel.Compilation.HasImplicitConversion(tupleType, parameterType))
-            {
-                return null;
-            }
-        }
-        
-        var variableNames = parameters.Select((_, i) => $"{argPrefix}{i}").ToArray();
-
-        return new Argument(
-            dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            methodInvocation)
-        {
-            TupleVariableNames = variableNames,
-            DisposeAfterTest = disposeAfterTest
-        };
+        return t.Interfaces.Select(i => i.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).Contains(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute.WithGlobalPrefix);
     }
 }

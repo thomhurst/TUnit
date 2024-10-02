@@ -1,18 +1,16 @@
 ﻿using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
-using TUnit.Core;
-using TUnit.Core.Enums;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-internal class LogLevelCommandProvider : ICommandLineOptionsProvider
+internal class DisableLogoCommandProvider : ICommandLineOptionsProvider
 {
-    public const string LogLevel = "tunit-log-level";
+    public const string DisableLogo = "disable-logo";
     
     private readonly IExtension _extension;
 
-    public LogLevelCommandProvider(IExtension extension)
+    public DisableLogoCommandProvider(IExtension extension)
     {
         _extension = extension;
     }
@@ -34,19 +32,13 @@ internal class LogLevelCommandProvider : ICommandLineOptionsProvider
     {
         return
         [
-            new CommandLineOption(LogLevel, "Set the log level for TUnit loggers", ArgumentArity.ExactlyOne, false)
+            new CommandLineOption(DisableLogo, "Disables the TUnit logo when starting a test session", ArgumentArity.Zero, false)
         ];
     }
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
     {
-        if (commandOption.Name == LogLevel && Enum.TryParse<LogLevel>(arguments[0], true, out var logLevel))
-        {
-            GlobalContext.LogLevel = logLevel;
-            return ValidationResult.ValidTask;
-        }
-
-        return ValidationResult.InvalidTask($"Value must be one of: {string.Join(", ", Enum.GetNames<LogLevel>())}");
+        return ValidationResult.ValidTask;
     }
 
     public Task<ValidationResult> ValidateCommandLineOptionsAsync(ICommandLineOptions commandLineOptions)

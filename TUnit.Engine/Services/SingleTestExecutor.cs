@@ -9,6 +9,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;

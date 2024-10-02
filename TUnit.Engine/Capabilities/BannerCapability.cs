@@ -1,6 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Services;
+using TUnit.Engine.CommandLineProviders;
 
 namespace TUnit.Engine.Capabilities;
 
@@ -10,17 +12,23 @@ internal class BannerCapability : IBannerMessageOwnerCapability
     const string Separator = " | ";
 
     private readonly IPlatformInformation _platformInformation;
+    private readonly ICommandLineOptions _commandLineOptions;
 
-    public BannerCapability(IPlatformInformation platformInformation)
+    public BannerCapability(IPlatformInformation platformInformation, ICommandLineOptions commandLineOptions)
     {
         _platformInformation = platformInformation;
+        _commandLineOptions = commandLineOptions;
     }
     
     public Task<string?> GetBannerMessageAsync()
     {
+        if (_commandLineOptions.IsOptionSet(DisableLogoCommandProvider.DisableLogo))
+        {
+            return Task.FromResult<string?>(GetRuntimeDetails());
+        }
+        
         return Task.FromResult<string?>(
             $"""
-            
             
             ████████╗██╗   ██╗███╗   ██╗██╗████████╗
             ╚══██╔══╝██║   ██║████╗  ██║██║╚══██╔══╝
@@ -37,15 +45,16 @@ internal class BannerCapability : IBannerMessageOwnerCapability
 
     private string GetRuntimeDetails()
     {
-        var segments = new List<string>();
+        List<string> segments =
+        [
+            $"TUnit v{typeof(BannerCapability).Assembly.GetName().Version!.ToString()}",
+            GetApplicationMemorySize(),
+            RuntimeInformation.OSDescription,
+            RuntimeInformation.RuntimeIdentifier,
+            RuntimeInformation.FrameworkDescription,
+            $"Microsoft Testing Platform v{_platformInformation.Version}"
+        ];
 
-        segments.Add($"v{typeof(BannerCapability).Assembly.GetName().Version!.ToString()}");
-        segments.Add(GetApplicationMemorySize());
-        segments.Add(RuntimeInformation.OSDescription);
-        segments.Add(RuntimeInformation.RuntimeIdentifier);
-        segments.Add(RuntimeInformation.FrameworkDescription);
-        segments.Add($"Microsoft Testing Platform v{_platformInformation.Version}");
-        
         return string.Join(Separator, segments);
     }
 

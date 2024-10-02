@@ -32,9 +32,10 @@ public static class AttributeDataExtensions
     
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
     {
-        var attributeClass = attributeData?.AttributeClass;
-
-        return DataSourceAttributes.Any(x => attributeClass?.IsOrInherits(x) == true);
+        return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
+                   x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+                   WellKnownFullyQualifiedClassNames.IDataAttribute.WithGlobalPrefix)
+               == true;
     }
     
     public static bool IsMatrixAttribute(this AttributeData? attributeData)

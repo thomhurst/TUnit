@@ -29,6 +29,9 @@ internal static class WellKnown
         public static readonly string NotInParallelAttribute = GetTypeName("NotInParallelAttribute");
         public static readonly string DependsOnAttribute = GetTypeName("DependsOnAttribute");
         public static readonly string CancellationToken = "global::System.Threading.CancellationToken";
+        
+        public static readonly string IDataAttribute = GetTypeName("IDataAttribute");
+        public static readonly string IDataSourceGeneratorAttribute = GetTypeName("IDataSourceGeneratorAttribute");
 
         private static string GetTypeName(string className) => $"global::TUnit.Core.{className}";
     }

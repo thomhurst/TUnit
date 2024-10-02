@@ -1,4 +1,4 @@
-using TUnit.Core.Enums;
+using TUnit.Core.Logging;
 
 namespace TUnit.Core;
 
@@ -9,6 +9,6 @@ public class GlobalContext : Context
     private GlobalContext()
     {
     }
-
-    public static LogLevel LogLevel { get; internal set; } = LogLevel.Information;
+    
+    internal ILogger GlobalLogger { get; set; }
 }
