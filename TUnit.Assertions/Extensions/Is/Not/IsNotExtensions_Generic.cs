@@ -45,4 +45,16 @@ public static partial class IsNotExtensions
             (actual, _, _) => $"{actual?.GetType()} is assignable from {type.Name}")
             , [type.Name]);
     }
+    
+    public static InvokableValueAssertionBuilder<TActual> IsDefault<TActual>(this IValueSource<TActual> valueSource)
+    {
+        return valueSource.RegisterAssertion(new DefaultAssertCondition<TActual>()
+            , []);
+    }
+    
+    public static InvokableValueAssertionBuilder<TActual> IsNotDefault<TActual>(this IValueSource<TActual> valueSource)
+    {
+        return valueSource.RegisterAssertion(new NotDefaultAssertCondition<TActual>()
+            , []);
+    }
 }
