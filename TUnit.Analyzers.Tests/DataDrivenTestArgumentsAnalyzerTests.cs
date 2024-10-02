@@ -58,7 +58,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
     {
         const string text = """
                             using TUnit.Core;
-                            
+
                             public class MyClass
                             {
                             
@@ -67,7 +67,28 @@ public class DataDrivenTestArgumentsAnalyzerTests
                                 public void MyTest(int value)
                                 {
                                 }
+
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+    
+    [Test]
+    public async Task Optional_Argument_Is_Not_Flagged()
+    {
+        const string text = """
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
                             
+                                [Test]
+                                [Arguments(1)]
+                                public void MyTest(int value, bool flag = true)
+                                {
+                                }
+
                             }
                             """;
         
