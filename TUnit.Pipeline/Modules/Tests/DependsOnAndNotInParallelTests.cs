@@ -13,12 +13,11 @@ public class DependsOnAndNotInParallelTests : TestModule
         return await RunTestsWithFilter(context, 
             "/*/*/DependsOnAndNotInParallelTests/*",
             [
-                result => result.Successful.Should().BeFalse(),
+                result => result.Successful.Should().BeTrue(),
                 result => result.Total.Should().Be(2),
-                result => result.Passed.Should().Be(1),
-                result => result.Failed.Should().Be(1),
+                result => result.Passed.Should().Be(2),
+                result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0),
-                result => result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("Test2")).Output!.ErrorInfo!.Message.Should().Contain("Test2 cannot use DependsOn with a test that has a NotInParallel attribute"),
 
             ], cancellationToken);
     }

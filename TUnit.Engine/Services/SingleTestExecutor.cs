@@ -486,8 +486,6 @@ internal class SingleTestExecutor : IDataProducer
     {
         foreach (var dependency in GetDependencies(testContext.TestDetails))
         {
-            AssertDoNotDependOnEachOther(testContext.TestContext, dependency.Test.TestContext);
-
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, context, true);
@@ -503,12 +501,12 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails testDetails)
+    private (DiscoveredTest Test, bool ProceedOnFailure)[] GetDependencies(TestDetails testDetails)
     {
-        return GetDependencies(testDetails, testDetails);
+        return GetDependencies(testDetails, testDetails, [testDetails]).ToArray();
     }
 
-    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails)
+    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails, List<TestDetails> currentChain)
     {
         foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
         {
@@ -518,40 +516,19 @@ internal class SingleTestExecutor : IDataProducer
 
             foreach (var dependency in dependencies)
             {
-                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
-
+                currentChain.Add(dependency.TestDetails);
+                
                 if (dependency.TestDetails.IsSameTest(original))
                 {
-                    yield break;
+                    throw new DependencyConflictException(currentChain);
                 }
+                
+                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
+                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails, currentChain))
                 {
                     yield return nestedDependency;
-
-                    if (nestedDependency.Test.TestDetails.IsSameTest(original))
-                    {
-                        yield break;
-                    }
                 }
-            }
-        }
-    }
-
-    private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
-    {
-        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails).Select(x => x.Test.TestContext)];
-        
-        foreach (var dependencyOfDependency in dependencies)
-        {
-            if (dependencyOfDependency.TestDetails.IsSameTest(testContext.TestDetails))
-            {
-                throw new DependencyConflictException(testContext.TestDetails, dependencies.Select(x => x.TestDetails));
-            }
-
-            if (dependencyOfDependency.TestDetails.NotInParallelConstraintKeys != null)
-            {
-                throw new DependsOnNotInParallelException(testContext.TestDetails.TestName);
             }
         }
     }

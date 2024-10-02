@@ -12,7 +12,7 @@ public partial class TestContext : Context
     
     public DateTimeOffset? TestStart { get; internal set; }
     
-    public Task TestTask => TaskCompletionSource.Task;
+    internal Task TestTask => TaskCompletionSource.Task;
 
     public TestDetails TestDetails { get; }
 
