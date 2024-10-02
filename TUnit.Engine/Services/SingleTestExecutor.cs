@@ -501,9 +501,9 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails testDetails)
+    private (DiscoveredTest Test, bool ProceedOnFailure)[] GetDependencies(TestDetails testDetails)
     {
-        return GetDependencies(testDetails, testDetails);
+        return GetDependencies(testDetails, testDetails).ToArray();
     }
 
     private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails)
