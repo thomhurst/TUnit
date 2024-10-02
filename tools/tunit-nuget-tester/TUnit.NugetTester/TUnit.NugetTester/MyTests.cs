@@ -1,4 +1,5 @@
 ﻿using TUnit.NugetTester.Library;
+using TUnit.Core.Logging;
 
 namespace TUnit.NugetTester;
 
