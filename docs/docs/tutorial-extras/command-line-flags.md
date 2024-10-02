@@ -51,7 +51,7 @@ sidebar_position: 13
 
     --timeout
         A global test execution timeout.
-        Takes one argument as string in the format <value>[h|m|s] where 'value' is float.
+        Takes one argument as string in the format [h|m|s] where 'value' is float.
 
     --coverage
         Collect the code coverage using dotnet-coverage tool
@@ -98,4 +98,4 @@ sidebar_position: 13
 
     --treenode-filter
         Use a tree filter to filter down the tests to execute
-</code>
+</pre>
