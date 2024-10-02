@@ -12,7 +12,7 @@ public class PropertyEqualsAssertCondition<TRootObjectType, TPropertyType>(Expre
                                                      Received: { GetPropertyValue(ActualValue)?.ToString() ?? $"Object `{typeof(TRootObjectType).Name}` was null" }
                                                  """;
 
-    private protected override bool Passes(TRootObjectType? actualValue, Exception? exception)
+    protected override bool Passes(TRootObjectType? actualValue, Exception? exception)
     {
         var propertyValue = GetPropertyValue(actualValue);
         

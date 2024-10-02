@@ -34,5 +34,5 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return Passes(actualValue, exception);
     }
 
-    private protected abstract bool Passes(TActual? actualValue, Exception? exception);
+    protected abstract bool Passes(TActual? actualValue, Exception? exception);
 }

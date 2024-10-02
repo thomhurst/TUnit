@@ -15,7 +15,7 @@ public class EnumerableNotEquivalentToAssertCondition<TActual, TInner> : AssertC
                                                    {string.Join(',', ActualValue ?? Enumerable.Empty<TInner>())}
                                                 """;
 
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null && ExpectedValue is null)
         {

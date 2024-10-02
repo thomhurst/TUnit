@@ -11,7 +11,7 @@ public class EnumerableCountEqualToAssertCondition<TActual> : AssertCondition<TA
 
     protected internal override string GetFailureMessage() => $"Length is {GetCount(ActualValue)} instead of {ExpectedValue}";
     
-    private protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {

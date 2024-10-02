@@ -9,7 +9,7 @@ public class StringNotEqualsAssertCondition : AssertCondition<string, string>
         _stringComparison = stringComparison;
     }
     
-    private protected override bool Passes(string? actualValue, Exception? exception)
+    protected override bool Passes(string? actualValue, Exception? exception)
     {
         return !string.Equals(actualValue, ExpectedValue, _stringComparison);
     }

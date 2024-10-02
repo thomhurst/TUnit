@@ -14,7 +14,7 @@ public class ThrowsWithMessageContainingAssertCondition<TActual> : AssertConditi
     
     protected internal override string GetFailureMessage() => $"Message '{_exceptionSelector(Exception)?.Message}' did not contain '{ExpectedValue}'";
 
-    private protected override bool Passes(TActual? actualValue, Exception? rootException)
+    protected override bool Passes(TActual? actualValue, Exception? rootException)
     {
         var exception = _exceptionSelector(rootException);
         
