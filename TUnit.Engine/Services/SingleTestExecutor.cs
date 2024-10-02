@@ -521,11 +521,6 @@ internal class SingleTestExecutor : IDataProducer
                     throw new DependencyConflictException(dependency.TestDetails,
                         dependencies.Select(x => x.TestDetails));
                 }
-
-                if (dependency.TestDetails.NotInParallelConstraintKeys != null)
-                {
-                    throw new DependsOnNotInParallelException(dependency.TestDetails.TestName);
-                }
                 
                 yield return (dependency, dependsOnAttribute.ProceedOnFailure);
 
