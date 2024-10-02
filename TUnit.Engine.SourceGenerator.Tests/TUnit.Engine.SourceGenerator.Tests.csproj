@@ -8,8 +8,10 @@
     <RootNamespace>TUnit.Engine.SourceGenerator.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="AutoFixture" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.10.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit.Analyzers">

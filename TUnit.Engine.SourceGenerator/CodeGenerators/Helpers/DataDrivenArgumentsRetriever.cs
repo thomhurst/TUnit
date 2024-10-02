@@ -1,5 +1,7 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
@@ -7,59 +9,67 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataDrivenArgumentsRetriever
 {
-    public static ArgumentsContainer ParseArguments(AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> parameterSymbols,
+    public static ArgumentsContainer ParseArguments(GeneratorAttributeSyntaxContext context,
+        AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> parameterSymbols,
+        ArgumentsType argumentsType,
         int dataAttributeIndex)
     {
         var constructorArgument = argumentAttribute.ConstructorArguments.SafeFirstOrDefault();
 
         if (constructorArgument.IsNull)
         {
-            return new ArgumentsContainer
+            return new ArgumentsAttributeContainer
             {
-                DataAttribute = argumentAttribute,
-                DataAttributeIndex = dataAttributeIndex,
-                IsEnumerableData = false,
+                ArgumentsType = argumentsType,
+                Attribute = argumentAttribute,
+                AttributeIndex = dataAttributeIndex,
                 Arguments =
                 [
                     new Argument(type: parameterSymbols.SafeFirstOrDefault()?.Type
                             .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
                         invocation: null
                     ),
-                ]
+                ],
+                DisposeAfterTest = argumentAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
             };
         }
-        
+
+        var attributeSyntax = (AttributeSyntax)argumentAttribute.ApplicationSyntaxReference!.GetSyntax();
+        var arguments = attributeSyntax.ArgumentList!.Arguments;
         var objectArray = constructorArgument.Values;
 
-        var args = GetArguments(objectArray, parameterSymbols);
+        var args = GetArguments(context, objectArray, arguments, parameterSymbols);
 
-        return new ArgumentsContainer
+        return new ArgumentsAttributeContainer
         {
-            DataAttribute = argumentAttribute,
-            DataAttributeIndex = dataAttributeIndex,
-            IsEnumerableData = false,
-            Arguments = [..args]
+            ArgumentsType = argumentsType,
+            Attribute = argumentAttribute,
+            AttributeIndex = dataAttributeIndex,
+            Arguments = [.. args],
+            DisposeAfterTest = argumentAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
         };
     }
 
-    private static IEnumerable<Argument> GetArguments(ImmutableArray<TypedConstant> objectArray,
+    private static IEnumerable<Argument> GetArguments(GeneratorAttributeSyntaxContext context,
+        ImmutableArray<TypedConstant> objectArray,
+        SeparatedSyntaxList<AttributeArgumentSyntax> arguments,
         ImmutableArray<IParameterSymbol> parameterSymbols)
     {
         if (objectArray.IsDefaultOrEmpty)
         {
             var type = parameterSymbols.SafeFirstOrDefault()?.Type
                 ?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var";
-            
+
             return [new Argument(type, null)];
         }
 
-        return objectArray.Select((x, i) =>
+        return objectArray.Zip(arguments, (o, a) => (o, a)).Select((element, index) =>
         {
-            var type = GetTypeFromParameters(parameterSymbols, i);
-            
+            var type = GetTypeFromParameters(parameterSymbols, index);
+
             return new Argument(type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
-                                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(x),
-                TypedConstantParser.GetTypedConstantValue(x, type));
+                                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(element.o),
+            TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element.a.Expression, type));
         });
     }
 

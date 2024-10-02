@@ -1,16 +1,11 @@
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
-
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class TypeOfAssertCondition<TActual, TAnd, TOr>(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, Type expectedType)
-    : AssertCondition<TActual, object?, TAnd, TOr>(assertionBuilder, default)
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class TypeOfAssertCondition<TActual>(Type expectedType)
+    : AssertCondition<TActual, object?>(default)
 {
-    protected override string DefaultMessage => $"{ActualValue} is {ActualValue?.GetType().Name ?? "null"} instead of {expectedType.Name}";
+    protected internal override string GetFailureMessage() => $"{ActualValue} is {ActualValue?.GetType().Name ?? "null"} instead of {expectedType.Name}";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return actualValue?.GetType() == expectedType;
     }

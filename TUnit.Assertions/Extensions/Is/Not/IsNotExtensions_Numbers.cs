@@ -5,160 +5,169 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class IsNotExtensions
 {
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotZero<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot)
+    public static InvokableValueAssertionBuilder<TActual> IsNotZero<TActual>(this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new NotEqualsAssertCondition<TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(null), TActual.Zero));
+        return valueSource.RegisterAssertion(new NotEqualsAssertCondition<TActual>(TActual.Zero)
+            , []);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotGreaterThan<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<TActual> IsNotDivisibleBy<TActual>(
+        this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+        where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
+                {
+                    if (value is null)
+                    {
+                        self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                        return false;
+                    }
+
+                    return value % expected != TActual.Zero;
+                },
+                (value, _, _) => $"{value} was not divisible by {expected}")
+            , [doNotPopulateThisValue]);
+    }
+    
+    public static InvokableValueAssertionBuilder<TActual> IsNotGreaterThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") where TActual : INumber<TActual>
+    {
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{isNot.IsNot().AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
 
                 return value <= expected;
             },
-            (value, _) => $"{value} was greater than {expected}"));
+            (value, _, _) => $"{value} was greater than {expected}")
+            , [doNotPopulateThisValue]);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotGreaterThanOrEqualTo<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<TActual> IsNotGreaterThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{isNot.IsNot().AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return value < expected;
             },
-            (value, _) => $"{value} was greater than or equal to {expected}"));
+            (value, _, _) => $"{value} was greater than or equal to {expected}")
+            , [doNotPopulateThisValue]);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotLessThan<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<TActual> IsNotLessThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{isNot.IsNot().AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return value >= expected;
             },
-            (value, _) => $"{value} was less than {expected}"));
+            (value, _, _) => $"{value} was less than {expected}")
+            , [doNotPopulateThisValue]);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotLessThanOrEqualTo<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<TActual> IsNotLessThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{isNot.IsNot().AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return value > expected;
             },
-            (value, _) => $"{value} was less than or equal to {expected}"));
+            (value, _, _) => $"{value} was less than or equal to {expected}")
+            , [doNotPopulateThisValue]);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotEven<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot) 
+    public static InvokableValueAssertionBuilder<TActual> IsNotEven<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{isNot.IsNot().AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return value % 2 != 0;
             },
-            (value, _) => $"{value} was even"));
+            (value, _, _) => $"{value} was even")
+            , []);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotOdd<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot) 
+    public static InvokableValueAssertionBuilder<TActual> IsNotOdd<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{isNot.IsNot().AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return value % 2 == 0;
             },
-            (value, _) => $"{value} was odd"));
+            (value, _, _) => $"{value} was odd")
+            , []);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotNegative<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot) 
+    public static InvokableValueAssertionBuilder<TActual> IsNotNegative<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{isNot.IsNot().AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return value >= TActual.Zero;
             },
-            (value, _) => $"{value} was negative"));
+            (value, _, _) => $"{value} was negative")
+            , []);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> IsNotPositive<TActual, TAnd, TOr>(this IIs<TActual, TAnd, TOr> isNot) 
+    public static InvokableValueAssertionBuilder<TActual> IsNotPositive<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(isNot.IsNot(), new DelegateAssertCondition<TActual, TActual, TAnd, TOr>(isNot.IsNot().AssertionBuilder.AppendCallerMethod(null), default, (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, self) =>
             {
                 if (value is null)
                 {
-                    self.WithMessage((_, _) => $"{isNot.IsNot().AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return value <= TActual.Zero;
             },
-            (value, _) => $"{value} was positive"));
+            (value, _, _) => $"{value} was positive")
+            , []);
     }
 }

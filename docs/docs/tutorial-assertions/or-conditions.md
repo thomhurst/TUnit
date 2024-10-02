@@ -10,6 +10,7 @@ When using this, only one condition needs to pass:
 
 ```csharp
     [Test]
+    [Repeat(100)]
     public async Task MyTest()
     {
         int[] array = [1, 2];

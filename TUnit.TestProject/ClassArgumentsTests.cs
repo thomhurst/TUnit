@@ -2,9 +2,9 @@
 
 [Arguments("str", 1)]
 [Arguments("str2", 2)]
-[MethodDataSource(nameof(MyMethod), UnfoldTuple = true)]
-[MethodDataSource(nameof(MyMethod2), UnfoldTuple = true)]
-[EnumerableMethodDataSource(nameof(MyEnumerableMethod), UnfoldTuple = true)]
+[MethodDataSource(nameof(MyMethod))]
+[MethodDataSource(nameof(MyMethod2))]
+[MethodDataSource(nameof(MyEnumerableMethod))]
 public class ClassArgumentsTests(
     [Matrix("matrix1", "matrix2", "matrix3")] string value, 
     [Matrix(1, 2)] int number)

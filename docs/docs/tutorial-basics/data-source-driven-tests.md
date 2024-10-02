@@ -10,8 +10,8 @@ If we want test data represented in the form of objects, or just to use somethin
 
 This can come in 3 forms, with help of the following attributes:
 - `[MethodDataSource]`
-- `[EnumerableMethodDataSource]`
 - `[ClassDataSource]`
+- `[ClassConstructorAttribute]` (for constructors only)
 
 ## MethodDataSource
 This has two options:
@@ -45,7 +45,7 @@ public class MyTestClass
     {
         var result = Add(additionTestData.Value1, additionTestData.Value2);
 
-        await Assert.That(result).Is.EqualTo(additionTestData.ExpectedResult);
+        await Assert.That(result).IsEqualTo(additionTestData.ExpectedResult);
     }
 
     private int Add(int x, int y)
@@ -80,7 +80,7 @@ public class MyTestClass
     {
         var result = Add(value1, value2);
 
-        await Assert.That(result).Is.EqualTo(expectedResult);
+        await Assert.That(result).IsEqualTo(expectedResult);
     }
 
     private int Add(int x, int y)
@@ -90,9 +90,7 @@ public class MyTestClass
 }
 ```
 
-## EnumerableMethodDataSource
-
-This works largely the same as `MethodDataSource`, except that your method is expected to return an `IEnumerable<>` of data. For each item returned, a new test will be created with that item passed in to the parameters.
+This attribute can also accept `IEnumerable<>`. For each item returned, a new test will be created with that item passed in to the parameters.
 
 Here's an example where the test would be invoked 3 times:
 
@@ -118,12 +116,12 @@ public static class MyTestDataSources
 public class MyTestClass
 {
     [Test]
-    [EnumerableMethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
+    [MethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
     public async Task MyTest(AdditionTestData additionTestData)
     {
         var result = Add(additionTestData.Value1, additionTestData.Value2);
 
-        await Assert.That(result).Is.EqualTo(additionTestData.ExpectedResult);
+        await Assert.That(result).IsEqualTo(additionTestData.ExpectedResult);
     }
 
     private int Add(int x, int y)
@@ -155,12 +153,12 @@ public static class MyTestDataSources
 public class MyTestClass
 {
     [Test]
-    [EnumerableMethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
+    [MethodDataSource(typeof(MyTestDataSources), nameof(MyTestDataSources.AdditionTestData))]
     public async Task MyTest(int value1, int value2, int expectedResult)
     {
         var result = Add(value1, value2);
 
-        await Assert.That(result).Is.EqualTo(expectedResult);
+        await Assert.That(result).IsEqualTo(expectedResult);
     }
 
     private int Add(int x, int y)
@@ -212,3 +210,6 @@ public class MyTestClass
     }
 }
 ```
+
+## ClassConstructorAttribute
+See [Class Constructor Helpers](../tutorial-extras/class-constructors.md)

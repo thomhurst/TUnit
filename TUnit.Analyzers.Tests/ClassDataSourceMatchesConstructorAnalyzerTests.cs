@@ -37,7 +37,7 @@ public class ClassDataSourceMatchesConstructorAnalyzerTests
                             using System.Collections.Generic;
                             using TUnit.Core;
 
-                            [EnumerableMethodDataSource(nameof(MyMethod))]
+                            [MethodDataSource(nameof(MyMethod))]
                             public class MyClass
                             {
                                 public MyClass(int value)
@@ -121,7 +121,7 @@ public class ClassDataSourceMatchesConstructorAnalyzerTests
                             using System.Collections.Generic;
                             using TUnit.Core;
 
-                            [{|#0:EnumerableMethodDataSource(nameof(MyMethod))|}]
+                            [{|#0:MethodDataSource(nameof(MyMethod))|}]
                             public class MyClass
                             {
                                 public MyClass(string value)
@@ -143,36 +143,6 @@ public class ClassDataSourceMatchesConstructorAnalyzerTests
         
         var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
             .WithArguments("int", "string")
-            .WithLocation(0);
-        
-        await Verifier.VerifyAnalyzerAsync(text, expected);
-    }
-     
-    [Test]
-    public async Task Not_IEnumerable_Return_Method_Error()
-    {
-        const string text = """
-                            using System.Collections.Generic;
-                            using TUnit.Core;
-
-                            [{|#0:EnumerableMethodDataSource(nameof(MyMethod))|}]
-                            public class MyClass
-                            {
-                                public MyClass(int value)
-                                {
-                                }
-                            
-                                [Test]
-                                public void MyTest()
-                                {
-                                }
-                                
-                                public static int MyMethod() => 1;
-                            }
-                            """;
-        
-        var expected = Verifier.Diagnostic(Rules.NotIEnumerable)
-            .WithArguments("int")
             .WithLocation(0);
         
         await Verifier.VerifyAnalyzerAsync(text, expected);

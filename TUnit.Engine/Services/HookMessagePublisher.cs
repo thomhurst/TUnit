@@ -1,17 +1,19 @@
 ﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.TestHost;
+using TUnit.Core;
 
 namespace TUnit.Engine.Services;
 
-public class HookMessagePublisher(IExtension extension) : IDataProducer
+public class HookMessagePublisher(IExtension extension, IMessageBus messageBus) : IDataProducer, IHookMessagePublisher
 {
-    public async Task Discover(ExecuteRequestContext context, string displayName, StaticHookMethod hookMethod)
+    public async Task Discover(string sessionId, string displayName, StaticHookMethod hookMethod)
     {
         TestNodeUid testNodeUid =
             $"{hookMethod.Assembly.FullName}_{hookMethod.ClassType.FullName}_{hookMethod.MethodInfo.Name}_{displayName}";
 
-        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
+        await messageBus.PublishAsync(this, new TestNodeUpdateMessage(new SessionUid(sessionId),
             new TestNode
             {
                 Uid = testNodeUid,
@@ -32,9 +34,9 @@ public class HookMessagePublisher(IExtension extension) : IDataProducer
             }));
     }
 
-    public async Task Push(ExecuteRequestContext context, string displayName, StaticHookMethod hookMethod, Func<Task> func)
+    public async Task Push(string sessionId, string displayName, StaticHookMethod hookMethod, Func<Task> func)
     {
-        await PublishAsync(context, displayName, hookMethod, DateTimeOffset.Now, DateTimeOffset.Now, InProgressTestNodeStateProperty.CachedInstance);
+        await PublishAsync(sessionId, displayName, hookMethod, DateTimeOffset.Now, DateTimeOffset.Now, InProgressTestNodeStateProperty.CachedInstance);
 
         var start = DateTimeOffset.Now;
         DateTimeOffset end;
@@ -43,21 +45,21 @@ public class HookMessagePublisher(IExtension extension) : IDataProducer
         {
             await func();
             end = DateTime.UtcNow;
-            await PublishAsync(context, displayName, hookMethod, start, end, PassedTestNodeStateProperty.CachedInstance);
+            await PublishAsync(sessionId, displayName, hookMethod, start, end, PassedTestNodeStateProperty.CachedInstance);
         }
         catch (Exception e)
         {
             end = DateTime.UtcNow;
-            await PublishAsync(context, displayName, hookMethod, start, end, new FailedTestNodeStateProperty(e));
+            await PublishAsync(sessionId, displayName, hookMethod, start, end, new FailedTestNodeStateProperty(e));
             throw;
         }
     }
 
-    private async Task PublishAsync(ExecuteRequestContext context, string displayName, StaticHookMethod hookMethod, DateTimeOffset start, DateTimeOffset end, TestNodeStateProperty stateProperty)
+    private async Task PublishAsync(string sessionId, string displayName, StaticHookMethod hookMethod, DateTimeOffset start, DateTimeOffset end, TestNodeStateProperty stateProperty)
     {
         TestNodeUid testNodeUid = $"{hookMethod.Assembly.FullName}_{hookMethod.ClassType.FullName}_{hookMethod.MethodInfo.Name}_{displayName}";
         
-        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(context.Request.Session.SessionUid,
+        await messageBus.PublishAsync(this, new TestNodeUpdateMessage(new SessionUid(sessionId),
             new TestNode
             {
                 Uid = testNodeUid,

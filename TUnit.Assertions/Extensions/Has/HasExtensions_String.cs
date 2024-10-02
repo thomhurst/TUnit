@@ -1,16 +1,14 @@
 #nullable disable
 
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static StringLength<TAnd, TOr> HasLength<TAnd, TOr>(this IHas<string, TAnd, TOr> has)
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static StringLength HasLength(this IValueSource<string> valueSource)
     {
-        return new StringLength<TAnd, TOr>(has.Has().AssertionBuilder.AppendCallerMethod(null), has.Has().ConnectorType, has.Has().OtherAssertCondition);
+        valueSource.AssertionBuilder.AppendCallerMethod([]);
+        return new StringLength(valueSource);
     }
 }

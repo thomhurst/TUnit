@@ -16,14 +16,15 @@ internal static class TestApplicationBuilderExtensions
         TUnitExtension extension = new();
         
         testApplicationBuilder.RegisterTestFramework(
-            serviceProvider  => new TestFrameworkCapabilities(new TrxReportCapability(), new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>())),
+            serviceProvider  => new TestFrameworkCapabilities(new TrxReportCapability(), new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>(), serviceProvider.GetCommandLineOptions())),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
         
         testApplicationBuilder.AddTreeNodeFilterService(extension);
-        testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
+        // TODO: testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new HideTestOutputCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
     }
 }

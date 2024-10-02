@@ -1,10 +1,15 @@
-﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using System.Collections.Concurrent;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
@@ -25,7 +30,8 @@ internal class SingleTestExecutor : IDataProducer
     private readonly ParallelLimitProvider _parallelLimitProvider;
     private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
     private readonly ClassHookOrchestrator _classHookOrchestrator;
-    private readonly TUnitLogger _logger;
+    private readonly TUnitFrameworkLogger _logger;
+    private readonly ConcurrentDictionary<object, Task> _asyncInitializers = new();
     
     public SingleTestExecutor(
         IExtension extension,
@@ -36,7 +42,7 @@ internal class SingleTestExecutor : IDataProducer
         ParallelLimitProvider parallelLimitProvider,
         AssemblyHookOrchestrator assemblyHookOrchestrator,
         ClassHookOrchestrator classHookOrchestrator,
-        TUnitLogger logger)
+        TUnitFrameworkLogger logger)
     {
         _extension = extension;
         _disposer = disposer;
@@ -107,6 +113,8 @@ internal class SingleTestExecutor : IDataProducer
 
                 start = DateTimeOffset.Now;
 
+                await InitializeParameters(testContext);
+                
                 try
                 {
                     await ExecuteBeforeHooks(test, context, testContext);
@@ -160,8 +168,8 @@ internal class SingleTestExecutor : IDataProducer
                     context.Request.Session.SessionUid,
                     test.ToTestNode()
                         .WithProperty(PassedTestNodeStateProperty.CachedInstance)
-                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
                         .WithProperty(timingProperty)
                 ));
 
@@ -174,7 +182,7 @@ internal class SingleTestExecutor : IDataProducer
                     ComputerName = Environment.MachineName,
                     Exception = null,
                     Status = Status.Passed,
-                    Output = testContext.GetTestOutput()
+                    Output = testContext.GetStandardOutput()
                 };
 
                 testContext.TaskCompletionSource.SetResult(null);
@@ -189,8 +197,8 @@ internal class SingleTestExecutor : IDataProducer
                     context.Request.Session.SessionUid,
                     test.ToTestNode()
                         .WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))
-                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
                 ));
 
                 var now = DateTimeOffset.Now;
@@ -215,8 +223,8 @@ internal class SingleTestExecutor : IDataProducer
                     context.Request.Session.SessionUid, test.ToTestNode()
                         .WithProperty(GetFailureStateProperty(testContext, e, timingProperty.GlobalTiming.Duration))
                         .WithProperty(timingProperty)
-                        .WithProperty(new StandardOutputProperty(testContext.GetTestOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetTestErrorOutput()))
+                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
                         .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
 
                 testContext.Result = new TestResult
@@ -227,7 +235,7 @@ internal class SingleTestExecutor : IDataProducer
                     ComputerName = Environment.MachineName,
                     Exception = e,
                     Status = Status.Failed,
-                    Output = $"{testContext.GetTestErrorOutput()}{Environment.NewLine}{testContext.GetTestOutput()}"
+                    Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}"
                 };
             }
 
@@ -237,10 +245,15 @@ internal class SingleTestExecutor : IDataProducer
         }
         finally
         {
-            if (semaphore != null)
-            {
-                semaphore.Dispose();
-            }
+            semaphore?.Release();
+        }
+    }
+
+    private async Task InitializeParameters(TestContext testContext)
+    {
+        foreach (var argument in testContext.TestDetails.TestClassArguments.OfType<IAsyncInitializer>())
+        {
+            await _asyncInitializers.GetOrAdd(argument, _ => argument.InitializeAsync());
         }
     }
 
@@ -455,9 +468,14 @@ internal class SingleTestExecutor : IDataProducer
 
     private async ValueTask ExecuteCore(DiscoveredTest discoveredTest)
     {
+        if (EngineCancellationToken.Token.IsCancellationRequested)
+        {
+            throw new SkipTestException("The test session has been cancelled...");
+        }
+        
         if (_cancellationTokenSource.IsCancellationRequested)
         {
-            return;
+            throw new SkipTestException("The test has been cancelled...");
         }
         
         await ExecuteTestMethodWithTimeout(discoveredTest);
@@ -468,46 +486,53 @@ internal class SingleTestExecutor : IDataProducer
     {
         foreach (var dependency in GetDependencies(testContext.TestDetails))
         {
-            AssertDoNotDependOnEachOther(testContext.TestContext, dependency.TestContext);
-            
+            AssertDoNotDependOnEachOther(testContext.TestContext, dependency.Test.TestContext);
+
             try
             {
-                await ExecuteTestAsync(dependency, filter, context, true);
+                await ExecuteTestAsync(dependency.Test, filter, context, true);
+            }
+            catch when (dependency.ProceedOnFailure)
+            {
+                // Ignore
             }
             catch (Exception e)
             {
-                throw new InconclusiveTestException($"A dependency has failed: {dependency.TestDetails.TestName}", e);
+                throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
             }
         }
     }
 
-    private IEnumerable<DiscoveredTest> GetDependencies(TestDetails testDetails)
+    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails testDetails)
     {
         return GetDependencies(testDetails, testDetails);
     }
 
-    private IEnumerable<DiscoveredTest> GetDependencies(TestDetails original, TestDetails testDetails)
+    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails)
     {
-        foreach (var dependency in testDetails.Attributes
-                     .OfType<DependsOnAttribute>()
-                     .SelectMany(dependsOnAttribute => TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
-                         dependsOnAttribute.ParameterTypes, testDetails.ClassType,
-                         testDetails.TestClassParameterTypes)))
+        foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
         {
-            yield return dependency;
+            var dependencies = TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
+                dependsOnAttribute.ParameterTypes, testDetails.ClassType,
+                testDetails.TestClassParameterTypes);
 
-            if (dependency.TestDetails.IsSameTest(original))
+            foreach (var dependency in dependencies)
             {
-                yield break;
-            }
-            
-            foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
-            {
-                yield return nestedDependency;
-                
-                if (nestedDependency.TestDetails.IsSameTest(original))
+                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
+
+                if (dependency.TestDetails.IsSameTest(original))
                 {
                     yield break;
+                }
+
+                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
+                {
+                    yield return nestedDependency;
+
+                    if (nestedDependency.Test.TestDetails.IsSameTest(original))
+                    {
+                        yield break;
+                    }
                 }
             }
         }
@@ -515,7 +540,7 @@ internal class SingleTestExecutor : IDataProducer
 
     private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
     {
-        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails).Select(x => x.TestContext)];
+        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails).Select(x => x.Test.TestContext)];
         
         foreach (var dependencyOfDependency in dependencies)
         {

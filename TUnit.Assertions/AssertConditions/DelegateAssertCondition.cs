@@ -1,26 +1,22 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
+﻿namespace TUnit.Assertions.AssertConditions;
 
-namespace TUnit.Assertions.AssertConditions;
-
-public class DelegateAssertCondition<TActual, TExpected, TAnd, TOr> : AssertCondition<TActual, TExpected, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class DelegateAssertCondition<TActual, TExpected> : AssertCondition<TActual, TExpected>
 {
-    private readonly Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected, TAnd, TOr>, bool> _condition;
+    private readonly Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected>, bool> _condition;
+    private readonly Func<TActual?, Exception?, string?, string> _defaultMessageFactory;
 
-    public DelegateAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, 
-        TExpected? expected, 
-        Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected, TAnd, TOr>, bool> condition,
-        Func<TActual?, Exception?, string> defaultMessageFactory) : base(assertionBuilder, expected)
+    public DelegateAssertCondition(TExpected? expected, 
+        Func<TActual?, TExpected?, Exception?, DelegateAssertCondition<TActual, TExpected>, bool> condition,
+        Func<TActual?, Exception?, string?, string> defaultMessageFactory) : base(expected)
     {
         _condition = condition;
-        WithMessage(defaultMessageFactory);
+        _defaultMessageFactory = defaultMessageFactory;
     }
 
-    protected override string DefaultMessage => string.Empty;
+    protected internal override string GetFailureMessage() =>
+        _defaultMessageFactory(ActualValue, Exception, ActualExpression);
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return _condition(actualValue, ExpectedValue, exception, this);
     }

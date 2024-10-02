@@ -32,8 +32,6 @@ internal record TestSourceDataModel
             hashCode = (hashCode * 397) ^ MethodParameterTypes.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodParameterNames.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodGenericTypeCount;
-            hashCode = (hashCode * 397) ^ IsEnumerableClassArguments.GetHashCode();
-            hashCode = (hashCode * 397) ^ IsEnumerableMethodArguments.GetHashCode();
             hashCode = (hashCode * 397) ^ TestId.GetHashCode();
             hashCode = (hashCode * 397) ^ CurrentRepeatAttempt;
             hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
@@ -48,22 +46,13 @@ internal record TestSourceDataModel
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
-    public required Argument[] ClassArguments { get; init; }
+    public required ArgumentsContainer ClassArguments { get; init; }
 
-    public required Argument[] MethodArguments { get; init; }
+    public required ArgumentsContainer MethodArguments { get; init; }
     
     public required string[] MethodParameterTypes { get; init; }
     public required string[] MethodParameterNames { get; init; }
     public required int MethodGenericTypeCount { get; init; }
-    
-    public required bool IsEnumerableClassArguments { get; init; }
-    public required bool IsEnumerableMethodArguments { get; init; }
-    
-    public required string[] ClassDataInvocations { get; init; }
-    public required string[] ClassVariables { get; init; }
-    
-    public required string[] MethodDataInvocations { get; init; }
-    public required string[] MethodVariables { get; init; }
     
     public required string TestId { get; init; }
     public required int CurrentRepeatAttempt { get; init; }
@@ -78,17 +67,16 @@ internal record TestSourceDataModel
     public required string? TestExecutor { get; init; }
     public required string? ParallelLimit { get; init; }
     public required string[] AttributeTypes { get; init; }
-    public required string? ClassConstructorType { get; init; }
 
     public string MethodVariablesWithCancellationToken()
     {
-        var variableNamesAsList = MethodVariables.ToCommaSeparatedString();
+        var variableNames = MethodArguments.GenerateArgumentVariableNames();
 
         if (HasTimeoutAttribute)
         {
-            return string.IsNullOrEmpty(variableNamesAsList) ? "cancellationToken" : $"{variableNamesAsList}, cancellationToken";
+            return !variableNames.Any() ? "cancellationToken" : $"{variableNames.ToCommaSeparatedString()}, cancellationToken";
         }
         
-        return variableNamesAsList;
+        return variableNames.ToCommaSeparatedString();
     }
 }

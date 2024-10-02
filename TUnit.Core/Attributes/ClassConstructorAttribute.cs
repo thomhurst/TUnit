@@ -1,7 +1,9 @@
-﻿using TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 
-public abstract class ClassConstructorAttribute : TUnitAttribute
+namespace TUnit.Core;
+
+public abstract class ClassConstructorAttribute : TestDataAttribute
 {
     public abstract Type ClassConstructorType { get; }
 
@@ -11,7 +13,8 @@ public abstract class ClassConstructorAttribute : TUnitAttribute
 }
 
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class)]
-public sealed class ClassConstructorAttribute<T> : ClassConstructorAttribute where T : IClassConstructor, new()
+public sealed class ClassConstructorAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> 
+    : ClassConstructorAttribute where T : IClassConstructor, new()
 {
     public override Type ClassConstructorType { get; } = typeof(T);
 }

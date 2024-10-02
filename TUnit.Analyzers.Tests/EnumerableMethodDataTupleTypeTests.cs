@@ -15,7 +15,7 @@ public class EnumerableMethodDataTupleTypeTests
                             public class EnumerableTupleDataSourceDrivenTests
                             {
                                 [Test]
-                                [{|#0:EnumerableMethodDataSource(nameof(TupleMethod), UnfoldTuple = true)|}]
+                                [{|#0:MethodDataSource(nameof(TupleMethod))|}]
                                 public void DataSource_TupleMethod(int value, string value2, bool value3, int va4)
                                 {
                                 }
@@ -31,7 +31,7 @@ public class EnumerableMethodDataTupleTypeTests
 
         var expected = Verifier
             .Diagnostic(Rules.WrongArgumentTypeTestDataSource)
-            .WithArguments("(int, string, bool)", "(int, string, bool, int)")
+            .WithArguments("int, string, bool", "int, string, bool, int")
             .WithLocation(0);
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
@@ -47,7 +47,7 @@ public class EnumerableMethodDataTupleTypeTests
                             public class EnumerableTupleDataSourceDrivenTests
                             {
                                 [Test]
-                                [{|#0:EnumerableMethodDataSource(nameof(TupleMethod), UnfoldTuple = true)|}]
+                                [{|#0:MethodDataSource(nameof(TupleMethod))|}]
                                 public void DataSource_TupleMethod(int value, string value2, bool value3)
                                 {
                                 }

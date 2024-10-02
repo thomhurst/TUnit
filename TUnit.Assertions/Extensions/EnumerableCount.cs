@@ -1,133 +1,130 @@
 ﻿using System.Collections;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
-public class EnumerableCount<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr> 
+public class EnumerableCount<TActual>
     where TActual : IEnumerable?
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
 {
-    protected internal AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
+    private readonly IValueSource<TActual> _valueSource;
+    protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
 
-    public EnumerableCount(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType,
-        BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+    public EnumerableCount(IValueSource<TActual> valueSource)
     {
-        AssertionBuilder = assertionBuilder.AppendExpression("Count");
+        _valueSource = valueSource;
+        AssertionBuilder = valueSource.AssertionBuilder.AppendExpression("HasCount");
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<TActual> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (enumerable, expected, _, self) =>
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, int>(expected, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
 
                 return GetCount(enumerable) == expected;
             },
-            (enumerable, _) =>
+            (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> Empty =>
-        Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (enumerable, expected, _, self) =>
-            {
-                if (enumerable is null)
+    public InvokableValueAssertionBuilder<TActual> Empty =>
+        _valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, int>(0, (enumerable, expected, _, self) =>
                 {
-                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
-                    return false;
-                }
+                    if (enumerable is null)
+                    {
+                        self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
+                        return false;
+                    }
                 
-                return GetCount(enumerable) == expected;
-            },
-            (enumerable, _) =>
-                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {0}")
-        );
+                    return GetCount(enumerable) == expected;
+                },
+                (enumerable, _, _) =>
+                    $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {0}")
+        , []);
     
-    public BaseAssertCondition<TActual, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<TActual> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(
-            AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
-            expected,
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, int>(expected,
             (enumerable, _, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return GetCount(enumerable) > expected;
             },
-            (enumerable, _) =>
+            (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<TActual> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (enumerable, expected, _, self) =>
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, int>(expected, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return GetCount(enumerable) >= expected;
             },
-            (enumerable, _) =>
+            (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than or equal to {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<TActual> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (enumerable, expected, _, self) =>
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, int>(expected, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return GetCount(enumerable) < expected;
             },
-            (enumerable, _) =>
+            (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 
-    public BaseAssertCondition<TActual, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<TActual> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<TActual, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (enumerable, expected, _, self) =>
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, int>(expected, (enumerable, expected, _, self) =>
             {
                 if (enumerable is null)
                 {
-                    self.WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+                    self.OverriddenMessage = $"{self.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
                 return GetCount(enumerable) <= expected;
             },
-            (enumerable, _) =>
+            (enumerable, _, _) =>
                 $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than or equal to {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
     
-    public BaseAssertCondition<TActual, TAnd, TOr> Negative() => LessThan(0);
+    public InvokableValueAssertionBuilder<TActual> Negative() => LessThan(0);
 
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualToZero() => EqualTo(0);
-    public BaseAssertCondition<TActual, TAnd, TOr> EqualToOne() => EqualTo(1);
+    public InvokableValueAssertionBuilder<TActual> EqualToZero() => EqualTo(0);
+    public InvokableValueAssertionBuilder<TActual> EqualToOne() => EqualTo(1);
     
-    public BaseAssertCondition<TActual, TAnd, TOr> Positive() => GreaterThan(0);
+    public InvokableValueAssertionBuilder<TActual> Positive() => GreaterThan(0);
 
 
     private int GetCount(TActual? actualValue)

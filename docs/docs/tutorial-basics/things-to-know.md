@@ -43,10 +43,10 @@ public class MyTests
     private int _value;
 
     [Test, NotInParallel]
-    public void MyTest1() { value = 99; }
+    public void MyTest1() { _value = 99; }
 
     [Test, NotInParallel]
-    public async Task MyTest2() { await Assert.That(_value).Is.EqualTo(99); }
+    public async Task MyTest2() { await Assert.That(_value).IsEqualTo(99); }
 }
 ```
 
@@ -62,9 +62,9 @@ public class MyTests
     private static int _value;
 
     [Test, NotInParallel]
-    public void MyTest1() { value = 99; }
+    public void MyTest1() { _value = 99; }
 
     [Test, NotInParallel]
-    public async Task MyTest2() { await Assert.That(_value).Is.EqualTo(99); }
+    public async Task MyTest2() { await Assert.That(_value).IsEqualTo(99); }
 }
 ```

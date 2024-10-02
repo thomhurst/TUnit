@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace TUnit.Core;
 
 public class DefaultExecutor : GenericAbstractExecutor
@@ -10,7 +8,6 @@ public class DefaultExecutor : GenericAbstractExecutor
     {
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected override Task ExecuteAsync(Func<Task> action)
     {
         return action();

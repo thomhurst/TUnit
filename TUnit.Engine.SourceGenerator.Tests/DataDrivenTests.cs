@@ -20,7 +20,7 @@ internal class DataDrivenTests : TestsBase<TestsGenerator>
         },
         generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(15));
+            Assert.That(generatedFiles.Length, Is.EqualTo(18));
 
             Assert.That(generatedFiles[0], Does.Contain("global::System.Int32 methodArg0 = 1;"));
             Assert.That(generatedFiles[1], Does.Contain("global::System.Int32 methodArg0 = 2;"));
@@ -33,8 +33,8 @@ internal class DataDrivenTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles[5], Does.Contain("global::System.Int32 methodArg0 = 3;"));
             Assert.That(generatedFiles[5], Does.Contain("global::System.String methodArg1 = \"String3\";"));
 
-            Assert.That(generatedFiles[6], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum)(0);"));
-            Assert.That(generatedFiles[7], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum)(1);"));
+            Assert.That(generatedFiles[6], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = global::TUnit.TestProject.TestEnum.One;"));
+            Assert.That(generatedFiles[7], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = global::TUnit.TestProject.TestEnum.Two;"));
             Assert.That(generatedFiles[8], Does.Contain("global::TUnit.TestProject.TestEnum methodArg0 = (global::TUnit.TestProject.TestEnum)(-1);"));
             
             Assert.That(generatedFiles[9], Does.Contain("global::System.String methodArg0 = null;"));
@@ -46,5 +46,11 @@ internal class DataDrivenTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles[12], Does.Contain("global::System.Boolean? methodArg0 = null;"));
             Assert.That(generatedFiles[13], Does.Contain("global::System.Boolean? methodArg0 = false;"));
             Assert.That(generatedFiles[14], Does.Contain("global::System.Boolean? methodArg0 = true;"));
+
+            Assert.That(generatedFiles[15], Does.Contain("global::System.Type methodArg0 = typeof(global::System.Object);"));
+
+            Assert.That(generatedFiles[16], Does.Contain("global::System.Int32[] methodArg0 = new[] { 1, 2, 3 };"));
+
+            Assert.That(generatedFiles[17], Does.Contain("global::System.Int32 methodArg0 = global::System.Int32.MaxValue;"));
         });
 }

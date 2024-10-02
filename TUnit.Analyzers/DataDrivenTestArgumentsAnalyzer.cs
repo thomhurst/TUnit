@@ -57,75 +57,81 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
             );
             return;
         }
-        
-        var methodParameterTypes = methodSymbol.Parameters.Select(x => x.Type).ToList();
-        var objectArrayArgument = argumentsAttribute.ConstructorArguments.First();
-        var attributeTypesPassedIn = 
-            objectArrayArgument.IsNull ? [null] : 
-            objectArrayArgument.Values.Select(x => x.IsNull ? null : x.Type).ToList();
 
-        if (methodSymbol.HasTimeoutAttribute(out _)
-            && SymbolEqualityComparer.Default.Equals(methodParameterTypes.LastOrDefault(),
-                context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!)))
-        {
-            methodParameterTypes.RemoveAt(methodParameterTypes.Count - 1);
-        }
+        var parameters = methodSymbol.Parameters;
+        var arguments = argumentsAttribute.ConstructorArguments.First().IsNull
+            ? ImmutableArray.Create(default(TypedConstant))
+            : argumentsAttribute.ConstructorArguments.First().Values;
+
+        var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
         
-        if (methodParameterTypes.Count != attributeTypesPassedIn.Count)
+        for (var i = 0; i < parameters.Length; i++)
         {
-            context.ReportDiagnostic(
-                Diagnostic.Create(Rules.WrongArgumentTypeTestData,
-                    argumentsAttribute.GetLocation(),
-                    string.Join(", ", attributeTypesPassedIn.Select(x => x?.ToDisplayString()) ?? ImmutableArray<string>.Empty),
-                    string.Join(", ", methodParameterTypes.Select(x => x?.ToDisplayString())))
-            );
-            return;
-        }
-        
-        for (var i = 0; i < methodParameterTypes.Count; i++)
-        {
-            var methodParameterType = methodParameterTypes[i];
-            var attributeArgumentType = attributeTypesPassedIn[i];
+            var methodParameter = parameters[i];
+            var argumentExists = i + 1 <= arguments.Length;
+            var methodParameterType = methodParameter.Type;
+            var argument = arguments.ElementAtOrDefault(i);
             
-            if (attributeArgumentType is null &&
-                methodParameterType.NullableAnnotation == NullableAnnotation.NotAnnotated)
-            {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.MethodParameterBadNullability,
-                        methodSymbol.Parameters[i].Locations.FirstOrDefault(),
-                        methodSymbol.Parameters[i].Name)
-                );
-            }
-            
-            if (IsEnumAndInteger(methodParameterType, attributeArgumentType))
+            if (methodSymbol.HasTimeoutAttribute(out _)
+                && SymbolEqualityComparer.Default.Equals(methodParameterType, cancellationTokenType))
             {
                 continue;
             }
-            
-            if (attributeArgumentType is not null &&
-                !context.Compilation.HasImplicitConversion(attributeArgumentType, methodParameterType))
+
+            if (!argumentExists && methodParameter.IsOptional)
+            {
+                continue;
+            }
+
+            if (!argumentExists)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         argumentsAttribute.GetLocation() ?? methodSymbol.Locations.FirstOrDefault(),
-                        attributeArgumentType.ToDisplayString(),
-                        methodParameterType.ToDisplayString())
+                        "null",
+                        methodParameterType?.ToDisplayString())
+                );
+                return;
+            }
+            
+            if (argument.IsNull && methodParameterType?.NullableAnnotation == NullableAnnotation.NotAnnotated)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rules.MethodParameterBadNullability,
+                        parameters[i].Locations.FirstOrDefault(),
+                        parameters[i].Name)
+                );
+            }
+            
+            if (IsEnumAndInteger(methodParameterType, argument.Type))
+            {
+                continue;
+            }
+            
+            if (!argument.IsNull &&
+                !context.Compilation.HasImplicitConversion(argument.Type, methodParameterType))
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rules.WrongArgumentTypeTestData,
+                        argumentsAttribute.GetLocation() ?? methodSymbol.Locations.FirstOrDefault(),
+                        argument.Type?.ToDisplayString(),
+                        methodParameterType?.ToDisplayString())
                 );
                 return;
             }
         }
     }
 
-    private bool IsEnumAndInteger(ITypeSymbol type1, ITypeSymbol? type2)
+    private bool IsEnumAndInteger(ITypeSymbol? type1, ITypeSymbol? type2)
     {
-        if (type1.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "int")
+        if (type1?.SpecialType is SpecialType.System_Int16 or SpecialType.System_Int32 or SpecialType.System_Int64)
         {
             return type2?.TypeKind == TypeKind.Enum;
         }
         
-        if (type2?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "int")
+        if (type2?.SpecialType is SpecialType.System_Int16 or SpecialType.System_Int32 or SpecialType.System_Int64)
         {
-            return type1.TypeKind == TypeKind.Enum;
+            return type1?.TypeKind == TypeKind.Enum;
         }
 
         return false;

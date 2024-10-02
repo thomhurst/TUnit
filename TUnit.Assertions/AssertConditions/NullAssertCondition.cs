@@ -1,18 +1,13 @@
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
-
 namespace TUnit.Assertions.AssertConditions;
 
-public class NullAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class NullAssertCondition<TActual> : AssertCondition<TActual, TActual>
 {
-    public NullAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(assertionBuilder, default)
+    public NullAssertCondition() : base(default)
     {
     }
 
-    protected override string DefaultMessage => $"{ActualValue} is not null";
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override string GetFailureMessage() => $"{ActualValue} is not null";
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return actualValue is null;
     }

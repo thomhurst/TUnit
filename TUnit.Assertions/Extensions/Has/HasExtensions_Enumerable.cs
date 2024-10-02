@@ -1,55 +1,41 @@
 #nullable disable
 
 using System.Collections;
-using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static BaseAssertCondition<TActual, TAnd, TOr> HasSingleItem<TActual, TAnd, TOr>(this IHas<TActual, TAnd, TOr> has, IEqualityComparer equalityComparer = null) 
+    public static InvokableValueAssertionBuilder<TActual> HasSingleItem<TActual>(this IValueSource<TActual> valueSource, IEqualityComparer equalityComparer = null) 
         where TActual : IEnumerable
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(has.Has(), new EnumerableCountEqualToAssertCondition<TActual, TAnd, TOr>(
-            has.Has().AssertionBuilder.AppendCallerMethod(null),
-            1)
-        );
+        return valueSource.RegisterAssertion(new EnumerableCountEqualToAssertCondition<TActual>(1)
+            , []);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> HasDistinctItems<TActual, TAnd, TOr>(this IHas<TActual, TAnd, TOr> has) 
+    public static InvokableValueAssertionBuilder<TActual> HasDistinctItems<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : IEnumerable
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(has.Has(), new EnumerableDistinctItemsAssertCondition<TActual, object, TAnd, TOr>(
-            has.Has().AssertionBuilder.AppendCallerMethod(null),
-            default,
+        return valueSource.RegisterAssertion(new EnumerableDistinctItemsAssertCondition<TActual, object>(default,
             null)
-        );
+            , []);
     }
     
-    public static BaseAssertCondition<TActual, TAnd, TOr> HasDistinctItems<TActual, TInner, TAnd, TOr>(this IHas<TActual, TAnd, TOr> has, IEqualityComparer<TInner> equalityComparer) 
+    public static InvokableValueAssertionBuilder<TActual> HasDistinctItems<TActual, TInner>(this IValueSource<TActual> valueSource, IEqualityComparer<TInner> equalityComparer) 
         where TActual : IEnumerable<TInner>
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return AssertionConditionCombiner.Combine(has.Has(), new EnumerableDistinctItemsAssertCondition<TActual, TInner, TAnd, TOr>(
-            has.Has().AssertionBuilder.AppendCallerMethod(null),
-            default,
+        return valueSource.RegisterAssertion(new EnumerableDistinctItemsAssertCondition<TActual, TInner>(default,
             equalityComparer)
-        );
+            , []);
     }
     
-    public static EnumerableCount<TActual, TAnd, TOr> HasCount<TActual, TAnd, TOr>(this IHas<TActual, TAnd, TOr> has) 
+    public static EnumerableCount<TActual> HasCount<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : IEnumerable
-        where TAnd : IAnd<TActual, TAnd, TOr>
-        where TOr : IOr<TActual, TAnd, TOr>
     {
-        return new EnumerableCount<TActual, TAnd, TOr>(has.Has().AssertionBuilder.AppendCallerMethod(null), has.Has().ConnectorType, has.Has().OtherAssertCondition);
+        valueSource.AssertionBuilder.AppendCallerMethod([]);
+        return new EnumerableCount<TActual>(valueSource);
     }
 }

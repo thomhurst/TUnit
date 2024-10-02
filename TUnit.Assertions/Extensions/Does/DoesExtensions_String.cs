@@ -4,96 +4,78 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertConditions.String;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesExtensions
 {
-    public static BaseAssertCondition<string, TAnd, TOr> Contains<TAnd, TOr>(this IDoes<string, TAnd, TOr> does, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Contains(does, expected, StringComparison.Ordinal, doNotPopulateThisValue);
+        return Contains(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Contains<TAnd, TOr>(this IDoes<string, TAnd, TOr> does, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return AssertionConditionCombiner.Combine(does.Does(), new StringContainsAssertCondition<TAnd, TOr>(does.Does().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), expected, stringComparison));
+        return valueSource.RegisterAssertion(new StringContainsAssertCondition(expected, stringComparison)
+            , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> StartsWith<TAnd, TOr>(this IDoes<string, TAnd, TOr> does, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return StartsWith(does, expected, StringComparison.Ordinal);
+        return StartsWith(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> StartsWith<TAnd, TOr>(this IDoes<string, TAnd, TOr> does, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return AssertionConditionCombiner.Combine(does.Does(), new DelegateAssertCondition<string, string, TAnd, TOr>(
-            does.Does().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
-            expected,
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, string>(expected,
             (actual, _, _, self) =>
             {
                 if (actual is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
                 return actual.StartsWith(expected, stringComparison);
             },
-            (actual, _) => $"\"{actual}\" does not start with \"{expected}\""));
+            (actual, _, _) => $"\"{actual}\" does not start with \"{expected}\"")
+            , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
         
-    public static BaseAssertCondition<string, TAnd, TOr> EndWiths<TAnd, TOr>(this IDoes<string, TAnd, TOr> does, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return EndWiths(does, expected, StringComparison.Ordinal);
+        return EndsWith(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> EndWiths<TAnd, TOr>(this IDoes<string, TAnd, TOr> does, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return AssertionConditionCombiner.Combine(does.Does(), new DelegateAssertCondition<string, string, TAnd, TOr>(
-            does.Does().AssertionBuilder.AppendCallerMethodWithMultipleExpressions([doNotPopulateThisValue1, doNotPopulateThisValue2]), 
-            expected,
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, string>(expected,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.EndsWith(expected, stringComparison);
             },
-            (actual, _) => $"\"{actual}\" does not end with \"{expected}\""));
+            (actual, _, _) => $"\"{actual}\" does not end with \"{expected}\"")
+            , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Matches<TAnd, TOr>(this IDoes<string, TAnd, TOr> does, string regex, [CallerArgumentExpression("regex")] string expression = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<string> Matches(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression("regex")] string expression = "")
     {
-        return Matches(does, new Regex(regex), expression);
+        return Matches(valueSource, new Regex(regex), expression);
     }
     
-    public static BaseAssertCondition<string, TAnd, TOr> Matches<TAnd, TOr>(this IDoes<string, TAnd, TOr> does, Regex regex, [CallerArgumentExpression("regex")] string expression = "")
-        where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-        where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+    public static InvokableValueAssertionBuilder<string> Matches(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression("regex")] string expression = "")
     {
-        return AssertionConditionCombiner.Combine(does.Does(), new DelegateAssertCondition<string, Regex, TAnd, TOr>(
-            does.Does().AssertionBuilder.AppendCallerMethod(expression), 
-            regex,
+        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, Regex>(regex,
             (actual, _, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return regex.IsMatch(actual);
             },
-            (actual, _) => $"The regex \"{regex}\" does not match with \"{actual}\""));
+            (actual, _, _) => $"The regex \"{regex}\" does not match with \"{actual}\"")
+            , [expression]);
     }
 }

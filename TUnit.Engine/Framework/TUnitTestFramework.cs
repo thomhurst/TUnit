@@ -1,16 +1,16 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
+using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
-using TUnit.Engine.Extensions;
+using TUnit.Core.Logging;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
-using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
 
@@ -18,12 +18,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 {
     private readonly IExtension _extension;
     private readonly ITestFrameworkCapabilities _capabilities;
-    private readonly ServiceProvider _serviceProvider;
-    private readonly TUnitLogger _logger;
-    private readonly TUnitTestDiscoverer _testDiscover;
-    private readonly TestsExecutor _testsExecutor;
-    private readonly TUnitInitializer _initializer;
-    private readonly OnEndExecutor _onEndExecutor;
+    private readonly TUnitServiceProvider _serviceProvider;
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
@@ -32,16 +27,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _extension = extension;
         _capabilities = capabilities;
         
-        _serviceProvider = new ServiceCollection()
-            .AddTestEngineServices(frameworkServiceProvider, extension)
-            .AddFromFrameworkServiceProvider(frameworkServiceProvider, extension)
-            .BuildServiceProvider();
-
-        _logger = _serviceProvider.GetRequiredService<TUnitLogger>();
-        _testDiscover = _serviceProvider.GetRequiredService<TUnitTestDiscoverer>();
-        _testsExecutor = _serviceProvider.GetRequiredService<TestsExecutor>();
-        _initializer = _serviceProvider.GetRequiredService<TUnitInitializer>();
-        _onEndExecutor = _serviceProvider.GetRequiredService<OnEndExecutor>();
+        _serviceProvider = new TUnitServiceProvider(extension, frameworkServiceProvider.GetMessageBus(), frameworkServiceProvider);
+        
+        GlobalContext.Current.GlobalLogger = _serviceProvider.Logger;
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -67,68 +55,85 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         
         EngineCancellationToken.Initialise(context.CancellationToken);
         
-        await using (_serviceProvider)
+        _serviceProvider.StandardOutConsoleInterceptor.Initialize();
+        _serviceProvider.StandardErrorConsoleInterceptor.Initialize();
+
+        try
         {
-            try
+            _serviceProvider.Initializer.Initialize();
+
+            await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
+
+            var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest,
+                context.CancellationToken);
+
+            var failedToInitializeTests = _serviceProvider.TestDiscoverer.GetFailedToInitializeTests();
+
+            var organisedTests = _serviceProvider.TestGrouper.OrganiseTests(discoveredTests);
+            foreach (var test in organisedTests.AllTests)
             {
-                _initializer.Initialize();
+                TestRegistrar.RegisterInstance(test.TestContext);
+            }
 
-                await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
-                
-                var discoveredTests = _testDiscover.DiscoverTests(context.Request as TestExecutionRequest, context.CancellationToken);
+            await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
+                new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
 
-                var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
-                
-                await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
-
-                switch (context.Request)
+            switch (context.Request)
+            {
+                case DiscoverTestExecutionRequest:
                 {
-                    case DiscoverTestExecutionRequest:
+                    foreach (var testNode in discoveredTests.Select(testInformation => testInformation.ToTestNode()))
                     {
-                        foreach (var testNode in discoveredTests.Select(testInformation => testInformation.ToTestNode()))
-                        {
-                            testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
+                        testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
 
-                            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-                                sessionUid: context.Request.Session.SessionUid,
-                                testNode: testNode)
-                            );
-                        }
-
-                        await NotifyFailedTests(context, failedToInitializeTests, true);
-                        break;
+                        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+                            sessionUid: context.Request.Session.SessionUid,
+                            testNode: testNode)
+                        );
                     }
-                    case RunTestExecutionRequest runTestExecutionRequest:
-                        await NotifyFailedTests(context, failedToInitializeTests, false);
 
-                        var testSessionContext = new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
-                        
-                        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
-                    
-                        await _testsExecutor.ExecuteAsync(discoveredTests, runTestExecutionRequest.Filter, context);
-                        
-                        await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
-
-                        foreach (var artifact in testSessionContext.Artifacts)
-                        {
-                            await context.MessageBus.PublishAsync(this, new SessionFileArtifact(context.Request.Session.SessionUid, artifact.File, artifact.DisplayName, artifact.Description));
-                        }
-
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
+                    await NotifyFailedTests(context, failedToInitializeTests, true);
+                    break;
                 }
-            }
-            catch (Exception e) when (e is TaskCanceledException or OperationCanceledException && context.CancellationToken.IsCancellationRequested)
-            {
-                await _logger.LogErrorAsync("The test run was cancelled.");
-            }
-            finally
-            {
-                await _onEndExecutor.ExecuteAsync();
+                case RunTestExecutionRequest runTestExecutionRequest:
+                    await NotifyFailedTests(context, failedToInitializeTests, false);
 
-                context.Complete();
+                    var testSessionContext =
+                        new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
+
+                    await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
+
+                    await _serviceProvider.TestsExecutor.ExecuteAsync(organisedTests, runTestExecutionRequest.Filter,
+                        context);
+
+                    await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
+
+                    foreach (var artifact in testSessionContext.Artifacts)
+                    {
+                        await context.MessageBus.PublishAsync(this,
+                            new SessionFileArtifact(context.Request.Session.SessionUid, artifact.File,
+                                artifact.DisplayName, artifact.Description));
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(context.Request), context.Request.GetType().Name);
             }
+        }
+        catch (Exception e) when (e is TaskCanceledException or OperationCanceledException &&
+                                  context.CancellationToken.IsCancellationRequested)
+        {
+            await _serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
+        }
+        catch (Exception e)
+        {
+            await _serviceProvider.Logger.LogErrorAsync(e);
+        }
+        finally
+        {
+            await _serviceProvider.OnEndExecutor.ExecuteAsync();
+
+            context.Complete();
         }
     }
 

@@ -52,11 +52,29 @@ cd 'C:/Your/Test/Directory/bin/Release/net8.0/win-x64/publish'
 ./YourTestProject.exe --report-trx --coverage
 ```
 
-# IDE
-As of August 2024, IDE support is still in development
+# IDE Support
 
 ## Visual Studio
-If you install Visual Studio, you can navigate to the preview/experimental options and enable the testing server option. Restart Visual Studio, build your test project, and the test explorer should show your tests.
+Visual Studio is supported on the Preview version currently. 
+
+- Install the [latest preview version](https://visualstudio.microsoft.com/vs/preview/)
+- Open Visual Studio and go to Tools > Manage Preview Features
+- Enable "Use testing platform server mode"
+
+![Visual Studio Settings](../../static/img/visual-studio.png)
 
 ## Rider
-Not yet supported, but in development I believe.
+Rider is supported. 
+
+The [Enable Testing Platform support](https://www.jetbrains.com/help/rider/Reference__Options__Tools__Unit_Testing__VSTest.html) option must be selected in Settings > Build, Execution, Deployment > Unit Testing > VSTest.
+
+![Rider Settings](../../static/img/rider.png)
+
+## VS Code
+Visual Studio Code is supported.
+
+- Install the extension Name: [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit)
+- Go to the C# Dev Kit extension's settings
+- Enable Dotnet > Test Window > Use Testing Platform Protocol
+
+![Visual Studio Code Settings](../../static/img/visual-studio-code.png)

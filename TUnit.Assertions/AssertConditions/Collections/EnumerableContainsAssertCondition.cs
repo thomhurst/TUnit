@@ -1,27 +1,22 @@
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
-
 namespace TUnit.Assertions.AssertConditions.Collections;
 
-public class EnumerableContainsAssertCondition<TActual, TInner, TAnd, TOr> : AssertCondition<TActual, TInner, TAnd, TOr>
+public class EnumerableContainsAssertCondition<TActual, TInner> : AssertCondition<TActual, TInner>
     where TActual : IEnumerable<TInner>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
 {
     private readonly IEqualityComparer<TInner?>? _equalityComparer;
 
-    public EnumerableContainsAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TInner expected, IEqualityComparer<TInner?>? equalityComparer) : base(assertionBuilder, expected)
+    public EnumerableContainsAssertCondition(TInner expected, IEqualityComparer<TInner?>? equalityComparer) : base(expected)
     {
         _equalityComparer = equalityComparer;
     }
 
-    protected override string DefaultMessage => $"{ExpectedValue} was not found in the collection";
+    protected internal override string GetFailureMessage() => $"{ExpectedValue} was not found in the collection";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {
-            WithMessage((_, _) => $"{AssertionBuilder.RawActualExpression ?? typeof(TActual).Name} is null");
+            OverriddenMessage = $"{ActualExpression ?? typeof(TActual).Name} is null";
             return false;
         }
         

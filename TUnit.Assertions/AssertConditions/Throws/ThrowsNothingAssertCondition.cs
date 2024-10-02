@@ -1,19 +1,14 @@
-﻿using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
+﻿namespace TUnit.Assertions.AssertConditions.Throws;
 
-namespace TUnit.Assertions.AssertConditions.Throws;
-
-public class ThrowsNothingAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class ThrowsNothingAssertCondition<TActual> : AssertCondition<TActual, TActual>
 {
-    public ThrowsNothingAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder) : base(assertionBuilder, default)
+    public ThrowsNothingAssertCondition() : base(default)
     {
     }
     
-    protected override string DefaultMessage => $"A {Exception?.GetType().Name} was thrown";
+    protected internal override string GetFailureMessage() => $"A {Exception?.GetType().Name} was thrown";
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         return exception is null;
     }

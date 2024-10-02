@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Running;
 using Tests.Benchmark;
 
-BenchmarkRunner.Run<Benchmarks>();
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 
 var output = new DirectoryInfo(Environment.CurrentDirectory)
     .GetFiles("*.md", SearchOption.AllDirectories)

@@ -1,6 +1,8 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
+﻿using System.Diagnostics;
+using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine.Services;
 
@@ -16,6 +18,12 @@ internal class TUnitInitializer
     public void Initialize()
     {
         ParseParameters();
+        SetUpExceptionListeners();
+    }
+
+    private void SetUpExceptionListeners()
+    {
+        Trace.Listeners.Insert(0, new ThrowListener());
     }
 
     private void ParseParameters()

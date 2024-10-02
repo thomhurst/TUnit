@@ -7,7 +7,7 @@ public class BasicTests
     {
         // Dummy method
     }
-    
+        
     [Test]
     public async Task AsynchronousTest()
     {

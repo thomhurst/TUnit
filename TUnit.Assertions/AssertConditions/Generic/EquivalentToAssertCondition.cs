@@ -1,24 +1,20 @@
 using System.Collections;
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EquivalentToAssertCondition<TActual, TAnd, TOr> : AssertCondition<TActual, TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class EquivalentToAssertCondition<TActual> : AssertCondition<TActual, TActual>
 {
-    public EquivalentToAssertCondition(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, TActual expected) : base(assertionBuilder, expected)
+    public EquivalentToAssertCondition(TActual expected) : base(expected)
     {
     }
 
-    protected override string DefaultMessage => $"""
+    protected internal override string GetFailureMessage() => $"""
                                                 The two items were not equivalent
                                                    Actual: {ActualValue}
                                                    Expected: {ExpectedValue}
                                                 """;
 
-    protected internal override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null && ExpectedValue is null)
         {

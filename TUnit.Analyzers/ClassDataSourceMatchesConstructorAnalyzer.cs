@@ -51,7 +51,6 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
             var dataSourceMethod = methodClass
                 .GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where(m => m.IsStatic)
                 .Where(m => !m.ReturnsVoid)
                 .Where(m => m.Parameters.IsDefaultOrEmpty)
                 .Where(m => m.DeclaredAccessibility == Accessibility.Public)
@@ -64,33 +63,55 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                 );
                 return;
             }
-
-            var returnTypes = GetReturnTypes(dataSourceMethod.ReturnType);
-
-            if (returnTypes.Length != parameters.Length)
+            
+            if (!dataSourceMethod.ReturnType.IsEnumerable(context, out var innerType))
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.Argument_Count_Not_Matching_Parameter_Count,
-                        attributeData.GetLocation(),
-                        returnTypes.Length, parameters.Length)
-                );
+                innerType = dataSourceMethod.ReturnType;
+            }
+
+            if (context.Compilation.HasImplicitConversion(innerType, parameters.FirstOrDefault()?.Type))
+            {
                 return;
             }
 
-            for (var i = 0; i < returnTypes.Length; i++)
+            if (innerType.IsTupleType && innerType is INamedTypeSymbol namedInnerType)
             {
-                var parameterType = parameters[i].Type;
-                var argumentType = returnTypes[i];
+                var tupleTypes = namedInnerType.TupleUnderlyingType?.TypeArguments ?? namedInnerType.TypeArguments;
 
-                if (!context.Compilation.HasImplicitConversion(parameterType, argumentType))
+                for (var index = 0; index < tupleTypes.Length; index++)
+                {
+                    var tupleType = tupleTypes.ElementAtOrDefault(index);
+                    var parameterType = parameters.WithoutTimeoutParameter().ElementAtOrDefault(index)?.Type;
+
+                    if (!context.Compilation.HasImplicitConversion(tupleType, parameterType))
+                    {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
+                                attributeData.GetLocation() ?? namedTypeSymbol.Locations.FirstOrDefault(),
+                                tupleType, parameterType)
+                        );
+                    }
+                }
+
+                if (tupleTypes.Length != parameters.WithoutTimeoutParameter().Count())
                 {
                     context.ReportDiagnostic(
                         Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
-                            attributeData.GetLocation(),
-                            argumentType, parameterType)
+                            attributeData.GetLocation() ?? namedTypeSymbol.Locations.FirstOrDefault(),
+                            string.Join(", ", tupleTypes), string.Join(", ", parameters.Select(x => x.Type)))
                     );
-                    return;
                 }
+                
+                return;
+            }
+
+            if (!context.Compilation.HasImplicitConversion(innerType, parameters.FirstOrDefault()?.Type))
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
+                        attributeData.GetLocation() ?? namedTypeSymbol.Locations.FirstOrDefault(),
+                        innerType, parameters.FirstOrDefault()?.Type)
+                );
             }
         }
         else if (attributeClass == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource)
@@ -99,6 +120,7 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                        (INamedTypeSymbol)attributeData.ConstructorArguments.First().Value!;
 
             var parameterType = parameters.FirstOrDefault()?.Type;
+            
             if (parameters.Length != 1 || !context.Compilation.HasImplicitConversion(type, parameterType))
             {
                 context.ReportDiagnostic(
@@ -108,83 +130,5 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
                 );
             }
         }
-        else if (attributeClass == WellKnown.AttributeFullyQualifiedClasses.EnumerableMethodDataSource)
-        {
-            var hasSpecifiedClass = attributeData.ConstructorArguments.Length > 1;
-
-            var methodClass = hasSpecifiedClass
-                ? (INamedTypeSymbol)attributeData.ConstructorArguments[0].Value!
-                : namedTypeSymbol;
-            var methodName = (string)attributeData.ConstructorArguments[hasSpecifiedClass ? 1 : 0].Value!;
-
-            var method = methodClass
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(m => m.IsStatic)
-                .Where(m => !m.ReturnsVoid)
-                .Where(m => m.Parameters.IsDefaultOrEmpty)
-                .Where(m => m.DeclaredAccessibility == Accessibility.Public)
-                .FirstOrDefault(m => m.Name == methodName);
-
-            if (method is null)
-            {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.NoMethodFound, attributeData.GetLocation())
-                );
-                return;
-            }
-
-            var enumerableReturnType = method.ReturnType;
-
-            if (!enumerableReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
-                    .StartsWith($"global::{typeof(IEnumerable<>).GetFullNameWithoutGenericArity()}"))
-            {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.NotIEnumerable, attributeData.GetLocation(), enumerableReturnType)
-                );
-                return;
-            }
-
-            var innerTypes = GetReturnTypes(((INamedTypeSymbol)enumerableReturnType).TypeArguments.First());
-
-            if (innerTypes.Length != parameters.Length)
-            {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.Argument_Count_Not_Matching_Parameter_Count,
-                        attributeData.GetLocation(),
-                        innerTypes.Length, parameters.Length)
-                );
-                return;
-            }
-
-            for (var i = 0; i < innerTypes.Length; i++)
-            {
-                var parameterType = parameters[i].Type;
-                var argumentType = innerTypes[i];
-
-                if (!SymbolEqualityComparer.Default.Equals(parameterType, argumentType))
-                {
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
-                            attributeData.GetLocation(),
-                            argumentType, parameterType)
-                    );
-                    return;
-                }
-            }
-        }
-    }
-
-    private ImmutableArray<ITypeSymbol> GetReturnTypes(ITypeSymbol methodReturnType)
-    {
-        if (!methodReturnType.IsTupleType)
-        {
-            return ImmutableArray.Create(methodReturnType);
-        }
-
-        var namedTypeSymbol = (INamedTypeSymbol)methodReturnType;
-        
-        return namedTypeSymbol.TupleUnderlyingType?.TypeArguments
-               ?? namedTypeSymbol.TypeArguments;
     }
 }

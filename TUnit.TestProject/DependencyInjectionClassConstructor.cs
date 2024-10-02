@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
-using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;
 
@@ -43,7 +42,7 @@ public class DependencyInjectionClassConstructor : IClassConstructor
     private static IServiceProvider CreateServiceProvider()
     {
         return new ServiceCollection()
-            .AddTransient<SomeAsyncDisposableClass>()
+            .AddTransient<DummyReferenceTypeClass>()
             .BuildServiceProvider();
     }
 }

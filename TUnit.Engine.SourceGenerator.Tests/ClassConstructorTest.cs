@@ -15,8 +15,7 @@ internal class ClassConstructorTest : TestsBase<TestsGenerator>
             [
                 Path.Combine(Git.RootDirectory.FullName,
                     "TUnit.TestProject",
-                    "Dummy",
-                    "SomeAsyncDisposableClass.cs"),
+                    "DummyReferenceTypeClass.cs"),
                 Path.Combine(Git.RootDirectory.FullName,
                     "TUnit.TestProject",
                     "DependencyInjectionClassConstructor.cs")
@@ -26,7 +25,8 @@ internal class ClassConstructorTest : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
             Assert.That(generatedFiles[0], Does.Contain("var classConstructor = new global::TUnit.TestProject.DependencyInjectionClassConstructor();"));
-            Assert.That(generatedFiles[0], Does.Contain("var resettableClassFactory = new ResettableLazy<global::TUnit.TestProject.ClassConstructorTest>(() => classConstructor.Create<global::TUnit.TestProject.ClassConstructorTest>());"));
+            Assert.That(generatedFiles[0], Does.Contain("var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassConstructorTest>(() => classConstructor.Create<global::TUnit.TestProject.ClassConstructorTest>());"));
+            Assert.That(generatedFiles[0], Does.Contain("var resettableClassFactory = resettableClassFactoryDelegate();"));
             Assert.That(generatedFiles[0], Does.Contain("ClassConstructor = classConstructor,"));
         });
 }

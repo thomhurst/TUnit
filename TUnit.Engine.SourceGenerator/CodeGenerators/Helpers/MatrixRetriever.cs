@@ -1,5 +1,7 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
+using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
 
@@ -8,50 +10,64 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 internal static class MatrixRetriever
 {
     // We return a List of a List. Inner List is for each test.
-    public static IEnumerable<ArgumentsContainer> Parse(ImmutableArray<IParameterSymbol> parameters)
+    public static IEnumerable<ArgumentsContainer> Parse(GeneratorAttributeSyntaxContext context, ImmutableArray<IParameterSymbol> parameters, ArgumentsType argumentsType)
     {
         if (parameters.IsDefaultOrEmpty || !parameters.HasMatrixAttribute())
         {
             return [];
         }
-        
+
         var matrixAttributes = parameters
             .Select(p => p.GetAttributes().SafeFirstOrDefault(a => a.GetFullyQualifiedAttributeTypeName()
                                                                == WellKnownFullyQualifiedClassNames.MatrixAttribute.WithGlobalPrefix))
             .OfType<AttributeData>()
             .ToList();
-        
-        var mappedToConstructorArrays = matrixAttributes
-            .Select(x => x.ConstructorArguments.SafeFirstOrDefault().Values);
+
+        var mappedToArgumentArrays = matrixAttributes
+            .Select(x =>
+            {
+                var attributeSyntax = (AttributeSyntax)x.ApplicationSyntaxReference!.GetSyntax();
+                var arguments = attributeSyntax.ArgumentList!.Arguments;
+
+                var objectArray = x.ConstructorArguments.SafeFirstOrDefault().Values;
+
+                return objectArray.Zip(arguments, (o, a) => (o, a));
+            });
 
         var attr = matrixAttributes.SafeFirstOrDefault();
-        
+
+        if (attr is null)
+        {
+            return [];
+        }
+
         var index = 0;
-        return GetMatrixArgumentsList(mappedToConstructorArrays)
-            .Select(x => MapToArgumentEnumerable(x, parameters))
-            .Select(x => new ArgumentsContainer
+        return GetMatrixArgumentsList(mappedToArgumentArrays)
+            .Select(x => MapToArgumentEnumerable(context, x, parameters))
+            .Select(x => new ArgumentsAttributeContainer
             {
-                DataAttribute = attr,
-                DataAttributeIndex = ++index,
-                IsEnumerableData = false,
-                Arguments = [..x]
+                ArgumentsType = argumentsType,
+                Attribute = attr,
+                AttributeIndex = ++index,
+                Arguments = [.. x],
+                DisposeAfterTest = attr.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
             });
     }
-
-    private static IEnumerable<Argument> MapToArgumentEnumerable(IEnumerable<TypedConstant> typedConstants, ImmutableArray<IParameterSymbol> parameterSymbols)
+    private static IEnumerable<Argument> MapToArgumentEnumerable(GeneratorAttributeSyntaxContext context, IEnumerable<(TypedConstant ArgumentConstant, AttributeArgumentSyntax ArgumentSyntax)> elements, ImmutableArray<IParameterSymbol> parameterSymbols)
     {
-        return typedConstants.Select((typedConstant, index) =>
-            {
-                var parameterSymbolType = parameterSymbols.ElementAt(index).Type;
-                
-                return new Argument(parameterSymbolType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-                    TypedConstantParser.GetTypedConstantValue(typedConstant, parameterSymbolType));
-            });
+        return elements.Select((element, index) =>
+        {
+            var type = parameterSymbols.ElementAt(index).Type;
+
+            return new Argument(type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
+                                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(element.ArgumentConstant),
+                TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element.ArgumentSyntax.Expression, type));
+        });
     }
 
-    private static readonly IEnumerable<IEnumerable<TypedConstant>> Seed = [[]];
-    
-    private static IEnumerable<IEnumerable<TypedConstant>> GetMatrixArgumentsList(IEnumerable<ImmutableArray<TypedConstant>> elements)
+    private static readonly IEnumerable<IEnumerable<(TypedConstant, AttributeArgumentSyntax)>> Seed = [[]];
+
+    private static IEnumerable<IEnumerable<(TypedConstant, AttributeArgumentSyntax)>> GetMatrixArgumentsList(IEnumerable<IEnumerable<(TypedConstant, AttributeArgumentSyntax)>> elements)
     {
         return elements.Aggregate(Seed, (accumulator, enumerable)
             => accumulator.SelectMany(x => enumerable.Select(x.Append)));

@@ -9,33 +9,39 @@
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
   
   <PropertyGroup>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Aot)' == true">
+  <PropertyGroup Condition="'$(Aot)' == 'true'">
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
     <WarningsAsErrors>true</WarningsAsErrors>
+    <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SingleFile)' == true">
+  <PropertyGroup Condition="'$(SingleFile)' == 'true'">
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
+    <NoWarn>IL2118</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>
     <Using Include="TUnit.Core.HookType" Static="True" />
     <Using Include="TUnit.Core" />
   </ItemGroup>
+  <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+  </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AutoFixture" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
     <PackageReference Include="System.Text.Json" />
@@ -43,6 +49,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
     <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>

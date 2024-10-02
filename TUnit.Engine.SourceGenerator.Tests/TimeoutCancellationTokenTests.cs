@@ -23,8 +23,8 @@ internal class TimeoutCancellationTokenTests : TestsBase<TestsGenerator>
             Assert.That(generatedFiles[2], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataTest(methodArg0, cancellationToken))"));
             
             Assert.That(generatedFiles[3], Does.Contain("TestName = \"DataSourceTest\""));
-            Assert.That(generatedFiles[3], Does.Contain("global::System.Int32 methodArg0 = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();"));
-            Assert.That(generatedFiles[3], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceTest(methodArg0, cancellationToken))"));
+            Assert.That(generatedFiles[3], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();"));
+            Assert.That(generatedFiles[3], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceTest(methodArg, cancellationToken))"));
             
             Assert.That(generatedFiles[4], Does.Contain("TestName = \"MatrixTest\""));
             Assert.That(generatedFiles[4], Does.Contain("global::System.Int32 methodArg0 = 1;"));

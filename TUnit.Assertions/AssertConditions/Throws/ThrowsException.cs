@@ -1,39 +1,42 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsException<TActual, TAnd, TOr> : Connector<TActual, TAnd, TOr>
-    where TAnd : IAnd<TActual, TAnd, TOr>
-    where TOr : IOr<TActual, TAnd, TOr>
+public class ThrowsException<TActual>
 {
+    private readonly IDelegateSource<TActual> _delegateSource;
     private readonly Func<Exception?, Exception?> _exceptionSelector;
-    protected AssertionBuilder<TActual, TAnd, TOr> AssertionBuilder { get; }
+    protected AssertionBuilder<TActual> AssertionBuilder { get; }
     
-    public ThrowsException(AssertionBuilder<TActual, TAnd, TOr> assertionBuilder, ConnectorType connectorType, BaseAssertCondition<TActual, TAnd, TOr>? otherAssertCondition, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "") : base(connectorType, otherAssertCondition)
+    public ThrowsException(IDelegateSource<TActual> delegateSource, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "")
     {
+        _delegateSource = delegateSource;
         _exceptionSelector = exceptionSelector;
-        AssertionBuilder = assertionBuilder
+        AssertionBuilder = delegateSource.AssertionBuilder
             .AppendExpression(callerMemberName);
     }
 
-    public ExceptionWith<TActual, TAnd, TOr> With => new(AssertionBuilder, ConnectorType, OtherAssertCondition, _exceptionSelector);
+    public ExceptionWith<TActual> With => new(_delegateSource, _exceptionSelector);
 
-    public BaseAssertCondition<TActual, TAnd, TOr> OfAnyType() =>
-        Combine(new ThrowsAnythingAssertCondition<TActual, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), _exceptionSelector));
+    public InvokableDelegateAssertionBuilder<TActual> OfAnyType() =>
+        _delegateSource.RegisterAssertion(new ThrowsAnythingAssertCondition<TActual>()
+            , []);
 
-    public BaseAssertCondition<TActual, TAnd, TOr> OfType<TExpected>() => Combine(new ThrowsExactTypeOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector));
+    public InvokableDelegateAssertionBuilder<TActual> OfType<TExpected>() => _delegateSource.RegisterAssertion(new ThrowsExactTypeOfAssertCondition<TActual, TExpected>()
+        , [typeof(TExpected).Name]);
 
-    public BaseAssertCondition<TActual, TAnd, TOr> SubClassOf<TExpected>() =>
-        Combine(new ThrowsSubClassOfAssertCondition<TActual, TExpected, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(typeof(TExpected).FullName), _exceptionSelector));
+    public InvokableDelegateAssertionBuilder<TActual> SubClassOf<TExpected>() =>
+        _delegateSource.RegisterAssertion(new ThrowsSubClassOfAssertCondition<TActual, TExpected>()
+            , [typeof(TExpected).Name]);
     
-    public BaseAssertCondition<TActual, TAnd, TOr> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        Combine(new DelegateAssertCondition<TActual,Exception,TAnd,TOr>(AssertionBuilder.AppendCallerMethod(expectedExpression),
-            default,
+    public InvokableDelegateAssertionBuilder<TActual> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
+        _delegateSource.RegisterAssertion(new DelegateAssertCondition<TActual,Exception>(default,
             (_, exception, _, _) => action(_exceptionSelector(exception)),
-            (_, exception) => messageFactory(_exceptionSelector(exception))
-        ));
+            (_, exception, _) => messageFactory(_exceptionSelector(exception))
+        ), [expectedExpression]);
 
     public TaskAwaiter GetAwaiter() => OfAnyType().GetAwaiter();
 }

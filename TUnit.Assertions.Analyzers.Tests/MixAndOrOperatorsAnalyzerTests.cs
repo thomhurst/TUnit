@@ -27,7 +27,7 @@ public class MixAndOrOperatorsAnalyzerTests
 
         var expected = Verifier.Diagnostic(Rules.MixAndOrConditionsAssertion).WithLocation(0);
         
-        await Verifier.VerifyAnalyzerAsync(text, expected, expected).ConfigureAwait(false);
+        await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
     
     [Test]

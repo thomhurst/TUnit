@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.NugetTester", "TUnit.NugetTester\TUnit.NugetTester.csproj", "{596A508A-F6D6-422F-8DA2-45B085916B97}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.NugetTester.Library", "TUnit.NugetTester.Library\TUnit.NugetTester.Library.csproj", "{61983286-B0EC-49E2-BB56-546FFB6D7BDE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{596A508A-F6D6-422F-8DA2-45B085916B97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{596A508A-F6D6-422F-8DA2-45B085916B97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{596A508A-F6D6-422F-8DA2-45B085916B97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61983286-B0EC-49E2-BB56-546FFB6D7BDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61983286-B0EC-49E2-BB56-546FFB6D7BDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61983286-B0EC-49E2-BB56-546FFB6D7BDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61983286-B0EC-49E2-BB56-546FFB6D7BDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

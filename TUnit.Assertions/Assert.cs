@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;
@@ -9,9 +8,9 @@ namespace TUnit.Assertions;
 
 public static class Assert
 {
-    public static ValueAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>> That<TActual>(TActual value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static ValueAssertionBuilder<TActual> That<TActual>(TActual value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
     {
-        return new ValueAssertionBuilder<TActual, ValueAnd<TActual>, ValueOr<TActual>>(value, doNotPopulateThisValue);
+        return new ValueAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
     public static DelegateAssertionBuilder That(Action value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
@@ -19,9 +18,9 @@ public static class Assert
         return new DelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static ValueDelegateAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> That<TActual>(Func<TActual> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static ValueDelegateAssertionBuilder<TActual> That<TActual>(Func<TActual> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
     {
-        return new ValueDelegateAssertionBuilder<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>(value, doNotPopulateThisValue);
+        return new ValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
     public static AsyncDelegateAssertionBuilder That(Func<Task> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
@@ -105,11 +104,11 @@ public static class Assert
         [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
         => ThrowsAsync<TException>(async () => await @delegate, doNotPopulateThisValue);
 
-    public static Exception ThrowsAsync(Action @delegate,
+    public static Exception Throws(Action @delegate,
         [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
-        => ThrowsAsync<Exception>(@delegate, doNotPopulateThisValue);
+        => Throws<Exception>(@delegate, doNotPopulateThisValue);
     
-    public static TException ThrowsAsync<TException>(Action @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
+    public static TException Throws<TException>(Action @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
     {
         try
         {

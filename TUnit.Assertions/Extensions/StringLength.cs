@@ -1,138 +1,136 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
-public class StringLength<TAnd, TOr> : Connector<string, TAnd, TOr>
-    where TAnd : And<string, TAnd, TOr>, IAnd<string, TAnd, TOr>
-    where TOr : Or<string, TAnd, TOr>, IOr<string, TAnd, TOr>
+public class StringLength
 {
-    protected AssertionBuilder<string, TAnd, TOr> AssertionBuilder { get; }
+    private readonly IValueSource<string> _valueSource;
+    protected AssertionBuilder<string> AssertionBuilder { get; }
 
-    public StringLength(AssertionBuilder<string, TAnd, TOr> assertionBuilder, ConnectorType connectorType,
-        BaseAssertCondition<string, TAnd, TOr>? otherAssertCondition) : base(connectorType, otherAssertCondition)
+    public StringLength(IValueSource<string> valueSource)
     {
-        AssertionBuilder = assertionBuilder.AppendExpression("Length");
+        _valueSource = valueSource;
+        AssertionBuilder = valueSource.AssertionBuilder.AppendExpression("HasLength");
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<string> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (actual, _, _, self) =>
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(expected, (actual, _, _, self) =>
             {
                 if (actual is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
                 return actual.Length == expected;
             },
-            (@string, _) =>
+            (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> Zero =>
-        Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), 0, (@string, _, _, self) =>
-            {
-                if (@string is null)
+    public InvokableValueAssertionBuilder<string> Zero =>
+        _valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(0,
+                (@string, _, _, self) =>
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
-                    return false;
-                }
-                
-                return @string.Length == 0;
-            },
-            (@string, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}")
-        );
+                    if (@string is null)
+                    {
+                        self.OverriddenMessage = "Actual string is null";
+                        return false;
+                    }
 
-    public BaseAssertCondition<string, TAnd, TOr> Positive =>
-        Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(null), default, (@string, _, _, self) =>
+                    return @string.Length == 0;
+                },
+                (@string, _, _) =>
+                    $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}")
+            , []);
+
+    public InvokableValueAssertionBuilder<string> Positive =>
+        _valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(default, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
                 return @string.Length > 0;
             },
-            (@string, _) =>
+            (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to empty"
-        ));
+        ), []);
 
 
-    public BaseAssertCondition<string, TAnd, TOr> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<string> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(
-            AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue),
-            expected,
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(expected,
             (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
                 return @string.Length > expected;
             },
-            (@string, _) =>
+            (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<string> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
                 return @string.Length >= expected;
             },
-            (@string, _) =>
+            (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than or equal to {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<string> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
                 return @string.Length < expected;
             },
-            (@string, _) =>
+            (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be less than {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 
-    public BaseAssertCondition<string, TAnd, TOr> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<string> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return Combine(new DelegateAssertCondition<string, int, TAnd, TOr>(AssertionBuilder.AppendCallerMethod(doNotPopulateThisValue), expected, (@string, _, _, self) =>
+        return _valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(expected, (@string, _, _, self) =>
             {
                 if (@string is null)
                 {
-                    self.WithMessage((_, _) => "Actual string is null");
+                    self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
                 
                 return @string.Length <= expected;
             },
-            (@string, _) =>
+            (@string, _, _) =>
                 $"\"{@string}\" was {@string?.Length} characters long but expected to be less than or equal to {expected}")
-        );
+            , [doNotPopulateThisValue]);
     }
 }

@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
-using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -18,36 +17,29 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterOperationAction(AnalyzeOperation, OperationKind.PropertyReference);
+        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Await);
     }
     
     private static void AnalyzeOperation(OperationAnalysisContext context)
     {
-        if (context.Operation is not IPropertyReferenceOperation propertyReferenceOperation)
+        if (context.Operation is not IAwaitOperation awaitOperation)
         {
             return;
         }
         
-        if (propertyReferenceOperation.Property.Name is not "And" and not "Or")
+        if(awaitOperation.Operation.Type?.AllInterfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+        is "global::TUnit.Assertions.AssertConditions.Interfaces.IValueSource"
+            or "global::TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource") != true)
         {
             return;
         }
-        
-        if(propertyReferenceOperation.Property.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) !=
-            "global::TUnit.Assertions.AssertConditions.BaseAssertCondition")
-        {
-            return;
-        }
-
-        var awaitOperation = propertyReferenceOperation.GetAncestorOperations().OfType<IAwaitOperation>().FirstOrDefault();
+    
         var chainedMethodCalls = awaitOperation?.Descendants().OfType<IPropertyReferenceOperation>().ToArray() ?? [];
 
         if (chainedMethodCalls.Any(x => x.Property.Name == "And")
             && chainedMethodCalls.Any(x => x.Property.Name == "Or"))
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.MixAndOrConditionsAssertion,
-                awaitOperation?.Syntax.GetLocation() ?? propertyReferenceOperation.Syntax.GetLocation())
-            );
+            context.ReportDiagnostic(Diagnostic.Create(Rules.MixAndOrConditionsAssertion, awaitOperation?.Syntax.GetLocation()));
         }
     }
 }

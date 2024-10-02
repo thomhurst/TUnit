@@ -1,13 +1,11 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class MethodDataSourceAttribute : TUnitAttribute
+public class MethodDataSourceAttribute : TestDataAttribute
 {
     public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }
-
-    public bool DisposeAfterTest { get; init; } = true;
-
+    
     public MethodDataSourceAttribute(string methodNameProvidingDataSource)
     {
         if (methodNameProvidingDataSource is null or { Length: < 1 })
@@ -34,6 +32,4 @@ public class MethodDataSourceAttribute : TUnitAttribute
         ClassProvidingDataSource = classProvidingDataSource;
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
-    
-    public bool UnfoldTuple { get; init; }
 }

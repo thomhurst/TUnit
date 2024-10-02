@@ -1,18 +1,22 @@
 ﻿using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.ClassMember;
 
-public class Member<TActualRootType, TPropertyType, TAnd, TOr>(Connector<TActualRootType, TAnd, TOr> connector, AssertionBuilder<TActualRootType, TAnd, TOr> assertionBuilder, Expression<Func<TActualRootType, TPropertyType>> selector)
-    where TAnd : IAnd<TActualRootType, TAnd, TOr>
-    where TOr : IOr<TActualRootType, TAnd, TOr>
+public class Member<TActualRootType, TPropertyType>(IValueSource<TActualRootType> valueSource, Expression<Func<TActualRootType, TPropertyType>> selector)
 {
-    public BaseAssertCondition<TActualRootType, TAnd, TOr> EqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<TActualRootType> EqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return AssertionConditionCombiner.Combine(connector, new PropertyEqualsAssertCondition<TActualRootType, TPropertyType, TAnd, TOr>(assertionBuilder.AppendCallerMethod(doNotPopulateThisValue), selector, expected, true));
+        return valueSource.RegisterAssertion(new PropertyEqualsAssertCondition<TActualRootType, TPropertyType>(selector, expected, true)
+            , [doNotPopulateThisValue]);
     }
 
-    public NotMember<TActualRootType, TPropertyType, TAnd, TOr> Not => new(connector, assertionBuilder, selector);
+    public InvokableValueAssertionBuilder<TActualRootType> NotEqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    {
+        return valueSource.RegisterAssertion(new PropertyEqualsAssertCondition<TActualRootType, TPropertyType>(selector, expected, false)
+            , [doNotPopulateThisValue]);
+    }
 }

@@ -22,7 +22,6 @@ Here are TUnit's equivalent attributes to other test frameworks.
 | [Arguments]                  | [InlineData]                      | [TestCase]       | [DataRow]     |
 | [ClassDataSource]            | [ClassData] or `IClassFixture<T>` | [TestCaseSource] | -             |
 | [MethodDataSource]           | [MemberData]                      | [TestCaseSource] | [DynamicData] |
-| [EnumerableMethodDataSource] | [MemberData]                      | [TestCaseSource] | [DynamicData] |
 | [Matrix]                     | -                                 | [Values]         | -             |
 
 ## Test Control Attributes

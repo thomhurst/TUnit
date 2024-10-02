@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="CliWrap" Version="3.6.6" />
@@ -16,17 +17,17 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.1" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-rc.1.24431.7" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.12.4" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.12.5" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.4.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.4.0" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="1.4.0" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.0" />
-    <PackageVersion Include="ModularPipelines.DotNet" Version="2.42.47" />
-    <PackageVersion Include="ModularPipelines.Git" Version="2.42.47" />
-    <PackageVersion Include="ModularPipelines.GitHub" Version="2.42.47" />
+    <PackageVersion Include="ModularPipelines.DotNet" Version="2.42.67" />
+    <PackageVersion Include="ModularPipelines.Git" Version="2.42.67" />
+    <PackageVersion Include="ModularPipelines.GitHub" Version="2.42.67" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.6.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.6.0" />
     <PackageVersion Include="NUnit" Version="4.2.2" />
@@ -34,8 +35,8 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="PolySharp" Version="1.14.1" />
     <PackageVersion Include="System.Text.Json" Version="8.0.4" />
-    <PackageVersion Include="TUnit" Version="0.1.720" />
-    <PackageVersion Include="xunit" Version="2.9.0" />
+    <PackageVersion Include="TUnit" Version="0.1.877" />
+    <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
 </Project>

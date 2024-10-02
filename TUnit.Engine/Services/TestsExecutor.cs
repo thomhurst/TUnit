@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
@@ -15,10 +16,7 @@ internal class TestsExecutor
     private int _currentlyExecutingTests;
 
     private readonly SingleTestExecutor _singleTestExecutor;
-    private readonly TestGrouper _testGrouper;
-    private readonly StandardOutConsoleInterceptor _standardOutConsoleInterceptor;
-    private readonly StandardErrorConsoleInterceptor _standardErrorConsoleInterceptor;
-    private readonly TUnitLogger _logger;
+    private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
 
     private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
@@ -27,34 +25,18 @@ internal class TestsExecutor
     private readonly int _maximumParallelTests;
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
-        TestGrouper testGrouper,
-        StandardOutConsoleInterceptor standardOutConsoleInterceptor,
-        StandardErrorConsoleInterceptor standardErrorConsoleInterceptor,
-        TUnitLogger logger,
+        TUnitFrameworkLogger logger,
         ICommandLineOptions commandLineOptions)
     {
         _singleTestExecutor = singleTestExecutor;
-        _testGrouper = testGrouper;
-        _standardOutConsoleInterceptor = standardOutConsoleInterceptor;
-        _standardErrorConsoleInterceptor = standardErrorConsoleInterceptor;
         _logger = logger;
         _commandLineOptions = commandLineOptions;
 
         _maximumParallelTests = GetParallelTestsLimit();
     }
 
-    public async Task ExecuteAsync(DiscoveredTest[] testNodes, ITestExecutionFilter? filter,  ExecuteRequestContext context)
+    public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter,  ExecuteRequestContext context)
     {
-        _standardOutConsoleInterceptor.Initialize();
-        _standardErrorConsoleInterceptor.Initialize();
-
-        var tests = _testGrouper.OrganiseTests(testNodes);
-
-        foreach (var test in tests.AllTests)
-        {
-            TestRegistrar.RegisterInstance(test.TestContext);
-        }
-
         // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint
         await Task.WhenAll(
             ProcessParallelTests(tests.Parallel, filter, context),

@@ -1,23 +1,22 @@
 using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class ValueDelegateAnd<TActual> 
-    : And<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IValueAssertions<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IDelegateAssertions<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>, IAnd<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>
+public class ValueDelegateAnd<TActual> : IValueDelegateSource<TActual>
 {
-    public ValueDelegateAnd(BaseAssertCondition<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> otherAssertCondition) : base(otherAssertCondition)
+    private readonly AssertionBuilder<TActual> _assertionBuilder;
+
+    public ValueDelegateAnd(AssertionBuilder<TActual> assertionBuilder)
     {
+        _assertionBuilder = assertionBuilder;
     }
     
-    public static ValueDelegateAnd<TActual> Create(BaseAssertCondition<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> otherAssertCondition)
+    public static ValueDelegateAnd<TActual> Create(AssertionBuilder<TActual> assertionBuilder)
     {
-        return new ValueDelegateAnd<TActual>(otherAssertCondition);
+        return new ValueDelegateAnd<TActual>(assertionBuilder);
     }
 
-    Is<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IIs<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.Is() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    IsNot<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IIs<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.IsNot() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    Has<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IHas<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.Has() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    Does<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IDoes<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.Does() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    DoesNot<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IDoes<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.DoesNot() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
-    Throws<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>> IThrows<TActual, ValueDelegateAnd<TActual>, ValueDelegateOr<TActual>>.Throws() => new(OtherAssertCondition.AssertionBuilder, ConnectorType.And, OtherAssertCondition);
+    AssertionBuilder<TActual>
+        ISource<TActual>.AssertionBuilder => new AndAssertionBuilder<TActual>(_assertionBuilder);
 }
