@@ -503,10 +503,10 @@ internal class SingleTestExecutor : IDataProducer
 
     private (DiscoveredTest Test, bool ProceedOnFailure)[] GetDependencies(TestDetails testDetails)
     {
-        return GetDependencies(testDetails, testDetails).ToArray();
+        return GetDependencies(testDetails, testDetails, [testDetails]).ToArray();
     }
 
-    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails)
+    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails, List<TestDetails> currentChain)
     {
         foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
         {
@@ -516,22 +516,17 @@ internal class SingleTestExecutor : IDataProducer
 
             foreach (var dependency in dependencies)
             {
+                currentChain.Add(dependency.TestDetails);
+                
                 if (dependency.TestDetails.IsSameTest(original))
                 {
-                    throw new DependencyConflictException(dependency.TestDetails,
-                        dependencies.Select(x => x.TestDetails));
+                    throw new DependencyConflictException(currentChain);
                 }
                 
                 yield return (dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
+                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails, currentChain))
                 {
-                    if (nestedDependency.Test.TestDetails.IsSameTest(original))
-                    {
-                        throw new DependencyConflictException(nestedDependency.Test.TestDetails,
-                            dependencies.Select(x => x.TestDetails));
-                    }
-                    
                     yield return nestedDependency;
                 }
             }
