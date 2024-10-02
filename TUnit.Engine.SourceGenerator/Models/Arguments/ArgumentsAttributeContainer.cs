@@ -9,15 +9,13 @@ internal record ArgumentsAttributeContainer : DataAttributeContainer
     
     public override void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter)
     {
-        var prefix = ArgumentsType == ArgumentsType.Method ? VariableNames.MethodArg : VariableNames.ClassArg;
-        
         for (var index = 0; index < Arguments.Length; index++)
         {
             var argument = Arguments.ElementAt(index);
             
             var invocation = argument.Invocation;
             
-            var variableName = $"{prefix}{index}";
+            var variableName = $"{VariableNamePrefix}{index}";
             
             sourceCodeWriter.WriteLine($"{argument.Type} {variableName} = {invocation};");
         }
@@ -32,9 +30,7 @@ internal record ArgumentsAttributeContainer : DataAttributeContainer
 
     public override string[] GenerateArgumentVariableNames()
     {
-        var variableName = ArgumentsType == ArgumentsType.Method ? VariableNames.MethodArg : VariableNames.ClassArg;
-
-        return Arguments.Select((_, index) => $"{variableName}{index}").ToArray();
+        return Arguments.Select((_, index) => $"{VariableNamePrefix}{index}").ToArray();
     }
 
     public override string[] GetArgumentTypes()

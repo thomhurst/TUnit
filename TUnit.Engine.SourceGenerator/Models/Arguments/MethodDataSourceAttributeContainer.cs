@@ -90,14 +90,10 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
 
     public override string[] GenerateArgumentVariableNames()
     {
-        var argsVariablePrefix = ArgumentsType == ArgumentsType.ClassConstructor
-            ? VariableNames.ClassArg
-            : VariableNames.MethodArg;
-        
         if (TupleTypes.Any())
         {
             return TupleTypes
-                .Select((x, i) => $"{argsVariablePrefix}{i}")
+                .Select((_, i) => $"{VariableNamePrefix}{i}")
                 .ToArray();
         }
         
@@ -113,7 +109,7 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
         
         return
         [
-            argsVariablePrefix
+            VariableNamePrefix
         ];
     }
 
