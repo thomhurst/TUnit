@@ -4,6 +4,7 @@ sidebar_position: 13
 
 # Command Line Flags
 
+<pre>
     --diagnostic
         Enable the diagnostic logging. The default log level is 'Trace'.
         The file will be written in the output directory with the name log_[MMddHHssfff].diag
@@ -97,3 +98,4 @@ sidebar_position: 13
 
     --treenode-filter
         Use a tree filter to filter down the tests to execute
+</code>
