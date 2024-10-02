@@ -13,7 +13,7 @@ public class DependsOnAndNotInParallelTests : TestModule
         return await RunTestsWithFilter(context, 
             "/*/*/DependsOnAndNotInParallelTests/*",
             [
-                result => result.Successful.Should().BeFalse(),
+                result => result.Successful.Should().BeTrue(),
                 result => result.Total.Should().Be(2),
                 result => result.Passed.Should().Be(2),
                 result => result.Failed.Should().Be(0),
