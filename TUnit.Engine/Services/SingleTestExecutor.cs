@@ -526,6 +526,12 @@ internal class SingleTestExecutor : IDataProducer
 
                 foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
                 {
+                    if (nestedDependency.Test.TestDetails.IsSameTest(original))
+                    {
+                        throw new DependencyConflictException(nestedDependency.Test.TestDetails,
+                            dependencies.Select(x => x.TestDetails));
+                    }
+                    
                     yield return nestedDependency;
                 }
             }
