@@ -47,12 +47,12 @@ public class MyTestClass
 
         public Task InitializeAsync() 
         {
-            await StopServer();
+            await StartServer();
         }
 
         public ValueTask DisposeAsync() 
         {
-            await StartServer();
+            await StopServer();
         }
     }
 }
