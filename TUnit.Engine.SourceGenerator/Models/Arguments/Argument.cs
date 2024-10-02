@@ -9,7 +9,5 @@ internal record Argument
     }
 
     public string Type { get; }
-    public string Invocation { get; }
-    public string[]? TupleVariableNames { get; init; }
-    public bool DisposeAfterTest { get; init; }
+    public string Invocation { get; } 
 }

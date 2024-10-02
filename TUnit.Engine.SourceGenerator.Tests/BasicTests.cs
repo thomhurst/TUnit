@@ -12,7 +12,7 @@ internal class BasicTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(2));
             
-            Assert.That(generatedFiles[0], Does.Contain("TestId = $\"TestAttribute:TUnit.TestProject.BasicTests.SynchronousTest:0\","));
-            Assert.That(generatedFiles[1], Does.Contain("TestId = $\"TestAttribute:TUnit.TestProject.BasicTests.AsynchronousTest:0\","));
+            Assert.That(generatedFiles[0], Does.Contain("TestId = $\"TUnit.TestProject.BasicTests.SynchronousTest:0\","));
+            Assert.That(generatedFiles[1], Does.Contain("TestId = $\"TUnit.TestProject.BasicTests.AsynchronousTest:0\","));
         });
 }

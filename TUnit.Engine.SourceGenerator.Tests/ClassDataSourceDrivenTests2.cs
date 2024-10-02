@@ -14,37 +14,37 @@ internal class ClassDataSourceDrivenTests2 : TestsBase<TestsGenerator>
 
             Assert.That(generatedFiles[0],
                 Does.Contain(
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1 classArg0 = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1();"));
+                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1 classArg = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1();"));
 
             Assert.That(generatedFiles[0],
                 Does.Contain(
-                    "var resettableClassFactory = new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg0));"));
+                    "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg));"));
 
 
             Assert.That(generatedFiles[1],
                 Does.Contain(
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2 classArg0 = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2();"));
+                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2 classArg = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2();"));
 
             Assert.That(generatedFiles[1],
                 Does.Contain(
-                    "var resettableClassFactory = new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg0));"));
+                    "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg));"));
 
 
             Assert.That(generatedFiles[2],
                 Does.Contain(
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1 classArg0 = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1();"));
+                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1 classArg = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1();"));
 
             Assert.That(generatedFiles[2],
                 Does.Contain(
-                    "var resettableClassFactory = new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg0));"));
+                    "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg));"));
 
 
             Assert.That(generatedFiles[3],
                 Does.Contain(
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2 classArg0 = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2();"));
+                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2 classArg = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2();"));
 
             Assert.That(generatedFiles[3],
                 Does.Contain(
-                    "var resettableClassFactory = new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg0));"));
+                    "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg));"));
         });
 }

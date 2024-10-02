@@ -4,6 +4,7 @@ using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
+using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
@@ -85,16 +86,16 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
 
-            if(modelTestSourceDataModel.IsEnumerableClassArguments)
+            if (modelTestSourceDataModel.ClassArguments is MethodDataSourceAttributeContainer { IsEnumerableData: true })
             {
                 sourceBuilder.WriteLine($"var {VariableNames.EnumerableClassDataIndex} = 0;");
             }
-
-            if(modelTestSourceDataModel.IsEnumerableMethodArguments)
+            
+            if (modelTestSourceDataModel.MethodArguments is MethodDataSourceAttributeContainer { IsEnumerableData: true })
             {
                 sourceBuilder.WriteLine($"var {VariableNames.EnumerableTestDataIndex} = 0;");
             }
-
+            
             sourceBuilder.WriteLine("try");
             sourceBuilder.WriteLine("{");
             GenericTestInvocationWriter.GenerateTestInvocationCode(sourceBuilder, modelTestSourceDataModel);

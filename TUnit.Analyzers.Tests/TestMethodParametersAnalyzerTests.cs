@@ -58,4 +58,55 @@ public class TestMethodParametersAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text);
     }
+    
+    [Test]
+    public async Task DataSourceGenerator()
+    {
+        const string text = """
+                            using AutoFixture;
+                            using TUnit.Core;
+                            using System;
+                            using System.Collections;
+                            using System.Collections.Generic;
+                            
+                            namespace TUnit.TestProject;
+                            
+                            public class DataSourceGeneratorTests
+                            {
+                                [Test]
+                                [AutoFixtureGenerator<int>]
+                                public void GeneratedData_Method(int value)
+                                {
+                                    // Dummy method
+                                }
+                                
+                                [Test]
+                                [AutoFixtureGenerator<int, string, bool>]
+                                public void GeneratedData_Method2(int value, string value2, bool value3)
+                                {
+                                    // Dummy method
+                                }
+                                
+                                public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
+                                {
+                                    public override IEnumerable<T> GenerateDataSources()
+                                    {
+                                        var fixture = new Fixture();
+                                        yield return fixture.Create<T>();
+                                    }
+                                }
+                                
+                                public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
+                                {
+                                    public override IEnumerable<(T1, T2, T3)> GenerateDataSources()
+                                    {
+                                        var fixture = new Fixture();
+                                        yield return (fixture.Create<T1>(), fixture.Create<T2>(), fixture.Create<T3>());
+                                    }
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
 }

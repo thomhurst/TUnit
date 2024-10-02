@@ -15,6 +15,7 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName ClassDataSourceAttribute = "TUnit.Core.ClassDataSourceAttribute";
     public static readonly FullyQualifiedTypeName MatrixAttribute = "TUnit.Core.MatrixAttribute";
     public static readonly FullyQualifiedTypeName ClassConstructorAttribute = "TUnit.Core.ClassConstructorAttribute";
+    public static readonly FullyQualifiedTypeName DataSourceGeneratorAttribute = "TUnit.Core.DataSourceGeneratorAttribute";
 
     
     // Metadata
@@ -36,4 +37,7 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName AfterEveryAttribute = "TUnit.Core.AfterEveryAttribute";
     
     public static readonly FullyQualifiedTypeName CancellationToken = "System.Threading.CancellationToken";
+    
+    public static readonly FullyQualifiedTypeName IDataAttribute = "TUnit.Core.IDataAttribute";
+    public static readonly FullyQualifiedTypeName IDataSourceGeneratorAttribute = "TUnit.Core.IDataSourceGeneratorAttribute";
 }

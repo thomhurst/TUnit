@@ -12,73 +12,32 @@ internal static class GenericTestInvocationWriter
         var testId = testSourceDataModel.TestId;
 
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
-
-        var hasEnumerableClassData = testSourceDataModel.IsEnumerableClassArguments;
-        var hasEnumerableMethodData = testSourceDataModel.IsEnumerableMethodArguments;
         
         var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"));
 
         sourceBuilder.WriteLine(
             $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
         
-        if (hasEnumerableClassData)
-        {
-            sourceBuilder.WriteLine($"foreach (var {VariableNames.ClassData} in {testSourceDataModel.ClassArguments.SafeFirstOrDefault()?.Invocation})");
-            sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"{VariableNames.EnumerableClassDataIndex}++;");
-        }
-
-        var wasArgument = false;
-        foreach (var classArgument in testSourceDataModel.ClassDataInvocations)
-        {
-            wasArgument = true;
-            sourceBuilder.WriteLine(classArgument);
-        }
-
-        if (wasArgument)
-        {
-            sourceBuilder.WriteLine();
-        }
-
-        if (testSourceDataModel.ClassConstructorType != null)
-        {
-            sourceBuilder.WriteLine($"var classConstructor = new {testSourceDataModel.ClassConstructorType}();");
-        }
+        testSourceDataModel.ClassArguments.GenerateInvocationStatements(sourceBuilder);
         
         sourceBuilder.WriteLine(
-            $"var resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => {ConstructClass(testSourceDataModel)});");
+            $"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => {NewClassWriter.ConstructClass(testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments)});");
+
+        
+        sourceBuilder.WriteLine(
+            $"var resettableClassFactory = resettableClassFactoryDelegate();");
 
         sourceBuilder.WriteLine();
         
-        if (hasEnumerableMethodData)
-        {
-            sourceBuilder.WriteLine($"foreach (var {VariableNames.MethodData} in {testSourceDataModel.MethodArguments.SafeFirstOrDefault()?.Invocation})");
-            sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"{VariableNames.EnumerableTestDataIndex}++;");
-        }
-        
-        wasArgument = false;
-        foreach (var methodArgument in testSourceDataModel.MethodDataInvocations)
-        {
-            wasArgument = true;
-            sourceBuilder.WriteLine(methodArgument);
-        }
-
-        if (wasArgument)
-        {
-            sourceBuilder.WriteLine();
-        }
-
-        var classVariables = testSourceDataModel.ClassVariables;
-        var methodVariables = testSourceDataModel.MethodVariables;
+        testSourceDataModel.MethodArguments.GenerateInvocationStatements(sourceBuilder);
 
         sourceBuilder.WriteLine($"TestRegistrar.RegisterTest<{fullyQualifiedClassType}>(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine($"TestClassArguments = [{classVariables.ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"TestMethodArguments = [{methodVariables.ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"InternalTestClassArguments = [{testSourceDataModel.ClassArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.ClassArg)).ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"InternalTestMethodArguments = [{testSourceDataModel.MethodArguments.Select((a, i) => ToInjectedType(a, i, VariableNames.MethodArg)).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.GenerateArgumentVariableNames().ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.GenerateArgumentVariableNames().ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"InternalTestClassArguments = [{ToInjectedTypes(testSourceDataModel.ClassArguments).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"InternalTestMethodArguments = [{ToInjectedTypes(testSourceDataModel.MethodArguments).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
@@ -92,33 +51,14 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine($"AttributeTypes = [ {string.Join(", ", testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})"))} ],");
         sourceBuilder.WriteLine("});");
-        if (hasEnumerableClassData)
-        {
-            sourceBuilder.WriteLine("}");
-        }
         
-        if (hasEnumerableMethodData)
-        {
-            sourceBuilder.WriteLine(
-                $"resettableClassFactory = new ResettableLazy<{fullyQualifiedClassType}>(() => new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.ClassVariables.ToCommaSeparatedString()}));");
-
-            sourceBuilder.WriteLine("}");
-        }
+        testSourceDataModel.ClassArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
+        testSourceDataModel.MethodArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
     }
 
     private static string GetClassConstructor(TestSourceDataModel testSourceDataModel)
     {
-        return testSourceDataModel.ClassConstructorType == null ? "null" : "classConstructor";
-    }
-
-    private static string ConstructClass(TestSourceDataModel testSourceDataModel)
-    {
-        if (testSourceDataModel.ClassConstructorType != null)
-        {
-            return $"classConstructor.Create<{testSourceDataModel.FullyQualifiedTypeName}>()";
-        }
-        
-        return $"new {testSourceDataModel.FullyQualifiedTypeName}({testSourceDataModel.ClassVariables.ToCommaSeparatedString()})";
+        return testSourceDataModel.ClassArguments is ClassConstructorAttributeContainer ? "classConstructor" : "null";
     }
 
     private static string GetTestExecutor(string? testExecutor)
@@ -141,33 +81,48 @@ internal static class GenericTestInvocationWriter
         return $"TUnit.Core.ParallelLimitProvider.GetParallelLimit<{parallelLimit}>()";
     }
 
-    private static string ToInjectedType(Argument arg, int index, string variablePrefix)
+    private static IEnumerable<string> ToInjectedTypes(ArgumentsContainer argumentsContainer)
     {
-        if (arg is KeyedSharedArgument keyedSharedArgument)
+        var types = argumentsContainer.GetArgumentTypes();
+        var variableNames = argumentsContainer.GenerateArgumentVariableNames();
+        
+        if (argumentsContainer is not ClassDataSourceAttributeContainer classDataSourceAttributeContainer 
+            || classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.None")
         {
-            return $$"""
-                   new TestData({{variablePrefix}}{{index}}, typeof({{arg.Type}}), InjectedDataType.SharedByKey)
+            for (var i = 0; i < types.Length; i++)
+            {
+                var argumentType = types[i];
+                var variableName = variableNames[i];
+                
+                yield return $$"""
+                         new TestData({{variableName}}, typeof({{argumentType}}), InjectedDataType.None)
+                         				{
+                             				DisposeAfterTest = {{argumentsContainer.DisposeAfterTest.ToString().ToLowerInvariant()}},
+                         				}
+                         """;
+            }
+            
+            yield break;
+        }
+        
+        if (classDataSourceAttributeContainer.Key != null)
+        {
+            yield return $$"""
+                   new TestData({{variableNames[0]}}, typeof({{types[0]}}), InjectedDataType.SharedByKey)
                    {
-                        StringKey = "{{keyedSharedArgument.Key}}"
+                        StringKey = "{{classDataSourceAttributeContainer.Key}}"
                    }
                    """;
         }
 
-        if (arg is GloballySharedArgument)
+        if (classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.Globally")
         {
-            return $"new TestData({variablePrefix}{index}, typeof({arg.Type}), InjectedDataType.SharedGlobally)";
+            yield return $"new TestData({variableNames[0]}, typeof({types[0]}), InjectedDataType.SharedGlobally)";
         }
 
-        if (arg is TestClassTypeSharedArgument)
+        if (classDataSourceAttributeContainer.ForClass != null)
         {
-            return $"new TestData({variablePrefix}{index}, typeof({arg.Type}), InjectedDataType.SharedByTestClassType)";
+            yield return $"new TestData({variableNames[0]}, typeof({types[0]}), InjectedDataType.SharedByTestClassType)";
         }
-
-        return $$"""
-                new TestData({{variablePrefix}}{{index}}, typeof({{arg.Type}}), InjectedDataType.None)
-                				{
-                    				DisposeAfterTest = {{arg.DisposeAfterTest.ToString().ToLower()}},
-                				}
-                """;
     }
 }

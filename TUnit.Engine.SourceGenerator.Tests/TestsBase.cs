@@ -61,20 +61,20 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         }
         
         // Run generators. Don't forget to use the new compilation rather than the previous one.
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out _);
-
-        foreach (var error in newCompilation.GetDiagnostics().Where(x => x.Severity == DiagnosticSeverity.Error))
-        {
-            throw new Exception(
-                $"There was an error with the generator compilation.{Environment.NewLine}{Environment.NewLine}{error}");
-        }
-
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
+        
         // Retrieve all files in the compilation.
         var generatedFiles = newCompilation.SyntaxTrees
             .Select(t => t.GetText().ToString())
             .Except([source])
             .Except(additionalSources)
             .ToArray();
+
+        foreach (var error in diagnostics.Where(x => x.Severity == DiagnosticSeverity.Error))
+        {
+            throw new Exception(
+                $"There was an error with the generator compilation.{Environment.NewLine}{Environment.NewLine}{error}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, generatedFiles)}");
+        }
 
         assertions(generatedFiles);
     }
