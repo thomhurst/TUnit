@@ -24,5 +24,13 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
         }
     }
 
-    protected string GenerateVariableName(int index) => $"{VariableNamePrefix}{index}";
+    protected string GenerateVariableName(int index)
+    {
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            return $"{VariableNamePrefix}_{Guid.NewGuid():N}";
+        }
+        
+        return $"{VariableNamePrefix}{index}";
+    }
 };
