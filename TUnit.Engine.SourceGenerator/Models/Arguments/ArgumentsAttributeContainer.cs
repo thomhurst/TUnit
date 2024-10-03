@@ -11,7 +11,7 @@ internal record ArgumentsAttributeContainer : DataAttributeContainer
     public ArgumentsAttributeContainer(ArgumentsType argumentsType, Argument[] arguments) : base(argumentsType)
     {
         Arguments = arguments;
-        VariableNames = arguments.Select(x => GenerateUniqueVariableName()).ToArray();
+        VariableNames = arguments.Select((_, i) => GenerateVariableName(i)).ToArray();
     }
 
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)

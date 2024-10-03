@@ -71,7 +71,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
     {
         if (ArgumentsType == ArgumentsType.Property)
         {
-            return [GenerateUniqueVariableName()];
+            return [GenerateVariableName(0)];
         }
         
         if (GenericArguments.Length == 1)
@@ -84,6 +84,6 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
             throw new Exception("Multiple data values not supported for property injection.");
         }
         
-        return Enumerable.Range(0, GenericArguments.Length).Select(i => $"{VariableNamePrefix}{i}").ToArray();
+        return Enumerable.Range(0, GenericArguments.Length).Select(i => $"{GenerateVariableName(i)}").ToArray();
     }
 }

@@ -104,7 +104,7 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
         if (TupleTypes.Any())
         {
             return TupleTypes
-                .Select((_, i) => GenerateUniqueVariableName())
+                .Select((_, i) => GenerateVariableName(i))
                 .ToArray();
         }
         
@@ -120,7 +120,7 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
         
         return
         [
-            GenerateUniqueVariableName()
+            GenerateVariableName(0)
         ];
     }
 

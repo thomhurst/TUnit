@@ -7,7 +7,7 @@ internal record ClassDataSourceAttributeContainer : DataAttributeContainer
 {
     public ClassDataSourceAttributeContainer(ArgumentsType ArgumentsType) : base(ArgumentsType)
     {
-        VariableNames = [GenerateUniqueVariableName()];
+        VariableNames = [GenerateVariableName(0)];
     }
 
     public required string TypeName { get; init; }
