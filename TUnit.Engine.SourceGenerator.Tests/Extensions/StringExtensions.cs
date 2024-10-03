@@ -2,13 +2,17 @@
 
 namespace TUnit.Engine.SourceGenerator.Tests.Extensions;
 
-public static partial class StringExtensions
+public static class StringExtensions
 {
     public static string IgnoreWhitespaceFormatting(this string value)
     {
-        return WhitespaceRegex().Replace(value, " ");
-    }
+        value = value.Replace("\t", "  ");
+        
+        while (value.Contains("  "))
+        {
+            value = value.Replace("  ", " ");
+        }
 
-    [GeneratedRegex(@"\s{2,}", RegexOptions.Compiled)]
-    private static partial Regex WhitespaceRegex();
+        return Regex.Replace(value, "\\s+", " ");
+    }
 }
