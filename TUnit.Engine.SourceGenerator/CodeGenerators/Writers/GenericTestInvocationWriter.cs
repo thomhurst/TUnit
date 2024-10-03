@@ -26,11 +26,11 @@ internal static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine();
         
-        sourceBuilder.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
+        sourceBuilder.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
         
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
         
-        sourceBuilder.WriteLine(");");
+        sourceBuilder.Write(");");
         
         sourceBuilder.WriteLine();
         

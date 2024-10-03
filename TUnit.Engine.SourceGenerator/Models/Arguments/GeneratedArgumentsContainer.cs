@@ -31,16 +31,18 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
             return;
         }
         
-        var guid = Guid.NewGuid().ToString("N");
-        sourceCodeWriter.WriteLine($"var {VariableNamePrefix}GeneratedDataArray{guid} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources());");
-        sourceCodeWriter.WriteLine($"foreach (var {VariableNamePrefix}GeneratedData in {VariableNamePrefix}GeneratedDataArray{guid})");
+        var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
+        var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
+        
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources());");
+        sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");
 
         if (GenericArguments.Length > 1)
         {
             for (var i = 0; i < GenericArguments.Length; i++)
             {
-                sourceCodeWriter.WriteLine($"{GenericArguments[i]} {VariableNames[i]} = {VariableNamePrefix}GeneratedData.Item{i + 1};");
+                sourceCodeWriter.WriteLine($"{GenericArguments[i]} {VariableNames[i]} = {generatedDataVariableName}.Item{i + 1};");
             }
 
             sourceCodeWriter.WriteLine();

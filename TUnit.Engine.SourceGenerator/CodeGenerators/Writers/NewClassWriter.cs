@@ -9,11 +9,11 @@ internal static class NewClassWriter
     {
         if (argumentsContainer is ClassConstructorAttributeContainer)
         {
-            sourceCodeWriter.WriteLine($"classConstructor.Create<{typeName}>()");
+            sourceCodeWriter.Write($"classConstructor.Create<{typeName}>()");
             return;
         }
         
-        sourceCodeWriter.WriteLine($"new {typeName}({argumentsContainer.VariableNames.ToCommaSeparatedString()})");
+        sourceCodeWriter.Write($"new {typeName}({argumentsContainer.VariableNames.ToCommaSeparatedString()})");
 
         classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
     }

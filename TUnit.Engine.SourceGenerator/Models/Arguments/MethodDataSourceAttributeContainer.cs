@@ -41,7 +41,12 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
             
             if (TupleTypes.Any())
             {
-                var tupleVariableName = $"tuples{Guid.NewGuid():N}";
+                var tupleVariableName = $"{VariableNamePrefix}Tuples";
+                if (ArgumentsType == ArgumentsType.Property)
+                {
+                    tupleVariableName += Guid.NewGuid().ToString("N");
+                }
+                
                 sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({dataName});");
 
                 for (var index = 0; index < TupleTypes.Length; index++)
@@ -55,7 +60,11 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
         }
         else if (TupleTypes.Any())
         {
-            var tupleVariableName = $"tuples{Guid.NewGuid():N}";
+            var tupleVariableName = $"{VariableNamePrefix}Tuples";
+            if (ArgumentsType == ArgumentsType.Property)
+            {
+                tupleVariableName += Guid.NewGuid().ToString("N");
+            }
 
             sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({GetMethodInvocation()});");
             

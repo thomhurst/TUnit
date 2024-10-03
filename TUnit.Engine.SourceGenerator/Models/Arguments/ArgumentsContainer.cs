@@ -30,6 +30,11 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
         {
             return $"{VariableNamePrefix}_{Guid.NewGuid():N}";
         }
+
+        if (index == 0)
+        {
+            return VariableNamePrefix;
+        }
         
         return $"{VariableNamePrefix}{index}";
     }
