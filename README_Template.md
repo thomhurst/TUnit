@@ -53,7 +53,7 @@ Visual Studio Code is supported.
 
 - Native AOT / Trimmed Single File application support
 - Source generated tests
-- Dependency injection support ([See here](https://thomhurst.github.io/TUnit/docs/tutorial-extras/class-constructors))
+- Property injection
 - Full async support
 - Parallel by default, with mechanisms to:
     - Run specific tests completely on their own
@@ -69,6 +69,7 @@ Visual Studio Code is supported.
     - Class
     - Test
 - Designed to avoid common pitfalls such as leaky test states
+- Dependency injection support ([See here](https://thomhurst.github.io/TUnit/docs/tutorial-extras/class-constructors))
 - Ability to view and interrogate metadata and results from various assembly/class/test context objects
 
 ## Installation
