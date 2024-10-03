@@ -9,7 +9,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 internal static class MethodDataSourceRetriever
 {
     public static ArgumentsContainer ParseMethodData(GeneratorAttributeSyntaxContext context,
-        ImmutableArray<IParameterSymbol> parameters,
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
         INamedTypeSymbol namedTypeSymbol, AttributeData methodDataAttribute, ArgumentsType argumentsType, int index)
     {
         string typeName;
@@ -41,7 +41,7 @@ internal static class MethodDataSourceRetriever
             methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ??
             true;
 
-        var isEnumerable = dataSourceMethod.ReturnType.EnumerableGenericTypeIs(context, parameters.Select(x => x.Type).ToImmutableArray(), out var innerType);
+        var isEnumerable = dataSourceMethod.ReturnType.EnumerableGenericTypeIs(context, parameterOrPropertyTypes, out var innerType);
         
         if (!isEnumerable)
         {
@@ -53,47 +53,54 @@ internal static class MethodDataSourceRetriever
             var tupleTypes = typeSymbol.TupleUnderlyingType?.TypeArguments ??
                              typeSymbol.TypeArguments;
 
-            if (CheckTupleTypes(parameters, tupleTypes) is {} result)
+            if (CheckTupleTypes(parameterOrPropertyTypes, tupleTypes) is {} result)
             {
                 return new MethodDataSourceAttributeContainer
+                (
+                    TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats
+                        .FullyQualifiedGenericWithGlobalPrefix),
+                    ArgumentsType: argumentsType,
+                    IsEnumerableData: isEnumerable,
+                    IsStatic: isStatic,
+                    MethodName: methodName,
+                    TypeName: typeName,
+                    MethodReturnType: dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats
+                        .FullyQualifiedGenericWithGlobalPrefix),
+                    TupleTypes: result.ToArray()
+                )
                 {
-                    TestClassTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-                    ArgumentsType = argumentsType,
                     Attribute = methodDataAttribute,
                     AttributeIndex = index,
-                    IsEnumerableData = isEnumerable,
-                    IsStatic = isStatic,
-                    MethodName = methodName,
-                    TypeName = typeName,
                     DisposeAfterTest = disposeAfterTest,
-                    MethodReturnType = dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-                    TupleTypes = result.ToArray()
                 };
             }
-        }        
-        
+        }
+
         return new MethodDataSourceAttributeContainer
+        (
+            TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            ArgumentsType: argumentsType,
+            IsEnumerableData: isEnumerable,
+            IsStatic: isStatic,
+            MethodName: methodName,
+            TypeName: typeName,
+            MethodReturnType: dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats
+                .FullyQualifiedGenericWithGlobalPrefix),
+            TupleTypes: []
+        )
         {
-            TestClassTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            ArgumentsType = argumentsType,
             Attribute = methodDataAttribute,
             AttributeIndex = index,
-            IsEnumerableData = isEnumerable,
-            IsStatic = isStatic,
-            MethodName = methodName,
-            TypeName = typeName,
             DisposeAfterTest = disposeAfterTest,
-            MethodReturnType = dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            TupleTypes = [],
         };
     }
 
-    private static IEnumerable<string> CheckTupleTypes(ImmutableArray<IParameterSymbol> parameters, ImmutableArray<ITypeSymbol> tupleTypes)
+    private static IEnumerable<string> CheckTupleTypes(ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, ImmutableArray<ITypeSymbol> tupleTypes)
     {
         for (var index = 0; index < tupleTypes.Length; index++)
         {
             var tupleType = tupleTypes.ElementAtOrDefault(index);
-            var parameterType = parameters.ElementAtOrDefault(index)?.Type;
+            var parameterType = parameterOrPropertyTypes.ElementAtOrDefault(index);
 
             yield return tupleType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
                 ?? parameterType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)!;

@@ -12,13 +12,19 @@ internal static class DataSourceGeneratorRetriever
         INamedTypeSymbol namedTypeSymbol, AttributeData attributeData, ArgumentsType argumentsType, int index)
     {
         return new GeneratedArgumentsContainer
+        (
+            ArgumentsType: argumentsType,
+            TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            AttributeDataGeneratorType: attributeData.AttributeClass!.ToDisplayString(DisplayFormats
+                .FullyQualifiedGenericWithGlobalPrefix),
+            GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass).TypeArguments
+                .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray(),
+            AttributeIndex: index
+        )
         {
-            ArgumentsType = argumentsType,
-            TestClassTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            AttributeDataGeneratorType = attributeData.AttributeClass!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            GenericArguments = GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass).TypeArguments.Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray(),
-            AttributeIndex = index,
-            DisposeAfterTest = attributeData.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
+            DisposeAfterTest =
+                attributeData.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ??
+                true,
         };
     }
 

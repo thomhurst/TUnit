@@ -10,7 +10,8 @@ internal class ClassConstructorRetriever
     {
         var type = dataAttribute.AttributeClass!.TypeArguments.First();
 
-        return new ClassConstructorAttributeContainer
+        // TODO: Property injection?
+        return new ClassConstructorAttributeContainer(ArgumentsType.ClassConstructor)
         {
             AttributeIndex = index,
             ClassConstructorType = type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),

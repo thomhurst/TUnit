@@ -5,17 +5,24 @@ namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record ArgumentsAttributeContainer : DataAttributeContainer
 {
-    public required Argument[] Arguments { get; init; }
+    public Argument[] Arguments { get; init; }
+    public override string[] VariableNames { get; }
     
-    public override void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter)
+    public ArgumentsAttributeContainer(ArgumentsType argumentsType, Argument[] arguments) : base(argumentsType)
+    {
+        Arguments = arguments;
+        VariableNames = arguments.Select(x => GenerateUniqueVariableName()).ToArray();
+    }
+
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
     {
         for (var index = 0; index < Arguments.Length; index++)
         {
-            var argument = Arguments.ElementAt(index);
+            var argument = Arguments[index];
             
             var invocation = argument.Invocation;
             
-            var variableName = $"{VariableNamePrefix}{index}";
+            var variableName = VariableNames[index];
             
             sourceCodeWriter.WriteLine($"{argument.Type} {variableName} = {invocation};");
         }
@@ -26,11 +33,6 @@ internal record ArgumentsAttributeContainer : DataAttributeContainer
     public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
     {
         // Nothing
-    }
-
-    public override string[] GenerateArgumentVariableNames()
-    {
-        return Arguments.Select((_, index) => $"{VariableNamePrefix}{index}").ToArray();
     }
 
     public override string[] GetArgumentTypes()

@@ -18,10 +18,15 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine(
             $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
         
-        testSourceDataModel.ClassArguments.GenerateInvocationStatements(sourceBuilder);
+        testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder);
         
-        sourceBuilder.WriteLine(
-            $"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => {NewClassWriter.ConstructClass(testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments)});");
+        testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder);
+
+        sourceBuilder.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
+
+        NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
+        
+        sourceBuilder.WriteLine(");");
 
         
         sourceBuilder.WriteLine(
@@ -29,13 +34,13 @@ internal static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine();
         
-        testSourceDataModel.MethodArguments.GenerateInvocationStatements(sourceBuilder);
+        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder);
 
         sourceBuilder.WriteLine($"TestRegistrar.RegisterTest<{fullyQualifiedClassType}>(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.GenerateArgumentVariableNames().ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.GenerateArgumentVariableNames().ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.VariableNames.ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.VariableNames.ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"InternalTestClassArguments = [{ToInjectedTypes(testSourceDataModel.ClassArguments).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"InternalTestMethodArguments = [{ToInjectedTypes(testSourceDataModel.MethodArguments).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
@@ -84,7 +89,7 @@ internal static class GenericTestInvocationWriter
     private static IEnumerable<string> ToInjectedTypes(ArgumentsContainer argumentsContainer)
     {
         var types = argumentsContainer.GetArgumentTypes();
-        var variableNames = argumentsContainer.GenerateArgumentVariableNames();
+        var variableNames = argumentsContainer.VariableNames;
         
         if (argumentsContainer is not ClassDataSourceAttributeContainer classDataSourceAttributeContainer 
             || classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.None")

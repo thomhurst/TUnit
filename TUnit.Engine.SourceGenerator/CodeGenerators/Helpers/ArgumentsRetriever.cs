@@ -10,15 +10,15 @@ internal static class ArgumentsRetriever
 {
     public static IEnumerable<ArgumentsContainer> GetArguments(GeneratorAttributeSyntaxContext context,
         ImmutableArray<IParameterSymbol> parameters,
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
         ImmutableArray<AttributeData> dataAttributes,
         INamedTypeSymbol namedTypeSymbol,
         ArgumentsType argumentsType)
     {
         if (parameters.IsDefaultOrEmpty || !IsDataDriven(dataAttributes, parameters))
         {
-            yield return new EmptyArgumentsContainer
+            yield return new EmptyArgumentsContainer(argumentsType)
             {
-                ArgumentsType = argumentsType,
                 DisposeAfterTest = false
             };
             
@@ -43,12 +43,12 @@ internal static class ArgumentsRetriever
             
             if (name == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
             {
-                yield return DataDrivenArgumentsRetriever.ParseArguments(context, dataAttribute, parameters, argumentsType, index);
+                yield return DataDrivenArgumentsRetriever.ParseArguments(context, dataAttribute, parameterOrPropertyTypes, argumentsType, index);
             }
             
             if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix)
             {
-                yield return MethodDataSourceRetriever.ParseMethodData(context, parameters, namedTypeSymbol, dataAttribute, argumentsType, index);
+                yield return MethodDataSourceRetriever.ParseMethodData(context, parameterOrPropertyTypes, namedTypeSymbol, dataAttribute, argumentsType, index);
             }
             
             if (name == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix)
@@ -73,5 +73,21 @@ internal static class ArgumentsRetriever
     {
         return dataAttributes.Any(x => x.IsDataSourceAttribute())
                || parameters.HasMatrixAttribute();
+    }
+
+    public static ClassPropertiesContainer GetProperties(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
+    {
+        var list = new List<(IPropertySymbol, ArgumentsContainer)>();
+
+        foreach (var propertySymbol in namedTypeSymbol.GetMembers().OfType<IPropertySymbol>())
+        {
+            var dataSourceAttributes = propertySymbol.GetAttributes().Where(x => x.IsDataSourceAttribute()).ToImmutableArray();
+            if (dataSourceAttributes.Any())
+            {
+                list.AddRange(GetArguments(context, ImmutableArray<IParameterSymbol>.Empty, ImmutableArray.Create(propertySymbol.Type), dataSourceAttributes, namedTypeSymbol, ArgumentsType.Property).Select(argumentsContainer => (propertySymbol, argumentsContainer)));
+            }
+        }
+
+        return new ClassPropertiesContainer(list);
     }
 }

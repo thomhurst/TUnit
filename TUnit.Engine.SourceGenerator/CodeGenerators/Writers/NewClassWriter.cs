@@ -5,13 +5,19 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
 internal static class NewClassWriter
 {
-    public static string ConstructClass(string typeName, ArgumentsContainer argumentsContainer)
+    public static void ConstructClass(SourceCodeWriter sourceCodeWriter, string typeName, ArgumentsContainer argumentsContainer, ClassPropertiesContainer? classPropertiesContainer)
     {
         if (argumentsContainer is ClassConstructorAttributeContainer)
         {
-            return $"classConstructor.Create<{typeName}>()";
+            sourceCodeWriter.WriteLine($"classConstructor.Create<{typeName}>()");
+            return;
         }
         
-        return $"new {typeName}({argumentsContainer.GenerateArgumentVariableNames().ToCommaSeparatedString()})";
+        sourceCodeWriter.WriteLine($"new {typeName}({argumentsContainer.VariableNames.ToCommaSeparatedString()})");
+
+        if (classPropertiesContainer?.PropertyContainers.Any() == true)
+        {
+            classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
+        }
     }
 }
