@@ -44,12 +44,10 @@ internal static class MatrixRetriever
         var index = 0;
         return GetMatrixArgumentsList(mappedToArgumentArrays)
             .Select(x => MapToArgumentEnumerable(context, x, parameters))
-            .Select(x => new ArgumentsAttributeContainer
+            .Select(x => new ArgumentsAttributeContainer(argumentsType, [.. x])
             {
-                ArgumentsType = argumentsType,
                 Attribute = attr,
                 AttributeIndex = ++index,
-                Arguments = [.. x],
                 DisposeAfterTest = attr.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
             });
     }

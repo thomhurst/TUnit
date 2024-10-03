@@ -3,16 +3,39 @@ using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal abstract record ArgumentsContainer
+internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
 {
-    public required ArgumentsType ArgumentsType { get; init; }
     public required bool DisposeAfterTest { get; init; }
-    public abstract void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter);
+    public abstract void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter);
     public abstract void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter);
-    public abstract string[] GenerateArgumentVariableNames();
+    public abstract string[] VariableNames { get; }
     public abstract string[] GetArgumentTypes();
 
-    protected string VariableNamePrefix => ArgumentsType == ArgumentsType.ClassConstructor
-        ? VariableNames.ClassArg
-        : VariableNames.MethodArg;
+    protected string VariableNamePrefix
+    {
+        get
+        {
+            return ArgumentsType switch
+            {
+                ArgumentsType.ClassConstructor => CodeGenerators.VariableNames.ClassArg,
+                ArgumentsType.Property => CodeGenerators.VariableNames.PropertyArg,
+                _ => CodeGenerators.VariableNames.MethodArg
+            };
+        }
+    }
+
+    protected string GenerateVariableName(int index)
+    {
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            return $"{VariableNamePrefix}_{Guid.NewGuid():N}";
+        }
+
+        if (index == 0)
+        {
+            return VariableNamePrefix;
+        }
+        
+        return $"{VariableNamePrefix}{index}";
+    }
 };

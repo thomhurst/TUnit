@@ -1,8 +1,10 @@
+using TUnit.Engine.SourceGenerator.Enums;
+
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record EmptyArgumentsContainer : ArgumentsContainer
+internal record EmptyArgumentsContainer(ArgumentsType ArgumentsType) : ArgumentsContainer(ArgumentsType)
 {
-    public override void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter)
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
     {
         // Nothing
     }
@@ -12,10 +14,7 @@ internal record EmptyArgumentsContainer : ArgumentsContainer
         // Nothing
     }
 
-    public override string[] GenerateArgumentVariableNames()
-    {
-        return [];
-    }
+    public override string[] VariableNames { get; } = [];
 
     public override string[] GetArgumentTypes()
     {

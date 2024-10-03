@@ -10,5 +10,6 @@ internal record TestGenerationContext
     public required IMethodSymbol MethodSymbol { get; init; }
     public required ArgumentsContainer TestArguments { get; init; }
     public required ArgumentsContainer ClassArguments { get; init; }
+    public required ClassPropertiesContainer PropertyArguments { get; init; }
     public required int CurrentRepeatAttempt { get; init; }
 }

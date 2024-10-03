@@ -10,7 +10,8 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 internal static class DataDrivenArgumentsRetriever
 {
     public static ArgumentsContainer ParseArguments(GeneratorAttributeSyntaxContext context,
-        AttributeData argumentAttribute, ImmutableArray<IParameterSymbol> parameterSymbols,
+        AttributeData argumentAttribute, 
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypeSymbols,
         ArgumentsType argumentsType,
         int dataAttributeIndex)
     {
@@ -18,18 +19,14 @@ internal static class DataDrivenArgumentsRetriever
 
         if (constructorArgument.IsNull)
         {
-            return new ArgumentsAttributeContainer
+            return new ArgumentsAttributeContainer(argumentsType, [new Argument(type: parameterOrPropertyTypeSymbols.SafeFirstOrDefault()?
+                    .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
+                invocation: null
+            )])
             {
                 ArgumentsType = argumentsType,
                 Attribute = argumentAttribute,
                 AttributeIndex = dataAttributeIndex,
-                Arguments =
-                [
-                    new Argument(type: parameterSymbols.SafeFirstOrDefault()?.Type
-                            .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
-                        invocation: null
-                    ),
-                ],
                 DisposeAfterTest = argumentAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
             };
         }
@@ -38,14 +35,12 @@ internal static class DataDrivenArgumentsRetriever
         var arguments = attributeSyntax.ArgumentList!.Arguments;
         var objectArray = constructorArgument.Values;
 
-        var args = GetArguments(context, objectArray, arguments, parameterSymbols);
+        var args = GetArguments(context, objectArray, arguments, parameterOrPropertyTypeSymbols);
 
-        return new ArgumentsAttributeContainer
+        return new ArgumentsAttributeContainer(argumentsType, [.. args])
         {
-            ArgumentsType = argumentsType,
             Attribute = argumentAttribute,
             AttributeIndex = dataAttributeIndex,
-            Arguments = [.. args],
             DisposeAfterTest = argumentAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
         };
     }
@@ -53,11 +48,11 @@ internal static class DataDrivenArgumentsRetriever
     private static IEnumerable<Argument> GetArguments(GeneratorAttributeSyntaxContext context,
         ImmutableArray<TypedConstant> objectArray,
         SeparatedSyntaxList<AttributeArgumentSyntax> arguments,
-        ImmutableArray<IParameterSymbol> parameterSymbols)
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypeSymbols)
     {
         if (objectArray.IsDefaultOrEmpty)
         {
-            var type = parameterSymbols.SafeFirstOrDefault()?.Type
+            var type = parameterOrPropertyTypeSymbols.SafeFirstOrDefault()
                 ?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var";
 
             return [new Argument(type, null)];
@@ -65,7 +60,7 @@ internal static class DataDrivenArgumentsRetriever
 
         return objectArray.Zip(arguments, (o, a) => (o, a)).Select((element, index) =>
         {
-            var type = GetTypeFromParameters(parameterSymbols, index);
+            var type = GetTypeFromParameters(parameterOrPropertyTypeSymbols, index);
 
             return new Argument(type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
                                 TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(element.o),
@@ -73,13 +68,13 @@ internal static class DataDrivenArgumentsRetriever
         });
     }
 
-    private static ITypeSymbol? GetTypeFromParameters(ImmutableArray<IParameterSymbol> parameterSymbols, int index)
+    private static ITypeSymbol? GetTypeFromParameters(ImmutableArray<ITypeSymbol> parameterSymbols, int index)
     {
         if (parameterSymbols.IsDefaultOrEmpty)
         {
             return null;
         }
 
-        return parameterSymbols.ElementAtOrDefault(index)?.Type;
+        return parameterSymbols.ElementAtOrDefault(index);
     }
 }

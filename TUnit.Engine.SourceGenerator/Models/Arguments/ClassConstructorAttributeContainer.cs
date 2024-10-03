@@ -1,3 +1,5 @@
+using TUnit.Engine.SourceGenerator.Enums;
+
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record ClassConstructorAttributeContainer : ArgumentsContainer
@@ -5,9 +7,16 @@ internal record ClassConstructorAttributeContainer : ArgumentsContainer
     public required string ClassConstructorType { get; init; }
     public int AttributeIndex { get; init; }
 
-    public override void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter)
+    public ClassConstructorAttributeContainer(ArgumentsType argumentsType) : base(argumentsType)
     {
-        sourceCodeWriter.WriteLine($"var classConstructor = new {ClassConstructorType}();");
+        VariableNames = ArgumentsType == ArgumentsType.Property
+            ? [$"classConstructor{Guid.NewGuid():N}"]
+            : [];
+    }
+
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
+    {
+        sourceCodeWriter.WriteLine($"var {VariableNames.ElementAtOrDefault(0) ?? "classConstructor"} = new {ClassConstructorType}();");
         sourceCodeWriter.WriteLine();
     }
 
@@ -16,10 +25,7 @@ internal record ClassConstructorAttributeContainer : ArgumentsContainer
         // Nothing
     }
 
-    public override string[] GenerateArgumentVariableNames()
-    {
-        return [];
-    }
+    public override string[] VariableNames { get; }
 
     public override string[] GetArgumentTypes()
     {

@@ -3,5 +3,6 @@
 public enum ArgumentsType
 {
     ClassConstructor,
-    Method
+    Method,
+    Property,
 }

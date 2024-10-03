@@ -5,16 +5,19 @@ namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record ClassDataSourceAttributeContainer : DataAttributeContainer
 {
+    public ClassDataSourceAttributeContainer(ArgumentsType ArgumentsType) : base(ArgumentsType)
+    {
+        VariableNames = [GenerateVariableName(0)];
+    }
+
     public required string TypeName { get; init; }
     public required string SharedArgumentType { get; init; }
     
     public required string? ForClass { get; init; }
     public required string? Key { get; init; }
-    public override void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter)
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
     {
-        var variableName = ArgumentsType == ArgumentsType.ClassConstructor
-            ? VariableNames.ClassArg
-            : VariableNames.MethodArg;
+        var variableName = VariableNames[0];
         
         if (SharedArgumentType is "TUnit.Core.SharedType.Globally")
         {
@@ -47,14 +50,7 @@ internal record ClassDataSourceAttributeContainer : DataAttributeContainer
         // Nothing
     }
 
-    public override string[] GenerateArgumentVariableNames()
-    {
-        var variableName = ArgumentsType == ArgumentsType.ClassConstructor
-            ? VariableNames.ClassArg
-            : VariableNames.MethodArg;
-        
-        return [$"{variableName}"];
-    }
+    public override string[] VariableNames { get; }
 
     public override string[] GetArgumentTypes()
     {
