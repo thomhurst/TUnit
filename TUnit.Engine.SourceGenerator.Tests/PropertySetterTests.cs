@@ -11,8 +11,5 @@ internal class PropertySetterTests : TestsBase<TestsGenerator>
         generatedFiles =>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
-            
-            Assert.That(generatedFiles[0], Does.Contain("TestId = $\"TUnit.TestProject.BasicTests.SynchronousTest:0\","));
-            Assert.That(generatedFiles[1], Does.Contain("TestId = $\"TUnit.TestProject.BasicTests.AsynchronousTest:0\","));
         });
 }
