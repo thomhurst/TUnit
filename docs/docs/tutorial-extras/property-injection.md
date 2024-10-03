@@ -7,7 +7,7 @@ sidebar_position: 13
 TUnit makes it easy to initialise some properties on your test class instead of passing them into the constructor.
 
 Your properties must be marked with the `required` keyword and then simply place a data attribute on it.
-The required keyword keeps your code clean and free from compiler warnings such as nullability.
+The required keyword keeps your code clean and correct. If a property isn't passed in, you'll get a compiler warning, so you know something has gone wrong. It also gets rid of any pesky nullability warnings.
 
 Supported attributes for properties are:
 - Argument
@@ -22,64 +22,33 @@ using TUnit.Core;
 
 namespace MyTestProject;
 
-public class DependencyInjectionClassConstructor : IClassConstructor
+public class PropertySetterTests
 {
-    private static readonly IServiceProvider _serviceProvider = CreateServiceProvider();
+    [Arguments("1")]
+    public required string Property1 { get; init; }
+        
+    [MethodDataSource(nameof(MethodData))]
+    public required string Property2 { get; init; }
+        
+    [ClassDataSource<InnerModel>]
+    public required InnerModel Property3 { get; init; }
     
-    private static readonly ConditionalWeakTable<object, IServiceScope> Scopes = new();
-
-    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : class
-    {
-        var scope = _serviceProvider.CreateAsyncScope();
+    [ClassDataSource<InnerModel>(Shared = SharedType.Globally)]
+    public required InnerModel Property4 { get; init; }
+    
+    [ClassDataSource<InnerModel>(Shared = SharedType.ForClass)]
+    public required InnerModel Property5 { get; init; }
+    
+    [ClassDataSource<InnerModel>(Shared = SharedType.Keyed, Key = "Key")]
+    public required InnerModel Property6 { get; init; }
         
-        var instance = ActivatorUtilities.GetServiceOrCreateInstance<T>(scope.ServiceProvider);
-        
-        Scopes.Add(instance, scope);
-        
-        return instance;
-    }
-
-    public async Task DisposeAsync<T>(T t)
-    {
-        if (t is IAsyncDisposable asyncDisposable)
-        {
-            await asyncDisposable.DisposeAsync();
-        }
-        else if (t is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-        
-        if (t != null && Scopes.TryGetValue(t, out var scope))
-        {
-            if (scope is IAsyncDisposable asyncScope)
-            {
-                await asyncScope.DisposeAsync();
-            }
-            else
-            {
-                scope.Dispose();
-            }
-        }
-    }
-
-    private static IServiceProvider CreateServiceProvider()
-    {
-        return new ServiceCollection()
-            .AddSingleton<SomeClass1>()
-            .AddSingleton<SomeClass2>()
-            .AddTransient<SomeClass3>()
-            .BuildServiceProvider();
-    }
-}
-
-[ClassConstructor<DependencyInjectionClassConstructor>]
-public class MyTestClass(SomeClass1 someClass1, SomeClass2 someClass2, SomeClass3 someClass3)
-{
+    [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
+    public required string Property7 { get; init; }
+    
     [Test]
-    public async Task Test()
+    public void Test()
     {
-        // ...
+        Console.WriteLine(Property7);
     }
 }
 ```
