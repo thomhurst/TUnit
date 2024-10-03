@@ -26,6 +26,7 @@ public class PropertySetterTests
     [Test]
     public void Test()
     {
+        Console.WriteLine(Property7);
     }
 
     public class InnerModel
