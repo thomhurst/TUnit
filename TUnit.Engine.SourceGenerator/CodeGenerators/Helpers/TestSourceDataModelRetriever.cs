@@ -20,7 +20,7 @@ internal static class TestSourceDataModelRetriever
         
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
         
-        var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes().Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, GetClassAttributes(namedTypeSymbol).Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
         var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodSymbol.Parameters, methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
         
         var repeatCount =
@@ -38,6 +38,11 @@ internal static class TestSourceDataModelRetriever
                 }
             }
         }
+    }
+
+    private static IEnumerable<AttributeData> GetClassAttributes(INamedTypeSymbol namedTypeSymbol)
+    {
+        return namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(t => t.GetAttributes());
     }
 
     private static IEnumerable<TestSourceDataModel> GenerateTestSourceDataModels(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol,
