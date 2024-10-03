@@ -20,7 +20,7 @@ internal class TestsGenerator : IIncrementalGenerator
                     new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx)))
             .Where(static m => m is not null);
         
-        context.RegisterImplementationSourceOutput(basicTests, Execute);
+        context.RegisterSourceOutput(basicTests, Execute);
     }
 
     static bool IsSyntaxTargetForGeneration(SyntaxNode node)

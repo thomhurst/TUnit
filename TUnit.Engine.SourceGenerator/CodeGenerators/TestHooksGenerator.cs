@@ -27,7 +27,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
-        context.RegisterImplementationSourceOutput(setUpMethods,
+        context.RegisterSourceOutput(setUpMethods,
             (productionContext, models) =>
             {
                 foreach (var model in models)
@@ -51,7 +51,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
                 }
             });
         
-        context.RegisterImplementationSourceOutput(cleanUpMethods,
+        context.RegisterSourceOutput(cleanUpMethods,
             (productionContext, models) =>
             {
                 foreach (var model in models)

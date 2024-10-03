@@ -19,7 +19,7 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static m => m is not null);
         
-        context.RegisterImplementationSourceOutput(inheritsTestsClasses, Execute);
+        context.RegisterSourceOutput(inheritsTestsClasses, Execute);
     }
 
     static bool IsSyntaxTargetForGeneration(SyntaxNode node)
