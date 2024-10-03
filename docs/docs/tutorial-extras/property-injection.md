@@ -2,16 +2,20 @@
 sidebar_position: 13
 ---
 
-# Class Constructor Helpers
+# Property Injection
 
-Some test suites might be more complex than others, and a user may want control over 'newing' up their test classes.
-This control is given to you by the `[ClassConstructorAttribute<T>]` - Where `T` is a class that implements `IClassConstructor`.
+TUnit makes it easy to initialise some properties on your test class instead of passing them into the constructor.
 
-This interface is very generic so you have freedom to construct and dispose as you please.
+Your properties must be marked with the `required` keyword and then simply place a data attribute on it.
+The required keyword keeps your code clean and free from compiler warnings such as nullability.
 
-By giving the freedom of how classes are created, we can tap into things like Dependency Injection.
+Supported attributes for properties are:
+- Argument
+- MethodDataSource
+- ClassDataSource
+- DataSourceGeneratorAttribute (though limited to the first item returned)
 
-Here's an example of that using the Microsoft.Extensions.DependencyInjection library
+This can help simplify base classes with common behaviour and avoid having to write boilerplate constructors everywhere.
 
 ```csharp
 using TUnit.Core;
