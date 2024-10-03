@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
@@ -8,8 +7,12 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataSourceGeneratorRetriever
 {
-    public static ArgumentsContainer Parse(ImmutableArray<IParameterSymbol> parameters,
-        INamedTypeSymbol namedTypeSymbol, AttributeData attributeData, ArgumentsType argumentsType, int index)
+    public static ArgumentsContainer Parse(
+        INamedTypeSymbol namedTypeSymbol, 
+        AttributeData attributeData, 
+        ArgumentsType argumentsType, 
+        int index,
+        string? propertyName)
     {
         return new GeneratedArgumentsContainer
         (
@@ -25,6 +28,7 @@ internal static class DataSourceGeneratorRetriever
             DisposeAfterTest =
                 attributeData.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ??
                 true,
+            PropertyName = propertyName
         };
     }
 

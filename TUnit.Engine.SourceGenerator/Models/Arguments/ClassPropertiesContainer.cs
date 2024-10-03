@@ -14,6 +14,11 @@ internal record ClassPropertiesContainer(IReadOnlyCollection<(IPropertySymbol Pr
 
     public void WriteObjectInitializer(SourceCodeWriter sourceCodeWriter)
     {
+        if (!PropertyContainers.Any())
+        {
+            return;
+        }
+        
         sourceCodeWriter.WriteLine("{");
         
         foreach (var (propertySymbol, argumentsContainer) in PropertyContainers)
@@ -21,6 +26,6 @@ internal record ClassPropertiesContainer(IReadOnlyCollection<(IPropertySymbol Pr
             sourceCodeWriter.WriteLine($"{propertySymbol.Name} = {argumentsContainer.VariableNames[0]},");
         }
 
-        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.WriteLine("}");
     }
 }

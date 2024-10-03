@@ -13,12 +13,23 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
 
         VariableNames = GenerateArgumentVariableNames();
     }
+    
+    public required string? PropertyName { get; init; }
 
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
     {
-        var objectToGetAttributesFrom = ArgumentsType == ArgumentsType.Method
-            ? "methodInfo"
-            : $"typeof({TestClassTypeName})";
+        var objectToGetAttributesFrom = ArgumentsType switch
+        {
+            ArgumentsType.Method => "methodInfo",
+            ArgumentsType.Property => $"typeof({TestClassTypeName}).GetProperty(\"{PropertyName}\")",
+            _ => $"typeof({TestClassTypeName})"
+        };
+
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            sourceCodeWriter.WriteLine($"var {VariableNames[0]} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources()).ElementAtOrDefault(0);");
+            return;
+        }
         
         var guid = Guid.NewGuid().ToString("N");
         sourceCodeWriter.WriteLine($"var {VariableNamePrefix}GeneratedDataArray{guid} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources());");
@@ -58,6 +69,11 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
 
     private string[] GenerateArgumentVariableNames()
     {
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            return [GenerateUniqueVariableName()];
+        }
+        
         if (GenericArguments.Length == 1)
         {
             return [$"{VariableNamePrefix}GeneratedData"];

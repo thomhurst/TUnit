@@ -18,19 +18,24 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine(
             $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
         
+        sourceBuilder.WriteLine();
+        
         testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder);
         
         testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder);
 
+        sourceBuilder.WriteLine();
+        
         sourceBuilder.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
-
+        
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
         
         sourceBuilder.WriteLine(");");
-
+        
+        sourceBuilder.WriteLine();
         
         sourceBuilder.WriteLine(
-            $"var resettableClassFactory = resettableClassFactoryDelegate();");
+            "var resettableClassFactory = resettableClassFactoryDelegate();");
 
         sourceBuilder.WriteLine();
         

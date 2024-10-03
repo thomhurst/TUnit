@@ -5,7 +5,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
 internal static class NewClassWriter
 {
-    public static void ConstructClass(SourceCodeWriter sourceCodeWriter, string typeName, ArgumentsContainer argumentsContainer, ClassPropertiesContainer? classPropertiesContainer)
+    public static void ConstructClass(SourceCodeWriter sourceCodeWriter, string typeName, ArgumentsContainer argumentsContainer, ClassPropertiesContainer classPropertiesContainer)
     {
         if (argumentsContainer is ClassConstructorAttributeContainer)
         {
@@ -15,9 +15,6 @@ internal static class NewClassWriter
         
         sourceCodeWriter.WriteLine($"new {typeName}({argumentsContainer.VariableNames.ToCommaSeparatedString()})");
 
-        if (classPropertiesContainer?.PropertyContainers.Any() == true)
-        {
-            classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
-        }
+        classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
     }
 }

@@ -24,5 +24,5 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
         }
     }
 
-    protected string GenerateUniqueVariableName() => $"{VariableNamePrefix}{Guid.NewGuid():N}";
+    protected string GenerateUniqueVariableName() => $"{VariableNamePrefix}_{Guid.NewGuid():N}";
 };
