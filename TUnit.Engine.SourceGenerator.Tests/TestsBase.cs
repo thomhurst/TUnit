@@ -57,7 +57,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
         
-        foreach (var error in diagnostics.Where(x => x.Severity == DiagnosticSeverity.Error))
+        foreach (var error in diagnostics.Where(x => IsError(x)))
         {
             throw new Exception
             (
@@ -86,5 +86,20 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         }
 
         assertions(generatedFiles);
+    }
+
+    private static bool IsError(Diagnostic x)
+    {
+        if (x.Severity == DiagnosticSeverity.Error)
+        {
+            return true;
+        }
+
+        if (x.Severity == DiagnosticSeverity.Warning &&  x.GetMessage().Contains("failed to generate source"))
+        {
+            return true;
+        }
+        
+        return false;
     }
 }

@@ -24,7 +24,7 @@ public class PropertySetterTests
     public required string Property7 { get; init; }
     
     [Test]
-    public void Test()
+    public void Test3()
     {
         Console.WriteLine(Property7);
     }

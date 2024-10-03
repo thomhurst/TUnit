@@ -78,7 +78,9 @@ internal static class ArgumentsRetriever
 
     public static ClassPropertiesContainer GetProperties(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
     {
-        var settableProperties = namedTypeSymbol.GetMembers()
+        var settableProperties = namedTypeSymbol
+            .GetSelfAndBaseTypes()
+            .SelectMany(x => x.GetMembers())
             .OfType<IPropertySymbol>()
             .Where(x => x.IsRequired)
             .ToList();

@@ -19,8 +19,7 @@ internal static class TypeExtensions
                 throw new Exception("ErrorTypeSymbol - Have you added any missing file sources to the compilation?");
             }
 
-            if (symbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
-                is "global::System.Object")
+            if (symbol.SpecialType == SpecialType.System_Object)
             {
                 break;
             }

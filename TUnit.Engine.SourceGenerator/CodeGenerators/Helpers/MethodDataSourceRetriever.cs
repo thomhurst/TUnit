@@ -19,8 +19,10 @@ internal static class MethodDataSourceRetriever
             typeName =
                 namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
 
-            dataSourceMethod = namedTypeSymbol.GetMembers(methodDataAttribute.ConstructorArguments[0].Value!.ToString())
-                .OfType<IMethodSymbol>().First();
+            dataSourceMethod = namedTypeSymbol
+                .GetMembersIncludingBase()
+                .OfType<IMethodSymbol>()
+                .First(x => x.Name == methodDataAttribute.ConstructorArguments[0].Value!.ToString());
         }
         else
         {
@@ -30,8 +32,9 @@ internal static class MethodDataSourceRetriever
                 .FullyQualifiedGenericWithGlobalPrefix);
 
             dataSourceMethod = typeContainingDataSourceMethod
-                .GetMembers(methodDataAttribute.ConstructorArguments[1].Value!.ToString())
-                .OfType<IMethodSymbol>().First();
+                .GetMembersIncludingBase()
+                .OfType<IMethodSymbol>()
+                .First(x => x.Name == methodDataAttribute.ConstructorArguments[1].Value!.ToString());
         }
 
         var methodName = dataSourceMethod.Name;
