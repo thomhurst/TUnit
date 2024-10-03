@@ -101,11 +101,9 @@ internal static class GenericTestInvocationWriter
                          				}
                          """;
             }
-            
-            yield break;
         }
         
-        if (classDataSourceAttributeContainer.Key != null)
+        else if (classDataSourceAttributeContainer.Key != null)
         {
             yield return $$"""
                    new TestData({{variableNames[0]}}, typeof({{types[0]}}), InjectedDataType.SharedByKey)
@@ -115,12 +113,12 @@ internal static class GenericTestInvocationWriter
                    """;
         }
 
-        if (classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.Globally")
+        else if (classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.Globally")
         {
             yield return $"new TestData({variableNames[0]}, typeof({types[0]}), InjectedDataType.SharedGlobally)";
         }
 
-        if (classDataSourceAttributeContainer.ForClass != null)
+        else if (classDataSourceAttributeContainer.ForClass != null)
         {
             yield return $"new TestData({variableNames[0]}, typeof({types[0]}), InjectedDataType.SharedByTestClassType)";
         }
