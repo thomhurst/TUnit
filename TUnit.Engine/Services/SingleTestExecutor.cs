@@ -250,19 +250,16 @@ internal class SingleTestExecutor : IDataProducer
 
     private async Task InitializeParameters(TestContext testContext)
     {
-        foreach (var argument in testContext.TestDetails.TestClassArguments.OfType<IAsyncInitializer>())
-        {
-            await TestDataContainer.RunInitializer(argument);
-        }
+        IEnumerable<TestData> args =
+        [
+            ..testContext.TestDetails.InternalTestClassArguments,
+            ..testContext.TestDetails.InternalTestClassProperties,
+            ..testContext.TestDetails.InternalTestMethodArguments,
+        ];
         
-        foreach (var argument in testContext.TestDetails.TestClassArguments.OfType<IAsyncInitializer>())
+        foreach (var argument in args)
         {
-            await TestDataContainer.RunInitializer(argument);
-        }
-        
-        foreach (var argument in testContext.TestDetails.TestClassProperties.OfType<IAsyncInitializer>())
-        {
-            await TestDataContainer.RunInitializer(argument);
+            await TestDataContainer.RunInitializer(testContext.TestDetails.ClassType, argument);
         }
     }
 
