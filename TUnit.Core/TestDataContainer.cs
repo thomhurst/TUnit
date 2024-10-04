@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -13,6 +14,8 @@ public static class TestDataContainer
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, object>> InjectedSharedPerClassType = new();
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
 
+    private static readonly Dictionary<IAsyncInitializer, Lazy<Task>> ObjectInitialisations = new();
+
     private static readonly object Lock = new();
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
     private static readonly ConcurrentDictionary<Type, int> CountsPerGlobalType = new();
@@ -22,7 +25,19 @@ public static class TestDataContainer
     public static T GetInstanceForType<T>(Type key, Func<T> func) where T : class
     {
         var objectsForClass = InjectedSharedPerClassType.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
-        return  (T)objectsForClass.GetOrAdd(typeof(T), _ => func());
+        return  (T)objectsForClass.GetOrAdd(typeof(T), _ => CreateObject(func));
+    }
+
+    private static T CreateObject<T>(Func<T> func) where T : class
+    {
+        var obj = func();
+
+        if (obj is IAsyncInitializer asyncInitializer)
+        {
+            ObjectInitialisations.Add(asyncInitializer, new Lazy<Task>(() => asyncInitializer.InitializeAsync()));
+        }
+        
+        return obj;
     }
 
     public static void IncrementGlobalUsage(Type type)
@@ -34,7 +49,7 @@ public static class TestDataContainer
     
     public static T GetGlobalInstance<T>(Func<T> func) where T : class
     {
-        return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => func());
+        return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => CreateObject(func));
     }
 
     public static void IncrementKeyUsage(string key, Type type)
@@ -50,7 +65,7 @@ public static class TestDataContainer
     {
         var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
 
-        return  (T)instancesForType.GetOrAdd(key, _ => func());
+        return  (T)instancesForType.GetOrAdd(key, _ => CreateObject(func));
     }
     
     internal static async Task OnLastInstance(Type testClassType)
@@ -103,5 +118,10 @@ public static class TestDataContainer
         }
         
         await Disposer.DisposeAsync(InjectedSharedGlobally.Remove(type));
+    }
+
+    internal static async Task RunInitializer(IAsyncInitializer asyncInitializer)
+    {
+        await ObjectInitialisations[asyncInitializer].Value;
     }
 }

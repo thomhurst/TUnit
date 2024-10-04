@@ -4,7 +4,7 @@ namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record EmptyArgumentsContainer(ArgumentsType ArgumentsType) : ArgumentsContainer(ArgumentsType)
 {
-    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         // Nothing
     }
@@ -13,9 +13,7 @@ internal record EmptyArgumentsContainer(ArgumentsType ArgumentsType) : Arguments
     {
         // Nothing
     }
-
-    public override string[] VariableNames { get; } = [];
-
+    
     public override string[] GetArgumentTypes()
     {
         return [];

@@ -74,13 +74,13 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var parameter in methodSymbol.Parameters)
         {
-            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+            if (parameter.Type.GloballyQualified() ==
                 WellKnown.AttributeFullyQualifiedClasses.ClassHookContext)
             {
                 continue;
             }
 
-            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+            if (parameter.Type.GloballyQualified() ==
                 WellKnown.AttributeFullyQualifiedClasses.CancellationToken)
             {
                 continue;

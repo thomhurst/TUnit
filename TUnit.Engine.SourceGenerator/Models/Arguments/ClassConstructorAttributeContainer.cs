@@ -9,12 +9,13 @@ internal record ClassConstructorAttributeContainer : ArgumentsContainer
 
     public ClassConstructorAttributeContainer(ArgumentsType argumentsType) : base(argumentsType)
     {
-        VariableNames = ArgumentsType == ArgumentsType.Property
-            ? [$"classConstructor{Guid.NewGuid():N}"]
-            : [];
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            AddVariable($"classConstructor{Guid.NewGuid():N}");
+        }
     }
 
-    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         sourceCodeWriter.WriteLine($"var {VariableNames.ElementAtOrDefault(0) ?? "classConstructor"} = new {ClassConstructorType}();");
         sourceCodeWriter.WriteLine();
@@ -24,9 +25,7 @@ internal record ClassConstructorAttributeContainer : ArgumentsContainer
     {
         // Nothing
     }
-
-    public override string[] VariableNames { get; }
-
+    
     public override string[] GetArgumentTypes()
     {
         return [];

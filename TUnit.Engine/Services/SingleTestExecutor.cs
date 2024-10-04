@@ -31,7 +31,6 @@ internal class SingleTestExecutor : IDataProducer
     private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
     private readonly ClassHookOrchestrator _classHookOrchestrator;
     private readonly TUnitFrameworkLogger _logger;
-    private readonly ConcurrentDictionary<object, Task> _asyncInitializers = new();
     
     public SingleTestExecutor(
         IExtension extension,
@@ -253,7 +252,17 @@ internal class SingleTestExecutor : IDataProducer
     {
         foreach (var argument in testContext.TestDetails.TestClassArguments.OfType<IAsyncInitializer>())
         {
-            await _asyncInitializers.GetOrAdd(argument, _ => argument.InitializeAsync());
+            await TestDataContainer.RunInitializer(argument);
+        }
+        
+        foreach (var argument in testContext.TestDetails.TestClassArguments.OfType<IAsyncInitializer>())
+        {
+            await TestDataContainer.RunInitializer(argument);
+        }
+        
+        foreach (var argument in testContext.TestDetails.TestClassProperties.OfType<IAsyncInitializer>())
+        {
+            await TestDataContainer.RunInitializer(argument);
         }
     }
 
@@ -350,14 +359,10 @@ internal class SingleTestExecutor : IDataProducer
     {
         var testInformation = testContext.TestDetails;
 
-        foreach (var methodArgument in testInformation.InternalTestMethodArguments)
+        IEnumerable<TestData> testData = [..testInformation.InternalTestMethodArguments, ..testInformation.InternalTestClassProperties, ..testInformation.InternalTestClassArguments];
+        foreach (var argument in testData)
         {
-            await DisposeInjectedData(methodArgument);
-        }
-        
-        foreach (var classArgument in testInformation.InternalTestClassArguments)
-        {
-            await DisposeInjectedData(classArgument);
+            await DisposeInjectedData(argument);
         }
 
         await _disposer.DisposeAsync(testContext);

@@ -23,11 +23,12 @@ public class ClassDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
     { 
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
+        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Property);
     }
     
     private void AnalyzeSymbol(SymbolAnalysisContext context)
     { 
-        if (context.Symbol is not INamedTypeSymbol and not IMethodSymbol)
+        if (context.Symbol is not INamedTypeSymbol and not IMethodSymbol and not IPropertySymbol)
         {
             return;
         }
@@ -39,17 +40,20 @@ public class ClassDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
         
-        ImmutableArray<IParameterSymbol> parameterSymbols;
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypeSymbols;
         if (context.Symbol is IMethodSymbol methodSymbol)
         {
-            parameterSymbols = methodSymbol.Parameters;
+            parameterOrPropertyTypeSymbols = methodSymbol.Parameters.Select(x => x.Type).ToImmutableArray();
         }
         else if (context.Symbol is INamedTypeSymbol namedTypeSymbol)
         {
-            parameterSymbols = namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
+            parameterOrPropertyTypeSymbols = namedTypeSymbol.Constructors.FirstOrDefault()?.Parameters.Select(x => x.Type).ToImmutableArray() ?? ImmutableArray<ITypeSymbol>.Empty;
+        } else if (context.Symbol is IPropertySymbol propertySymbol)
+        {
+            parameterOrPropertyTypeSymbols = ImmutableArray.Create(propertySymbol.Type);
         }
 
-        if (!parameterSymbols.Any())
+        if (!parameterOrPropertyTypeSymbols.Any())
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.NoMatchingParameterClassDataSource, context.Symbol.Locations.FirstOrDefault()));
             return;
@@ -73,7 +77,7 @@ public class ClassDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             
-            if (!parameterSymbols.Any(parameter => context.Compilation.HasImplicitConversion(type, parameter.Type)))
+            if (!parameterOrPropertyTypeSymbols.Any(parameterOrPropertyTypes => context.Compilation.HasImplicitConversion(type, parameterOrPropertyTypes)))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.NoMatchingParameterClassDataSource, attributeData.GetLocation()));
             }

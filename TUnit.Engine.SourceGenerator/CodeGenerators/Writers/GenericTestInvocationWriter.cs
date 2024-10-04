@@ -19,12 +19,14 @@ internal static class GenericTestInvocationWriter
             $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
         
         sourceBuilder.WriteLine();
-        
-        testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder);
-        
-        testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder);
 
-        sourceBuilder.WriteLine();
+        var classVariablesIndex = 0;
+        var methodVariablesIndex = 0;
+        var propertiesVariablesIndex = 0;
+        
+        testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
+        
+        testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
         
         sourceBuilder.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
         
@@ -39,14 +41,16 @@ internal static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine();
         
-        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder);
+        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
         sourceBuilder.WriteLine($"TestRegistrar.RegisterTest<{fullyQualifiedClassType}>(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.VariableNames.ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.VariableNames.ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.PropertyContainers.SelectMany(x => x.ArgumentsContainer.VariableNames).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"InternalTestClassArguments = [{ToInjectedTypes(testSourceDataModel.ClassArguments).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"InternalTestClassProperties = [{testSourceDataModel.PropertyArguments.PropertyContainers.SelectMany(x => ToInjectedTypes(x.ArgumentsContainer)).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"InternalTestMethodArguments = [{ToInjectedTypes(testSourceDataModel.MethodArguments).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");

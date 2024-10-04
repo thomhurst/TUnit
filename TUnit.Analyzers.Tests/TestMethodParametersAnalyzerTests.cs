@@ -89,7 +89,7 @@ public class TestMethodParametersAnalyzerTests
                                 
                                 public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
                                 {
-                                    public override IEnumerable<T> GenerateDataSources()
+                                    public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                                     {
                                         var fixture = new Fixture();
                                         yield return fixture.Create<T>();
@@ -98,7 +98,7 @@ public class TestMethodParametersAnalyzerTests
                                 
                                 public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
                                 {
-                                    public override IEnumerable<(T1, T2, T3)> GenerateDataSources()
+                                    public override IEnumerable<(T1, T2, T3)> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                                     {
                                         var fixture = new Fixture();
                                         yield return (fixture.Create<T1>(), fixture.Create<T2>(), fixture.Create<T3>());

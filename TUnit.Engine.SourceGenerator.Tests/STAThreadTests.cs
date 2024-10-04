@@ -12,6 +12,6 @@ internal class STAThreadTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(2));
             
-            Assert.That(generatedFiles[0], Does.Contain("TestExecutor = new global::TUnit.Core.STAThreadExecutor(),"));
+            AssertFileContains(generatedFiles[0], "TestExecutor = new global::TUnit.Core.STAThreadExecutor(),");
         });
 }

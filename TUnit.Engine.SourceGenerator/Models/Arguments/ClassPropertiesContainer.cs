@@ -4,12 +4,14 @@ namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record ClassPropertiesContainer(IReadOnlyCollection<(IPropertySymbol PropertySymbol, ArgumentsContainer ArgumentsContainer)> PropertyContainers)
 {
-    public void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
+    public void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         foreach (var (_, argumentsContainer) in PropertyContainers)
         {
-            argumentsContainer.WriteVariableAssignments(sourceCodeWriter);
+            argumentsContainer.WriteVariableAssignments(sourceCodeWriter, ref variableIndex);
         }
+        
+        sourceCodeWriter.WriteLine();
     }
 
     public void WriteObjectInitializer(SourceCodeWriter sourceCodeWriter)

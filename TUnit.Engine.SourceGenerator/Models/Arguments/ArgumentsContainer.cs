@@ -1,14 +1,13 @@
-﻿using TUnit.Engine.SourceGenerator.CodeGenerators;
-using TUnit.Engine.SourceGenerator.Enums;
+﻿using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
 {
     public required bool DisposeAfterTest { get; init; }
-    public abstract void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter);
+    public abstract void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex);
     public abstract void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter);
-    public abstract string[] VariableNames { get; }
+    public List<string> VariableNames { get; } = [];
     public abstract string[] GetArgumentTypes();
 
     protected string VariableNamePrefix
@@ -24,18 +23,20 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
         }
     }
 
-    protected string GenerateVariableName(int index)
+    protected string GenerateVariableName(ref int index)
     {
-        if (ArgumentsType == ArgumentsType.Property)
-        {
-            return $"{VariableNamePrefix}_{Guid.NewGuid():N}";
-        }
-
         if (index == 0)
         {
-            return VariableNamePrefix;
+            index++;
+            return AddVariable(VariableNamePrefix);
         }
         
-        return $"{VariableNamePrefix}{index}";
+        return AddVariable($"{VariableNamePrefix}{index++}");
+    }
+
+    protected string AddVariable(string variableName)
+    {
+        VariableNames.Add(variableName);
+        return variableName;
     }
 };

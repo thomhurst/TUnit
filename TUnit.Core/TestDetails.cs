@@ -26,6 +26,7 @@ public abstract record TestDetails
     
     public required Type[] TestClassParameterTypes { get; init; }
     public required object?[] TestClassArguments { get; init; }
+    public required object?[] TestClassProperties { get; init; }
     
     public required IReadOnlyList<string> Categories { get; init; }
     
@@ -67,6 +68,8 @@ public abstract record TestDetails
     public required IParallelLimit? ParallelLimit { get; init; }
 
     [JsonIgnore] internal TestData[] InternalTestClassArguments { get; init; } = null!;
+
+    [JsonIgnore] internal TestData[] InternalTestClassProperties { get; set; } = null!;
 
     [JsonIgnore] internal TestData[] InternalTestMethodArguments { get; init; } = null!;
 

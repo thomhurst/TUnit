@@ -26,14 +26,14 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (methodSymbol.IsAbstract)
+        if (methodSymbol.IsAbstract || !methodSymbol.IsTestMethod())
         {
             return;
         }
 
         var parameters = methodSymbol.Parameters.WithoutTimeoutParameter().ToArray();
         
-        if (parameters.Length == 0 || !methodSymbol.IsTestMethod())
+        if (parameters.Length == 0)
         {
             return;
         }

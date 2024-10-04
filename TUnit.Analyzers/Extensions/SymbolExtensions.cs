@@ -18,7 +18,7 @@ internal static class SymbolExtensions
         var attributes = symbol.GetAttributes();
 
         return attributes.Any(a => a.AttributeClass?.AllInterfaces.Any(x =>
-            x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+            x.GloballyQualified() ==
             WellKnown.AttributeFullyQualifiedClasses.IDataAttribute) == true)
                || HasMatrixValues(symbol);
     }

@@ -36,7 +36,7 @@ public class ForbidRedefiningAttributeUsageAnalyzer : ConcurrentDiagnosticAnalyz
             return;
         }
 
-        var attributeUsage = namedTypeSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == $"global::{typeof(AttributeUsageAttribute).FullName}");
+        var attributeUsage = namedTypeSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.GloballyQualified() == $"global::{typeof(AttributeUsageAttribute).FullName}");
 
         if (attributeUsage == null)
         {

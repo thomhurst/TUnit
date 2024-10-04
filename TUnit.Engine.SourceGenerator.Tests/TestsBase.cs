@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Engine.SourceGenerator.Tests.Extensions;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -101,5 +102,10 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         }
         
         return false;
+    }
+
+    protected void AssertFileContains(string file, string expected)
+    {
+        Assert.That(file.IgnoreWhitespaceFormatting(), Does.Contain(expected.IgnoreWhitespaceFormatting()));
     }
 }

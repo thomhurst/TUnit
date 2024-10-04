@@ -31,7 +31,7 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     
     public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
     {
-        public override IEnumerable<T> GenerateDataSources()
+        public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata metadata)
         {
             var fixture = new Fixture();
             yield return fixture.Create<T>();
@@ -40,7 +40,7 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     
     public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
     {
-        public override IEnumerable<(T1, T2, T3)> GenerateDataSources()
+        public override IEnumerable<(T1, T2, T3)> GenerateDataSources(DataGeneratorMetadata metadata)
         {
             var fixture = new Fixture();
             
@@ -50,7 +50,7 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     
     public class AutoFixtureGeneratorAttribute : DataSourceGeneratorAttribute<int, string, bool>
     {
-        public override IEnumerable<(int, string, bool)> GenerateDataSources()
+        public override IEnumerable<(int, string, bool)> GenerateDataSources(DataGeneratorMetadata metadata)
         {
             var fixture = new Fixture();
             yield return (fixture.Create<int>(), fixture.Create<string>(), fixture.Create<bool>());
