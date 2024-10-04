@@ -22,7 +22,7 @@ So to create a custom assertion:
    `TExpected` will be the data (if any) that you receive from your extension method, so you'll be responsible for passing this in. You must pass it to the base class via the base constructor: `base(expectedValue)`
 
 2. Override the method: 
-   `private protected override bool Passes(TActual? actualValue, Exception? exception)`
+   `protected override bool Passes(TActual? actualValue, Exception? exception)`
 
    If this method returns true, then your assertion has passed, if it returns false, then your exception will throw with the failure message that you specify.
 
@@ -59,7 +59,7 @@ public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<
 public class StringContainsAssertCondition(string expected, StringComparison stringComparison)
     : AssertCondition<string, string>(expected)
 {
-    private protected override bool Passes(string? actualValue, Exception? exception)
+    protected override bool Passes(string? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {
