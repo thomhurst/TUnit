@@ -16,6 +16,11 @@ internal static class ClassDataSourceRetriever
 
         var sharedArgumentType = sharedArgument.ToCSharpString();
 
+        if (sharedArgumentType == "null")
+        {
+            sharedArgumentType = "TUnit.Core.SharedType.None";
+        }
+        
         var key = classDataAttribute.NamedArguments.SafeFirstOrDefault(x => x.Key == "Key").Value.Value as string;
             
         return new ClassDataSourceAttributeContainer(argumentsType)

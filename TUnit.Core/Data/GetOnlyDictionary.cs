@@ -23,4 +23,6 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
 
         return default;
     }
+    
+    public TValue this[TKey key] => InnerDictionary[key];
 }

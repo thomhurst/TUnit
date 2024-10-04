@@ -101,7 +101,7 @@ internal static class GenericTestInvocationWriter
         var variableNames = argumentsContainer.VariableNames;
         
         if (argumentsContainer is not ClassDataSourceAttributeContainer classDataSourceAttributeContainer 
-            || classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.None")
+            || classDataSourceAttributeContainer.SharedArgumentType is "TUnit.Core.SharedType.None")
         {
             for (var i = 0; i < types.Length; i++)
             {
