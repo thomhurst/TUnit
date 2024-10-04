@@ -108,7 +108,7 @@ internal class TestsExecutor
     {
         await Parallel.ForEachAsync(queue, new ParallelOptions
         {
-            MaxDegreeOfParallelism = GetParallelTestsLimit(),
+            MaxDegreeOfParallelism = _maximumParallelTests,
             CancellationToken = context.CancellationToken
         }, (test, token) => ProcessTest(test, filter, context, token));
     }
