@@ -22,31 +22,31 @@ internal class DataSourceClassCombinedWithDataSourceMethodTests : TestsBase<Test
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(9));
             
-            Assert.That(generatedFiles[0], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();"));
-            Assert.That(generatedFiles[0], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();"));
+            AssertFileContains(generatedFiles[0], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
+            AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
             
-            Assert.That(generatedFiles[1], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();"));
-            Assert.That(generatedFiles[1], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();"));
+            AssertFileContains(generatedFiles[1], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
+            AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
             
-            Assert.That(generatedFiles[2], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();"));
-            Assert.That(generatedFiles[2], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();"));
+            AssertFileContains(generatedFiles[2], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
+            AssertFileContains(generatedFiles[2], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
             
-            Assert.That(generatedFiles[3], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();"));
-            Assert.That(generatedFiles[3], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();"));
+            AssertFileContains(generatedFiles[3], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
+            AssertFileContains(generatedFiles[3], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
             
-            Assert.That(generatedFiles[4], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();"));
-            Assert.That(generatedFiles[4], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();"));
+            AssertFileContains(generatedFiles[4], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
+            AssertFileContains(generatedFiles[4], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
             
-            Assert.That(generatedFiles[5], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();"));
-            Assert.That(generatedFiles[5], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();"));
+            AssertFileContains(generatedFiles[5], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
+            AssertFileContains(generatedFiles[5], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
             
-            Assert.That(generatedFiles[6], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();"));
-            Assert.That(generatedFiles[6], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();"));
+            AssertFileContains(generatedFiles[6], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
+            AssertFileContains(generatedFiles[6], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
             
-            Assert.That(generatedFiles[7], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();"));
-            Assert.That(generatedFiles[7], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();"));
+            AssertFileContains(generatedFiles[7], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
+            AssertFileContains(generatedFiles[7], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
             
-            Assert.That(generatedFiles[8], Does.Contain("global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();"));
-            Assert.That(generatedFiles[8], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();"));
+            AssertFileContains(generatedFiles[8], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
+            AssertFileContains(generatedFiles[8], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
         });
 }

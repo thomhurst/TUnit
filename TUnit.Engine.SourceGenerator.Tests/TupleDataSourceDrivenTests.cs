@@ -12,12 +12,12 @@ internal class TupleDataSourceDrivenTests : TestsBase<TestsGenerator>
         {
             Assert.That(generatedFiles.Length, Is.EqualTo(1));
             
-            Assert.That(generatedFiles[0], Does.Contain("var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod());"));
-            Assert.That(generatedFiles[0], Does.Contain("global::System.Int32 methodArg = methodArgTuples.Item1;"));
-            Assert.That(generatedFiles[0], Does.Contain("global::System.String methodArg1 = methodArgTuples.Item2;"));
-            Assert.That(generatedFiles[0], Does.Contain("global::System.Boolean methodArg2 = methodArgTuples.Item3;"));
-            Assert.That(generatedFiles[0], Does.Contain("TestMethodArguments = [methodArg, methodArg1, methodArg2],"));
-            Assert.That(generatedFiles[0], Does.Contain("DisplayName = $\"DataSource_TupleMethod({methodArg}, {methodArg1}, {methodArg2})\","));
-            Assert.That(generatedFiles[0], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2))"));
+            AssertFileContains(generatedFiles[0], "var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod());");
+            AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = methodArgTuples.Item1;");
+            AssertFileContains(generatedFiles[0], "global::System.String methodArg1 = methodArgTuples.Item2;");
+            AssertFileContains(generatedFiles[0], "global::System.Boolean methodArg2 = methodArgTuples.Item3;");
+            AssertFileContains(generatedFiles[0], "TestMethodArguments = [methodArg, methodArg1, methodArg2],");
+            AssertFileContains(generatedFiles[0], "DisplayName = $\"DataSource_TupleMethod({methodArg}, {methodArg1}, {methodArg2})\",");
+            AssertFileContains(generatedFiles[0], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2))");
         });
 }
