@@ -1,4 +1,3 @@
-using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
@@ -14,12 +13,15 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
         this.IsEnumerableData = IsEnumerableData;
         this.TupleTypes = TupleTypes;
         this.MethodReturnType = MethodReturnType;
-
-        VariableNames = GenerateArgumentVariableNames();
     }
 
-    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter)
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
+        if(!VariableNames.Any())
+        {
+            GenerateArgumentVariableNames(ref variableIndex);
+        }
+
         if (IsEnumerableData)
         {
             if (ArgumentsType == ArgumentsType.Property)
@@ -105,32 +107,28 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
             sourceCodeWriter.WriteLine("}");
         }
     }
-
-    public override string[] VariableNames { get; }
-
-    public string[] GenerateArgumentVariableNames()
+    
+    public void GenerateArgumentVariableNames(ref int variableIndex)
     {
         if (TupleTypes.Any())
         {
-            return TupleTypes
-                .Select((_, i) => GenerateVariableName(i))
-                .ToArray();
+            for (var index = 0; index < TupleTypes.Length; index++)
+            {
+                GenerateVariableName(ref variableIndex);
+            }
+
+            return;
         }
         
         if (IsEnumerableData)
         {
-            return
-            [
-                ArgumentsType == ArgumentsType.ClassConstructor
-                    ? CodeGenerators.VariableNames.ClassData
-                    : CodeGenerators.VariableNames.MethodData
-            ];
+            AddVariable(ArgumentsType == ArgumentsType.ClassConstructor
+                ? CodeGenerators.VariableNames.ClassData
+                : CodeGenerators.VariableNames.MethodData);
+            return;
         }
         
-        return
-        [
-            GenerateVariableName(0)
-        ];
+        GenerateVariableName(ref variableIndex);
     }
 
     public override string[] GetArgumentTypes()
@@ -144,10 +142,10 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
     }
 
     public string TestClassTypeName { get; init; }
-    public string TypeName { get; init; }
-    public string MethodName { get; init; }
-    public bool IsStatic { get; init; }
-    public bool IsEnumerableData { get; init; }
-    public string[] TupleTypes { get; init; }
-    public string MethodReturnType { get; init; }
+    public string TypeName { get; }
+    public string MethodName { get; }
+    public bool IsStatic { get; }
+    public bool IsEnumerableData { get; }
+    public string[] TupleTypes { get; }
+    public string MethodReturnType { get; }
 }

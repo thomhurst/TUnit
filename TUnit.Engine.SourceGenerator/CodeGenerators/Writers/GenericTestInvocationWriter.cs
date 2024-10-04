@@ -19,12 +19,14 @@ internal static class GenericTestInvocationWriter
             $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
         
         sourceBuilder.WriteLine();
-        
-        testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder);
-        
-        testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder);
 
-        sourceBuilder.WriteLine();
+        var classVariablesIndex = 0;
+        var methodVariablesIndex = 0;
+        var propertiesVariablesIndex = 0;
+        
+        testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
+        
+        testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
         
         sourceBuilder.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
         
@@ -39,7 +41,7 @@ internal static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine();
         
-        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder);
+        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
         sourceBuilder.WriteLine($"TestRegistrar.RegisterTest<{fullyQualifiedClassType}>(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
