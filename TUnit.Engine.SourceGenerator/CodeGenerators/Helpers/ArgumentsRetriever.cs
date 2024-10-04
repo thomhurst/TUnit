@@ -97,7 +97,8 @@ internal static class ArgumentsRetriever
             var dataSourceAttributes = propertySymbol.GetAttributes().Where(x => x.IsDataSourceAttribute()).ToImmutableArray();
             if (dataSourceAttributes.Any())
             {
-                list.AddRange(GetArguments(context, ImmutableArray<IParameterSymbol>.Empty, ImmutableArray.Create(propertySymbol.Type), dataSourceAttributes, namedTypeSymbol, ArgumentsType.Property, propertySymbol.Name).Select(argumentsContainer => (propertySymbol, argumentsContainer)));
+                list.AddRange(GetArguments(context, ImmutableArray<IParameterSymbol>.Empty, ImmutableArray.Create(propertySymbol.Type), dataSourceAttributes, namedTypeSymbol, ArgumentsType.Property, propertySymbol.Name)
+                    .Select(argumentsContainer => (propertySymbol, argumentsContainer)));
             }
         }
 

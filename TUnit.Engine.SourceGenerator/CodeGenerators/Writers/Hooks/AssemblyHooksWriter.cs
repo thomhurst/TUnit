@@ -14,8 +14,8 @@ internal static class AssemblyHooksWriter
             return;
         }
         
-        var className = $"AssemblyHooks_{model.MinimalTypeName}";
-        var fileName = $"{className}_{Guid.NewGuid():N}";
+        var className = $"Hooks__{model.MinimalTypeName}";
+        var fileName = $"{className}__{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 

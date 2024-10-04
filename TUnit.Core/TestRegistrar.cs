@@ -38,7 +38,9 @@ public static class TestRegistrar
 			Attributes = attributes,
 			TestClassArguments = testMetadata.TestClassArguments,
 			TestMethodArguments = testMetadata.TestMethodArguments,
+			TestClassProperties = testMetadata.TestClassProperties,
 			InternalTestClassArguments = testMetadata.InternalTestClassArguments,
+			InternalTestClassProperties = testMetadata.InternalTestClassProperties,
 			InternalTestMethodArguments = testMetadata.InternalTestMethodArguments,
 			TestClassParameterTypes = classType.GetConstructors().FirstOrDefault()?.GetParameters().Select(x => x.ParameterType).ToArray() ?? [],
 			TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
@@ -58,7 +60,7 @@ public static class TestRegistrar
 		};
 
 		var testContext = new TestContext(testDetails);
-
+		
 		RunOnTestDiscoveryAttributes(attributes, testContext);
 		
 		var unInvokedTest = new DiscoveredTest<TClassType>(testMetadata.ResettableClassFactory)
@@ -109,21 +111,15 @@ public static class TestRegistrar
 		RegisterTestContext(classType, testContext);
 		
 		var testInformation = testContext.TestDetails;
-        
-		foreach (var argument in testInformation.InternalTestClassArguments)
-		{
-			if (argument.InjectedDataType == InjectedDataType.SharedByKey)
-			{
-				TestDataContainer.IncrementKeyUsage(argument.StringKey!, argument.Type);
-			}
-            
-			if (argument.InjectedDataType == InjectedDataType.SharedGlobally)
-			{
-				TestDataContainer.IncrementGlobalUsage(argument.Type);
-			}
-		}
-        
-		foreach (var argument in testInformation.InternalTestMethodArguments)
+
+		IEnumerable<TestData> testData =
+		[
+			..testInformation.InternalTestClassArguments, 
+			..testInformation.InternalTestClassProperties,
+			..testInformation.InternalTestMethodArguments
+		];
+		
+		foreach (var argument in testData)
 		{
 			if (argument.InjectedDataType == InjectedDataType.SharedByKey)
 			{

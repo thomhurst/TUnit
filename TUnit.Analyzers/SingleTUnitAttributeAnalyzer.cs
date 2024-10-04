@@ -39,7 +39,7 @@ public class SingleTUnitAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var typeWithBases = attributeData.AttributeClass?.GetSelfAndBaseTypes().ToList();
         
-        var index = typeWithBases?.FindIndex(x => x?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == "global::TUnit.Core.SingleTUnitAttribute");
+        var index = typeWithBases?.FindIndex(x => x?.GloballyQualified() == "global::TUnit.Core.SingleTUnitAttribute");
         
         if (index is null or -1 or 0)
         {

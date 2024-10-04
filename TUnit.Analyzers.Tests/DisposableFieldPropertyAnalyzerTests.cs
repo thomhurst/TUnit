@@ -6,7 +6,7 @@ namespace TUnit.Analyzers.Tests;
 public class DisposableFieldPropertyAnalyzerTests
 {
     [Test]
-    public async Task DataDriven_Argument_Is_Flagged_When_No_Parameters_Passed()
+    public async Task Method_Data_Source_Is_Flagged_When_No_Parameters_Passed()
     {
         const string text = """
                             using System.Net.Http;

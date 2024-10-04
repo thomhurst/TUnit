@@ -68,8 +68,8 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
 
         foreach (var modelTestSourceDataModel in model.TestSourceDataModels)
         {
-            var className = $"{model.MinimalTypeName}_Inherited";
-            var fileName = $"{className}_{Guid.NewGuid():N}";
+            var className = $"{model.MinimalTypeName}__Inherited";
+            var fileName = $"{className}__{Guid.NewGuid():N}";
 
             using var sourceBuilder = new SourceCodeWriter();
 

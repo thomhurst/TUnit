@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.DataSourceDrivenTestArgumentsAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.MethodDataSourceAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 

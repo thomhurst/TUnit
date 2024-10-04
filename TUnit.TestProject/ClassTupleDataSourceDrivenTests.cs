@@ -4,6 +4,12 @@
 [MethodDataSource(nameof(NamedTupleMethod))]
 public class ClassTupleDataSourceDrivenTests
 {
+    [MethodDataSource(nameof(TupleMethod))]
+    public required (int, string, string) Property1 { get; init; }
+    
+    [MethodDataSource(nameof(NamedTupleMethod))]
+    public required (int, string, bool) Property2 { get; init; }
+
     public ClassTupleDataSourceDrivenTests(int value, string value2, bool value3)
     {
         // Dummy method

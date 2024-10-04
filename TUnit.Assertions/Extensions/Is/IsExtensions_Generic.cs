@@ -12,12 +12,22 @@ public static partial class IsExtensions
 {
     public static InvokableValueAssertionBuilder<TActual> IsEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        return valueSource.RegisterAssertion(new EqualsAssertCondition<TActual>(expected)
-            , [doNotPopulateThisValue1]);
+        if (expected != null)
+        {
+            valueSource = valueSource.RegisterAssertionWithoutExpression(new NotNullAssertCondition<TActual>());
+        }
+        
+        return valueSource
+            .RegisterAssertion(new EqualsAssertCondition<TActual>(expected), [doNotPopulateThisValue1]);
     }
     
     public static InvokableValueAssertionBuilder<object> IsEquivalentTo(this IValueSource<object> valueSource, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
+        if (expected != null)
+        {
+            valueSource = valueSource.RegisterAssertionWithoutExpression(new NotNullAssertCondition<object>());
+        }
+        
         return valueSource.RegisterAssertion(new EquivalentToAssertCondition<object>(expected)
             , [doNotPopulateThisValue1]);
     }

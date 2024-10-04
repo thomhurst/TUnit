@@ -60,8 +60,8 @@ internal class TestsGenerator : IIncrementalGenerator
     {
         foreach (var model in testCollection.TestSourceDataModels)
         {
-            var className = $"{model.MethodName}_{model.MinimalTypeName}";
-            var fileName = $"{className}_{Guid.NewGuid():N}";
+            var className = $"{model.MinimalTypeName}__{model.MethodName}";
+            var fileName = $"{className}__{Guid.NewGuid():N}";
 
             using var sourceBuilder = new SourceCodeWriter();
 

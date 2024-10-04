@@ -37,13 +37,10 @@ internal class TestsExecutor
 
     public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter,  ExecuteRequestContext context)
     {
-        // These two can run together - We're ensuring same keyed tests don't run together, but no harm in running those alongside tests without a not in parallel constraint
-        await Task.WhenAll(
-            ProcessParallelTests(tests.Parallel, filter, context),
-            ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context)
-        );
+        await ProcessParallelTests(tests.Parallel, filter, context);
 
-        // These have to run on their own
+        await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context);
+
         await ProcessNotInParallelTests(tests.NotInParallel, filter, context);
     }
 

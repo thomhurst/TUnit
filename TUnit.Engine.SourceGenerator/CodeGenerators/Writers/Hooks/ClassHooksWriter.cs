@@ -9,8 +9,8 @@ internal static class ClassHooksWriter
 {
     public static void Execute(SourceProductionContext context, HooksDataModel model, HookLocationType hookLocationType)
     {
-        var className = $"ClassHooks_{model.MinimalTypeName}";
-        var fileName = $"{className}_{Guid.NewGuid():N}";
+        var className = $"Hooks__{model.MinimalTypeName}";
+        var fileName = $"{className}__{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 

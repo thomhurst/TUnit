@@ -1,9 +1,9 @@
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.DataSourceDrivenTestArgumentsAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.MethodDataSourceAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
-public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
+public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
     public async Task DataSourceDriven_Argument_Is_Flagged_When_Does_Not_Match_Parameter_Type()
@@ -32,7 +32,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
-    public async Task DataDriven_Argument_Is_Not_Flagged_When_Matches_Parameter_Type()
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Matches_Parameter_Type()
     {
         const string text = """
                             using TUnit.Core;
@@ -55,7 +55,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
-    public async Task DataDriven_Argument_Is_Not_Flagged_When_Enumerable_Inner_Type_Matches_Parameter_Type()
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Enumerable_Inner_Type_Matches_Parameter_Type()
     {
         const string text = """
                             using TUnit.Core;
@@ -81,7 +81,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
-    public async Task DataDriven_Argument_Is_Flagged_When_Argument_Missing()
+    public async Task Method_Data_Source_Is_Flagged_When_Argument_Missing()
     {
         const string text = """
                             using TUnit.Core;
@@ -104,7 +104,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
-    public async Task DataDriven_Argument_Is_Not_Flagged_When_Data_Within_Another_Class()
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Data_Within_Another_Class()
     {
         const string text = """
                             using TUnit.Core;
@@ -130,7 +130,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
-    public async Task DataDriven_Argument_Is_Not_Flagged_When_Timeout_CancellationToken()
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Timeout_CancellationToken()
     {
         const string text = """
                             using System.Threading;
@@ -159,7 +159,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     
     [TestCase(true)]
     [TestCase(false)]
-    public async Task DataDriven_Argument_Is_Not_Flagged_When_Matching_Tuple(bool includeTimeoutToken)
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Matching_Tuple(bool includeTimeoutToken)
     {
         var text = $$"""
                               using System.Threading;
@@ -185,7 +185,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     
     [TestCase(true)]
     [TestCase(false)]
-    public async Task DataDriven_Argument_Is_Flagged_When_Tuple_Count_Mismatch(bool includeTimeoutToken)
+    public async Task Method_Data_Source_Is_Flagged_When_Tuple_Count_Mismatch(bool includeTimeoutToken)
     {
         var text = $$"""
                      using System.Threading;
@@ -215,7 +215,7 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
     
     [TestCase(true)]
     [TestCase(false)]
-    public async Task DataDriven_Argument_Is_Flagged_When_Non_Matching_Tuple(bool includeTimeoutToken)
+    public async Task Method_Data_Source_Is_Flagged_When_Non_Matching_Tuple(bool includeTimeoutToken)
     {
         var text = $$"""
                             using System.Threading;
@@ -241,5 +241,145 @@ public class DataSourceDrivenTestArgumentsAnalyzerTests : BaseAnalyzerTests
             .WithArguments("bool", "string");
         
         await Verifier.VerifyAnalyzerAsync(text, expected);
+    }
+    
+    [Test]
+    public async Task Method_Data_Source_Is_Flagged_When_Does_Not_Match_Property_Type()
+    {
+        const string text = """
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data))|}]
+                                public required string MyProperty { get; init; }
+                                
+                                [Test]
+                                public void MyTest()
+                                {
+                                }
+                            
+                                public static int Data()
+                                {
+                                    return 1;
+                                }
+                            }
+                            """;
+
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id).WithLocation(0)
+            .WithArguments("int", "string");
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Does_Match_Property_Type()
+    {
+        const string text = """
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data))|}]
+                                public required int MyProperty { get; init; }
+                                
+                                [Test]
+                                public void MyTest()
+                                {
+                                }
+                            
+                                public static int Data()
+                                {
+                                    return 1;
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Method_Data_Source_Is_Flagged_When_Does_Not_Match_Property_Type_Enumerable()
+    {
+        const string text = """
+                            using TUnit.Core;
+                            using System.Collections.Generic;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data))|}]
+                                public required int MyProperty { get; init; }
+                                
+                                [Test]
+                                public void MyTest()
+                                {
+                                }
+                            
+                                public static IEnumerable<int> Data()
+                                {
+                                    return [1];
+                                }
+                            }
+                            """;
+
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id).WithLocation(0)
+            .WithArguments("System.Collections.Generic.IEnumerable<int>", "int");
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Method_Data_Source_Is_Flagged_When_Does_Not_Match_Property_Type_Tuple()
+    {
+        const string text = """
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data))|}]
+                                public required (string, string) MyProperty { get; init; }
+                                
+                                [Test]
+                                public void MyTest()
+                                {
+                                }
+                            
+                                public static (string, int) Data()
+                                {
+                                    return ("Hello", 1);
+                                }
+                            }
+                            """;
+
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id).WithLocation(0)
+            .WithArguments("string, int", "(string, string)");
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Does_Match_Property_Type_Tuple()
+    {
+        const string text = """
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data))|}]
+                                public required (string, int) MyProperty { get; init; }
+                                
+                                [Test]
+                                public void MyTest()
+                                {
+                                }
+                            
+                                public static (string, int) Data()
+                                {
+                                    return ("Hello", 1);
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
     }
 }

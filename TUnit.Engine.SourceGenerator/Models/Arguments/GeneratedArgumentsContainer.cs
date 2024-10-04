@@ -16,7 +16,10 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
 
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
-        GenerateArgumentVariableNames(ref variableIndex);
+        if(!VariableNames.Any())
+        {
+            GenerateArgumentVariableNames(ref variableIndex);
+        }
 
         var objectToGetAttributesFrom = ArgumentsType switch
         {

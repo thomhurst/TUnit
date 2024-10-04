@@ -6,7 +6,7 @@ namespace TUnit.Analyzers.Tests;
 public class DataDrivenTestArgumentsAnalyzerTests
 {
     [Test]
-    public async Task DataDriven_Argument_Is_Flagged_When_No_Parameters_Passed()
+    public async Task Method_Data_Source_Is_Flagged_When_No_Parameters_Passed()
     {
         const string text = """
                             using TUnit.Core;
@@ -30,7 +30,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
     }
     
     [Test]
-    public async Task DataDriven_Argument_Is_Flagged_When_Does_Not_Match_Parameter_Type()
+    public async Task Method_Data_Source_Is_Flagged_When_Does_Not_Match_Parameter_Type()
     {
         const string text = """
                             using TUnit.Core;
@@ -54,7 +54,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
     }
     
     [Test]
-    public async Task DataDriven_Argument_Is_Not_Flagged_When_Matches_Parameter_Type()
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Matches_Parameter_Type()
     {
         const string text = """
                             using TUnit.Core;

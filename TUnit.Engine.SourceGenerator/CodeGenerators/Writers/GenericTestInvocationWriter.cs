@@ -48,7 +48,9 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.VariableNames.ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.VariableNames.ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.PropertyContainers.SelectMany(x => x.ArgumentsContainer.VariableNames).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"InternalTestClassArguments = [{ToInjectedTypes(testSourceDataModel.ClassArguments).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"InternalTestClassProperties = [{testSourceDataModel.PropertyArguments.PropertyContainers.SelectMany(x => ToInjectedTypes(x.ArgumentsContainer)).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"InternalTestMethodArguments = [{ToInjectedTypes(testSourceDataModel.MethodArguments).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");

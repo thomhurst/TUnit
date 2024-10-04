@@ -15,7 +15,7 @@ internal record ClassDataSourceAttributeContainer : DataAttributeContainer
     public required string? Key { get; init; }
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
-        var variableName = GenerateVariableName(ref variableIndex);
+        var variableName = VariableNames.ElementAtOrDefault(0) ?? GenerateVariableName(ref variableIndex);
         
         if (SharedArgumentType is "TUnit.Core.SharedType.Globally")
         {

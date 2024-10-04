@@ -51,7 +51,7 @@ internal static class MethodDataSourceRetriever
             innerType = dataSourceMethod.ReturnType!;
         }
         
-        if (innerType!.IsTupleType && innerType is INamedTypeSymbol typeSymbol)
+        if (parameterOrPropertyTypes.Length > 1 && innerType!.IsTupleType && innerType is INamedTypeSymbol typeSymbol)
         {
             var tupleTypes = typeSymbol.TupleUnderlyingType?.TypeArguments ??
                              typeSymbol.TypeArguments;

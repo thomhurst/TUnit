@@ -11,6 +11,11 @@ public abstract class BaseAssertCondition
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
+    internal InvokableAssertionBuilder<TActual> ChainedToWithoutExpression(AssertionBuilder<TActual> assertionBuilder)
+    {
+        return assertionBuilder.WithAssertion(this);
+    }
+    
     internal InvokableAssertionBuilder<TActual> ChainedTo(AssertionBuilder<TActual> assertionBuilder, string[] argumentExpressions, [CallerMemberName] string caller = "")
     {
         return assertionBuilder.AppendExpression($"{caller}({string.Join(", ", argumentExpressions)})").WithAssertion(this);
