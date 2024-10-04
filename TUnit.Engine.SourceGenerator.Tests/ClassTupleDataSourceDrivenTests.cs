@@ -19,7 +19,7 @@ internal class ClassTupleDataSourceDrivenTests : TestsBase<TestsGenerator>
             AssertFileContains(generatedFiles[index], "global::System.Int32 classArg = classArgTuples.Item1;");
             AssertFileContains(generatedFiles[index], "global::System.String classArg1 = classArgTuples.Item2;");
             AssertFileContains(generatedFiles[index], "global::System.Boolean classArg2 = classArgTuples.Item3;");
-            AssertFileContains(generatedFiles[index], "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)\t\t\t{\n\t\t\t\tProperty1 = propertyArg,\n\t\t\t\tProperty2 = propertyArg1,\n\t\t\t}\n);");
+            AssertFileContains(generatedFiles[index], "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)\t\t\t{\n\t\t\t\tProperty1 = propertyArg,\n\t\t\t\tProperty2 = propertyArg1,\n\t\t\t\tProperty3 = propertyArg2,\n\t\t\t\tProperty4 = propertyArg3,\n\t\t\t}\n);");
             
             AssertFileContains(generatedFiles[index], $"var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.{testMethodName}());");
             AssertFileContains(generatedFiles[index], "global::System.Int32 methodArg = methodArgTuples.Item1;");
