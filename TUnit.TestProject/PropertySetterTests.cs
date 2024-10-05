@@ -80,7 +80,11 @@ public class PropertySetterTests
         public async ValueTask DisposeAsync()
         {
             await PrintMessage("Disposing Property");
-            await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
+            
+            if (TestSessionContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
+            {
+                await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
+            }
         }
     }
     
@@ -99,7 +103,11 @@ public class PropertySetterTests
         public async ValueTask DisposeAsync()
         {
             await PrintMessage("Disposing Static Property");
-            await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
+            
+            if (TestSessionContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
+            {
+                await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
+            }
         }
     }
 
