@@ -31,27 +31,10 @@ public class PropertySetterTests
     [ClassDataSource<StaticInnerModel>(Shared = SharedType.Globally)]
     public static StaticInnerModel StaticProperty { get; set; } = null!;
     
-    private static readonly StringBuilder _stringBuilder = new();
-    private static TextWriter? _defaultOut;
-    
-    [Before(TestDiscovery)]
-    public static void RedirectConsole()
-    {
-        _defaultOut = Console.Out;
-        Console.SetOut(new StringWriter(_stringBuilder));
-    }
-    
-    [After(TestSession)]
-    public static async Task RevertConsole()
-    {
-        Console.SetOut(_defaultOut!);
-        await File.WriteAllTextAsync("PropertySetterTests_CapturedOutput.txt", _stringBuilder.ToString());
-    }
-    
     [Before(TestSession)]
     public static async Task BeforeTestSession()
     {
-        Console.WriteLine("Before Test Session");
+        await PrintMessage("Before Test Session");
 
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
     }
@@ -59,7 +42,7 @@ public class PropertySetterTests
     [Before(Assembly)]
     public static async Task BeforeAssembly()
     {
-        Console.WriteLine("Before Assembly");
+        await PrintMessage("Before Assembly");
 
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
     }
@@ -67,7 +50,7 @@ public class PropertySetterTests
     [Before(Class)]
     public static async Task BeforeClass()
     {
-        Console.WriteLine("Before Class");
+        await PrintMessage("Before Class");
 
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
     }
@@ -75,9 +58,9 @@ public class PropertySetterTests
     [Test]
     public async Task Test()
     {
-        Console.WriteLine("Running Test");
+        await PrintMessage("Running Test");
 
-        Console.WriteLine(StaticProperty);
+        await PrintMessage(StaticProperty.ToString());
         await Assert.That(StaticProperty).IsNotNull();
         await Assert.That(StaticProperty.IsInitialized).IsTrue();
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
@@ -85,12 +68,11 @@ public class PropertySetterTests
 
     public class InnerModel : IAsyncInitializer, IAsyncDisposable
     {
-        public Task InitializeAsync()
+        public async Task InitializeAsync()
         {
-            Console.WriteLine("Initializing Property");
+            await PrintMessage("Initializing Property");
             IsInitialized = true;
             Foo = "Bar";
-            return Task.CompletedTask;
         }
 
         public bool IsInitialized { get; private set; }
@@ -98,19 +80,18 @@ public class PropertySetterTests
 
         public async ValueTask DisposeAsync()
         {
-            Console.WriteLine("Disposing Property");
+            await PrintMessage("Disposing Property");
             await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
         }
     }
     
     public record StaticInnerModel : IAsyncInitializer, IAsyncDisposable
     {
-        public Task InitializeAsync()
+        public async Task InitializeAsync()
         {
-            Console.WriteLine("Initializing Static Property");
+            await PrintMessage("Initializing Static Property");
             IsInitialized = true;
             Foo = "Bar";
-            return Task.CompletedTask;
         }
 
         public bool IsInitialized { get; private set; }
@@ -118,10 +99,16 @@ public class PropertySetterTests
 
         public async ValueTask DisposeAsync()
         {
-            Console.WriteLine("Disposing Static Property");
+            await PrintMessage("Disposing Static Property");
             await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
         }
     }
 
     public static string MethodData() => "2";
+
+    private static async Task PrintMessage(string message)
+    {
+        await PrintMessage(message);
+        await File.AppendAllTextAsync("PropertySetterTests_CapturedOutput.txt", message);
+    }
 }
