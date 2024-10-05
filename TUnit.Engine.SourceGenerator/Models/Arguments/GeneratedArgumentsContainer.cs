@@ -50,7 +50,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
 
         if (ArgumentsType == ArgumentsType.Property)
         {
-            sourceCodeWriter.WriteLine($"var {VariableNames[0]} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources({dataGeneratorMetadata})).ElementAtOrDefault(0);");
+            sourceCodeWriter.WriteLine($"var {VariableNames.ElementAt(0)} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources({dataGeneratorMetadata})).ElementAtOrDefault(0);");
             sourceCodeWriter.WriteLine();
             return;
         }
@@ -67,7 +67,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
         {
             for (var i = 0; i < GenericArguments.Length; i++)
             {
-                sourceCodeWriter.WriteLine($"{GenericArguments[i]} {VariableNames[i]} = {generatedDataVariableName}.Item{i + 1};");
+                sourceCodeWriter.WriteLine($"{GenericArguments[i]} {VariableNames.ElementAt(i)} = {generatedDataVariableName}.Item{i + 1};");
             }
 
             sourceCodeWriter.WriteLine();

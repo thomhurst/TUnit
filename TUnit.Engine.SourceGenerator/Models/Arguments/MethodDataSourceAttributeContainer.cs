@@ -55,7 +55,7 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
                 {
                     var tupleType = TupleTypes[index];
                 
-                    sourceCodeWriter.WriteLine($"{tupleType} {VariableNames[index]} = {tupleVariableName}.Item{index+1};");
+                    sourceCodeWriter.WriteLine($"{tupleType} {VariableNames.ElementAt(index)} = {tupleVariableName}.Item{index+1};");
                 }
             }
             
@@ -74,12 +74,12 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
             {
                 var tupleType = TupleTypes[index];
                 
-                sourceCodeWriter.WriteLine($"{tupleType} {VariableNames[index]} = {tupleVariableName}.Item{index+1};");
+                sourceCodeWriter.WriteLine($"{tupleType} {VariableNames.ElementAt(index)} = {tupleVariableName}.Item{index+1};");
             }
         }
         else
         {
-            sourceCodeWriter.WriteLine($"{MethodReturnType} {VariableNames[0]} = {GetMethodInvocation()};");
+            sourceCodeWriter.WriteLine($"{MethodReturnType} {VariableNames.ElementAt(0)} = {GetMethodInvocation()};");
         }
         
         sourceCodeWriter.WriteLine();
