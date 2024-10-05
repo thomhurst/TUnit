@@ -498,12 +498,10 @@ public static class TestRegistrar
         }));
     }
     
-    public static void RegisterStaticPropertyInjector(Type testClassType, Type injectableType, Func<object?> propertyAccessor)
+    public static void RegisterStaticPropertyInjector(Type testClassType, Type injectableType, object? obj)
     {
 	    var func = TestDictionary.StaticInjectedPropertiesByInjectedType.GetOrAdd(injectableType, _ => new Lazy<Task<object?>>(async () =>
 	    {
-		    var obj = propertyAccessor();
-
 		    if (obj is IAsyncInitializer)
 		    {
 			    await TestDataContainer.InjectedSharedGloballyInitializations[injectableType].Value;
