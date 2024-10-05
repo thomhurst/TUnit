@@ -63,13 +63,13 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
             var currentTestFilter = GetTestFilter(context);
             
+            GlobalContext.Current.TestFilter = currentTestFilter;
+            
             await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
             {
                 TestFilter = currentTestFilter
             });
             
-            GlobalContext.Current.TestFilter = currentTestFilter;
-
             var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest,
                 context.CancellationToken);
 
