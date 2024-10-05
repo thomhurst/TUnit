@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions;
+﻿using System.Text;
+using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 
@@ -29,7 +30,24 @@ public class PropertySetterTests
 
     [ClassDataSource<StaticInnerModel>(Shared = SharedType.Globally)]
     public static StaticInnerModel StaticProperty { get; set; } = null!;
-
+    
+    private static readonly StringBuilder _stringBuilder = new();
+    private static TextWriter? _defaultOut;
+    
+    [Before(TestDiscovery)]
+    public static void RedirectConsole()
+    {
+        _defaultOut = Console.Out;
+        Console.SetOut(new StringWriter(_stringBuilder));
+    }
+    
+    [After(TestSession)]
+    public static async Task RevertConsole()
+    {
+        Console.SetOut(_defaultOut!);
+        await File.WriteAllTextAsync("PropertySetterTests_CapturedOutput.txt", _stringBuilder.ToString());
+    }
+    
     [Before(TestSession)]
     public static async Task BeforeTestSession()
     {
@@ -59,7 +77,7 @@ public class PropertySetterTests
     {
         Console.WriteLine("Running Test");
 
-        Console.WriteLine(Property7);
+        Console.WriteLine(StaticProperty);
         await Assert.That(StaticProperty).IsNotNull();
         await Assert.That(StaticProperty.IsInitialized).IsTrue();
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
@@ -85,7 +103,7 @@ public class PropertySetterTests
         }
     }
     
-    public class StaticInnerModel : IAsyncInitializer, IAsyncDisposable
+    public record StaticInnerModel : IAsyncInitializer, IAsyncDisposable
     {
         public Task InitializeAsync()
         {
