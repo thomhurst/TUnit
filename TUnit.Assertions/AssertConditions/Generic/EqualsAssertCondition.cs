@@ -2,10 +2,10 @@
 
 public class EqualsAssertCondition<TActual>(TActual expected) : AssertCondition<TActual, TActual>(expected)
 {
-    protected internal override string GetFailureMessage() => $"""
-                                                 Expected: {ExpectedValue}
-                                                 Received: {ActualValue}
-                                                 """;
+    protected internal override string GetFailureMessage()
+        => $"""
+            Expected {ActualExpression} to be {ExpectedValue}{Because}, but found {ActualValue}.
+            """;
 
     protected override bool Passes(TActual? actualValue, Exception? exception)
     {

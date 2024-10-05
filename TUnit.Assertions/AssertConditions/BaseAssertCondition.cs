@@ -40,4 +40,13 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     }
 
     protected abstract bool Passes(TActual? actualValue, Exception? exception);
+
+    protected string Because => _becauseReason?.ToString() ?? string.Empty;
+
+    private BecauseReason? _becauseReason;
+    
+    internal virtual void SetBecauseReason(BecauseReason becauseReason)
+    {
+        _becauseReason = becauseReason;
+    }
 }
