@@ -107,7 +107,10 @@ public class PropertySetterTests
 
     private static async Task PrintMessage(string message)
     {
-        Console.WriteLine(message);
-        await File.AppendAllTextAsync("PropertySetterTests_CapturedOutput.txt", message);
+        if (TestSessionContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
+        {
+            Console.WriteLine(message);
+            await File.AppendAllTextAsync("PropertySetterTests_CapturedOutput.txt", message);
+        }
     }
 }

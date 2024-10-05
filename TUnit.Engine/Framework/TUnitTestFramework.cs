@@ -60,7 +60,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             _serviceProvider.Initializer.Initialize();
 
-            await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
+            await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
+            {
+                TestFilter = GetTestFilter(context)
+            });
 
             var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest,
                 context.CancellationToken);
@@ -77,7 +80,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             }
 
             await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
-                new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
+                new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
+                {
+                    TestFilter = GetTestFilter(context)
+                });
 
             switch (context.Request)
             {
@@ -100,7 +106,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     await NotifyFailedTests(context, failedToInitializeTests, false);
 
                     var testSessionContext =
-                        new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
+                        new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
+                        {
+                            TestFilter = GetTestFilter(context)
+                        };
 
                     await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
 
@@ -192,9 +201,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         typeof(TestNodeUpdateMessage),
         typeof(SessionFileArtifact)
     ];
-    
+
     private async ValueTask InitializeStaticProperties(TestContext testContext)
     {
         await _serviceProvider.StaticPropertyInjectorsOrchestrator.Execute(testContext.TestDetails.ClassType);
+    }
+
+    private static string? GetTestFilter(ExecuteRequestContext context)
+    {
+        return context.Request switch
+        {
+            RunTestExecutionRequest runTestExecutionRequest => runTestExecutionRequest.Filter.ToString(),
+            DiscoverTestExecutionRequest discoverTestExecutionRequest => discoverTestExecutionRequest.Filter.ToString(),
+            TestExecutionRequest testExecutionRequest => testExecutionRequest.Filter.ToString(),
+            _ => throw new ArgumentException(nameof(context.Request))
+        };
     }
 }

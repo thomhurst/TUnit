@@ -13,6 +13,8 @@ public class TestDiscoveryContext : Context
     {
         Assemblies = assemblies;
     }
+    
+    public required string? TestFilter { get; init; }
 
     public IEnumerable<AssemblyHookContext> Assemblies { get; }
     public IEnumerable<ClassHookContext> TestClasses => Assemblies.SelectMany(x => x.TestClasses);
