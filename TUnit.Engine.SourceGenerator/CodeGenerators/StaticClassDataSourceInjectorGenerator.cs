@@ -47,24 +47,16 @@ internal class StaticClassDataSourceInjectorGenerator : IIncrementalGenerator
         {
             yield break;
         }
-        
-        foreach (var contextAttribute in context.Attributes)
-        {
-            if (!contextAttribute.NamedArguments.Any(static a =>
-                    a.Key == "Shared" && a.Value.ToCSharpString() == "TUnit.Core.SharedType.Globally"))
-            {
-                continue;
-            }
-            
-            var injectableType = contextAttribute.AttributeClass!.TypeArguments.First();
 
+        foreach (var contextAttribute in context.Attributes
+                     .Where(contextAttribute => contextAttribute.NamedArguments
+                         .Any(static a => a.Key == "Shared" && a.Value.ToCSharpString() == "TUnit.Core.SharedType.Globally")))
+        {
+            var injectableType = contextAttribute.AttributeClass!.TypeArguments.First();
+            
             yield return new StaticClassDataSourceInjectorModel
             {
-                MinimalTypeName = propertySymbol.ContainingType.Name,
-                FullyQualifiedTypeName =
-                    propertySymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-                PropertyName = propertySymbol.Name,
-                InjectableType = injectableType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                MinimalTypeName = propertySymbol.ContainingType.Name, FullyQualifiedTypeName = propertySymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix), PropertyName = propertySymbol.Name, InjectableType = injectableType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             };
         }
     }

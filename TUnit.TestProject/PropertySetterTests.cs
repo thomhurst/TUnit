@@ -1,5 +1,4 @@
-﻿using System.Text;
-using TUnit.Assertions;
+﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 
