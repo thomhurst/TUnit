@@ -93,7 +93,7 @@ public class PropertySetterTests
             
             if (IsMatchingTestFilter())
             {
-                await File.WriteAllTextAsync($"{TestContext.Current!.TestDetails.ClassType.Name}_Property_IAsyncDisposable.txt", "true");
+                await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
             }
         }
     }
@@ -125,10 +125,16 @@ public class PropertySetterTests
 
     private static async Task PrintMessage(string message)
     {
-        if (IsMatchingTestFilter())
+        if (GlobalContext.Current.TestFilter is "/*/*/PropertySetterTests/*")
         {
             Console.WriteLine(message);
-            await File.AppendAllLinesAsync($"{TestContext.Current!.TestDetails.ClassType.Name}_CapturedOutput.txt", [message]);
+            await File.AppendAllLinesAsync("PropertySetterTests_CapturedOutput.txt", [message]);
+        }
+        
+        if (GlobalContext.Current.TestFilter is "/*/*/InheritedPropertySetterTests/*")
+        {
+            Console.WriteLine(message);
+            await File.AppendAllLinesAsync("InheritedPropertySetterTests_CapturedOutput.txt", [message]);
         }
     }
 
