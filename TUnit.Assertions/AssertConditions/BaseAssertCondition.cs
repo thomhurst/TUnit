@@ -47,6 +47,11 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     
     internal virtual void SetBecauseReason(BecauseReason becauseReason)
     {
+        if (_becauseReason != null)
+        {
+            // If multiple because reasons are provided, only apply them to the newer assertions.
+            return;
+        }
         _becauseReason = becauseReason;
     }
 }

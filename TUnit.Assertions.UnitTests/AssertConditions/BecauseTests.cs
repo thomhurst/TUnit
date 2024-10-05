@@ -65,4 +65,71 @@ public class BecauseTests
         var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
         await Assert.That(exception.Message).Contains("Expected variable to be False, but found True");
     }
+
+    [Test]
+    public async Task Apply_Because_Reasons_Only_On_Previous_Assertions()
+    {
+        var because = "we only apply it to previous assertions";
+        var variable = true;
+
+        var action = async () =>
+        {
+            await Assert.That(variable).IsTrue().Because(because)
+                .And.IsFalse();
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        await Assert.That(exception.Message).Contains("Expected variable to be False, but found True");
+    }
+
+    [Test]
+    public async Task Do_Not_Overwrite_Previous_Because_Reasons()
+    {
+        var because1 = "this is the first reason";
+        var because2 = "this is the second reason";
+        var variable = false;
+
+        var action = async () =>
+        {
+            await Assert.That(variable).IsTrue().Because(because1)
+                .And.IsFalse().Because(because2);
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        await Assert.That(exception.Message).Contains(because1);
+    }
+
+    [Test]
+    public async Task Apply_Because_Reason_When_Combining_With_And()
+    {
+        var because1 = "this is the first reason";
+        var because2 = "this is the second reason";
+        var variable = true;
+
+        var action = async () =>
+        {
+            await Assert.That(variable).IsTrue().Because(because1)
+                .And.IsFalse().Because(because2);
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        await Assert.That(exception.Message).Contains(because2);
+    }
+
+    [Test]
+    public async Task Apply_Because_Reason_When_Combining_With_Or()
+    {
+        var because1 = "this is the first reason";
+        var because2 = "this is the second reason";
+        var variable = true;
+
+        var action = async () =>
+        {
+            await Assert.That(variable).IsFalse().Because(because1)
+                .Or.IsFalse().Because(because2);
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        await Assert.That(exception.Message).Contains(because1).And.Contains(because2);
+    }
 }

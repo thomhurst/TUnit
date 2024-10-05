@@ -20,7 +20,10 @@ public class InvokableValueAssertionBuilder<TActual> : InvokableAssertionBuilder
     public InvokableValueAssertionBuilder<TActual> Because([StringSyntax("CompositeFormat")] string because, params object[] becauseArgs)
     {
         var becauseReason = new BecauseReason(because, becauseArgs);
-        this.Assertions.Peek().SetBecauseReason(becauseReason);
+        foreach (var assertion in Assertions)
+        {
+            assertion.SetBecauseReason(becauseReason);
+        }
         return this;
     }
 

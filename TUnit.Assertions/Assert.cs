@@ -94,7 +94,7 @@ public static class Assert
         }
         catch (TException e)
         {
-            // In case we assert on the AssertionException we should deal with it correctly!
+            // In case we want to assert to catch an AssertionException
             return e;
         }
 

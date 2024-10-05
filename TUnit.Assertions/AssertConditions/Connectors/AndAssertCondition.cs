@@ -35,4 +35,10 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
     {
         return _condition1.Assert(actualValue, exception, ActualExpression) && _condition2.Assert(actualValue, exception, ActualExpression);
     }
+
+    internal override void SetBecauseReason(BecauseReason becauseReason)
+    {
+        _condition1.SetBecauseReason(becauseReason);
+        _condition2.SetBecauseReason(becauseReason);
+    }
 }
