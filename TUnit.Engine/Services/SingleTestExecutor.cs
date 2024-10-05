@@ -111,14 +111,14 @@ internal class SingleTestExecutor : IDataProducer
                 }
 
                 start = DateTimeOffset.Now;
-
-                await InitializeParameters(testContext);
                 
                 try
                 {
                     await ExecuteBeforeHooks(test, context, testContext);
 
                     TestContext.Current = testContext;
+                    
+                    await InitializeParameters(testContext);
 
                     foreach (var beforeTestAttribute in test.BeforeTestAttributes)
                     {
