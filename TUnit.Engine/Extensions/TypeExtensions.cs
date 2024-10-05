@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Engine.Extensions;
 
-public static class TypeExtensions
+internal static class TypeExtensions
 {
     public static IEnumerable<Type> GetSelfAndBaseTypes(this Type type)
     {
