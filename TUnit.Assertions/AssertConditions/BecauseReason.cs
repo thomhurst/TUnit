@@ -2,25 +2,18 @@
 
 namespace TUnit.Assertions.AssertConditions;
 
-internal class BecauseReason(string because)
+internal class BecauseReason(string reason)
 {
     private string? _message;
 
     private string CreateMessage()
     {
         const string prefix = "because";
-        try
-        {
-            string message = because.Trim();
+        string message = reason.Trim();
 
-            return !message.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                ? $" {prefix} {message}"
-                : $" {message}";
-        }
-        catch (FormatException)
-        {
-            return $"**WARNING: the because message '{because}' could not be formatted correctly!**";
-        }
+        return !message.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            ? $" {prefix} {message}"
+            : $" {message}";
     }
 
     public override string ToString()

@@ -15,9 +15,9 @@ public class InvokableValueAssertionBuilder<TActual> : InvokableAssertionBuilder
     /// Provide a reason explaining why the assertion is needed.<br />
     /// If the phrase does not start with the word <i>because</i>, it is prepended automatically.
     /// </summary>
-    public InvokableValueAssertionBuilder<TActual> Because(string because)
+    public InvokableValueAssertionBuilder<TActual> Because(string reason)
     {
-        var becauseReason = new BecauseReason(because);
+        var becauseReason = new BecauseReason(reason);
         foreach (var assertion in Assertions)
         {
             assertion.SetBecauseReason(becauseReason);
