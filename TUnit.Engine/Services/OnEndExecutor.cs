@@ -25,11 +25,11 @@ internal class OnEndExecutor
         _staticPropertyInjectorsOrchestrator = staticPropertyInjectorsOrchestrator;
     }
 
-    public async Task ExecuteAsync()
+    public async Task ExecuteAsync(TestSessionContext? testSessionContext)
     {
         try
         {
-            await WriteJsonOutputFile();
+            await WriteJsonOutputFile(testSessionContext);
             await DisposeStaticInjectableProperties();
         }
         catch (Exception e)
@@ -43,7 +43,7 @@ internal class OnEndExecutor
         await _staticPropertyInjectorsOrchestrator.DisposeAll();
     }
 
-    private async Task WriteJsonOutputFile()
+    private async Task WriteJsonOutputFile(TestSessionContext? testSessionContext)
     {
         if (!_commandLineOptions.IsOptionSet(JsonOutputCommandProvider.OutputJson))
         {
@@ -56,7 +56,7 @@ internal class OnEndExecutor
         
             await using var file = File.Create(path);
 
-            var jsonOutput = GetJsonOutput();
+            var jsonOutput = GetJsonOutput(testSessionContext);
         
             await JsonSerializer.SerializeAsync(file, jsonOutput, JsonContext.Default.TestSessionJson);
 
@@ -84,8 +84,16 @@ internal class OnEndExecutor
         return $"{prefix}{filename}.json";
     }
 
-    private static TestSessionJson GetJsonOutput()
+    private static TestSessionJson GetJsonOutput(TestSessionContext? testSessionContext)
     {
-        return new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()).ToJsonModel();
+        if (testSessionContext is null)
+        {
+            return new TestSessionJson
+            {
+                Assemblies = []
+            };
+        }
+        
+        return testSessionContext.ToJsonModel();
     }
 }

@@ -56,6 +56,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _serviceProvider.StandardOutConsoleInterceptor.Initialize();
         _serviceProvider.StandardErrorConsoleInterceptor.Initialize();
 
+        TestSessionContext? testSessionContext = null;
         try
         {
             _serviceProvider.Initializer.Initialize();
@@ -105,7 +106,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 case RunTestExecutionRequest runTestExecutionRequest:
                     await NotifyFailedTests(context, failedToInitializeTests, false);
 
-                    var testSessionContext =
+                    testSessionContext =
                         new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
                         {
                             TestFilter = GetTestFilter(context)
@@ -141,7 +142,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         finally
         {
-            await _serviceProvider.OnEndExecutor.ExecuteAsync();
+            await _serviceProvider.OnEndExecutor.ExecuteAsync(testSessionContext);
 
             context.Complete();
         }
