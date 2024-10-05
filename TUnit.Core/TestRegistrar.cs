@@ -500,10 +500,20 @@ public static class TestRegistrar
     
     public static void RegisterStaticPropertyInjector(Type testClassType, Type injectableType, Func<object?> propertyAccessor)
     {
-	    TestDictionary.StaticInjectedPropertiesByInjectedType.GetOrAdd(injectableType, _ => propertyAccessor);
+	    var func = TestDictionary.StaticInjectedPropertiesByInjectedType.GetOrAdd(injectableType, async _ =>
+	    {
+		    var obj = propertyAccessor();
+
+		    if (obj is IAsyncInitializer)
+		    {
+			    await TestDataContainer.InjectedSharedGloballyInitializations[injectableType].Value;
+		    }
+
+		    return obj;
+	    });
 	    
 	    var propertiesByTestClass = TestDictionary.StaticInjectedPropertiesByTestClassType.GetOrAdd(testClassType, _ => []);
-	    propertiesByTestClass.Enqueue(propertyAccessor);
+	    propertiesByTestClass.Enqueue(func);
     }
     
     internal static ClassHookContext GetClassHookContext(Type type)

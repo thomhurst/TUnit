@@ -28,17 +28,7 @@ internal class StaticPropertyInjectorsOrchestrator
 
         while (initialisers.TryDequeue(out var initialiser))
         {
-            var obj = initialiser.Invoke();
-            
-            if(obj is null)
-            {
-                continue;
-            }
-           
-            if (TestDataContainer.InjectedSharedGloballyInitializations.TryGetValue(obj.GetType(), out var asyncInitializer))
-            {
-                await asyncInitializer.Value;
-            }
+            await initialiser;
         }
     }
 
@@ -48,7 +38,7 @@ internal class StaticPropertyInjectorsOrchestrator
         {
             try
             {
-                var obj = staticInjectedProperty();
+                var obj = await staticInjectedProperty;
                 await _disposer.DisposeAsync(obj);
             }
             catch (Exception e)
