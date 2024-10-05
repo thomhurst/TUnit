@@ -27,8 +27,8 @@ public class PropertySetterTests
     [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
     public required string Property7 { get; init; }
 
-    [ClassDataSource<InnerModel>(Shared = SharedType.Globally)]
-    public static InnerModel StaticProperty { get; set; } = null!;
+    [ClassDataSource<StaticInnerModel>(Shared = SharedType.Globally)]
+    public static StaticInnerModel StaticProperty { get; set; } = null!;
 
     [Before(TestSession)]
     public static async Task BeforeTestSession()
@@ -66,6 +66,26 @@ public class PropertySetterTests
     }
 
     public class InnerModel : IAsyncInitializer, IAsyncDisposable
+    {
+        public Task InitializeAsync()
+        {
+            Console.WriteLine("Initializing Property");
+            IsInitialized = true;
+            Foo = "Bar";
+            return Task.CompletedTask;
+        }
+
+        public bool IsInitialized { get; private set; }
+        public string? Foo { get; private set; }
+
+        public async ValueTask DisposeAsync()
+        {
+            Console.WriteLine("Disposing Property");
+            await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
+        }
+    }
+    
+    public class StaticInnerModel : IAsyncInitializer, IAsyncDisposable
     {
         public Task InitializeAsync()
         {
