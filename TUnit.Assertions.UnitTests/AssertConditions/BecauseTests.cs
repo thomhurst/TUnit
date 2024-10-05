@@ -65,6 +65,36 @@ public class BecauseTests
         var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
         await Assert.That(exception.Message).Contains("Expected variable to be False, but found True");
     }
+    
+    [Test]
+    public async Task Include_Because_Arguments_In_Message()
+    {
+        var because = "Reason with {0} {1} in it";
+        var variable = true;
+
+        var action = async () =>
+        {
+            await Assert.That(variable).IsFalse().Because(because, 2, "Arguments");
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        await Assert.That(exception.Message).Contains("Reason with 2 Arguments in it");
+    }
+    
+    [Test]
+    public async Task Include_Warning_For_Incorrect_Format_Strings()
+    {
+        var because = "Reason with {} incorrect placeholder";
+        var variable = true;
+
+        var action = async () =>
+        {
+            await Assert.That(variable).IsFalse().Because(because, "Some Argument");
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        await Assert.That(exception.Message).Contains("**WARNING").And.Contains(because);
+    }
 
     [Test]
     public async Task Apply_Because_Reasons_Only_On_Previous_Assertions()
