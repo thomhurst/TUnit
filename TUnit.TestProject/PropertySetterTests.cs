@@ -33,24 +33,32 @@ public class PropertySetterTests
     [Before(TestSession)]
     public static async Task BeforeTestSession()
     {
+        Console.WriteLine("Before Test Session");
+
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
     }
     
     [Before(Assembly)]
     public static async Task BeforeAssembly()
     {
+        Console.WriteLine("Before Assembly");
+
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
     }
 
     [Before(Class)]
     public static async Task BeforeClass()
     {
+        Console.WriteLine("Before Class");
+
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
     }
 
     [Test]
     public async Task Test()
     {
+        Console.WriteLine("Running Test");
+
         Console.WriteLine(Property7);
         await Assert.That(StaticProperty).IsNotNull();
         await Assert.That(StaticProperty.IsInitialized).IsTrue();
@@ -61,6 +69,7 @@ public class PropertySetterTests
     {
         public Task InitializeAsync()
         {
+            Console.WriteLine("Initializing Static Property");
             IsInitialized = true;
             Foo = "Bar";
             return Task.CompletedTask;
@@ -71,6 +80,7 @@ public class PropertySetterTests
 
         public async ValueTask DisposeAsync()
         {
+            Console.WriteLine("Disposing Static Property");
             await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
         }
     }
