@@ -1,4 +1,8 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Core.Interfaces;
+
+namespace TUnit.TestProject;
 
 public class PropertySetterTests
 {
@@ -22,15 +26,27 @@ public class PropertySetterTests
         
     [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
     public required string Property7 { get; init; }
+
+    [ClassDataSource<InnerModel>(Shared = SharedType.Globally)]
+    public static InnerModel StaticProperty { get; set; } = null!;
     
     [Test]
-    public void Test()
+    public async Task Test()
     {
         Console.WriteLine(Property7);
+        await Assert.That(StaticProperty).IsNotNull();
+        await Assert.That(StaticProperty.IsInitialized).IsTrue();
     }
 
-    public class InnerModel
+    public class InnerModel : IAsyncInitializer
     {
+        public Task InitializeAsync()
+        {
+            IsInitialized = true;
+            return Task.CompletedTask;
+        }
+
+        public bool IsInitialized { get; private set; }
     }
 
     public static string MethodData() => "2";

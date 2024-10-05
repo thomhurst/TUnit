@@ -31,7 +31,7 @@ internal class SingleTestExecutor : IDataProducer
     private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
     private readonly ClassHookOrchestrator _classHookOrchestrator;
     private readonly TUnitFrameworkLogger _logger;
-    
+
     public SingleTestExecutor(
         IExtension extension,
         Disposer disposer,
@@ -248,8 +248,9 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task InitializeParameters(TestContext testContext)
+    private async ValueTask InitializeParameters(TestContext testContext)
     {
+        // Instance
         IEnumerable<TestData> args =
         [
             ..testContext.TestDetails.InternalTestClassArguments,
