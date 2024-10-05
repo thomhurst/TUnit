@@ -29,13 +29,32 @@ public class PropertySetterTests
 
     [ClassDataSource<InnerModel>(Shared = SharedType.Globally)]
     public static InnerModel StaticProperty { get; set; } = null!;
+
+    [Before(TestSession)]
+    public static async Task BeforeTestSession()
+    {
+        await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+    }
     
+    [Before(Assembly)]
+    public static async Task BeforeAssembly()
+    {
+        await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+    }
+
+    [Before(Class)]
+    public static async Task BeforeClass()
+    {
+        await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+    }
+
     [Test]
     public async Task Test()
     {
         Console.WriteLine(Property7);
         await Assert.That(StaticProperty).IsNotNull();
         await Assert.That(StaticProperty.IsInitialized).IsTrue();
+        await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
     }
 
     public class InnerModel : IAsyncInitializer, IAsyncDisposable
@@ -43,10 +62,12 @@ public class PropertySetterTests
         public Task InitializeAsync()
         {
             IsInitialized = true;
+            Foo = "Bar";
             return Task.CompletedTask;
         }
 
         public bool IsInitialized { get; private set; }
+        public string? Foo { get; private set; }
 
         public async ValueTask DisposeAsync()
         {
