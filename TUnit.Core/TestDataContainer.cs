@@ -127,6 +127,12 @@ public static class TestDataContainer
 
     internal static async Task ConsumeGlobalCount(Type type)
     {
+        if (TestDictionary.StaticInjectedProperties.TryGet(type, out var _))
+        {
+            // This is also being used in static properties, so we'll dispose it after the test session.
+            return;
+        }
+        
         lock (Lock)
         {
             var count = CountsPerGlobalType.GetOrAdd(type, _ => 0);

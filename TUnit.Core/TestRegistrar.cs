@@ -498,10 +498,11 @@ public static class TestRegistrar
         }));
     }
     
-    public static void RegisterStaticPropertyInjector(Type testClassType, Type injectableType, Lazy<Action> func)
+    public static void RegisterStaticPropertyInjector(Type testClassType, Type injectableType, Func<object?> propertyAccessor, Lazy<Action> initializer)
     {
 	    var list = TestDictionary.StaticPropertyInjectors.GetOrAdd(testClassType, _ => []);
-	    list.Enqueue((injectableType, func));
+	    list.Enqueue((injectableType, initializer));
+	    TestDictionary.StaticInjectedProperties.GetOrAdd(injectableType, _ => propertyAccessor);
     }
     
     internal static ClassHookContext GetClassHookContext(Type type)
