@@ -61,10 +61,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             _serviceProvider.Initializer.Initialize();
 
+            var currentTestFilter = GetTestFilter(context);
+            
             await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
             {
-                TestFilter = GetTestFilter(context)
+                TestFilter = currentTestFilter
             });
+            
+            GlobalContext.Current.TestFilter = currentTestFilter;
 
             var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest,
                 context.CancellationToken);
@@ -83,7 +87,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
                 new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
                 {
-                    TestFilter = GetTestFilter(context)
+                    TestFilter = currentTestFilter
                 });
 
             switch (context.Request)
@@ -109,7 +113,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     testSessionContext =
                         new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
                         {
-                            TestFilter = GetTestFilter(context)
+                            TestFilter = currentTestFilter
                         };
 
                     await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
