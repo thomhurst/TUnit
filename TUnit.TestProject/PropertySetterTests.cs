@@ -127,7 +127,7 @@ public class PropertySetterTests
         if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
         {
             Console.WriteLine(message);
-            await File.AppendAllTextAsync("PropertySetterTests_CapturedOutput.txt", message);
+            await File.AppendAllLinesAsync("PropertySetterTests_CapturedOutput.txt", [message]);
         }
     }
 }
