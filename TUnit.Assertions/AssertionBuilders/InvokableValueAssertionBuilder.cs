@@ -12,14 +12,12 @@ public class InvokableValueAssertionBuilder<TActual> : InvokableAssertionBuilder
     }
 
     /// <summary>
-    /// Provide a formatted phrase explaining why the assertion is needed.<br />
+    /// Provide a reason explaining why the assertion is needed.<br />
     /// If the phrase does not start with the word <i>because</i>, it is prepended automatically.
     /// </summary>
-    /// <param name="because">The composite format string explaining why the assertion is needed.</param>
-    /// <param name="becauseArgs">The optional parameters used to replace the placeholders in <paramref name="because"/> with <see cref="string.Format(string,object[])" />.</param>
-    public InvokableValueAssertionBuilder<TActual> Because([StringSyntax("CompositeFormat")] string because, params object[] becauseArgs)
+    public InvokableValueAssertionBuilder<TActual> Because(string because)
     {
-        var becauseReason = new BecauseReason(because, becauseArgs);
+        var becauseReason = new BecauseReason(because);
         foreach (var assertion in Assertions)
         {
             assertion.SetBecauseReason(becauseReason);

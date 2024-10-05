@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.AssertConditions;
 
-internal class BecauseReason(string because, object[] becauseArgs)
+internal class BecauseReason(string because)
 {
     private string? _message;
 
@@ -12,11 +12,6 @@ internal class BecauseReason(string because, object[] becauseArgs)
         try
         {
             string message = because.Trim();
-
-            if (becauseArgs?.Length > 0)
-            {
-                message = string.Format(CultureInfo.InvariantCulture, message, becauseArgs);
-            }
 
             return !message.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
                 ? $" {prefix} {message}"

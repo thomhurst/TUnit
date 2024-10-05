@@ -52,6 +52,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
             // If multiple because reasons are provided, only apply them to the newer assertions.
             return;
         }
+        
         _becauseReason = becauseReason;
     }
 }
