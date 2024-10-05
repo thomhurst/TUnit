@@ -33,25 +33,34 @@ public class PropertySetterTests
     [Before(TestSession)]
     public static async Task BeforeTestSession()
     {
-        await PrintMessage("Before Test Session");
+        if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+        {
+            await PrintMessage("Before Test Session");
 
-        await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+            await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+        }
     }
     
     [Before(Assembly)]
     public static async Task BeforeAssembly()
     {
-        await PrintMessage("Before Assembly");
+        if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+        {
+            await PrintMessage("Before Assembly");
 
-        await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+            await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+        }
     }
 
     [Before(Class)]
     public static async Task BeforeClass()
     {
-        await PrintMessage("Before Class");
+        if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+        {
+            await PrintMessage("Before Class");
 
-        await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+            await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+        }
     }
 
     [Test]
