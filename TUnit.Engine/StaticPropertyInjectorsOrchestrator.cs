@@ -21,17 +21,21 @@ internal class StaticPropertyInjectorsOrchestrator
     
     public async ValueTask Execute(Type testClassType)
     {
-        if (!TestDictionary.StaticPropertyInjectors.TryGetValue(testClassType, out var initialisers))
+        if (!TestDictionary.StaticInjectedPropertiesByTestClassType.TryGet(testClassType, out var initialisers))
         {
             return;
         }
 
         while (initialisers.TryDequeue(out var initialiser))
         {
-            initialiser.InitialiserAction.Value.Invoke();
+            var obj = initialiser.Invoke();
+            
+            if(obj is null)
+            {
+                continue;
+            }
            
-            if (TestDataContainer.InjectedSharedGloballyInitializations.TryGetValue(initialiser.InjectableType,
-                    out var asyncInitializer))
+            if (TestDataContainer.InjectedSharedGloballyInitializations.TryGetValue(obj.GetType(), out var asyncInitializer))
             {
                 await asyncInitializer.Value;
             }
@@ -40,7 +44,7 @@ internal class StaticPropertyInjectorsOrchestrator
 
     public async Task DisposeAll()
     {
-        foreach (var staticInjectedProperty in TestDictionary.StaticInjectedProperties.Values)
+        foreach (var staticInjectedProperty in TestDictionary.StaticInjectedPropertiesByInjectedType.Values)
         {
             try
             {
