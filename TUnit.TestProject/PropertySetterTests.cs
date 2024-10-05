@@ -81,7 +81,7 @@ public class PropertySetterTests
         {
             await PrintMessage("Disposing Property");
             
-            if (TestSessionContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
+            if (BeforeTestDiscoveryContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
             {
                 await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
             }
@@ -104,7 +104,7 @@ public class PropertySetterTests
         {
             await PrintMessage("Disposing Static Property");
             
-            if (TestSessionContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
+            if (BeforeTestDiscoveryContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
             {
                 await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
             }
@@ -115,7 +115,7 @@ public class PropertySetterTests
 
     private static async Task PrintMessage(string message)
     {
-        if (TestSessionContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
+        if (BeforeTestDiscoveryContext.Current!.TestFilter == "/*/*/PropertySetterTests/*")
         {
             Console.WriteLine(message);
             await File.AppendAllTextAsync("PropertySetterTests_CapturedOutput.txt", message);
