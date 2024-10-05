@@ -12,6 +12,7 @@ public class TestDiscoveryContext : Context
     internal TestDiscoveryContext(IEnumerable<AssemblyHookContext> assemblies)
     {
         Assemblies = assemblies;
+        Current = this;
     }
     
     public required string? TestFilter { get; init; }

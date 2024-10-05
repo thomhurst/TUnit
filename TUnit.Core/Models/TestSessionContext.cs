@@ -11,6 +11,7 @@ public class TestSessionContext : TestDiscoveryContext
     
     internal TestSessionContext(IEnumerable<AssemblyHookContext> assemblies) : base(assemblies)
     {
+        Current = this;
     }
 
     internal readonly List<Artifact> Artifacts = [];
