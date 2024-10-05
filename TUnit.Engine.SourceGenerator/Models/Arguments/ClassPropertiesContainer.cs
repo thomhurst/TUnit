@@ -25,7 +25,7 @@ internal record ClassPropertiesContainer(IReadOnlyCollection<(IPropertySymbol Pr
         
         foreach (var (propertySymbol, argumentsContainer) in PropertyContainers)
         {
-            sourceCodeWriter.WriteLine($"{propertySymbol.Name} = {argumentsContainer.VariableNames[0]},");
+            sourceCodeWriter.WriteLine($"{propertySymbol.Name} = {argumentsContainer.VariableNames.ElementAt(0)},");
         }
 
         sourceCodeWriter.WriteLine("}");

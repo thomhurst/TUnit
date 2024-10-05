@@ -106,7 +106,7 @@ internal static class GenericTestInvocationWriter
             for (var i = 0; i < types.Length; i++)
             {
                 var argumentType = types[i];
-                var variableName = variableNames[i];
+                var variableName = variableNames.ElementAt(i);
                 
                 yield return $$"""
                          new TestData({{variableName}}, typeof({{argumentType}}), InjectedDataType.None)
@@ -120,7 +120,7 @@ internal static class GenericTestInvocationWriter
         else if (classDataSourceAttributeContainer.Key != null)
         {
             yield return $$"""
-                   new TestData({{variableNames[0]}}, typeof({{types[0]}}), InjectedDataType.SharedByKey)
+                   new TestData({{variableNames.ElementAt(0)}}, typeof({{types[0]}}), InjectedDataType.SharedByKey)
                    {
                         StringKey = "{{classDataSourceAttributeContainer.Key}}"
                    }
@@ -129,12 +129,12 @@ internal static class GenericTestInvocationWriter
 
         else if (classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.Globally")
         {
-            yield return $"new TestData({variableNames[0]}, typeof({types[0]}), InjectedDataType.SharedGlobally)";
+            yield return $"new TestData({variableNames.ElementAt(0)}, typeof({types[0]}), InjectedDataType.SharedGlobally)";
         }
 
         else if (classDataSourceAttributeContainer.ForClass != null)
         {
-            yield return $"new TestData({variableNames[0]}, typeof({types[0]}), InjectedDataType.SharedByTestClassType)";
+            yield return $"new TestData({variableNames.ElementAt(0)}, typeof({types[0]}), InjectedDataType.SharedByTestClassType)";
         }
     }
 }

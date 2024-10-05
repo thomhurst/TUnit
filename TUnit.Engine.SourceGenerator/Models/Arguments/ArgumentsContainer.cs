@@ -7,7 +7,7 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
     public required bool DisposeAfterTest { get; init; }
     public abstract void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex);
     public abstract void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter);
-    public List<string> VariableNames { get; } = [];
+    public HashSet<string> VariableNames { get; } = [];
     public abstract string[] GetArgumentTypes();
 
     protected string VariableNamePrefix
@@ -23,15 +23,15 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
         }
     }
 
-    protected string GenerateVariableName(ref int index)
+    protected string GenerateVariableName(ref int globalIndex)
     {
-        if (index == 0)
+        if (globalIndex == 0)
         {
-            index++;
+            globalIndex++;
             return AddVariable(VariableNamePrefix);
         }
         
-        return AddVariable($"{VariableNamePrefix}{index++}");
+        return AddVariable($"{VariableNamePrefix}{globalIndex++}");
     }
 
     protected string AddVariable(string variableName)
