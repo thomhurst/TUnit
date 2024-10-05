@@ -14,7 +14,7 @@ public static class TestDataContainer
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, object>> InjectedSharedPerClassType = new();
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
 
-    private static readonly Dictionary<Type, Lazy<Task>> InjectedSharedGloballyInitializations = new();
+    internal static readonly Dictionary<Type, Lazy<Task>> InjectedSharedGloballyInitializations = new();
     private static readonly GetOnlyDictionary<Type, Dictionary<Type, Lazy<Task>>> InjectedSharedPerClassTypeInitializations = new();
     private static readonly GetOnlyDictionary<Type, Dictionary<string, Lazy<Task>>> InjectedSharedPerKeyInitializations = new();
     
