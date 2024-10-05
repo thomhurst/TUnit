@@ -214,12 +214,29 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     private static string? GetTestFilter(ExecuteRequestContext context)
     {
-        return context.Request switch
+        var filter = context.Request switch
         {
-            RunTestExecutionRequest runTestExecutionRequest => runTestExecutionRequest.Filter.ToString(),
-            DiscoverTestExecutionRequest discoverTestExecutionRequest => discoverTestExecutionRequest.Filter.ToString(),
-            TestExecutionRequest testExecutionRequest => testExecutionRequest.Filter.ToString(),
+            RunTestExecutionRequest runTestExecutionRequest => runTestExecutionRequest.Filter,
+            DiscoverTestExecutionRequest discoverTestExecutionRequest => discoverTestExecutionRequest.Filter,
+            TestExecutionRequest testExecutionRequest => testExecutionRequest.Filter,
             _ => throw new ArgumentException(nameof(context.Request))
         };
+
+        return StringifyFilter(filter);
     }
+
+#pragma warning disable TPEXP
+    private static string? StringifyFilter(ITestExecutionFilter filter)
+    {
+        return filter switch
+        {
+            NopFilter => null,
+            TestNodeUidListFilter testNodeUidListFilter => string.Join(",",
+                testNodeUidListFilter.TestNodeUids.Select(x => x.Value)),
+            TreeNodeFilter treeNodeFilter => treeNodeFilter.Filter,
+            _ => throw new ArgumentOutOfRangeException(nameof(filter))
+        };
+    }
+#pragma warning restore TPEXP
+
 }
