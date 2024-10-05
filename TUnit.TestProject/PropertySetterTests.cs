@@ -4,6 +4,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 
+[NotInParallel(nameof(PropertySetterTests))]
 public class PropertySetterTests
 {
     [Arguments("1")]
@@ -92,7 +93,7 @@ public class PropertySetterTests
             
             if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
             {
-                await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
+                await File.WriteAllTextAsync($"{TestContext.Current!.TestDetails.ClassType.Name}_Property_IAsyncDisposable.txt", "true");
             }
         }
     }
@@ -115,7 +116,7 @@ public class PropertySetterTests
             
             if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
             {
-                await File.WriteAllTextAsync($"{TestContext.Current!.TestDetails.ClassType.Name}_StaticProperty_IAsyncDisposable.txt", "true");
+                await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
             }
         }
     }
