@@ -116,6 +116,11 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
+
+        if (IsInjectedProperty(property))
+        {
+            return;
+        }
         
         var expectedHookType = property.IsStatic
                 ? "Class"
@@ -143,6 +148,11 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.Dispose_Member_In_Cleanup, context.Node.GetLocation()));
         }
+    }
+
+    private bool IsInjectedProperty(IPropertySymbol property)
+    {
+        return property.TryGetClassDataAttribute(out var classAttributeData);
     }
 
     private static bool IsExpectedMethod(IMethodSymbol method, string expectedHookType)
