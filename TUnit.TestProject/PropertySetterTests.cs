@@ -38,7 +38,7 @@ public class PropertySetterTests
         await Assert.That(StaticProperty.IsInitialized).IsTrue();
     }
 
-    public class InnerModel : IAsyncInitializer
+    public class InnerModel : IAsyncInitializer, IAsyncDisposable
     {
         public Task InitializeAsync()
         {
@@ -47,6 +47,11 @@ public class PropertySetterTests
         }
 
         public bool IsInitialized { get; private set; }
+
+        public async ValueTask DisposeAsync()
+        {
+            await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
+        }
     }
 
     public static string MethodData() => "2";
