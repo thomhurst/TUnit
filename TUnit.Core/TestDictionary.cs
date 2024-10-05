@@ -39,7 +39,8 @@ internal static class TestDictionary
     public static readonly List<(string Name, StaticHookMethod HookMethod, Func<TestSessionContext, Task> Action)> AfterTestSession = [];
 
     public static readonly ConcurrentDictionary<Type, Queue<(Type InjectableType, Lazy<Action> InitialiserAction)>> StaticPropertyInjectors = new();
-
+    public static readonly GetOnlyDictionary<Type, Func<object?>> StaticInjectedProperties = new();
+    
     internal static void AddTest(string testId, DiscoveredTest discoveredTest)
     {
         Tests[testId] = discoveredTest;

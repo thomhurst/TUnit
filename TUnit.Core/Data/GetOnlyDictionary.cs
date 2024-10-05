@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core.Data;
 
@@ -25,4 +26,9 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
     }
     
     public TValue this[TKey key] => InnerDictionary[key];
+
+    public bool TryGet(TKey key, out TValue? o)
+    {
+        return InnerDictionary.TryGetValue(key, out o);
+    }
 }
