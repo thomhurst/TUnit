@@ -28,7 +28,7 @@ internal class StaticPropertyInjectorsOrchestrator
 
         while (initialisers.TryDequeue(out var initialiser))
         {
-            await initialiser;
+            await initialiser.Value;
         }
     }
 
@@ -38,7 +38,7 @@ internal class StaticPropertyInjectorsOrchestrator
         {
             try
             {
-                var obj = await staticInjectedProperty;
+                var obj = await staticInjectedProperty.Value;
                 await _disposer.DisposeAsync(obj);
             }
             catch (Exception e)

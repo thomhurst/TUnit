@@ -500,7 +500,7 @@ public static class TestRegistrar
     
     public static void RegisterStaticPropertyInjector(Type testClassType, Type injectableType, Func<object?> propertyAccessor)
     {
-	    var func = TestDictionary.StaticInjectedPropertiesByInjectedType.GetOrAdd(injectableType, async _ =>
+	    var func = TestDictionary.StaticInjectedPropertiesByInjectedType.GetOrAdd(injectableType, _ => new Lazy<Task<object?>>(async () =>
 	    {
 		    var obj = propertyAccessor();
 
@@ -510,7 +510,7 @@ public static class TestRegistrar
 		    }
 
 		    return obj;
-	    });
+	    }));
 	    
 	    var propertiesByTestClass = TestDictionary.StaticInjectedPropertiesByTestClassType.GetOrAdd(testClassType, _ => []);
 	    propertiesByTestClass.Enqueue(func);
