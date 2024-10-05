@@ -4,6 +4,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 
+[NotInParallel(nameof(PropertySetterTests))]
 public class PropertySetterTests
 {
     [Arguments("1")]
@@ -33,7 +34,7 @@ public class PropertySetterTests
     [Before(TestSession)]
     public static async Task BeforeTestSession()
     {
-        if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+        if (IsMatchingTestFilter())
         {
             await PrintMessage("Before Test Session");
 
@@ -44,7 +45,7 @@ public class PropertySetterTests
     [Before(Assembly)]
     public static async Task BeforeAssembly()
     {
-        if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+        if (IsMatchingTestFilter())
         {
             await PrintMessage("Before Assembly");
 
@@ -55,7 +56,7 @@ public class PropertySetterTests
     [Before(Class)]
     public static async Task BeforeClass()
     {
-        if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+        if (IsMatchingTestFilter())
         {
             await PrintMessage("Before Class");
 
@@ -90,7 +91,7 @@ public class PropertySetterTests
         {
             await PrintMessage("Disposing Property");
             
-            if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+            if (IsMatchingTestFilter())
             {
                 await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
             }
@@ -113,7 +114,7 @@ public class PropertySetterTests
         {
             await PrintMessage("Disposing Static Property");
             
-            if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+            if (IsMatchingTestFilter())
             {
                 await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
             }
@@ -124,10 +125,21 @@ public class PropertySetterTests
 
     private static async Task PrintMessage(string message)
     {
-        if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
+        if (GlobalContext.Current.TestFilter is "/*/*/PropertySetterTests/*")
         {
             Console.WriteLine(message);
             await File.AppendAllLinesAsync("PropertySetterTests_CapturedOutput.txt", [message]);
         }
+        
+        if (GlobalContext.Current.TestFilter is "/*/*/InheritedPropertySetterTests/*")
+        {
+            Console.WriteLine(message);
+            await File.AppendAllLinesAsync("InheritedPropertySetterTests_CapturedOutput.txt", [message]);
+        }
+    }
+
+    private static bool IsMatchingTestFilter()
+    {
+        return GlobalContext.Current.TestFilter is "/*/*/PropertySetterTests/*" or "/*/*/InheritedPropertySetterTests/*";
     }
 }
