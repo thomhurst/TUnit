@@ -56,12 +56,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _serviceProvider.StandardOutConsoleInterceptor.Initialize();
         _serviceProvider.StandardErrorConsoleInterceptor.Initialize();
 
+        TestSessionContext? testSessionContext = null;
         try
         {
             _serviceProvider.Initializer.Initialize();
 
-            await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext());
-
+            var currentTestFilter = GetTestFilter(context);
+            
+            GlobalContext.Current.TestFilter = currentTestFilter;
+            
+            await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
+            {
+                TestFilter = currentTestFilter
+            });
+            
             var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest,
                 context.CancellationToken);
 
@@ -73,11 +81,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             {
                 TestRegistrar.RegisterInstance(test.TestContext);
                 
-                await InjectStaticProperties(test.TestContext);
+                await InitializeStaticProperties(test.TestContext);
             }
 
             await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
-                new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()));
+                new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
+                {
+                    TestFilter = currentTestFilter
+                });
 
             switch (context.Request)
             {
@@ -99,8 +110,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 case RunTestExecutionRequest runTestExecutionRequest:
                     await NotifyFailedTests(context, failedToInitializeTests, false);
 
-                    var testSessionContext =
-                        new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts());
+                    testSessionContext =
+                        new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
+                        {
+                            TestFilter = currentTestFilter
+                        };
 
                     await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
 
@@ -132,7 +146,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         finally
         {
-            await _serviceProvider.OnEndExecutor.ExecuteAsync();
+            await _serviceProvider.OnEndExecutor.ExecuteAsync(testSessionContext);
 
             context.Complete();
         }
@@ -192,9 +206,37 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         typeof(TestNodeUpdateMessage),
         typeof(SessionFileArtifact)
     ];
-    
-    private async ValueTask InjectStaticProperties(TestContext testContext)
+
+    private async ValueTask InitializeStaticProperties(TestContext testContext)
     {
         await _serviceProvider.StaticPropertyInjectorsOrchestrator.Execute(testContext.TestDetails.ClassType);
     }
+
+    private static string? GetTestFilter(ExecuteRequestContext context)
+    {
+        var filter = context.Request switch
+        {
+            RunTestExecutionRequest runTestExecutionRequest => runTestExecutionRequest.Filter,
+            DiscoverTestExecutionRequest discoverTestExecutionRequest => discoverTestExecutionRequest.Filter,
+            TestExecutionRequest testExecutionRequest => testExecutionRequest.Filter,
+            _ => throw new ArgumentException(nameof(context.Request))
+        };
+
+        return StringifyFilter(filter);
+    }
+
+#pragma warning disable TPEXP
+    private static string? StringifyFilter(ITestExecutionFilter filter)
+    {
+        return filter switch
+        {
+            NopFilter => null,
+            TestNodeUidListFilter testNodeUidListFilter => string.Join(",",
+                testNodeUidListFilter.TestNodeUids.Select(x => x.Value)),
+            TreeNodeFilter treeNodeFilter => treeNodeFilter.Filter,
+            _ => throw new ArgumentOutOfRangeException(nameof(filter))
+        };
+    }
+#pragma warning restore TPEXP
+
 }

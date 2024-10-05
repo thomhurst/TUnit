@@ -21,30 +21,24 @@ internal class StaticPropertyInjectorsOrchestrator
     
     public async ValueTask Execute(Type testClassType)
     {
-        if (!TestDictionary.StaticPropertyInjectors.TryGetValue(testClassType, out var initialisers))
+        if (!TestDictionary.StaticInjectedPropertiesByTestClassType.TryGet(testClassType, out var initialisers))
         {
             return;
         }
 
         while (initialisers.TryDequeue(out var initialiser))
         {
-            initialiser.InitialiserAction.Value.Invoke();
-           
-            if (TestDataContainer.InjectedSharedGloballyInitializations.TryGetValue(initialiser.InjectableType,
-                    out var asyncInitializer))
-            {
-                await asyncInitializer.Value;
-            }
+            await initialiser.Value;
         }
     }
 
     public async Task DisposeAll()
     {
-        foreach (var staticInjectedProperty in TestDictionary.StaticInjectedProperties.Values)
+        foreach (var staticInjectedProperty in TestDictionary.StaticInjectedPropertiesByInjectedType.Values)
         {
             try
             {
-                var obj = staticInjectedProperty();
+                var obj = await staticInjectedProperty.Value;
                 await _disposer.DisposeAsync(obj);
             }
             catch (Exception e)

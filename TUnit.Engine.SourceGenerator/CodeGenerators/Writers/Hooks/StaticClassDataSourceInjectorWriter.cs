@@ -33,10 +33,9 @@ internal static class StaticClassDataSourceInjectorWriter
 
         sourceBuilder.WriteLine(
                 $$$"""
-                   TestRegistrar.RegisterStaticPropertyInjector(typeof({{{model.FullyQualifiedTypeName}}}), typeof({{{model.InjectableType}}}), () => {{{model.FullyQualifiedTypeName}}}.{{{model.PropertyName}}}, new global::System.Lazy<global::System.Action>(() => 
-                   		{ 
-                    		{{{model.FullyQualifiedTypeName}}}.{{{model.PropertyName}}} = TestDataContainer.GetGlobalInstance<{{{model.InjectableType}}}>(() => new {{{model.InjectableType}}}());
-                   		}));
+                   {{{model.FullyQualifiedTypeName}}}.{{{model.PropertyName}}} = TestDataContainer.GetGlobalInstance<{{{model.InjectableType}}}>(() => new {{{model.InjectableType}}}());
+                   
+                   TestRegistrar.RegisterStaticPropertyInjector(typeof({{{model.FullyQualifiedTypeName}}}), typeof({{{model.InjectableType}}}), {{{model.FullyQualifiedTypeName}}}.{{{model.PropertyName}}});
                    """);
 
         sourceBuilder.WriteLine("}");
