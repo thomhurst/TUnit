@@ -115,7 +115,7 @@ public class PropertySetterTests
             
             if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
             {
-                await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
+                await File.WriteAllTextAsync($"{TestContext.Current!.TestDetails.ClassType.Name}_StaticProperty_IAsyncDisposable.txt", "true");
             }
         }
     }
@@ -127,7 +127,7 @@ public class PropertySetterTests
         if (GlobalContext.Current.TestFilter == "/*/*/PropertySetterTests/*")
         {
             Console.WriteLine(message);
-            await File.AppendAllLinesAsync("PropertySetterTests_CapturedOutput.txt", [message]);
+            await File.AppendAllLinesAsync($"{TestContext.Current!.TestDetails.ClassType.Name}_CapturedOutput.txt", [message]);
         }
     }
 }

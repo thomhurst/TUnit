@@ -5,19 +5,19 @@ using ModularPipelines.Git.Extensions;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
-public class PropertySetterTests : TestModule
+public class InheritedPropertySetterTests : TestModule
 {
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 
-            "/*/*/PropertySetterTests/*",
+            "/*/*/InheritedPropertySetterTests/*",
             [
                 result => result.Successful.Should().BeTrue(),
                 result => result.Total.Should().Be(1),
                 result => result.Passed.Should().Be(1),
                 result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0),
-                _ => context.Git().RootDirectory.FindFile(x => x.Name == "PropertySetterTests_CapturedOutput.txt").AssertExists().ReadAsync(cancellationToken).Result.Should().Contain(
+                _ => context.Git().RootDirectory.FindFile(x => x.Name == "InheritedPropertySetterTests_CapturedOutput.txt").AssertExists().ReadAsync(cancellationToken).Result.Should().Contain(
                     """
                     Initializing Static Property
                     Before Test Session
@@ -32,7 +32,7 @@ public class PropertySetterTests : TestModule
                     Disposing Property
                     """
                     ),
-                _ => context.Git().RootDirectory.FindFile(x => x.Name == "PropertySetterTests_StaticProperty_IAsyncDisposable.txt").AssertExists().Delete()
+                _ => context.Git().RootDirectory.FindFile(x => x.Name == "InheritedPropertySetterTests_StaticProperty_IAsyncDisposable.txt").AssertExists().Delete()
             ], cancellationToken);
     }
 }
