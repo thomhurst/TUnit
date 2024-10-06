@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Extensions.Chronology;
 using TUnit.Assertions.Extensions.Throws;
 using TUnit.Engine.Extensions;

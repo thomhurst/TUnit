@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 
