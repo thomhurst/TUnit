@@ -1,6 +1,9 @@
-﻿namespace TUnit.Assertions.AssertConditions;
+﻿using System.Runtime.CompilerServices;
 
-public abstract class AssertCondition<TActual, TExpected>(TExpected? expected) : BaseAssertCondition<TActual>
+namespace TUnit.Assertions.AssertConditions;
+
+public abstract class AssertCondition<TActual, TExpected>(TExpected? expected, [CallerArgumentExpression("expected")] string expectedExpression = "") : BaseAssertCondition<TActual>
 {
     protected TExpected? ExpectedValue { get; } = expected;
+    public string ExpectedExpression { get; } = expectedExpression;
 }

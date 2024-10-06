@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
 
@@ -11,9 +12,36 @@ public abstract class BaseAssertCondition
         return false;
     }
     
-    internal string? OverriddenMessage { get; set; }
+    public string? OverriddenMessage { get; internal set; }
     protected internal abstract string GetFailureMessage();
     protected internal abstract string GetFullFailureMessage();
+
+    protected string Format(object? obj)
+    {
+        if (obj is null)
+        {
+            return "null";
+        }
+
+        if (obj is string)
+        {
+            return $"""
+                    "{obj}"
+                    """;
+        }
+
+        if (obj is char)
+        {
+            return "'{obj}";
+        }
+
+        if (obj is IEnumerable enumerable)
+        {
+            return $"[{string.Join(", ", enumerable.Cast<object>().Select(Format))}]";
+        }
+
+        return obj.ToString() ?? "null";
+    }
 }
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
