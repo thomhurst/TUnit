@@ -1,16 +1,26 @@
 ﻿namespace TUnit.Assertions.AssertConditions.String;
 
-public class StringEqualsAssertCondition(string expected, StringComparison stringComparison)
-    : BaseStringValueAssertCondition(expected, stringComparison)
+public class StringEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
+    : ExpectedValueAssertCondition<string, string>(expected)
 {
-    protected override bool Passes(string actualValue, string expectedValue, StringComparison stringComparison)
+    protected override bool Passes(string? actualValue, string? expectedValue)
     {
+        if (actualValue is null && expectedValue is null)
+        {
+            return true;
+        }
+
+        if (actualValue is null || expectedValue is null)
+        {
+            return false;
+        }
+        
         return string.Equals(actualValue, expectedValue, stringComparison);
     }
     
-    protected internal override string GetFailureMessage() => $"""
-                                                               Expected: "{ExpectedValue}"
-                                                               Received: "{ActualValue}"
+    protected override string GetFailureMessage(string? actualValue, string? expectedValue) => $"""
+                                                               Expected: {Format(ExpectedValue)}
+                                                               Received: {Format(ActualValue)}
                                                                {GetLocation()}
                                                                """;
 

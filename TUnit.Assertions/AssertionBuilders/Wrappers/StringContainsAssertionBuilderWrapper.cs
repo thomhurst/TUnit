@@ -10,18 +10,18 @@ public class StringContainsAssertionBuilderWrapper : InvokableValueAssertionBuil
 
     public StringContainsAssertionBuilderWrapper WithTrimming()
     {
-        var assertion = (StringEqualsAssertCondition) Assertions.Peek();
+        var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
-        assertion.Trimmed();
+        assertion.WithTransform(s => s?.Trim(), s => s?.Trim());
         
         return this;
     }
     
     public StringContainsAssertionBuilderWrapper IgnoringWhitespace()
     {
-        var assertion = (StringEqualsAssertCondition) Assertions.Peek();
+        var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
-        assertion.IgnoringWhitespace();
+        assertion.WithTransform(StringUtils.StripWhitespace, StringUtils.StripWhitespace);
         
         return this;
     }

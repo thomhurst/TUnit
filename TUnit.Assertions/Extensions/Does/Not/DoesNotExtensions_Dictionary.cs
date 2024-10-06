@@ -13,8 +13,8 @@ public static partial class DoesNotExtensions
     public static InvokableValueAssertionBuilder<TDictionary> DoesNotContainKey<TDictionary, TKey>(this IValueSource<TDictionary> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TDictionary : IDictionary
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TDictionary, TKey>(expected,
-            (actual, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TDictionary, TKey>(expected,
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.Keys.Cast<TKey>().Contains(expected, equalityComparer);
@@ -26,8 +26,8 @@ public static partial class DoesNotExtensions
     public static InvokableValueAssertionBuilder<TDictionary> DoesNotContainValue<TDictionary, TValue>(this IValueSource<TDictionary> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
         where TDictionary : IDictionary
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TDictionary, TValue>(expected,
-            (actual, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TDictionary, TValue>(expected,
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.Values.Cast<TValue>().Contains(expected, equalityComparer);

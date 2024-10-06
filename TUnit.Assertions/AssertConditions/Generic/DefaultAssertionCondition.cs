@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class DefaultAssertCondition<TActual>() : AssertCondition<TActual, TActual>(default)
+public class DefaultExpectedValueAssertCondition<TActual> : BaseAssertCondition<TActual>
 {
 	  private readonly TActual? _defaultValue = default;
 	

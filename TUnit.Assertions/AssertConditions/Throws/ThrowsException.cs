@@ -22,19 +22,19 @@ public class ThrowsException<TActual>
     public ExceptionWith<TActual> With => new(_delegateSource, _exceptionSelector);
 
     public InvokableDelegateAssertionBuilder<TActual> OfAnyType() =>
-        _delegateSource.RegisterAssertion(new ThrowsAnythingAssertCondition<TActual>()
+        _delegateSource.RegisterAssertion(new ThrowsAnythingExpectedValueAssertCondition<TActual>()
             , []);
 
-    public InvokableDelegateAssertionBuilder<TActual> OfType<TExpected>() => _delegateSource.RegisterAssertion(new ThrowsExactTypeOfAssertCondition<TActual, TExpected>()
+    public InvokableDelegateAssertionBuilder<TActual> OfType<TExpected>() where TExpected : Exception => _delegateSource.RegisterAssertion(new ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpected>()
         , [typeof(TExpected).Name]);
 
     public InvokableDelegateAssertionBuilder<TActual> SubClassOf<TExpected>() =>
-        _delegateSource.RegisterAssertion(new ThrowsSubClassOfAssertCondition<TActual, TExpected>()
+        _delegateSource.RegisterAssertion(new ThrowsSubClassOfExpectedValueAssertCondition<TActual, TExpected>()
             , [typeof(TExpected).Name]);
     
     public InvokableDelegateAssertionBuilder<TActual> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        _delegateSource.RegisterAssertion(new DelegateAssertCondition<TActual,Exception>(default,
-            (_, exception, _, _) => action(_exceptionSelector(exception)),
+        _delegateSource.RegisterAssertion(new FuncValueAssertCondition<TActual,Exception>(default,
+            (_, exception, _) => action(_exceptionSelector(exception)),
             (_, exception, _) => messageFactory(_exceptionSelector(exception))
         ), [expectedExpression]);
 

@@ -13,7 +13,7 @@ public static class ThrowsExtensions
     
     public static InvokableDelegateAssertionBuilder<TActual> ThrowsNothing<TActual>(this IDelegateSource<TActual> delegateSource)
     {
-        return delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>()
+        return delegateSource.RegisterAssertion(new ThrowsNothingExpectedValueAssertCondition<TActual>()
             , []);
     }
 }

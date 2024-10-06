@@ -2,21 +2,21 @@ using System.Collections;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EquivalentToAssertCondition<TActual> : AssertCondition<TActual, TActual>
+public class EquivalentToExpectedValueAssertCondition<TActual> : ExpectedValueAssertCondition<TActual, TActual>
 {
-    public EquivalentToAssertCondition(TActual expected) : base(expected)
+    public EquivalentToExpectedValueAssertCondition(TActual expected) : base(expected)
     {
     }
 
     private readonly List<string> _ignoredMembers = [];
 
-    protected internal override string GetFailureMessage() => $"""
+    protected override string GetFailureMessage(TActual? actualValue, TActual? expectedValue) => $"""
                                                                The two items were not equivalent
                                                                   Actual: {ActualValue}
                                                                   Expected: {ExpectedValue}
                                                                """;
 
-    protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue is null && ExpectedValue is null)
         {

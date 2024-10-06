@@ -2,18 +2,19 @@
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class NumericNotEqualAssertCondition<TActual>(TActual expected) : AssertCondition<TActual, TActual>(expected) 
+public class NumericEqualsExpectedValueAssertCondition<TActual>(TActual expected) : ExpectedValueAssertCondition<TActual, TActual>(expected) 
     where TActual : INumber<TActual>
 {
     private TActual? _tolerance;
     
-    protected internal override string GetFailureMessage() => $"""
-                                                 Expected Not Equal To: {ExpectedValue}{WithToleranceMessage()}
+    protected override string GetFailureMessage(TActual? actualValue, TActual? expectedValue) => $"""
+                                                 Expected: {ExpectedValue}{WithToleranceMessage()}
+                                                 Received: {ActualValue}
                                                  """;
 
     private string WithToleranceMessage()
     {
-        if (_tolerance == null)
+        if (_tolerance == null || _tolerance == default)
         {
             return string.Empty;
         }
@@ -21,7 +22,7 @@ public class NumericNotEqualAssertCondition<TActual>(TActual expected) : AssertC
         return $" +-{_tolerance}";
     }
 
-    protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override bool Passes(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue == null && ExpectedValue == null)
         {
@@ -33,15 +34,15 @@ public class NumericNotEqualAssertCondition<TActual>(TActual expected) : AssertC
             return false;
         }
         
-        if (_tolerance != null)
+        if (_tolerance != default && _tolerance != null)
         {
             var min = ExpectedValue - _tolerance;
             var max = ExpectedValue + _tolerance;
             
-            return actualValue < min || actualValue > max;
+            return actualValue >= min && actualValue <= max;
         }
         
-        return actualValue != ExpectedValue;
+        return actualValue == ExpectedValue;
     }
 
     public void SetTolerance(TActual tolerance)

@@ -10,13 +10,13 @@ public static class BooleanIsExtensions
 {
     public static InvokableValueAssertionBuilder<bool> IsTrue(this IValueSource<bool> valueSource)
     {
-        return valueSource.RegisterAssertion(new EqualsAssertCondition<bool>(true)
+        return valueSource.RegisterAssertion(new EqualsExpectedValueAssertCondition<bool>(true)
             , []);
     }
     
     public static InvokableValueAssertionBuilder<bool> IsFalse(this IValueSource<bool> valueSource)
     {
-        return valueSource.RegisterAssertion(new EqualsAssertCondition<bool>(false)
+        return valueSource.RegisterAssertion(new EqualsExpectedValueAssertCondition<bool>(false)
             , []);
     }
 }

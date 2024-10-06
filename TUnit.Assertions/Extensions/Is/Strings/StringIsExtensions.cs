@@ -18,7 +18,7 @@ public static class StringIsExtensions
     
     public static StringEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new StringEqualsAssertCondition(expected, stringComparison)
+        var assertionBuilder = valueSource.RegisterAssertion(new StringEqualsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
         
         return new StringEqualToAssertionBuilderWrapper(assertionBuilder);
@@ -26,8 +26,8 @@ public static class StringIsExtensions
     
     public static InvokableValueAssertionBuilder<string> IsEmpty(this IValueSource<string> valueSource)
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(0,
-            (value, _, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
+            (value, _, self) =>
             {
                 if (value is null)
                 {
@@ -42,15 +42,15 @@ public static class StringIsExtensions
     
     public static InvokableValueAssertionBuilder<string> IsNullOrEmpty(this IValueSource<string> valueSource)
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(0,
-            (value, _, _, _) => string.IsNullOrEmpty(value),
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
+            (value, _, _) => string.IsNullOrEmpty(value),
             (s, _, _) => $"'{s}' is not null or empty")
             , []); }
     
     public static InvokableValueAssertionBuilder<string> IsNullOrWhitespace(this IValueSource<string> valueSource)
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(0,
-            (value, _, _, _) => string.IsNullOrWhiteSpace(value),
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
+            (value, _, _) => string.IsNullOrWhiteSpace(value),
             (s, _, _) => $"'{s}' is not null or whitespace")
             , []); }
 }

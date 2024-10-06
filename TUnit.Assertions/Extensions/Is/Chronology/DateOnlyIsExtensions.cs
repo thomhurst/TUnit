@@ -11,7 +11,7 @@ public static class DateOnlyIsExtensions
 {
     public static InvokableValueAssertionBuilder<DateOnly> IsAfter(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<DateOnly, DateOnly>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateOnly, DateOnly>(default, (value, _, _) =>
             {
                 return value > expected;
             },
@@ -20,7 +20,7 @@ public static class DateOnlyIsExtensions
     
     public static InvokableValueAssertionBuilder<DateOnly> IsAfterOrEqualTo(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<DateOnly, DateOnly>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateOnly, DateOnly>(default, (value, _, _) =>
             {
                 return value >= expected;
             },
@@ -29,7 +29,7 @@ public static class DateOnlyIsExtensions
     
     public static InvokableValueAssertionBuilder<DateOnly> IsBefore(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<DateOnly, DateOnly>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateOnly, DateOnly>(default, (value, _, _) =>
             {
                 return value < expected;
             },
@@ -39,8 +39,8 @@ public static class DateOnlyIsExtensions
     public static InvokableValueAssertionBuilder<DateOnly> IsBeforeOrEqualTo(this IValueSource<DateOnly> valueSource,
         DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<DateOnly, DateOnly>(default,
-                (value, _, _, _) => { return value <= expected; },
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateOnly, DateOnly>(default,
+                (value, _, _) => { return value <= expected; },
                 (value, _, _) => $"{value} was not less than or equal to {expected}")
             , [doNotPopulateThisValue]);
     }

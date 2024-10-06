@@ -10,13 +10,13 @@ public class Member<TActualRootType, TPropertyType>(IValueSource<TActualRootType
 {
     public InvokableValueAssertionBuilder<TActualRootType> EqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return valueSource.RegisterAssertion(new PropertyEqualsAssertCondition<TActualRootType, TPropertyType>(selector, expected, true)
+        return valueSource.RegisterAssertion(new PropertyEqualsExpectedValueAssertCondition<TActualRootType, TPropertyType>(selector, expected, true)
             , [doNotPopulateThisValue]);
     }
 
     public InvokableValueAssertionBuilder<TActualRootType> NotEqualTo(TPropertyType expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return valueSource.RegisterAssertion(new PropertyEqualsAssertCondition<TActualRootType, TPropertyType>(selector, expected, false)
+        return valueSource.RegisterAssertion(new PropertyEqualsExpectedValueAssertCondition<TActualRootType, TPropertyType>(selector, expected, false)
             , [doNotPopulateThisValue]);
     }
 }

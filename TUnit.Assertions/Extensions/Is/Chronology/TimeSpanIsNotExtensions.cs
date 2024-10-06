@@ -12,20 +12,20 @@ public static class TimeSpanIsNotExtensions
 {
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotZero(this IValueSource<TimeSpan> valueSource)
     {
-        return valueSource.RegisterAssertion(new NotEqualsAssertCondition<TimeSpan>(TimeSpan.Zero)
+        return valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TimeSpan>(TimeSpan.Zero)
             , []);
     }
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotGreaterThan(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) => value <= expected,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) => value <= expected,
             (value, _, _) => $"{value} was greater than {expected}")
             , [doNotPopulateThisValue]);
     }
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotGreaterThanOrEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
             {
                 return value < expected;
             },
@@ -35,7 +35,7 @@ public static class TimeSpanIsNotExtensions
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotLessThan(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
             {
                 return value >= expected;
             },
@@ -45,7 +45,7 @@ public static class TimeSpanIsNotExtensions
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotLessThanOrEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
             {
                 return value > expected;
             },

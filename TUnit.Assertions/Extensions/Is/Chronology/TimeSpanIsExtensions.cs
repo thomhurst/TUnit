@@ -12,8 +12,8 @@ public static class TimeSpanIsExtensions
 {
     public static InvokableValueAssertionBuilder<TimeSpan> IsEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, TimeSpan tolerance, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("tolerance")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TimeSpan, TimeSpan>(expected,
-            (actual, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(expected,
+            (actual, _, _) =>
             {
                 return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
             },
@@ -22,7 +22,7 @@ public static class TimeSpanIsExtensions
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsZero(this IValueSource<TimeSpan> valueSource)
     {
-        return valueSource.RegisterAssertion(new EqualsAssertCondition<TimeSpan>(TimeSpan.Zero)
+        return valueSource.RegisterAssertion(new EqualsExpectedValueAssertCondition<TimeSpan>(TimeSpan.Zero)
             , []);
     }
 }

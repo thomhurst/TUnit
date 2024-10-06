@@ -24,7 +24,7 @@ public class ExceptionMessage<TActual>
 
     public InvokableValueAssertionBuilder<TActual> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return _valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, string>(expected, (actual, _, _, _) =>
+        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, string>(expected, (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return string.Equals(actual.Message, expected, stringComparison);

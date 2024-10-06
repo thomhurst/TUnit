@@ -1,7 +1,7 @@
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class NotTypeOfAssertCondition<TActual, TExpected>()
-    : AssertCondition<TActual, TExpected>(default)
+public class NotTypeOfExpectedValueAssertCondition<TActual, TExpected>
+    : BaseAssertCondition<TActual>
 {
     protected internal override string GetFailureMessage() => $"{ActualValue} is {typeof(TExpected).Name}";
 
