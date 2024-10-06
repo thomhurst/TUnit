@@ -26,7 +26,7 @@ public class ExceptionWithMessage<TActual>
 
     public InvokableDelegateAssertionBuilder<TActual> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return _delegateSource.RegisterAssertion(new ThrowsWithMessageEqualToAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
+        return _delegateSource.RegisterAssertion(new ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 
@@ -37,7 +37,7 @@ public class ExceptionWithMessage<TActual>
 
     public InvokableDelegateAssertionBuilder<TActual> Containing(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return _delegateSource.RegisterAssertion(new ThrowsWithMessageContainingAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
+        return _delegateSource.RegisterAssertion(new ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(expected, stringComparison, _exceptionSelector)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 }

@@ -17,29 +17,29 @@ public static class StringIsNotExtensions
     
     public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new StringNotEqualsAssertCondition(expected, stringComparison)
+        return valueSource.RegisterAssertion(new StringNotEqualsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
     public static InvokableValueAssertionBuilder<string> IsNotEmpty(this IValueSource<string> valueSource)
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(0,
-            (value, _, _, _) => value != string.Empty,
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, int>(0,
+            (value, _, _) => value != string.Empty,
             (s, _, _) => $"'{s}' is empty")
             , []);
     }
     
     public static InvokableValueAssertionBuilder<string> IsNotNullOrEmpty(this IValueSource<string> valueSource)
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(0,
-            (value, _, _, _) => !string.IsNullOrEmpty(value),
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, int>(0,
+            (value, _, _) => !string.IsNullOrEmpty(value),
             (s, _, _) => $"'{s}' is null or empty"), []);
     }
     
     public static InvokableValueAssertionBuilder<string> IsNotNullOrWhitespace(this IValueSource<string> valueSource)
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, int>(0,
-            (value, _, _, _) => !string.IsNullOrWhiteSpace(value),
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, int>(0,
+            (value, _, _) => !string.IsNullOrWhiteSpace(value),
             (s, _, _) => $"'{s}' is null or whitespace")
             , []);
     }

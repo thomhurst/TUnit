@@ -19,7 +19,7 @@ public static partial class DoesExtensions
     
     public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new StringContainsAssertCondition(expected, stringComparison)
+        var assertionBuilder = valueSource.RegisterAssertion(new StringContainsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
         
         return new StringContainsAssertionBuilderWrapper(assertionBuilder);
@@ -32,8 +32,8 @@ public static partial class DoesExtensions
     
     public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, string>(expected,
-            (actual, _, _, self) =>
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, string>(expected,
+            (actual, _, self) =>
             {
                 if (actual is null)
                 {
@@ -55,8 +55,8 @@ public static partial class DoesExtensions
     
     public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, string>(expected,
-            (actual, _, _, _) =>
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, string>(expected,
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.EndsWith(expected, stringComparison);
@@ -72,8 +72,8 @@ public static partial class DoesExtensions
     
     public static InvokableValueAssertionBuilder<string> Matches(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression("regex")] string expression = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, Regex>(regex,
-            (actual, _, _, _) =>
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, Regex>(regex,
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return regex.IsMatch(actual);

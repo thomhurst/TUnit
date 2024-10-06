@@ -61,9 +61,9 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
     }
 
-    protected TActual? ActualValue { get; private set; }
-    protected Exception? Exception { get; private set; }
-    protected internal string? ActualExpression { get; private set; }
+    internal TActual? ActualValue { get; private set; }
+    internal Exception? Exception { get; private set; }
+    public string? ActualExpression { get; private set; }
     
     internal bool Assert(TActual? actualValue, Exception? exception, string? actualExpression)
     {

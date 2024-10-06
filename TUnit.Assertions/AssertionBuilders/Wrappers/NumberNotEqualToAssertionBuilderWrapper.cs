@@ -11,7 +11,7 @@ public class NumberNotEqualToAssertionBuilderWrapper<TActual> : InvokableValueAs
 
     public NumberNotEqualToAssertionBuilderWrapper<TActual> Within(TActual tolerance)
     {
-        var assertion = (NumericNotEqualAssertCondition<TActual>) Assertions.Peek();
+        var assertion = (NumericNotEqualExpectedValueAssertCondition<TActual>) Assertions.Peek();
 
         assertion.SetTolerance(tolerance);
         

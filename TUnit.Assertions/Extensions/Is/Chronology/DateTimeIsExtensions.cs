@@ -11,7 +11,7 @@ public static class DateTimeIsExtensions
 {
     public static InvokableValueAssertionBuilder<DateTime> IsAfter(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<DateTime, DateTime>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
             {
                 return value > expected;
             },
@@ -20,7 +20,7 @@ public static class DateTimeIsExtensions
     
     public static InvokableValueAssertionBuilder<DateTime> IsAfterOrEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<DateTime, DateTime>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
             {
                 return value >= expected;
             },
@@ -29,7 +29,7 @@ public static class DateTimeIsExtensions
     
     public static InvokableValueAssertionBuilder<DateTime> IsBefore(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<DateTime, DateTime>(default, (value, _, _, _) =>
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
             {
                 return value < expected;
             },
@@ -39,8 +39,8 @@ public static class DateTimeIsExtensions
     public static InvokableValueAssertionBuilder<DateTime> IsBeforeOrEqualTo(this IValueSource<DateTime> valueSource,
         DateTime expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<DateTime, DateTime>(default,
-                (value, _, _, _) => { return value <= expected; },
+        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<DateTime, DateTime>(default,
+                (value, _, _) => { return value <= expected; },
                 (value, _, _) =>
                     $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}")
             , [doNotPopulateThisValue]);

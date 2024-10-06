@@ -11,7 +11,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual> : InvokableValueAssert
     
     public EquivalentToAssertionBuilderWrapper<TActual> IgnoringMember(string propertyName)
     {
-        var assertion = (EquivalentToAssertCondition<TActual>) Assertions.Peek();
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual>) Assertions.Peek();
 
         assertion.IgnoringMember(propertyName);
         
