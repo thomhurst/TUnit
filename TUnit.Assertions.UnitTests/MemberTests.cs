@@ -8,7 +8,7 @@ public class MemberTests
     [Test]
     public async Task Number_Truthy()
     {
-        var myClass = new MyClass()
+        var myClass = new MyClass
         {
             Number = 123,
             Text = "Blah",

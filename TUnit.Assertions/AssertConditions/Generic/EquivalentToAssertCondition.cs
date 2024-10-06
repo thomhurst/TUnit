@@ -53,7 +53,7 @@ public class EquivalentToAssertCondition<TActual> : AssertCondition<TActual, TAc
             return enumerable.Cast<object>().SequenceEqual(enumerable2.Cast<object>());
         }
 
-        var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions()
+        var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions
         {
             MembersToIgnore = [.._ignoredMembers],
         }).ToList();

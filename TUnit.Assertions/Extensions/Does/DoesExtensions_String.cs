@@ -6,20 +6,23 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.String;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesExtensions
 {
-    public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return Contains(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
     
-    public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+    public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new StringContainsAssertCondition(expected, stringComparison)
+        var assertionBuilder = valueSource.RegisterAssertion(new StringContainsAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+        
+        return new StringContainsAssertionBuilderWrapper(assertionBuilder);
     }
     
     public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")

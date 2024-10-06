@@ -1,24 +1,14 @@
 ﻿namespace TUnit.Assertions.AssertConditions.String;
 
 public class StringContainsAssertCondition(string expected, StringComparison stringComparison)
-    : AssertCondition<string, string>(expected)
+    : BaseStringValueAssertCondition(expected, stringComparison)
 {
-    protected override bool Passes(string? actualValue, Exception? exception)
+    protected override bool Passes(string actualValue, string expectedValue, StringComparison stringComparison)
     {
-        if (actualValue is null)
-        {
-            return FailWithMessage($"{ActualExpression ?? "Actual string"} is null");
-        }
-        
-        if (ExpectedValue is null)
-        {
-            return FailWithMessage("No expected value given"); ;
-        }
-        
-        return actualValue.Contains(ExpectedValue, stringComparison);
+        return actualValue.Contains(expectedValue, stringComparison);
     }
 
     protected internal override string GetFailureMessage() => $"""
-                                              Expected "{ActualValue}" to contain "{ExpectedValue}"
-                                              """;
+                                                               Expected "{ActualValue}" to contain "{ExpectedValue}"
+                                                               """;
 }
