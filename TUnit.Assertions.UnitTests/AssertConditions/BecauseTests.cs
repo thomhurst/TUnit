@@ -1,4 +1,6 @@
 ﻿using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Booleans;
+using TUnit.Assertions.Extensions.Strings;
 
 namespace TUnit.Assertions.UnitTests.AssertConditions;
 

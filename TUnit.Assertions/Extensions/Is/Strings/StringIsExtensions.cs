@@ -5,20 +5,23 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.String;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions.Strings;
 
 public static class StringIsExtensions
 {
-    public static InvokableValueAssertionBuilder<string> IsEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+    public static StringEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
         return IsEqualTo(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue1);
     }
     
-    public static InvokableValueAssertionBuilder<string> IsEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+    public static StringEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new StringEqualsAssertCondition(expected, stringComparison)
+        var assertionBuilder = valueSource.RegisterAssertion(new StringEqualsAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+        
+        return new StringEqualToAssertionBuilderWrapper(assertionBuilder);
     }
     
     public static InvokableValueAssertionBuilder<string> IsEmpty(this IValueSource<string> valueSource)

@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-using TUnit.Assertions.AssertConditions.Generic;
-using TUnit.Assertions.AssertConditions.String;
+﻿using TUnit.Assertions.AssertConditions.String;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
@@ -10,11 +8,29 @@ public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertionBuild
     {
     }
 
-    public StringEqualToAssertionBuilderWrapper Within(string tolerance)
+    public StringEqualToAssertionBuilderWrapper WithTrimming()
     {
         var assertion = (StringEqualsAssertCondition) Assertions.Peek();
 
-        assertion.SetTolerance(tolerance);
+        assertion.Trimmed();
+        
+        return this;
+    }
+    
+    public StringEqualToAssertionBuilderWrapper WithNullAndEmptyEquality()
+    {
+        var assertion = (StringEqualsAssertCondition) Assertions.Peek();
+
+        assertion.WithNullAndEmptyEquality();
+        
+        return this;
+    }
+    
+    public StringEqualToAssertionBuilderWrapper IgnoringWhitespace()
+    {
+        var assertion = (StringEqualsAssertCondition) Assertions.Peek();
+
+        assertion.IgnoringWhitespace();
         
         return this;
     }
