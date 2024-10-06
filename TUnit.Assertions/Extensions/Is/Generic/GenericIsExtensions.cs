@@ -5,6 +5,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions.Generic;
 
@@ -16,10 +17,12 @@ public static class GenericIsExtensions
             .RegisterAssertion(new EqualsAssertCondition<TActual>(expected), [doNotPopulateThisValue1]);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+    public static EquivalentToAssertionBuilderWrapper<TActual> IsEquivalentTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        return valueSource.RegisterAssertion(new EquivalentToAssertCondition<TActual>(expected)
+        var assertionBuilder = valueSource.RegisterAssertion(new EquivalentToAssertCondition<TActual>(expected)
             , [doNotPopulateThisValue1]);
+        
+        return new EquivalentToAssertionBuilderWrapper<TActual>(assertionBuilder);
     }
     
     public static InvokableValueAssertionBuilder<object> IsSameReference(this IValueSource<object> valueSource, object expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
