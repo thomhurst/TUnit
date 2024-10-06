@@ -19,8 +19,8 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
     }
     
     protected override string GetFailureMessage(string? actualValue, string? expectedValue) => $"""
-                                                               Expected: "{ExpectedValue}"
-                                                               Received: "{ActualValue}"
+                                                               Expected: {Format(ExpectedValue)}
+                                                               Received: {Format(ActualValue)}
                                                                {GetLocation()}
                                                                """;
 

@@ -19,6 +19,6 @@ public class StringNotEqualsExpectedValueAssertCondition(string expected, String
     }
 
     protected override string GetFailureMessage(string? actualValue, string? expectedValue) => $"""
-                                              "{ActualValue}" is equal to "{ExpectedValue}"
+                                              {Format(ActualValue)} is equal to {Format(ExpectedValue)}
                                               """;
 }
