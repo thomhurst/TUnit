@@ -26,46 +26,26 @@ public class EquivalentToAssertCondition<TActual> : AssertCondition<TActual, TAc
             return false;
         }
 
-        if (actualValue is IEqualityComparer<TActual> equalityComparerActual)
+        if (actualValue is IEqualityComparer<TActual> typedEqualityComparer)
         {
-            return equalityComparerActual.Equals(actualValue, ExpectedValue);
+            return typedEqualityComparer.Equals(actualValue, ExpectedValue);
         }
         
-        if (actualValue is IEqualityComparer equalityComparerActual2)
+        if (actualValue is IEqualityComparer basicEqualityComparer)
         {
-            return equalityComparerActual2.Equals(actualValue, ExpectedValue);
+            return basicEqualityComparer.Equals(actualValue, ExpectedValue);
         }
         
-        if (actualValue is IComparable<TActual> comparableActual)
+        if (ExpectedValue is IEqualityComparer<TActual> expectedTypeEqualityComparer)
         {
-            return comparableActual.CompareTo(ExpectedValue) == 0;
+            return expectedTypeEqualityComparer.Equals(actualValue, ExpectedValue);
         }
         
-        if (actualValue is IComparable comparableActual2)
+        if (ExpectedValue is IEqualityComparer expectedBasicEqualityComparer)
         {
-            return comparableActual2.CompareTo(ExpectedValue) == 0;
+            return expectedBasicEqualityComparer.Equals(actualValue, ExpectedValue);
         }
         
-        if (ExpectedValue is IEqualityComparer<TActual> equalityComparerActual3)
-        {
-            return equalityComparerActual3.Equals(actualValue, ExpectedValue);
-        }
-        
-        if (ExpectedValue is IEqualityComparer equalityComparerActual4)
-        {
-            return equalityComparerActual4.Equals(actualValue, ExpectedValue);
-        }
-        
-        if (ExpectedValue is IComparable<TActual> comparableActual3)
-        {
-            return comparableActual3.CompareTo(actualValue) == 0;
-        }
-        
-        if (ExpectedValue is IComparable comparableActual4)
-        {
-            return comparableActual4.CompareTo(actualValue) == 0;
-        }
-
         if (actualValue is IEnumerable enumerable && ExpectedValue is IEnumerable enumerable2)
         {
             return enumerable.Cast<object>().SequenceEqual(enumerable2.Cast<object>());

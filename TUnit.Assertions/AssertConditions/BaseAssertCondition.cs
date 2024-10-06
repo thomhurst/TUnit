@@ -5,7 +5,13 @@ namespace TUnit.Assertions.AssertConditions;
 
 public abstract class BaseAssertCondition
 {
-    protected internal string? OverriddenMessage { get; set; }
+    public bool FailWithMessage(string message)
+    {
+        OverriddenMessage = message;
+        return false;
+    }
+    
+    internal string? OverriddenMessage { get; set; }
     protected internal abstract string GetFailureMessage();
     protected internal abstract string GetFullFailureMessage();
 }

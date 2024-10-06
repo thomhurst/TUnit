@@ -1,6 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Extensions.Generic;
+using TUnit.Assertions.Extensions.Numbers;
 using TUnit.Core.Enums;
 
 namespace TUnit.TestProject;

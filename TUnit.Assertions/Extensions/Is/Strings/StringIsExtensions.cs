@@ -31,7 +31,7 @@ public static class StringIsExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = "Actual string is null";
+                    self.FailWithMessage("Actual string is null");
                     return false;
                 }
                 

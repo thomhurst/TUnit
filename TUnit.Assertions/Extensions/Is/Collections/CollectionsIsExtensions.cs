@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Extensions.Collections;
 
 public static class CollectionsIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentCollectionTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : IEnumerable<TInner>
     {
         return valueSource.RegisterAssertion(new EnumerableEquivalentToAssertCondition<TActual, TInner>(expected, equalityComparer)

@@ -5,6 +5,7 @@ using TUnit.Assertions.Extensions.Collections;
 using TUnit.Assertions.Extensions.Comparable;
 using TUnit.Assertions.Extensions.Generic;
 using TUnit.Assertions.Extensions.Strings;
+using TUnit.Assertions.Extensions.Numbers;
 using TUnit.Assertions.Extensions.Throws;
 
 namespace TUnit.TestProject;

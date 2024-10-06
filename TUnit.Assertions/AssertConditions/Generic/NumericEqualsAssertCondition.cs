@@ -10,12 +10,11 @@ public class NumericEqualsAssertCondition<TActual>(TActual expected) : AssertCon
     protected internal override string GetFailureMessage() => $"""
                                                  Expected: {ExpectedValue}{WithToleranceMessage()}
                                                  Received: {ActualValue}
-                                                 
                                                  """;
 
     private string WithToleranceMessage()
     {
-        if (_tolerance == null)
+        if (_tolerance == null || _tolerance == default)
         {
             return string.Empty;
         }
@@ -35,7 +34,7 @@ public class NumericEqualsAssertCondition<TActual>(TActual expected) : AssertCon
             return false;
         }
         
-        if (_tolerance != null)
+        if (_tolerance != default && _tolerance != null)
         {
             var min = ExpectedValue - _tolerance;
             var max = ExpectedValue + _tolerance;

@@ -7,14 +7,12 @@ public class StringContainsAssertCondition(string expected, StringComparison str
     {
         if (actualValue is null)
         {
-            OverriddenMessage = $"{ActualExpression ?? "Actual string"} is null";
-            return false;
+            return FailWithMessage($"{ActualExpression ?? "Actual string"} is null");
         }
         
         if (ExpectedValue is null)
         {
-            OverriddenMessage = "No expected value given";
-            return false;
+            return FailWithMessage("No expected value given"); ;
         }
         
         return actualValue.Contains(ExpectedValue, stringComparison);
