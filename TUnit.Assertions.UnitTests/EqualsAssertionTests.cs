@@ -1,4 +1,5 @@
 using TUnit.Assertions.Extensions.Generic;
+using TUnit.Assertions.Extensions.Numbers;
 using TUnit.Assertions.Extensions.Strings;
 
 namespace TUnit.Assertions.UnitTests;
@@ -6,10 +7,11 @@ namespace TUnit.Assertions.UnitTests;
 public class EqualsAssertionTests
 {
     [Test]
-    public void Assertion_Message_Has_Correct_Expression()
+    public async Task Assertion_Message_Has_Correct_Expression()
     {
         var one = "1";
-        NUnitAssert.That(async () =>
+        
+        await NUnitAssert.ThatAsync(async () =>
                 await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsTypeOf(typeof(string)),
             Throws.Exception.Message.Contain("Assert.That(one).IsEqualTo(\"2\", StringComparison.Ordinal).And.IsNotEqualTo(\"1\", StringComparison.Ordinal).And.IsTypeOf(String)")
         );
