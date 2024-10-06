@@ -6,11 +6,21 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Numbers;
 
-public static partial class IsNotExtensions
+public static class NumberIsNotExtensions
 {
+    public static NumberNotEqualToAssertionBuilderWrapper<TActual> IsNotEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+        where TActual : INumber<TActual>
+    {
+        var assertionBuilder = valueSource.RegisterAssertion(new NotEqualsAssertCondition<TActual>(expected)
+            , [doNotPopulateThisValue]);
+        
+        return new NumberNotEqualToAssertionBuilderWrapper<TActual>(assertionBuilder);
+    }
+    
     public static InvokableValueAssertionBuilder<TActual> IsNotZero<TActual>(this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>
     {

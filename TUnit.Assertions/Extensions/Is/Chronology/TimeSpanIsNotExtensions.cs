@@ -6,9 +6,9 @@ using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Chronology;
 
-public static partial class IsNotExtensions
+public static class TimeSpanIsNotExtensions
 {
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotZero(this IValueSource<TimeSpan> valueSource)
     {

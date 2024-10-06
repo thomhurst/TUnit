@@ -4,9 +4,9 @@ using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Booleans;
 
-public static partial class IsExtensions
+public static class BooleanIsExtensions
 {
     public static InvokableValueAssertionBuilder<bool> IsTrue(this IValueSource<bool> valueSource)
     {

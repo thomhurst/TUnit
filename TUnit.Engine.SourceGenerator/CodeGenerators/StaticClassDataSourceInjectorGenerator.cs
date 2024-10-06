@@ -2,8 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;
-using TUnit.Engine.SourceGenerator.Enums;
-using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;

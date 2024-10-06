@@ -5,9 +5,9 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Comparable;
 
-public static partial class IsExtensions
+public static class ComparableIsExtensions
 {
     public static InvokableValueAssertionBuilder<TActual> IsGreaterThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : IComparable<TActual>

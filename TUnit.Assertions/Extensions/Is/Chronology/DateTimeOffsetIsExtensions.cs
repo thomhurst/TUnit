@@ -5,9 +5,9 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Chronology;
 
-public static partial class IsExtensions
+public static class DateTimeOffsetIsExtensions
 {
     public static InvokableValueAssertionBuilder<DateTimeOffset> IsBetween(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset lowerBound, DateTimeOffset upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
     {

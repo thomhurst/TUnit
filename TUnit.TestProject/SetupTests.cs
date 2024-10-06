@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Generic;
+using TUnit.Assertions.Extensions.Strings;
 
 namespace TUnit.TestProject;
 

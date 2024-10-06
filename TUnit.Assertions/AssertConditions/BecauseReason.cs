@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace TUnit.Assertions.AssertConditions;
+﻿namespace TUnit.Assertions.AssertConditions;
 
 internal class BecauseReason(string reason)
 {

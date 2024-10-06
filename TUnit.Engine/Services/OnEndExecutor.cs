@@ -4,7 +4,6 @@ using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Extensions;
-using TUnit.Engine.Hooks;
 using TUnit.Engine.Json;
 using TUnit.Engine.Logging;
 

@@ -3,7 +3,10 @@
 public class StringEqualsAssertCondition : AssertCondition<string, string>
 {
     private readonly StringComparison _stringComparison;
-    
+    private bool _trimmed;
+    private bool _nullAndEmptyEquality;
+    private bool _ignoreWhitespace;
+
     public StringEqualsAssertCondition(string expected, StringComparison stringComparison) : base(expected)
     {
         _stringComparison = stringComparison;
@@ -11,7 +14,35 @@ public class StringEqualsAssertCondition : AssertCondition<string, string>
     
     protected override bool Passes(string? actualValue, Exception? exception)
     {
-        return string.Equals(actualValue, ExpectedValue, _stringComparison);
+        var actual = actualValue;
+        var expected = ExpectedValue;
+
+        if (_nullAndEmptyEquality)
+        {
+            if (actual == null && expected == string.Empty)
+            {
+                return true;
+            }
+
+            if (expected == null && actualValue == string.Empty)
+            {
+                return true;
+            }
+        }
+
+        if (_trimmed)
+        {
+            actual = actual?.Trim();
+            expected = expected?.Trim();
+        }
+
+        if (_ignoreWhitespace)
+        {
+            actual = StripWhitespace(actual);
+            expected = StripWhitespace(expected);
+        }
+        
+        return string.Equals(actual, expected, _stringComparison);
     }
 
     protected internal override string GetFailureMessage() => $"""
@@ -56,4 +87,18 @@ public class StringEqualsAssertCondition : AssertCondition<string, string>
                    {new string(' ', spacesPrecedingArrow)}^
                 """;
     }
+
+    private string? StripWhitespace(string? input)
+    {
+        if (input == null)
+        {
+            return null;
+        }
+        
+        return string.Join(string.Empty, input.Where(c=>!char.IsWhiteSpace(c)));
+    }
+
+    public void Trimmed() => _trimmed = true;
+    public void WithNullAndEmptyEquality() => _nullAndEmptyEquality = true;
+    public void IgnoringWhitespace() => _ignoreWhitespace = true;
 }

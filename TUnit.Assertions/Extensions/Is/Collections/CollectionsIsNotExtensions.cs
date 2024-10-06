@@ -6,9 +6,9 @@ using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Collections;
 
-public static partial class IsNotExtensions
+public static class CollectionsIsNotExtensions
 {
     public static InvokableValueAssertionBuilder<TActual> IsNotEquivalentTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : IEnumerable<TInner>

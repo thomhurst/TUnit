@@ -11,7 +11,7 @@ public class InvokableAssertionBuilder<TActual> :
     {
     }
 
-    public async Task ProcessAssertionsAsync()
+    internal async Task ProcessAssertionsAsync()
     {
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
         
@@ -29,7 +29,7 @@ public class InvokableAssertionBuilder<TActual> :
             {
                 throw new AssertionException(
                     $"""
-                     {GetExpression()}
+                     {((IInvokableAssertionBuilder)this).GetExpression()}
                      {assertion.OverriddenMessage ?? assertion.GetFullFailureMessage()}
                      """
                 );
@@ -37,7 +37,7 @@ public class InvokableAssertionBuilder<TActual> :
         }
     }
 
-    public async IAsyncEnumerable<BaseAssertCondition> GetFailures()
+    async IAsyncEnumerable<BaseAssertCondition> IInvokableAssertionBuilder.GetFailures()
     {
         var assertionData = await AssertionDataDelegate();
         
@@ -51,8 +51,8 @@ public class InvokableAssertionBuilder<TActual> :
     }
 
     public TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
-    
-    public string? GetExpression()
+
+    string? IInvokableAssertionBuilder.GetExpression()
     {
         return ExpressionBuilder?.ToString();
     }

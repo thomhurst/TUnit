@@ -5,9 +5,9 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Chronology;
 
-public static partial class IsExtensions
+public static class TimeOnlyIsExtensions
 {
     public static InvokableValueAssertionBuilder<TimeOnly> IsAfter(this IValueSource<TimeOnly> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {

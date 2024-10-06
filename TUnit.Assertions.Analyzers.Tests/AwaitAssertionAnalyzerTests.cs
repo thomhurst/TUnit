@@ -12,6 +12,9 @@ public class AwaitAssertionAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
+                            using TUnit.Assertions.Extensions.Booleans;
+                            using TUnit.Assertions.Extensions.Strings;
+                            using TUnit.Assertions.Extensions.Numbers;
                             using TUnit.Core;
                             
                             public class MyClass
@@ -38,6 +41,9 @@ public class AwaitAssertionAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
+                            using TUnit.Assertions.Extensions.Booleans;
+                            using TUnit.Assertions.Extensions.Strings;
+                            using TUnit.Assertions.Extensions.Numbers;
                             using TUnit.Core;
 
                             public class MyClass
@@ -64,6 +70,9 @@ public class AwaitAssertionAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
+                            using TUnit.Assertions.Extensions.Booleans;
+                            using TUnit.Assertions.Extensions.Strings;
+                            using TUnit.Assertions.Extensions.Numbers;
                             using TUnit.Core;
 
                             public class MyClass
@@ -92,6 +101,10 @@ public class AwaitAssertionAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
+                            using TUnit.Assertions.Extensions.Collections;
+                            using TUnit.Assertions.Extensions.Strings;
+                            using TUnit.Assertions.Extensions.Numbers;
+                            
                             using TUnit.Core;
 
                             public class MyClass
@@ -123,6 +136,9 @@ public class AwaitAssertionAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
+                            using TUnit.Assertions.Extensions.Collections;
+                            using TUnit.Assertions.Extensions.Strings;
+                            using TUnit.Assertions.Extensions.Numbers;
                             using TUnit.Core;
 
                             public class MyClass
