@@ -1,5 +1,11 @@
 ﻿namespace TUnit.Assertions.AssertConditions;
 
+public abstract class DelegateAssertCondition : DelegateAssertCondition<object?, Exception>;
+
+public abstract class ExpectedExceptionDelegateAssertCondition<TException> : DelegateAssertCondition<object?, Exception>;
+
+public abstract class DelegateAssertCondition<TActual> : DelegateAssertCondition<TActual, Exception>;
+
 public abstract class DelegateAssertCondition<TActual, TException> : BaseAssertCondition<TActual> where TException : Exception
 {
     private readonly List<Func<TException?, AssertionDecision>> _customComparers = [];

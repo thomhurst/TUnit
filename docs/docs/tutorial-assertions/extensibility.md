@@ -16,25 +16,29 @@ Delegates are bits of code that haven't executed yet - Instead they are passed i
 
 So to create a custom assertion:
 
-1. Create a class that inherits from `AssertCondition<TActual, TExpected>`
-   `TActual` will be the type of object that is being asserted. For example if I started with `Assert.That("Some text")` then `TActual` would be a `string` because that's what we're asserting on.
+1. There are multiple classes you can inherit from to simplify your needs:
+   1. If you want to assert a value has some expected data, then inherit from the `ExpectedValueAssertCondition<TActual, TExpected>`
+   2. If you want to assert a value meets some criteria (e.g. IsNull) then inherit from `ValueAssertCondition<TActual>`
+   3. If you want to assert a delegate threw or didn't throw an exception, inherit from `DelegateAssertCondition` or `ExpectedExceptionDelegateAssertCondition<TException>`
+   4. If those don't fit what you need, the most basic class to inherit from is `BaseAssertCondition<TActual>`
+2. For the generic types above, `TActual` will be the type of object that is being asserted. For example if I started with `Assert.That("Some text")` then `TActual` would be a `string` because that's what we're asserting on.
 
    `TExpected` will be the data (if any) that you receive from your extension method, so you'll be responsible for passing this in. You must pass it to the base class via the base constructor: `base(expectedValue)`
 
-2. Override the method: 
-   `protected override bool Passes(TActual? actualValue, Exception? exception)`
+3. Override the method: 
+   `protected override bool Passes(...)`
 
    If this method returns true, then your assertion has passed, if it returns false, then your exception will throw with the failure message that you specify.
 
-   To access `TExpected` here, it's an accessible property called `ExpectedValue`
+   You will be passed relevant objects based on what you're asserting. These may or may not be null, so the logic is up to you.
 
-   The `Exception` object will be populated if your assertion is a Delegate type and the delegate threw.
+   Any `Exception` object will be populated if your assertion is a Delegate type and the delegate threw.
 
-   The `TActual` object will be populated if a value was passed into `Assert.That(...)`, or a delegate with a return value was executed successfully.
+   Any `TActual` object will be populated if a value was passed into `Assert.That(...)`, or a delegate with a return value was executed successfully.
 
-3. Override the `GetFailureMessage` method to return a message when the assertion fails. While you're inside the `Passes()` method you can also do `return FailWithMessage(string)`. This will take priority over any string set inside `GetFailureMessage()`. This can be useful if you want to change the failure message dynamically based on some logic.
+4. Override the `GetFailureMessage` method to return a message when the assertion fails. While you're inside the `Passes()` method you can also do `return FailWithMessage(string)`. This will take priority over any string set inside `GetFailureMessage()`. This can be useful if you want to change the failure message dynamically based on some logic.
 
-4. Create the extension method!
+5. Create the extension method!
 
    You need to create an extension off of either `IValueSource<TActual>` or `IDelegateSource<TActual>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
 
@@ -56,26 +60,26 @@ public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<
 ```
 
 ```csharp
-public class StringContainsAssertCondition(string expected, StringComparison stringComparison)
-    : AssertCondition<string, string>(expected)
+public class StringContainsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
+    : ExpectedValueAssertCondition<string, string>(expected)
 {
-    protected override bool Passes(string? actualValue, Exception? exception)
+    protected override bool Passes(string? actualValue, string? expectedValue)
     {
-        if (actualValue is null)
+        if (actualValue is null && expectedValue is null)
         {
-            return FailWithMessage($"{ActualExpression ?? "Actual string"} is null");
+            return true;
+        }
+
+        if (actualValue is null || expectedValue is null)
+        {
+            return FailWithMessage("Data was null!");
         }
         
-        if (ExpectedValue is null)
-        {
-            return FailWithMessage("No expected value given");
-        }
-        
-        return actualValue.Contains(ExpectedValue, stringComparison);
+        return actualValue.Contains(expectedValue, stringComparison);
     }
 
-    protected internal override string GetFailureMessage() => $"""
-                                              Expected "{ActualValue}" to contain "{ExpectedValue}"
-                                              """;
+    protected override string GetFailureMessage(string? actualValue, string? expectedValue) => $"""
+         Expected {Format(actualValue)} to contain {Format(expectedValue)}
+         """;
 }
 ```
