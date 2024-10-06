@@ -1,6 +1,7 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Logging;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 
 namespace TUnit.Engine;
@@ -21,14 +22,18 @@ internal class StaticPropertyInjectorsOrchestrator
     
     public async ValueTask Execute(Type testClassType)
     {
-        if (!TestDictionary.StaticInjectedPropertiesByTestClassType.TryGet(testClassType, out var initialisers))
+        foreach (var type in testClassType.GetSelfAndBaseTypes().Reverse())
         {
-            return;
-        }
+            if (!TestDictionary.StaticInjectedPropertiesByTestClassType.TryGet(type, out var initialisers)
+                || initialisers is null)
+            {
+                continue;
+            }
 
-        while (initialisers.TryDequeue(out var initialiser))
-        {
-            await initialiser.Value;
+            while (initialisers.TryDequeue(out var initialiser))
+            {
+                await initialiser.Value;
+            }
         }
     }
 
