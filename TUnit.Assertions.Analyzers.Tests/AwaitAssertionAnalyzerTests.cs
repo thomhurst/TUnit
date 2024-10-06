@@ -116,7 +116,7 @@ public class AwaitAssertionAnalyzerTests
                             
                                     await using (Assert.Multiple())
                                     {
-                                        await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                        await Assert.That(list).IsEquivalentCollectionTo(new[] { 1, 2, 3, 4, 5 });
                                         await Assert.That(list).HasCount().EqualTo(5);
                                     }
                                 }
@@ -150,7 +150,7 @@ public class AwaitAssertionAnalyzerTests
                             
                                     await using var _ = Assert.Multiple();
                                     
-                                    await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                    await Assert.That(list).IsEquivalentCollectionTo(new[] { 1, 2, 3, 4, 5 });
                                     await Assert.That(list).HasCount().EqualTo(5);
                                 }
                                 

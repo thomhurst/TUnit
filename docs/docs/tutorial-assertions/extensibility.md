@@ -32,7 +32,7 @@ So to create a custom assertion:
 
    The `TActual` object will be populated if a value was passed into `Assert.That(...)`, or a delegate with a return value was executed successfully.
 
-3. Override the `GetFailureMessage` method to return a message when the assertion fails. While you're inside the `Passes()` method you can also set an `OverriddenMessage` string property that will take priority instead. This can be useful if you want to change the failure message dynamically. For example, the default is 'Expected x but received y' - But if one of the values is null, we want to change the message to 'No expected value was passed into the assertion'.
+3. Override the `GetFailureMessage` method to return a message when the assertion fails. While you're inside the `Passes()` method you can also do `return FailWithMessage(string)`. This will take priority over any string set inside `GetFailureMessage()`. This can be useful if you want to change the failure message dynamically based on some logic.
 
 4. Create the extension method!
 
@@ -63,14 +63,12 @@ public class StringContainsAssertCondition(string expected, StringComparison str
     {
         if (actualValue is null)
         {
-            OverriddenMessage = $"{ActualExpression ?? "Actual string"} is null";
-            return false;
+            return FailWithMessage($"{ActualExpression ?? "Actual string"} is null");
         }
         
         if (ExpectedValue is null)
         {
-            OverriddenMessage = "No expected value given";
-            return false;
+            return FailWithMessage("No expected value given");
         }
         
         return actualValue.Contains(ExpectedValue, stringComparison);
