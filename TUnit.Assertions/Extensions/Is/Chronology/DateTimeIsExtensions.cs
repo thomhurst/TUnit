@@ -5,7 +5,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions.Chronology;
+namespace TUnit.Assertions.Extensions;
 
 public static class DateTimeIsExtensions
 {

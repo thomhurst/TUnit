@@ -1,6 +1,6 @@
-using TUnit.Assertions.Extensions.Generic;
-using TUnit.Assertions.Extensions.Numbers;
-using TUnit.Assertions.Extensions.Strings;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 

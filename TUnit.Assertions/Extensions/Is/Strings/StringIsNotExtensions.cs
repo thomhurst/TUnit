@@ -6,7 +6,7 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.String;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions.Strings;
+namespace TUnit.Assertions.Extensions;
 
 public static class StringIsNotExtensions
 {

@@ -1,12 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Extensions.Collections;
-using TUnit.Assertions.Extensions.Comparable;
-using TUnit.Assertions.Extensions.Generic;
-using TUnit.Assertions.Extensions.Strings;
-using TUnit.Assertions.Extensions.Numbers;
-using TUnit.Assertions.Extensions.Throws;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 

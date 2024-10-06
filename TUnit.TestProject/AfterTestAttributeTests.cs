@@ -1,5 +1,5 @@
 ﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions.Booleans;
+using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;

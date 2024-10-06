@@ -6,7 +6,7 @@ using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions.Collections;
+namespace TUnit.Assertions.Extensions;
 
 public static class CollectionsIsNotExtensions
 {

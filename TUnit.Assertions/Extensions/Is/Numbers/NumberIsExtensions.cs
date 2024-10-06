@@ -8,7 +8,7 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.AssertionBuilders.Wrappers;
 
-namespace TUnit.Assertions.Extensions.Numbers;
+namespace TUnit.Assertions.Extensions;
 
 public static class NumberIsExtensions
 {
