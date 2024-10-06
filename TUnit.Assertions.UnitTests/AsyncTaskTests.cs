@@ -1,6 +1,6 @@
 #pragma warning disable CA2012
 
-using TUnit.Assertions.Extensions.Strings;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 

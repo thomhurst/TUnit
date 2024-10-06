@@ -6,7 +6,7 @@ using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions.Generic;
+namespace TUnit.Assertions.Extensions;
 
 public static class GenericIsNotExtensions
 {
@@ -16,7 +16,7 @@ public static class GenericIsNotExtensions
             , []);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> IsNotEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TActual> IsNotEquatableOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TActual>(expected)
             , [doNotPopulateThisValue]);

@@ -2,7 +2,7 @@
 using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions.Throws;
+namespace TUnit.Assertions.Extensions;
 
 public static class ThrowsExtensions
 {
