@@ -28,7 +28,7 @@ public static partial class DoesNotExtensions
     
     public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, string>(expected,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
@@ -46,7 +46,7 @@ public static partial class DoesNotExtensions
     
     public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, string>(expected,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);

@@ -33,7 +33,7 @@ public class ThrowsException<TActual>
             , [typeof(TExpected).Name]);
     
     public InvokableDelegateAssertionBuilder<TActual> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        _delegateSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual,Exception>(default,
+        _delegateSource.RegisterAssertion(new FuncValueAssertCondition<TActual,Exception>(default,
             (_, exception, _) => action(_exceptionSelector(exception)),
             (_, exception, _) => messageFactory(_exceptionSelector(exception))
         ), [expectedExpression]);

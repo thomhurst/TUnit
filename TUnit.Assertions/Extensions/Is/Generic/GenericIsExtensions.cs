@@ -45,14 +45,14 @@ public static class GenericIsExtensions
 
     public static InvokableValueAssertionBuilder<TActual> IsAssignableTo<TActual>(this IValueSource<TActual> valueSource, Type type) 
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, Type>(default,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, Type>(default,
             (value, _, _) => value!.GetType().IsAssignableTo(type),
             (actual, _, _) => $"{actual?.GetType()} is not assignable to {type.Name}")
             , [type.Name]); }
 
     public static InvokableValueAssertionBuilder<TActual> IsAssignableFrom<TActual>(this IValueSource<TActual> valueSource, Type type) 
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, Type>(default,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, Type>(default,
             (value, _, _) => value!.GetType().IsAssignableFrom(type),
             (actual, _, _) => $"{actual?.GetType()} is not assignable from {type.Name}")
             , [type.Name]); }

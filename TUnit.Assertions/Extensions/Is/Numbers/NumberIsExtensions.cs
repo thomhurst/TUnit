@@ -35,7 +35,7 @@ public static class NumberIsExtensions
         this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
                 {
                     if (value is null)
                     {
@@ -53,7 +53,7 @@ public static class NumberIsExtensions
         this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
                 {
                     if (value is null)
                     {
@@ -70,7 +70,7 @@ public static class NumberIsExtensions
     public static InvokableValueAssertionBuilder<TActual> IsOdd<TActual>(this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
                 {
                     if (value is null)
                     {
@@ -88,7 +88,7 @@ public static class NumberIsExtensions
         this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
                 {
                     if (value is null)
                     {
@@ -106,7 +106,7 @@ public static class NumberIsExtensions
         this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
                 {
                     if (value is null)
                     {

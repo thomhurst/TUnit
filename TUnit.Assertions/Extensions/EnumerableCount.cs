@@ -20,7 +20,7 @@ public class EnumerableCount<TActual>
 
     public InvokableValueAssertionBuilder<TActual> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
+        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {
@@ -36,7 +36,7 @@ public class EnumerableCount<TActual>
     }
 
     public InvokableValueAssertionBuilder<TActual> Empty =>
-        _valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, int>(0, (enumerable, _, self) =>
+        _valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(0, (enumerable, _, self) =>
                 {
                     if (enumerable is null)
                     {
@@ -52,7 +52,7 @@ public class EnumerableCount<TActual>
     
     public InvokableValueAssertionBuilder<TActual> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, int>(expected,
+        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected,
             (enumerable, _, self) =>
             {
                 if (enumerable is null)
@@ -70,7 +70,7 @@ public class EnumerableCount<TActual>
 
     public InvokableValueAssertionBuilder<TActual> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
+        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {
@@ -87,7 +87,7 @@ public class EnumerableCount<TActual>
 
     public InvokableValueAssertionBuilder<TActual> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
+        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {
@@ -104,7 +104,7 @@ public class EnumerableCount<TActual>
 
     public InvokableValueAssertionBuilder<TActual> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
+        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
                 if (enumerable is null)
                 {

@@ -18,14 +18,14 @@ public static class TimeSpanIsNotExtensions
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotGreaterThan(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) => value <= expected,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) => value <= expected,
             (value, _, _) => $"{value} was greater than {expected}")
             , [doNotPopulateThisValue]);
     }
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotGreaterThanOrEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
             {
                 return value < expected;
             },
@@ -35,7 +35,7 @@ public static class TimeSpanIsNotExtensions
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotLessThan(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
             {
                 return value >= expected;
             },
@@ -45,7 +45,7 @@ public static class TimeSpanIsNotExtensions
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsNotLessThanOrEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(default, (value, _, _) =>
             {
                 return value > expected;
             },

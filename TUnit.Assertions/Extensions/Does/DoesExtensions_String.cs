@@ -32,7 +32,7 @@ public static partial class DoesExtensions
     
     public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, string>(expected,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, self) =>
             {
                 if (actual is null)
@@ -55,7 +55,7 @@ public static partial class DoesExtensions
     
     public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, string>(expected,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
@@ -72,7 +72,7 @@ public static partial class DoesExtensions
     
     public static InvokableValueAssertionBuilder<string> Matches(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression("regex")] string expression = "")
     {
-        return valueSource.RegisterAssertion(new DelegateExpectedValueAssertCondition<string, Regex>(regex,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, Regex>(regex,
             (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);

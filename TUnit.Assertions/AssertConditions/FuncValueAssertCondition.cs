@@ -1,8 +1,8 @@
 ﻿namespace TUnit.Assertions.AssertConditions;
 
-public class DelegateExpectedValueAssertCondition<TActual, TExpected>(
+public class FuncValueAssertCondition<TActual, TExpected>(
     TExpected? expected,
-    Func<TActual?, TExpected?, DelegateExpectedValueAssertCondition<TActual, TExpected>, bool> condition,
+    Func<TActual?, TExpected?, FuncValueAssertCondition<TActual, TExpected>, bool> condition,
     Func<TActual?, Exception?, string?, string> defaultMessageFactory
 )
     : ExpectedValueAssertCondition<TActual, TExpected>(expected)
