@@ -1,9 +1,9 @@
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsAnythingExpectedValueAssertCondition<TActual>
-    : ExpectedExceptionAssertCondition<TActual>
+    : DelegateAssertCondition<TActual, Exception>
 {
-    protected internal override string GetFailureMessage() => "Nothing was thrown";
+    protected override string GetFailureMessage(Exception? exception) => "Nothing was thrown";
 
     protected override bool Passes(Exception? exception)
     {

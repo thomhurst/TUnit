@@ -25,7 +25,7 @@ public class ThrowsException<TActual>
         _delegateSource.RegisterAssertion(new ThrowsAnythingExpectedValueAssertCondition<TActual>()
             , []);
 
-    public InvokableDelegateAssertionBuilder<TActual> OfType<TExpected>() => _delegateSource.RegisterAssertion(new ThrowsExactTypeOfExpectedExceptionAssertCondition<TActual, TExpected>()
+    public InvokableDelegateAssertionBuilder<TActual> OfType<TExpected>() where TExpected : Exception => _delegateSource.RegisterAssertion(new ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpected>()
         , [typeof(TExpected).Name]);
 
     public InvokableDelegateAssertionBuilder<TActual> SubClassOf<TExpected>() =>

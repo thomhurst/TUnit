@@ -12,7 +12,7 @@ public class StringContainsAssertionBuilderWrapper : InvokableValueAssertionBuil
     {
         var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
 
-        assertion.WithTransform(s => s.Trim(), s => s.Trim());
+        assertion.WithTransform(s => s?.Trim(), s => s?.Trim());
         
         return this;
     }

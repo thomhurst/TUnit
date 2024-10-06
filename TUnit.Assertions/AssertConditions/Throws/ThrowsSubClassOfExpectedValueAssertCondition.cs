@@ -1,8 +1,8 @@
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsSubClassOfExpectedValueAssertCondition<TActual, TExpected> : ExpectedExceptionAssertCondition<TActual>
+public class ThrowsSubClassOfExpectedValueAssertCondition<TActual, TExpected> : DelegateAssertCondition<TActual, Exception>
 {
-    protected internal override string GetFailureMessage() => $"A {Exception?.GetType().Name} was thrown instead of subclass of {typeof(TExpected).Name}";
+    protected override string GetFailureMessage(Exception? exception) => $"A {exception?.GetType().Name} was thrown instead of subclass of {typeof(TExpected).Name}";
 
     protected override bool Passes(Exception? exception)
     {

@@ -4,9 +4,9 @@ public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(
     string expectedMessage,
     StringComparison stringComparison,
     Func<Exception?, Exception?> exceptionSelector)
-    : ExpectedExceptionAssertCondition<TActual>
+    : DelegateAssertCondition<TActual, Exception>
 {
-    protected internal override string GetFailureMessage() => $"Message '{exceptionSelector(Exception)?.Message}' did not contain '{expectedMessage}'";
+    protected override string GetFailureMessage(Exception? exception) => $"Message '{exceptionSelector(Exception)?.Message}' did not contain '{expectedMessage}'";
 
     protected override bool Passes(Exception? rootException)
     {
