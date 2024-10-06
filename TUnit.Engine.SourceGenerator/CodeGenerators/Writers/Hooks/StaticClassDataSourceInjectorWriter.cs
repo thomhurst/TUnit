@@ -1,6 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
-using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Models;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers.Hooks;

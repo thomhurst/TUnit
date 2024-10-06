@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -8,7 +7,6 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;

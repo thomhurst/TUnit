@@ -6,27 +6,21 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions.Numbers;
 
-public static partial class IsExtensions
+public static class NumberIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsEqualToWithTolerance<TActual>(
-        this IValueSource<TActual> valueSource, TActual expected, TActual tolerance,
-        [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "",
-        [CallerArgumentExpression("tolerance")] string doNotPopulateThisValue2 = "")
+    public static NumberEqualToAssertionBuilderWrapper<TActual> IsEqualTo<TActual>(
+        this IValueSource<TActual> valueSource, TActual expected,
+        [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
         where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(expected,
-                (actual, _, _, _) =>
-                {
-                    ArgumentNullException.ThrowIfNull(actual);
-                    ArgumentNullException.ThrowIfNull(expected);
-
-                    return actual <= expected + tolerance && actual >= expected - tolerance;
-                },
-                (number, _, _) => $"{number} is not between {number! - tolerance} and {number! + tolerance}")
-            , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+        var assertionBuilder = valueSource.RegisterAssertion(new NumericEqualsAssertCondition<TActual>(expected)
+            , [doNotPopulateThisValue1]);
+        
+        return new NumberEqualToAssertionBuilderWrapper<TActual>(assertionBuilder);
     }
 
     public static InvokableValueAssertionBuilder<TActual> IsZero<TActual>(

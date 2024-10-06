@@ -36,11 +36,11 @@ public abstract class AssertionBuilder<TActual>
     
     internal StringBuilder? ExpressionBuilder { get; init; }
     internal string? ActualExpression { get; init; }
-    public Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
+    internal Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
     
     internal readonly Stack<BaseAssertCondition<TActual>> Assertions = new();
     
-    public AssertionBuilder<TActual> AppendExpression(string expression)
+    internal AssertionBuilder<TActual> AppendExpression(string expression)
     {
         ExpressionBuilder?.Append($".{expression}");
         return this;
@@ -66,21 +66,19 @@ public abstract class AssertionBuilder<TActual>
         return AppendExpression($"{methodName}({string.Join(", ", expressions)})");
     }
 
-    public InvokableAssertionBuilder<TActual> WithAssertion(BaseAssertCondition<TActual> assertCondition)
+    internal InvokableAssertionBuilder<TActual> WithAssertion(BaseAssertCondition<TActual> assertCondition)
     {
         var builder = new InvokableAssertionBuilder<TActual>(AssertionDataDelegate, this);
 
-        if (this is IOrAssertionBuilder)
+        assertCondition = this switch
         {
-            assertCondition = new OrAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition);
-        }
-        
-        if (this is IAndAssertionBuilder)
-        {
-            assertCondition = new AndAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition);
-        }
-        
+            IOrAssertionBuilder => new OrAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition),
+            IAndAssertionBuilder => new AndAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition),
+            _ => assertCondition
+        };
+
         builder.Assertions.Push(assertCondition);
+        
         return builder;
     }
     

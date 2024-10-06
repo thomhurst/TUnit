@@ -6,9 +6,9 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.String;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Strings;
 
-public static partial class IsExtensions
+public static class StringIsExtensions
 {
     public static InvokableValueAssertionBuilder<string> IsEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {

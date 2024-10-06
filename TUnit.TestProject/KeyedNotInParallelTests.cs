@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Booleans;
 
 namespace TUnit.TestProject;
 

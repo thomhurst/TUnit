@@ -6,9 +6,9 @@ using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Extensions.Chronology;
 
-public static partial class IsExtensions
+public static class TimeSpanIsExtensions
 {
     public static InvokableValueAssertionBuilder<TimeSpan> IsBetween(this IValueSource<TimeSpan> valueSource, TimeSpan lowerBound, TimeSpan upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
     {

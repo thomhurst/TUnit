@@ -1,5 +1,8 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Booleans;
+using TUnit.Assertions.Extensions.Generic;
+using TUnit.Assertions.Extensions.Strings;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;

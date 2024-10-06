@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Chronology;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.TestProject;

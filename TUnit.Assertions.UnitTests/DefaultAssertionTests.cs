@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Extensions.Generic;
 using TUnit.Assertions.Extensions.Throws;
 
 namespace TUnit.Assertions.UnitTests;
