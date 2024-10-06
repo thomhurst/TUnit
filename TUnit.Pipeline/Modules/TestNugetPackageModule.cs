@@ -14,8 +14,10 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<CopyToLocalNuGetModule>]
 public class TestNugetPackageModule : Module<CommandResult[]>
 {
-    private string[] _frameworks = ["net8.0", "net9.0"];
-    protected override async Task<CommandResult[]?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    private readonly string[] _frameworks = ["net8.0", "net9.0"];
+
+    protected override async Task<CommandResult[]?> ExecuteAsync(IPipelineContext context,
+        CancellationToken cancellationToken)
     {
         var version = await GetModule<GenerateVersionModule>();
 
@@ -26,15 +28,17 @@ public class TestNugetPackageModule : Module<CommandResult[]>
             .AssertExists();
 
         return await _frameworks.SelectAsync(framework =>
-            context.DotNet().Run(new DotNetRunOptions
-            {
-                Project = project,
-                Framework = framework,
-                Properties =
-                [
-                    new KeyValue("TUnitVersion", version.Value!.SemVer!)
-                ]
-            }, cancellationToken)
-, cancellationToken: cancellationToken).ProcessOneAtATime();
+                SubModule(framework, () =>
+                    context.DotNet().Run(new DotNetRunOptions
+                    {
+                        Project = project,
+                        Framework = framework,
+                        Properties =
+                        [
+                            new KeyValue("TUnitVersion", version.Value!.SemVer!)
+                        ]
+                    }, cancellationToken)
+                )
+            , cancellationToken: cancellationToken).ProcessOneAtATime();
     }
 }
