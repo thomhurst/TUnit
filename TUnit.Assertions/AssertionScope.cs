@@ -55,6 +55,7 @@ internal class AssertionScope : IAsyncDisposable
             var assertionException = new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Select(x =>
             {
                 return $"""
+                       {x.Item1.GetExpression()}
                        {string.Join(Environment.NewLine, x.Item2.Select(e =>  e.OverriddenMessage ?? e.GetFullFailureMessage()?.Trim()))}
                        """;
             })));
