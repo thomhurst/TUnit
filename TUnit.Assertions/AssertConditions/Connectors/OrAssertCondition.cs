@@ -14,7 +14,7 @@ internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
         _condition2 = condition2;
     }
 
-    protected internal override string GetFailureMessage() => $"{_condition1.OverriddenMessage ?? _condition1.GetFailureMessage()}{Environment.NewLine} or{Environment.NewLine}{_condition2.OverriddenMessage ?? _condition2.GetFailureMessage()}";
+    protected internal override string GetFailureMessage() => $"{_condition1.OverriddenMessage ?? _condition1.GetFullFailureMessage()}{Environment.NewLine} or{Environment.NewLine}{_condition2.OverriddenMessage ?? _condition2.GetFullFailureMessage()}";
 
     protected override bool Passes(TActual? actualValue, Exception? exception)
     {

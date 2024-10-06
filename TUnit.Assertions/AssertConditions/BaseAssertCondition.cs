@@ -7,6 +7,7 @@ public abstract class BaseAssertCondition
 {
     protected internal string? OverriddenMessage { get; set; }
     protected internal abstract string GetFailureMessage();
+    protected internal abstract string GetFullFailureMessage();
 }
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
@@ -40,6 +41,16 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     }
 
     protected abstract bool Passes(TActual? actualValue, Exception? exception);
+
+    protected internal override string GetFullFailureMessage()
+    {
+        if (string.IsNullOrEmpty(Because))
+        {
+            return GetFailureMessage();
+        }
+
+        return $"{GetFailureMessage()}{Environment.NewLine}{Because}";
+    }
 
     protected string Because => _becauseReason?.ToString() ?? string.Empty;
 

@@ -20,9 +20,9 @@ public class BecauseTests
     }
 
     [Test]
-    [TestCase("we prefix the reason", "because we prefix the reason")]
-    [TestCase("  we ignore whitespace", "because we ignore whitespace")]
-    [TestCase("because we honor a leading 'because'", "because we honor a leading 'because'")]
+    [TestCase("we prefix the reason", "Because: we prefix the reason")]
+    [TestCase("  we ignore whitespace", "Because: we ignore whitespace")]
+    [TestCase("because we honor a leading 'because'", "Because: we honor a leading 'because'")]
     public async Task Prefix_Because_Message(string because, string expectedWithPrefix)
     {
         var variable = true;
@@ -48,8 +48,8 @@ public class BecauseTests
         };
 
         var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
-        await Assert.That(exception.Message).Contains(because)
-            .And.DoesNotContain($"because {because}");
+        await Assert.That(exception.Message).Contains("we honor a leading 'because'")
+            .And.DoesNotContain(because);
     }
 
     [Test]
@@ -63,7 +63,11 @@ public class BecauseTests
         };
 
         var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
-        await Assert.That(exception.Message).Contains("Expected variable to be False, but found True");
+        await Assert.That(exception.Message).IsEqualTo("""
+                                                       Assert.That(variable).IsFalse()
+                                                       Expected: False
+                                                       Received: True
+                                                       """);
     }
 
     [Test]
@@ -79,7 +83,11 @@ public class BecauseTests
         };
 
         var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
-        await Assert.That(exception.Message).Contains("Expected variable to be False, but found True");
+        await Assert.That(exception.Message).IsEqualTo("""
+                                                       Assert.That(variable).IsTrue().And.IsFalse()
+                                                       Expected: False
+                                                       Received: True
+                                                       """);
     }
 
     [Test]

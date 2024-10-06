@@ -20,12 +20,12 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
             
         if (!_condition1.Assert(ActualValue, Exception, ActualExpression))
         {
-            messages.Add(_condition1.OverriddenMessage ?? _condition1.GetFailureMessage());
+            messages.Add(_condition1.OverriddenMessage ?? _condition1.GetFullFailureMessage());
         }
             
         if (!_condition2.Assert(ActualValue, Exception, ActualExpression))
         {
-            messages.Add(_condition2.OverriddenMessage ?? _condition2.GetFailureMessage());
+            messages.Add(_condition2.OverriddenMessage ?? _condition2.GetFullFailureMessage());
         }
 
         return string.Join($"{Environment.NewLine} and{Environment.NewLine}", messages);

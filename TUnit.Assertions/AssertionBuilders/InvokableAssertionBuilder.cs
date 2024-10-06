@@ -30,7 +30,7 @@ public class InvokableAssertionBuilder<TActual> :
                 throw new AssertionException(
                     $"""
                      {GetExpression()}
-                     {assertion.OverriddenMessage ?? assertion.GetFailureMessage()}
+                     {assertion.OverriddenMessage ?? assertion.GetFullFailureMessage()}
                      """
                 );
             }
