@@ -2,8 +2,10 @@
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions.Comparable;
 
@@ -49,13 +51,12 @@ public static class ComparableIsExtensions
             (value, _, _) => $"{value} was not less than or equal to {expected}")
             , [doNotPopulateThisValue]); }
     
-    public static InvokableValueAssertionBuilder<TActual> IsBetween<TActual>(this IValueSource<TActual> valueSource, TActual lowerBound, TActual upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
+    public static BetweenAssertionBuilderWrapper<TActual> IsBetween<TActual>(this IValueSource<TActual> valueSource, TActual lowerBound, TActual upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")
         where TActual : IComparable<TActual>
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<TActual, TActual>(default, (value, _, _, _) =>
-            {
-                return value.CompareTo(lowerBound) >= 0 && value.CompareTo(upperBound) <= 0;
-            },
-            (value, _, _) => $"{value} was not between {lowerBound} and {upperBound}")
-            , [doNotPopulateThisValue1, doNotPopulateThisValue2]); }
+        var assertionBuilder = valueSource.RegisterAssertion(new BetweenAssertCondition<TActual>(lowerBound, upperBound)
+            , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+        
+        return new BetweenAssertionBuilderWrapper<TActual>(assertionBuilder);
+    }
 }

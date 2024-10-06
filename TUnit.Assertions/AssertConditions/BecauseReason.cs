@@ -7,7 +7,7 @@ internal class BecauseReason(string reason)
     private string CreateMessage()
     {
         const string prefix = "because";
-        string message = reason.Trim();
+        var message = reason.Trim();
 
         var messageWithoutPrefix = message.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
             ? message.Substring(prefix.Length).Trim()
