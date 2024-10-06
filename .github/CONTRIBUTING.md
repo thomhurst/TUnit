@@ -86,12 +86,9 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 
 #### How Do I Submit a Good Bug Report?
 
-> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to <>.
-<!-- You may add a PGP key to allow the messages to be sent encrypted as well. -->
-
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
 
-- Open an [Issue](https://github.com/thomhurst/TUnit/issues/new). (Since we can't be sure at this point whether it is a bug or not, we ask you not to talk about a bug yet and not to label the issue.)
+- Open an [Issue](https://github.com/thomhurst/TUnit/issues/new). 
 - Explain the behavior you would expect and the actual behavior.
 - Please provide as much context as possible and describe the *reproduction steps* that someone else can follow to recreate the issue on their own. This usually includes your code. For good bug reports you should isolate the problem and create a reduced test case.
 - Provide the information you collected in the previous section.
@@ -101,9 +98,6 @@ Once it's filed:
 - The project team will label the issue accordingly.
 - A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as `needs-repro`. Bugs with the `needs-repro` tag will not be addressed until they are reproduced.
 - If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be [implemented by someone](#your-first-code-contribution).
-
-<!-- You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
-
 
 ### Suggesting Enhancements
 
@@ -123,13 +117,11 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/thomhu
 - Use a **clear and descriptive title** for the issue to identify the suggestion.
 - Provide a **step-by-step description of the suggested enhancement** in as many details as possible.
 - **Describe the current behavior** and **explain which behavior you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
-- You may want to **include screenshots and animated GIFs** which help you demonstrate the steps or point out the part which the suggestion is related to. You can use [this tool](https://www.cockos.com/licecap/) to record GIFs on macOS and Windows, and [this tool](https://github.com/colinkeenan/silentcast) or [this tool](https://github.com/GNOME/byzanz) on Linux. <!-- this should only be included if the project has a GUI -->
+
 - **Explain why this enhancement would be useful** to most TUnit users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
 
-<!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
-
 ### Improving The Documentation
-If you think the documentation could be improved, feel free to add and tweak the docs!
+If you think the documentation could be improved, feel free to add to and tweak the docs!
 
 The documentation is generated from files within this repository, so you can fork, clone and create a PR to update the documentation.
 
