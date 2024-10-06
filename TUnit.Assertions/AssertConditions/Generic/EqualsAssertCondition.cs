@@ -1,11 +1,11 @@
-namespace TUnit.Assertions.AssertConditions.Generic;
+﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
 public class EqualsAssertCondition<TActual>(TActual expected) : AssertCondition<TActual, TActual>(expected)
 {
     protected internal override string GetFailureMessage() => $"""
-                                                               Expected: {ExpectedValue}
-                                                               Received: {ActualValue}
-                                                               """;
+                                                 Expected: {ExpectedValue}
+                                                 Received: {ActualValue}
+                                                 """;
 
     protected override bool Passes(TActual? actualValue, Exception? exception)
     {
