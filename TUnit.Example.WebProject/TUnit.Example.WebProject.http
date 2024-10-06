@@ -1,0 +1,6 @@
+@TUnit.Example.WebProject_HostAddress = http://localhost:5085
+
+GET {{TUnit.Example.WebProject_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
