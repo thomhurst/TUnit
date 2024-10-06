@@ -1,4 +1,4 @@
-name: .NET
+name: Web Project Example Test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 jobs:
-  tests:
+  web-example-test:
     runs-on: ubuntu-latest
 
     steps:
