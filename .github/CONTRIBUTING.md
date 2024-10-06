@@ -14,7 +14,6 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 
 - [Contributing to TUnit](#contributing-to-tunit)
   - [Table of Contents](#table-of-contents)
-  - [Code of Conduct](#code-of-conduct)
   - [I Have a Question](#i-have-a-question)
   - [I Want To Contribute](#i-want-to-contribute)
     - [Reporting Bugs](#reporting-bugs)
@@ -24,15 +23,6 @@ All types of contributions are encouraged and valued. See the [Table of Contents
       - [Before Submitting an Enhancement](#before-submitting-an-enhancement)
       - [How Do I Submit a Good Enhancement Suggestion?](#how-do-i-submit-a-good-enhancement-suggestion)
     - [Improving The Documentation](#improving-the-documentation)
-
-
-## Code of Conduct
-
-This project and everyone participating in it is governed by the
-[TUnit Code of Conduct](https://github.com/thomhurst/TUnitblob/master/CODE_OF_CONDUCT.md).
-By participating, you are expected to uphold this code. Please report unacceptable behavior
-to <>.
-
 
 ## I Have a Question
 
@@ -47,21 +37,6 @@ If you then still feel the need to ask a question and need clarification, we rec
 - Provide project and platform versions (nodejs, npm, etc), depending on what seems relevant.
 
 We will then take care of the issue as soon as possible.
-
-<!--
-You might want to create a separate issue tag for questions and include it in this description. People should then tag their issues accordingly.
-
-Depending on how large the project is, you may want to outsource the questioning, e.g. to Stack Overflow or Gitter. You may add additional contact and information possibilities:
-- IRC
-- Slack
-- Gitter
-- Stack Overflow tag
-- Blog
-- FAQ
-- Roadmap
-- E-Mail List
-- Forum
--->
 
 ## I Want To Contribute
 
