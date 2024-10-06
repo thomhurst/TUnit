@@ -92,6 +92,11 @@ public static class Assert
             
             Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
+        catch (TException e)
+        {
+            // In case we want to assert to catch an AssertionException
+            return e;
+        }
 
         return null!;
     }
