@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.String;
+﻿using TUnit.Assertions.Extensions;
+
+namespace TUnit.Assertions.AssertConditions.String;
 
 public class StringEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
@@ -18,46 +20,46 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
         return string.Equals(actualValue, expectedValue, stringComparison);
     }
     
-    protected override string GetFailureMessage(string? actualValue, string? expectedValue) => $"""
-                                                               Expected: {Format(ExpectedValue)}
-                                                               Received: {Format(ActualValue)}
-                                                               {GetLocation()}
-                                                               """;
-
-    private string GetLocation()
+    protected override string GetFailureMessage(string? actualValue, string? expectedValue)
     {
-        var longest = Math.Max(ActualValue?.Length ?? 0, ExpectedValue?.Length ?? 0);
-
-        var errorIndex = -1;
-        for (var i = 0; i < longest; i++)
+        if (actualValue?.Length <= 100 && expectedValue?.Length <= 100)
         {
-            var actualCharacter = ActualValue?.ElementAtOrDefault(i);
-            var expectedCharacter = ExpectedValue?.ElementAtOrDefault(i);
-
-            if (actualCharacter != expectedCharacter)
-            {
-                errorIndex = i;
-                break;
-            }
+            return $"""
+                    Expected: {Format(ExpectedValue)}
+                    Received: {Format(ActualValue)}
+                    {GetLocation(actualValue, expectedValue)}
+                    """;
         }
+        
+        return GetLocation(actualValue, expectedValue);
+    }
 
-        if (errorIndex == -1)
-        {
-            return string.Empty;
-        }
+    private string GetLocation(string? actualValue, string? expectedValue)
+    {
+        var initialIndexOfDifference = StringUtils.IndexOfDifference(actualValue, expectedValue);
 
-        var startIndex = Math.Max(0, errorIndex - 10);
+        var startIndex = Math.Max(0, initialIndexOfDifference - 25);
+        
+        var actualLine = actualValue
+            ?.Substring(startIndex, Math.Min(actualValue.Length - startIndex, 55))
+            .ReplaceNewLines()
+            .Trim()
+            .TruncateWithEllipsis(50) ?? string.Empty;
 
-        var spacesPrecedingArrow = errorIndex - startIndex;
+        var expectedLine = expectedValue
+            ?.Substring(startIndex, Math.Min(expectedValue.Length - startIndex, 55))
+            .ReplaceNewLines()
+            .Trim()
+            .TruncateWithEllipsis(50) ?? string.Empty;
+        
+        var spacesBeforeArrow = StringUtils.IndexOfDifference(actualLine, expectedLine) + 1;
         
         return $"""
-
-
-                Difference at index {errorIndex}:
-                   {ActualValue?.Substring(startIndex, Math.Min(ActualValue!.Length - startIndex, 20))}
-                   {new string(' ', spacesPrecedingArrow)}^
-                   {ExpectedValue?.Substring(startIndex, Math.Min(ExpectedValue!.Length - startIndex, 20))}
-                   {new string(' ', spacesPrecedingArrow)}^
+                Difference at index {initialIndexOfDifference}:
+                   {Format(actualLine)}
+                   {new string(' ', spacesBeforeArrow)}^
+                   {Format(expectedLine)}
+                   {new string(' ', spacesBeforeArrow)}^
                 """;
     }
 }

@@ -11,4 +11,19 @@ internal static class StringExtensions
     {
         return value ?? defaultValue;
     }
+
+    public static string ReplaceNewLines(this string value)
+    {
+        return value.ReplaceLineEndings(" ");
+    }
+    
+    public static string TruncateWithEllipsis(this string value, int maxLength)
+    {
+        if (value.Length <= maxLength)
+        {
+            return value;
+        }
+        
+        return $"{value[..maxLength]}...";
+    }
 }
