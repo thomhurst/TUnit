@@ -1,5 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions.Generic;
-using TUnit.Assertions.AssertConditions.String;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Generic;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
@@ -9,11 +9,13 @@ public class EquivalentToAssertionBuilderWrapper<TActual> : InvokableValueAssert
     {
     }
     
-    public EquivalentToAssertionBuilderWrapper<TActual> IgnoringMember(string propertyName)
+    public EquivalentToAssertionBuilderWrapper<TActual> IgnoringMember(string propertyName, [CallerArgumentExpression("propertyName")] string doNotPopulateThis = "")
     {
         var assertion = (EquivalentToExpectedValueAssertCondition<TActual>) Assertions.Peek();
 
         assertion.IgnoringMember(propertyName);
+        
+        AppendCallerMethod([doNotPopulateThis]);
         
         return this;
     }

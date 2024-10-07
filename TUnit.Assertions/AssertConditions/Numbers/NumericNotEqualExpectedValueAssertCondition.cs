@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace TUnit.Assertions.AssertConditions.Generic;
+namespace TUnit.Assertions.AssertConditions.Numbers;
 
 public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expected) : ExpectedValueAssertCondition<TActual, TActual>(expected) 
     where TActual : INumber<TActual>
@@ -23,25 +23,25 @@ public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expect
 
     protected override bool Passes(TActual? actualValue, TActual? expectedValue)
     {
-        if (actualValue == null && ExpectedValue == null)
+        if (actualValue == null && expectedValue == null)
         {
             return true;
         }
 
-        if (actualValue == null || ExpectedValue == null)
+        if (actualValue == null || expectedValue == null)
         {
             return false;
         }
         
         if (_tolerance != null)
         {
-            var min = ExpectedValue - _tolerance;
-            var max = ExpectedValue + _tolerance;
+            var min = expectedValue - _tolerance;
+            var max = expectedValue + _tolerance;
             
             return actualValue < min || actualValue > max;
         }
         
-        return actualValue != ExpectedValue;
+        return actualValue != expectedValue;
     }
 
     public void SetTolerance(TActual tolerance)

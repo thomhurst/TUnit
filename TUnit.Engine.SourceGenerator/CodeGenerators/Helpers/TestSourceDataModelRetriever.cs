@@ -48,7 +48,7 @@ internal static class TestSourceDataModelRetriever
     }
 
     private static IEnumerable<TestSourceDataModel> GenerateTestSourceDataModels(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol,
-        ArgumentsContainer classArguments, int runCount, AttributeData testAttribute, ArgumentsContainer testArguments, ClassPropertiesContainer classPropertiesContainer)
+        BaseContainer classArguments, int runCount, AttributeData testAttribute, BaseContainer testArguments, ClassPropertiesContainer classPropertiesContainer)
     {
         if (classArguments is EmptyArgumentsContainer)
         {
@@ -69,7 +69,7 @@ internal static class TestSourceDataModelRetriever
 
     private static IEnumerable<TestSourceDataModel> GenerateSingleClassInstance(IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute,
-        ArgumentsContainer testArguments,
+        BaseContainer testArguments,
         ClassPropertiesContainer classPropertiesContainer)
     {
         for (var i = 0; i < runCount; i++)
@@ -78,10 +78,7 @@ internal static class TestSourceDataModelRetriever
             {
                     MethodSymbol = methodSymbol,
                     ClassSymbol = namedTypeSymbol,
-                    ClassArguments = new EmptyArgumentsContainer(ArgumentsType.ClassConstructor)
-                    {
-                        DisposeAfterTest = false,
-                    },
+                    ClassArguments = new EmptyArgumentsContainer(),
                     TestArguments = testArguments,
                     CurrentRepeatAttempt = i,
                     TestAttribute = testAttribute,
@@ -91,8 +88,8 @@ internal static class TestSourceDataModelRetriever
     }
 
     private static IEnumerable<TestSourceDataModel> GenerateMultipleClassInstances(IMethodSymbol methodSymbol,
-        INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, ArgumentsContainer classArguments,
-        ArgumentsContainer testArguments,
+        INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, BaseContainer classArguments,
+        BaseContainer testArguments,
         ClassPropertiesContainer classPropertiesContainer)
     {
         for (var i = 0; i < runCount; i++)

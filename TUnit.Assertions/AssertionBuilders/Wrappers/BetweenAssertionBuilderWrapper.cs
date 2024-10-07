@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using TUnit.Assertions.AssertConditions.Generic;
+﻿using TUnit.Assertions.AssertConditions.Comparable;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
@@ -15,6 +14,8 @@ public class BetweenAssertionBuilderWrapper<TActual> : InvokableValueAssertionBu
 
         assertion.Inclusive();
         
+        AppendCallerMethod([]);
+        
         return this;
     }
     
@@ -23,6 +24,8 @@ public class BetweenAssertionBuilderWrapper<TActual> : InvokableValueAssertionBu
         var assertion = (BetweenAssertCondition<TActual>) Assertions.Peek();
 
         assertion.Exclusive();
+        
+        AppendCallerMethod([]);
         
         return this;
     }

@@ -14,6 +14,7 @@ internal class ClassConstructorRetriever
         return new ClassConstructorAttributeContainer(ArgumentsType.ClassConstructor)
         {
             AttributeIndex = index,
+            Attribute = dataAttribute,
             ClassConstructorType = type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ArgumentsType = ArgumentsType.ClassConstructor,
             DisposeAfterTest = dataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,

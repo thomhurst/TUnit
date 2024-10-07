@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
@@ -10,11 +11,11 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
             "TUnit.TestProject",
             "AfterTests",
             "AfterTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(14));
+            await Assert.That(generatedFiles.Length).IsEqualTo(14);
 
-            Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[0], 
 	            """
 	            TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.Base1), new StaticHookMethod<ClassHookContext>
 	            { 
@@ -25,9 +26,9 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 	                FilePath = @"", 
 	                LineNumber = 5,
 	            });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[2], 
 	            """
 	            TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.Base2), new StaticHookMethod<ClassHookContext>
 	            { 
@@ -38,9 +39,9 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 	                FilePath = @"", 
 	                LineNumber = 20,
 	            });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[4], 
 	            """
 	            TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.Base3), new StaticHookMethod<ClassHookContext>
 	            { 
@@ -51,9 +52,9 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 	                FilePath = @"", 
 	                LineNumber = 35,
 	            });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[6], 
 	            """
 		            		TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticHookMethod<ClassHookContext>
 		            		{ 
@@ -64,9 +65,9 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 		                       FilePath = @"", 
 		                       LineNumber = 50,
 		            		});
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
             
-            Assert.That(generatedFiles[7].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[7], 
 	            """
 		            		TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticHookMethod<ClassHookContext>
 		            		{ 
@@ -77,9 +78,9 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 		                       FilePath = @"", 
 		                       LineNumber = 56,
 		            		});
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
             
-            Assert.That(generatedFiles[8].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[8], 
 	            """
 		            		TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticHookMethod<ClassHookContext>
 		            		{ 
@@ -90,9 +91,9 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 		                       FilePath = @"", 
 		                       LineNumber = 62,
 		            		});
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
             
-            Assert.That(generatedFiles[9].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[9], 
 	            """
 		            		TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticHookMethod<ClassHookContext>
 		            		{ 
@@ -103,6 +104,6 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
 		                       FilePath = @"", 
 		                       LineNumber = 68,
 		            		});
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
         });
 }

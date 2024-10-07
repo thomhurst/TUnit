@@ -119,4 +119,10 @@ internal static class TypeExtensions
         
         return false;
     }
+    
+    public static string GloballyQualified(this ITypeSymbol typeSymbol) =>
+        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    
+    public static string GloballyQualifiedNonGeneric(this ITypeSymbol typeSymbol) =>
+        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
 }

@@ -8,8 +8,7 @@ public static class VariableNames
     public const string ClassArg = "classArg";
     public const string PropertyArg = "propertyArg";
     public const string MethodArg = "methodArg";
-
     
-    public const string EnumerableTestDataIndex = "enumerableTestDataIndex";
-    public const string EnumerableClassDataIndex = "enumerableClassDataIndex";
+    public const string TestMethodDataIndex = "testMethodDataIndex";
+    public const string ClassDataIndex = "classDataIndex";
 }

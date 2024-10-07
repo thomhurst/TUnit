@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
@@ -10,11 +11,11 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
             "TUnit.TestProject",
             "AfterTests",
             "AfterTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-	        Assert.That(generatedFiles.Length, Is.EqualTo(14));
+	        await Assert.That(generatedFiles.Length).IsEqualTo(14);
 
-            Assert.That(generatedFiles[1].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[1], 
 	            """
 	            TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base1>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base1>
 	            {
@@ -23,9 +24,9 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
 	                HookExecutor = DefaultExecutor.Instance,
 	                Order = 0,
 	            });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[3].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[3], 
 	            """
 	             TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base2>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base2>
 	             {
@@ -34,9 +35,9 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
 	                 HookExecutor = DefaultExecutor.Instance,
 	                 Order = 0,
 	             });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[5].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[5], 
 	            """
 	             TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base3>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base3>
 	             {
@@ -45,9 +46,9 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
 	               	 HookExecutor = DefaultExecutor.Instance,
 	               	 Order = 0,
 	             });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[10].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[10], 
 	            """
 		             TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
 		             {
@@ -56,9 +57,9 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
 		               	 HookExecutor = DefaultExecutor.Instance,
 		               	 Order = 0,
 		             });
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
             
-            Assert.That(generatedFiles[11].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[11], 
 	            """
 		             TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
 		             {
@@ -67,9 +68,9 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
 		               	 HookExecutor = DefaultExecutor.Instance,
 		               	 Order = 0,
 		             });
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
             
-            Assert.That(generatedFiles[12].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[12], 
 	            """
 		             TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
 		             {
@@ -78,9 +79,9 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
 		               	 HookExecutor = DefaultExecutor.Instance,
 		               	 Order = 0,
 		             });
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
                         
-            Assert.That(generatedFiles[13].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[13], 
 	            """
 		             TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
 		             {
@@ -89,6 +90,6 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
 		               	 HookExecutor = DefaultExecutor.Instance,
 		               	 Order = 0,
 		             });
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
         });
 }

@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.AssertConditions.Generic;
+﻿namespace TUnit.Assertions.AssertConditions.Comparable;
 
 public class BetweenAssertCondition<TActual>(TActual minimum, TActual maximum) : BaseAssertCondition<TActual> 
     where TActual : IComparable<TActual>

@@ -2,13 +2,23 @@
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static class DateOnlyIsExtensions
 {
+    public static DateOnlyEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+    {
+        return new DateOnlyEqualToAssertionBuilderWrapper(
+            valueSource.RegisterAssertion(new DateOnlyEqualsExpectedValueAssertCondition(expected),
+                [doNotPopulateThisValue1])
+        );
+    }
+    
     public static InvokableValueAssertionBuilder<DateOnly> IsAfter(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateOnly, DateOnly>(default, (value, _, _) =>

@@ -40,7 +40,7 @@ public abstract class AssertionBuilder<TActual>
     
     internal readonly Stack<BaseAssertCondition<TActual>> Assertions = new();
     
-    internal AssertionBuilder<TActual> AppendExpression(string expression)
+    protected internal AssertionBuilder<TActual> AppendExpression(string expression)
     {
         ExpressionBuilder?.Append($".{expression}");
         return this;
@@ -56,7 +56,7 @@ public abstract class AssertionBuilder<TActual>
         return AppendExpression(chainType.ToString());
     }
     
-    internal AssertionBuilder<TActual> AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
+    protected internal AssertionBuilder<TActual> AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
     {
         if (string.IsNullOrEmpty(methodName))
         {

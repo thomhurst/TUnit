@@ -86,15 +86,8 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
 
-            if (modelTestSourceDataModel.ClassArguments is MethodDataSourceAttributeContainer { IsEnumerableData: true })
-            {
-                sourceBuilder.WriteLine($"var {VariableNames.EnumerableClassDataIndex} = 0;");
-            }
-            
-            if (modelTestSourceDataModel.MethodArguments is MethodDataSourceAttributeContainer { IsEnumerableData: true })
-            {
-                sourceBuilder.WriteLine($"var {VariableNames.EnumerableTestDataIndex} = 0;");
-            }
+            sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
+            sourceBuilder.WriteLine($"var {VariableNames.TestMethodDataIndex} = 0;");
             
             sourceBuilder.WriteLine("try");
             sourceBuilder.WriteLine("{");

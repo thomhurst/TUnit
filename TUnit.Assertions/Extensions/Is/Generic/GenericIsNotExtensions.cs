@@ -12,7 +12,7 @@ public static class GenericIsNotExtensions
 {
     public static InvokableValueAssertionBuilder<TActual> IsNotNull<TActual>(this IValueSource<TActual> valueSource)
     {
-        return valueSource.RegisterAssertion(new NotNullExpectedValueAssertCondition<TActual>()
+        return valueSource!.RegisterAssertion(new NotNullExpectedValueAssertCondition<TActual>()
             , []);
     }
     

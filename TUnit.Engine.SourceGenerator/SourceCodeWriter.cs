@@ -6,10 +6,19 @@ internal class SourceCodeWriter : IDisposable
 {
     private int _tabLevel;
     private readonly StringBuilder _stringBuilder = new();
+    private bool _lastWriteContainedNewLine;
 
     public void WriteLine()
     {
         _stringBuilder.AppendLine();
+    }
+
+    public void WriteTabs()
+    {
+        for (var i = 0; i < _tabLevel; i++)
+        {
+            _stringBuilder.Append('\t');
+        }
     }
     
     public void WriteLine(string value)
@@ -24,11 +33,13 @@ internal class SourceCodeWriter : IDisposable
             _tabLevel--;
         }
 
-        for (var i = 0; i < _tabLevel; i++)
+        if (_lastWriteContainedNewLine)
         {
-            _stringBuilder.Append('\t');
+            WriteTabs();
         }
-        
+
+        _lastWriteContainedNewLine = true;
+
         _stringBuilder.AppendLine(value);
 
         if (value[0] == '{')
@@ -40,6 +51,7 @@ internal class SourceCodeWriter : IDisposable
     public void Write(string value)
     {
         _stringBuilder.Append(value);
+        _lastWriteContainedNewLine = false;
     }
 
     public override string ToString()

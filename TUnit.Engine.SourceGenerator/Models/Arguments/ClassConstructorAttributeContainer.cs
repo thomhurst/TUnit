@@ -5,7 +5,6 @@ namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 internal record ClassConstructorAttributeContainer : ArgumentsContainer
 {
     public required string ClassConstructorType { get; init; }
-    public int AttributeIndex { get; init; }
 
     public ClassConstructorAttributeContainer(ArgumentsType argumentsType) : base(argumentsType)
     {

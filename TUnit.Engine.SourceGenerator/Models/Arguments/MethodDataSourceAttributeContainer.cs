@@ -2,7 +2,7 @@ using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record MethodDataSourceAttributeContainer : DataAttributeContainer
+internal record MethodDataSourceAttributeContainer : ArgumentsContainer
 {
     public MethodDataSourceAttributeContainer(ArgumentsType ArgumentsType, string TestClassTypeName, string TypeName, string MethodName, bool IsStatic, bool IsEnumerableData, string[] TupleTypes, string MethodReturnType) : base(ArgumentsType)
     {
@@ -30,8 +30,8 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
             }
             
             var enumerableIndexName = ArgumentsType == ArgumentsType.ClassConstructor
-                ? CodeGenerators.VariableNames.EnumerableClassDataIndex
-                : CodeGenerators.VariableNames.EnumerableTestDataIndex;
+                ? CodeGenerators.VariableNames.ClassDataIndex
+                : CodeGenerators.VariableNames.TestMethodDataIndex;
             
             var dataName = ArgumentsType == ArgumentsType.ClassConstructor
                 ? CodeGenerators.VariableNames.ClassData

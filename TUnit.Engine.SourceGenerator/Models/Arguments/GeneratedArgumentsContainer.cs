@@ -50,7 +50,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
 
         if (ArgumentsType == ArgumentsType.Property)
         {
-            sourceCodeWriter.WriteLine($"var {VariableNames.ElementAt(0)} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources({dataGeneratorMetadata})).ElementAtOrDefault(0);");
+            sourceCodeWriter.WriteLine($"var {VariableNames.ElementAt(0)} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}, true).ElementAt(0).GenerateDataSources({dataGeneratorMetadata}).ElementAtOrDefault(0);");
             sourceCodeWriter.WriteLine();
             return;
         }
@@ -58,11 +58,21 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
         
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources({dataGeneratorMetadata}));");
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}, true).ElementAt({AttributeIndex}).GenerateDataSources({dataGeneratorMetadata});");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");
 
+        if (ArgumentsType == ArgumentsType.ClassConstructor)
+        {
+            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
+        }
+        
+        if (ArgumentsType == ArgumentsType.Method)
+        {
+            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
+        }
+        
         if (GenericArguments.Length > 1)
         {
             for (var i = 0; i < GenericArguments.Length; i++)
@@ -83,9 +93,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
     {
         return GenericArguments;
     }
-
-    public int AttributeIndex { get; }
-
+    
     public string TestClassTypeName { get; }
 
     public string[] GenericArguments { get; }

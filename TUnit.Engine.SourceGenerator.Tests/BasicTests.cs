@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -8,11 +9,11 @@ internal class BasicTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "BasicTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(2));
+            await Assert.That(generatedFiles.Length).IsEqualTo(2);
             
-            AssertFileContains(generatedFiles[0], "TestId = $\"TUnit.TestProject.BasicTests.SynchronousTest:0\",");
-            AssertFileContains(generatedFiles[1], "TestId = $\"TUnit.TestProject.BasicTests.AsynchronousTest:0\",");
+            await AssertFileContains(generatedFiles[0], "TestId = $\"TUnit.TestProject.BasicTests.SynchronousTest:0\",");
+            await AssertFileContains(generatedFiles[1], "TestId = $\"TUnit.TestProject.BasicTests.AsynchronousTest:0\",");
         });
 }

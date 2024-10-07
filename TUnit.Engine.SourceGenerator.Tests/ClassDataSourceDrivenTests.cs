@@ -1,4 +1,5 @@
-﻿using TUnit.Engine.SourceGenerator.CodeGenerators;
+﻿using TUnit.Assertions.Extensions;
+using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -19,19 +20,17 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
                     "SomeAsyncDisposableClass.cs")
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(2));
+            await Assert.That(generatedFiles.Length).IsEqualTo(2);
 
-            Assert.That(generatedFiles[0],
-                Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();"));
-            AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArg)");
+            await AssertFileContains(generatedFiles[0], 
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();");
+            await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArg)");
 
-            Assert.That(generatedFiles[1],
-                Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();"));
-            AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArg)");
+            await AssertFileContains(generatedFiles[1], 
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();");
+            await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArg)");
         });
 
     [Test]
@@ -48,19 +47,17 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
                     "SomeAsyncDisposableClass.cs")
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(2));
+            await Assert.That(generatedFiles.Length).IsEqualTo(2);
 
-            Assert.That(generatedFiles[0],
-                Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();"));
-            AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArg)");
+            await AssertFileContains(generatedFiles[0], 
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();");
+            await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArg)");
 
-            Assert.That(generatedFiles[1],
-                Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();"));
-            AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArg)");
+            await AssertFileContains(generatedFiles[1], 
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass();");
+            await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArg)");
         });
 
     [Test]
@@ -77,19 +74,17 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
                     "SomeAsyncDisposableClass.cs")
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(2));
+            await Assert.That(generatedFiles.Length).IsEqualTo(2);
 
-            Assert.That(generatedFiles[0],
-                Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
-            AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArg)");
+            await AssertFileContains(generatedFiles[0], 
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());");
+            await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArg)");
 
-            Assert.That(generatedFiles[1],
-                Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
-            AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArg)");
+            await AssertFileContains(generatedFiles[1], 
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = TestDataContainer.GetInstanceForType<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedForClass), () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());");
+            await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArg)");
         });
 
     [Test]
@@ -106,18 +101,16 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
                     "SomeAsyncDisposableClass.cs")
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(2));
+            await Assert.That(generatedFiles.Length).IsEqualTo(2);
 
-            Assert.That(generatedFiles[0],
-                Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = TestDataContainer.GetInstanceForKey<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(\"🔑\", () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
-            AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArg)");
+            await AssertFileContains(generatedFiles[0], 
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = TestDataContainer.GetInstanceForKey<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(\"🔑\", () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());");
+            await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArg)");
 
-            Assert.That(generatedFiles[1],
-                Does.Contain(
-                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = TestDataContainer.GetInstanceForKey<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(\"🔑\", () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());"));
-            AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArg)");
+            await AssertFileContains(generatedFiles[1], 
+                    "global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass methodArg = TestDataContainer.GetInstanceForKey<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>(\"🔑\", () => new global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass());");
+            await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArg)");
         });
 }

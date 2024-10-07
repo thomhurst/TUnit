@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
-using TUnit.Assertions.AssertConditions.Generic;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Numbers;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
@@ -9,11 +10,13 @@ public class NumberEqualToAssertionBuilderWrapper<TActual> : InvokableValueAsser
     {
     }
 
-    public NumberEqualToAssertionBuilderWrapper<TActual> Within(TActual tolerance)
+    public NumberEqualToAssertionBuilderWrapper<TActual> Within(TActual tolerance, [CallerArgumentExpression("tolerance")] string doNotPopulateThis = "")
     {
         var assertion = (NumericEqualsExpectedValueAssertCondition<TActual>) Assertions.Peek();
 
         assertion.SetTolerance(tolerance);
+        
+        AppendCallerMethod([doNotPopulateThis]);
         
         return this;
     }

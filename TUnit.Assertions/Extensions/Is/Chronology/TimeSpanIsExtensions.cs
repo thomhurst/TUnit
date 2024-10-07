@@ -2,23 +2,23 @@
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static class TimeSpanIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TimeSpan> IsEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, TimeSpan tolerance, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("tolerance")] string doNotPopulateThisValue2 = "")
+    public static TimeSpanEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeSpan, TimeSpan>(expected,
-            (actual, _, _) =>
-            {
-                return actual <= expected.Add(tolerance) && actual >= expected.Subtract(tolerance);
-            },
-            (timeSpan, _, _) => $"{timeSpan} is not between {timeSpan.Subtract(tolerance)} and {timeSpan.Add(tolerance)}")
-            , [doNotPopulateThisValue1, doNotPopulateThisValue2]); }
+        return new TimeSpanEqualToAssertionBuilderWrapper(
+            valueSource.RegisterAssertion(new TimeSpanEqualsExpectedValueAssertCondition(expected),
+                [doNotPopulateThisValue1])
+        );
+    }
     
     public static InvokableValueAssertionBuilder<TimeSpan> IsZero(this IValueSource<TimeSpan> valueSource)
     {
