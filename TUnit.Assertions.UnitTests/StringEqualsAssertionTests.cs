@@ -129,7 +129,7 @@ public class StringEqualsAssertionTests
                      Eu magna dolores justo kasd aliquyam augue et sed ipsum et stet dolores aliquyam et eos erat diam duo. 
                      Quis duo feugait erat diam. Amet minim vero veniam esse consequat tation takimata eu in diam ut ea hendrerit eos gubergren ea eirmod. 
                      Volutpat vero est ea clita clita magna dolor nulla ipsum aliquyam nonumy.
-                     """;
+                     """.ReplaceLineEndings(" ");
         
         var value2 = """
                      Lorem ipsum dolor sit amet diam duo amet sea rebum. 
@@ -150,12 +150,12 @@ public class StringEqualsAssertionTests
                      Eu magna dolores justo kasd aliquyam augue et sed ipsum et stet dolores aliquyam et eos erat diam duo. 
                      Quis duo feugait erat diam. Amet minim vero veniam esse consequat tation takimata eu in diam ut ea hendrerit eos gubergren ea eirmod. 
                      Volutpat vero est ea clita clita magna dolor nulla ipsum aliquyam nonumy.
-                     """;
+                     """.ReplaceLineEndings(" ");
         
         var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
         NUnitAssert.That(exception!.Message, Is.EqualTo("""
                                                         Assert.That(value1).IsEqualTo(value2, StringComparison.Ordinal)
-                                                        Difference at index 563:
+                                                        Difference at index 556:
                                                            "Consequat odio ea veniam. Amet enim in gubergren s..."
                                                                                     ^
                                                            "Consequat odio ea veniam! Amet enim in gubergren s..."
