@@ -19,6 +19,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SingleFile)' == 'true'">
+    <UseAppHost>true</UseAppHost>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
