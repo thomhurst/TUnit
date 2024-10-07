@@ -32,7 +32,7 @@ public abstract class BaseAssertCondition
 
         if (obj is char)
         {
-            return "'{obj}";
+            return "'{obj}'";
         }
 
         if (obj is IEnumerable enumerable)
