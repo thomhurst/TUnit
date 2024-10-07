@@ -54,6 +54,13 @@ public class InvokableAssertionBuilder<TActual> :
 
     string? IInvokableAssertionBuilder.GetExpression()
     {
-        return ExpressionBuilder?.ToString();
+        var expression = ExpressionBuilder?.ToString();
+
+        if (expression?.Length < 100)
+        {
+            return expression;
+        }
+        
+        return $"{expression?[..100]}...";
     }
 }
