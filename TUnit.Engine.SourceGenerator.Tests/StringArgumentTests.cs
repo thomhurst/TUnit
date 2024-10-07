@@ -1,4 +1,3 @@
-using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
