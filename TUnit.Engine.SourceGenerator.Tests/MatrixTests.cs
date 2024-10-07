@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
@@ -18,13 +19,13 @@ internal class MatrixTests : TestsBase<TestsGenerator>
                     "TestEnum.cs")
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(76));
+            await Assert.That(generatedFiles.Length).IsEqualTo(76);
 
             AssertTestOne(generatedFiles);
             AssertTestTwo(generatedFiles);
-            AssertTestThree(generatedFiles);
+            await AssertTestThree(generatedFiles);
         });
 
     private void AssertTestOne(string[] generatedFiles)
@@ -35,11 +36,11 @@ internal class MatrixTests : TestsBase<TestsGenerator>
     {
     }
 
-    private void AssertTestThree(string[] generatedFiles)
+    private async Task AssertTestThree(string[] generatedFiles)
     {
-        AssertFileContains(generatedFiles[72], "global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);");
-        AssertFileContains(generatedFiles[73], "global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;");
-        AssertFileContains(generatedFiles[74], "global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);");
-        AssertFileContains(generatedFiles[75], "global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;");
+        await AssertFileContains(generatedFiles[72], "global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);");
+        await AssertFileContains(generatedFiles[73], "global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;");
+        await AssertFileContains(generatedFiles[74], "global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);");
+        await AssertFileContains(generatedFiles[75], "global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;");
     }
 }

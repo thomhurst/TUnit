@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
@@ -18,8 +19,8 @@ internal class InheritedPropertySetterTests : TestsBase<InheritsTestsGenerator>
                     "PropertySetterTests.cs")
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(1));
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
         });
 }

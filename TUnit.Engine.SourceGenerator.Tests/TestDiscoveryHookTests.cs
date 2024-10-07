@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
@@ -9,11 +10,11 @@ internal class TestDiscoveryHookTests : TestsBase<GlobalTestHooksGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "TestDiscoveryHookTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles, Has.Length.EqualTo(2));
+            await Assert.That(generatedFiles).HasCount().EqualTo(2);
             
-            Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[0], 
                 """
                     		TestRegistrar.RegisterBeforeHook(new StaticHookMethod<BeforeTestDiscoveryContext>
                     		{ 
@@ -24,10 +25,9 @@ internal class TestDiscoveryHookTests : TestsBase<GlobalTestHooksGenerator>
                                FilePath = @"", 
                                LineNumber = 5,
                     		});
-                    """.IgnoreWhitespaceFormatting()
-            ));
+                    """);
             
-            Assert.That(generatedFiles[1].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[1], 
                 """
                     		TestRegistrar.RegisterAfterHook(new StaticHookMethod<TestDiscoveryContext>
                     		{ 
@@ -38,7 +38,6 @@ internal class TestDiscoveryHookTests : TestsBase<GlobalTestHooksGenerator>
                                FilePath = @"{}", 
                                LineNumber = 10,
                     		});
-                    """.IgnoreWhitespaceFormatting()
-            ));
+                    """);
         });
 }

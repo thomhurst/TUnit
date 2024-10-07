@@ -2,7 +2,7 @@ using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record ClassDataSourceAttributeContainer : DataAttributeContainer
+internal record ClassDataSourceAttributeContainer : ArgumentsContainer
 {
     public ClassDataSourceAttributeContainer(ArgumentsType ArgumentsType) : base(ArgumentsType)
     {

@@ -21,6 +21,11 @@ internal static class TestInformationRetriever
     {
         var stringBuilder = new StringBuilder();
 
+        if (testGenerationContext.ClassArguments is DataAttributeContainer classDataAttributeContainer)
+        {
+            stringBuilder.Append($"{classDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.ClassDataIndex}}}:");
+        }
+
         if (testGenerationContext.ClassArguments is ClassDataSourceAttributeContainer classLevelClassDataSourceAttributeContainer)
         {
             stringBuilder.Append($"CL-CDS{classLevelClassDataSourceAttributeContainer.AttributeIndex}:");
@@ -29,7 +34,7 @@ internal static class TestInformationRetriever
         if (testGenerationContext.ClassArguments is MethodDataSourceAttributeContainer classLevelMethodDataSourceAttributeContainer)
         {
             stringBuilder.Append(classLevelMethodDataSourceAttributeContainer.IsEnumerableData
-                ? $"CL-EMDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.EnumerableClassDataIndex}}}:"
+                ? $"CL-EMDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.ClassDataIndex}}}:"
                 : $"CL-MDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:");
         }
 
@@ -48,6 +53,11 @@ internal static class TestInformationRetriever
             stringBuilder.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
         
+        if (testGenerationContext.TestArguments is DataAttributeContainer testMethodDataAttributeContainer)
+        {
+            stringBuilder.Append($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
+        }
+        
         if (testGenerationContext.TestArguments is ClassDataSourceAttributeContainer testLevelClassDataSourceAttributeContainer)
         {
             stringBuilder.Append($"TL-CDS{testLevelClassDataSourceAttributeContainer.AttributeIndex}:");
@@ -56,7 +66,7 @@ internal static class TestInformationRetriever
         if (testGenerationContext.TestArguments is MethodDataSourceAttributeContainer testLevelMethodDataSourceAttributeContainer)
         {
             stringBuilder.Append(testLevelMethodDataSourceAttributeContainer.IsEnumerableData
-                ? $"TL-EMDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.EnumerableTestDataIndex}}}:"
+                ? $"TL-EMDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.TestMethodDataIndex}}}:"
                 : $"TL-MDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:");
         }
 

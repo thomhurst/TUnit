@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
@@ -19,8 +20,8 @@ internal class PriorityFilteringTests : TestsBase<TestsGenerator>
                         "PriorityLevel.cs")
                 ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(6));
+            await Assert.That(generatedFiles.Length).IsEqualTo(6);
         });
 }

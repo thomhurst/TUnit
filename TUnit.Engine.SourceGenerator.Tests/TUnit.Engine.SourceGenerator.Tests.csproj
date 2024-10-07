@@ -19,9 +19,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="TUnit.Assertions" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
     <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" />

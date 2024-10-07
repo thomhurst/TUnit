@@ -2,13 +2,23 @@
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static class TimeOnlyIsExtensions
 {
+    public static TimeOnlyEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<TimeOnly> valueSource, TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+    {
+        return new TimeOnlyEqualToAssertionBuilderWrapper(
+            valueSource.RegisterAssertion(new TimeOnlyEqualsExpectedValueAssertCondition(expected),
+                [doNotPopulateThisValue1])
+        );
+    }
+    
     public static InvokableValueAssertionBuilder<TimeOnly> IsAfter(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {

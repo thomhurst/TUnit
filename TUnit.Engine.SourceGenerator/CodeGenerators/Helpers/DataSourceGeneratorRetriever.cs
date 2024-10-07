@@ -26,9 +26,12 @@ internal static class DataSourceGeneratorRetriever
         )
         {
             DisposeAfterTest =
-                attributeData.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ??
+                attributeData.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest")
+                    .Value.Value as bool? ??
                 true,
-            PropertyName = propertyName
+            PropertyName = propertyName,
+            Attribute = attributeData,
+            AttributeIndex = index
         };
     }
 

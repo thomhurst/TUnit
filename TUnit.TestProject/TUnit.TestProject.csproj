@@ -75,5 +75,16 @@
     <None Update="Data\Zip.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Remove="TestSessionBeforeTestsf0c92d0f0b76411586c21a9e35725e52.txt" />
+    <None Remove="TestSessionBeforeTestsd88e1b21db384671bf54c1566868d5b5.txt" />
+    <None Remove="TestSessionBeforeTests69391ad339924d46ac83d97cba0f0445.txt" />
+    <None Remove="TestSessionBeforeTests48984758645f49a1b81325b7ead3691b.txt" />
+    <None Remove="TestSessionAfterTests64849b6d029f4b9e87b19d846e3ce987.txt" />
+    <None Remove="TestSessionAfterTests4cc0c11724514a5ebd725eb8ddcf5e40.txt" />
+    <None Remove="TestSessionAfterTests4b6d284e2387416e803932ca3c2fa14f.txt" />
+    <None Remove="TestDiscoveryBeforeTestse082f5f793764b0da9a4bb36672dd150.txt" />
+    <None Remove="TestDiscoveryBeforeTests2755f870250a426688faae04115318f8.txt" />
+    <None Remove="TestDiscoveryAfterTests673d52cd069f4574a3b3dfd48c2bf63b.txt" />
+    <None Remove="TestDiscoveryAfterTests4502fad04e994cea9362a758688008a6.txt" />
   </ItemGroup>
 </Project>

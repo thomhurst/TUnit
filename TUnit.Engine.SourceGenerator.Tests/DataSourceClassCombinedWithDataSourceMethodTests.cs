@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
@@ -18,35 +19,35 @@ internal class DataSourceClassCombinedWithDataSourceMethodTests : TestsBase<Test
                     "CommonTestData.cs"),
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(9));
+            await Assert.That(generatedFiles.Length).IsEqualTo(9);
             
-            AssertFileContains(generatedFiles[0], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
-            AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
+            await AssertFileContains(generatedFiles[0], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
+            await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
             
-            AssertFileContains(generatedFiles[1], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
-            AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
+            await AssertFileContains(generatedFiles[1], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
+            await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
             
-            AssertFileContains(generatedFiles[2], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
-            AssertFileContains(generatedFiles[2], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
+            await AssertFileContains(generatedFiles[2], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
+            await AssertFileContains(generatedFiles[2], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.One();");
             
-            AssertFileContains(generatedFiles[3], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
-            AssertFileContains(generatedFiles[3], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
+            await AssertFileContains(generatedFiles[3], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
+            await AssertFileContains(generatedFiles[3], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
             
-            AssertFileContains(generatedFiles[4], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
-            AssertFileContains(generatedFiles[4], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
+            await AssertFileContains(generatedFiles[4], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
+            await AssertFileContains(generatedFiles[4], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
             
-            AssertFileContains(generatedFiles[5], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
-            AssertFileContains(generatedFiles[5], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
+            await AssertFileContains(generatedFiles[5], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
+            await AssertFileContains(generatedFiles[5], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Two();");
             
-            AssertFileContains(generatedFiles[6], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
-            AssertFileContains(generatedFiles[6], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
+            await AssertFileContains(generatedFiles[6], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.One();");
+            await AssertFileContains(generatedFiles[6], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
             
-            AssertFileContains(generatedFiles[7], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
-            AssertFileContains(generatedFiles[7], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
+            await AssertFileContains(generatedFiles[7], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Two();");
+            await AssertFileContains(generatedFiles[7], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
             
-            AssertFileContains(generatedFiles[8], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
-            AssertFileContains(generatedFiles[8], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
+            await AssertFileContains(generatedFiles[8], "global::System.Int32 classArg = global::TUnit.TestProject.CommonTestData.Three();");
+            await AssertFileContains(generatedFiles[8], "global::System.Int32 methodArg = global::TUnit.TestProject.CommonTestData.Three();");
         });
 }

@@ -5,7 +5,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 
 internal static class NewClassWriter
 {
-    public static void ConstructClass(SourceCodeWriter sourceCodeWriter, string typeName, ArgumentsContainer argumentsContainer, ClassPropertiesContainer classPropertiesContainer)
+    public static void ConstructClass(SourceCodeWriter sourceCodeWriter, string typeName, BaseContainer argumentsContainer, ClassPropertiesContainer classPropertiesContainer)
     {
         if (argumentsContainer is ClassConstructorAttributeContainer)
         {

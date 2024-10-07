@@ -78,15 +78,8 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
 
-            if (model.ClassArguments is MethodDataSourceAttributeContainer { IsEnumerableData: true })
-            {
-                sourceBuilder.WriteLine($"var {VariableNames.EnumerableClassDataIndex} = 0;");
-            }
-            
-            if (model.MethodArguments is MethodDataSourceAttributeContainer { IsEnumerableData: true })
-            {
-                sourceBuilder.WriteLine($"var {VariableNames.EnumerableTestDataIndex} = 0;");
-            }
+            sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
+            sourceBuilder.WriteLine($"var {VariableNames.TestMethodDataIndex} = 0;");
             
             sourceBuilder.WriteLine("try");
             sourceBuilder.WriteLine("{");

@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
@@ -10,9 +11,9 @@ internal class AbstractTests : TestsBase<InheritsTestsGenerator>
             "TUnit.TestProject",
             "AbstractTests",
             "AbstractBaseClass.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles, Is.Empty);
+            await Assert.That(generatedFiles).IsEmpty();
         });
     
     [Test]
@@ -27,10 +28,10 @@ internal class AbstractTests : TestsBase<InheritsTestsGenerator>
                 Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "AbstractTests", "AbstractBaseClass.cs")
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(1));
-            // AssertFileContains(generatedFiles[0], "ReturnType = typeof(void),");
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
+            // await AssertFileContains(generatedFiles[0], "ReturnType = typeof(void),");
         });
     
     [Test]
@@ -46,10 +47,10 @@ internal class AbstractTests : TestsBase<InheritsTestsGenerator>
                 Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "AbstractTests", "AbstractBaseClass.cs")
             ]
         },
-        generatedFiles =>
+        async generatedFiles =>
         {
             // Extra generation because we added ConcreteClass1 to the compilation (because it's a base class and therefore a required dependency)
-            Assert.That(generatedFiles.Length, Is.EqualTo(3));
-            // AssertFileContains(generatedFiles[0], "ReturnType = typeof(void),");
+            await Assert.That(generatedFiles.Length).IsEqualTo(3);
+            // await AssertFileContains(generatedFiles[0], "ReturnType = typeof(void),");
         });
 }

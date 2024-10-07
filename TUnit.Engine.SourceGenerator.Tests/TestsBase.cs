@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.Tests.Extensions;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
@@ -11,12 +12,12 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
     {
     }
 
-    public Task RunTest(string inputFile, Action<string[]> assertions)
+    public Task RunTest(string inputFile, Func<string[], Task> assertions)
     {
         return RunTest(inputFile, new RunTestOptions(), assertions);
     }
     
-    public async Task RunTest(string inputFile, RunTestOptions runTestOptions, Action<string[]> assertions)
+    public async Task RunTest(string inputFile, RunTestOptions runTestOptions, Func<string[], Task> assertions)
     {
         var source = await File.ReadAllTextAsync(inputFile);
 
@@ -86,7 +87,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
                 $"There was an error with the generator compilation.{Environment.NewLine}{Environment.NewLine}{error}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, generatedFiles)}");
         }
 
-        assertions(generatedFiles);
+        await assertions(generatedFiles);
     }
 
     private static bool IsError(Diagnostic x)
@@ -104,8 +105,8 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         return false;
     }
 
-    protected void AssertFileContains(string file, string expected)
+    protected async Task AssertFileContains(string file, string expected)
     {
-        Assert.That(file.IgnoreWhitespaceFormatting(), Does.Contain(expected.IgnoreWhitespaceFormatting()));
+        await Assert.That(file).Contains(expected).IgnoringWhitespace();
     }
 }

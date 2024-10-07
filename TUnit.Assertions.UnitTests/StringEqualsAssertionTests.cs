@@ -2,7 +2,6 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 
-
 public class StringEqualsAssertionTests
 {
     [Test]

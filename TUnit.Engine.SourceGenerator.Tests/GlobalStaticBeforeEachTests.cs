@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
@@ -10,11 +11,11 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
             "TUnit.TestProject",
             "BeforeTests",
             "BeforeEveryTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(7));
+            await Assert.That(generatedFiles.Length).IsEqualTo(7);
 
-            Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[0], 
 	            """
 	            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
 	            { 
@@ -25,9 +26,9 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            FilePath = @"", 
 	            LineNumber = 5,
 	            });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[1].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[1], 
 	            """
 	            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
 	            { 
@@ -38,9 +39,9 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            FilePath = @"", 
 	            LineNumber = 20,
 	            });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[2], 
 	            """
 	            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
 	            { 
@@ -51,9 +52,9 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 	            FilePath = @"", 
 	            LineNumber = 35,
 	            });
-	            """.IgnoreWhitespaceFormatting()));
+	            """);
             
-            Assert.That(generatedFiles[3].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[3], 
 	            """
 		            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
 		            { 
@@ -64,9 +65,9 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            FilePath = @"", 
 		            LineNumber = 50,
 		            });
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
             
-            Assert.That(generatedFiles[4].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[4], 
 	            """
 		            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
 		            { 
@@ -77,9 +78,9 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            FilePath = @"", 
 		            LineNumber = 56,
 		            });
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
             
-            Assert.That(generatedFiles[5].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[5], 
 	            """
 		            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
 		            { 
@@ -90,9 +91,9 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            FilePath = @"", 
 		            LineNumber = 62,
 		            });
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
             
-            Assert.That(generatedFiles[6].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[6], 
 	            """
 		            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
 		            { 
@@ -103,6 +104,6 @@ internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
 		            FilePath = @"", 
 		            LineNumber = 68,
 		            });
-		            """.IgnoreWhitespaceFormatting()));
+		            """);
         });
 }

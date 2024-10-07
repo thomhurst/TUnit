@@ -2,13 +2,9 @@
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType)
+internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataAttributeContainer(ArgumentsType)
 {
     public required bool DisposeAfterTest { get; init; }
-    public abstract void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex);
-    public abstract void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter);
-    public HashSet<string> VariableNames { get; } = [];
-    public abstract string[] GetArgumentTypes();
 
     protected string VariableNamePrefix
     {

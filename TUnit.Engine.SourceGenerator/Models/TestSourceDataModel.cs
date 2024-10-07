@@ -46,9 +46,9 @@ internal record TestSourceDataModel
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
-    public required ArgumentsContainer ClassArguments { get; init; }
+    public required BaseContainer ClassArguments { get; init; }
 
-    public required ArgumentsContainer MethodArguments { get; init; }
+    public required BaseContainer MethodArguments { get; init; }
     
     public required string[] MethodParameterTypes { get; init; }
     public required string[] MethodParameterNames { get; init; }
@@ -71,8 +71,10 @@ internal record TestSourceDataModel
 
     public string MethodVariablesWithCancellationToken()
     {
-        var variableNames = MethodArguments.VariableNames;
-
+        var variableNames = MethodArguments is ArgumentsContainer argumentsContainer
+            ? argumentsContainer.VariableNames
+            : [];
+        
         if (HasTimeoutAttribute)
         {
             return !variableNames.Any() ? "cancellationToken" : $"{variableNames.ToCommaSeparatedString()}, cancellationToken";
