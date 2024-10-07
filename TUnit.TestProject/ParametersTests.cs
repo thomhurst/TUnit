@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 

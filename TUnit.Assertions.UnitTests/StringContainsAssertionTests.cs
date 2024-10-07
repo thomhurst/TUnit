@@ -1,4 +1,3 @@
-using NUnit.Framework.Constraints;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
