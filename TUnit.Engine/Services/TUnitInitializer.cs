@@ -19,6 +19,7 @@ internal class TUnitInitializer
     {
         ParseParameters();
         SetUpExceptionListeners();
+        TestContext.WorkingDirectory = TestContext.OutputDirectory;
     }
 
     private void SetUpExceptionListeners()
