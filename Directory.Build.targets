@@ -25,7 +25,7 @@
     <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'TUnit.Engine.SourceGenerator'">
     <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>
