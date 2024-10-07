@@ -14,12 +14,16 @@ internal class TUnitInitializer
     {
         _commandLineOptions = commandLineOptions;
     }
-    
+
     public void Initialize()
     {
         ParseParameters();
         SetUpExceptionListeners();
-        TestContext.WorkingDirectory = TestContext.OutputDirectory;
+
+        if (TestContext.OutputDirectory != null)
+        {
+            TestContext.WorkingDirectory = TestContext.OutputDirectory;
+        }
     }
 
     private void SetUpExceptionListeners()
