@@ -23,7 +23,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.1" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-rc.1.24431.7" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-rc.2.24473.5" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.12.5" />
