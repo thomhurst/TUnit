@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests.AssertConditions;
+﻿namespace TUnit.Assertions.Tests.AssertConditions;
 
 public class BecauseTests
 {
@@ -15,14 +13,14 @@ public class BecauseTests
             await Assert.That(variable).IsFalse().Because(because);
         };
 
-        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).Contains(because);
     }
 
     [Test]
-    [TestCase("we prefix the reason", "Because: we prefix the reason")]
-    [TestCase("  we ignore whitespace", "Because: we ignore whitespace")]
-    [TestCase("because we honor a leading 'because'", "Because: we honor a leading 'because'")]
+    [Arguments("we prefix the reason", "Because: we prefix the reason")]
+    [Arguments("  we ignore whitespace", "Because: we ignore whitespace")]
+    [Arguments("because we honor a leading 'because'", "Because: we honor a leading 'because'")]
     public async Task Prefix_Because_Message(string because, string expectedWithPrefix)
     {
         var variable = true;
@@ -32,7 +30,7 @@ public class BecauseTests
             await Assert.That(variable).IsFalse().Because(because);
         };
 
-        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).Contains(expectedWithPrefix);
     }
 
@@ -47,7 +45,7 @@ public class BecauseTests
             await Assert.That(variable).IsFalse().Because(because);
         };
 
-        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).Contains("we honor a leading 'because'")
             .And.DoesNotContain(because);
     }
@@ -62,7 +60,7 @@ public class BecauseTests
             await Assert.That(variable).IsFalse();
         };
 
-        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).IsEqualTo("""
                                                        Assert.That(variable).IsFalse()
                                                        Expected: False
@@ -82,7 +80,7 @@ public class BecauseTests
                 .And.IsFalse();
         };
 
-        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).IsEqualTo("""
                                                        Assert.That(variable).IsTrue().And.IsFalse()
                                                        Expected: False
@@ -103,7 +101,7 @@ public class BecauseTests
                 .And.IsFalse().Because(because2);
         };
 
-        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).Contains(because1);
     }
 
@@ -120,7 +118,7 @@ public class BecauseTests
                 .And.IsFalse().Because(because2);
         };
 
-        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).Contains(because2);
     }
 
@@ -137,7 +135,7 @@ public class BecauseTests
                 .Or.IsFalse().Because(because2);
         };
 
-        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(action);
+        var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).Contains(because1).And.Contains(because2);
     }
 }
