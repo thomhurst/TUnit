@@ -114,8 +114,19 @@ internal static class TestSourceDataModelRetriever
         var classArguments = testGenerationContext.ClassArguments;
         var testArguments = testGenerationContext.TestArguments;
         var testAttribute = testGenerationContext.TestAttribute;
-        
-        var allAttributes = methodSymbol.GetAttributesIncludingClass(namedTypeSymbol);
+
+        AttributeData[] allAttributes =
+        [
+            ..methodSymbol.GetAttributes(),
+            ..namedTypeSymbol.GetAttributesIncludingBaseTypes(),
+            ..namedTypeSymbol.ContainingAssembly.GetAttributes()
+        ];
+
+        var propertyAttributes = testGenerationContext.PropertyArguments
+            .InnerContainers
+            .Select(x => x.PropertySymbol)
+            .SelectMany(x => x.GetAttributes())
+            .Where(x => x.IsDataSourceAttribute());
         
         return new TestSourceDataModel
         {
@@ -136,7 +147,8 @@ internal static class TestSourceDataModelRetriever
             HasTimeoutAttribute = allAttributes.Any(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix) == true),
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.ParallelLimiterAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            AttributeTypes = allAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(), 
+            AttributeTypes = allAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(),
+            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
         };
     }

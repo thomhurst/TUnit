@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
@@ -110,52 +111,7 @@ internal class SingleTestExecutor : IDataProducer
 
                 start = DateTimeOffset.Now;
                 
-                try
-                {
-                    await ExecuteBeforeHooks(test, context, testContext);
-
-                    TestContext.Current = testContext;
-                    
-                    await InitializeParameters(testContext);
-
-                    foreach (var beforeTestAttribute in test.BeforeTestAttributes)
-                    {
-                        await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
-                            () => beforeTestAttribute.OnBeforeTest(
-                                new BeforeTestContext(testContext.InternalDiscoveredTest)));
-                    }
-
-                    await ExecuteWithRetries(test);
-                }
-                finally
-                {
-                    await DecrementSharedData(test);
-
-                    foreach (var afterTestAttribute in test.AfterTestAttributes)
-                    {
-                        await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
-                            () => RunHelpers.RunSafelyAsync(() => afterTestAttribute.OnAfterTest(testContext),
-                                cleanUpExceptions));
-                    }
-
-                    await DisposeTest(testContext, cleanUpExceptions);
-
-                    await RunHelpers.RunSafelyAsync(
-                        () => test.ClassConstructor?.DisposeAsync(test.TestDetails.ClassInstance) ?? Task.CompletedTask,
-                        cleanUpExceptions);
-
-                    TestContext.Current = null;
-
-                    await ExecuteAfterHooks(test, context, testContext, cleanUpExceptions);
-
-                    foreach (var artifact in testContext.Artifacts)
-                    {
-                        await context.MessageBus.PublishAsync(this,
-                            new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(),
-                                artifact.File,
-                                artifact.DisplayName, artifact.Description));
-                    }
-                }
+                await ExecuteTest(test, context, testContext, cleanUpExceptions);
 
                 ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
 
@@ -246,6 +202,62 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
+    private async Task ExecuteTest(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
+        List<Exception> cleanUpExceptions)
+    {
+        try
+        {
+            foreach (var beforeTestAttribute in test.BeforeTestAttributes)
+            {
+                await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
+                    () => beforeTestAttribute.OnBeforeTest(
+                        new BeforeTestContext(testContext.InternalDiscoveredTest)));
+            }
+            
+            await ExecuteBeforeHooks(test, context, testContext);
+
+            TestContext.Current = testContext;
+
+            await InitializeParameters(testContext);
+
+            await ExecuteWithRetries(test);
+        }
+        finally
+        {
+            // TestStart is null if the test was skipped
+            // If skipped, we didn't perform set ups, so also don't perform tear downs
+            if (testContext.TestStart != null)
+            {
+                await DecrementSharedData(test);
+
+                foreach (var afterTestAttribute in test.AfterTestAttributes)
+                {
+                    await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
+                        () => RunHelpers.RunSafelyAsync(() => afterTestAttribute.OnAfterTest(testContext),
+                            cleanUpExceptions));
+                }
+
+                await DisposeTest(testContext, cleanUpExceptions);
+
+                await RunHelpers.RunSafelyAsync(
+                    () => test.ClassConstructor?.DisposeAsync(test.TestDetails.ClassInstance) ?? Task.CompletedTask,
+                    cleanUpExceptions);
+
+                TestContext.Current = null;
+
+                await ExecuteAfterHooks(test, context, testContext, cleanUpExceptions);
+
+                foreach (var artifact in testContext.Artifacts)
+                {
+                    await context.MessageBus.PublishAsync(this,
+                        new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(),
+                            artifact.File,
+                            artifact.DisplayName, artifact.Description));
+                }
+            }
+        }
+    }
+
     private async ValueTask InitializeParameters(TestContext testContext)
     {
         // Instance
@@ -283,11 +295,22 @@ internal class SingleTestExecutor : IDataProducer
     {
         try
         {
-            await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context,
+            await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context, testContext,
                 test.TestContext.TestDetails.ClassType, cleanUpExceptions);
 
-            await _assemblyHookOrchestrator.ExecuteCleanups(context,
+            await _assemblyHookOrchestrator.ExecuteCleanupsIfLastInstance(context, testContext,
                 test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
+
+            if (InstanceTracker.IsLastTest())
+            {
+                await RunHelpers.RunSafelyAsync(async () =>
+                {
+                    foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
+                    {
+                        await testEndEventsObject.IfLastTestInTestSession(TestSessionContext.Current!, testContext);
+                    }
+                }, cleanUpExceptions);
+            }
         }
         catch
         {

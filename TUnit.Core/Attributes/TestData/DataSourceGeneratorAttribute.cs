@@ -1,4 +1,7 @@
-﻿namespace TUnit.Core;
+﻿using System.Reflection;
+using TUnit.Core.Interfaces;
+
+namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 public abstract class DataSourceGeneratorAttribute<T> : TestDataAttribute, IDataSourceGeneratorAttribute

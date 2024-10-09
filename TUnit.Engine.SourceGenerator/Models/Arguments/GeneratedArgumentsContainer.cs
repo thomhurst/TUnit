@@ -43,14 +43,16 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
                                      new DataGeneratorMetadata
                                      {
                                         Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
+                                        TestClassType = testClassType,
                                         ParameterInfos = {{parameterInfos}},
-                                        PropertyInfo = {{propertyInfo}}
+                                        PropertyInfo = {{propertyInfo}},
+                                        TestObjectBag = objectBag,
                                      }
                                      """;
 
         if (ArgumentsType == ArgumentsType.Property)
         {
-            sourceCodeWriter.WriteLine($"var {VariableNames.ElementAt(0)} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}, true).ElementAt(0).GenerateDataSources({dataGeneratorMetadata}).ElementAtOrDefault(0);");
+            sourceCodeWriter.WriteLine($"var {VariableNames.ElementAt(0)} = {objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt(0).GenerateDataSources({dataGeneratorMetadata}).ElementAtOrDefault(0);");
             sourceCodeWriter.WriteLine();
             return;
         }
@@ -58,7 +60,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
         
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}, true).ElementAt({AttributeIndex}).GenerateDataSources({dataGeneratorMetadata});");
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt({AttributeIndex}).GenerateDataSources({dataGeneratorMetadata});");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");

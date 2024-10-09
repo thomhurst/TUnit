@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -12,10 +13,12 @@ public static class TestDataContainer
 {
     private static readonly GetOnlyDictionary<Type, object> InjectedSharedGlobally = new();
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, object>> InjectedSharedPerClassType = new();
+    private static readonly GetOnlyDictionary<Assembly, GetOnlyDictionary<Type, object>> InjectedSharedPerAssembly = new();
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
 
     internal static readonly Dictionary<Type, Lazy<Task>> InjectedSharedGloballyInitializations = new();
     private static readonly GetOnlyDictionary<Type, Dictionary<Type, Lazy<Task>>> InjectedSharedPerClassTypeInitializations = new();
+    private static readonly GetOnlyDictionary<Assembly, Dictionary<Type, Lazy<Task>>> InjectedSharedPerAssemblyInitializations = new();
     private static readonly GetOnlyDictionary<Type, Dictionary<string, Lazy<Task>>> InjectedSharedPerKeyInitializations = new();
     
     private static readonly object Lock = new();
@@ -24,7 +27,7 @@ public static class TestDataContainer
 
     private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);
     
-    public static T GetInstanceForType<T>(Type key, Func<T> func) where T : class
+    public static T GetInstanceForType<T>(Type key, Func<T> func)
     {
         var objectsForClass = InjectedSharedPerClassType.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
         return  (T)objectsForClass.GetOrAdd(typeof(T), _ =>
@@ -38,7 +41,25 @@ public static class TestDataContainer
                 dictionary.Add(typeof(T), new Lazy<Task>(() => asyncInitializer.InitializeAsync()));
             }
 
-            return obj;
+            return obj!;
+        });
+    }
+    
+    public static T GetInstanceForAssembly<T>(Assembly assembly, Func<T> func)
+    {
+        var objectsForClass = InjectedSharedPerAssembly.GetOrAdd(assembly, _ => new GetOnlyDictionary<Type, object>());
+        return  (T)objectsForClass.GetOrAdd(typeof(T), _ =>
+        {
+            var obj = func();
+
+            if (obj is IAsyncInitializer asyncInitializer)
+            {
+                var dictionary =
+                    InjectedSharedPerAssemblyInitializations.GetOrAdd(assembly, _ => new Dictionary<Type, Lazy<Task>>());
+                dictionary.Add(typeof(T), new Lazy<Task>(() => asyncInitializer.InitializeAsync()));
+            }
+
+            return obj!;
         });
     }
     
@@ -49,7 +70,7 @@ public static class TestDataContainer
         CountsPerGlobalType[type] = count + 1;
     }
     
-    public static T GetGlobalInstance<T>(Func<T> func) where T : class
+    public static T GetGlobalInstance<T>(Func<T> func)
     {
         return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ =>
         {
@@ -73,7 +94,7 @@ public static class TestDataContainer
         keysForType[key] = count + 1;
     }
 
-    public static T GetInstanceForKey<T>(string key, Func<T> func) where T : class
+    public static T GetInstanceForKey<T>(string key, Func<T> func)
     {
         var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
 

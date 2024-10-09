@@ -1,14 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-  </PropertyGroup>
   
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <RootNamespace>TUnit.Engine.SourceGenerator.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AutoFixture" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.10.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />

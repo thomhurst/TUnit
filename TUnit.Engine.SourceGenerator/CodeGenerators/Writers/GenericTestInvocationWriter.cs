@@ -15,10 +15,14 @@ internal static class GenericTestInvocationWriter
         
         var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"));
 
+        sourceBuilder.WriteLine($"var testClassType = typeof({fullyQualifiedClassType});");
+        
         sourceBuilder.WriteLine(
-            $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
+            $"var methodInfo = testClassType.GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
         
         sourceBuilder.WriteLine();
+        
+        sourceBuilder.WriteLine("var objectBag = new global::System.Collections.Generic.Dictionary<string, object?>();");
 
         var classVariablesIndex = 0;
         var methodVariablesIndex = 0;
@@ -70,10 +74,33 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine($"AttributeTypes = [ {string.Join(", ", testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})"))} ],");
+        sourceBuilder.WriteLine($"DataAttributes = [ {string.Join(", ", GenerateDataAttributes(testSourceDataModel))} ],");
+        sourceBuilder.WriteLine("ObjectBag = objectBag,");
         sourceBuilder.WriteLine("});");
         
         testSourceDataModel.ClassArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
         testSourceDataModel.MethodArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
+    }
+
+    private static IEnumerable<string> GenerateDataAttributes(TestSourceDataModel testSourceDataModel)
+    {
+        if (testSourceDataModel.ClassArguments is ArgumentsContainer classArgumentsContainer)
+        {
+            yield return
+                $"testClassType.GetCustomAttributes<{classArgumentsContainer.Attribute.AttributeClass!.GloballyQualified()}>().ElementAt({classArgumentsContainer.AttributeIndex})";
+        }
+        
+        if (testSourceDataModel.MethodArguments is ArgumentsContainer testArgumentsContainer)
+        {
+            yield return
+                $"methodInfo.GetCustomAttributes<{testArgumentsContainer.Attribute.AttributeClass!.GloballyQualified()}>().ElementAt({testArgumentsContainer.AttributeIndex})";
+        }
+        
+        foreach (var propertyArgumentsInnerContainer in testSourceDataModel.PropertyArguments.InnerContainers)
+        {
+            yield return
+                $"testClassType.GetProperty(\"{propertyArgumentsInnerContainer.PropertySymbol.Name}\").GetCustomAttributes<{propertyArgumentsInnerContainer.ArgumentsContainer.Attribute.AttributeClass!.GloballyQualified()}>().ElementAt(0)";
+        }
     }
 
     private static string GetClassConstructor(TestSourceDataModel testSourceDataModel)

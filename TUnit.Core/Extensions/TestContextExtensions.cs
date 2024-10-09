@@ -1,6 +1,6 @@
-﻿using TUnit.Core;
+﻿using TUnit.Core.Interfaces;
 
-namespace TUnit.Engine.Extensions;
+namespace TUnit.Core.Extensions;
 
 public static class TestContextExtensions
 {
@@ -21,5 +21,20 @@ public static class TestContextExtensions
         }
         
         return tests;
+    }
+    
+    internal static IEnumerable<ITestRegisteredEvents> GetTestRegisteredEventsObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestRegisteredEvents>();
+
+    internal static IEnumerable<ITestEndEvents> GetTestEndEventsObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestEndEvents>();
+
+    private static IEnumerable<object?> GetPossibleEventObjects(this TestContext context)
+    {
+        return
+        [
+            ..context.TestDetails.DataAttributes,
+            context.TestDetails.ClassInstance,
+        ];
     }
 }

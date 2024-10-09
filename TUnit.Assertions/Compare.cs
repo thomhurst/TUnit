@@ -1,14 +1,17 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Assertions;
 
 public static class Compare
 {
+    [RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
     public static IEnumerable<ComparisonFailure> CheckEquivalent<T>(T actual, T expected, CompareOptions options)
     {
         return CheckEquivalent(actual, expected, options, [], MemberType.Value);
     }
     
+    [RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
     public static IEnumerable<ComparisonFailure> CheckEquivalent<T>(T actual, T expected, CompareOptions options, string[] memberNames, MemberType memberType)
     {
         if (actual is null && expected is null)
@@ -36,7 +39,9 @@ public static class Compare
             
             for (var i = 0; i < Math.Max(actualObjects.Length, expectedObjects.Length); i++)
             {
-                if (options.MembersToIgnore.Contains(string.Join('.', [..memberNames, $"[{i}]"])))
+                string?[] readOnlySpan = [..memberNames, $"[{i}]"];
+                
+                if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
                 {
                     continue;
                 }
@@ -72,7 +77,9 @@ public static class Compare
 
         foreach (var fieldInfo in actual.GetType().GetFields().Concat(expected.GetType().GetFields()).Distinct())
         {
-            if (options.MembersToIgnore.Contains(string.Join('.', [..memberNames, fieldInfo.Name])))
+            string?[] readOnlySpan = [..memberNames, fieldInfo.Name];
+            
+            if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
             {
                 continue;
             }
@@ -109,7 +116,9 @@ public static class Compare
                      .Distinct()
                      .Where(p => p.GetIndexParameters().Length == 0))
         {
-            if (options.MembersToIgnore.Contains(string.Join('.', [..memberNames, propertyInfo.Name])))
+            string?[] readOnlySpan = [..memberNames, propertyInfo.Name];
+            
+            if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
             {
                 continue;
             }

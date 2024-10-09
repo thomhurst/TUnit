@@ -65,7 +65,7 @@ public class PropertySetterTests
     }
 
     [Test]
-    public async Task Test()
+    public async Task Test5()
     {
         await PrintMessage("Running Test");
 

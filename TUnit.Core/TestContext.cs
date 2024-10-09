@@ -5,9 +5,10 @@ public partial class TestContext : Context, IDisposable
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
 
-    internal TestContext(TestDetails testDetails)
+    internal TestContext(TestDetails testDetails, Dictionary<string, object?> objectBag)
     {
         TestDetails = testDetails;
+        ObjectBag = objectBag;
     }
     
     public DateTimeOffset? TestStart { get; internal set; }
@@ -19,7 +20,7 @@ public partial class TestContext : Context, IDisposable
     public int CurrentRetryAttempt { get; internal set; }
 
     public List<Timing> Timings { get; } = [];
-    public Dictionary<string, object?> ObjectBag { get; } = new();
+    public Dictionary<string, object?> ObjectBag { get; }
     
     public TestResult? Result { get; internal set; }
     internal DiscoveredTest InternalDiscoveredTest { get; set; } = null!;
@@ -30,7 +31,7 @@ public partial class TestContext : Context, IDisposable
     }
     
     public EventHandler? OnDispose { get; set; }
-
+    
     public void Dispose()
     {
         OnDispose?.Invoke(this, EventArgs.Empty);

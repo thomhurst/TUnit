@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace TUnit.TestProject;
 
 [ClassDataSource<Derived1>]

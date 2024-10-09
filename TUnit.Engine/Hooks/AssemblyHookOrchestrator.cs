@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
+using TUnit.Core.Extensions;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
@@ -76,7 +77,8 @@ public class AssemblyHookOrchestrator(
         }
     }
 
-    internal async Task ExecuteCleanups(ExecuteRequestContext executeRequestContext, Assembly assembly, TestContext testContext, List<Exception> cleanUpExceptions)
+    internal async Task ExecuteCleanupsIfLastInstance(ExecuteRequestContext executeRequestContext, TestContext testContext1,
+        Assembly assembly, TestContext testContext, List<Exception> cleanUpExceptions)
     {
         if (!InstanceTracker.IsLastTestForAssembly(assembly))
         {
@@ -89,6 +91,14 @@ public class AssemblyHookOrchestrator(
         }
         
         var context = GetAssemblyHookContext(assembly);
+        
+        await RunHelpers.RunSafelyAsync(async () =>
+        {
+            foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
+            {
+                await testEndEventsObject.IfLastTestInAssembly(context, testContext);
+            }
+        }, cleanUpExceptions);
         
         // Run global ones last
         await globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);

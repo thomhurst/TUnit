@@ -2,6 +2,7 @@
 using System.Reflection;
 using TUnit.Core.Data;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
@@ -21,9 +22,11 @@ public static class TestRegistrar
 		var classType = typeof(TClassType);
 
 		var methodAttributes = testMetadata.AttributeTypes.SelectMany(x => methodInfo.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
-		var typeAttributes = AttributeCache.Types.GetOrAdd(classType, _ => testMetadata.AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray());
-		var assemblyAttributes = AttributeCache.Assemblies.GetOrAdd(classType.Assembly, _ => testMetadata.AttributeTypes.SelectMany(x => classType.Assembly.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray());
+		var dataAttributes = testMetadata.DataAttributes;
+		var typeAttributes = testMetadata.AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
+		var assemblyAttributes = testMetadata.AttributeTypes.SelectMany(x => classType.Assembly.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
 		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
+		
 		
 		var testDetails = new TestDetails<TClassType>
 		{
@@ -35,6 +38,7 @@ public static class TestRegistrar
 			AssemblyAttributes = assemblyAttributes,
 			ClassAttributes = typeAttributes,
 			TestAttributes = methodAttributes,
+			DataAttributes = dataAttributes,
 			Attributes = attributes,
 			TestClassArguments = testMetadata.TestClassArguments,
 			TestMethodArguments = testMetadata.TestMethodArguments,
@@ -59,7 +63,7 @@ public static class TestRegistrar
 			ParallelLimit = testMetadata.ParallelLimit,
 		};
 
-		var testContext = new TestContext(testDetails);
+		var testContext = new TestContext(testDetails, testMetadata.ObjectBag);
 		
 		RunOnTestDiscoveryAttributes(attributes, testContext);
 		
@@ -102,7 +106,7 @@ public static class TestRegistrar
 		TestDictionary.RegisterFailedTest(testId, failedInitializationTest);
 	}
 	
-	internal static void RegisterInstance(TestContext testContext)
+	internal static async Task RegisterInstance(TestContext testContext)
 	{
 		var classType = testContext.TestDetails.ClassType;
 		
@@ -110,26 +114,9 @@ public static class TestRegistrar
 		
 		RegisterTestContext(classType, testContext);
 		
-		var testInformation = testContext.TestDetails;
-
-		IEnumerable<TestData> testData =
-		[
-			..testInformation.InternalTestClassArguments, 
-			..testInformation.InternalTestClassProperties,
-			..testInformation.InternalTestMethodArguments
-		];
-		
-		foreach (var argument in testData)
+		foreach (var testRegisteredEventsObject in testContext.GetTestRegisteredEventsObjects())
 		{
-			if (argument.InjectedDataType == InjectedDataType.SharedByKey)
-			{
-				TestDataContainer.IncrementKeyUsage(argument.StringKey!, argument.Type);
-			}
-            
-			if (argument.InjectedDataType == InjectedDataType.SharedGlobally)
-			{
-				TestDataContainer.IncrementGlobalUsage(argument.Type);
-			}
+			await testRegisteredEventsObject.OnTestRegistered(testContext);
 		}
 	}
 	

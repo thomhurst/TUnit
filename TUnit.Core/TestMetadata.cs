@@ -38,4 +38,8 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     
     // Need to be referenced statically for AOT
     public required Type[] AttributeTypes { get; init; }
+    
+    public required Attribute[] DataAttributes { get; init; }
+    
+    public required Dictionary<string, object?> ObjectBag { get; init; }
 }

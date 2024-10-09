@@ -31,11 +31,27 @@ public static class MethodExtensions
 
     public static AttributeData[] GetAttributesIncludingClass(this IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
     {
-        return
-        [
-            ..methodSymbol.GetAttributes(),
-            ..namedTypeSymbol.GetAttributes()
-        ];
+        return GetAttributesIncludingClassEnumerable(methodSymbol, namedTypeSymbol).ToArray();
+    }
+    
+    public static IEnumerable<AttributeData> GetAttributesIncludingClassEnumerable(this IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
+    {
+        foreach (var attributeData in methodSymbol.GetAttributes())
+        {
+            yield return attributeData;
+        }
+
+        var type = namedTypeSymbol;
+
+        while (type != null)
+        {
+            foreach (var attributeData in type.GetAttributes())
+            {
+                yield return attributeData;
+            }
+            
+            type = type.BaseType;
+        }
     }
 
     public static IEnumerable<IParameterSymbol> ParametersWithoutTimeoutCancellationToken(

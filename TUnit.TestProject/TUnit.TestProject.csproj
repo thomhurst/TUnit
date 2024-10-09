@@ -1,10 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
+    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
   
@@ -27,16 +24,10 @@
     <NoWarn>IL2118</NoWarn>
   </PropertyGroup>
   
-  <ItemGroup>
-    <Using Include="TUnit.Core.HookType" Static="True" />
-    <Using Include="TUnit.Core" />
-  </ItemGroup>
   <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AutoFixture" />
-    <PackageReference Include="AutoFixture.AutoMoq" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
@@ -45,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
+    <ProjectReference Include="..\TUnit\TUnit.csproj" />
   </ItemGroup>
   <PropertyGroup>
     <!--        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->

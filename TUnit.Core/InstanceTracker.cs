@@ -11,6 +11,8 @@ internal static class InstanceTracker
     private static readonly object PerAssemblyLock = new();
     private static readonly ConcurrentDictionary<Assembly, int> PerAssembly = new();
 
+    private static int TotalInstances;
+    
     public static void Register(Type classType)
     {
         foreach (var type in GetTypesIncludingBase(classType))
@@ -25,6 +27,8 @@ internal static class InstanceTracker
             var count = PerAssembly.GetOrAdd(assembly, _ => 0);
             PerAssembly[assembly] = count + 1;
         }
+
+        TotalInstances++;
     }
 
     public static bool IsLastTestForType(Type type)
@@ -70,5 +74,10 @@ internal static class InstanceTracker
             yield return type;
             type = type.BaseType;
         }
+    }
+
+    public static bool IsLastTest()
+    {
+        return Interlocked.Decrement(ref TotalInstances) == 0;
     }
 }

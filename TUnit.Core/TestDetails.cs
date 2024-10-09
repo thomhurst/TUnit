@@ -53,6 +53,9 @@ public abstract record TestDetails
     public required Attribute[] TestAttributes { get; init; }
     
     [JsonIgnore]
+    public required Attribute[] DataAttributes { get; init; }
+    
+    [JsonIgnore]
     public required Attribute[] Attributes { get; init; }
 
     [JsonIgnore]
