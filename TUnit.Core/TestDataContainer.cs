@@ -17,9 +17,6 @@ public static class TestDataContainer
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
 
     internal static readonly Dictionary<Type, Lazy<Task>> InjectedSharedGloballyInitializations = new();
-    private static readonly GetOnlyDictionary<Type, Dictionary<Type, Lazy<Task>>> InjectedSharedPerClassTypeInitializations = new();
-    private static readonly GetOnlyDictionary<Assembly, Dictionary<Type, Lazy<Task>>> InjectedSharedPerAssemblyInitializations = new();
-    private static readonly GetOnlyDictionary<Type, Dictionary<string, Lazy<Task>>> InjectedSharedPerKeyInitializations = new();
     
     private static readonly object Lock = new();
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
@@ -30,37 +27,13 @@ public static class TestDataContainer
     public static T GetInstanceForType<T>(Type key, Func<T> func)
     {
         var objectsForClass = InjectedSharedPerClassType.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
-        return  (T)objectsForClass.GetOrAdd(typeof(T), _ =>
-        {
-            var obj = func();
-
-            if (obj is IAsyncInitializer asyncInitializer)
-            {
-                var dictionary =
-                    InjectedSharedPerClassTypeInitializations.GetOrAdd(key, _ => new Dictionary<Type, Lazy<Task>>());
-                dictionary.Add(typeof(T), new Lazy<Task>(() => asyncInitializer.InitializeAsync()));
-            }
-
-            return obj!;
-        });
+        return  (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
     }
     
     public static T GetInstanceForAssembly<T>(Assembly assembly, Func<T> func)
     {
         var objectsForClass = InjectedSharedPerAssembly.GetOrAdd(assembly, _ => new GetOnlyDictionary<Type, object>());
-        return  (T)objectsForClass.GetOrAdd(typeof(T), _ =>
-        {
-            var obj = func();
-
-            if (obj is IAsyncInitializer asyncInitializer)
-            {
-                var dictionary =
-                    InjectedSharedPerAssemblyInitializations.GetOrAdd(assembly, _ => new Dictionary<Type, Lazy<Task>>());
-                dictionary.Add(typeof(T), new Lazy<Task>(() => asyncInitializer.InitializeAsync()));
-            }
-
-            return obj!;
-        });
+        return  (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
     }
     
     public static void IncrementGlobalUsage(Type type)
@@ -72,17 +45,7 @@ public static class TestDataContainer
     
     public static T GetGlobalInstance<T>(Func<T> func)
     {
-        return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ =>
-        {
-            var obj = func();
-
-            if (obj is IAsyncInitializer asyncInitializer)
-            { 
-                InjectedSharedGloballyInitializations[typeof(T)] = new Lazy<Task>(() => asyncInitializer.InitializeAsync());
-            }
-
-            return obj;
-        });
+        return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => func()!);
     }
 
     public static void IncrementKeyUsage(string key, Type type)
@@ -98,19 +61,7 @@ public static class TestDataContainer
     {
         var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
 
-        return  (T)instancesForType.GetOrAdd(key, _ =>
-        {
-            var obj = func();
-
-            if (obj is IAsyncInitializer asyncInitializer)
-            {
-                var dictionary =
-                    InjectedSharedPerKeyInitializations.GetOrAdd(typeof(T), _ => new Dictionary<string, Lazy<Task>>());
-                dictionary.Add(key, new Lazy<Task>(() => asyncInitializer.InitializeAsync()));
-            }
-
-            return obj;
-        });
+        return  (T)instancesForType.GetOrAdd(key, _ => func()!);
     }
     
     internal static async Task OnLastInstance(Type testClassType)
@@ -148,12 +99,6 @@ public static class TestDataContainer
 
     internal static async Task ConsumeGlobalCount(Type type)
     {
-        if (TestDictionary.StaticInjectedPropertiesByTestClassType.TryGet(type, out var _))
-        {
-            // This is also being used in static properties, so we'll dispose it after the test session.
-            return;
-        }
-        
         lock (Lock)
         {
             var count = CountsPerGlobalType.GetOrAdd(type, _ => 0);
@@ -169,24 +114,5 @@ public static class TestDataContainer
         }
         
         await Disposer.DisposeAsync(InjectedSharedGlobally.Remove(type));
-    }
-
-    internal static Task RunInitializer(Type testClassType, TestData testData)
-    {
-        if (testData.Argument is not IAsyncInitializer asyncInitializer)
-        {
-            return Task.CompletedTask;
-        }
-
-        return testData.InjectedDataType switch
-        {
-            InjectedDataType.None => asyncInitializer.InitializeAsync(),
-            InjectedDataType.SharedGlobally => InjectedSharedGloballyInitializations[testData.Type].Value,
-            InjectedDataType.SharedByTestClassType => InjectedSharedPerClassTypeInitializations[testClassType][
-                testData.Type].Value,
-            InjectedDataType.SharedByKey => InjectedSharedPerKeyInitializations[testData.Type][testData.StringKey!]
-                .Value,
-            _ => throw new ArgumentOutOfRangeException()
-        };
     }
 }

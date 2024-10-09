@@ -14,7 +14,7 @@ internal static class GenericTestInvocationWriter
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
         
         var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"));
-
+        
         sourceBuilder.WriteLine($"var testClassType = typeof({fullyQualifiedClassType});");
         
         sourceBuilder.WriteLine(
@@ -31,7 +31,17 @@ internal static class GenericTestInvocationWriter
         testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
         
         testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
-        
+
+        foreach (var (propertySymbol, argumentsContainer) in testSourceDataModel.PropertyArguments.InnerContainers)
+        {
+            if (!propertySymbol.IsStatic)
+            {
+                continue;
+            }
+            
+            sourceBuilder.WriteLine($"{fullyQualifiedClassType}.{propertySymbol.Name} = {argumentsContainer.VariableNames.ElementAt(0)};");
+        }
+
         sourceBuilder.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
         
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
@@ -52,7 +62,7 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.VariableNames.ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.VariableNames.ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.InnerContainers.SelectMany(x => x.ArgumentsContainer.VariableNames).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic).SelectMany(x => x.ArgumentsContainer.VariableNames).ToCommaSeparatedString()}],");
         sourceBuilder.WriteTabs();
         sourceBuilder.Write("InternalTestClassArguments = ");
         WriteInternalInjectedTypes(testSourceDataModel.ClassArguments, sourceBuilder);
@@ -84,22 +94,22 @@ internal static class GenericTestInvocationWriter
 
     private static IEnumerable<string> GenerateDataAttributes(TestSourceDataModel testSourceDataModel)
     {
-        if (testSourceDataModel.ClassArguments is ArgumentsContainer classArgumentsContainer)
+        if (testSourceDataModel.ClassArguments is ArgumentsContainer { Attribute.AttributeClass: not null } classArgumentsContainer)
         {
             yield return
-                $"testClassType.GetCustomAttributes<{classArgumentsContainer.Attribute.AttributeClass!.GloballyQualified()}>().ElementAt({classArgumentsContainer.AttributeIndex})";
+                $"testClassType.GetCustomAttributes<{classArgumentsContainer.Attribute.AttributeClass.GloballyQualified()}>().ElementAt({classArgumentsContainer.AttributeIndex})";
         }
         
-        if (testSourceDataModel.MethodArguments is ArgumentsContainer testArgumentsContainer)
+        if (testSourceDataModel.MethodArguments is ArgumentsContainer { Attribute.AttributeClass: not null } testArgumentsContainer)
         {
             yield return
-                $"methodInfo.GetCustomAttributes<{testArgumentsContainer.Attribute.AttributeClass!.GloballyQualified()}>().ElementAt({testArgumentsContainer.AttributeIndex})";
+                $"methodInfo.GetCustomAttributes<{testArgumentsContainer.Attribute.AttributeClass.GloballyQualified()}>().ElementAt({testArgumentsContainer.AttributeIndex})";
         }
         
-        foreach (var propertyArgumentsInnerContainer in testSourceDataModel.PropertyArguments.InnerContainers)
+        foreach (var propertyArgumentsInnerContainer in testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
             yield return
-                $"testClassType.GetProperty(\"{propertyArgumentsInnerContainer.PropertySymbol.Name}\").GetCustomAttributes<{propertyArgumentsInnerContainer.ArgumentsContainer.Attribute.AttributeClass!.GloballyQualified()}>().ElementAt(0)";
+                $"testClassType.GetProperty(\"{propertyArgumentsInnerContainer.PropertySymbol.Name}\").GetCustomAttributes<{propertyArgumentsInnerContainer.ArgumentsContainer.Attribute!.AttributeClass!.GloballyQualified()}>().ElementAt(0)";
         }
     }
 
@@ -150,7 +160,7 @@ internal static class GenericTestInvocationWriter
     {
         if (container is ClassPropertiesContainer classPropertiesContainer)
         {
-            foreach (var (_, argumentsContainer) in classPropertiesContainer.InnerContainers)
+            foreach (var (_, argumentsContainer) in classPropertiesContainer.InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
             {
                 WriteInternalArgs(argumentsContainer, sourceCodeWriter, true);
             }

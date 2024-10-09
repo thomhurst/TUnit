@@ -41,13 +41,12 @@ internal static class MatrixRetriever
             return [];
         }
 
-        var index = 0;
         return GetMatrixArgumentsList(mappedToArgumentArrays)
             .Select(x => MapToArgumentEnumerable(context, x, parameters))
             .Select(x => new ArgumentsAttributeContainer(argumentsType, [.. x])
             {
-                Attribute = attr,
-                AttributeIndex = ++index,
+                Attribute = null,
+                AttributeIndex = 0,
                 DisposeAfterTest = attr.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,
             });
     }

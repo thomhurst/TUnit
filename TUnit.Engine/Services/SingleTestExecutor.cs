@@ -218,7 +218,7 @@ internal class SingleTestExecutor : IDataProducer
 
             TestContext.Current = testContext;
 
-            await InitializeParameters(testContext);
+            await InitializeObjects(testContext);
 
             await ExecuteWithRetries(test);
         }
@@ -258,19 +258,11 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async ValueTask InitializeParameters(TestContext testContext)
+    private async ValueTask InitializeObjects(TestContext testContext)
     {
-        // Instance
-        IEnumerable<TestData> args =
-        [
-            ..testContext.TestDetails.InternalTestClassArguments,
-            ..testContext.TestDetails.InternalTestClassProperties,
-            ..testContext.TestDetails.InternalTestMethodArguments,
-        ];
-        
-        foreach (var argument in args)
+        foreach (var testStartEventsObject in testContext.GetTestStartEventsObjects())
         {
-            await TestDataContainer.RunInitializer(testContext.TestDetails.ClassType, argument);
+            await testStartEventsObject.OnTestStart(testContext);
         }
     }
 

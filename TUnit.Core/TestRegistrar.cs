@@ -485,22 +485,6 @@ public static class TestRegistrar
         }));
     }
     
-    public static void RegisterStaticPropertyInjector(Type testClassType, Type injectableType, object? obj)
-    {
-	    var func = TestDictionary.StaticInjectedPropertiesByInjectedType.GetOrAdd(injectableType, _ => new Lazy<Task<object?>>(async () =>
-	    {
-		    if (obj is IAsyncInitializer)
-		    {
-			    await TestDataContainer.InjectedSharedGloballyInitializations[injectableType].Value;
-		    }
-
-		    return obj;
-	    }));
-	    
-	    var propertiesByTestClass = TestDictionary.StaticInjectedPropertiesByTestClassType.GetOrAdd(testClassType, _ => []);
-	    propertiesByTestClass.Enqueue(func);
-    }
-    
     internal static ClassHookContext GetClassHookContext(Type type)
     {
 	    lock (type)

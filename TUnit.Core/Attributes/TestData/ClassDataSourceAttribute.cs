@@ -1,13 +1,21 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : DataSourceGeneratorAttribute<T>, ITestRegisteredEvents, ITestEndEvents where T : new()
+public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : DataSourceGeneratorAttribute<T>, ITestRegisteredEvents, ITestStartEvents, ITestEndEvents where T : new()
 {
-    private readonly List<object?> _toDisposeOnTestEnd = new();
+    private T? _item;
+    private DataGeneratorMetadata _dataGeneratorMetadata;
+    private static readonly GetOnlyDictionary<Type, Task> _globalInitializers = new();
+    private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, Task>> _testClassTypeInitializers = new();
+    private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> _assemblyInitializers = new();
+    private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, Task>> _keyedInitializers = new();
     
     public ClassDataSourceAttribute()
     {
@@ -21,24 +29,24 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     public string Key { get; set; } = string.Empty;
     public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        _dataGeneratorMetadata = dataGeneratorMetadata;
+        
         var t = Shared switch
         {
             SharedType.None => new T(),
             SharedType.Globally => TestDataContainer.GetGlobalInstance(() => new T()),
             SharedType.ForClass => TestDataContainer.GetInstanceForType<T>(dataGeneratorMetadata.TestClassType, () => new T()),
             SharedType.Keyed => TestDataContainer.GetInstanceForKey(Key, () => new T()),
+            SharedType.ForAssembly => TestDataContainer.GetInstanceForAssembly(dataGeneratorMetadata.TestClassType.Assembly, () => new T()),
             _ => throw new ArgumentOutOfRangeException()
         };
         
-        if(Shared == SharedType.None)
-        {
-            _toDisposeOnTestEnd.Add(t);
-        }
+        _item = t;
 
         yield return t;
     }
 
-    public Task OnTestRegistered(TestContext testContext)
+    public async Task OnTestRegistered(TestContext testContext)
     {
         switch (Shared)
         {
@@ -58,17 +66,64 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
                 throw new ArgumentOutOfRangeException();
         }
 
-        return Task.CompletedTask;
+        if (_dataGeneratorMetadata.PropertyInfo?.GetAccessors()[0].IsStatic == true)
+        {
+            await Initialize(testContext);
+        }
+    }
+
+    public async Task OnTestStart(TestContext testContext)
+    {
+        if (_dataGeneratorMetadata.PropertyInfo?.GetAccessors()[0].IsStatic == true)
+        {
+            // Done already before test start
+            return;
+        }
+        
+        await Initialize(testContext);
+    }
+
+    private async Task Initialize(TestContext testContext)
+    {
+        if (Shared == SharedType.Globally)
+        {
+            await _globalInitializers.GetOrAdd(typeof(T), type => Initialize(_item));
+        }
+        else if (Shared == SharedType.None)
+        {
+            await Initialize(_item);
+        }
+        else if (Shared == SharedType.ForClass)
+        {
+            var typeDictionary =
+                _testClassTypeInitializers.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<Type, Task>());
+            
+            await typeDictionary.GetOrAdd(testContext.TestDetails.ClassType, _ => Initialize(_item));
+        }
+        else if (Shared == SharedType.ForAssembly)
+        {
+            var assemblyDictionary =
+                _assemblyInitializers.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<Assembly, Task>());
+            
+            await assemblyDictionary.GetOrAdd(testContext.TestDetails.ClassType.Assembly, _ => Initialize(_item));
+        }
+        else if (Shared == SharedType.Keyed)
+        {
+            var keyedDictionary = _keyedInitializers.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, Task>());
+            
+            await keyedDictionary.GetOrAdd(Key, _ => Initialize(_item));
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(Shared));
+        }
     }
 
     public async Task OnTestEnd(TestContext testContext)
     {
         if (Shared == SharedType.None)
         {
-            foreach (T? obj in _toDisposeOnTestEnd)
-            {
-                await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(obj);
-            }
+            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(_item);
         }
 
         if (Shared == SharedType.Keyed)
@@ -100,6 +155,16 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public Task IfLastTestInTestSession(TestSessionContext current, TestContext testContext)
     {
+        return Task.CompletedTask;
+    }
+
+    private Task Initialize(T? item)
+    {
+        if (item is IAsyncInitializer asyncInitializer)
+        {
+            return asyncInitializer.InitializeAsync();
+        }
+        
         return Task.CompletedTask;
     }
 }

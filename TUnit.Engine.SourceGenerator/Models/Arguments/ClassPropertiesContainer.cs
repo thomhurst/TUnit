@@ -47,7 +47,7 @@ internal record ClassPropertiesContainer : ArgumentsContainer
         
         sourceCodeWriter.WriteLine("{");
         
-        foreach (var (propertySymbol, argumentsContainer) in InnerContainers)
+        foreach (var (propertySymbol, argumentsContainer) in InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
             sourceCodeWriter.WriteLine($"{propertySymbol.Name} = {argumentsContainer.VariableNames.ElementAt(0)},");
         }

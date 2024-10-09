@@ -53,7 +53,7 @@ internal static class TestInformationRetriever
             stringBuilder.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
         
-        if (testGenerationContext.TestArguments is DataAttributeContainer testMethodDataAttributeContainer)
+        if (testGenerationContext.TestArguments is DataAttributeContainer { Attribute.AttributeClass: not null } testMethodDataAttributeContainer)
         {
             stringBuilder.Append($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
         }

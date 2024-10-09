@@ -55,12 +55,6 @@ internal static class ArgumentsRetriever
                         namedTypeSymbol, dataAttribute, argumentsType, index);
                 }
 
-                if (name == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix)
-                {
-                    yield return ClassDataSourceRetriever.ParseClassData(namedTypeSymbol, dataAttribute, argumentsType,
-                        index);
-                }
-
                 if (name == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix)
                 {
                     yield return ClassConstructorRetriever.Parse(dataAttribute, index);
@@ -89,7 +83,7 @@ internal static class ArgumentsRetriever
             .GetSelfAndBaseTypes()
             .SelectMany(x => x.GetMembers())
             .OfType<IPropertySymbol>()
-            .Where(x => x.IsRequired)
+            .Where(x => x.IsRequired || x.IsStatic)
             .ToList();
 
         if (!settableProperties.Any())

@@ -26,6 +26,9 @@ public static class TestContextExtensions
     internal static IEnumerable<ITestRegisteredEvents> GetTestRegisteredEventsObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestRegisteredEvents>();
 
+    internal static IEnumerable<ITestStartEvents> GetTestStartEventsObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestStartEvents>();
+    
     internal static IEnumerable<ITestEndEvents> GetTestEndEventsObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestEndEvents>();
 

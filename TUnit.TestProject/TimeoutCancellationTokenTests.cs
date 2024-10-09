@@ -48,7 +48,7 @@ public class TimeoutCancellationTokenTests
     [Test]
     [Timeout(5_000)]
     [Category("Blah")]
-    public async Task MatrixTest(
+    public async Task MatrixTest8(
         [Matrix(1, 2, 3)] int value, 
         CancellationToken cancellationToken)
     {
