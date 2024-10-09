@@ -70,12 +70,6 @@ public abstract record TestDetails
     
     public required IParallelLimit? ParallelLimit { get; init; }
 
-    [JsonIgnore] internal TestData[] InternalTestClassArguments { get; init; } = null!;
-
-    [JsonIgnore] internal TestData[] InternalTestClassProperties { get; set; } = null!;
-
-    [JsonIgnore] internal TestData[] InternalTestMethodArguments { get; init; } = null!;
-
 
     internal bool IsSameTest(TestDetails testDetails) => TestName == testDetails.TestName &&
                                                                  ClassType == testDetails.ClassType &&

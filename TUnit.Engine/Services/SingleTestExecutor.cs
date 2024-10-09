@@ -228,8 +228,12 @@ internal class SingleTestExecutor : IDataProducer
             // If skipped, we didn't perform set ups, so also don't perform tear downs
             if (testContext.TestStart != null)
             {
-                await DecrementSharedData(test);
-
+                foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
+                {
+                    await RunHelpers.RunSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
+                        cleanUpExceptions);
+                }
+                
                 foreach (var afterTestAttribute in test.AfterTestAttributes)
                 {
                     await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
@@ -368,61 +372,7 @@ internal class SingleTestExecutor : IDataProducer
 
     private async ValueTask Dispose(TestContext testContext)
     {
-        var testInformation = testContext.TestDetails;
-
-        IEnumerable<TestData> testData = [..testInformation.InternalTestMethodArguments, ..testInformation.InternalTestClassProperties, ..testInformation.InternalTestClassArguments];
-        foreach (var argument in testData)
-        {
-            await DisposeInjectedData(argument);
-        }
-
         await _disposer.DisposeAsync(testContext);
-    }
-
-    private async ValueTask DisposeInjectedData(TestData? testData)
-    {
-        if (testData?.InjectedDataType 
-            is InjectedDataType.SharedGlobally 
-            or InjectedDataType.SharedByKey
-            or InjectedDataType.SharedByTestClassType)
-        {
-            // Handled later - Might be shared with other tests too so we can't just dispose it without checking
-            return;
-        }
-
-        if (testData?.DisposeAfterTest == true)
-        {
-            await _disposer.DisposeAsync(testData);
-        }
-    }
-    
-    private static async ValueTask DecrementSharedData(DiscoveredTest discoveredTest)
-    {
-        foreach (var methodArgument in discoveredTest.TestContext.TestDetails.InternalTestMethodArguments)
-        {
-            if (methodArgument.InjectedDataType == InjectedDataType.SharedByKey)
-            {
-                await TestDataContainer.ConsumeKey(methodArgument.StringKey!, methodArgument.Type);
-            }
-            
-            if (methodArgument.InjectedDataType == InjectedDataType.SharedGlobally)
-            {
-                await TestDataContainer.ConsumeGlobalCount(methodArgument.Type);
-            }
-        }
-        
-        foreach (var classArgument in discoveredTest.TestContext.TestDetails.InternalTestClassArguments)
-        {
-            if (classArgument.InjectedDataType == InjectedDataType.SharedByKey)
-            {
-                await TestDataContainer.ConsumeKey(classArgument.StringKey!, classArgument.Type);
-            }
-            
-            if (classArgument.InjectedDataType == InjectedDataType.SharedGlobally)
-            {
-                await TestDataContainer.ConsumeGlobalCount(classArgument.Type);
-            }
-        }
     }
 
     private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
