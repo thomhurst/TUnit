@@ -22,7 +22,8 @@ public class PublishAOTModule : Module<CommandResult>
             RuntimeIdentifier = GetRuntimeIdentifier(),
             Configuration = Configuration.Release,
             OutputDirectory = "TESTPROJECT_AOT",
-            Properties = [new KeyValue("Aot", "true")]
+            Properties = [new KeyValue("Aot", "true")],
+            Framework = "net8.0"
         }, cancellationToken);
     }
 

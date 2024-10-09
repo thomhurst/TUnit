@@ -19,7 +19,8 @@ public class RunAssertionsTestsModule : Module<CommandResult>
         return await context.DotNet().Test(new DotNetTestOptions(project)
         {
             NoBuild = true,
-            Configuration = Configuration.Release
+            Configuration = Configuration.Release,
+            Framework = "net8.0"
         }, cancellationToken);
     }
 }
