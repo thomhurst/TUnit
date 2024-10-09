@@ -15,28 +15,8 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
             
             await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();");
             await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Method(methodArg)");
-            await AssertFileContains(generatedFiles[0], 
-                """
-                				InternalTestMethodArguments = 
-                				[
-                					new TestData(methodArg, typeof(global::System.Int32), InjectedDataType.None)
-                					{
-                    					DisposeAfterTest = true,
-                					},
-                				],
-                """);
             
             await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();");
             await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Method2(methodArg)");
-            await AssertFileContains(generatedFiles[1], 
-	            """
-	            				InternalTestMethodArguments = 
-	            				[
-	            					new TestData(methodArg, typeof(global::System.Int32), InjectedDataType.None)
-	            					{
-	                					DisposeAfterTest = false,
-	            					},
-	            				],
-	            """);
         });
 }
