@@ -21,7 +21,7 @@ internal static class TestInformationRetriever
     {
         var stringBuilder = new StringBuilder();
 
-        if (testGenerationContext.ClassArguments is DataAttributeContainer classDataAttributeContainer)
+        if (testGenerationContext.ClassArguments is DataAttributeContainer { Attribute.AttributeClass: not null } classDataAttributeContainer)
         {
             stringBuilder.Append($"{classDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.ClassDataIndex}}}:");
         }

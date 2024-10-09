@@ -1,4 +1,6 @@
 <Project>
+  <PropertyGroup>
+  </PropertyGroup>
     <PropertyGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
         <OutputType>Exe</OutputType>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>

@@ -11,11 +11,11 @@ namespace TUnit.Core;
 public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : DataSourceGeneratorAttribute<T>, ITestRegisteredEvents, ITestStartEvents, ITestEndEvents where T : new()
 {
     private T? _item;
-    private DataGeneratorMetadata _dataGeneratorMetadata;
-    private static readonly GetOnlyDictionary<Type, Task> _globalInitializers = new();
-    private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, Task>> _testClassTypeInitializers = new();
-    private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> _assemblyInitializers = new();
-    private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, Task>> _keyedInitializers = new();
+    private DataGeneratorMetadata? _dataGeneratorMetadata;
+    private static Task? GlobalInitializer;
+    private static readonly GetOnlyDictionary<Type, Task> TestClassTypeInitializers = new();
+    private static readonly GetOnlyDictionary<Assembly, Task> AssemblyInitializers = new();
+    private static readonly GetOnlyDictionary<string, Task> KeyedInitializers = new();
     
     public ClassDataSourceAttribute()
     {
@@ -66,7 +66,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
                 throw new ArgumentOutOfRangeException();
         }
 
-        if (_dataGeneratorMetadata.PropertyInfo?.GetAccessors()[0].IsStatic == true)
+        if (_dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true)
         {
             await Initialize(testContext);
         }
@@ -74,7 +74,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async Task OnTestStart(TestContext testContext)
     {
-        if (_dataGeneratorMetadata.PropertyInfo?.GetAccessors()[0].IsStatic == true)
+        if (_dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true)
         {
             // Done already before test start
             return;
@@ -83,40 +83,19 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         await Initialize(testContext);
     }
 
-    private async Task Initialize(TestContext testContext)
+    private Task Initialize(TestContext testContext)
     {
-        if (Shared == SharedType.Globally)
+        return Shared switch
         {
-            await _globalInitializers.GetOrAdd(typeof(T), type => Initialize(_item));
-        }
-        else if (Shared == SharedType.None)
-        {
-            await Initialize(_item);
-        }
-        else if (Shared == SharedType.ForClass)
-        {
-            var typeDictionary =
-                _testClassTypeInitializers.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<Type, Task>());
-            
-            await typeDictionary.GetOrAdd(testContext.TestDetails.ClassType, _ => Initialize(_item));
-        }
-        else if (Shared == SharedType.ForAssembly)
-        {
-            var assemblyDictionary =
-                _assemblyInitializers.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<Assembly, Task>());
-            
-            await assemblyDictionary.GetOrAdd(testContext.TestDetails.ClassType.Assembly, _ => Initialize(_item));
-        }
-        else if (Shared == SharedType.Keyed)
-        {
-            var keyedDictionary = _keyedInitializers.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, Task>());
-            
-            await keyedDictionary.GetOrAdd(Key, _ => Initialize(_item));
-        }
-        else
-        {
-            throw new ArgumentOutOfRangeException(nameof(Shared));
-        }
+            SharedType.Globally => GlobalInitializer ??= Initialize(_item),
+            SharedType.None => Initialize(_item),
+            SharedType.ForClass => TestClassTypeInitializers.GetOrAdd(testContext.TestDetails.ClassType,
+                _ => Initialize(_item)),
+            SharedType.ForAssembly => AssemblyInitializers.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
+                _ => Initialize(_item)),
+            SharedType.Keyed => KeyedInitializers.GetOrAdd(Key, _ => Initialize(_item)),
+            _ => throw new ArgumentOutOfRangeException(nameof(Shared))
+        };
     }
 
     public async Task OnTestEnd(TestContext testContext)
