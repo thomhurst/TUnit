@@ -74,7 +74,7 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
             sourceBuilder.WriteLine($"file partial class {className}");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine("[global::System.Diagnostics.DebuggerHidden]");
+            sourceBuilder.WriteLine("[global::System.Diagnostics.StackTraceHidden]");
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");

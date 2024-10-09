@@ -4,20 +4,20 @@ namespace TUnit.Core;
 
 public static class AsyncConvert
 {
-    [DebuggerHidden]
+    [StackTraceHidden]
     public static Task Convert(Action action)
     {
         action();
         return Task.CompletedTask;
     }
 
-    [DebuggerHidden]
+    [StackTraceHidden]
     public static async Task Convert(Func<Task> action)
     {
         await action();
     }
     
-    [DebuggerHidden]
+    [StackTraceHidden]
     public static async Task Convert(Func<ValueTask> action)
     {
         await action();

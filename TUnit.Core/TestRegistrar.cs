@@ -16,7 +16,7 @@ public static class TestRegistrar
 {
 	private const int DefaultOrder = int.MaxValue / 2;
 
-	[DebuggerHidden]
+	[StackTraceHidden]
 	public static void RegisterTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>(TestMetadata<TClassType> testMetadata)
 	{
 		var testId = testMetadata.TestId;
