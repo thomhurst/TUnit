@@ -12,11 +12,11 @@ namespace TUnit.Core;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
+[StackTraceHidden]
 public static class TestRegistrar
 {
 	private const int DefaultOrder = int.MaxValue / 2;
 
-	[StackTraceHidden]
 	public static void RegisterTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>(TestMetadata<TClassType> testMetadata)
 	{
 		var testId = testMetadata.TestId;
