@@ -1,24 +1,27 @@
-﻿namespace TUnit.Assertions.AssertConditions.String;
+﻿using TUnit.Assertions.Extensions;
+
+namespace TUnit.Assertions.AssertConditions.String;
 
 public class StringNotEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-    protected override AssertionResult Passes(string? actualValue, string? expectedValue)
+	protected internal override string GetFailureMessage()
+		=> $"to not be equal to {Format(expected).TruncateWithEllipsis(100)}";
+
+	protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
     {
-        if (actualValue is null && expectedValue is null)
-        {
-            return true;
-        }
 
-        if (actualValue is null || expectedValue is null)
-        {
-            return false;
-        }
-        
-        return !actualValue.Equals(expectedValue, stringComparison);
+	    if (actualValue is null)
+	    {
+		    return AssertionResult
+			    .FailIf(
+				    () => expectedValue is null,
+				    "it was null");
+	    }
+
+	    return AssertionResult
+		    .FailIf(
+			    () => string.Equals(actualValue, expectedValue, stringComparison),
+			    $"it was");
     }
-
-    protected override string GetFailureMessage(string? actualValue, string? expectedValue) => $"""
-                                              {Format(ActualValue)} is equal to {Format(ExpectedValue)}
-                                              """;
 }

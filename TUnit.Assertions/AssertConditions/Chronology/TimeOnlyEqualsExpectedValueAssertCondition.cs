@@ -14,7 +14,7 @@ public class TimeOnlyEqualsExpectedValueAssertCondition(TimeOnly expected) : Exp
 		return $"to be equal to {expected} +-{_tolerance}";
 	}
 
-    protected override AssertionResult Passes(TimeOnly actualValue, TimeOnly expectedValue)
+    protected internal override AssertionResult Passes(TimeOnly actualValue, TimeOnly expectedValue)
     {
         if (_tolerance is not null)
         {

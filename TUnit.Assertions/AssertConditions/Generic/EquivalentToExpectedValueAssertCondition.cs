@@ -2,55 +2,58 @@ using System.Collections;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EquivalentToExpectedValueAssertCondition<TActual> : ExpectedValueAssertCondition<TActual, TActual>
+public class EquivalentToExpectedValueAssertCondition<TActual>(TActual expected) : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {
-    public EquivalentToExpectedValueAssertCondition(TActual expected) : base(expected)
-    {
-    }
-
     private readonly List<string> _ignoredMembers = [];
 
-    protected override string GetFailureMessage(TActual? actualValue, TActual? expectedValue) => $"""
-                                                               The two items were not equivalent
-                                                                  Actual: {ActualValue}
-                                                                  Expected: {ExpectedValue}
-                                                               """;
+    protected internal override string GetFailureMessage()
+		=> $"to be equivalent to {expected}";
 
-    protected override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
+    protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue is null && ExpectedValue is null)
         {
-            return true;
+            return AssertionResult.Passed;
         }
 
         if (actualValue is null || ExpectedValue is null)
         {
-            return false;
+	        return AssertionResult
+		        .FailIf(
+			        () => actualValue is null,
+			        "it is null")
+		        .OrFailIf(
+			        () => expectedValue is null,
+			        "it is not null");
         }
 
-        if (actualValue is IEqualityComparer<TActual> typedEqualityComparer)
+        bool? isEqual = null;
+		if (actualValue is IEqualityComparer<TActual> typedEqualityComparer)
         {
-            return typedEqualityComparer.Equals(actualValue, ExpectedValue);
+	        isEqual = typedEqualityComparer.Equals(actualValue, ExpectedValue);
         }
-
-        if (actualValue is IEqualityComparer basicEqualityComparer)
+        else if (actualValue is IEqualityComparer basicEqualityComparer)
         {
-            return basicEqualityComparer.Equals(actualValue, ExpectedValue);
+	        isEqual = basicEqualityComparer.Equals(actualValue, ExpectedValue);
         }
-
-        if (ExpectedValue is IEqualityComparer<TActual> expectedTypeEqualityComparer)
+        else if (ExpectedValue is IEqualityComparer<TActual> expectedTypeEqualityComparer)
         {
-            return expectedTypeEqualityComparer.Equals(actualValue, ExpectedValue);
+	        isEqual = expectedTypeEqualityComparer.Equals(actualValue, ExpectedValue);
         }
-
-        if (ExpectedValue is IEqualityComparer expectedBasicEqualityComparer)
+        else if (ExpectedValue is IEqualityComparer expectedBasicEqualityComparer)
         {
-            return expectedBasicEqualityComparer.Equals(actualValue, ExpectedValue);
+	        isEqual = expectedBasicEqualityComparer.Equals(actualValue, ExpectedValue);
         }
-
-        if (actualValue is IEnumerable enumerable && ExpectedValue is IEnumerable enumerable2)
+        else if (actualValue is IEnumerable enumerable && ExpectedValue is IEnumerable enumerable2)
         {
-            return enumerable.Cast<object>().SequenceEqual(enumerable2.Cast<object>());
+	        isEqual = enumerable.Cast<object>().SequenceEqual(enumerable2.Cast<object>());
+        }
+        if (isEqual != null)
+        {
+            return AssertionResult
+	            .FailIf(
+		            () => !isEqual.Value,
+		            $"found {actualValue}");
         }
 
         var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions
@@ -62,10 +65,7 @@ public class EquivalentToExpectedValueAssertCondition<TActual> : ExpectedValueAs
         {
             if (firstFailure.Type == MemberType.Value)
             {
-                return FailWithMessage($"""
-                                        Expected: {Format(firstFailure.Expected)}
-                                        Received: {Format(firstFailure.Actual)}
-                                        """);
+                return FailWithMessage(Format(firstFailure.Actual));
             }
 
             return FailWithMessage($"""
@@ -75,7 +75,7 @@ public class EquivalentToExpectedValueAssertCondition<TActual> : ExpectedValueAs
                                     """);
         }
 
-        return true;
+        return AssertionResult.Passed;
     }
 
     public void IgnoringMember(string fieldName)

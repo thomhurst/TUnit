@@ -1,24 +1,26 @@
-﻿namespace TUnit.Assertions.AssertConditions.String;
+﻿using TUnit.Assertions.Extensions;
+
+namespace TUnit.Assertions.AssertConditions.String;
 
 public class StringContainsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-    protected override AssertionResult Passes(string? actualValue, string? expectedValue)
+	protected internal override string GetFailureMessage()
+		=> $"to contain {Format(expected).TruncateWithEllipsis(100)}";
+
+	protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
     {
-        if (actualValue is null && expectedValue is null)
+        if (actualValue is null)
         {
-            return true;
+            return AssertionResult
+	            .FailIf(
+		            () => expectedValue is not null,
+		            "it was null");
         }
 
-        if (actualValue is null || expectedValue is null)
-        {
-            return false;
-        }
-        
-        return actualValue.Contains(expectedValue, stringComparison);
+		return AssertionResult
+			.FailIf(
+				() => !actualValue.Contains(expectedValue, stringComparison),
+				$"it was not found in {Format(actualValue).TruncateWithEllipsis(100)}");
     }
-
-    protected override string GetFailureMessage(string? actualValue, string? expectedValue) => $"""
-         Expected {Format(actualValue)} to contain {Format(expectedValue)}
-         """;
 }

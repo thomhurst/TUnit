@@ -8,7 +8,7 @@ public class EnumerableCountEqualToExpectedValueAssertCondition<TActual>(int exp
 {
     protected internal override string GetFailureMessage() => $"to have a count of {expected}";
 
-    protected override AssertionResult Passes(TActual? actualValue, int count)
+    protected internal override AssertionResult Passes(TActual? actualValue, int count)
     {
         var actualCount = GetCount(actualValue);
 

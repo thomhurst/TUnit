@@ -74,9 +74,9 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return Passes(actualValue, exception);
 	}
 
-	protected abstract AssertionResult Passes(TActual? actualValue, Exception? exception);
+	protected internal abstract AssertionResult Passes(TActual? actualValue, Exception? exception);
 
-    protected string Because => _becauseReason?.ToString() ?? string.Empty;
+    protected internal string Because => _becauseReason?.ToString() ?? string.Empty;
 
     private BecauseReason? _becauseReason;
     

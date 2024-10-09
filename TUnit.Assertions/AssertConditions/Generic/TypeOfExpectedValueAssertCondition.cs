@@ -3,10 +3,12 @@ namespace TUnit.Assertions.AssertConditions.Generic;
 public class TypeOfExpectedValueAssertCondition<TActual>(Type expectedType)
     : BaseAssertCondition<TActual>
 {
-    protected internal override string GetFailureMessage() => $"{ActualValue} is {ActualValue?.GetType().Name ?? "null"} instead of {expectedType.Name}";
+	protected internal override string GetFailureMessage()
+		=> $"to be of type {expectedType.Name}";
 
-    protected override AssertionResult Passes(TActual? actualValue, Exception? exception)
-    {
-        return actualValue?.GetType() == expectedType;
-    }
+	protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
+		=> AssertionResult
+			.FailIf(
+				() => actualValue?.GetType() != expectedType,
+				$"{actualValue} it is {ActualValue?.GetType().Name ?? "null"}");
 }

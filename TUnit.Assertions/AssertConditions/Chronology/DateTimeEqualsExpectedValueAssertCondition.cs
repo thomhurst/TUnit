@@ -14,7 +14,7 @@ public class DateTimeEqualsExpectedValueAssertCondition(DateTime expected) : Exp
 		return $"to be equal to {expected} +-{_tolerance}";
 	}
 
-    protected override AssertionResult Passes(DateTime actualValue, DateTime expectedValue)
+    protected internal override AssertionResult Passes(DateTime actualValue, DateTime expectedValue)
     {
         if (_tolerance is not null)
         {

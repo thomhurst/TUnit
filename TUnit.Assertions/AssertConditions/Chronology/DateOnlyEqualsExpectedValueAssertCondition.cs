@@ -14,7 +14,7 @@ public class DateOnlyEqualsExpectedValueAssertCondition(DateOnly expected) : Exp
 		return $"to be equal to {expected} +-{_tolerance}";
 	}
 
-    protected override AssertionResult Passes(DateOnly actualValue, DateOnly expectedValue)
+    protected internal override AssertionResult Passes(DateOnly actualValue, DateOnly expectedValue)
 	{
 		if (_tolerance is not null)
 		{

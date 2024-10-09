@@ -30,7 +30,7 @@ public class InvokableAssertionBuilder<TActual> :
             {
                 throw new AssertionException(
                     $"""
-                     Expected {assertionData.ActualExpression} {assertion.GetFailureMessage()} but {result.Message}
+                     Expected {assertionData.ActualExpression} {assertion.GetFailureMessage()}{assertion.Because} but {result.Message}
                      """
                 );
             }
@@ -42,8 +42,9 @@ public class InvokableAssertionBuilder<TActual> :
         var assertionData = await AssertionDataDelegate();
         
         foreach (var assertion in Assertions.Reverse())
-        {
-            if (!assertion.Assert(assertionData))
+		{
+			var result = assertion.Passes(assertionData.Result, assertionData.Exception);
+			if (!result.IsPassed)
             {
                 yield return assertion;
             }

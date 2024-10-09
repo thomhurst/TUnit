@@ -8,7 +8,7 @@ public class EnumerableDistinctItemsExpectedValueAssertCondition<TActual, TInner
 {
     protected internal override string GetFailureMessage() => "items to be distinct";
 
-    protected override AssertionResult Passes(TActual? actualValue, Exception? exception)
+    protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
     {
         if (actualValue is null)
         {

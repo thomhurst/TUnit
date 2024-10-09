@@ -5,33 +5,23 @@ namespace TUnit.Assertions.AssertConditions.String;
 public class StringEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-    protected override AssertionResult Passes(string? actualValue, string? expectedValue)
-    {
-        if (actualValue is null && expectedValue is null)
-        {
-            return true;
-        }
+	protected internal override string GetFailureMessage()
+		=> $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
 
-        if (actualValue is null || expectedValue is null)
-        {
-            return false;
-        }
-        
-        return string.Equals(actualValue, expectedValue, stringComparison);
-    }
-    
-    protected override string GetFailureMessage(string? actualValue, string? expectedValue)
-    {
-        if (actualValue?.Length <= 100 && expectedValue?.Length <= 100)
-        {
-            return $"""
-                    Expected: {Format(ExpectedValue)}
-                    Received: {Format(ActualValue)}
-                    {GetLocation(actualValue, expectedValue)}
-                    """;
-        }
-        
-        return GetLocation(actualValue, expectedValue);
+	protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
+	{
+		if (actualValue is null)
+		{
+			return AssertionResult
+				.FailIf(
+					() => expectedValue is not null,
+					"it was null");
+		}
+
+		return AssertionResult
+			.FailIf(
+				() => !string.Equals(actualValue, expectedValue, stringComparison),
+				$"found {Format(actualValue).TruncateWithEllipsis(100)} which differs at {GetLocation(actualValue, expectedValue)}");
     }
 
     private string GetLocation(string? actualValue, string? expectedValue)
@@ -55,7 +45,7 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
         var spacesBeforeArrow = StringUtils.IndexOfDifference(actualLine, expectedLine) + 1;
         
         return $"""
-                Difference at index {initialIndexOfDifference}:
+                index {initialIndexOfDifference}:
                    {Format(actualLine)}
                    {new string(' ', spacesBeforeArrow)}^
                    {Format(expectedLine)}

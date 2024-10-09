@@ -2,18 +2,22 @@
 
 public class EqualsExpectedValueAssertCondition<TActual>(TActual expected) : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {
-    protected override string GetFailureMessage(TActual? actualValue, TActual? expectedValue) => $"""
-                                                 Expected: {ExpectedValue}
-                                                 Received: {ActualValue}
-                                                 """;
+	protected internal override string GetFailureMessage()
+		=> $"to be equal to {expected}";
 
-    protected override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
+    protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue is IEquatable<TActual> equatable)
-        {
-            return equatable.Equals(ExpectedValue);
+		{
+			return AssertionResult
+				.FailIf(
+					() => !equatable.Equals(expected),
+					$"found {actualValue}");
         }
-        
-        return Equals(actualValue, ExpectedValue);
+
+		return AssertionResult
+			.FailIf(
+				() => !Equals(actualValue, ExpectedValue),
+				$"found {actualValue}");
     }
 }

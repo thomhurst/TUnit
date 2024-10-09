@@ -20,18 +20,18 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
             
         if (!_condition1.Assert(ActualValue, Exception, ActualExpression).IsPassed)
         {
-            messages.Add(_condition1.OverriddenMessage ?? _condition1.GetFullFailureMessage());
+            messages.Add(_condition1.OverriddenMessage ?? _condition1.GetFailureMessage());
         }
             
         if (!_condition2.Assert(ActualValue, Exception, ActualExpression).IsPassed)
         {
-            messages.Add(_condition2.OverriddenMessage ?? _condition2.GetFullFailureMessage());
+            messages.Add(_condition2.OverriddenMessage ?? _condition2.GetFailureMessage());
         }
 
         return string.Join($"{Environment.NewLine} and{Environment.NewLine}", messages);
     }
     
-    protected override AssertionResult Passes(TActual? actualValue, Exception? exception)
+    protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
     {
         return _condition1.Assert(actualValue, exception, ActualExpression);
         //TODO VAB:
