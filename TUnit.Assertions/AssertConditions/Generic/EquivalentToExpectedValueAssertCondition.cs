@@ -2,12 +2,12 @@ using System.Collections;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EquivalentToExpectedValueAssertCondition<TActual>(TActual expected) : ExpectedValueAssertCondition<TActual, TActual>(expected)
+public class EquivalentToExpectedValueAssertCondition<TActual>(TActual expected, string expectedExpression) : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {
     private readonly List<string> _ignoredMembers = [];
 
     protected override string GetExpectation()
-		=> $"to be equivalent to {expected}";
+		=> $"to be equivalent to {expectedExpression}";
 
     protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
     {

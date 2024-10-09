@@ -32,10 +32,10 @@ public class EquivalentAssertionTests
         
         NUnitAssert.That(exception!.Message, Is.EqualTo(
             """
-            Assert.That(object1).IsEquivalentTo(object2)
-            Property Value did not match
+            Expected object1 to be equivalent to object2, but Property Value did not match
             Expected: "Foo"
             Received: null
+            at Assert.That(object1).IsEquivalentTo(object2)
             """
             ));
     }

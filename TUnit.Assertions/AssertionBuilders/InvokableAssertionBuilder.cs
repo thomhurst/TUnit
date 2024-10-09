@@ -30,7 +30,8 @@ public class InvokableAssertionBuilder<TActual> :
             {
                 throw new AssertionException(
                     $"""
-                     Expected {assertionData.ActualExpression} {assertion.GetExpectationWithReason()} but {result.Message}
+                     Expected {assertionData.ActualExpression} {assertion.GetExpectationWithReason()}, but {result.Message}
+                     at {((IInvokableAssertionBuilder)this).GetExpression()}
                      """
                 );
             }
