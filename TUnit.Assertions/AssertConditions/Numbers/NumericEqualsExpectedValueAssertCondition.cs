@@ -22,7 +22,7 @@ public class NumericEqualsExpectedValueAssertCondition<TActual>(TActual expected
         return $" +-{_tolerance}";
     }
 
-    protected override bool Passes(TActual? actualValue, TActual? expectedValue)
+    protected override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue == null && expectedValue == null)
         {

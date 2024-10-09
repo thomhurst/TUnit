@@ -6,24 +6,25 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-    protected override string GetFailureMessage(TActual? actualValue, IEnumerable<TInner>? expectedValue) => $"""
-                                                                                                              The two Enumerables were not equivalent
-                                                                                                                 Actual: {(actualValue != null ? string.Join(',', actualValue) : null)}
-                                                                                                                 Expected: {(expectedValue != null ? string.Join(',', expectedValue) : null)}
-                                                                                                              """;
+    protected internal override string GetFailureMessage() => $" to be equivalent to {(expected != null ? string.Join(',', expected) : null)}";
 
-    protected override bool Passes(TActual? actualValue, IEnumerable<TInner>? expectedValue)
+    protected override AssertionResult Passes(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
         if (actualValue is null && expectedValue is null)
         {
-            return true;
+            return AssertionResult.Passed;
         }
 
-        if (actualValue is null || expectedValue is null)
-        {
-            return false;
-        }
-        
-        return actualValue.SequenceEqual(expectedValue, equalityComparer);
+        return AssertionResult
+            .FailIf(
+                () => actualValue is null,
+                "it is null")
+            .OrFailIf(
+                () => expectedValue is null,
+                "it is not null")
+            .OrFailIf(
+                () => !actualValue.SequenceEqual(expectedValue, equalityComparer),
+                $"it is {(actualValue != null ? string.Join(',', actualValue) : null)}"
+            );
     }
 }

@@ -6,23 +6,22 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-    protected override string GetFailureMessage(TActual? actualValue, IEnumerable<TInner>? expected) => $"""
-         The two Enumerables were equivalent
-            {string.Join(',', ActualValue ?? Enumerable.Empty<TInner>())}
-         """;
+	protected internal override string GetFailureMessage() => $" to be not equivalent to {(expected != null ? string.Join(',', expected) : null)}";
 
-    protected override bool Passes(TActual? actualValue, IEnumerable<TInner>? expectedValue)
-    {
-        if (actualValue is null && expectedValue is null)
-        {
-            return false;
-        }
-        
-        if (actualValue is null || expectedValue is null)
-        {
-            return true;
-        }
-        
-        return !actualValue.SequenceEqual(expectedValue!, equalityComparer);
+    protected override AssertionResult Passes(TActual? actualValue, IEnumerable<TInner>? expectedValue)
+	{
+		if (actualValue is null != expectedValue is null)
+		{
+			return AssertionResult.Passed;
+		}
+
+		return AssertionResult
+			.FailIf(
+				() => actualValue is null && expectedValue is null,
+				"it is null")
+			.OrFailIf(
+				() => actualValue.SequenceEqual(expectedValue, equalityComparer),
+				$"the two Enumerables were equivalent"
+			);
     }
 }

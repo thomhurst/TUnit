@@ -5,19 +5,26 @@ public class BetweenAssertCondition<TActual>(TActual minimum, TActual maximum) :
 {
     private bool _inclusiveBounds;
 
-    protected internal override string GetFailureMessage() => $"""
-                                                               Expected between {minimum} & {minimum} ({GetRange()} Range)
-                                                               Received: {ActualValue}
-                                                               """;
+	protected internal override string GetFailureMessage() => $"to be between {minimum} & {minimum} ({GetRange()} Range)";
 
-    protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override AssertionResult Passes(TActual? actualValue, Exception? exception)
     {
+        bool isInRange;
+
         if (_inclusiveBounds)
         {
-            return actualValue!.CompareTo(minimum) >= 0 && actualValue.CompareTo(maximum) <= 0;
+            isInRange = actualValue!.CompareTo(minimum) >= 0 && actualValue.CompareTo(maximum) <= 0;
+        }
+        else
+        {
+            isInRange = actualValue!.CompareTo(minimum) > 0 && actualValue.CompareTo(maximum) < 0;
         }
 
-        return actualValue!.CompareTo(minimum) > 0 && actualValue.CompareTo(maximum) < 0;
+        return AssertionResult
+            .FailIf(
+                () => !isInRange,
+                $"received {actualValue}");
+
     }
 
     public void Inclusive()

@@ -3,34 +3,35 @@
 public class TimeOnlyEqualsExpectedValueAssertCondition(TimeOnly expected) : ExpectedValueAssertCondition<TimeOnly, TimeOnly>(expected) 
 {
     private TimeSpan? _tolerance;
-    
-    protected override string GetFailureMessage(TimeOnly actualValue, TimeOnly expectedValue) => $"""
-                                                 Expected: {ExpectedValue}{WithToleranceMessage()}
-                                                 Received: {ActualValue}
-                                                 """;
 
-    private string WithToleranceMessage()
-    {
-        if (_tolerance == null || _tolerance == default)
-        {
-            return string.Empty;
-        }
+	protected internal override string GetFailureMessage()
+	{
+		if (_tolerance == null || _tolerance == default)
+		{
+			return $"to be equal to {expected}";
+		}
 
-        return $" +-{_tolerance}";
-    }
+		return $"to be equal to {expected} +-{_tolerance}";
+	}
 
-    protected override bool Passes(TimeOnly actualValue, TimeOnly expectedValue)
+    protected override AssertionResult Passes(TimeOnly actualValue, TimeOnly expectedValue)
     {
         if (_tolerance is not null)
         {
             var min = expectedValue.Add(-_tolerance.Value);
             var max = expectedValue.Add(_tolerance.Value);
-            
-            return actualValue >= min && actualValue <= max;
-        }
-        
-        return actualValue == expectedValue;
-    }
+
+			return AssertionResult
+				.FailIf(
+					() => actualValue < min || actualValue > max,
+					$"the received value {actualValue} is outside the tolerances");
+		}
+
+		return AssertionResult
+			.FailIf(
+				() => actualValue != expected,
+				$"the received value {actualValue} is different");
+	}
 
     public void SetTolerance(TimeSpan tolerance)
     {

@@ -6,16 +6,19 @@ public class EnumerableCountEqualToExpectedValueAssertCondition<TActual>(int exp
     : ExpectedValueAssertCondition<TActual, int>(expected)
     where TActual : IEnumerable
 {
-    protected override string GetFailureMessage(TActual? actualValue, int count) => $"Length is {GetCount(actualValue)} instead of {count}";
-    
-    protected override bool Passes(TActual? actualValue, int count)
+    protected internal override string GetFailureMessage() => $"to have a count of {expected}";
+
+    protected override AssertionResult Passes(TActual? actualValue, int count)
     {
-        if (actualValue is null)
-        {
-            return FailWithMessage($"{ActualExpression ?? typeof(TActual).Name} is null");
-        }
-        
-        return GetCount(actualValue) == count;
+        var actualCount = GetCount(actualValue);
+
+		return AssertionResult
+            .FailIf(
+                () => actualValue is null,
+                $"{ActualExpression ?? typeof(TActual).Name} is null")
+            .OrFailIf(
+                () => actualCount != count,
+                $"it was {actualCount} instead");
     }
 
     private int GetCount(TActual? actualValue)

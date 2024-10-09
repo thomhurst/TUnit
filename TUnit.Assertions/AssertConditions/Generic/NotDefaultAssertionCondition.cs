@@ -9,6 +9,6 @@ public class NotDefaultExpectedValueAssertCondition<TActual>() : ExpectedValueAs
 					     $"{ActualExpression ?? typeof(TActual).Name} was default value null" : 
 					     $"{ActualExpression ?? typeof(TActual).Name} was default value {_defaultValue}";
 	
-	  protected override bool Passes(TActual? actualValue, TActual? expectedValue)
+	  protected override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
 				=> actualValue is not null && !actualValue.Equals(_defaultValue);
 }

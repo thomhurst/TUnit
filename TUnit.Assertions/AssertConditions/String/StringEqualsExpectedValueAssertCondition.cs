@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertConditions.String;
 public class StringEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-    protected override bool Passes(string? actualValue, string? expectedValue)
+    protected override AssertionResult Passes(string? actualValue, string? expectedValue)
     {
         if (actualValue is null && expectedValue is null)
         {

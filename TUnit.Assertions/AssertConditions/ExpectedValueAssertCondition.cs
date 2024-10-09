@@ -20,7 +20,7 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
         _customComparers.Add(comparer);
     }
 
-    protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected override AssertionResult Passes(TActual? actualValue, Exception? exception)
     {
         var expected = ExpectedValue;
         
@@ -35,7 +35,7 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
             switch (result)
             {
                 case AssertionDecision.PassDecision:
-                    return true;
+                    return AssertionResult.Passed;
                 case AssertionDecision.FailDecision failDecision:
                     return FailWithMessage(failDecision.Message);
             }
@@ -44,12 +44,5 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
         return Passes(actualValue, expected);
     }
     
-    protected abstract bool Passes(TActual? actualValue, TExpected? expectedValue);
-    
-    protected abstract string GetFailureMessage(TActual? actualValue, TExpected? expectedValue);
-
-    protected internal override string GetFailureMessage()
-    {
-        return GetFailureMessage(ActualValue, ExpectedValue);
-    }
+    protected abstract AssertionResult Passes(TActual? actualValue, TExpected? expectedValue);
 }

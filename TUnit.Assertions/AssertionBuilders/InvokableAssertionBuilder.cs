@@ -25,12 +25,12 @@ public class InvokableAssertionBuilder<TActual> :
         
         foreach (var assertion in Assertions.Reverse())
         {
-            if (!assertion.Assert(assertionData))
+            var result = assertion.Passes(assertionData.Result, assertionData.Exception);
+            if (!result.IsPassed)
             {
                 throw new AssertionException(
                     $"""
-                     {((IInvokableAssertionBuilder)this).GetExpression()}
-                     {assertion.OverriddenMessage ?? assertion.GetFullFailureMessage()}
+                     Expected {assertionData.ActualExpression} {assertion.GetFailureMessage()} but {result.Message}
                      """
                 );
             }
