@@ -22,7 +22,7 @@ internal class PropertySetterTests : TestsBase<TestsGenerator>
             
             // Static
             await AssertFileContains(generatedFiles[0], "var propertyArg6 = testClassType.GetProperty(\"StaticProperty\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>>(true).ElementAt(0).GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Property,\n   TestClassType = testClassType,\n   ParameterInfos = null,\n   PropertyInfo = testClassType.GetProperty(\"StaticProperty\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy),\n   TestObjectBag = objectBag,\n}).ElementAtOrDefault(0);");
-            await AssertFileContains(generatedFiles[0], "global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;,");
+            await AssertFileContains(generatedFiles[0], "global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;");
 
             await AssertFileContains(generatedFiles[0], "Property1 = propertyArg,");
             await AssertFileContains(generatedFiles[0], "Property2 = propertyArg1,");
