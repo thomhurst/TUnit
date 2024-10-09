@@ -22,7 +22,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         _dataGeneratorMetadata = dataGeneratorMetadata;
-        
+
         var t = Shared switch
         {
             SharedType.None => new T(),

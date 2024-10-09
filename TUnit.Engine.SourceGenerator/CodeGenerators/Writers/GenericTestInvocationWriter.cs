@@ -109,7 +109,7 @@ internal static class GenericTestInvocationWriter
         foreach (var propertyArgumentsInnerContainer in testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
             yield return
-                $"testClassType.GetProperty(\"{propertyArgumentsInnerContainer.PropertySymbol.Name}\").GetCustomAttributes<{propertyArgumentsInnerContainer.ArgumentsContainer.Attribute!.AttributeClass!.GloballyQualified()}>().ElementAt(0)";
+                $"testClassType.GetProperty(\"{propertyArgumentsInnerContainer.PropertySymbol.Name}\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy).GetCustomAttributes<{propertyArgumentsInnerContainer.ArgumentsContainer.Attribute!.AttributeClass!.GloballyQualified()}>().ElementAt(0)";
         }
     }
 

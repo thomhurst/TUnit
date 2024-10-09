@@ -24,7 +24,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
         var objectToGetAttributesFrom = ArgumentsType switch
         {
             ArgumentsType.Method => "methodInfo",
-            ArgumentsType.Property => $"typeof({TestClassTypeName}).GetProperty(\"{PropertyName}\")",
+            ArgumentsType.Property => $"testClassType.GetProperty(\"{PropertyName}\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)",
             _ => $"typeof({TestClassTypeName})"
         };
         
