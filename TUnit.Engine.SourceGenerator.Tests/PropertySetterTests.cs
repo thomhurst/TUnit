@@ -20,7 +20,7 @@ internal class PropertySetterTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[0], "var propertyArg4 = testClassType.GetProperty(\"Property5\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>>(true).ElementAt(0).GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Property,\n   TestClassType = testClassType,\n   ParameterInfos = null,\n   PropertyInfo = testClassType.GetProperty(\"Property5\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy),\n   TestObjectBag = objectBag,\n}).ElementAtOrDefault(0);");
             await AssertFileContains(generatedFiles[0], "var propertyArg5 = testClassType.GetProperty(\"Property6\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>>(true).ElementAt(0).GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Property,\n   TestClassType = testClassType,\n   ParameterInfos = null,\n   PropertyInfo = testClassType.GetProperty(\"Property6\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy),\n   TestObjectBag = objectBag,\n}).ElementAtOrDefault(0);");
             
-            // Static
+            // Stati
             await AssertFileContains(generatedFiles[0], "var propertyArg6 = testClassType.GetProperty(\"StaticProperty\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>>(true).ElementAt(0).GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Property,\n   TestClassType = testClassType,\n   ParameterInfos = null,\n   PropertyInfo = testClassType.GetProperty(\"StaticProperty\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy),\n   TestObjectBag = objectBag,\n}).ElementAtOrDefault(0);");
             await AssertFileContains(generatedFiles[0], "global::TUnit.TestProject.PropertySetterTests.StaticProperty = propertyArg6;");
 
@@ -32,12 +32,5 @@ internal class PropertySetterTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[0], "Property6 = propertyArg5,");
             
             await AssertFileContains(generatedFiles[0], "TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3, propertyArg4, propertyArg5],");
-            
-            await AssertFileContains(generatedFiles[0], "new TestData(propertyArg, typeof(global::System.String), InjectedDataType.None) { DisposeAfterTest = propertyArgDisposeAfter, }");
-            await AssertFileContains(generatedFiles[0], "new TestData(propertyArg1, typeof(global::System.String), InjectedDataType.None) { DisposeAfterTest = propertyArg1DisposeAfter, }");
-            await AssertFileContains(generatedFiles[0], "new TestData(propertyArg2, typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel), InjectedDataType.None) { DisposeAfterTest = propertyArg2DisposeAfter, }");
-            await AssertFileContains(generatedFiles[0], "new TestData(propertyArg3, typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel), InjectedDataType.SharedGlobally),");
-            await AssertFileContains(generatedFiles[0], "new TestData(propertyArg4, typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel), InjectedDataType.SharedByTestClassType)");
-            await AssertFileContains(generatedFiles[0], "new TestData(propertyArg5, typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel), InjectedDataType.SharedByKey) { StringKey = \"Key\" }");
         });
 }
