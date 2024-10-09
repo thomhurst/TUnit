@@ -69,6 +69,7 @@ public abstract class TestModule : Module<TestResult>
             CommandLogging = CommandLogging.None,
             Arguments =
             [
+                "-f", "net8.0",
                 "--treenode-filter", filter, 
                 "--report-trx", "--report-trx-filename", trxFilename,
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
@@ -107,6 +108,7 @@ public abstract class TestModule : Module<TestResult>
             CommandLogging = CommandLogging.None,
             Arguments =
             [
+                "-f", "net8.0",
                 "--treenode-filter", filter, 
                 "--report-trx", "--report-trx-filename", trxFilename,
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
@@ -140,6 +142,7 @@ public abstract class TestModule : Module<TestResult>
             CommandLogging = CommandLogging.None,
             Arguments =
             [
+                "-f", "net8.0",
                 "--treenode-filter", filter, 
                 "--report-trx", "--report-trx-filename", trxFilename,
                 // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
