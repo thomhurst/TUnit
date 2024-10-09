@@ -2,7 +2,7 @@
 
 public class EqualsExpectedValueAssertCondition<TActual>(TActual expected) : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {
-	protected internal override string GetFailureMessage()
+	protected override string GetExpectation()
 		=> $"to be equal to {expected}";
 
     protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)

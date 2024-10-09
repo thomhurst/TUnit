@@ -3,7 +3,7 @@
 public class SameReferenceExpectedValueAssertCondition<TActual, TExpected>(TExpected expected)
     : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
-	protected internal override string GetFailureMessage()
+	protected override string GetExpectation()
 		=> $"to have the same reference as {expected}";
 
 	protected internal override AssertionResult Passes(TActual? actualValue, TExpected? expectedValue) => AssertionResult

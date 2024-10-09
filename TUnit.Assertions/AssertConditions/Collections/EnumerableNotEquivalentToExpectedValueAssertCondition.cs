@@ -6,7 +6,7 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-	protected internal override string GetFailureMessage() => $" to be not equivalent to {(expected != null ? string.Join(',', expected) : null)}";
+	protected override string GetExpectation() => $" to be not equivalent to {(expected != null ? string.Join(',', expected) : null)}";
 
     protected internal override AssertionResult Passes(TActual? actualValue, IEnumerable<TInner>? expectedValue)
 	{

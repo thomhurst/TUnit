@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertConditions.String;
 public class StringNotContainsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-	protected internal override string GetFailureMessage()
+	protected override string GetExpectation()
 		=> $"to not contain {Format(expected).TruncateWithEllipsis(100)}";
 
 	protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)

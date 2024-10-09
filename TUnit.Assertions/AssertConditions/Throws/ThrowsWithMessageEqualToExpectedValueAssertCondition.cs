@@ -8,7 +8,7 @@ public class ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(
     Func<Exception?, Exception?> exceptionSelector)
     : DelegateAssertCondition<TActual, Exception>
 {
-	protected internal override string GetFailureMessage()
+	protected override string GetExpectation()
 		=> $"to have Message equal to \"{expectedMessage}\"";
 
     protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)

@@ -4,7 +4,7 @@ public class DefaultExpectedValueAssertCondition<TActual> : BaseAssertCondition<
 {
 	private readonly TActual? _defaultValue = default;
 
-	protected internal override string GetFailureMessage()
+	protected override string GetExpectation()
 		=> $"to be {(_defaultValue is null ? "null" : _defaultValue)}";
 
 	protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)

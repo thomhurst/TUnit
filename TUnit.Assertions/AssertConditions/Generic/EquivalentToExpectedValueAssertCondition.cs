@@ -6,7 +6,7 @@ public class EquivalentToExpectedValueAssertCondition<TActual>(TActual expected)
 {
     private readonly List<string> _ignoredMembers = [];
 
-    protected internal override string GetFailureMessage()
+    protected override string GetExpectation()
 		=> $"to be equivalent to {expected}";
 
     protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)

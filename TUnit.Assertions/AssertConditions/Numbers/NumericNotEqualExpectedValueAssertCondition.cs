@@ -7,7 +7,7 @@ public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expect
 {
     private TActual? _tolerance;
 
-    protected internal override string GetFailureMessage()
+    protected override string GetExpectation()
     {
 	    if (_tolerance == null || _tolerance == default)
 	    {

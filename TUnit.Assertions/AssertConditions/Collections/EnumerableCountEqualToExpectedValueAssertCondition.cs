@@ -6,7 +6,7 @@ public class EnumerableCountEqualToExpectedValueAssertCondition<TActual>(int exp
     : ExpectedValueAssertCondition<TActual, int>(expected)
     where TActual : IEnumerable
 {
-    protected internal override string GetFailureMessage() => $"to have a count of {expected}";
+    protected override string GetExpectation() => $"to have a count of {expected}";
 
     protected internal override AssertionResult Passes(TActual? actualValue, int count)
     {

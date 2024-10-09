@@ -12,20 +12,23 @@ internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
         
         _condition1 = condition1;
         _condition2 = condition2;
-    }
+	}
 
-    protected internal override string GetFailureMessage() => $"{_condition1.OverriddenMessage ?? _condition1.GetFailureMessage()}{Environment.NewLine} or{Environment.NewLine}{_condition2.OverriddenMessage ?? _condition2.GetFailureMessage()}";
+    protected override string GetExpectation()
+	    => throw new NotSupportedException();
+
+	internal override string GetExpectationWithReason()
+	    => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} or{Environment.NewLine}{_condition2.GetExpectationWithReason()}";
 
     protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
-    {
-		return _condition1.Assert(actualValue, exception, ActualExpression);
-		//TODO VAB:
-		// return _condition1.Assert(actualValue, exception, null).IsPassed || _condition2.Assert(actualValue, exception, null).IsPassed;
+	{
+		return _condition1.Assert(actualValue, exception, ActualExpression)
+			.Or(_condition2.Assert(actualValue, exception, ActualExpression));
 	}
 
 	internal override void SetBecauseReason(BecauseReason becauseReason)
-    {
-        _condition1.SetBecauseReason(becauseReason);
-        _condition2.SetBecauseReason(becauseReason);
-    }
+		=> _condition2.SetBecauseReason(becauseReason);
+
+	internal override string GetBecauseReason()
+		=> _condition2.GetBecauseReason();
 }

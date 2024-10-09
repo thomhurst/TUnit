@@ -4,7 +4,7 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsSubClassOfExpectedValueAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, Exception>
 {
-	protected internal override string GetFailureMessage()
+	protected override string GetExpectation()
 		=> $"to throw {typeof(TExpectedException).Name.PrependAOrAn()}";
 
 	protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)

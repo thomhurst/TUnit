@@ -20,6 +20,36 @@ public class AssertionResult
 		return new AssertionResult(false, message);
 	}
 
+	public AssertionResult And(AssertionResult other)
+	{
+		if (IsPassed && other.IsPassed)
+		{
+			return this;
+		}
+
+		if (IsPassed)
+		{
+			return other;
+		}
+
+		if (other.IsPassed)
+		{
+			return this;
+		}
+
+		return Fail(this.Message + " and " + other.Message);
+	}
+
+	public AssertionResult Or(AssertionResult other)
+	{
+		if (!IsPassed && !other.IsPassed)
+		{
+			return Fail(this.Message + " and " + other.Message);
+		}
+
+		return this;
+	}
+
 	public AssertionResult OrFailIf(Func<bool> isFailed, string message)
 	{
         if (!IsPassed || !isFailed())

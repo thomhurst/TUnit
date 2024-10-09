@@ -6,7 +6,17 @@ namespace TUnit.Assertions.AssertConditions;
 
 public abstract class BaseAssertCondition
 {
-    public AssertionResult FailWithMessage(string message)
+	private BecauseReason? _becauseReason;
+
+	internal virtual void SetBecauseReason(BecauseReason becauseReason)
+	{
+		_becauseReason = becauseReason;
+	}
+
+	internal virtual string GetBecauseReason()
+		=> _becauseReason?.ToString() ?? string.Empty;
+
+	public AssertionResult FailWithMessage(string message)
     {
         OverriddenMessage = message;
         return AssertionResult.Fail(message);
@@ -14,9 +24,13 @@ public abstract class BaseAssertCondition
     
     public string? OverriddenMessage { get; internal set; }
 
-    protected internal abstract string GetFailureMessage();
+    protected abstract string GetExpectation();
 
-    protected string Format(object? obj)
+    internal virtual string GetExpectationWithReason()
+	    => $"{GetExpectation()}{GetBecauseReason()}";
+
+
+	protected string Format(object? obj)
     {
         if (obj is null)
         {
@@ -76,18 +90,5 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 
 	protected internal abstract AssertionResult Passes(TActual? actualValue, Exception? exception);
 
-    protected internal string Because => _becauseReason?.ToString() ?? string.Empty;
 
-    private BecauseReason? _becauseReason;
-    
-    internal virtual void SetBecauseReason(BecauseReason becauseReason)
-    {
-        if (_becauseReason != null)
-        {
-            // If multiple because reasons are provided, only apply them to the newer assertions.
-            return;
-        }
-        
-        _becauseReason = becauseReason;
-    }
 }

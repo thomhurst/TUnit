@@ -2,7 +2,7 @@ namespace TUnit.Assertions.AssertConditions;
 
 public class NotNullExpectedValueAssertCondition<TActual> : BaseAssertCondition<TActual>
 {
-	protected internal override string GetFailureMessage()
+	protected override string GetExpectation()
 		=> "to not be null";
 
 	protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)

@@ -48,7 +48,7 @@ public abstract class ValueAssertCondition<TActual>
     
     protected abstract string GetFailureMessage(TActual? actualValue);
 
-    protected internal override string GetFailureMessage()
+    protected override string GetExpectation()
     {
         return GetFailureMessage(ActualValue);
     }

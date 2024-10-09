@@ -18,9 +18,9 @@ public class BecauseTests
     }
 
     [Test]
-    [Arguments("we prefix the reason", "Because: we prefix the reason")]
-    [Arguments("  we ignore whitespace", "Because: we ignore whitespace")]
-    [Arguments("because we honor a leading 'because'", "Because: we honor a leading 'because'")]
+    [Arguments("we prefix the reason", "because we prefix the reason")]
+    [Arguments("  we ignore whitespace", "because we ignore whitespace")]
+    [Arguments("because we honor a leading 'because'", "because we honor a leading 'because'")]
     public async Task Prefix_Because_Message(string because, string expectedWithPrefix)
     {
         var variable = true;
@@ -46,8 +46,8 @@ public class BecauseTests
         };
 
         var exception = await Assert.ThrowsAsync<AssertionException>(action);
-        await Assert.That(exception.Message).Contains("we honor a leading 'because'")
-            .And.DoesNotContain(because);
+        await Assert.That(exception.Message).Contains(because)
+            .And.DoesNotContain("because because");
     }
 
     [Test]
@@ -62,9 +62,7 @@ public class BecauseTests
 
         var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).IsEqualTo("""
-                                                       Assert.That(variable).IsFalse()
-                                                       Expected: False
-                                                       Received: True
+                                                       Expected variable to be equal to False but found True
                                                        """);
     }
 
@@ -82,9 +80,9 @@ public class BecauseTests
 
         var exception = await Assert.ThrowsAsync<AssertionException>(action);
         await Assert.That(exception.Message).IsEqualTo("""
-                                                       Assert.That(variable).IsTrue().And.IsFalse()
-                                                       Expected: False
-                                                       Received: True
+                                                       Expected variable to be equal to True, because we only apply it to previous assertions
+                                                        and
+                                                       to be equal to False but found True
                                                        """);
     }
 

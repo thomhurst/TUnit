@@ -7,7 +7,7 @@ public class FuncValueAssertCondition<TActual, TExpected>(
 )
     : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
-	protected internal override string GetFailureMessage()
+	protected override string GetExpectation()
 		=> $"to satisfy {this.GetType().Name}";
 
 	protected internal override AssertionResult Passes(TActual? actualValue, TExpected? expectedValue)

@@ -6,7 +6,7 @@ public class EnumerableDistinctItemsExpectedValueAssertCondition<TActual, TInner
     : BaseAssertCondition<TActual>
     where TActual : IEnumerable
 {
-    protected internal override string GetFailureMessage() => "items to be distinct";
+    protected override string GetExpectation() => "items to be distinct";
 
     protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
     {
