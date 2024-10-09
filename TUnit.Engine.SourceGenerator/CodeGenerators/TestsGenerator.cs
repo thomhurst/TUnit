@@ -71,6 +71,7 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();
+            sourceBuilder.WriteLine("[global::System.Diagnostics.DebuggerHidden]");
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
             sourceBuilder.WriteLine($"file partial class {className}");
             sourceBuilder.WriteLine("{");
