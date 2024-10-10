@@ -61,10 +61,5 @@ public class TimeoutCancellationTokenTests
         return 1;
     }
     
-    public class FiveSecondTimeout : TimeoutAttribute
-    {
-        public FiveSecondTimeout() : base(5_000)
-        {
-        }
-    }
+    public class FiveSecondTimeout() : TimeoutAttribute(5_000);
 }

@@ -1,4 +1,3 @@
-using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;

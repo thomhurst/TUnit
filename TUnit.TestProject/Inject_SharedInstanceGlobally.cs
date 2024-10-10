@@ -9,24 +9,17 @@ public static class SharedInjectedGloballyContainer
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
-public class InjectSharedGlobally1
+public class InjectSharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
-    private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
-    
-    public InjectSharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeClass)
-    {
-        _dummyReferenceTypeClass = dummyReferenceTypeClass;
-    }
-
     [Test, Repeat(5)]
     public async Task Test1()
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
     
@@ -35,10 +28,10 @@ public class InjectSharedGlobally1
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
     
@@ -47,33 +40,26 @@ public class InjectSharedGlobally1
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
-public class InjectSharedGlobally2
+public class InjectSharedGlobally2(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
-    private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
-    
-    public InjectSharedGlobally2(DummyReferenceTypeClass dummyReferenceTypeClass)
-    {
-        _dummyReferenceTypeClass = dummyReferenceTypeClass;
-    }
-
     [Test, Repeat(5)]
     public async Task Test1()
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
     
@@ -82,10 +68,10 @@ public class InjectSharedGlobally2
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
     
@@ -94,33 +80,26 @@ public class InjectSharedGlobally2
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
 }
 
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
-public class InjectSharedGlobally3
+public class InjectSharedGlobally3(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
-    private readonly DummyReferenceTypeClass _dummyReferenceTypeClass;
-    
-    public InjectSharedGlobally3(DummyReferenceTypeClass dummyReferenceTypeClass)
-    {
-        _dummyReferenceTypeClass = dummyReferenceTypeClass;
-    }
-
     [Test, Repeat(5)]
     public async Task Test1()
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
     
@@ -129,10 +108,10 @@ public class InjectSharedGlobally3
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
     
@@ -141,10 +120,10 @@ public class InjectSharedGlobally3
     {
         if (SharedInjectedGloballyContainer.Instances.Any())
         {
-            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(_dummyReferenceTypeClass);
+            await Assert.That(SharedInjectedGloballyContainer.Instances).Contains(dummyReferenceTypeClass);
         }
 
-        SharedInjectedGloballyContainer.Instances.Add(_dummyReferenceTypeClass);
+        SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
 }

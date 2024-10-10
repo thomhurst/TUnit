@@ -4,22 +4,16 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ExceptionWith<TActual>
+public class ExceptionWith<TActual>(
+    IDelegateSource<TActual> delegateSource,
+    Func<Exception?, Exception?> exceptionSelector,
+    [CallerMemberName] string callerMemberName = "")
 {
-    private readonly IDelegateSource<TActual> _delegateSource;
-    private readonly Func<Exception?, Exception?> _exceptionSelector;
-    protected AssertionBuilder<TActual> AssertionBuilder { get; }
-    
-    public ExceptionWith(IDelegateSource<TActual> delegateSource, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "")
-    {
-        _delegateSource = delegateSource;
-        _exceptionSelector = exceptionSelector;
-        AssertionBuilder = delegateSource.AssertionBuilder
-            .AppendExpression(callerMemberName);
-    }
+    protected AssertionBuilder<TActual> AssertionBuilder { get; } = delegateSource.AssertionBuilder
+        .AppendExpression(callerMemberName);
 
     public ExceptionWithMessage<TActual> Message =>
-        new(_delegateSource, _exceptionSelector);
+        new(delegateSource, exceptionSelector);
     
-    public ThrowsException<TActual> InnerException => new(_delegateSource, e => _exceptionSelector(e)?.InnerException);
+    public ThrowsException<TActual> InnerException => new(delegateSource, e => exceptionSelector(e)?.InnerException);
 }

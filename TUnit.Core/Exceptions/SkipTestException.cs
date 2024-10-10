@@ -1,11 +1,6 @@
 ﻿namespace TUnit.Core.Exceptions;
 
-public class SkipTestException : TUnitException
+public class SkipTestException(string reason) : TUnitException
 {
-    public string Reason { get; }
-
-    public SkipTestException(string reason)
-    {
-        Reason = reason;
-    }
+    public string Reason { get; } = reason;
 }

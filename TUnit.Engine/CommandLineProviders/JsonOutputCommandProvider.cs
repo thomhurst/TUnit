@@ -4,31 +4,24 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-internal class JsonOutputCommandProvider : ICommandLineOptionsProvider
+internal class JsonOutputCommandProvider(IExtension extension) : ICommandLineOptionsProvider
 {
     public const string OutputJson = "output-json";
     public const string OutputJsonFilename = "output-json-filename";
     public const string OutputJsonFilenamePrefix = "output-json-prefix";
-    
-    private readonly IExtension _extension;
-
-    public JsonOutputCommandProvider(IExtension extension)
-    {
-        _extension = extension;
-    }
 
     public Task<bool> IsEnabledAsync()
     {
-        return _extension.IsEnabledAsync();
+        return extension.IsEnabledAsync();
     }
 
-    public string Uid => _extension.Uid;
+    public string Uid => extension.Uid;
 
-    public string Version => _extension.Version;
+    public string Version => extension.Version;
 
-    public string DisplayName => _extension.DisplayName;
+    public string DisplayName => extension.DisplayName;
 
-    public string Description => _extension.Description;
+    public string Description => extension.Description;
     
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {

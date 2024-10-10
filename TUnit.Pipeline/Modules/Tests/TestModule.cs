@@ -249,15 +249,8 @@ public abstract class TestModule : Module<TestResult>
     }
 }
 
-public record TestResult
+public record TestResult(DotNetTestResult TrxReport)
 {
-    public DotNetTestResult TrxReport { get; }
-
-    public TestResult(DotNetTestResult trxReport)
-    {
-        TrxReport = trxReport;
-    }
-
     public int Failed => TrxReport.UnitTestResults.Count(x => x.Outcome == TestOutcome.Failed);
     public int Passed => TrxReport.UnitTestResults.Count(x => x.Outcome == TestOutcome.Passed);
     public int Skipped => TrxReport.UnitTestResults.Count(x => x.Outcome == TestOutcome.NotExecuted);

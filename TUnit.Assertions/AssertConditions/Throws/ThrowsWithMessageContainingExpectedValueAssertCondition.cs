@@ -1,5 +1,3 @@
-using TUnit.Assertions.Extensions;
-
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(

@@ -26,17 +26,7 @@ public class CategoryTests
         return TestContext.Current?.TestDetails.Categories ?? [];
     }
 
-    public class ClassCategoryAttribute : CategoryAttribute
-    {
-        public ClassCategoryAttribute() : base("ClassCategory2")
-        {
-        }
-    }
+    public class ClassCategoryAttribute() : CategoryAttribute("ClassCategory2");
     
-    public class MethodCategoryAttribute : CategoryAttribute
-    {
-        public MethodCategoryAttribute() : base("MethodCategory2")
-        {
-        }
-    }
+    public class MethodCategoryAttribute() : CategoryAttribute("MethodCategory2");
 }

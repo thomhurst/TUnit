@@ -5,20 +5,13 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
-public class StringLength
+public class StringLength(IValueSource<string> valueSource)
 {
-    private readonly IValueSource<string> _valueSource;
-    protected AssertionBuilder<string> AssertionBuilder { get; }
-
-    public StringLength(IValueSource<string> valueSource)
-    {
-        _valueSource = valueSource;
-        AssertionBuilder = valueSource.AssertionBuilder.AppendExpression("HasLength");
-    }
+    protected AssertionBuilder<string> AssertionBuilder { get; } = valueSource.AssertionBuilder.AppendExpression("HasLength");
 
     public InvokableValueAssertionBuilder<string> EqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (actual, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (actual, _, self) =>
             {
                 if (actual is null)
                 {
@@ -34,7 +27,7 @@ public class StringLength
     }
 
     public InvokableValueAssertionBuilder<string> Zero =>
-        _valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
+        valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
                 (@string, _, self) =>
                 {
                     if (@string is null)
@@ -50,7 +43,7 @@ public class StringLength
             , []);
 
     public InvokableValueAssertionBuilder<string> Positive =>
-        _valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(default, (@string, _, self) =>
+        valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(default, (@string, _, self) =>
             {
                 if (@string is null)
                 {
@@ -67,7 +60,7 @@ public class StringLength
 
     public InvokableValueAssertionBuilder<string> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected,
             (@string, _, self) =>
             {
                 if (@string is null)
@@ -85,7 +78,7 @@ public class StringLength
 
     public InvokableValueAssertionBuilder<string> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (@string, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (@string, _, self) =>
             {
                 if (@string is null)
                 {
@@ -102,7 +95,7 @@ public class StringLength
 
     public InvokableValueAssertionBuilder<string> LessThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (@string, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (@string, _, self) =>
             {
                 if (@string is null)
                 {
@@ -119,7 +112,7 @@ public class StringLength
 
     public InvokableValueAssertionBuilder<string> LessThanOrEqualTo(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (@string, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (@string, _, self) =>
             {
                 if (@string is null)
                 {

@@ -50,24 +50,16 @@ public class CustomRetryTests
         await Assert.That(RetryCount4).IsEqualTo(1);
     }
 
-    public class RetryOperationCancelledExceptionAttribute : RetryAttribute
+    public class RetryOperationCancelledExceptionAttribute(int times) : RetryAttribute(times)
     {
-        public RetryOperationCancelledExceptionAttribute(int times) : base(times)
-        {
-        }
-
         public override Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)
         {
             return Task.FromResult(exception is OperationCanceledException);
         }
     }
     
-    public class RetryNullReferenceExceptionAttribute : RetryAttribute
+    public class RetryNullReferenceExceptionAttribute(int times) : RetryAttribute(times)
     {
-        public RetryNullReferenceExceptionAttribute(int times) : base(times)
-        {
-        }
-
         public override Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)
         {
             return Task.FromResult(exception is NullReferenceException);

@@ -6,15 +6,8 @@ using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine.Services;
 
-internal class TUnitInitializer
+internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
 {
-    private readonly ICommandLineOptions _commandLineOptions;
-
-    public TUnitInitializer(ICommandLineOptions commandLineOptions)
-    {
-        _commandLineOptions = commandLineOptions;
-    }
-
     public void Initialize()
     {
         ParseParameters();
@@ -33,7 +26,7 @@ internal class TUnitInitializer
 
     private void ParseParameters()
     {
-        if (!_commandLineOptions.TryGetOptionArgumentList(ParametersCommandProvider.TestParameter, out var parameters))
+        if (!commandLineOptions.TryGetOptionArgumentList(ParametersCommandProvider.TestParameter, out var parameters))
         {
             return;
         }

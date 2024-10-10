@@ -3,18 +3,12 @@
 namespace TUnit.Core;
 
 internal class DiscoveredTest<
-    [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)] 
+    [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis
+        .DynamicallyAccessedMemberTypes.All)]
     TTestClass
-    > : DiscoveredTest
+>(ResettableLazy<TTestClass> resettableLazyTestClassFactory) : DiscoveredTest
 {
-    private readonly ResettableLazy<TTestClass> _resettableLazyTestClassFactory;
-
-    public DiscoveredTest(ResettableLazy<TTestClass> resettableLazyTestClassFactory)
-    {
-        _resettableLazyTestClassFactory = resettableLazyTestClassFactory;
-    }
-    
-    public TTestClass TestClass => _resettableLazyTestClassFactory.Value;
+    public TTestClass TestClass => resettableLazyTestClassFactory.Value;
     
     public required Func<TTestClass, CancellationToken, Task> TestBody { get; init; }
 
@@ -25,7 +19,7 @@ internal class DiscoveredTest<
     
     public override async Task ResetTestInstance()
     {
-        await _resettableLazyTestClassFactory.ResetLazy();
+        await resettableLazyTestClassFactory.ResetLazy();
     }
 }
 
