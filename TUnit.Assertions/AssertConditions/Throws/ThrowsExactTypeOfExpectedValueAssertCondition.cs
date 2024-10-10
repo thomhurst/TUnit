@@ -8,7 +8,7 @@ public class ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpectedExceptio
 	protected override string GetExpectation()
 		=> $"to throw exactly {typeof(TExpectedException).Name.PrependAOrAn()}";
 
-	protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
+	protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
 		=> AssertionResult
 		.FailIf(
 			() => exception is null,

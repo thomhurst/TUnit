@@ -25,7 +25,7 @@ public class InvokableAssertionBuilder<TActual> :
         
         foreach (var assertion in Assertions.Reverse())
         {
-            var result = assertion.Passes(assertionData.Result, assertionData.Exception);
+            var result = assertion.GetResult(assertionData.Result, assertionData.Exception);
             if (!result.IsPassed)
             {
                 assertion.SetSubject(assertionData.ActualExpression);
@@ -46,7 +46,7 @@ public class InvokableAssertionBuilder<TActual> :
         foreach (var assertion in Assertions.Reverse())
 		{
             assertion.SetSubject(assertionData.ActualExpression);
-			var result = assertion.Passes(assertionData.Result, assertionData.Exception);
+			var result = assertion.GetResult(assertionData.Result, assertionData.Exception);
 			if (!result.IsPassed)
             {
                 yield return (assertion, result);

@@ -18,7 +18,7 @@ public abstract class ValueAssertCondition<TActual>
         _customComparers.Add(comparer);
     }
 
-    protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
+    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
     {
         if (exception is not null)
         {

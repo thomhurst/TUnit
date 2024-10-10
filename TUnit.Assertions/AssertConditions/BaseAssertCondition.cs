@@ -90,8 +90,8 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         Exception = exception;
         ActualExpression = actualExpression;
         
-        return Passes(actualValue, exception);
+        return GetResult(actualValue, exception);
 	}
 
-	protected internal abstract AssertionResult Passes(TActual? actualValue, Exception? exception);
+	protected internal abstract AssertionResult GetResult(TActual? actualValue, Exception? exception);
 }

@@ -5,7 +5,7 @@ public class NotNullExpectedValueAssertCondition<TActual> : BaseAssertCondition<
 	protected override string GetExpectation()
 		=> "to not be null";
 
-	protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
+	protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
 		=> AssertionResult
 			.FailIf(
 				() => actualValue is null,

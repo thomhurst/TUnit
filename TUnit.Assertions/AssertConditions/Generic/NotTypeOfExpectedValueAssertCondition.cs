@@ -6,7 +6,7 @@ public class NotTypeOfExpectedValueAssertCondition<TActual, TExpected>
 	protected override string GetExpectation()
 		=> $"to not be of type {typeof(TExpected).Name}";
 
-	protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
+	protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
 		=> AssertionResult
 			.FailIf(
 				() => actualValue?.GetType() == typeof(TExpected),

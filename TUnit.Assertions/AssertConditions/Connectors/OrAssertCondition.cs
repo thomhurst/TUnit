@@ -20,7 +20,7 @@ internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
 	internal override string GetExpectationWithReason()
 	    => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} or{Environment.NewLine}{_condition2.GetExpectationWithReason()}";
 
-    protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
+    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
 	{
 		return _condition1.Assert(actualValue, exception, ActualExpression)
 			.Or(_condition2.Assert(actualValue, exception, ActualExpression));

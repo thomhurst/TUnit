@@ -6,7 +6,7 @@ public class TypeOfExpectedValueAssertCondition<TActual>(Type expectedType)
 	protected override string GetExpectation()
 		=> $"to be of type {expectedType.Name}";
 
-	protected internal override AssertionResult Passes(TActual? actualValue, Exception? exception)
+	protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
 		=> AssertionResult
 			.FailIf(
 				() => actualValue?.GetType() != expectedType,
