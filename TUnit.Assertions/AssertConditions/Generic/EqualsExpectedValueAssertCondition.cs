@@ -5,7 +5,7 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected) : Exp
     protected override string GetExpectation()
         => $"to be equal to {expected}";
 
-    protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
+    protected override AssertionResult GetResult(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue is IEquatable<TActual> equatable)
         {

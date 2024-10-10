@@ -7,7 +7,7 @@ public class DefaultExpectedValueAssertCondition<TActual> : BaseAssertCondition<
     protected override string GetExpectation()
         => $"to be {(_defaultValue is null ? "null" : _defaultValue)}";
 
-    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+    protected override AssertionResult GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult
             .FailIf(
                 () => actualValue is not null && !actualValue.Equals(_defaultValue),

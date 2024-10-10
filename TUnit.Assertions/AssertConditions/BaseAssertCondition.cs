@@ -93,5 +93,5 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return GetResult(actualValue, exception);
     }
 
-    protected internal abstract AssertionResult GetResult(TActual? actualValue, Exception? exception);
+    protected abstract AssertionResult GetResult(TActual? actualValue, Exception? exception);
 }

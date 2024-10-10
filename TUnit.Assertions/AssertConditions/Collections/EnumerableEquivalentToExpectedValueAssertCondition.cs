@@ -8,7 +8,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
 {
     protected override string GetExpectation() => $"to be equivalent to {(expected != null ? string.Join(',', expected) : null)}";
 
-    protected internal override AssertionResult Passes(TActual? actualValue, IEnumerable<TInner>? expectedValue)
+    protected override AssertionResult GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
         if (actualValue is null && expectedValue is null)
         {
