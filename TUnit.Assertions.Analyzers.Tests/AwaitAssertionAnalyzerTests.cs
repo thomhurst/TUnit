@@ -92,6 +92,7 @@ public class AwaitAssertionAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
+                            
                             using TUnit.Core;
 
                             public class MyClass
@@ -103,7 +104,7 @@ public class AwaitAssertionAnalyzerTests
                             
                                     await using (Assert.Multiple())
                                     {
-                                        await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                        await Assert.That(list).IsEquivalentCollectionTo(new[] { 1, 2, 3, 4, 5 });
                                         await Assert.That(list).HasCount().EqualTo(5);
                                     }
                                 }
@@ -134,7 +135,7 @@ public class AwaitAssertionAnalyzerTests
                             
                                     await using var _ = Assert.Multiple();
                                     
-                                    await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3, 4, 5 });
+                                    await Assert.That(list).IsEquivalentCollectionTo(new[] { 1, 2, 3, 4, 5 });
                                     await Assert.That(list).HasCount().EqualTo(5);
                                 }
                                 

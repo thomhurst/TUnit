@@ -8,49 +8,49 @@ internal class StringArgumentTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "StringArgumentTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles[0], Does.Contain(
+            await AssertFileContains(generatedFiles[0], 
                 """
-                global::System.String methodArg0 = "";
-                """));
+                global::System.String methodArg = "";
+                """);
             
-            Assert.That(generatedFiles[1], Does.Contain(
+            await AssertFileContains(generatedFiles[1], 
                 """
-                global::System.String methodArg0 = @"\";
-                """));
+                global::System.String methodArg = @"\";
+                """);
             
-            Assert.That(generatedFiles[2], Does.Contain(
+            await AssertFileContains(generatedFiles[2], 
                 """
-                global::System.String methodArg0 = @"\t";
-                """));
+                global::System.String methodArg = @"\t";
+                """);
             
-            Assert.That(generatedFiles[3], Does.Contain(
+            await AssertFileContains(generatedFiles[3], 
                 """
-                global::System.String methodArg0 = "\t";
-                """));
+                global::System.String methodArg = "\t";
+                """);
             
-            Assert.That(generatedFiles[4], Does.Contain(
+            await AssertFileContains(generatedFiles[4], 
                 """
-                global::System.String methodArg0 = "\\t";
-                """));
+                global::System.String methodArg = "\\t";
+                """);
             
-            Assert.That(generatedFiles[5], Does.Contain(
+            await AssertFileContains(generatedFiles[5], 
                 """
-                global::System.String methodArg0 = "\\\t";
-                """));
+                global::System.String methodArg = "\\\t";
+                """);
             
-            Assert.That(generatedFiles[6], Does.Contain(
+            await AssertFileContains(generatedFiles[6], 
                 """
-                global::System.String methodArg0 = "\\\\t";
-                """));
+                global::System.String methodArg = "\\\\t";
+                """);
 
-            Assert.That(generatedFiles[7], Does.Contain(
+            await AssertFileContains(generatedFiles[7], 
                 """"
-                global::System.String methodArg0 = """
+                global::System.String methodArg = """
                         Hello
                         World
                         """;
-                """"));
+                """");
         });
 }

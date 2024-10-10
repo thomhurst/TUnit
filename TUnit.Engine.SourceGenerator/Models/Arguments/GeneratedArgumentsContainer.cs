@@ -4,26 +4,80 @@ namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
 internal record GeneratedArgumentsContainer : ArgumentsContainer
 {
-    public required int AttributeIndex { get; set; }
-    public required string TestClassTypeName { get; init; }
-    public required string[] GenericArguments { get; init; }
-    public required string AttributeDataGeneratorType { get; init; }
-
-    public override void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter)
+    public GeneratedArgumentsContainer(ArgumentsType ArgumentsType, int AttributeIndex, string TestClassTypeName, string[] GenericArguments, string AttributeDataGeneratorType) : base(ArgumentsType)
     {
-        var objectToGetAttributesFrom = ArgumentsType == ArgumentsType.Method
-            ? "methodInfo"
-            : $"typeof({TestClassTypeName})";
+        this.AttributeIndex = AttributeIndex;
+        this.TestClassTypeName = TestClassTypeName;
+        this.GenericArguments = GenericArguments;
+        this.AttributeDataGeneratorType = AttributeDataGeneratorType;
+    }
+    
+    public required string? PropertyName { get; init; }
+
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+        if(!VariableNames.Any())
+        {
+            GenerateArgumentVariableNames(ref variableIndex);
+        }
+
+        var objectToGetAttributesFrom = ArgumentsType switch
+        {
+            ArgumentsType.Method => "methodInfo",
+            ArgumentsType.Property => $"typeof({TestClassTypeName}).GetProperty(\"{PropertyName}\")",
+            _ => $"typeof({TestClassTypeName})"
+        };
         
-        sourceCodeWriter.WriteLine($"var {VariableNamePrefix}GeneratedDataArray = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}).SelectMany(x => x.GenerateDataSources());");
-        sourceCodeWriter.WriteLine($"foreach (var {VariableNamePrefix}GeneratedData in {VariableNamePrefix}GeneratedDataArray)");
+        var type = ArgumentsType == ArgumentsType.Property ? "Property" : "Parameters";
+        
+        var parameterInfos = ArgumentsType switch
+        {
+            ArgumentsType.Property => "null",
+            ArgumentsType.ClassConstructor => $"{objectToGetAttributesFrom}.GetConstructors().First().GetParameters()",
+            _ => $"{objectToGetAttributesFrom}.GetParameters()"
+        };
+        
+        var propertyInfo = ArgumentsType == ArgumentsType.Property ? objectToGetAttributesFrom : "null";
+        
+        var dataGeneratorMetadata = $$"""
+                                     new DataGeneratorMetadata
+                                     {
+                                        Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
+                                        ParameterInfos = {{parameterInfos}},
+                                        PropertyInfo = {{propertyInfo}}
+                                     }
+                                     """;
+
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            sourceCodeWriter.WriteLine($"var {VariableNames.ElementAt(0)} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}, true).ElementAt(0).GenerateDataSources({dataGeneratorMetadata}).ElementAtOrDefault(0);");
+            sourceCodeWriter.WriteLine();
+            return;
+        }
+        
+        var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
+        var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
+        
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}, true).ElementAt({AttributeIndex}).GenerateDataSources({dataGeneratorMetadata});");
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");
 
+        if (ArgumentsType == ArgumentsType.ClassConstructor)
+        {
+            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
+        }
+        
+        if (ArgumentsType == ArgumentsType.Method)
+        {
+            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
+        }
+        
         if (GenericArguments.Length > 1)
         {
             for (var i = 0; i < GenericArguments.Length; i++)
             {
-                sourceCodeWriter.WriteLine($"{GenericArguments[i]} {VariableNamePrefix}{i} = {VariableNamePrefix}GeneratedData.Item{i + 1};");
+                sourceCodeWriter.WriteLine($"{GenericArguments[i]} {VariableNames.ElementAt(i)} = {generatedDataVariableName}.Item{i + 1};");
             }
 
             sourceCodeWriter.WriteLine();
@@ -34,19 +88,40 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
     {
         sourceCodeWriter.WriteLine("}");
     }
-
-    public override string[] GenerateArgumentVariableNames()
-    {
-        if (GenericArguments.Length == 1)
-        {
-            return [$"{VariableNamePrefix}GeneratedData"];
-        }
-        
-        return Enumerable.Range(0, GenericArguments.Length).Select(i => $"{VariableNamePrefix}{i}").ToArray();
-    }
-
+    
     public override string[] GetArgumentTypes()
     {
         return GenericArguments;
+    }
+    
+    public string TestClassTypeName { get; }
+
+    public string[] GenericArguments { get; }
+
+    public string AttributeDataGeneratorType { get; }
+
+    private void GenerateArgumentVariableNames(ref int index)
+    {
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            GenerateVariableName(ref index);
+            return;
+        }
+        
+        if (GenericArguments.Length == 1)
+        {
+            AddVariable($"{VariableNamePrefix}GeneratedData");
+            return;
+        }
+
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            throw new Exception("Multiple data values not supported for property injection.");
+        }
+
+        for (var i = 0; i < GenericArguments.Length; i++)
+        {
+            GenerateVariableName(ref index);
+        }
     }
 }

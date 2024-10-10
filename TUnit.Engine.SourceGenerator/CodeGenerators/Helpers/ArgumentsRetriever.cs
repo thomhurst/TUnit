@@ -8,19 +8,17 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class ArgumentsRetriever
 {
-    public static IEnumerable<ArgumentsContainer> GetArguments(GeneratorAttributeSyntaxContext context,
+    public static IEnumerable<BaseContainer> GetArguments(GeneratorAttributeSyntaxContext context,
         ImmutableArray<IParameterSymbol> parameters,
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
         ImmutableArray<AttributeData> dataAttributes,
         INamedTypeSymbol namedTypeSymbol,
-        ArgumentsType argumentsType)
+        ArgumentsType argumentsType,
+        string? propertyName = null)
     {
-        if (parameters.IsDefaultOrEmpty || !IsDataDriven(dataAttributes, parameters))
+        if (parameterOrPropertyTypes.IsDefaultOrEmpty || !IsDataDriven(dataAttributes, parameters))
         {
-            yield return new EmptyArgumentsContainer
-            {
-                ArgumentsType = argumentsType,
-                DisposeAfterTest = false
-            };
+            yield return new EmptyArgumentsContainer();
             
             yield break;
         }
@@ -43,12 +41,12 @@ internal static class ArgumentsRetriever
             
             if (name == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
             {
-                yield return DataDrivenArgumentsRetriever.ParseArguments(context, dataAttribute, parameters, argumentsType, index);
+                yield return DataDrivenArgumentsRetriever.ParseArguments(context, dataAttribute, parameterOrPropertyTypes, argumentsType, index);
             }
             
             if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix)
             {
-                yield return MethodDataSourceRetriever.ParseMethodData(context, parameters, namedTypeSymbol, dataAttribute, argumentsType, index);
+                yield return MethodDataSourceRetriever.ParseMethodData(context, parameterOrPropertyTypes, namedTypeSymbol, dataAttribute, argumentsType, index);
             }
             
             if (name == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix)
@@ -63,7 +61,12 @@ internal static class ArgumentsRetriever
             
             if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
             {
-                yield return DataSourceGeneratorRetriever.Parse(parameters, namedTypeSymbol, dataAttribute, argumentsType, index);
+                var indexOfThisType = dataAttributes
+                    .Where(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, dataAttribute.AttributeClass))
+                    .ToList()
+                    .IndexOf(dataAttribute);
+                
+                yield return DataSourceGeneratorRetriever.Parse(namedTypeSymbol, dataAttribute, argumentsType, indexOfThisType, propertyName);
             }
         }
     }
@@ -73,5 +76,50 @@ internal static class ArgumentsRetriever
     {
         return dataAttributes.Any(x => x.IsDataSourceAttribute())
                || parameters.HasMatrixAttribute();
+    }
+
+    public static ClassPropertiesContainer GetProperties(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
+    {
+        var settableProperties = namedTypeSymbol
+            .GetSelfAndBaseTypes()
+            .SelectMany(x => x.GetMembers())
+            .OfType<IPropertySymbol>()
+            .Where(x => x.IsRequired)
+            .ToList();
+
+        if (!settableProperties.Any())
+        {
+            return new ClassPropertiesContainer([])
+            {
+                DisposeAfterTest = false,
+                AttributeIndex = 0,
+                Attribute = context.Attributes.FirstOrDefault()!,
+            };
+        }
+
+        var list = new List<(IPropertySymbol, ArgumentsContainer)>();
+
+        foreach (var propertySymbol in settableProperties)
+        {
+            var dataSourceAttributes = propertySymbol.GetAttributes().Where(x => x.IsDataSourceAttribute()).ToImmutableArray();
+            if (dataSourceAttributes.Any())
+            {
+                var args = GetArguments(context, ImmutableArray<IParameterSymbol>.Empty,
+                    ImmutableArray.Create(propertySymbol.Type), dataSourceAttributes, namedTypeSymbol,
+                    ArgumentsType.Property, propertySymbol.Name);
+                
+                foreach (var container in args.OfType<ArgumentsContainer>())
+                {
+                    list.Add((propertySymbol, container));
+                }
+            }
+        }
+
+        return new ClassPropertiesContainer(list)
+        {
+            DisposeAfterTest = false,
+            Attribute = null!,
+            AttributeIndex = 0
+        };
     }
 }

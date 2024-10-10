@@ -23,4 +23,11 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
 
         return default;
     }
+    
+    public TValue this[TKey key] => InnerDictionary[key];
+
+    public bool TryGet(TKey key, out TValue? o)
+    {
+        return InnerDictionary.TryGetValue(key, out o);
+    }
 }

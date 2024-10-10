@@ -1,6 +1,6 @@
 namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 public sealed class ArgumentsAttribute : TestDataAttribute
 {
     public object?[] Values { get; }

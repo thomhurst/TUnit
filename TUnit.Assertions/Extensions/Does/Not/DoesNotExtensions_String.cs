@@ -17,7 +17,7 @@ public static partial class DoesNotExtensions
     
     public static InvokableValueAssertionBuilder<string> DoesNotContain(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new StringNotContainsAssertCondition(expected, stringComparison)
+        return valueSource.RegisterAssertion(new StringNotContainsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
@@ -28,8 +28,8 @@ public static partial class DoesNotExtensions
     
     public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, string>(expected,
-            (actual, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.StartsWith(expected, stringComparison);
@@ -46,8 +46,8 @@ public static partial class DoesNotExtensions
     
     public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return valueSource.RegisterAssertion(new DelegateAssertCondition<string, string>(expected,
-            (actual, _, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
+            (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.EndsWith(expected, stringComparison);

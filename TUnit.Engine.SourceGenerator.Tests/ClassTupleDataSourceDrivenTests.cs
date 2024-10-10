@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -11,23 +12,28 @@ internal class ClassTupleDataSourceDrivenTests : TestsBase<TestsGenerator>
     public Task Test(int index, string classMethodName, string testMethodName) => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "ClassTupleDataSourceDrivenTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(4));
+            await Assert.That(generatedFiles.Length).IsEqualTo(4);
             
-            Assert.That(generatedFiles[index], Does.Contain($"var classArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.{classMethodName}());"));
-            Assert.That(generatedFiles[index], Does.Contain("global::System.Int32 classArg0 = classArgTuples.Item1;"));
-            Assert.That(generatedFiles[index], Does.Contain("global::System.String classArg1 = classArgTuples.Item2;"));
-            Assert.That(generatedFiles[index], Does.Contain("global::System.Boolean classArg2 = classArgTuples.Item3;"));
-            Assert.That(generatedFiles[index], Does.Contain("var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg0, classArg1, classArg2));"));
+            await AssertFileContains(generatedFiles[index], $"var classArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.{classMethodName}());");
+            await AssertFileContains(generatedFiles[index], "global::System.Int32 classArg = classArgTuples.Item1;");
+            await AssertFileContains(generatedFiles[index], "global::System.String classArg1 = classArgTuples.Item2;");
+            await AssertFileContains(generatedFiles[index], "global::System.Boolean classArg2 = classArgTuples.Item3;");
+            await AssertFileContains(generatedFiles[index], "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)\t\t\t{\n\t\t\t\tProperty1 = propertyArg,\n\t\t\t\tProperty2 = propertyArg1,\n\t\t\t\tProperty3 = propertyArg2,\n\t\t\t\tProperty4 = propertyArg3,\n\t\t\t}\n);");
             
-            Assert.That(generatedFiles[index], Does.Contain($"var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.{testMethodName}());"));
-            Assert.That(generatedFiles[index], Does.Contain("global::System.Int32 methodArg0 = methodArgTuples.Item1;"));
-            Assert.That(generatedFiles[index], Does.Contain("global::System.String methodArg1 = methodArgTuples.Item2;"));
-            Assert.That(generatedFiles[index], Does.Contain("global::System.Boolean methodArg2 = methodArgTuples.Item3;"));
+            await AssertFileContains(generatedFiles[index], $"var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.{testMethodName}());");
+            await AssertFileContains(generatedFiles[index], "global::System.Int32 methodArg = methodArgTuples.Item1;");
+            await AssertFileContains(generatedFiles[index], "global::System.String methodArg1 = methodArgTuples.Item2;");
+            await AssertFileContains(generatedFiles[index], "global::System.Boolean methodArg2 = methodArgTuples.Item3;");
             
-            Assert.That(generatedFiles[index], Does.Contain("TestMethodArguments = [methodArg0, methodArg1, methodArg2],"));
-            Assert.That(generatedFiles[index], Does.Contain("DisplayName = $\"DataSource_TupleMethod({methodArg0}, {methodArg1}, {methodArg2})\","));
-            Assert.That(generatedFiles[index], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg0, methodArg1, methodArg2))"));
+            await AssertFileContains(generatedFiles[index], "TestMethodArguments = [methodArg, methodArg1, methodArg2],");
+            await AssertFileContains(generatedFiles[index], "DisplayName = $\"DataSource_TupleMethod({methodArg}, {methodArg1}, {methodArg2})\",");
+            await AssertFileContains(generatedFiles[index],
+                "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2))");
+                
+            await AssertFileContains(generatedFiles[index], "(global::System.Int32, global::System.String, global::System.Boolean) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();");
+            await AssertFileContains(generatedFiles[index], "(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();");
+
         });
 }

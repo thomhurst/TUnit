@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -8,28 +9,28 @@ internal class RepeatTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "RepeatTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(9));
+            await Assert.That(generatedFiles.Length).IsEqualTo(9);
             
-            Assert.That(generatedFiles[0], Does.Contain("RepeatLimit = 1,"));
-            Assert.That(generatedFiles[1], Does.Contain("RepeatLimit = 1,"));
-            Assert.That(generatedFiles[2], Does.Contain("RepeatLimit = 2,"));
-            Assert.That(generatedFiles[3], Does.Contain("RepeatLimit = 2,"));
-            Assert.That(generatedFiles[4], Does.Contain("RepeatLimit = 2,"));
-            Assert.That(generatedFiles[5], Does.Contain("RepeatLimit = 3,"));
-            Assert.That(generatedFiles[6], Does.Contain("RepeatLimit = 3,"));
-            Assert.That(generatedFiles[7], Does.Contain("RepeatLimit = 3,"));
-            Assert.That(generatedFiles[8], Does.Contain("RepeatLimit = 3,"));
+            await AssertFileContains(generatedFiles[0], "RepeatLimit = 1,");
+            await AssertFileContains(generatedFiles[1], "RepeatLimit = 1,");
+            await AssertFileContains(generatedFiles[2], "RepeatLimit = 2,");
+            await AssertFileContains(generatedFiles[3], "RepeatLimit = 2,");
+            await AssertFileContains(generatedFiles[4], "RepeatLimit = 2,");
+            await AssertFileContains(generatedFiles[5], "RepeatLimit = 3,");
+            await AssertFileContains(generatedFiles[6], "RepeatLimit = 3,");
+            await AssertFileContains(generatedFiles[7], "RepeatLimit = 3,");
+            await AssertFileContains(generatedFiles[8], "RepeatLimit = 3,");
             
-            Assert.That(generatedFiles[0], Does.Contain("CurrentRepeatAttempt = 0,"));
-            Assert.That(generatedFiles[1], Does.Contain("CurrentRepeatAttempt = 1,"));
-            Assert.That(generatedFiles[2], Does.Contain("CurrentRepeatAttempt = 0,"));
-            Assert.That(generatedFiles[3], Does.Contain("CurrentRepeatAttempt = 1,"));
-            Assert.That(generatedFiles[4], Does.Contain("CurrentRepeatAttempt = 2,"));
-            Assert.That(generatedFiles[5], Does.Contain("CurrentRepeatAttempt = 0,"));
-            Assert.That(generatedFiles[6], Does.Contain("CurrentRepeatAttempt = 1,"));
-            Assert.That(generatedFiles[7], Does.Contain("CurrentRepeatAttempt = 2,"));
-            Assert.That(generatedFiles[8], Does.Contain("CurrentRepeatAttempt = 3,"));
+            await AssertFileContains(generatedFiles[0], "CurrentRepeatAttempt = 0,");
+            await AssertFileContains(generatedFiles[1], "CurrentRepeatAttempt = 1,");
+            await AssertFileContains(generatedFiles[2], "CurrentRepeatAttempt = 0,");
+            await AssertFileContains(generatedFiles[3], "CurrentRepeatAttempt = 1,");
+            await AssertFileContains(generatedFiles[4], "CurrentRepeatAttempt = 2,");
+            await AssertFileContains(generatedFiles[5], "CurrentRepeatAttempt = 0,");
+            await AssertFileContains(generatedFiles[6], "CurrentRepeatAttempt = 1,");
+            await AssertFileContains(generatedFiles[7], "CurrentRepeatAttempt = 2,");
+            await AssertFileContains(generatedFiles[8], "CurrentRepeatAttempt = 3,");
         });
 }

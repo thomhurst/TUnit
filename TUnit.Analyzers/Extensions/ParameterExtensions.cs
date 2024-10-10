@@ -21,4 +21,20 @@ public static class ParameterExtensions
 
         return parameterSymbols;
     }
+    
+    public static IEnumerable<ITypeSymbol> WithoutTimeoutParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
+    {
+        if (typeSymbols.IsDefaultOrEmpty)
+        {
+            return typeSymbols;
+        }
+
+        if (typeSymbols.Last().ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+            WellKnown.AttributeFullyQualifiedClasses.CancellationToken)
+        {
+            return typeSymbols.Take(typeSymbols.Length - 1);
+        }
+
+        return typeSymbols;
+    }
 }

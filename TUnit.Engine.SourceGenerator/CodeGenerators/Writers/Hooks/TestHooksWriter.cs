@@ -9,8 +9,8 @@ internal static class TestHooksWriter
 {
     public static void Execute(SourceProductionContext context, HooksDataModel model, HookLocationType hookLocationType)
     {
-        var className = $"TestHooks_{model.MinimalTypeName}";
-        var fileName = $"{className}_{Guid.NewGuid():N}";
+        var className = $"Hooks__{model.MinimalTypeName}";
+        var fileName = $"{className}__{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 
@@ -36,12 +36,12 @@ internal static class TestHooksWriter
             sourceBuilder.WriteLine(
                 $$"""
                   TestRegistrar.RegisterBeforeHook<{{model.FullyQualifiedTypeName}}>(new InstanceHookMethod<{{model.FullyQualifiedTypeName}}>
-                  		{
-                  		     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                  		     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}})),
-                  		     HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
-                  		     Order = {{model.Order}},
-                  		});
+                          {
+                               MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                               Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}})),
+                               HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
+                               Order = {{model.Order}},
+                          });
                   """);
         }
         else if (hookLocationType == HookLocationType.After)
@@ -49,12 +49,12 @@ internal static class TestHooksWriter
             sourceBuilder.WriteLine(
                 $$"""
                  TestRegistrar.RegisterAfterHook<{{model.FullyQualifiedTypeName}}>(new InstanceHookMethod<{{model.FullyQualifiedTypeName}}>
-                 		{
-                 		     MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                 		     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}})),
-                 		     HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
-                 		     Order = {{model.Order}},
-                 		});
+                         {
+                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
+                              Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.{{model.MethodName}}({{GenerateContextObject(model)}})),
+                              HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
+                              Order = {{model.Order}},
+                         });
                  """);
         }
 

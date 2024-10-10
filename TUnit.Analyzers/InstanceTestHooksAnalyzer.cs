@@ -66,13 +66,13 @@ public class InstanceTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var parameter in methodSymbol.Parameters)
         {
-            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+            if (parameter.Type.GloballyQualified() ==
                 WellKnown.AttributeFullyQualifiedClasses.TestContext)
             {
                 continue;
             }
 
-            if (parameter.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
+            if (parameter.Type.GloballyQualified() ==
                 WellKnown.AttributeFullyQualifiedClasses.CancellationToken)
             {
                 continue;

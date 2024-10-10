@@ -5,13 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-    
-    <PropertyGroup Condition="'$(TUnitVersion)' == ''">
-        <TUnitVersion>0.1.891</TUnitVersion>
-    </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="TUnit.Core" VersionOverride="$(TUnitVersion)" />
+        <PackageReference Include="TUnit.Core">
+            <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
+        </PackageReference>
     </ItemGroup>
 
 </Project>

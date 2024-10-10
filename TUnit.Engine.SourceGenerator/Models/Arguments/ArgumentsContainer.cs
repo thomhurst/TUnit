@@ -1,18 +1,38 @@
-﻿using TUnit.Engine.SourceGenerator.CodeGenerators;
-using TUnit.Engine.SourceGenerator.Enums;
+﻿using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal abstract record ArgumentsContainer
+internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataAttributeContainer(ArgumentsType)
 {
-    public required ArgumentsType ArgumentsType { get; init; }
     public required bool DisposeAfterTest { get; init; }
-    public abstract void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter);
-    public abstract void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter);
-    public abstract string[] GenerateArgumentVariableNames();
-    public abstract string[] GetArgumentTypes();
 
-    protected string VariableNamePrefix => ArgumentsType == ArgumentsType.ClassConstructor
-        ? VariableNames.ClassArg
-        : VariableNames.MethodArg;
+    protected string VariableNamePrefix
+    {
+        get
+        {
+            return ArgumentsType switch
+            {
+                ArgumentsType.ClassConstructor => CodeGenerators.VariableNames.ClassArg,
+                ArgumentsType.Property => CodeGenerators.VariableNames.PropertyArg,
+                _ => CodeGenerators.VariableNames.MethodArg
+            };
+        }
+    }
+
+    protected string GenerateVariableName(ref int globalIndex)
+    {
+        if (globalIndex == 0)
+        {
+            globalIndex++;
+            return AddVariable(VariableNamePrefix);
+        }
+        
+        return AddVariable($"{VariableNamePrefix}{globalIndex++}");
+    }
+
+    protected string AddVariable(string variableName)
+    {
+        VariableNames.Add(variableName);
+        return variableName;
+    }
 };

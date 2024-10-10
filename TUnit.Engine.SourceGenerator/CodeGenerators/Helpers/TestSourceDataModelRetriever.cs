@@ -19,9 +19,11 @@ internal static class TestSourceDataModelRetriever
         }
         
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
-        
-        var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty, namedTypeSymbol.GetAttributes().Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
-        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodSymbol.Parameters, methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
+
+        var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, constructorParameters, constructorParameters.Select(x => x.Type).ToImmutableArray(), GetClassAttributes(namedTypeSymbol).Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodSymbol.Parameters, methodSymbol.Parameters.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
+        var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol);
         
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
@@ -32,7 +34,7 @@ internal static class TestSourceDataModelRetriever
         {
             foreach (var classArguments in classArgumentsContainers)
             {
-                foreach (var testSourceDataModel in GenerateTestSourceDataModels(methodSymbol, namedTypeSymbol, classArguments, runCount, testAttribute, testArguments))
+                foreach (var testSourceDataModel in GenerateTestSourceDataModels(methodSymbol, namedTypeSymbol, classArguments, runCount, testAttribute, testArguments, propertyArgumentsContainer))
                 {
                     yield return testSourceDataModel;
                 }
@@ -40,13 +42,17 @@ internal static class TestSourceDataModelRetriever
         }
     }
 
+    private static IEnumerable<AttributeData> GetClassAttributes(INamedTypeSymbol namedTypeSymbol)
+    {
+        return namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(t => t.GetAttributes());
+    }
+
     private static IEnumerable<TestSourceDataModel> GenerateTestSourceDataModels(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol,
-        ArgumentsContainer classArguments, int runCount, AttributeData testAttribute, ArgumentsContainer testArguments)
+        BaseContainer classArguments, int runCount, AttributeData testAttribute, BaseContainer testArguments, ClassPropertiesContainer classPropertiesContainer)
     {
         if (classArguments is EmptyArgumentsContainer)
         {
-            foreach (var testSourceDataModel in GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, runCount, testAttribute,
-                         testArguments))
+            foreach (var testSourceDataModel in GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, runCount, testAttribute, testArguments, classPropertiesContainer))
             {
                 yield return testSourceDataModel;
             }
@@ -55,7 +61,7 @@ internal static class TestSourceDataModelRetriever
         }
 
         foreach (var generateMultipleClassInstance in GenerateMultipleClassInstances(methodSymbol, namedTypeSymbol, runCount, testAttribute,
-                     classArguments, testArguments))
+                     classArguments, testArguments, classPropertiesContainer))
         {
             yield return generateMultipleClassInstance;
         }
@@ -63,7 +69,8 @@ internal static class TestSourceDataModelRetriever
 
     private static IEnumerable<TestSourceDataModel> GenerateSingleClassInstance(IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute,
-        ArgumentsContainer testArguments)
+        BaseContainer testArguments,
+        ClassPropertiesContainer classPropertiesContainer)
     {
         for (var i = 0; i < runCount; i++)
         {
@@ -71,21 +78,19 @@ internal static class TestSourceDataModelRetriever
             {
                     MethodSymbol = methodSymbol,
                     ClassSymbol = namedTypeSymbol,
-                    ClassArguments = new EmptyArgumentsContainer
-                    {
-                        ArgumentsType = ArgumentsType.ClassConstructor,
-                        DisposeAfterTest = false,
-                    },
+                    ClassArguments = new EmptyArgumentsContainer(),
                     TestArguments = testArguments,
                     CurrentRepeatAttempt = i,
                     TestAttribute = testAttribute,
+                    PropertyArguments = classPropertiesContainer
                 });
         }
     }
 
     private static IEnumerable<TestSourceDataModel> GenerateMultipleClassInstances(IMethodSymbol methodSymbol,
-        INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, ArgumentsContainer classArguments,
-        ArgumentsContainer testArguments)
+        INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, BaseContainer classArguments,
+        BaseContainer testArguments,
+        ClassPropertiesContainer classPropertiesContainer)
     {
         for (var i = 0; i < runCount; i++)
         {
@@ -97,6 +102,7 @@ internal static class TestSourceDataModelRetriever
                 TestArguments = testArguments,
                 CurrentRepeatAttempt = i,
                 TestAttribute = testAttribute,
+                PropertyArguments = classPropertiesContainer
             });
         }
     }
@@ -131,6 +137,7 @@ internal static class TestSourceDataModelRetriever
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.ParallelLimiterAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             AttributeTypes = allAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(), 
+            PropertyArguments = testGenerationContext.PropertyArguments,
         };
     }
 }

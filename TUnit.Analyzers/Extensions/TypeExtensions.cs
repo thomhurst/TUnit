@@ -30,7 +30,7 @@ public static class TypeExtensions
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == typeName);
+            .Any(x => x.GloballyQualified() == typeName);
     }
     
     public static bool IsTestClass(this INamedTypeSymbol namedTypeSymbol)
@@ -65,4 +65,10 @@ public static class TypeExtensions
         innerType = null;
         return false;
     }
+
+    public static string GloballyQualified(this ITypeSymbol typeSymbol) =>
+        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    
+    public static string GloballyQualifiedNonGeneric(this ITypeSymbol typeSymbol) =>
+        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
 }

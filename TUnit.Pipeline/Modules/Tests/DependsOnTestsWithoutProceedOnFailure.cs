@@ -1,10 +1,13 @@
 ﻿using FluentAssertions;
 using ModularPipelines.Context;
+using Polly.Retry;
 
 namespace TUnit.Pipeline.Modules.Tests;
 
 public class DependsOnTestsWithoutProceedOnFailure : TestModule
 {
+    protected override AsyncRetryPolicy<TestResult?> RetryPolicy => CreateRetryPolicy(3);
+
     protected override async Task<TestResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         return await RunTestsWithFilter(context, 

@@ -13,7 +13,6 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
-                            using TUnit.Assertions.Extensions.Numbers;
                             using TUnit.Core;
 
                             public class MyClass
@@ -36,7 +35,6 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
-                            using TUnit.Assertions.Extensions.Numbers;
                             using TUnit.Core;
 
                             public class MyClass
@@ -59,7 +57,6 @@ public class ObjectBaseEqualsMethodAnalyzerTests
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
                             using TUnit.Assertions.Extensions;
-                            using TUnit.Assertions.Extensions.Numbers;
                             using TUnit.Core;
 
                             public class MyClass
@@ -107,7 +104,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
         const string text = """
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
-                            using TUnit.Assertions.Extensions.Numbers;
+                            using TUnit.Assertions.Extensions;
                             using TUnit.Core;
 
                             public class MyClass
@@ -133,7 +130,7 @@ public class ObjectBaseEqualsMethodAnalyzerTests
         const string text = """
                             using System.Threading.Tasks;
                             using TUnit.Assertions;
-                            using TUnit.Assertions.Extensions.Numbers;
+                            using TUnit.Assertions.Extensions;
                             using TUnit.Core;
 
                             public class MyClass

@@ -10,9 +10,11 @@ internal class ClassConstructorRetriever
     {
         var type = dataAttribute.AttributeClass!.TypeArguments.First();
 
-        return new ClassConstructorAttributeContainer
+        // TODO: Property injection?
+        return new ClassConstructorAttributeContainer(ArgumentsType.ClassConstructor)
         {
             AttributeIndex = index,
+            Attribute = dataAttribute,
             ClassConstructorType = type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ArgumentsType = ArgumentsType.ClassConstructor,
             DisposeAfterTest = dataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ?? true,

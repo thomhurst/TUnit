@@ -45,6 +45,6 @@ public class GlobalTestHooksTests
     {
         await Assert.That(TestContext.Current?.ObjectBag).HasCount().EqualTo(1);
         await Assert.That(TestContext.Current?.ObjectBag.First().Key).IsEqualTo("SetUpCustomTestNameProperty");
-        await Assert.That(TestContext.Current?.ObjectBag.First().Value).IsEqualTo("SetUpTest1");
+        await Assert.That(TestContext.Current?.ObjectBag.First().Value).IsEquatableOrEqualTo("SetUpTest1");
     }
 }

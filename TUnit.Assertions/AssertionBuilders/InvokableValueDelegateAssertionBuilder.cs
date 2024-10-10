@@ -1,10 +1,9 @@
 ﻿using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class InvokableValueDelegateAssertionBuilder<TActual> : InvokableAssertionBuilder<TActual>, IValueDelegateSource<TActual>
+public class InvokableValueDelegateAssertionBuilder<TActual> : InvokableAssertionBuilder<TActual>
 {
     internal InvokableValueDelegateAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionDataDelegate, assertionBuilder)
     {

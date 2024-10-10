@@ -54,6 +54,7 @@ internal class TUnitServiceProvider : IAsyncDisposable
         var disposer = new Disposer(Logger);
         var cancellationTokenSource = EngineCancellationToken.CancellationTokenSource;
         var testInvoker = new TestInvoker();
+        StaticPropertyInjectorsOrchestrator = new StaticPropertyInjectorsOrchestrator(Logger, disposer);
         var explicitFilterService = new ExplicitFilterService();
         var parallelLimitProvider = new ParallelLimitProvider();
         var hookMessagePublisher = new HookMessagePublisher(extension, messageBus);
@@ -66,8 +67,10 @@ internal class TUnitServiceProvider : IAsyncDisposable
         
         TestsExecutor = new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions);
         
-        OnEndExecutor = new OnEndExecutor(CommandLineOptions, Logger);
+        OnEndExecutor = new OnEndExecutor(CommandLineOptions, Logger, StaticPropertyInjectorsOrchestrator);
     }
+
+    public StaticPropertyInjectorsOrchestrator StaticPropertyInjectorsOrchestrator { get; }
 
     public async ValueTask DisposeAsync()
     {

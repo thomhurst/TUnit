@@ -9,8 +9,8 @@ internal static class GlobalTestHooksWriter
 {
     public static void Execute(SourceProductionContext context, HooksDataModel model, HookLocationType hookLocationType)
     {
-        var className = $"GlobalStaticTestHooks_{model.MinimalTypeName}";
-        var fileName = $"{className}_{Guid.NewGuid():N}";
+        var className = $"Hooks__{model.MinimalTypeName}";
+        var fileName = $"{className}__{Guid.NewGuid():N}";
 
         using var sourceBuilder = new SourceCodeWriter();
                 
@@ -36,14 +36,14 @@ internal static class GlobalTestHooksWriter
             sourceBuilder.WriteLine(
                 $$$"""
                    TestRegistrar.RegisterBeforeHook(new StaticHookMethod<{{{GetClassType(model.HookLevel, hookLocationType)}}}>
-                   		{ 
+                           { 
                               MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model, hookLocationType)}}})),
                               HookExecutor = {{{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}}},
                               Order = {{{model.Order}}},
                               FilePath = @"{{{model.FilePath}}}",
                               LineNumber = {{{model.LineNumber}}},
-                   		});
+                           });
                    """);
         }
         else if (hookLocationType == HookLocationType.After)
@@ -51,14 +51,14 @@ internal static class GlobalTestHooksWriter
             sourceBuilder.WriteLine(
                 $$"""
                   TestRegistrar.RegisterAfterHook(new StaticHookMethod<{{GetClassType(model.HookLevel, hookLocationType)}}>
-                  		{ 
+                          { 
                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model, hookLocationType)}})),
                              HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
                              Order = {{model.Order}},
                              FilePath = @"{{{model.FilePath}}}",
                              LineNumber = {{model.LineNumber}},
-                  		});
+                          });
                   """);
         }
 

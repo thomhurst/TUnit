@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -8,29 +9,29 @@ internal class DataSourceGeneratorTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "DataSourceGeneratorTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(6));
+            await Assert.That(generatedFiles.Length).IsEqualTo(6);
             
-            Assert.That(generatedFiles[0], Does.Contain("TestId = $\"CL-GAC0:TL-GAC1:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method(System.Int32):0\","));
-            Assert.That(generatedFiles[0], Does.Contain("var methodArgGeneratedDataArray = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>>(methodInfo).SelectMany(x => x.GenerateDataSources());"));
-            Assert.That(generatedFiles[0], Does.Contain("foreach (var methodArgGeneratedData in methodArgGeneratedDataArray)"));
-            Assert.That(generatedFiles[0], Does.Contain("classInstance.GeneratedData_Method(methodArgGeneratedData))"));
+            await AssertFileContains(generatedFiles[0], "TestId = $\"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method(System.Int32):0\"");
+            await AssertFileContains(generatedFiles[0], "var methodArgGeneratedDataArray = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>>(methodInfo, true).ElementAt(0).GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,\n   ParameterInfos = methodInfo.GetParameters(),\n   PropertyInfo = null\n});");
+            await AssertFileContains(generatedFiles[0], "foreach (var methodArgGeneratedData in methodArgGeneratedDataArray)");
+            await AssertFileContains(generatedFiles[0], "classInstance.GeneratedData_Method(methodArgGeneratedData))");
 
-            Assert.That(generatedFiles[2], Does.Contain("TestId = $\"CL-GAC0:TL-GAC1:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method2(System.Int32,System.String,System.Boolean):0\","));
-            Assert.That(generatedFiles[2], Does.Contain("var methodArgGeneratedDataArray = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>>(methodInfo).SelectMany(x => x.GenerateDataSources());"));
-            Assert.That(generatedFiles[2], Does.Contain("foreach (var methodArgGeneratedData in methodArgGeneratedDataArray)"));
-            Assert.That(generatedFiles[2], Does.Contain("global::System.Int32 methodArg0 = methodArgGeneratedData.Item1;"));
-            Assert.That(generatedFiles[2], Does.Contain("global::System.String methodArg1 = methodArgGeneratedData.Item2;"));
-            Assert.That(generatedFiles[2], Does.Contain("global::System.Boolean methodArg2 = methodArgGeneratedData.Item3;"));
-            Assert.That(generatedFiles[2], Does.Contain("classInstance.GeneratedData_Method2(methodArg0, methodArg1, methodArg2)"));
+            await AssertFileContains(generatedFiles[2], "TestId = $\"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method2(System.Int32,System.String,System.Boolean):0\",");
+            await AssertFileContains(generatedFiles[2], "var methodArgGeneratedDataArray = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>>(methodInfo, true).ElementAt(0).GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,\n   ParameterInfos = methodInfo.GetParameters(),\n   PropertyInfo = null\n});");
+            await AssertFileContains(generatedFiles[2], "foreach (var methodArgGeneratedData in methodArgGeneratedDataArray)");
+            await AssertFileContains(generatedFiles[2], "global::System.Int32 methodArg = methodArgGeneratedData.Item1;");
+            await AssertFileContains(generatedFiles[2], "global::System.String methodArg1 = methodArgGeneratedData.Item2;");
+            await AssertFileContains(generatedFiles[2], "global::System.Boolean methodArg2 = methodArgGeneratedData.Item3;");
+            await AssertFileContains(generatedFiles[2], "classInstance.GeneratedData_Method2(methodArg, methodArg1, methodArg2)");
             
-            Assert.That(generatedFiles[4], Does.Contain("TestId = $\"CL-GAC0:TL-GAC1:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method3(System.Int32,System.String,System.Boolean):0\","));
-            Assert.That(generatedFiles[4], Does.Contain("var methodArgGeneratedDataArray = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute>(methodInfo).SelectMany(x => x.GenerateDataSources());"));
-            Assert.That(generatedFiles[4], Does.Contain("foreach (var methodArgGeneratedData in methodArgGeneratedDataArray)"));
-            Assert.That(generatedFiles[4], Does.Contain("global::System.Int32 methodArg0 = methodArgGeneratedData.Item1;"));
-            Assert.That(generatedFiles[4], Does.Contain("global::System.String methodArg1 = methodArgGeneratedData.Item2;"));
-            Assert.That(generatedFiles[4], Does.Contain("global::System.Boolean methodArg2 = methodArgGeneratedData.Item3;"));
-            Assert.That(generatedFiles[4], Does.Contain("classInstance.GeneratedData_Method3(methodArg0, methodArg1, methodArg2)"));
+            await AssertFileContains(generatedFiles[4], "TestId = $\"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method3(System.Int32,System.String,System.Boolean):0\",");
+            await AssertFileContains(generatedFiles[4], "var methodArgGeneratedDataArray = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute>(methodInfo, true).ElementAt(0).GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,\n   ParameterInfos = methodInfo.GetParameters(),\n   PropertyInfo = null\n});");
+            await AssertFileContains(generatedFiles[4], "foreach (var methodArgGeneratedData in methodArgGeneratedDataArray)");
+            await AssertFileContains(generatedFiles[4], "global::System.Int32 methodArg = methodArgGeneratedData.Item1;");
+            await AssertFileContains(generatedFiles[4], "global::System.String methodArg1 = methodArgGeneratedData.Item2;");
+            await AssertFileContains(generatedFiles[4], "global::System.Boolean methodArg2 = methodArgGeneratedData.Item3;");
+            await AssertFileContains(generatedFiles[4], "classInstance.GeneratedData_Method3(methodArg, methodArg1, methodArg2)");
         });
 }

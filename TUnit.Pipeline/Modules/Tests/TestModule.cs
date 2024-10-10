@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
@@ -25,15 +24,6 @@ namespace TUnit.Pipeline.Modules.Tests;
 [DependsOn<PublishSingleFileModule>]
 public abstract class TestModule : Module<TestResult>
 {
-    public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
-
-    // protected override AsyncRetryPolicy<TestResult?> RetryPolicy { get; } = Policy<TestResult?>.Handle<Exception>().RetryAsync(3);
-    
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
-    {
-        WriteIndented = true 
-    };
-
     protected Task<TestResult?> RunTestsWithFilter(IPipelineContext context, string filter,
         List<Action<TestResult>> assertions,
         CancellationToken cancellationToken = default,

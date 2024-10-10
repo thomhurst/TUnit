@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -8,28 +9,34 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "MethodDataSourceDrivenTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(2));
+            await Assert.That(generatedFiles.Length).IsEqualTo(2);
             
-            Assert.That(generatedFiles[0], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();"));
-            Assert.That(generatedFiles[0], Does.Contain("classInstance.DataSource_Method(methodArg)"));
-            Assert.That(generatedFiles[0], Does.Contain(
+            await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();");
+            await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Method(methodArg)");
+            await AssertFileContains(generatedFiles[0], 
                 """
-                				InternalTestMethodArguments = [new TestData(methodArg, typeof(global::System.Int32), InjectedDataType.None)
-                				{
-                    				DisposeAfterTest = true,
-                				}],
-                """));
+                                InternalTestMethodArguments = 
+                                [
+                                    new TestData(methodArg, typeof(global::System.Int32), InjectedDataType.None)
+                                    {
+                                        DisposeAfterTest = true,
+                                    },
+                                ],
+                """);
             
-            Assert.That(generatedFiles[1], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();"));
-            Assert.That(generatedFiles[1], Does.Contain("classInstance.DataSource_Method2(methodArg)"));
-            Assert.That(generatedFiles[1], Does.Contain(
-	            """
-	            				InternalTestMethodArguments = [new TestData(methodArg, typeof(global::System.Int32), InjectedDataType.None)
-	            				{
-	                				DisposeAfterTest = false,
-	            				}],
-	            """));
+            await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();");
+            await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Method2(methodArg)");
+            await AssertFileContains(generatedFiles[1], 
+                """
+                                InternalTestMethodArguments = 
+                                [
+                                    new TestData(methodArg, typeof(global::System.Int32), InjectedDataType.None)
+                                    {
+                                        DisposeAfterTest = false,
+                                    },
+                                ],
+                """);
         });
 }

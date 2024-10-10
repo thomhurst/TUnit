@@ -1,5 +1,5 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
-using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
@@ -9,36 +9,34 @@ internal class TestDiscoveryHookTests : TestsBase<GlobalTestHooksGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "TestDiscoveryHookTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles, Has.Length.EqualTo(2));
+            await Assert.That(generatedFiles).HasCount().EqualTo(2);
             
-            Assert.That(generatedFiles[0].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[0], 
                 """
-                    		TestRegistrar.RegisterBeforeHook(new StaticHookMethod<BeforeTestDiscoveryContext>
-                    		{ 
+                            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<BeforeTestDiscoveryContext>
+                            { 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 5,
                                FilePath = @"", 
                                LineNumber = 5,
-                    		});
-                    """.IgnoreWhitespaceFormatting()
-            ));
+                            });
+                    """);
             
-            Assert.That(generatedFiles[1].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[1], 
                 """
-                    		TestRegistrar.RegisterAfterHook(new StaticHookMethod<TestDiscoveryContext>
-                    		{ 
+                            TestRegistrar.RegisterAfterHook(new StaticHookMethod<TestDiscoveryContext>
+                            { 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 0,
                                FilePath = @"{}", 
                                LineNumber = 10,
-                    		});
-                    """.IgnoreWhitespaceFormatting()
-            ));
+                            });
+                    """);
         });
 }

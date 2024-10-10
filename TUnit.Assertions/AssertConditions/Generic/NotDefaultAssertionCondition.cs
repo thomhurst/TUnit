@@ -1,14 +1,15 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class NotDefaultAssertCondition<TActual>() : AssertCondition<TActual, TActual>(default)
+public class NotDefaultExpectedValueAssertCondition<TActual>() : ExpectedValueAssertCondition<TActual, TActual>(default)
 {
-		private readonly TActual? _defaultValue = default;
+        private readonly TActual? _defaultValue = default;
 
-	  protected internal override string GetFailureMessage()
-				=> _defaultValue is null ? 
-					     $"{ActualExpression ?? typeof(TActual).Name} was default value null" : 
-					     $"{ActualExpression ?? typeof(TActual).Name} was default value {_defaultValue}";
-	
-	  protected override bool Passes(TActual? actualValue, Exception? exception)
-				=> actualValue is not null && !actualValue.Equals(_defaultValue);
+        protected override string GetExpectation()
+            => $"to not be {(_defaultValue is null ? "null" : _defaultValue)}";
+
+        protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
+            => AssertionResult
+                .FailIf(
+                    () => actualValue is null || actualValue.Equals(_defaultValue),
+                    "it was");
 }

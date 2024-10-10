@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-public partial class TestContext : Context
+public partial class TestContext : Context, IDisposable
 {
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
@@ -12,7 +12,7 @@ public partial class TestContext : Context
     
     public DateTimeOffset? TestStart { get; internal set; }
     
-    public Task TestTask => TaskCompletionSource.Task;
+    internal Task TestTask => TaskCompletionSource.Task;
 
     public TestDetails TestDetails { get; }
 
@@ -27,5 +27,12 @@ public partial class TestContext : Context
     public void AddArtifact(Artifact artifact)
     {
         Artifacts.Add(artifact);
+    }
+    
+    public EventHandler? OnDispose { get; set; }
+
+    public void Dispose()
+    {
+        OnDispose?.Invoke(this, EventArgs.Empty);
     }
 }

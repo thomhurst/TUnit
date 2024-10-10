@@ -4,7 +4,6 @@ using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Extensions;
-using TUnit.Engine.Hooks;
 using TUnit.Engine.Json;
 using TUnit.Engine.Logging;
 
@@ -14,18 +13,23 @@ internal class OnEndExecutor
 {
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitFrameworkLogger _logger;
+    private readonly StaticPropertyInjectorsOrchestrator _staticPropertyInjectorsOrchestrator;
 
-    public OnEndExecutor(ICommandLineOptions commandLineOptions, TUnitFrameworkLogger logger)
+    public OnEndExecutor(ICommandLineOptions commandLineOptions, 
+        TUnitFrameworkLogger logger,
+        StaticPropertyInjectorsOrchestrator staticPropertyInjectorsOrchestrator)
     {
         _commandLineOptions = commandLineOptions;
         _logger = logger;
+        _staticPropertyInjectorsOrchestrator = staticPropertyInjectorsOrchestrator;
     }
 
-    public async Task ExecuteAsync()
+    public async Task ExecuteAsync(TestSessionContext? testSessionContext)
     {
         try
         {
-            await WriteJsonOutputFile();
+            await WriteJsonOutputFile(testSessionContext);
+            await DisposeStaticInjectableProperties();
         }
         catch (Exception e)
         {
@@ -33,7 +37,12 @@ internal class OnEndExecutor
         }
     }
 
-    private async Task WriteJsonOutputFile()
+    private async Task DisposeStaticInjectableProperties()
+    {
+        await _staticPropertyInjectorsOrchestrator.DisposeAll();
+    }
+
+    private async Task WriteJsonOutputFile(TestSessionContext? testSessionContext)
     {
         if (!_commandLineOptions.IsOptionSet(JsonOutputCommandProvider.OutputJson))
         {
@@ -46,7 +55,7 @@ internal class OnEndExecutor
         
             await using var file = File.Create(path);
 
-            var jsonOutput = GetJsonOutput();
+            var jsonOutput = GetJsonOutput(testSessionContext);
         
             await JsonSerializer.SerializeAsync(file, jsonOutput, JsonContext.Default.TestSessionJson);
 
@@ -74,8 +83,16 @@ internal class OnEndExecutor
         return $"{prefix}{filename}.json";
     }
 
-    private static TestSessionJson GetJsonOutput()
+    private static TestSessionJson GetJsonOutput(TestSessionContext? testSessionContext)
     {
-        return new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts()).ToJsonModel();
+        if (testSessionContext is null)
+        {
+            return new TestSessionJson
+            {
+                Assemblies = []
+            };
+        }
+        
+        return testSessionContext.ToJsonModel();
     }
 }

@@ -1,33 +1,41 @@
-using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record MethodDataSourceAttributeContainer : DataAttributeContainer
+internal record MethodDataSourceAttributeContainer : ArgumentsContainer
 {
-    public required string TestClassTypeName { get; init; }
-    public required string TypeName { get; init; }
-    public required string MethodName { get; init; }
-    public required bool IsStatic { get; init; }
-    public required bool IsEnumerableData { get; init; }
-    public required string[] TupleTypes { get; init; }
-    public required string MethodReturnType { get; set; }
-
-    public override void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter)
+    public MethodDataSourceAttributeContainer(ArgumentsType ArgumentsType, string TestClassTypeName, string TypeName, string MethodName, bool IsStatic, bool IsEnumerableData, string[] TupleTypes, string MethodReturnType) : base(ArgumentsType)
     {
-        var argsVariableNamePrefix = ArgumentsType == ArgumentsType.ClassConstructor
-            ? VariableNames.ClassArg
-            : VariableNames.MethodArg;
-        
+        this.TestClassTypeName = TestClassTypeName;
+        this.TypeName = TypeName;
+        this.MethodName = MethodName;
+        this.IsStatic = IsStatic;
+        this.IsEnumerableData = IsEnumerableData;
+        this.TupleTypes = TupleTypes;
+        this.MethodReturnType = MethodReturnType;
+    }
+
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+        if(!VariableNames.Any())
+        {
+            GenerateArgumentVariableNames(ref variableIndex);
+        }
+
         if (IsEnumerableData)
         {
+            if (ArgumentsType == ArgumentsType.Property)
+            {
+                throw new Exception("Property Injection is not supported with Enumerable data");
+            }
+            
             var enumerableIndexName = ArgumentsType == ArgumentsType.ClassConstructor
-                ? VariableNames.EnumerableClassDataIndex
-                : VariableNames.EnumerableTestDataIndex;
+                ? CodeGenerators.VariableNames.ClassDataIndex
+                : CodeGenerators.VariableNames.TestMethodDataIndex;
             
             var dataName = ArgumentsType == ArgumentsType.ClassConstructor
-                ? VariableNames.ClassData
-                : VariableNames.MethodData;
+                ? CodeGenerators.VariableNames.ClassData
+                : CodeGenerators.VariableNames.MethodData;
             
             sourceCodeWriter.WriteLine($"foreach (var {dataName} in {GetMethodInvocation()})");
             sourceCodeWriter.WriteLine("{");
@@ -35,31 +43,43 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
             
             if (TupleTypes.Any())
             {
-                sourceCodeWriter.WriteLine($"var {argsVariableNamePrefix}Tuples = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({dataName});");
+                var tupleVariableName = $"{VariableNamePrefix}Tuples";
+                if (ArgumentsType == ArgumentsType.Property)
+                {
+                    tupleVariableName += Guid.NewGuid().ToString("N");
+                }
+                
+                sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({dataName});");
 
                 for (var index = 0; index < TupleTypes.Length; index++)
                 {
                     var tupleType = TupleTypes[index];
                 
-                    sourceCodeWriter.WriteLine($"{tupleType} {argsVariableNamePrefix}{index} = {argsVariableNamePrefix}Tuples.Item{index+1};");
+                    sourceCodeWriter.WriteLine($"{tupleType} {VariableNames.ElementAt(index)} = {tupleVariableName}.Item{index+1};");
                 }
             }
             
         }
         else if (TupleTypes.Any())
         {
-            sourceCodeWriter.WriteLine($"var {argsVariableNamePrefix}Tuples = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({GetMethodInvocation()});");
+            var tupleVariableName = $"{VariableNamePrefix}Tuples";
+            if (ArgumentsType == ArgumentsType.Property)
+            {
+                tupleVariableName += Guid.NewGuid().ToString("N");
+            }
+
+            sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({GetMethodInvocation()});");
             
             for (var index = 0; index < TupleTypes.Length; index++)
             {
                 var tupleType = TupleTypes[index];
                 
-                sourceCodeWriter.WriteLine($"{tupleType} {argsVariableNamePrefix}{index} = {argsVariableNamePrefix}Tuples.Item{index+1};");
+                sourceCodeWriter.WriteLine($"{tupleType} {VariableNames.ElementAt(index)} = {tupleVariableName}.Item{index+1};");
             }
         }
         else
         {
-            sourceCodeWriter.WriteLine($"{MethodReturnType} {argsVariableNamePrefix} = {GetMethodInvocation()};");
+            sourceCodeWriter.WriteLine($"{MethodReturnType} {VariableNames.ElementAt(0)} = {GetMethodInvocation()};");
         }
         
         sourceCodeWriter.WriteLine();
@@ -87,30 +107,28 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
             sourceCodeWriter.WriteLine("}");
         }
     }
-
-    public override string[] GenerateArgumentVariableNames()
+    
+    public void GenerateArgumentVariableNames(ref int variableIndex)
     {
         if (TupleTypes.Any())
         {
-            return TupleTypes
-                .Select((_, i) => $"{VariableNamePrefix}{i}")
-                .ToArray();
+            for (var index = 0; index < TupleTypes.Length; index++)
+            {
+                GenerateVariableName(ref variableIndex);
+            }
+
+            return;
         }
         
         if (IsEnumerableData)
         {
-            return
-            [
-                ArgumentsType == ArgumentsType.ClassConstructor
-                    ? VariableNames.ClassData
-                    : VariableNames.MethodData
-            ];
+            AddVariable(ArgumentsType == ArgumentsType.ClassConstructor
+                ? CodeGenerators.VariableNames.ClassData
+                : CodeGenerators.VariableNames.MethodData);
+            return;
         }
         
-        return
-        [
-            VariableNamePrefix
-        ];
+        GenerateVariableName(ref variableIndex);
     }
 
     public override string[] GetArgumentTypes()
@@ -122,4 +140,12 @@ internal record MethodDataSourceAttributeContainer : DataAttributeContainer
         
         return [MethodReturnType];
     }
+
+    public string TestClassTypeName { get; init; }
+    public string TypeName { get; }
+    public string MethodName { get; }
+    public bool IsStatic { get; }
+    public bool IsEnumerableData { get; }
+    public string[] TupleTypes { get; }
+    public string MethodReturnType { get; }
 }

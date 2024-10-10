@@ -1,23 +1,24 @@
-using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record ArgumentsAttributeContainer : DataAttributeContainer
+internal record ArgumentsAttributeContainer : ArgumentsContainer
 {
-    public required Argument[] Arguments { get; init; }
-    
-    public override void GenerateInvocationStatements(SourceCodeWriter sourceCodeWriter)
+    public Argument[] Arguments { get; }
+    public ArgumentsAttributeContainer(ArgumentsType argumentsType, Argument[] arguments) : base(argumentsType)
+    {
+        Arguments = arguments;
+    }
+
+    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         for (var index = 0; index < Arguments.Length; index++)
         {
-            var argument = Arguments.ElementAt(index);
+            var argument = Arguments[index];
             
             var invocation = argument.Invocation;
             
-            var variableName = $"{VariableNamePrefix}{index}";
-            
-            sourceCodeWriter.WriteLine($"{argument.Type} {variableName} = {invocation};");
+            sourceCodeWriter.WriteLine($"{argument.Type} {GenerateVariableName(ref variableIndex)} = {invocation};");
         }
         
         sourceCodeWriter.WriteLine();
@@ -26,11 +27,6 @@ internal record ArgumentsAttributeContainer : DataAttributeContainer
     public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
     {
         // Nothing
-    }
-
-    public override string[] GenerateArgumentVariableNames()
-    {
-        return Arguments.Select((_, index) => $"{VariableNamePrefix}{index}").ToArray();
     }
 
     public override string[] GetArgumentTypes()

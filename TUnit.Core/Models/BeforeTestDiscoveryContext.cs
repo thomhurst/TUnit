@@ -11,5 +11,8 @@ public class BeforeTestDiscoveryContext : Context
     
     internal BeforeTestDiscoveryContext()
     {
+        Current = this;
     }
+    
+    public required string? TestFilter { get; init; }
 }

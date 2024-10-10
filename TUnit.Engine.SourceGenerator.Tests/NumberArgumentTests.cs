@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -8,16 +9,16 @@ internal class NumberArgumentTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "NumberArgumentTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(6));
+            await Assert.That(generatedFiles.Length).IsEqualTo(6);
             
-            Assert.That(generatedFiles[0], Does.Contain("global::System.Int32 methodArg0 = 1;"));
-            Assert.That(generatedFiles[1], Does.Contain("global::System.Double methodArg0 = 1.1;"));
-            Assert.That(generatedFiles[2], Does.Contain("global::System.Single methodArg0 = 1.1f;"));
-            Assert.That(generatedFiles[3], Does.Contain("global::System.Int64 methodArg0 = 1L;"));
-            Assert.That(generatedFiles[4], Does.Contain("global::System.UInt64 methodArg0 = 1UL;"));
-            Assert.That(generatedFiles[5], Does.Contain("global::System.UInt32 methodArg0 = 1U;"));
+            await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = 1;");
+            await AssertFileContains(generatedFiles[1], "global::System.Double methodArg = 1.1;");
+            await AssertFileContains(generatedFiles[2], "global::System.Single methodArg = 1.1f;");
+            await AssertFileContains(generatedFiles[3], "global::System.Int64 methodArg = 1L;");
+            await AssertFileContains(generatedFiles[4], "global::System.UInt64 methodArg = 1UL;");
+            await AssertFileContains(generatedFiles[5], "global::System.UInt32 methodArg = 1U;");
         });
 
     [Test]

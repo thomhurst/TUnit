@@ -15,9 +15,9 @@ public partial class TestContext
 
     public static IReadOnlyDictionary<string, string> Parameters => InternalParametersDictionary;
     
-    public static string OutputDirectory
+    public static string? OutputDirectory
         => Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
-           ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+           ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
     
     public static string WorkingDirectory
     {

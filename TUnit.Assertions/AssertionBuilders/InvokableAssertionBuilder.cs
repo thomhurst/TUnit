@@ -11,7 +11,7 @@ public class InvokableAssertionBuilder<TActual> :
     {
     }
 
-    public async Task ProcessAssertionsAsync()
+    internal async Task ProcessAssertionsAsync()
     {
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
         
@@ -25,35 +25,46 @@ public class InvokableAssertionBuilder<TActual> :
         
         foreach (var assertion in Assertions.Reverse())
         {
-            if (!assertion.Assert(assertionData))
+            var result = assertion.GetResult(assertionData.Result, assertionData.Exception);
+            if (!result.IsPassed)
             {
+                assertion.SetSubject(assertionData.ActualExpression);
                 throw new AssertionException(
                     $"""
-                     {GetExpression()}
-                     {assertion.OverriddenMessage ?? assertion.GetFailureMessage()}
+                     Expected {assertion.Subject} {assertion.GetExpectationWithReason()}, but {result.Message}.
+                     At {((IInvokableAssertionBuilder)this).GetExpression()}
                      """
                 );
             }
         }
     }
 
-    public async IAsyncEnumerable<BaseAssertCondition> GetFailures()
+    async IAsyncEnumerable<(BaseAssertCondition Assertion, AssertionResult Result)> IInvokableAssertionBuilder.GetFailures()
     {
         var assertionData = await AssertionDataDelegate();
         
         foreach (var assertion in Assertions.Reverse())
         {
-            if (!assertion.Assert(assertionData))
+            assertion.SetSubject(assertionData.ActualExpression);
+            var result = assertion.GetResult(assertionData.Result, assertionData.Exception);
+            if (!result.IsPassed)
             {
-                yield return assertion;
+                yield return (assertion, result);
             }
         }
     }
 
     public TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
-    
-    public string? GetExpression()
+
+    string? IInvokableAssertionBuilder.GetExpression()
     {
-        return ExpressionBuilder?.ToString();
+        var expression = ExpressionBuilder?.ToString();
+
+        if (expression?.Length < 100)
+        {
+            return expression;
+        }
+        
+        return $"{expression?[..100]}...";
     }
 }

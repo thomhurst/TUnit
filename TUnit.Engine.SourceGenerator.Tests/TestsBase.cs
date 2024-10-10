@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.Tests.Options;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -10,12 +11,12 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
     {
     }
 
-    public Task RunTest(string inputFile, Action<string[]> assertions)
+    public Task RunTest(string inputFile, Func<string[], Task> assertions)
     {
         return RunTest(inputFile, new RunTestOptions(), assertions);
     }
     
-    public async Task RunTest(string inputFile, RunTestOptions runTestOptions, Action<string[]> assertions)
+    public async Task RunTest(string inputFile, RunTestOptions runTestOptions, Func<string[], Task> assertions)
     {
         var source = await File.ReadAllTextAsync(inputFile);
 
@@ -53,15 +54,24 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             )
             .AddReferences(ReferencesHelper.References)
             .AddSyntaxTrees(additionalSources.Select(x => CSharpSyntaxTree.ParseText(x)));
-
-        foreach (var error in compilation.GetDiagnostics().Where(x => x.Severity == DiagnosticSeverity.Error))
-        {
-            throw new Exception(
-                $"There was an error with the compilation. Have you added required references and additional files?{Environment.NewLine}{Environment.NewLine}{error}");
-        }
         
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
+        
+        foreach (var error in diagnostics.Where(x => IsError(x)))
+        {
+            throw new Exception
+            (
+                $"""
+                  There was an error with the compilation. 
+                  Have you added required references and additional files?
+                  
+                  {error}
+                  
+                  {string.Join(Environment.NewLine, newCompilation.SyntaxTrees.Select(x => x.GetText()))}
+                 """
+            );
+        }
         
         // Retrieve all files in the compilation.
         var generatedFiles = newCompilation.SyntaxTrees
@@ -76,6 +86,26 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
                 $"There was an error with the generator compilation.{Environment.NewLine}{Environment.NewLine}{error}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, generatedFiles)}");
         }
 
-        assertions(generatedFiles);
+        await assertions(generatedFiles);
+    }
+
+    private static bool IsError(Diagnostic x)
+    {
+        if (x.Severity == DiagnosticSeverity.Error)
+        {
+            return true;
+        }
+
+        if (x.Severity == DiagnosticSeverity.Warning &&  x.GetMessage().Contains("failed to generate source"))
+        {
+            return true;
+        }
+        
+        return false;
+    }
+
+    protected async Task AssertFileContains(string file, string expected)
+    {
+        await Assert.That(file).Contains(expected).IgnoringWhitespace();
     }
 }

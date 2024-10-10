@@ -4,7 +4,6 @@ using TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Engine.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models;
-using TUnit.Engine.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Engine.SourceGenerator.CodeGenerators;
 
@@ -68,8 +67,8 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
 
         foreach (var modelTestSourceDataModel in model.TestSourceDataModels)
         {
-            var className = $"{model.MinimalTypeName}_Inherited";
-            var fileName = $"{className}_{Guid.NewGuid():N}";
+            var className = $"{model.MinimalTypeName}__Inherited";
+            var fileName = $"{className}__{Guid.NewGuid():N}";
 
             using var sourceBuilder = new SourceCodeWriter();
 
@@ -86,15 +85,8 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
 
-            if (modelTestSourceDataModel.ClassArguments is MethodDataSourceAttributeContainer { IsEnumerableData: true })
-            {
-                sourceBuilder.WriteLine($"var {VariableNames.EnumerableClassDataIndex} = 0;");
-            }
-            
-            if (modelTestSourceDataModel.MethodArguments is MethodDataSourceAttributeContainer { IsEnumerableData: true })
-            {
-                sourceBuilder.WriteLine($"var {VariableNames.EnumerableTestDataIndex} = 0;");
-            }
+            sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
+            sourceBuilder.WriteLine($"var {VariableNames.TestMethodDataIndex} = 0;");
             
             sourceBuilder.WriteLine("try");
             sourceBuilder.WriteLine("{");

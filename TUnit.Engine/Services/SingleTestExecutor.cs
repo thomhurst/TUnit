@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
@@ -8,7 +7,6 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
@@ -31,8 +29,7 @@ internal class SingleTestExecutor : IDataProducer
     private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
     private readonly ClassHookOrchestrator _classHookOrchestrator;
     private readonly TUnitFrameworkLogger _logger;
-    private readonly ConcurrentDictionary<object, Task> _asyncInitializers = new();
-    
+
     public SingleTestExecutor(
         IExtension extension,
         Disposer disposer,
@@ -112,14 +109,14 @@ internal class SingleTestExecutor : IDataProducer
                 }
 
                 start = DateTimeOffset.Now;
-
-                await InitializeParameters(testContext);
                 
                 try
                 {
                     await ExecuteBeforeHooks(test, context, testContext);
 
                     TestContext.Current = testContext;
+                    
+                    await InitializeParameters(testContext);
 
                     foreach (var beforeTestAttribute in test.BeforeTestAttributes)
                     {
@@ -249,11 +246,19 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task InitializeParameters(TestContext testContext)
+    private async ValueTask InitializeParameters(TestContext testContext)
     {
-        foreach (var argument in testContext.TestDetails.TestClassArguments.OfType<IAsyncInitializer>())
+        // Instance
+        IEnumerable<TestData> args =
+        [
+            ..testContext.TestDetails.InternalTestClassArguments,
+            ..testContext.TestDetails.InternalTestClassProperties,
+            ..testContext.TestDetails.InternalTestMethodArguments,
+        ];
+        
+        foreach (var argument in args)
         {
-            await _asyncInitializers.GetOrAdd(argument, _ => argument.InitializeAsync());
+            await TestDataContainer.RunInitializer(testContext.TestDetails.ClassType, argument);
         }
     }
 
@@ -350,14 +355,10 @@ internal class SingleTestExecutor : IDataProducer
     {
         var testInformation = testContext.TestDetails;
 
-        foreach (var methodArgument in testInformation.InternalTestMethodArguments)
+        IEnumerable<TestData> testData = [..testInformation.InternalTestMethodArguments, ..testInformation.InternalTestClassProperties, ..testInformation.InternalTestClassArguments];
+        foreach (var argument in testData)
         {
-            await DisposeInjectedData(methodArgument);
-        }
-        
-        foreach (var classArgument in testInformation.InternalTestClassArguments)
-        {
-            await DisposeInjectedData(classArgument);
+            await DisposeInjectedData(argument);
         }
 
         await _disposer.DisposeAsync(testContext);
@@ -486,8 +487,6 @@ internal class SingleTestExecutor : IDataProducer
     {
         foreach (var dependency in GetDependencies(testContext.TestDetails))
         {
-            AssertDoNotDependOnEachOther(testContext.TestContext, dependency.Test.TestContext);
-
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, context, true);
@@ -503,12 +502,12 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails testDetails)
+    private (DiscoveredTest Test, bool ProceedOnFailure)[] GetDependencies(TestDetails testDetails)
     {
-        return GetDependencies(testDetails, testDetails);
+        return GetDependencies(testDetails, testDetails, [testDetails]).ToArray();
     }
 
-    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails)
+    private IEnumerable<(DiscoveredTest Test, bool ProceedOnFailure)> GetDependencies(TestDetails original, TestDetails testDetails, List<TestDetails> currentChain)
     {
         foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
         {
@@ -518,40 +517,19 @@ internal class SingleTestExecutor : IDataProducer
 
             foreach (var dependency in dependencies)
             {
-                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
-
+                currentChain.Add(dependency.TestDetails);
+                
                 if (dependency.TestDetails.IsSameTest(original))
                 {
-                    yield break;
+                    throw new DependencyConflictException(currentChain);
                 }
+                
+                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
 
-                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails))
+                foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails, currentChain))
                 {
                     yield return nestedDependency;
-
-                    if (nestedDependency.Test.TestDetails.IsSameTest(original))
-                    {
-                        yield break;
-                    }
                 }
-            }
-        }
-    }
-
-    private void AssertDoNotDependOnEachOther(TestContext testContext, TestContext dependency)
-    {
-        TestContext[] dependencies = [dependency, ..GetDependencies(dependency.TestDetails).Select(x => x.Test.TestContext)];
-        
-        foreach (var dependencyOfDependency in dependencies)
-        {
-            if (dependencyOfDependency.TestDetails.IsSameTest(testContext.TestDetails))
-            {
-                throw new DependencyConflictException(testContext.TestDetails, dependencies.Select(x => x.TestDetails));
-            }
-
-            if (dependencyOfDependency.TestDetails.NotInParallelConstraintKeys != null)
-            {
-                throw new DependsOnNotInParallelException(testContext.TestDetails.TestName);
             }
         }
     }

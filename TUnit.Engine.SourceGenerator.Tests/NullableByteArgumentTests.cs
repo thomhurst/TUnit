@@ -1,5 +1,5 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
-using TUnit.Engine.SourceGenerator.Tests.Extensions;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
 
@@ -9,30 +9,30 @@ internal class NullableByteArgumentTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "NullableByteArgumentTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(4));
+            await Assert.That(generatedFiles.Length).IsEqualTo(4);
 
-            Assert.That(generatedFiles[0], Does.Contain(
+            await AssertFileContains(generatedFiles[0], 
                 """
-                global::System.Byte? methodArg0 = (global::System.Byte)1;
-                """));
+                global::System.Byte? methodArg = (global::System.Byte)1;
+                """);
             
-            Assert.That(generatedFiles[1], Does.Contain(
+            await AssertFileContains(generatedFiles[1], 
                 """
-                global::System.Byte? methodArg0 = null;
-                """));
+                global::System.Byte? methodArg = null;
+                """);
             
-            Assert.That(generatedFiles[2].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[2], 
                 """
-                global::System.Byte methodArg0 = (global::System.Byte)1;
+                global::System.Byte methodArg = (global::System.Byte)1;
                 global::System.Byte? methodArg1 = (global::System.Byte)1;
-                """.IgnoreWhitespaceFormatting()));
+                """);
             
-            Assert.That(generatedFiles[3].IgnoreWhitespaceFormatting(), Does.Contain(
+            await AssertFileContains(generatedFiles[3], 
                 """
-                global::System.Byte methodArg0 = (global::System.Byte)1;
+                global::System.Byte methodArg = (global::System.Byte)1;
                 global::System.Byte? methodArg1 = null;
-                """.IgnoreWhitespaceFormatting()));
+                """);
         });
 }

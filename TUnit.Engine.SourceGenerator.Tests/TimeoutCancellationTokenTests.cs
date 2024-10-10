@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Engine.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -8,34 +9,34 @@ internal class TimeoutCancellationTokenTests : TestsBase<TestsGenerator>
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "TimeoutCancellationTokenTests.cs"),
-        generatedFiles =>
+        async generatedFiles =>
         {
-            Assert.That(generatedFiles.Length, Is.EqualTo(7));
+            await Assert.That(generatedFiles.Length).IsEqualTo(7);
             
-            Assert.That(generatedFiles[0], Does.Contain("TestName = \"BasicTest\""));
-            Assert.That(generatedFiles[0], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.BasicTest(cancellationToken))"));
+            await AssertFileContains(generatedFiles[0], "TestName = \"BasicTest\"");
+            await AssertFileContains(generatedFiles[0], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.BasicTest(cancellationToken))");
             
-            Assert.That(generatedFiles[1], Does.Contain("TestName = \"InheritedTimeoutAttribute\""));
-            Assert.That(generatedFiles[1], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.InheritedTimeoutAttribute(cancellationToken))"));
+            await AssertFileContains(generatedFiles[1], "TestName = \"InheritedTimeoutAttribute\"");
+            await AssertFileContains(generatedFiles[1], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.InheritedTimeoutAttribute(cancellationToken))");
 
-            Assert.That(generatedFiles[2], Does.Contain("TestName = \"DataTest\""));
-            Assert.That(generatedFiles[2], Does.Contain("global::System.Int32 methodArg0 = 1;"));
-            Assert.That(generatedFiles[2], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataTest(methodArg0, cancellationToken))"));
+            await AssertFileContains(generatedFiles[2], "TestName = \"DataTest\"");
+            await AssertFileContains(generatedFiles[2], "global::System.Int32 methodArg = 1;");
+            await AssertFileContains(generatedFiles[2], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataTest(methodArg, cancellationToken))");
             
-            Assert.That(generatedFiles[3], Does.Contain("TestName = \"DataSourceTest\""));
-            Assert.That(generatedFiles[3], Does.Contain("global::System.Int32 methodArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();"));
-            Assert.That(generatedFiles[3], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceTest(methodArg, cancellationToken))"));
+            await AssertFileContains(generatedFiles[3], "TestName = \"DataSourceTest\"");
+            await AssertFileContains(generatedFiles[3], "global::System.Int32 methodArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();");
+            await AssertFileContains(generatedFiles[3], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSourceTest(methodArg, cancellationToken))");
             
-            Assert.That(generatedFiles[4], Does.Contain("TestName = \"MatrixTest\""));
-            Assert.That(generatedFiles[4], Does.Contain("global::System.Int32 methodArg0 = 1;"));
-            Assert.That(generatedFiles[4], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg0, cancellationToken))"));
+            await AssertFileContains(generatedFiles[4], "TestName = \"MatrixTest\"");
+            await AssertFileContains(generatedFiles[4], "global::System.Int32 methodArg = 1;");
+            await AssertFileContains(generatedFiles[4], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken))");
             
-            Assert.That(generatedFiles[5], Does.Contain("TestName = \"MatrixTest\""));
-            Assert.That(generatedFiles[5], Does.Contain("global::System.Int32 methodArg0 = 2;"));
-            Assert.That(generatedFiles[5], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg0, cancellationToken))"));
+            await AssertFileContains(generatedFiles[5], "TestName = \"MatrixTest\"");
+            await AssertFileContains(generatedFiles[5], "global::System.Int32 methodArg = 2;");
+            await AssertFileContains(generatedFiles[5], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken))");
             
-            Assert.That(generatedFiles[6], Does.Contain("TestName = \"MatrixTest\""));
-            Assert.That(generatedFiles[6], Does.Contain("global::System.Int32 methodArg0 = 3;"));
-            Assert.That(generatedFiles[6], Does.Contain("TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg0, cancellationToken))"));
+            await AssertFileContains(generatedFiles[6], "TestName = \"MatrixTest\"");
+            await AssertFileContains(generatedFiles[6], "global::System.Int32 methodArg = 3;");
+            await AssertFileContains(generatedFiles[6], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken))");
         });
 }

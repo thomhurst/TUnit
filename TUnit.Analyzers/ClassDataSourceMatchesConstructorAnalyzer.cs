@@ -36,7 +36,7 @@ public class ClassDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAna
     private void Check(SymbolAnalysisContext context, INamedTypeSymbol namedTypeSymbol, AttributeData attributeData,
         ImmutableArray<IParameterSymbol> parameters)
     {
-        var attributeClass = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        var attributeClass = attributeData.AttributeClass?.GloballyQualified();
 
         if (attributeClass == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource)
         {

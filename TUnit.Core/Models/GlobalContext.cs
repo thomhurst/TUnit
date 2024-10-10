@@ -11,4 +11,6 @@ public class GlobalContext : Context
     }
     
     internal ILogger GlobalLogger { get; set; }
+    
+    public string? TestFilter { get; internal set; }
 }

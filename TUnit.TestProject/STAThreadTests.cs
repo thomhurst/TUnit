@@ -23,12 +23,12 @@ public class STAThreadTests
     [Test, TestExecutor<STAThreadExecutor>]
     public async Task With_STA()
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
     }
     
     [Test]
     public async Task Without_STA()
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEqualTo(ApartmentState.MTA);
+        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.MTA);
     }
 }

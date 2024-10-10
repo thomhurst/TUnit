@@ -35,6 +35,6 @@ public class TestDiscoveryAfterTests
     [Test]
     public async Task EnsureAfterEveryTestDiscovoryHit()
     {
-        await Assert.That(TestContext.Current?.ObjectBag["AfterEveryTestDiscoveryHit"]).IsEqualTo(true);
+        await Assert.That(TestContext.Current?.ObjectBag["AfterEveryTestDiscoveryHit"]).IsEquatableOrEqualTo(true);
     }
 }

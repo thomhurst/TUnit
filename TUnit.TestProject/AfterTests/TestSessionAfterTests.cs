@@ -26,7 +26,7 @@ public class TestSessionAfterHooksTests
             return;
         }
 
-        await Assert.That(test.ObjectBag["AfterEveryTestSessionHit"]).IsEqualTo(true);
+        await Assert.That(test.ObjectBag["AfterEveryTestSessionHit"]).IsEquatableOrEqualTo(true);
     }
 }
 
@@ -36,6 +36,6 @@ public class TestSessionAfterTests
     public async Task PepareForAfterSession()
     {
         TestContext.Current?.ObjectBag.Add("AfterEveryTestSessionHit", true);
-        await Assert.That(TestContext.Current?.ObjectBag["AfterEveryTestSessionHit"]).IsEqualTo(true);
+        await Assert.That(TestContext.Current?.ObjectBag["AfterEveryTestSessionHit"]).IsEquatableOrEqualTo(true);
     }
 }

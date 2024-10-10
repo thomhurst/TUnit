@@ -18,26 +18,46 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine(
             $"var methodInfo = typeof({fullyQualifiedClassType}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
         
-        testSourceDataModel.ClassArguments.GenerateInvocationStatements(sourceBuilder);
-        
-        sourceBuilder.WriteLine(
-            $"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => {NewClassWriter.ConstructClass(testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments)});");
+        sourceBuilder.WriteLine();
 
+        var classVariablesIndex = 0;
+        var methodVariablesIndex = 0;
+        var propertiesVariablesIndex = 0;
+        
+        testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
+        
+        testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
+        
+        sourceBuilder.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
+        
+        NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
+        
+        sourceBuilder.Write(");");
+        
+        sourceBuilder.WriteLine();
         
         sourceBuilder.WriteLine(
-            $"var resettableClassFactory = resettableClassFactoryDelegate();");
+            "var resettableClassFactory = resettableClassFactoryDelegate();");
 
         sourceBuilder.WriteLine();
         
-        testSourceDataModel.MethodArguments.GenerateInvocationStatements(sourceBuilder);
+        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
         sourceBuilder.WriteLine($"TestRegistrar.RegisterTest<{fullyQualifiedClassType}>(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.GenerateArgumentVariableNames().ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.GenerateArgumentVariableNames().ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"InternalTestClassArguments = [{ToInjectedTypes(testSourceDataModel.ClassArguments).ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"InternalTestMethodArguments = [{ToInjectedTypes(testSourceDataModel.MethodArguments).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.VariableNames.ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.VariableNames.ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.InnerContainers.SelectMany(x => x.ArgumentsContainer.VariableNames).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("InternalTestClassArguments = ");
+        WriteInternalInjectedTypes(testSourceDataModel.ClassArguments, sourceBuilder);
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("InternalTestClassProperties = ");
+        WriteInternalInjectedTypes(testSourceDataModel.PropertyArguments, sourceBuilder);
+        sourceBuilder.WriteTabs();
+        sourceBuilder.Write("InternalTestMethodArguments = ");
+        WriteInternalInjectedTypes(testSourceDataModel.MethodArguments, sourceBuilder);
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
@@ -81,48 +101,77 @@ internal static class GenericTestInvocationWriter
         return $"TUnit.Core.ParallelLimitProvider.GetParallelLimit<{parallelLimit}>()";
     }
 
-    private static IEnumerable<string> ToInjectedTypes(ArgumentsContainer argumentsContainer)
+    private static void WriteInternalInjectedTypes(BaseContainer container, SourceCodeWriter sourceCodeWriter)
     {
-        var types = argumentsContainer.GetArgumentTypes();
-        var variableNames = argumentsContainer.GenerateArgumentVariableNames();
-        
-        if (argumentsContainer is not ClassDataSourceAttributeContainer classDataSourceAttributeContainer 
-            || classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.None")
+        var variableNames = container.VariableNames;
+
+        if (!variableNames.Any())
         {
+            sourceCodeWriter.WriteLine("[],");
+            return;
+        }
+        
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine("[");
+
+        WriteInternalArgs(container, sourceCodeWriter, false);
+        
+        sourceCodeWriter.WriteLine("],");
+    }
+
+    private static void WriteInternalArgs(BaseContainer container, SourceCodeWriter sourceCodeWriter, bool isProperties)
+    {
+        if (container is ClassPropertiesContainer classPropertiesContainer)
+        {
+            foreach (var (_, argumentsContainer) in classPropertiesContainer.InnerContainers)
+            {
+                WriteInternalArgs(argumentsContainer, sourceCodeWriter, true);
+            }
+
+            return;
+        }
+
+        var variableNames = container.VariableNames;
+        var types = container.GetArgumentTypes();
+        
+        if (container is not ClassDataSourceAttributeContainer classDataSourceAttributeContainer 
+            || classDataSourceAttributeContainer.SharedArgumentType is "TUnit.Core.SharedType.None")
+        {
+            var disposeAfter = (container is not ArgumentsContainer argumentsContainer || argumentsContainer.DisposeAfterTest).ToString().ToLowerInvariant();
+            
             for (var i = 0; i < types.Length; i++)
             {
                 var argumentType = types[i];
-                var variableName = variableNames[i];
+                var variableName = variableNames.ElementAt(i);
                 
-                yield return $$"""
-                         new TestData({{variableName}}, typeof({{argumentType}}), InjectedDataType.None)
-                         				{
-                             				DisposeAfterTest = {{argumentsContainer.DisposeAfterTest.ToString().ToLowerInvariant()}},
-                         				}
-                         """;
+                if (isProperties)
+                {
+                    disposeAfter = $"{variableName}DisposeAfter";
+                }
+
+                sourceCodeWriter.WriteLine($"new TestData({variableName}, typeof({argumentType}), InjectedDataType.None)");
+                sourceCodeWriter.WriteLine("{");
+                sourceCodeWriter.WriteLine($"DisposeAfterTest = {disposeAfter},");
+                sourceCodeWriter.WriteLine("},");
             }
-            
-            yield break;
         }
         
-        if (classDataSourceAttributeContainer.Key != null)
+        else if (classDataSourceAttributeContainer.Key != null)
         {
-            yield return $$"""
-                   new TestData({{variableNames[0]}}, typeof({{types[0]}}), InjectedDataType.SharedByKey)
-                   {
-                        StringKey = "{{classDataSourceAttributeContainer.Key}}"
-                   }
-                   """;
+            sourceCodeWriter.WriteLine($"new TestData({variableNames.ElementAt(0)}, typeof({types[0]}), InjectedDataType.SharedByKey)");
+            sourceCodeWriter.WriteLine("{");
+            sourceCodeWriter.WriteLine($"StringKey = \"{classDataSourceAttributeContainer.Key}\"");
+            sourceCodeWriter.WriteLine("},");
         }
 
-        if (classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.Globally")
+        else if (classDataSourceAttributeContainer.SharedArgumentType == "TUnit.Core.SharedType.Globally")
         {
-            yield return $"new TestData({variableNames[0]}, typeof({types[0]}), InjectedDataType.SharedGlobally)";
+            sourceCodeWriter.WriteLine($"new TestData({variableNames.ElementAt(0)}, typeof({types[0]}), InjectedDataType.SharedGlobally),");
         }
 
-        if (classDataSourceAttributeContainer.ForClass != null)
+        else if (classDataSourceAttributeContainer.ForClass != null)
         {
-            yield return $"new TestData({variableNames[0]}, typeof({types[0]}), InjectedDataType.SharedByTestClassType)";
+            sourceCodeWriter.WriteLine($"new TestData({variableNames.ElementAt(0)}, typeof({types[0]}), InjectedDataType.SharedByTestClassType),");
         }
     }
 }

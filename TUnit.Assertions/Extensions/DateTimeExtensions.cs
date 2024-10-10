@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.Extensions;
 
-public static class DateTimeExtensions
+internal static class DateTimeExtensions
 {
     private static readonly string? DateFormat = "yyyy/MM/dd";
     private static readonly string? LongTimeFormatWithMilliseconds = "hh:mm:ss.ffff tt";

@@ -22,8 +22,11 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     
     public required object?[] TestClassArguments { get; init; }
     public required object?[] TestMethodArguments { get; init; }
+    public required object?[] TestClassProperties { get; init; }
     
     public required TestData[] InternalTestClassArguments { internal get; init; }
+
+    public required TestData[] InternalTestClassProperties { internal get; init; }
 
     public required TestData[] InternalTestMethodArguments { internal get; init; }
     
