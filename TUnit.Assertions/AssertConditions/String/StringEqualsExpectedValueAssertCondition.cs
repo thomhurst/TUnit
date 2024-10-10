@@ -9,7 +9,7 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
     protected override string GetExpectation()
         => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
 
-    protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
+    protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
     {
         if (actualValue is null)
         {

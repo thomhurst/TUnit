@@ -9,7 +9,7 @@ public class EquivalentToExpectedValueAssertCondition<TActual>(TActual expected,
     protected override string GetExpectation()
         => $"to be equivalent to {expectedExpression}";
 
-    protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
+    protected override AssertionResult GetResult(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue is null && ExpectedValue is null)
         {

@@ -8,7 +8,7 @@ public class StringNotContainsExpectedValueAssertCondition(string expected, Stri
     protected override string GetExpectation()
         => $"to not contain {Format(expected).TruncateWithEllipsis(100)}";
 
-    protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
+    protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
     {
         if (actualValue is null)
         {

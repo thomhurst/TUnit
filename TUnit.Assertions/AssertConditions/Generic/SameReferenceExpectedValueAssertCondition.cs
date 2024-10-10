@@ -6,7 +6,7 @@ public class SameReferenceExpectedValueAssertCondition<TActual, TExpected>(TExpe
     protected override string GetExpectation()
         => $"to have the same reference as {expected}";
 
-    protected internal override AssertionResult Passes(TActual? actualValue, TExpected? expectedValue) => AssertionResult
+    protected override AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue) => AssertionResult
         .FailIf(
             () => !ReferenceEquals(actualValue, expectedValue),
             "they did not");

@@ -20,7 +20,7 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
         _customComparers.Add(comparer);
     }
 
-    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+    protected override AssertionResult GetResult(TActual? actualValue, Exception? exception)
     {
         var expected = ExpectedValue;
         
@@ -41,8 +41,8 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
             }
         }
 
-        return Passes(actualValue, expected);
+        return GetResult(actualValue, expected);
     }
     
-    protected internal abstract AssertionResult Passes(TActual? actualValue, TExpected? expectedValue);
+    protected abstract AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue);
 }

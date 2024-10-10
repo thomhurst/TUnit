@@ -11,7 +11,7 @@ public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(
     protected override string GetExpectation()
         => $"to have Message containing \"{expectedMessage}\"";
 
-    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+    protected override AssertionResult GetResult(TActual? actualValue, Exception? exception)
     {
         var actualException = exceptionSelector(exception);
 
