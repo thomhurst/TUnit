@@ -49,8 +49,10 @@ internal record MethodDataSourceAttributeContainer : ArgumentsContainer
                 for (var index = 0; index < TupleTypes.Length; index++)
                 {
                     var tupleType = TupleTypes[index];
-                
-                    sourceCodeWriter.WriteLine(GenerateVariable(tupleType, $"{tupleVariableName}.Item{index+1}", ref variableIndex).ToString());
+
+                    var refIndex = index;
+                    
+                    sourceCodeWriter.WriteLine(GenerateVariable(tupleType, $"{tupleVariableName}.Item{index+1}", ref refIndex).ToString());
                 }
             }
             else
@@ -76,8 +78,10 @@ internal record MethodDataSourceAttributeContainer : ArgumentsContainer
             for (var index = 0; index < TupleTypes.Length; index++)
             {
                 var tupleType = TupleTypes[index];
+
+                var refIndex = index;
                 
-                sourceCodeWriter.WriteLine(GenerateVariable(tupleType, $"{tupleVariableName}.Item{index+1}", ref variableIndex).ToString());
+                sourceCodeWriter.WriteLine(GenerateVariable(tupleType, $"{tupleVariableName}.Item{index+1}", ref refIndex).ToString());
             }
         }
         else

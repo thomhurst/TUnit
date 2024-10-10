@@ -36,13 +36,16 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataA
     {
         if (globalIndex == 0)
         {
-            globalIndex++;
-            return AddVariable(new Variable
+            var generateVariable = AddVariable(new Variable
             {
                 Type = type,
                 Name = VariableNamePrefix,
                 Value = value
             });
+            
+            globalIndex++;
+            
+            return generateVariable;
         }
 
         return AddVariable(new Variable

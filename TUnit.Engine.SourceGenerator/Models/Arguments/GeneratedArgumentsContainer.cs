@@ -95,7 +95,8 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
         {
             for (var i = 0; i < GenericArguments.Length; i++)
             {
-                sourceCodeWriter.WriteLine(GenerateVariable(GenericArguments[i], $"{generatedDataVariableName}.Item{i + 1}", ref variableIndex).ToString());
+                var refIndex = i;
+                sourceCodeWriter.WriteLine(GenerateVariable(GenericArguments[i], $"{generatedDataVariableName}.Item{i + 1}", ref refIndex).ToString());
             }
 
             sourceCodeWriter.WriteLine();
