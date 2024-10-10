@@ -24,6 +24,14 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
             _ => $"typeof({TestClassTypeName})"
         };
         
+        var propertyName = "null";
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            propertyName = $"propertyInfo{variableIndex}";
+            sourceCodeWriter.WriteLine($"var {propertyName} = {objectToGetAttributesFrom};");
+            objectToGetAttributesFrom = propertyName;
+        }
+        
         var type = ArgumentsType == ArgumentsType.Property ? "Property" : "Parameters";
         
         var parameterInfos = ArgumentsType switch
@@ -33,15 +41,13 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
             _ => $"{objectToGetAttributesFrom}.GetParameters()"
         };
         
-        var propertyInfo = ArgumentsType == ArgumentsType.Property ? objectToGetAttributesFrom : "null";
-        
         var dataGeneratorMetadata = $$"""
                                      new DataGeneratorMetadata
                                      {
                                         Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
                                         TestClassType = testClassType,
                                         ParameterInfos = {{parameterInfos}},
-                                        PropertyInfo = {{propertyInfo}},
+                                        PropertyInfo = {{propertyName}},
                                         TestObjectBag = objectBag,
                                      }
                                      """;
