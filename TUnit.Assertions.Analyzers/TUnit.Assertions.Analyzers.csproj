@@ -11,6 +11,7 @@
     <AssemblyName>TUnit.Assertions.Analyzers</AssemblyName>
     <NoWarn>RS2003</NoWarn>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
