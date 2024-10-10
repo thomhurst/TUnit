@@ -69,7 +69,7 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataA
         return AddDataAttributeVariable(new Variable
         {
             Type = type,
-            Name = $"{DataAttributeVariableNamePrefix}{globalIndex++}",
+            Name = $"{DataAttributeVariableNamePrefix}{globalIndex}",
             Value = value
         });
     }
