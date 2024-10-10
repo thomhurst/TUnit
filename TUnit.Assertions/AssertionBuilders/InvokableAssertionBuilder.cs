@@ -31,8 +31,8 @@ public class InvokableAssertionBuilder<TActual> :
                 assertion.SetSubject(assertionData.ActualExpression);
                 throw new AssertionException(
                     $"""
-                     Expected {assertion.Subject} {assertion.GetExpectationWithReason()}, but {result.Message}
-                     at {((IInvokableAssertionBuilder)this).GetExpression()}
+                     Expected {assertion.Subject} {assertion.GetExpectationWithReason()}, but {result.Message}.
+                     At {((IInvokableAssertionBuilder)this).GetExpression()}
                      """
                 );
             }
