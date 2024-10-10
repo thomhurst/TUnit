@@ -16,7 +16,12 @@ internal static class StringExtensions
     {
         return value.ReplaceLineEndings(" ");
     }
-    
+
+    public static string ShowNewLines(this string value)
+    {
+        return value.Replace("\n", "\\n").Replace("\r", "\\r");
+    }
+
     public static string TruncateWithEllipsis(this string value, int maxLength)
     {
         if (value.Length <= maxLength)
