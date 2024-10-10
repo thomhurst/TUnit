@@ -26,9 +26,9 @@ So to create a custom assertion:
    `TExpected` will be the data (if any) that you receive from your extension method, so you'll be responsible for passing this in. You must pass it to the base class via the base constructor: `base(expectedValue)`
 
 3. Override the method: 
-   `protected override bool Passes(...)`
+   `protected override AssertionResult Passes(...)`
 
-   If this method returns true, then your assertion has passed, if it returns false, then your exception will throw with the failure message that you specify.
+   `AssertionResult` has static methods to represent a pass or a fail.
 
    You will be passed relevant objects based on what you're asserting. These may or may not be null, so the logic is up to you.
 
@@ -36,9 +36,34 @@ So to create a custom assertion:
 
    Any `TActual` object will be populated if a value was passed into `Assert.That(...)`, or a delegate with a return value was executed successfully.
 
-4. Override the `GetFailureMessage` method to return a message when the assertion fails. While you're inside the `Passes()` method you can also do `return FailWithMessage(string)`. This will take priority over any string set inside `GetFailureMessage()`. This can be useful if you want to change the failure message dynamically based on some logic.
+4. Override the `GetExpectation` method to return a message representing what would have been a success, in the format of "to [Your Expectation]".
+e.g. Expected [Actual Value] *to be equal to [Expected Value]*
 
-5. Create the extension method!
+When you return an `AssertionResult.Fail` result, you supply a message. This is appended after the above statement with a `but {Your Message}`
+e.g. Expected [Actual Value] to be equal to [Expected Value] *but it was null*
+
+In your assertion class, that'd be set up like:
+
+```csharp
+    protected override string GetExpectation()
+        => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
+
+   protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult
+                .FailIf(
+                    () => expectedValue is not null,
+                    "it was null");
+        }
+
+        ...
+    }
+```
+
+
+1. Create the extension method!
 
    You need to create an extension off of either `IValueSource<TActual>` or `IDelegateSource<TActual>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
 
@@ -60,26 +85,26 @@ public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<
 ```
 
 ```csharp
-public class StringContainsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
+public class StringEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-    protected override bool Passes(string? actualValue, string? expectedValue)
+    protected override string GetExpectation()
+        => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
+
+    protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
     {
-        if (actualValue is null && expectedValue is null)
+        if (actualValue is null)
         {
-            return true;
+            return AssertionResult
+                .FailIf(
+                    () => expectedValue is not null,
+                    "it was null");
         }
 
-        if (actualValue is null || expectedValue is null)
-        {
-            return FailWithMessage("Data was null!");
-        }
-        
-        return actualValue.Contains(expectedValue, stringComparison);
+        return AssertionResult
+            .FailIf(
+                () => !string.Equals(actualValue, expectedValue, stringComparison),
+                $"found {Format(actualValue).TruncateWithEllipsis(100)}");
     }
-
-    protected override string GetFailureMessage(string? actualValue, string? expectedValue) => $"""
-         Expected {Format(actualValue)} to contain {Format(expectedValue)}
-         """;
 }
 ```

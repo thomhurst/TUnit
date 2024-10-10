@@ -5,6 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+        <IsTestProject>true</IsTestProject>
+        <IsPackable>false</IsPackable>
         <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     </PropertyGroup>
     
