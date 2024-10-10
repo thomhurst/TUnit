@@ -24,10 +24,10 @@ internal static class StringExtensions
             return value;
         }
 
-		return $"{value[..maxLength]}...";
-	}
+        return $"{value[..maxLength]}...";
+    }
 
-	public static string PrependAOrAn(this string value)
+    public static string PrependAOrAn(this string value)
     {
         char[] vocals = ['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'];
         if (value.Length > 0 && vocals.Contains(value[0]))

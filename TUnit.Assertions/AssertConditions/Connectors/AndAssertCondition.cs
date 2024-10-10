@@ -20,17 +20,17 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
     protected override string GetExpectation() => "";
 
     internal override string GetExpectationWithReason()
-	    => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} and{Environment.NewLine}{_condition2.GetExpectationWithReason()}";
+        => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} and{Environment.NewLine}{_condition2.GetExpectationWithReason()}";
     
     protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
     {
         return _condition1.Assert(actualValue, exception, ActualExpression)
-	        .And(_condition2.Assert(actualValue, exception, ActualExpression));
-	}
+            .And(_condition2.Assert(actualValue, exception, ActualExpression));
+    }
 
     internal override void SetBecauseReason(BecauseReason becauseReason)
-	    => _condition2.SetBecauseReason(becauseReason);
+        => _condition2.SetBecauseReason(becauseReason);
 
     internal override string GetBecauseReason()
-	    => _condition2.GetBecauseReason();
+        => _condition2.GetBecauseReason();
 }

@@ -10,9 +10,9 @@ public class ThrowTests
         public async Task Fails_For_Code_With_Exceptions()
         {
             string expectedMessage = """
-				Expected action to throw nothing, but a CustomException was thrown.
-				At Assert.That(action).ThrowsNothing()
-				""";
+                Expected action to throw nothing, but a CustomException was thrown.
+                At Assert.That(action).ThrowsNothing()
+                """;
             Exception exception = CustomException.Create();
             Action action = () => throw exception;
 
@@ -41,9 +41,9 @@ public class ThrowTests
         public async Task Fails_For_Code_Without_Exceptions()
         {
             string expectedMessage = """
-				Expected action to throw an exception, but none was thrown.
-				At Assert.That(action).ThrowsException.OfAnyType()
-				""";
+                Expected action to throw an exception, but none was thrown.
+                At Assert.That(action).ThrowsException.OfAnyType()
+                """;
             Action action = () => { };
 
             var sut = async ()
@@ -67,48 +67,48 @@ public class ThrowTests
     }
 
     public class ThrowsException_OfType
-	{
-		[Test]
-		public async Task Fails_For_Code_With_Other_Exceptions()
-		{
-			string expectedMessage = """
-				Expected action to throw exactly a CustomException, but an OtherException was thrown.
-				At Assert.That(action).ThrowsException.OfType(CustomException)
-				""";
-			Exception exception = OtherException.Create();
-			Action action = () => throw exception;
+    {
+        [Test]
+        public async Task Fails_For_Code_With_Other_Exceptions()
+        {
+            string expectedMessage = """
+                Expected action to throw exactly a CustomException, but an OtherException was thrown.
+                At Assert.That(action).ThrowsException.OfType(CustomException)
+                """;
+            Exception exception = OtherException.Create();
+            Action action = () => throw exception;
 
-			var sut = async ()
-				=> await Assert.That(action).ThrowsException().OfType<CustomException>();
+            var sut = async ()
+                => await Assert.That(action).ThrowsException().OfType<CustomException>();
 
-			await Assert.That(sut).ThrowsException()
-				.With.Message.EqualTo(expectedMessage);
-		}
+            await Assert.That(sut).ThrowsException()
+                .With.Message.EqualTo(expectedMessage);
+        }
 
-		[Test]
-		public async Task Fails_For_Code_With_Subtype_Exceptions()
-		{
-			string expectedMessage = """
-				Expected action to throw exactly a CustomException, but a SubCustomException was thrown.
-				At Assert.That(action).ThrowsException.OfType(CustomException)
-				""";
-			Exception exception = SubCustomException.Create();
-			Action action = () => throw exception;
+        [Test]
+        public async Task Fails_For_Code_With_Subtype_Exceptions()
+        {
+            string expectedMessage = """
+                Expected action to throw exactly a CustomException, but a SubCustomException was thrown.
+                At Assert.That(action).ThrowsException.OfType(CustomException)
+                """;
+            Exception exception = SubCustomException.Create();
+            Action action = () => throw exception;
 
-			var sut = async ()
-				=> await Assert.That(action).ThrowsException().OfType<CustomException>();
+            var sut = async ()
+                => await Assert.That(action).ThrowsException().OfType<CustomException>();
 
-			await Assert.That(sut).ThrowsException()
-				.With.Message.EqualTo(expectedMessage);
-		}
+            await Assert.That(sut).ThrowsException()
+                .With.Message.EqualTo(expectedMessage);
+        }
 
-		[Test]
+        [Test]
         public async Task Fails_For_Code_Without_Exceptions()
         {
             string expectedMessage = """
-				Expected action to throw exactly a CustomException, but none was thrown.
-				At Assert.That(action).ThrowsException.OfType(CustomException)
-				""";
+                Expected action to throw exactly a CustomException, but none was thrown.
+                At Assert.That(action).ThrowsException.OfType(CustomException)
+                """;
             Action action = () => { };
 
             var sut = async ()
@@ -132,31 +132,31 @@ public class ThrowTests
     }
 
     public class ThrowsException_SubClassOf
-	{
-		[Test]
-		public async Task Fails_For_Code_With_Other_Exceptions()
-		{
-			string expectedMessage = """
-				Expected action to throw a CustomException, but an OtherException was thrown.
-				At Assert.That(action).ThrowsException.SubClassOf(CustomException)
-				""";
-			Exception exception = OtherException.Create();
-			Action action = () => throw exception;
+    {
+        [Test]
+        public async Task Fails_For_Code_With_Other_Exceptions()
+        {
+            string expectedMessage = """
+                Expected action to throw a CustomException, but an OtherException was thrown.
+                At Assert.That(action).ThrowsException.SubClassOf(CustomException)
+                """;
+            Exception exception = OtherException.Create();
+            Action action = () => throw exception;
 
-			var sut = async ()
-				=> await Assert.That(action).ThrowsException().SubClassOf<CustomException>();
+            var sut = async ()
+                => await Assert.That(action).ThrowsException().SubClassOf<CustomException>();
 
-			await Assert.That(sut).ThrowsException()
-				.With.Message.EqualTo(expectedMessage);
-		}
+            await Assert.That(sut).ThrowsException()
+                .With.Message.EqualTo(expectedMessage);
+        }
 
-		[Test]
+        [Test]
         public async Task Fails_For_Code_Without_Exceptions()
         {
             string expectedMessage = """
-				Expected action to throw a CustomException, but none was thrown.
-				At Assert.That(action).ThrowsException.SubClassOf(CustomException)
-				""";
+                Expected action to throw a CustomException, but none was thrown.
+                At Assert.That(action).ThrowsException.SubClassOf(CustomException)
+                """;
             Action action = () => { };
 
             var sut = async ()
@@ -185,13 +185,13 @@ public class ThrowTests
         public async Task Fails_For_Exceptions_With_Different_Message()
         {
             string expectedMessage = """
-				Expected action to have Message equal to "Fails_For_Some_Other_Reason", but it differs at index 10:
-				              ↓
-				   "Fails_For_Exceptions_With_Different_Message"
-				   "Fails_For_Some_Other_Reason"
-				              ↑.
-				At Assert.That(action).ThrowsException.With.Message.EqualTo("Fails_For_Some_Other_Reason", StringCompar...
-				""";
+                Expected action to have Message equal to "Fails_For_Some_Other_Reason", but it differs at index 10:
+                              ↓
+                   "Fails_For_Exceptions_With_Different_Message"
+                   "Fails_For_Some_Other_Reason"
+                              ↑.
+                At Assert.That(action).ThrowsException.With.Message.EqualTo("Fails_For_Some_Other_Reason", StringCompar...
+                """;
 
             Exception exception = CustomException.Create();
             Action action = () => throw exception;
@@ -224,9 +224,9 @@ public class ThrowTests
         public async Task Fails_For_Exceptions_With_Different_Message()
         {
             string expectedMessage = """
-				Expected action to have Message containing "Fails_For_Some_Other_Reason", but it was not found.
-				At Assert.That(action).ThrowsException.With.Message.Containing("Fails_For_Some_Other_Reason", StringCom...
-				""";
+                Expected action to have Message containing "Fails_For_Some_Other_Reason", but it was not found.
+                At Assert.That(action).ThrowsException.With.Message.Containing("Fails_For_Some_Other_Reason", StringCom...
+                """;
             Exception exception = CustomException.Create();
             Action action = () => throw exception;
 

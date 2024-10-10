@@ -10,6 +10,6 @@ public class ThrowsNothingExpectedValueAssertCondition<TActual> : DelegateAssert
     protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult
         .FailIf(
-			() => exception is not null,
+            () => exception is not null,
             $"{exception?.GetType().Name.PrependAOrAn()} was thrown");
 }

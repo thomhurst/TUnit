@@ -5,23 +5,23 @@ namespace TUnit.Assertions.AssertConditions.String;
 public class StringEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-	protected override string GetExpectation()
-		=> $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
+    protected override string GetExpectation()
+        => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
 
-	protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
-	{
-		if (actualValue is null)
-		{
-			return AssertionResult
-				.FailIf(
-					() => expectedValue is not null,
-					"it was null");
-		}
+    protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult
+                .FailIf(
+                    () => expectedValue is not null,
+                    "it was null");
+        }
 
-		return AssertionResult
-			.FailIf(
-				() => !string.Equals(actualValue, expectedValue, stringComparison),
-				$"found {Format(actualValue).TruncateWithEllipsis(100)} which differs at {GetLocation(actualValue, expectedValue)}");
+        return AssertionResult
+            .FailIf(
+                () => !string.Equals(actualValue, expectedValue, stringComparison),
+                $"found {Format(actualValue).TruncateWithEllipsis(100)} which differs at {GetLocation(actualValue, expectedValue)}");
     }
 
     private string GetLocation(string? actualValue, string? expectedValue)

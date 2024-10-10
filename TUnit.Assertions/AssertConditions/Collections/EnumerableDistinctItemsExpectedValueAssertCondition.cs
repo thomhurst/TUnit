@@ -24,5 +24,5 @@ public class EnumerableDistinctItemsExpectedValueAssertCondition<TActual, TInner
                 () => list.Count != distinct.Count(),
                 "duplicate items found in the collection");
 
-	}
+    }
 }

@@ -17,26 +17,26 @@ internal class EnumerableDataSourceDrivenTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[0], "TestMethodArguments = [methodData],");
             await AssertFileContains(generatedFiles[0], 
                 """
-                				InternalTestMethodArguments = 
-                				[
-                					new TestData(methodData, typeof(global::System.Collections.Generic.IEnumerable<global::System.Int32>), InjectedDataType.None)
-                					{
-                    					DisposeAfterTest = true,
-                					},
-                				],
+                                InternalTestMethodArguments = 
+                                [
+                                    new TestData(methodData, typeof(global::System.Collections.Generic.IEnumerable<global::System.Int32>), InjectedDataType.None)
+                                    {
+                                        DisposeAfterTest = true,
+                                    },
+                                ],
                 """);
             
             await AssertFileContains(generatedFiles[1], "foreach (var methodData in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())");
             await AssertFileContains(generatedFiles[1], "TestMethodArguments = [methodData],");
             await AssertFileContains(generatedFiles[1], 
-	            """
-	            				InternalTestMethodArguments = 
-	            				[
-	            					new TestData(methodData, typeof(global::System.Collections.Generic.IEnumerable<global::System.Int32>), InjectedDataType.None)
-	            					{
-	                					DisposeAfterTest = false,
-	            					},
-	            				],
-	            """);
+                """
+                                InternalTestMethodArguments = 
+                                [
+                                    new TestData(methodData, typeof(global::System.Collections.Generic.IEnumerable<global::System.Int32>), InjectedDataType.None)
+                                    {
+                                        DisposeAfterTest = false,
+                                    },
+                                ],
+                """);
         });
 }

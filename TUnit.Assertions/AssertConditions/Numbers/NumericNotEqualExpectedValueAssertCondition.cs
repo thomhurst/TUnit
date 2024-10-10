@@ -9,22 +9,22 @@ public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expect
 
     protected override string GetExpectation()
     {
-	    if (_tolerance == null || _tolerance == default)
-	    {
-		    return $"to not be equal to {expected}";
-	    }
+        if (_tolerance == null || _tolerance == default)
+        {
+            return $"to not be equal to {expected}";
+        }
 
-	    return $"to not be equal to {expected} +-{_tolerance}";
+        return $"to not be equal to {expected} +-{_tolerance}";
     }
 
     protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue is null)
         {
-	        return AssertionResult
-		        .FailIf(
-			        () => expectedValue is null,
-			        "it is null");
+            return AssertionResult
+                .FailIf(
+                    () => expectedValue is null,
+                    "it is null");
 
         }
         
@@ -33,10 +33,10 @@ public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expect
             var min = expectedValue - _tolerance;
             var max = expectedValue + _tolerance;
 
-			return AssertionResult
-				.FailIf(
-					() => actualValue >= min && actualValue <= max,
-					$"found {actualValue}");
+            return AssertionResult
+                .FailIf(
+                    () => actualValue >= min && actualValue <= max,
+                    $"found {actualValue}");
         }
 
         return AssertionResult.Passed;

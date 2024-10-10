@@ -142,13 +142,13 @@ public class EquivalentAssertionTests
         var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(object1).IsEquivalentTo(object2));
         
         NUnitAssert.That(exception!.Message, Is.EqualTo(
-			"""
+            """
             Expected object1 to be equivalent to object2, but EnumerableItem Inner.Inner.Collection.[3] did not match
             Expected: "4"
             Received: null.
             At Assert.That(object1).IsEquivalentTo(object2)
             """
-		));
+        ));
     }
     
     [Test]

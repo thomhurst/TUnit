@@ -7,14 +7,14 @@ public class FuncValueAssertCondition<TActual, TExpected>(
 )
     : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
-	protected override string GetExpectation()
-		=> $"to satisfy {this.GetType().Name}";
+    protected override string GetExpectation()
+        => $"to satisfy {this.GetType().Name}";
 
-	protected internal override AssertionResult Passes(TActual? actualValue, TExpected? expectedValue)
+    protected internal override AssertionResult Passes(TActual? actualValue, TExpected? expectedValue)
     {
         // TODO VAB
         return AssertionResult.FailIf(
-	        () => !condition(actualValue, ExpectedValue, this),
-	        defaultMessageFactory(actualValue, Exception, Format(expectedValue)));
+            () => !condition(actualValue, ExpectedValue, this),
+            defaultMessageFactory(actualValue, Exception, Format(expectedValue)));
     }
 }

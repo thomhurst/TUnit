@@ -44,10 +44,10 @@ public class InvokableAssertionBuilder<TActual> :
         var assertionData = await AssertionDataDelegate();
         
         foreach (var assertion in Assertions.Reverse())
-		{
+        {
             assertion.SetSubject(assertionData.ActualExpression);
-			var result = assertion.GetResult(assertionData.Result, assertionData.Exception);
-			if (!result.IsPassed)
+            var result = assertion.GetResult(assertionData.Result, assertionData.Exception);
+            if (!result.IsPassed)
             {
                 yield return (assertion, result);
             }

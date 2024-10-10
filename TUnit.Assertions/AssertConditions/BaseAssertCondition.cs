@@ -6,17 +6,17 @@ namespace TUnit.Assertions.AssertConditions;
 
 public abstract class BaseAssertCondition
 {
-	private BecauseReason? _becauseReason;
+    private BecauseReason? _becauseReason;
 
-	internal virtual void SetBecauseReason(BecauseReason becauseReason)
-	{
-		_becauseReason = becauseReason;
-	}
+    internal virtual void SetBecauseReason(BecauseReason becauseReason)
+    {
+        _becauseReason = becauseReason;
+    }
 
-	internal virtual string GetBecauseReason()
-		=> _becauseReason?.ToString() ?? string.Empty;
+    internal virtual string GetBecauseReason()
+        => _becauseReason?.ToString() ?? string.Empty;
 
-	public AssertionResult FailWithMessage(string message)
+    public AssertionResult FailWithMessage(string message)
     {
         OverriddenMessage = message;
         return AssertionResult.Fail(message);
@@ -29,13 +29,13 @@ public abstract class BaseAssertCondition
     protected abstract string GetExpectation();
 
     internal virtual string GetExpectationWithReason()
-	    => $"{GetExpectation()}{GetBecauseReason()}";
+        => $"{GetExpectation()}{GetBecauseReason()}";
     
     internal void SetSubject(string? subject)
         => Subject = subject;
 
 
-	protected string Format(object? obj)
+    protected string Format(object? obj)
     {
         if (obj is null)
         {
@@ -91,7 +91,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         ActualExpression = actualExpression;
         
         return GetResult(actualValue, exception);
-	}
+    }
 
-	protected internal abstract AssertionResult GetResult(TActual? actualValue, Exception? exception);
+    protected internal abstract AssertionResult GetResult(TActual? actualValue, Exception? exception);
 }
