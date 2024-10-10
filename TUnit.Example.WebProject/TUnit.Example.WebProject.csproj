@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+        <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
