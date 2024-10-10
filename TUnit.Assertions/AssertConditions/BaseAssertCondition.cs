@@ -23,11 +23,16 @@ public abstract class BaseAssertCondition
     }
     
     public string? OverriddenMessage { get; internal set; }
+    
+    public string? Subject { get; private set; }
 
     protected abstract string GetExpectation();
 
     internal virtual string GetExpectationWithReason()
 	    => $"{GetExpectation()}{GetBecauseReason()}";
+    
+    internal void SetSubject(string? subject)
+        => Subject = subject;
 
 
 	protected string Format(object? obj)
@@ -89,6 +94,4 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 	}
 
 	protected internal abstract AssertionResult Passes(TActual? actualValue, Exception? exception);
-
-
 }

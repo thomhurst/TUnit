@@ -28,9 +28,10 @@ public class InvokableAssertionBuilder<TActual> :
             var result = assertion.Passes(assertionData.Result, assertionData.Exception);
             if (!result.IsPassed)
             {
+                assertion.SetSubject(assertionData.ActualExpression);
                 throw new AssertionException(
                     $"""
-                     Expected {assertionData.ActualExpression} {assertion.GetExpectationWithReason()}, but {result.Message}
+                     Expected {assertion.Subject} {assertion.GetExpectationWithReason()}, but {result.Message}
                      at {((IInvokableAssertionBuilder)this).GetExpression()}
                      """
                 );
@@ -38,16 +39,17 @@ public class InvokableAssertionBuilder<TActual> :
         }
     }
 
-    async IAsyncEnumerable<BaseAssertCondition> IInvokableAssertionBuilder.GetFailures()
+    async IAsyncEnumerable<(BaseAssertCondition Assertion, AssertionResult Result)> IInvokableAssertionBuilder.GetFailures()
     {
         var assertionData = await AssertionDataDelegate();
         
         foreach (var assertion in Assertions.Reverse())
 		{
+            assertion.SetSubject(assertionData.ActualExpression);
 			var result = assertion.Passes(assertionData.Result, assertionData.Exception);
 			if (!result.IsPassed)
             {
-                yield return assertion;
+                yield return (assertion, result);
             }
         }
     }

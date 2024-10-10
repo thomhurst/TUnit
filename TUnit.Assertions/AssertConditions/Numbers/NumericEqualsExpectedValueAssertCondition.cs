@@ -6,10 +6,11 @@ public class NumericEqualsExpectedValueAssertCondition<TActual>(TActual expected
     where TActual : INumber<TActual>
 {
     private TActual? _tolerance;
+    private bool _isToleranceSet;
 
     protected override string GetExpectation()
     {
-	    if (_tolerance == null || _tolerance == default)
+	    if (!_isToleranceSet)
 	    {
 		    return $"to be equal to {expected}";
 	    }
@@ -35,7 +36,7 @@ public class NumericEqualsExpectedValueAssertCondition<TActual>(TActual expected
 			        "it is not null");
         }
 
-		if (_tolerance is not null)
+		if (_isToleranceSet && _tolerance is not null)
 		{
 			var min = expectedValue - _tolerance;
 			var max = expectedValue + _tolerance;
@@ -55,5 +56,6 @@ public class NumericEqualsExpectedValueAssertCondition<TActual>(TActual expected
     public void SetTolerance(TActual tolerance)
     {
         _tolerance = tolerance;
+        _isToleranceSet = true;
     }
 }

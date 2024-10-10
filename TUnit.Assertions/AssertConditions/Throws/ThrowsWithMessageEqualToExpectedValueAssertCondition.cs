@@ -20,8 +20,8 @@ public class ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(
 				() => actualException is null,
                 "the exception is null")
             .OrFailIf(
-				() => !string.Equals(exception.Message, expectedMessage, stringComparison),
-				$"it differs at {GetLocation(exception.Message, expectedMessage)}");
+				() => !string.Equals(actualException.Message, expectedMessage, stringComparison),
+				$"it differs at {GetLocation(actualException.Message, expectedMessage)}");
 	}
 
 	private string GetLocation(string? actualValue, string? expectedValue)
