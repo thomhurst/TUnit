@@ -18,7 +18,7 @@ public abstract class ValueAssertCondition<TActual>
         _customComparers.Add(comparer);
     }
 
-    protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
     {
         if (exception is not null)
         {
@@ -35,7 +35,7 @@ public abstract class ValueAssertCondition<TActual>
             switch (result)
             {
                 case AssertionDecision.PassDecision:
-                    return true;
+                    return AssertionResult.Passed;
                 case AssertionDecision.FailDecision failDecision:
                     return FailWithMessage(failDecision.Message);
             }
@@ -44,11 +44,11 @@ public abstract class ValueAssertCondition<TActual>
         return Passes(actualValue);
     }
     
-    protected abstract bool Passes(TActual? actualValue);
+    protected abstract AssertionResult Passes(TActual? actualValue);
     
     protected abstract string GetFailureMessage(TActual? actualValue);
 
-    protected internal override string GetFailureMessage()
+    protected override string GetExpectation()
     {
         return GetFailureMessage(ActualValue);
     }

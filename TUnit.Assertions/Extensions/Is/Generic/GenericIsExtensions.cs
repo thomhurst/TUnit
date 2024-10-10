@@ -19,7 +19,7 @@ public static class GenericIsExtensions
     
     public static EquivalentToAssertionBuilderWrapper<TActual> IsEquivalentTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new EquivalentToExpectedValueAssertCondition<TActual>(expected)
+        var assertionBuilder = valueSource.RegisterAssertion(new EquivalentToExpectedValueAssertCondition<TActual>(expected, doNotPopulateThisValue1)
             , [doNotPopulateThisValue1]);
         
         return new EquivalentToAssertionBuilderWrapper<TActual>(assertionBuilder);

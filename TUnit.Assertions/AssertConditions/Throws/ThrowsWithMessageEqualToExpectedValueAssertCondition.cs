@@ -1,3 +1,5 @@
+using TUnit.Assertions.Extensions;
+
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(
@@ -6,17 +8,50 @@ public class ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(
     Func<Exception?, Exception?> exceptionSelector)
     : DelegateAssertCondition<TActual, Exception>
 {
-    protected override string GetFailureMessage(Exception? exception) => $"Message was {exceptionSelector(exception)?.Message} instead of {expectedMessage}";
+    protected override string GetExpectation()
+        => $"to have Message equal to \"{expectedMessage}\"";
 
-    protected override bool Passes(Exception? rootException)
+    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
     {
-        var exception = exceptionSelector(rootException);
+        var actualException = exceptionSelector(exception);
 
-        if (exception is null)
-        {
-            return FailWithMessage("Exception is null");
-        }
-        
-        return string.Equals(exception.Message, expectedMessage, stringComparison);
+        return AssertionResult
+            .FailIf(
+                () => actualException is null,
+                "the exception is null")
+            .OrFailIf(
+                () => !string.Equals(actualException.Message, expectedMessage, stringComparison),
+                $"it differs at {GetLocation(actualException.Message, expectedMessage)}");
+    }
+
+    private string GetLocation(string? actualValue, string? expectedValue)
+    {
+        const char arrowDown = '\u2193';
+        const char arrowUp = '\u2191';
+        var initialIndexOfDifference = StringUtils.IndexOfDifference(actualValue, expectedValue);
+
+        var startIndex = Math.Max(0, initialIndexOfDifference - 25);
+
+        var actualLine = actualValue
+            ?.Substring(startIndex, Math.Min(actualValue.Length - startIndex, 55))
+            .ReplaceNewLines()
+            .Trim()
+            .TruncateWithEllipsis(50) ?? string.Empty;
+
+        var expectedLine = expectedValue
+            ?.Substring(startIndex, Math.Min(expectedValue.Length - startIndex, 55))
+            .ReplaceNewLines()
+            .Trim()
+            .TruncateWithEllipsis(50) ?? string.Empty;
+
+        var spacesBeforeArrow = StringUtils.IndexOfDifference(actualLine, expectedLine) + 1;
+
+        return $"""
+                index {initialIndexOfDifference}:
+                   {new string(' ', spacesBeforeArrow)}{arrowDown}
+                   {Format(actualLine)}
+                   {Format(expectedLine)}
+                   {new string(' ', spacesBeforeArrow)}{arrowUp}
+                """;
     }
 }

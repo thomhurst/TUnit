@@ -6,42 +6,40 @@ public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expect
     where TActual : INumber<TActual>
 {
     private TActual? _tolerance;
-    
-    protected override string GetFailureMessage(TActual? actualValue, TActual? expectedValue) => $"""
-                                                 Expected Not Equal To: {ExpectedValue}{WithToleranceMessage()}
-                                                 """;
 
-    private string WithToleranceMessage()
+    protected override string GetExpectation()
     {
-        if (_tolerance == null)
+        if (_tolerance == null || _tolerance == default)
         {
-            return string.Empty;
+            return $"to not be equal to {expected}";
         }
 
-        return $" +-{_tolerance}";
+        return $"to not be equal to {expected} +-{_tolerance}";
     }
 
-    protected override bool Passes(TActual? actualValue, TActual? expectedValue)
+    protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
     {
-        if (actualValue == null && expectedValue == null)
+        if (actualValue is null)
         {
-            return true;
-        }
+            return AssertionResult
+                .FailIf(
+                    () => expectedValue is null,
+                    "it is null");
 
-        if (actualValue == null || expectedValue == null)
-        {
-            return false;
         }
         
         if (_tolerance != null)
         {
             var min = expectedValue - _tolerance;
             var max = expectedValue + _tolerance;
-            
-            return actualValue < min || actualValue > max;
+
+            return AssertionResult
+                .FailIf(
+                    () => actualValue >= min && actualValue <= max,
+                    $"found {actualValue}");
         }
-        
-        return actualValue != expectedValue;
+
+        return AssertionResult.Passed;
     }
 
     public void SetTolerance(TActual tolerance)

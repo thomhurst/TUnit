@@ -22,25 +22,20 @@ public class AssertMultipleTests
         });
 
         NUnitAssert.That(assertionException!.Message, Is.EqualTo("""
-                                                                Assert.That(1).IsEqualTo(2)
-                                                                Expected: 2
-                                                                Received: 1
+                                                                Expected 1 to be equal to 2, but the received value 1 is different.
+                                                                At Assert.That(1).IsEqualTo(2)
                                                                 
-                                                                Assert.That(2).IsEqualTo(3)
-                                                                Expected: 3
-                                                                Received: 2
+                                                                Expected 2 to be equal to 3, but the received value 2 is different.
+                                                                At Assert.That(2).IsEqualTo(3)
                                                                 
-                                                                Assert.That(3).IsEqualTo(4)
-                                                                Expected: 4
-                                                                Received: 3
+                                                                Expected 3 to be equal to 4, but the received value 3 is different.
+                                                                At Assert.That(3).IsEqualTo(4)
                                                                 
-                                                                Assert.That(4).IsEqualTo(5)
-                                                                Expected: 5
-                                                                Received: 4
+                                                                Expected 4 to be equal to 5, but the received value 4 is different.
+                                                                At Assert.That(4).IsEqualTo(5)
                                                                 
-                                                                Assert.That(5).IsEqualTo(6)
-                                                                Expected: 6
-                                                                Received: 5
+                                                                Expected 5 to be equal to 6, but the received value 5 is different.
+                                                                At Assert.That(5).IsEqualTo(6)
                                                                 """));
     }
     
@@ -60,40 +55,30 @@ public class AssertMultipleTests
         });
 
         NUnitAssert.That(assertionException!.Message, Is.EqualTo("""
-                                                                Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
-                                                                Expected: 2
-                                                                Received: 1
+                                                                Expected 1 to be equal to 2
                                                                  or
-                                                                Expected: 3
-                                                                Received: 1
+                                                                to be equal to 3, but the received value 1 is different and the received value 1 is different.
+                                                                At Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
                                                                 
-                                                                Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
-                                                                Expected: 3
-                                                                Received: 2
+                                                                Expected 2 to be equal to 3
                                                                  and
-                                                                Expected: 4
-                                                                Received: 2
+                                                                to be equal to 4, but the received value 2 is different and the received value 2 is different.
+                                                                At Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
                                                                 
-                                                                Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
-                                                                Expected: 4
-                                                                Received: 3
+                                                                Expected 3 to be equal to 4
                                                                  or
-                                                                Expected: 5
-                                                                Received: 3
+                                                                to be equal to 5, but the received value 3 is different and the received value 3 is different.
+                                                                At Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
                                                                 
-                                                                Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
-                                                                Expected: 5
-                                                                Received: 4
+                                                                Expected 4 to be equal to 5
                                                                  and
-                                                                Expected: 6
-                                                                Received: 4
+                                                                to be equal to 6, but the received value 4 is different and the received value 4 is different.
+                                                                At Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
                                                                 
-                                                                Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
-                                                                Expected: 6
-                                                                Received: 5
+                                                                Expected 5 to be equal to 6
                                                                  or
-                                                                Expected: 7
-                                                                Received: 5
+                                                                to be equal to 7, but the received value 5 is different and the received value 5 is different.
+                                                                At Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
                                                                 """));
     }
     
@@ -131,37 +116,30 @@ public class AssertMultipleTests
         var assertionException3 = (TUnitAssertionException)aggregateException.InnerExceptions[2];
         
         NUnitAssert.That(assertionException1.Message, Is.EqualTo("""
-                                                                 Assert.That(1).IsEqualTo(2)
-                                                                 Expected: 2
-                                                                 Received: 1
-
-                                                                 Assert.That(2).IsEqualTo(3)
-                                                                 Expected: 3
-                                                                 Received: 2
-
-                                                                 Assert.That(3).IsEqualTo(4)
-                                                                 Expected: 4
-                                                                 Received: 3
+                                                                 Expected 1 to be equal to 2, but the received value 1 is different.
+                                                                 At Assert.That(1).IsEqualTo(2)
+                                                                 
+                                                                 Expected 2 to be equal to 3, but the received value 2 is different.
+                                                                 At Assert.That(2).IsEqualTo(3)
+                                                                 
+                                                                 Expected 3 to be equal to 4, but the received value 3 is different.
+                                                                 At Assert.That(3).IsEqualTo(4)
                                                                  """));
         
         NUnitAssert.That(assertionException2.Message, Is.EqualTo("""
-                                                                 Assert.That(4).IsEqualTo(5)
-                                                                 Expected: 5
-                                                                 Received: 4
-
-                                                                 Assert.That(5).IsEqualTo(6)
-                                                                 Expected: 6
-                                                                 Received: 5
+                                                                 Expected 4 to be equal to 5, but the received value 4 is different.
+                                                                 At Assert.That(4).IsEqualTo(5)
+                                                                 
+                                                                 Expected 5 to be equal to 6, but the received value 5 is different.
+                                                                 At Assert.That(5).IsEqualTo(6)
                                                                  """));
         
         NUnitAssert.That(assertionException3.Message, Is.EqualTo("""
-                                                                 Assert.That(6).IsEqualTo(7)
-                                                                 Expected: 7
-                                                                 Received: 6
-
-                                                                 Assert.That(7).IsEqualTo(8)
-                                                                 Expected: 8
-                                                                 Received: 7
+                                                                 Expected 6 to be equal to 7, but the received value 6 is different.
+                                                                 At Assert.That(6).IsEqualTo(7)
+                                                                 
+                                                                 Expected 7 to be equal to 8, but the received value 7 is different.
+                                                                 At Assert.That(7).IsEqualTo(8)
                                                                  """));
     }
 }
