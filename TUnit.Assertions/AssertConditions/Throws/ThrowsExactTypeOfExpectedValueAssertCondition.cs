@@ -1,17 +1,20 @@
+using TUnit.Assertions.Extensions;
+
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, TExpectedException> 
+public class ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, TExpectedException>
     where TExpectedException : Exception
 {
-    protected override string GetFailureMessage(TExpectedException? exception) => $"A {exception?.GetType().Name} was thrown instead of {typeof(TExpectedException).Name}";
+    protected override string GetExpectation()
+        => $"to throw exactly {typeof(TExpectedException).Name.PrependAOrAn()}";
 
-    protected override bool Passes(TExpectedException? exception)
-    {
-        if (exception is null)
-        {
-            return FailWithMessage("Exception is null");
-        }
-        
-        return exception.GetType() == typeof(TExpectedException);
-    }
+    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+        => AssertionResult
+        .FailIf(
+            () => exception is null,
+            $"none was thrown")
+        .OrFailIf(
+            () => exception.GetType() != typeof(TExpectedException),
+            $"{exception?.GetType().Name.PrependAOrAn()} was thrown"
+        );
 }

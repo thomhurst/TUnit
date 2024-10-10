@@ -3,10 +3,11 @@
 public class NotEqualsExpectedValueAssertCondition<TActual>(TActual expected)
     : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {
-    protected override string GetFailureMessage(TActual? actualValue, TActual? expectedValue) => $"{ActualValue} equals {ExpectedValue}";
+    protected override string GetExpectation()
+        => $"to not be equal to {expected}";
 
-    protected override bool Passes(TActual? actualValue, TActual? expectedValue)
-    {
-        return !Equals(actualValue, ExpectedValue);
-    }
+    protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue) => AssertionResult
+        .FailIf(
+            () => Equals(actualValue, expectedValue),
+            "it was");
 }

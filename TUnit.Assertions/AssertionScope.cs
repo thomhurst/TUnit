@@ -28,15 +28,15 @@ internal class AssertionScope : IAsyncDisposable
     {
         SetCurrentAssertionScope(_parent);
         
-        var failed = new List<(IInvokableAssertionBuilder, List<BaseAssertCondition>)>();
+        var failed = new List<(IInvokableAssertionBuilder, List<(BaseAssertCondition Assertion, AssertionResult Result)>)>();
         
         foreach (var assertionBuilder in _assertionBuilders)
         {
-            var list = new List<BaseAssertCondition>();
+            var list = new List<(BaseAssertCondition Assertion, AssertionResult Result)>();
             
-            await foreach (var failedAssertion in assertionBuilder.GetFailures())
+            await foreach (var failedAssertionWithResult in assertionBuilder.GetFailures())
             {
-                list.Add(failedAssertion);
+                list.Add(failedAssertionWithResult);
             }
 
             if (list.Count != 0)
@@ -55,8 +55,8 @@ internal class AssertionScope : IAsyncDisposable
             var assertionException = new AssertionException(string.Join($"{Environment.NewLine}{Environment.NewLine}", failed.Select(x =>
             {
                 return $"""
-                       {x.Item1.GetExpression()}
-                       {string.Join(Environment.NewLine, x.Item2.Select(e =>  e.OverriddenMessage ?? e.GetFullFailureMessage()?.Trim()))}
+                       {string.Join(Environment.NewLine, x.Item2.Select(e =>  $"Expected {e.Assertion.Subject} {e.Assertion.GetExpectationWithReason()}, but {e.Result.Message}."))}
+                       At {x.Item1.GetExpression()}
                        """;
             })));
             

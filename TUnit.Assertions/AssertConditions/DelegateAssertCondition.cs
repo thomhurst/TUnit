@@ -15,7 +15,7 @@ public abstract class DelegateAssertCondition<TActual, TException> : BaseAssertC
         _customComparers.Add(comparer);
     }
 
-    protected override bool Passes(TActual? actualValue, Exception? exception)
+    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
     {
         if (exception != null && exception is not TException)
         {
@@ -29,20 +29,18 @@ public abstract class DelegateAssertCondition<TActual, TException> : BaseAssertC
             switch (result)
             {
                 case AssertionDecision.PassDecision:
-                    return true;
+                    return AssertionResult.Passed;
                 case AssertionDecision.FailDecision failDecision:
                     return FailWithMessage(failDecision.Message);
             }
         }
         
-        return Passes(typedException);
+        return AssertionResult.Passed;
     }
 
-    protected abstract bool Passes(TException? exception);
-    
-    protected abstract string GetFailureMessage(TException? exception);
+    protected virtual string GetFailureMessage(TException? exception) => "TODO VAB";
 
-    protected internal override string GetFailureMessage()
+    protected override string GetExpectation()
     {
         return GetFailureMessage(Exception as TException);
     }

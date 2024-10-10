@@ -2,13 +2,14 @@
 
 public class DefaultExpectedValueAssertCondition<TActual> : BaseAssertCondition<TActual>
 {
-	  private readonly TActual? _defaultValue = default;
-	
-		protected internal override string GetFailureMessage()
-			  => _defaultValue is null ?
-						   $"{ActualExpression ?? typeof(TActual).Name} was not default value null" : 
-						   $"{ActualExpression ?? typeof(TActual).Name} was not default value {_defaultValue}";
+    private readonly TActual? _defaultValue = default;
 
-		protected override bool Passes(TActual? actualValue, Exception? exception)
-				=> actualValue is null || actualValue.Equals(_defaultValue);
-} 
+    protected override string GetExpectation()
+        => $"to be {(_defaultValue is null ? "null" : _defaultValue)}";
+
+    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+        => AssertionResult
+            .FailIf(
+                () => actualValue is not null && !actualValue.Equals(_defaultValue),
+                $"found {actualValue}");
+}

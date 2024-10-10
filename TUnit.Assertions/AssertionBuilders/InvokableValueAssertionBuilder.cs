@@ -13,10 +13,8 @@ public class InvokableValueAssertionBuilder<TActual>(InvokableAssertionBuilder<T
     public InvokableValueAssertionBuilder<TActual> Because(string reason)
     {
         var becauseReason = new BecauseReason(reason);
-        foreach (var assertion in Assertions)
-        {
-            assertion.SetBecauseReason(becauseReason);
-        }
+        var assertion = Assertions.Peek();
+        assertion.SetBecauseReason(becauseReason);
         return this;
     }
 

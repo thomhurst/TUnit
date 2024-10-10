@@ -1,11 +1,15 @@
-﻿namespace TUnit.Assertions.AssertConditions.Throws;
+﻿using TUnit.Assertions.Extensions;
+
+namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsNothingExpectedValueAssertCondition<TActual> : DelegateAssertCondition<TActual, Exception>
 {
-    protected override string GetFailureMessage(Exception? exception) => $"A {exception?.GetType().Name} was thrown";
+    protected override string GetExpectation()
+        => "to throw nothing";
 
-    protected override bool Passes(Exception? exception)
-    {
-        return exception is null;
-    }
+    protected internal override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+        => AssertionResult
+        .FailIf(
+            () => exception is not null,
+            $"{exception?.GetType().Name.PrependAOrAn()} was thrown");
 }

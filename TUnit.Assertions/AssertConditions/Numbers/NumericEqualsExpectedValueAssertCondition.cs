@@ -6,47 +6,56 @@ public class NumericEqualsExpectedValueAssertCondition<TActual>(TActual expected
     where TActual : INumber<TActual>
 {
     private TActual? _tolerance;
-    
-    protected override string GetFailureMessage(TActual? actualValue, TActual? expectedValue) => $"""
-                                                 Expected: {ExpectedValue}{WithToleranceMessage()}
-                                                 Received: {ActualValue}
-                                                 """;
+    private bool _isToleranceSet;
 
-    private string WithToleranceMessage()
+    protected override string GetExpectation()
     {
-        if (_tolerance == null || _tolerance == default)
+        if (!_isToleranceSet)
         {
-            return string.Empty;
+            return $"to be equal to {expected}";
         }
 
-        return $" +-{_tolerance}";
+        return $"to be equal to {expected} +-{_tolerance}";
     }
 
-    protected override bool Passes(TActual? actualValue, TActual? expectedValue)
+    protected internal override AssertionResult Passes(TActual? actualValue, TActual? expectedValue)
     {
-        if (actualValue == null && expectedValue == null)
+        if (actualValue is null && expectedValue is null)
         {
-            return true;
+            return AssertionResult.Passed;
         }
 
-        if (actualValue == null || expectedValue == null)
+        if (actualValue is null || expectedValue is null)
         {
-            return false;
+            return AssertionResult
+                .FailIf(
+                    () => actualValue is null,
+                    "it is null")
+                .OrFailIf(
+                    () => expectedValue is null,
+                    "it is not null");
         }
-        
-        if (_tolerance != default && _tolerance != null)
+
+        if (_isToleranceSet && _tolerance is not null)
         {
             var min = expectedValue - _tolerance;
             var max = expectedValue + _tolerance;
-            
-            return actualValue >= min && actualValue <= max;
+
+            return AssertionResult
+                .FailIf(
+                    () => actualValue < min || actualValue > max,
+                    $"the received value {actualValue} is outside the tolerances");
         }
-        
-        return actualValue == expectedValue;
+
+        return AssertionResult
+            .FailIf(
+                () => actualValue != expected,
+                $"the received value {actualValue} is different");
     }
 
     public void SetTolerance(TActual tolerance)
     {
         _tolerance = tolerance;
+        _isToleranceSet = true;
     }
 }
