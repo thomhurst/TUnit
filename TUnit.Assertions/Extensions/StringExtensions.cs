@@ -24,7 +24,8 @@ internal static class StringExtensions
             return value;
         }
 
-        return $"{value[..maxLength]}...";
+        const char ellipsis = '\u2026';
+        return $"{value[..maxLength]}{ellipsis}";
     }
 
     public static string PrependAOrAn(this string value)
