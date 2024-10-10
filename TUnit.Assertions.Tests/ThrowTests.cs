@@ -185,20 +185,52 @@ public class ThrowTests
         public async Task Fails_For_Exceptions_With_Different_Message()
         {
             string expectedMessage = """
-                Expected action to have Message equal to "Fails_For_Some_Other_Reason", but it differs at index 10:
-                              ↓
-                   "Fails_For_Exceptions_With_Different_Message"
-                   "Fails_For_Some_Other_Reason"
-                              ↑.
-                At Assert.That(action).ThrowsException.With.Message.EqualTo("Fails_For_Some_Other_Reason", StringCompar...
-                """;
+                                     Expected action to have Message equal to "Fails_For_Some_Other_Reason", but it differs at index 10:
+                                                   ↓
+                                        "Fails_For_Exceptions_With_Different_Message"
+                                        "Fails_For_Some_Other_Reason"
+                                                   ↑.
+                                     At Assert.That(action).ThrowsException.With.Message.EqualTo("Fails_For_Some_Other_Reason", StringCompar...
+                                     """;
 
             Exception exception = CustomException.Create();
             Action action = () => throw exception;
 
             var sut = async ()
                 => await Assert.That(action).ThrowsException()
-                .With.Message.EqualTo("Fails_For_Some_Other_Reason");
+                    .With.Message.EqualTo("Fails_For_Some_Other_Reason");
+
+            await Assert.That(sut).ThrowsException()
+                .With.Message.EqualTo(expectedMessage);
+        }
+
+        [Test]
+        public async Task Fails_For_Exceptions_With_Different_Multiline_Message()
+        {
+            string newline = $"{Environment.NewLine}".Replace("\n", "\\n").Replace("\r", "\\r");
+            string longCommonString = """
+                                      Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+                                      sed diam nonumy eirmod tempor invidunt ut labore et dolore
+                                      magna aliquyam erat, sed diam voluptua. At vero eos et
+                                      accusam et justo duo dolores et ea rebum. Stet clita kasd
+                                      gubergren, no sea takimata sanctus est Lorem ipsum dolor
+                                      sit amet.
+                                      """;
+            string expectedMessage = $$"""
+                                     Expected action to have Message equal to "Lorem ipsum dolor sit amet, consetetur sadipscing elitr,{{newline}}sed diam nonumy eirmod tempor invidunt u…", but it differs at index 302:
+                                                                     ↓
+                                        "ipsum dolor\r\nsit amet.\r\nsome value"
+                                        "ipsum dolor\r\nsit amet.\r\nanother value"
+                                                                     ↑.
+                                     At Assert.That(action).ThrowsException.With.Message.EqualTo($"{longCommonString}{Environment.NewLine}an...
+                                     """;
+
+            Exception exception = CustomException.Create($"{longCommonString}{Environment.NewLine}some value");
+            Action action = () => throw exception;
+
+            var sut = async ()
+                => await Assert.That(action).ThrowsException()
+                    .With.Message.EqualTo($"{longCommonString}{Environment.NewLine}another value");
 
             await Assert.That(sut).ThrowsException()
                 .With.Message.EqualTo(expectedMessage);
