@@ -43,7 +43,9 @@ internal static class TestExtensions
 
     private static string GetClassTypeName(TestDetails testDetails)
     {
-        var classTypeName = testDetails.ClassType.FullName?[(testDetails.ClassType.Namespace?.Length ?? 0)..]
+        var classTypeName = testDetails.ClassType.FullName?
+                                .Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                                .LastOrDefault()
             ?? testDetails.ClassType.Name;
         
         if (testDetails.TestClassArguments.Length == 0)
