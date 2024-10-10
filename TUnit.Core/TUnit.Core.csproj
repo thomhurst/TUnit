@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-    </PropertyGroup>
+    
     <ItemGroup>
         <Content Include="TUnit.Core.props">
             <Pack>true</Pack>
@@ -13,9 +11,6 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Engine.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Engine.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>

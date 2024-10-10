@@ -21,14 +21,9 @@ internal static class TestInformationRetriever
     {
         var stringBuilder = new StringBuilder();
 
-        if (testGenerationContext.ClassArguments is DataAttributeContainer classDataAttributeContainer)
+        if (testGenerationContext.ClassArguments is DataAttributeContainer { Attribute.AttributeClass: not null } classDataAttributeContainer)
         {
             stringBuilder.Append($"{classDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.ClassDataIndex}}}:");
-        }
-
-        if (testGenerationContext.ClassArguments is ClassDataSourceAttributeContainer classLevelClassDataSourceAttributeContainer)
-        {
-            stringBuilder.Append($"CL-CDS{classLevelClassDataSourceAttributeContainer.AttributeIndex}:");
         }
 
         if (testGenerationContext.ClassArguments is MethodDataSourceAttributeContainer classLevelMethodDataSourceAttributeContainer)
@@ -53,14 +48,9 @@ internal static class TestInformationRetriever
             stringBuilder.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
         
-        if (testGenerationContext.TestArguments is DataAttributeContainer testMethodDataAttributeContainer)
+        if (testGenerationContext.TestArguments is DataAttributeContainer { Attribute.AttributeClass: not null } testMethodDataAttributeContainer)
         {
             stringBuilder.Append($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
-        }
-        
-        if (testGenerationContext.TestArguments is ClassDataSourceAttributeContainer testLevelClassDataSourceAttributeContainer)
-        {
-            stringBuilder.Append($"TL-CDS{testLevelClassDataSourceAttributeContainer.AttributeIndex}:");
         }
 
         if (testGenerationContext.TestArguments is MethodDataSourceAttributeContainer testLevelMethodDataSourceAttributeContainer)

@@ -1,5 +1,4 @@
-﻿using AutoFixture;
-
+﻿
 namespace TUnit.TestProject;
 
 [AutoFixtureGenerator<int, string, bool>]
@@ -11,6 +10,7 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     public void GeneratedData_Method(int value)
     {
         var data = value;
+        var attrs = TestContext.Current!.TestDetails.Attributes;
     }
     
     [Test]
@@ -33,8 +33,7 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     {
         public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata metadata)
         {
-            var fixture = new Fixture();
-            yield return fixture.Create<T>();
+            return [default];
         }
     }
     
@@ -42,9 +41,7 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     {
         public override IEnumerable<(T1, T2, T3)> GenerateDataSources(DataGeneratorMetadata metadata)
         {
-            var fixture = new Fixture();
-            
-            yield return (fixture.Create<T1>(), fixture.Create<T2>(), fixture.Create<T3>());
+            return [default];
         }
     }
     
@@ -52,8 +49,7 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     {
         public override IEnumerable<(int, string, bool)> GenerateDataSources(DataGeneratorMetadata metadata)
         {
-            var fixture = new Fixture();
-            yield return (fixture.Create<int>(), fixture.Create<string>(), fixture.Create<bool>());
+            return [default];
         }
     }
 }

@@ -13,6 +13,8 @@ public class GetPackageProjectsModule : Module<List<File>>
         return context.Git().RootDirectory
             .GetFiles(x => x.Extension == ".csproj")
             .Where(x => !x.Name.Contains("Pipeline"))
+            .Where(x => !x.Name.Contains("Analyzer"))
+            .Where(x => !x.Name.Contains("Generator"))
             .Where(x => !x.Name.Contains("Sample"))
             .Where(x => !x.Name.Contains("TestProject"))
             .Where(x => !x.Name.Contains("Test"))

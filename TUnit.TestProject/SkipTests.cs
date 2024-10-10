@@ -1,10 +1,25 @@
 ﻿namespace TUnit.TestProject;
 
-public class SkipTests
+public class SkipTests : SkipDummyHooks
 {
     [Test]
     [Skip("Just because.")]
-    public void Test()
+    public void SkippedTest()
+    {
+    }
+}
+
+public class SkipDummyHooks
+{
+    public string? _dummy;
+    
+    [Before(Test)]
+    public void SetUp()
+    {
+    }
+    
+    [After(Test)]
+    public void TearDown()
     {
     }
 }

@@ -24,7 +24,8 @@ public class PublishSingleFileModule : Module<CommandResult>
             RuntimeIdentifier = GetRuntimeIdentifier(),
             Configuration = Configuration.Release,
             OutputDirectory = "TESTPROJECT_SINGLEFILE",
-            Properties = [new KeyValue("SingleFile", "true")]
+            Properties = [new KeyValue("SingleFile", "true")],
+            Framework = "net8.0"
         }, cancellationToken);
     }
 

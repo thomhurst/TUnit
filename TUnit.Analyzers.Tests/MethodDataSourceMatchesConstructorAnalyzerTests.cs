@@ -1,9 +1,9 @@
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.ClassDataSourceMatchesConstructorAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.MethodDataSourceMatchesConstructorAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
-public class ClassDataSourceMatchesConstructorAnalyzerTests
+public class MethodDataSourceMatchesConstructorAnalyzerTests
 {
     [Test]
     public async Task No_Error()

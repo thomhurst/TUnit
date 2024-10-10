@@ -19,10 +19,9 @@ internal record ClassPropertiesContainer : ArgumentsContainer
 
         foreach (var (_, argumentsContainer) in InnerContainers)
         {
-            foreach (var variableName in argumentsContainer.VariableNames)
+            foreach (var variableName in argumentsContainer.DataVariables)
             {
-                VariableNames.Add(variableName);
-                sourceCodeWriter.WriteLine($"var {variableName}DisposeAfter = {argumentsContainer.DisposeAfterTest.ToString().ToLowerInvariant()};");
+                DataVariables.Add(variableName);
             }
         }
 
@@ -47,9 +46,9 @@ internal record ClassPropertiesContainer : ArgumentsContainer
         
         sourceCodeWriter.WriteLine("{");
         
-        foreach (var (propertySymbol, argumentsContainer) in InnerContainers)
+        foreach (var (propertySymbol, argumentsContainer) in InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
-            sourceCodeWriter.WriteLine($"{propertySymbol.Name} = {argumentsContainer.VariableNames.ElementAt(0)},");
+            sourceCodeWriter.WriteLine($"{propertySymbol.Name} = {argumentsContainer.DataVariables.Select(x => x.Name).ElementAt(0)},");
         }
 
         sourceCodeWriter.WriteLine("}");

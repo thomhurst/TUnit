@@ -46,6 +46,11 @@ internal static class TypeExtensions
             type = type.BaseType;
         }
     }
+    
+    public static IEnumerable<AttributeData> GetAttributesIncludingBaseTypes(this ITypeSymbol namedTypeSymbol)
+    {
+        return GetSelfAndBaseTypes(namedTypeSymbol).SelectMany(x => x.GetAttributes());
+    }
 
     public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, string typeName)
     {

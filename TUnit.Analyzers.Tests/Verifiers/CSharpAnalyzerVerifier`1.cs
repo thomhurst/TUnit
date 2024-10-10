@@ -1,4 +1,3 @@
-using AutoFixture;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -28,13 +27,12 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         var test = new Test
         {
             TestCode = source,
-            ReferenceAssemblies = Net.Net80,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
             TestState =
             {
                 AdditionalReferences =
                 {
                     typeof(TUnitAttribute).Assembly.Location,
-                    typeof(Fixture).Assembly.Location,
                 },
             },
         };

@@ -24,12 +24,6 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     public required object?[] TestMethodArguments { get; init; }
     public required object?[] TestClassProperties { get; init; }
     
-    public required TestData[] InternalTestClassArguments { internal get; init; }
-
-    public required TestData[] InternalTestClassProperties { internal get; init; }
-
-    public required TestData[] InternalTestMethodArguments { internal get; init; }
-    
     public required ITestExecutor TestExecutor { get; init; }
 
     public required IClassConstructor? ClassConstructor { get; init; }
@@ -38,4 +32,8 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     
     // Need to be referenced statically for AOT
     public required Type[] AttributeTypes { get; init; }
+    
+    public required Attribute[] DataAttributes { get; init; }
+    
+    public required Dictionary<string, object?> ObjectBag { get; init; }
 }

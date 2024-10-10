@@ -13,15 +13,12 @@ internal class OnEndExecutor
 {
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitFrameworkLogger _logger;
-    private readonly StaticPropertyInjectorsOrchestrator _staticPropertyInjectorsOrchestrator;
 
     public OnEndExecutor(ICommandLineOptions commandLineOptions, 
-        TUnitFrameworkLogger logger,
-        StaticPropertyInjectorsOrchestrator staticPropertyInjectorsOrchestrator)
+        TUnitFrameworkLogger logger)
     {
         _commandLineOptions = commandLineOptions;
         _logger = logger;
-        _staticPropertyInjectorsOrchestrator = staticPropertyInjectorsOrchestrator;
     }
 
     public async Task ExecuteAsync(TestSessionContext? testSessionContext)
@@ -29,17 +26,11 @@ internal class OnEndExecutor
         try
         {
             await WriteJsonOutputFile(testSessionContext);
-            await DisposeStaticInjectableProperties();
         }
         catch (Exception e)
         {
             await _logger.LogErrorAsync(e);
         }
-    }
-
-    private async Task DisposeStaticInjectableProperties()
-    {
-        await _staticPropertyInjectorsOrchestrator.DisposeAll();
     }
 
     private async Task WriteJsonOutputFile(TestSessionContext? testSessionContext)

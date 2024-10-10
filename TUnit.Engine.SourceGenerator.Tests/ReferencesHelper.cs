@@ -1,5 +1,4 @@
-﻿using AutoFixture;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TUnit.Engine.SourceGenerator.Tests;
@@ -16,7 +15,6 @@ internal class ReferencesHelper
                 MetadataReference.CreateFromFile(typeof(Assertions.Assert).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Core.TestAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(ServiceProvider).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Fixture).Assembly.Location)
             ])
             .ToList();
 }

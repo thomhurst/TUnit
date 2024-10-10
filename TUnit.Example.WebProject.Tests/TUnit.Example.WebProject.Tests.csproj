@@ -7,6 +7,7 @@
         <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
         <IsTestProject>true</IsTestProject>
         <IsPackable>false</IsPackable>
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     </PropertyGroup>
     
     <ItemGroup>
@@ -19,7 +20,6 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
-        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
     </ItemGroup>
 
 </Project>

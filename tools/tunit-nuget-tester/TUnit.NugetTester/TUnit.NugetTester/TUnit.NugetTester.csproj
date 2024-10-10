@@ -8,7 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="TUnit" VersionOverride="$(TUnitVersion)" />
+        <PackageReference Include="TUnit">
+            <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
+        </PackageReference>    
     </ItemGroup>
 
     <ItemGroup>

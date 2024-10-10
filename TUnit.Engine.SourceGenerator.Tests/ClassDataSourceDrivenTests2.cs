@@ -13,31 +13,9 @@ internal class ClassDataSourceDrivenTests2 : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles).HasCount().EqualTo(4);
 
-            await AssertFileContains(generatedFiles[0], 
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1 classArg = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1();");
-
-            await AssertFileContains(generatedFiles[0], 
-                    "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg));");
-
-
-            await AssertFileContains(generatedFiles[1], 
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2 classArg = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2();");
-
-            await AssertFileContains(generatedFiles[1], 
-                    "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg));");
-
-
-            await AssertFileContains(generatedFiles[2], 
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1 classArg = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1();");
-
-            await AssertFileContains(generatedFiles[2], 
-                    "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg));");
-
-
-            await AssertFileContains(generatedFiles[3], 
-                    "global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2 classArg = new global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2();");
-
-            await AssertFileContains(generatedFiles[3], 
-                    "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArg));");
+            await AssertFileContains(generatedFiles[0], "var classDataAttribute = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>>(true).ElementAt(0);");
+            await AssertFileContains(generatedFiles[0], "var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,\n   TestClassType = testClassType,\n   ParameterInfos = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructors().First().GetParameters(),\n   PropertyInfo = null,\n   TestObjectBag = objectBag,\n});");
+            await AssertFileContains(generatedFiles[0],
+                "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArgGeneratedData));");
         });
 }

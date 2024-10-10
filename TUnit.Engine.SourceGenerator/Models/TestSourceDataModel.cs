@@ -67,13 +67,16 @@ internal record TestSourceDataModel
     public required string? TestExecutor { get; init; }
     public required string? ParallelLimit { get; init; }
     public required string[] AttributeTypes { get; init; }
+    public required string[] PropertyAttributeTypes { get; init; }
     public required ClassPropertiesContainer PropertyArguments { get; init; }
 
     public string MethodVariablesWithCancellationToken()
     {
-        var variableNames = MethodArguments is ArgumentsContainer argumentsContainer
-            ? argumentsContainer.VariableNames
+        var variables = MethodArguments is ArgumentsContainer argumentsContainer
+            ? argumentsContainer.DataVariables
             : [];
+        
+        var variableNames = variables.Select(x => x.Name).ToArray();
         
         if (HasTimeoutAttribute)
         {

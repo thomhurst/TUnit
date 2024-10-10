@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
+using TUnit.Core.Extensions;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
@@ -69,11 +70,14 @@ public class ClassHookOrchestrator(
         }
     }
     
-    public async Task ExecuteCleanUpsIfLastInstance(ExecuteRequestContext executeRequestContext, Type testClassType,
+    public async Task ExecuteCleanUpsIfLastInstance(ExecuteRequestContext executeRequestContext,
+        TestContext testContext, Type testClassType,
         List<Exception> cleanUpExceptions)
     {
         var typesIncludingBase = GetTypesIncludingBase(testClassType);
 
+        var context = GetClassHookContext(testClassType);
+        
         foreach (var type in typesIncludingBase)
         {
             if (!InstanceTracker.IsLastTestForType(type))
@@ -81,7 +85,15 @@ public class ClassHookOrchestrator(
                 // Only run one time clean downs when no instances are left!
                 continue;
             }
-
+            
+            await RunHelpers.RunSafelyAsync(async () =>
+            {
+                foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
+                {
+                    await testEndEventsObject.IfLastTestInClass(context, testContext);
+                }
+            }, cleanUpExceptions);
+            
             await TestDataContainer.OnLastInstance(testClassType);
             
             if (!TestDictionary.ClassCleanUps.TryGetValue(type, out var cleanUpsForType))
@@ -93,12 +105,10 @@ public class ClassHookOrchestrator(
             {
                 await hookMessagePublisher.Push(executeRequestContext.Request.Session.SessionUid.Value, $"After Class: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
             }
-            
-            var context = GetClassHookContext(testClassType);
-        
-            // Run Global Hooks Last
-            await globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
         }
+        
+        // Run Global Hooks Last
+        await globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
     }
 
     public static IEnumerable<TestContext> GetTestsForType(Type type)

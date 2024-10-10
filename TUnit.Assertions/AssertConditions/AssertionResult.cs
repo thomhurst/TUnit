@@ -37,14 +37,14 @@ public class AssertionResult
             return this;
         }
 
-        return Fail(this.Message + " and " + other.Message);
+        return Fail(Message + " and " + other.Message);
     }
 
     public AssertionResult Or(AssertionResult other)
     {
         if (!IsPassed && !other.IsPassed)
         {
-            return Fail(this.Message + " and " + other.Message);
+            return Fail(Message + " and " + other.Message);
         }
 
         return Passed;

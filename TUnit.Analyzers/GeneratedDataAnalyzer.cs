@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.EqualityComparers;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
@@ -62,7 +63,7 @@ public class GeneratedDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 continue;
             }
 
-            if (parameterOrPropertyTypes.SequenceEqual(baseGeneratorAttribute.TypeArguments, SymbolEqualityComparer.Default))
+            if (baseGeneratorAttribute.TypeArguments.SequenceEqual(parameterOrPropertyTypes, SelfOrBaseEqualityComparer.Instance))
             {
                 continue;
             }

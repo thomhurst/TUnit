@@ -79,9 +79,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             
             foreach (var test in organisedTests.AllTests)
             {
-                TestRegistrar.RegisterInstance(test.TestContext);
-                
-                await InitializeStaticProperties(test.TestContext);
+                await TestRegistrar.RegisterInstance(test.TestContext);
             }
 
             await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
@@ -206,11 +204,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         typeof(TestNodeUpdateMessage),
         typeof(SessionFileArtifact)
     ];
-
-    private async ValueTask InitializeStaticProperties(TestContext testContext)
-    {
-        await _serviceProvider.StaticPropertyInjectorsOrchestrator.Execute(testContext.TestDetails.ClassType);
-    }
 
     private static string? GetTestFilter(ExecuteRequestContext context)
     {

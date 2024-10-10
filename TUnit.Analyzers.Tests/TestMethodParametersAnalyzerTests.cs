@@ -63,7 +63,6 @@ public class TestMethodParametersAnalyzerTests
     public async Task DataSourceGenerator()
     {
         const string text = """
-                            using AutoFixture;
                             using TUnit.Core;
                             using System;
                             using System.Collections;
@@ -91,8 +90,7 @@ public class TestMethodParametersAnalyzerTests
                                 {
                                     public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                                     {
-                                        var fixture = new Fixture();
-                                        yield return fixture.Create<T>();
+                                        return [default];
                                     }
                                 }
                                 
@@ -100,8 +98,7 @@ public class TestMethodParametersAnalyzerTests
                                 {
                                     public override IEnumerable<(T1, T2, T3)> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                                     {
-                                        var fixture = new Fixture();
-                                        yield return (fixture.Create<T1>(), fixture.Create<T2>(), fixture.Create<T3>());
+                                        return [default];
                                     }
                                 }
                             }

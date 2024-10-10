@@ -53,6 +53,9 @@ public abstract record TestDetails
     public required Attribute[] TestAttributes { get; init; }
     
     [JsonIgnore]
+    public required Attribute[] DataAttributes { get; init; }
+    
+    [JsonIgnore]
     public required Attribute[] Attributes { get; init; }
 
     [JsonIgnore]
@@ -66,12 +69,6 @@ public abstract record TestDetails
     public required string DisplayName { get; init; }
     
     public required IParallelLimit? ParallelLimit { get; init; }
-
-    [JsonIgnore] internal TestData[] InternalTestClassArguments { get; init; } = null!;
-
-    [JsonIgnore] internal TestData[] InternalTestClassProperties { get; set; } = null!;
-
-    [JsonIgnore] internal TestData[] InternalTestMethodArguments { get; init; } = null!;
 
 
     internal bool IsSameTest(TestDetails testDetails) => TestName == testDetails.TestName &&

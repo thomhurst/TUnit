@@ -1,3 +1,4 @@
+using TUnit.Engine.SourceGenerator.CodeGenerators;
 using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
@@ -16,17 +17,20 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
 
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
-        if(!VariableNames.Any())
-        {
-            GenerateArgumentVariableNames(ref variableIndex);
-        }
-
         var objectToGetAttributesFrom = ArgumentsType switch
         {
             ArgumentsType.Method => "methodInfo",
-            ArgumentsType.Property => $"typeof({TestClassTypeName}).GetProperty(\"{PropertyName}\")",
+            ArgumentsType.Property => $"testClassType.GetProperty(\"{PropertyName}\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)",
             _ => $"typeof({TestClassTypeName})"
         };
+        
+        var propertyName = "null";
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            propertyName = $"propertyInfo{variableIndex}";
+            sourceCodeWriter.WriteLine($"var {propertyName} = {objectToGetAttributesFrom};");
+            objectToGetAttributesFrom = propertyName;
+        }
         
         var type = ArgumentsType == ArgumentsType.Property ? "Property" : "Parameters";
         
@@ -37,28 +41,42 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
             _ => $"{objectToGetAttributesFrom}.GetParameters()"
         };
         
-        var propertyInfo = ArgumentsType == ArgumentsType.Property ? objectToGetAttributesFrom : "null";
-        
         var dataGeneratorMetadata = $$"""
                                      new DataGeneratorMetadata
                                      {
                                         Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
+                                        TestClassType = testClassType,
                                         ParameterInfos = {{parameterInfos}},
-                                        PropertyInfo = {{propertyInfo}}
+                                        PropertyInfo = {{propertyName}},
+                                        TestObjectBag = objectBag,
                                      }
                                      """;
-
+        
         if (ArgumentsType == ArgumentsType.Property)
         {
-            sourceCodeWriter.WriteLine($"var {VariableNames.ElementAt(0)} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}, true).ElementAt(0).GenerateDataSources({dataGeneratorMetadata}).ElementAtOrDefault(0);");
+            var attr = GenerateDataAttributeVariable("var",
+                $"{objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt(0)",
+                ref variableIndex);
+            
+            sourceCodeWriter.WriteLine(attr.ToString());
+            
+            sourceCodeWriter.WriteLine(GenerateVariable("var", $"{attr.Name}.GenerateDataSources({dataGeneratorMetadata}).ElementAtOrDefault(0)", ref variableIndex).ToString());
             sourceCodeWriter.WriteLine();
             return;
         }
         
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
+
+        var dataAttr = GenerateDataAttributeVariable("var",
+            $"{objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt({AttributeIndex})",
+            ref variableIndex);
+            
+        sourceCodeWriter.WriteLine(dataAttr.ToString());
         
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = global::System.Reflection.CustomAttributeExtensions.GetCustomAttributes<{AttributeDataGeneratorType}>({objectToGetAttributesFrom}, true).ElementAt({AttributeIndex}).GenerateDataSources({dataGeneratorMetadata});");
+        sourceCodeWriter.WriteLine();
+        
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata});;");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");
@@ -77,10 +95,20 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
         {
             for (var i = 0; i < GenericArguments.Length; i++)
             {
-                sourceCodeWriter.WriteLine($"{GenericArguments[i]} {VariableNames.ElementAt(i)} = {generatedDataVariableName}.Item{i + 1};");
+                var refIndex = i;
+                sourceCodeWriter.WriteLine(GenerateVariable(GenericArguments[i], $"{generatedDataVariableName}.Item{i + 1}", ref refIndex).ToString());
             }
 
             sourceCodeWriter.WriteLine();
+        }
+        else
+        {
+            DataVariables.Add(new Variable
+            {
+                Type = "var",
+                Name = generatedDataVariableName,
+                Value = String.Empty
+            });
         }
     }
 
@@ -99,29 +127,4 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
     public string[] GenericArguments { get; }
 
     public string AttributeDataGeneratorType { get; }
-
-    private void GenerateArgumentVariableNames(ref int index)
-    {
-        if (ArgumentsType == ArgumentsType.Property)
-        {
-            GenerateVariableName(ref index);
-            return;
-        }
-        
-        if (GenericArguments.Length == 1)
-        {
-            AddVariable($"{VariableNamePrefix}GeneratedData");
-            return;
-        }
-
-        if (ArgumentsType == ArgumentsType.Property)
-        {
-            throw new Exception("Multiple data values not supported for property injection.");
-        }
-
-        for (var i = 0; i < GenericArguments.Length; i++)
-        {
-            GenerateVariableName(ref index);
-        }
-    }
 }

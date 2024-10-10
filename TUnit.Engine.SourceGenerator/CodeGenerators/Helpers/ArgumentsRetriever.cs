@@ -28,45 +28,44 @@ internal static class ArgumentsRetriever
             yield return argumentsContainer;
         }
 
-        for (var index = 0; index < dataAttributes.Length; index++)
+        foreach (var attributeTypeGroup in dataAttributes.GroupBy(x => x.AttributeClass,
+                     SymbolEqualityComparer.Default))
         {
-            var dataAttribute = dataAttributes.ElementAtOrDefault(index);
-            
-            if (dataAttribute is null)
+            for (var index = 0; index < attributeTypeGroup.Count(); index++)
             {
-                continue;
-            }
-            
-            var name = dataAttribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-            
-            if (name == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
-            {
-                yield return DataDrivenArgumentsRetriever.ParseArguments(context, dataAttribute, parameterOrPropertyTypes, argumentsType, index);
-            }
-            
-            if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix)
-            {
-                yield return MethodDataSourceRetriever.ParseMethodData(context, parameterOrPropertyTypes, namedTypeSymbol, dataAttribute, argumentsType, index);
-            }
-            
-            if (name == WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix)
-            {
-                yield return ClassDataSourceRetriever.ParseClassData(namedTypeSymbol, dataAttribute, argumentsType, index);
-            }
-            
-            if (name == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix)
-            {
-                yield return ClassConstructorRetriever.Parse(dataAttribute, index);
-            }
-            
-            if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
-            {
-                var indexOfThisType = dataAttributes
-                    .Where(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, dataAttribute.AttributeClass))
-                    .ToList()
-                    .IndexOf(dataAttribute);
-                
-                yield return DataSourceGeneratorRetriever.Parse(namedTypeSymbol, dataAttribute, argumentsType, indexOfThisType, propertyName);
+                var dataAttribute = attributeTypeGroup.ElementAtOrDefault(index);
+
+                if (dataAttribute is null)
+                {
+                    continue;
+                }
+
+                var name = dataAttribute.AttributeClass?.ToDisplayString(DisplayFormats
+                    .FullyQualifiedNonGenericWithGlobalPrefix);
+
+                if (name == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix)
+                {
+                    yield return DataDrivenArgumentsRetriever.ParseArguments(context, dataAttribute,
+                        parameterOrPropertyTypes, argumentsType, index);
+                }
+
+                if (name == WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix)
+                {
+                    yield return MethodDataSourceRetriever.ParseMethodData(context, parameterOrPropertyTypes,
+                        namedTypeSymbol, dataAttribute, argumentsType, index);
+                }
+
+                if (name == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix)
+                {
+                    yield return ClassConstructorRetriever.Parse(dataAttribute, index);
+                }
+
+                if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
+                        .DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
+                {
+                    yield return DataSourceGeneratorRetriever.Parse(namedTypeSymbol, dataAttribute, argumentsType,
+                        index, propertyName);
+                }
             }
         }
     }
@@ -84,7 +83,7 @@ internal static class ArgumentsRetriever
             .GetSelfAndBaseTypes()
             .SelectMany(x => x.GetMembers())
             .OfType<IPropertySymbol>()
-            .Where(x => x.IsRequired)
+            .Where(x => x.IsRequired || x.IsStatic)
             .ToList();
 
         if (!settableProperties.Any())
@@ -108,10 +107,7 @@ internal static class ArgumentsRetriever
                     ImmutableArray.Create(propertySymbol.Type), dataSourceAttributes, namedTypeSymbol,
                     ArgumentsType.Property, propertySymbol.Name);
                 
-                foreach (var container in args.OfType<ArgumentsContainer>())
-                {
-                    list.Add((propertySymbol, container));
-                }
+                list.Add((propertySymbol, args.OfType<ArgumentsContainer>().First()));
             }
         }
 
