@@ -36,13 +36,14 @@ So to create a custom assertion:
 
    Any `TActual` object will be populated if a value was passed into `Assert.That(...)`, or a delegate with a return value was executed successfully.
 
-4. Override the `GetExpectation` method to return a message representing what would have been a success, in the format of "to /something/".
-e.g. Expected {ActualValue} *to be equal to {ExpectedValue}*
+4. Override the `GetExpectation` method to return a message representing what would have been a success, in the format of "to [Your Expectation]".
+e.g. Expected [Actual Value] *to be equal to [Expected Value]*
 
 When you return an `AssertionResult.Fail` result, you supply a message. This is appended after the above statement with a `but {Your Message}`
-e.g. Expected {ActualValue} to be equal to {ExpectedValue} *but it was null*
+e.g. Expected [Actual Value] to be equal to [Expected Value] *but it was null*
 
 In your assertion class, that'd be set up like:
+
 ```csharp
     protected override string GetExpectation()
         => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
@@ -62,7 +63,7 @@ In your assertion class, that'd be set up like:
 ```
 
 
-5. Create the extension method!
+1. Create the extension method!
 
    You need to create an extension off of either `IValueSource<TActual>` or `IDelegateSource<TActual>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
 
