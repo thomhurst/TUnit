@@ -8,6 +8,7 @@
     <RootNamespace>TUnit.Engine.SourceGenerator</RootNamespace>
     <PackageId>TUnit.Engine.SourceGenerator</PackageId>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
