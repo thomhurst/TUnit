@@ -47,7 +47,7 @@ public class AssertionResult
 			return Fail(this.Message + " and " + other.Message);
 		}
 
-		return this;
+		return Passed;
 	}
 
 	public AssertionResult OrFailIf(Func<bool> isFailed, string message)

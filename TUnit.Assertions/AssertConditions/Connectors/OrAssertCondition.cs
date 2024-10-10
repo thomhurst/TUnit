@@ -14,8 +14,9 @@ internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
         _condition2 = condition2;
 	}
 
-    protected override string GetExpectation()
-	    => throw new NotSupportedException();
+    // This method is not used, as the GetExpectationWithReason is overwritten
+    // and uses the expectation from the two conditions.
+    protected override string GetExpectation() => "";
 
 	internal override string GetExpectationWithReason()
 	    => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} or{Environment.NewLine}{_condition2.GetExpectationWithReason()}";
