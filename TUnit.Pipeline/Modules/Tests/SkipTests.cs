@@ -10,7 +10,7 @@ public class SkipTests : TestModule
         return await RunTestsWithFilter(context, 
             "/*/*/SkipTests/*",
             [
-                result => result.Successful.Should().BeFalse(),
+                result => result.Successful.Should().BeTrue(),
                 result => result.Total.Should().Be(1),
                 result => result.Passed.Should().Be(0),
                 result => result.Failed.Should().Be(0),
