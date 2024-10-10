@@ -72,9 +72,11 @@ internal record TestSourceDataModel
 
     public string MethodVariablesWithCancellationToken()
     {
-        var variableNames = MethodArguments is ArgumentsContainer argumentsContainer
-            ? argumentsContainer.VariableNames
+        var variables = MethodArguments is ArgumentsContainer argumentsContainer
+            ? argumentsContainer.DataVariables
             : [];
+        
+        var variableNames = variables.Select(x => x.Name).ToArray();
         
         if (HasTimeoutAttribute)
         {

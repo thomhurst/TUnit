@@ -12,15 +12,11 @@ internal record ArgumentsAttributeContainer : ArgumentsContainer
 
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
-        for (var index = 0; index < Arguments.Length; index++)
+        foreach (var argument in Arguments)
         {
-            var argument = Arguments[index];
-            
-            var invocation = argument.Invocation;
-            
-            sourceCodeWriter.WriteLine($"{argument.Type} {GenerateVariableName(ref variableIndex)} = {invocation};");
+            sourceCodeWriter.WriteLine(GenerateVariable(argument.Type, argument.Invocation, ref variableIndex).ToString());
         }
-        
+
         sourceCodeWriter.WriteLine();
     }
 

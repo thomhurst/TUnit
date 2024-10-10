@@ -18,21 +18,71 @@ internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataA
             };
         }
     }
+    
+    protected string DataAttributeVariableNamePrefix
+    {
+        get
+        {
+            return ArgumentsType switch
+            {
+                ArgumentsType.ClassConstructor => CodeGenerators.VariableNames.ClassDataAttribute,
+                ArgumentsType.Property => CodeGenerators.VariableNames.PropertyDataAttribute,
+                _ => CodeGenerators.VariableNames.MethodDataAttribute
+            };
+        }
+    }
 
-    protected string GenerateVariableName(ref int globalIndex)
+    protected Variable GenerateVariable(string type, string value, ref int globalIndex)
     {
         if (globalIndex == 0)
         {
             globalIndex++;
-            return AddVariable(VariableNamePrefix);
+            return AddVariable(new Variable
+            {
+                Type = type,
+                Name = VariableNamePrefix,
+                Value = value
+            });
         }
-        
-        return AddVariable($"{VariableNamePrefix}{globalIndex++}");
+
+        return AddVariable(new Variable
+        {
+            Type = type,
+            Name = $"{VariableNamePrefix}{globalIndex++}",
+            Value = value
+        });
+    }
+    
+    protected Variable GenerateDataAttributeVariable(string type, string value, ref int globalIndex)
+    {
+        if (globalIndex == 0)
+        {
+            globalIndex++;
+            return AddDataAttributeVariable(new Variable
+            {
+                Type = type,
+                Name = DataAttributeVariableNamePrefix,
+                Value = value
+            });
+        }
+
+        return AddDataAttributeVariable(new Variable
+        {
+            Type = type,
+            Name = $"{DataAttributeVariableNamePrefix}{globalIndex++}",
+            Value = value
+        });
     }
 
-    protected string AddVariable(string variableName)
+    protected Variable AddVariable(Variable variable)
     {
-        VariableNames.Add(variableName);
-        return variableName;
+        DataVariables.Add(variable);
+        return variable;
+    }
+    
+    protected Variable AddDataAttributeVariable(Variable variable)
+    {
+        DataAttributesVariables.Add(variable);
+        return variable;
     }
 };

@@ -39,9 +39,16 @@ internal static class GenericTestInvocationWriter
                 continue;
             }
             
-            sourceBuilder.WriteLine($"{fullyQualifiedClassType}.{propertySymbol.Name} = {argumentsContainer.VariableNames.ElementAt(0)};");
+            sourceBuilder.WriteLine($"{fullyQualifiedClassType}.{propertySymbol.Name} = {argumentsContainer.DataVariables.Select(x => x.Name).ElementAt(0)};");
         }
 
+        IEnumerable<BaseContainer> dataContainers =
+            [
+                testSourceDataModel.ClassArguments,
+                testSourceDataModel.MethodArguments,
+                ..testSourceDataModel.PropertyArguments.InnerContainers.Select(x => x.ArgumentsContainer)
+            ];
+        
         sourceBuilder.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
         
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
@@ -60,9 +67,9 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestRegistrar.RegisterTest<{fullyQualifiedClassType}>(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
-        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.VariableNames.ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.VariableNames.ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic).SelectMany(x => x.ArgumentsContainer.VariableNames).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic).SelectMany(x => x.ArgumentsContainer.DataVariables.Select(x => x.Name)).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");
@@ -74,8 +81,8 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"DisplayName = $\"{DisplayNameWriter.GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        sourceBuilder.WriteLine($"AttributeTypes = [ {string.Join(", ", testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})"))} ],");
-        sourceBuilder.WriteLine($"DataAttributes = [ {string.Join(", ", GenerateDataAttributes(testSourceDataModel))} ],");
+        sourceBuilder.WriteLine($"AttributeTypes = [ {testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})").ToCommaSeparatedString()} ],");
+        sourceBuilder.WriteLine($"DataAttributes = [ {dataContainers.SelectMany(x => x.DataAttributesVariables).Select(x => x.Name).ToCommaSeparatedString()} ],");
         sourceBuilder.WriteLine("ObjectBag = objectBag,");
         sourceBuilder.WriteLine("});");
         
@@ -106,7 +113,7 @@ internal static class GenericTestInvocationWriter
 
     private static string GetClassConstructor(TestSourceDataModel testSourceDataModel)
     {
-        return testSourceDataModel.ClassArguments is ClassConstructorAttributeContainer ? "classConstructor" : "null";
+        return testSourceDataModel.ClassArguments is ClassConstructorAttributeContainer classConstructorAttributeContainer ? classConstructorAttributeContainer.DataVariables.ElementAt(0).Name : "null";
     }
 
     private static string GetTestExecutor(string? testExecutor)

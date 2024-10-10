@@ -25,7 +25,7 @@ internal static class DisplayNameWriter
             return null;
         }
         
-        var args = testSourceDataModel.MethodArguments.VariableNames;
+        var args = testSourceDataModel.MethodArguments.DataVariables.Select(x => x.Name);
 
         for (var index = 0; index < testSourceDataModel.MethodParameterNames.Length; index++)
         {
@@ -38,7 +38,7 @@ internal static class DisplayNameWriter
 
     private static string GetMethodArgs(TestSourceDataModel testSourceDataModel)
     {
-        var variableNames = testSourceDataModel.MethodArguments.VariableNames;
+        var variableNames = testSourceDataModel.MethodArguments.DataVariables.Select(x => x.Name).ToArray();
         
         if (!variableNames.Any())
         {
