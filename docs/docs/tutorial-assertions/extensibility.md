@@ -26,7 +26,7 @@ So to create a custom assertion:
    `TExpected` will be the data (if any) that you receive from your extension method, so you'll be responsible for passing this in. You must pass it to the base class via the base constructor: `base(expectedValue)`
 
 3. Override the method: 
-   `protected override AssertionResult Passes(...)`
+   `protected override AssertionResult GetResult(...)`
 
    `AssertionResult` has static methods to represent a pass or a fail.
 
@@ -48,7 +48,7 @@ In your assertion class, that'd be set up like:
     protected override string GetExpectation()
         => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
 
-   protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
+   protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
     {
         if (actualValue is null)
         {
@@ -91,7 +91,7 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
     protected override string GetExpectation()
         => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
 
-    protected internal override AssertionResult Passes(string? actualValue, string? expectedValue)
+    protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
     {
         if (actualValue is null)
         {
