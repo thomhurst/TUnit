@@ -7,18 +7,18 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class InvokableAssertionBuilder<TActual> : 
     AssertionBuilder<TActual>, IInvokableAssertionBuilder 
 {
-    internal InvokableAssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionDataDelegate, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
+    internal InvokableAssertionBuilder(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder.AssertionDataDelegate, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
     {
     }
 
-    internal async Task ProcessAssertionsAsync()
+    internal async Task<AssertionData<TActual>> ProcessAssertionsAsync()
     {
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
         
         if (currentAssertionScope != null)
         {
             currentAssertionScope.Add(this);
-            return;
+            return null!;
         }
 
         var assertionData = await AssertionDataDelegate();
@@ -37,6 +37,8 @@ public class InvokableAssertionBuilder<TActual> :
                 );
             }
         }
+        
+        return assertionData;
     }
 
     async IAsyncEnumerable<(BaseAssertCondition Assertion, AssertionResult Result)> IInvokableAssertionBuilder.GetFailures()
@@ -54,7 +56,7 @@ public class InvokableAssertionBuilder<TActual> :
         }
     }
 
-    public TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
+    public TaskAwaiter GetAwaiter() => ((Task) ProcessAssertionsAsync()).GetAwaiter();
 
     string? IInvokableAssertionBuilder.GetExpression()
     {

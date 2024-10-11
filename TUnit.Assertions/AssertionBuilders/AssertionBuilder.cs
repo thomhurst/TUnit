@@ -68,7 +68,7 @@ public abstract class AssertionBuilder<TActual>
 
     internal InvokableAssertionBuilder<TActual> WithAssertion(BaseAssertCondition<TActual> assertCondition)
     {
-        var builder = new InvokableAssertionBuilder<TActual>(AssertionDataDelegate, this);
+        var builder = new InvokableAssertionBuilder<TActual>(this);
 
         assertCondition = this switch
         {
