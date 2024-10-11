@@ -11,18 +11,23 @@ public class InvokableAssertionBuilder<TActual> :
     {
     }
 
-    internal async Task ProcessAssertionsAsync()
+    internal Task ProcessAssertionsAsync()
+    {
+        return ProcessAssertionDataAsync();
+    }
+
+    private async Task<AssertionData<TActual>?> ProcessAssertionDataAsync()
     {
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
-        
+
         if (currentAssertionScope != null)
         {
             currentAssertionScope.Add(this);
-            return;
+            return null;
         }
 
         var assertionData = await AssertionDataDelegate();
-        
+
         foreach (var assertion in Assertions.Reverse())
         {
             var result = assertion.Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
@@ -37,6 +42,26 @@ public class InvokableAssertionBuilder<TActual> :
                 );
             }
         }
+
+        return assertionData;
+    }
+
+    internal async Task<TActual?> ProcessAssertionsWithValueAsync()
+    {
+        var assertionData = await ProcessAssertionDataAsync();
+        if (assertionData != null)
+        {
+            return assertionData.Result;
+        }
+
+        return default;
+    }
+
+    internal async Task<TException?> ProcessAssertionsWithExceptionAsync<TException>()
+        where TException : Exception
+    {
+        var assertionData = await ProcessAssertionDataAsync();
+        return assertionData?.Exception as TException;
     }
 
     async IAsyncEnumerable<(BaseAssertCondition Assertion, AssertionResult Result)> IInvokableAssertionBuilder.GetFailures()
@@ -54,7 +79,15 @@ public class InvokableAssertionBuilder<TActual> :
         }
     }
 
-    public TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
+    public TaskAwaiter<TActual?> GetAwaiter() => ProcessAssertionsWithValueAsync().GetAwaiter();
+
+    public TaskAwaiter GetAwaiterWithoutValue() => ProcessAssertionsAsync().GetAwaiter();
+
+    public TaskAwaiter<TActual?> GetAwaiterWithValue() => ProcessAssertionsWithValueAsync().GetAwaiter();
+
+    public TaskAwaiter<TException?> GetAwaiterWithException<TException>()
+        where TException : Exception
+        => ProcessAssertionsWithExceptionAsync<TException>().GetAwaiter();
 
     string? IInvokableAssertionBuilder.GetExpression()
     {
