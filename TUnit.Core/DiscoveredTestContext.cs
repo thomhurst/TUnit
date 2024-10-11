@@ -4,7 +4,6 @@ namespace TUnit.Core;
 
 public class DiscoveredTestContext
 {
-    internal Dictionary<string, string>? Properties;
     public TestContext TestContext { get; }
     public TestDetails TestDetails => TestContext.TestDetails;
 
@@ -15,7 +14,6 @@ public class DiscoveredTestContext
 
     public void AddProperty(string key, string value)
     {
-        var properties = Properties ??= new Dictionary<string, string>();
-        properties.Add(key, value);
+        TestContext.TestDetails.InternalCustomProperties.Add(key, value);
     }
 }

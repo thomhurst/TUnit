@@ -41,7 +41,7 @@ internal static class TestExtensions
         return testNode;
     }
 
-    internal static string GetClassTypeName(TestDetails testDetails)
+    internal static string GetClassTypeName(this TestDetails testDetails)
     {
         var classTypeName = testDetails.ClassType.FullName?
                                 .Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)

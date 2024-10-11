@@ -6,7 +6,6 @@ internal class SourceCodeWriter : IDisposable
 {
     private int _tabLevel;
     private readonly StringBuilder _stringBuilder = new();
-    private bool _lastWriteContainedNewLine;
 
     public void WriteLine()
     {
@@ -32,14 +31,7 @@ internal class SourceCodeWriter : IDisposable
         {
             _tabLevel--;
         }
-
-        if (_lastWriteContainedNewLine)
-        {
-            WriteTabs();
-        }
-
-        _lastWriteContainedNewLine = true;
-
+        
         _stringBuilder.AppendLine(value);
 
         if (value[0] == '{')
@@ -51,7 +43,6 @@ internal class SourceCodeWriter : IDisposable
     public void Write(string value)
     {
         _stringBuilder.Append(value);
-        _lastWriteContainedNewLine = false;
     }
 
     public override string ToString()
