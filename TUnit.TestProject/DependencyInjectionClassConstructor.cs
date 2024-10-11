@@ -1,42 +1,24 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 
-public class DependencyInjectionClassConstructor : IClassConstructor
+public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEvent
 {
     private readonly IServiceProvider _serviceProvider = CreateServiceProvider();
+    private AsyncServiceScope _scope;
     
-    private static readonly ConditionalWeakTable<object, IServiceScope> Scopes = new();
-
     public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : class
     {
-        var scope = _serviceProvider.CreateAsyncScope();
+        _scope = _serviceProvider.CreateAsyncScope();
         
-        var instance = ActivatorUtilities.GetServiceOrCreateInstance<T>(scope.ServiceProvider);
-        
-        Scopes.Add(instance, scope);
-        
-        return instance;
+        return ActivatorUtilities.GetServiceOrCreateInstance<T>(_scope.ServiceProvider);
     }
 
-    public async Task DisposeAsync<T>(T t)
-    {
-        if (t is IAsyncDisposable asyncDisposable)
-        {
-            await asyncDisposable.DisposeAsync();
-        }
-        else if (t is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-        
-        if (t != null && Scopes.TryGetValue(t, out var scope))
-        {
-            scope.Dispose();
-        }
+    public ValueTask OnTestEnd(TestContext testContext)
+    { 
+        return _scope.DisposeAsync();
     }
 
     private static IServiceProvider CreateServiceProvider()

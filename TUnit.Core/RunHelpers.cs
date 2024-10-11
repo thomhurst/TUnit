@@ -1,4 +1,6 @@
-﻿using TUnit.Core.Exceptions;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using TUnit.Core.Exceptions;
 using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Core;
@@ -60,7 +62,9 @@ internal static class RunHelpers
             await taskCompletionSource.Task;
         }
     }
-
+    
+    [StackTraceHidden]
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static async Task RunSafelyAsync(Func<Task> action, List<Exception> exceptions)
     {
         try
@@ -72,7 +76,9 @@ internal static class RunHelpers
             exceptions.Add(exception);
         }
     }
-
+    
+    [StackTraceHidden]
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static async Task RunValueTaskSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
     {
         try

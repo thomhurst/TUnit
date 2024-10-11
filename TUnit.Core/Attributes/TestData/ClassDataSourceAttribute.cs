@@ -7,7 +7,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : DataSourceGeneratorAttribute<T>, ITestRegisteredEvents, ITestStartEvents, ITestEndEvents where T : new()
+public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : DataSourceGeneratorAttribute<T>, ITestRegisteredEvents, ITestStartEvent, ITestEndEvent, ILastTestInClassEvent, ILastTestInAssemblyEvent where T : new()
 {
     private T? _item;
     private DataGeneratorMetadata? _dataGeneratorMetadata;
@@ -37,7 +37,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         yield return t;
     }
 
-    public async Task OnTestRegistered(TestContext testContext)
+    public async ValueTask OnTestRegistered(TestContext testContext)
     {
         switch (Shared)
         {
@@ -63,7 +63,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         }
     }
 
-    public async Task OnTestStart(TestContext testContext)
+    public async ValueTask OnTestStart(BeforeTestContext beforeTestContext)
     {
         if (_dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true)
         {
@@ -71,7 +71,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
             return;
         }
         
-        await Initialize(testContext);
+        await Initialize(beforeTestContext.TestContext);
     }
 
     private Task Initialize(TestContext testContext)
@@ -89,7 +89,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         };
     }
 
-    public async Task OnTestEnd(TestContext testContext)
+    public async ValueTask OnTestEnd(TestContext testContext)
     {
         if (Shared == SharedType.None)
         {
@@ -107,7 +107,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         }
     }
 
-    public async Task IfLastTestInClass(ClassHookContext context, TestContext testContext)
+    public async ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext)
     {
         if (Shared == SharedType.ForClass)
         {
@@ -115,17 +115,12 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         }
     }
 
-    public async Task IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
+    public async ValueTask IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
     {
         if (Shared == SharedType.ForAssembly)
         {
             await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(TestDataContainer.GetInstanceForType(typeof(T), () => default(T)!));
         }
-    }
-
-    public Task IfLastTestInTestSession(TestSessionContext current, TestContext testContext)
-    {
-        return Task.CompletedTask;
     }
 
     private Task Initialize(T? item)

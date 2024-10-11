@@ -85,15 +85,14 @@ public class ClassHookOrchestrator(
                 // Only run one time clean downs when no instances are left!
                 continue;
             }
-            
-            await RunHelpers.RunSafelyAsync(async () =>
+
+            foreach (var testEndEventsObject in testContext.GetLastTestInClassEventObjects())
             {
-                foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
-                {
-                    await testEndEventsObject.IfLastTestInClass(context, testContext);
-                }
-            }, cleanUpExceptions);
-            
+                await RunHelpers.RunValueTaskSafelyAsync(
+                    () => testEndEventsObject.IfLastTestInClass(context, testContext),
+                    cleanUpExceptions);
+            }
+
             await TestDataContainer.OnLastInstance(testClassType);
             
             if (!TestDictionary.ClassCleanUps.TryGetValue(type, out var cleanUpsForType))

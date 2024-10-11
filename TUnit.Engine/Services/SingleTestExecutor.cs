@@ -86,6 +86,8 @@ internal class SingleTestExecutor(
                 {
                     throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
                 }
+                
+                await ExecuteOnTestStartEvents(testContext);
 
                 start = DateTimeOffset.Now;
                 
@@ -185,19 +187,10 @@ internal class SingleTestExecutor(
     {
         try
         {
-            foreach (var beforeTestAttribute in test.BeforeTestAttributes)
-            {
-                await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
-                    () => beforeTestAttribute.OnBeforeTest(
-                        new BeforeTestContext(testContext.InternalDiscoveredTest)));
-            }
-            
             await ExecuteBeforeHooks(test, context, testContext);
 
             TestContext.Current = testContext;
-
-            await InitializeObjects(testContext);
-
+            
             await ExecuteWithRetries(test);
         }
         finally
@@ -206,24 +199,13 @@ internal class SingleTestExecutor(
             // If skipped, we didn't perform set ups, so also don't perform tear downs
             if (testContext.TestStart != null)
             {
-                foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
+                foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
                 {
-                    await RunHelpers.RunSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
+                    await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
                         cleanUpExceptions);
-                }
-                
-                foreach (var afterTestAttribute in test.AfterTestAttributes)
-                {
-                    await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
-                        () => RunHelpers.RunSafelyAsync(() => afterTestAttribute.OnAfterTest(testContext),
-                            cleanUpExceptions));
                 }
 
                 await DisposeTest(testContext, cleanUpExceptions);
-
-                await RunHelpers.RunSafelyAsync(
-                    () => test.ClassConstructor?.DisposeAsync(test.TestDetails.ClassInstance) ?? Task.CompletedTask,
-                    cleanUpExceptions);
 
                 TestContext.Current = null;
 
@@ -240,11 +222,11 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async ValueTask InitializeObjects(TestContext testContext)
+    private async ValueTask ExecuteOnTestStartEvents(TestContext testContext)
     {
-        foreach (var testStartEventsObject in testContext.GetTestStartEventsObjects())
+        foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
         {
-            await testStartEventsObject.OnTestStart(testContext);
+            await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
         }
     }
 
@@ -277,13 +259,12 @@ internal class SingleTestExecutor(
 
             if (InstanceTracker.IsLastTest())
             {
-                await RunHelpers.RunSafelyAsync(async () =>
+                foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
                 {
-                    foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
-                    {
-                        await testEndEventsObject.IfLastTestInTestSession(TestSessionContext.Current!, testContext);
-                    }
-                }, cleanUpExceptions);
+                    await RunHelpers.RunValueTaskSafelyAsync(
+                        () => testEndEventsObject.IfLastTestInTestSession(TestSessionContext.Current!, testContext),
+                        cleanUpExceptions);
+                }
             }
         }
         catch
@@ -292,7 +273,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
+    private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
     {
         await TestHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
             
