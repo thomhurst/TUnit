@@ -2,15 +2,11 @@
 
 namespace TUnit.Engine.Models;
 
-internal class ConstraintKeysCollection : IReadOnlyList<string>, IEquatable<ConstraintKeysCollection>
+internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
+    : IReadOnlyList<string>, IEquatable<ConstraintKeysCollection>
 {
-    private readonly IReadOnlyList<string> _constraintKeys;
+    private readonly IReadOnlyList<string> _constraintKeys = constraintKeys;
 
-    public ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
-    {
-        _constraintKeys = constraintKeys;
-    }
-    
     public IEnumerator<string> GetEnumerator()
     {
         return _constraintKeys.GetEnumerator();

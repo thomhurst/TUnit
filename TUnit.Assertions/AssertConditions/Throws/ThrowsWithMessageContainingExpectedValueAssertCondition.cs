@@ -1,5 +1,3 @@
-using TUnit.Assertions.Extensions;
-
 namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(
@@ -20,7 +18,7 @@ public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(
                 () => actualException is null,
                 "the exception is null")
             .OrFailIf(
-                () => !string.Equals(exception.Message, expectedMessage, stringComparison),
-                $"it was not found");
+                () => !string.Equals(exception!.Message, expectedMessage, stringComparison),
+                "it was not found");
     }
 }

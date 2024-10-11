@@ -6,15 +6,10 @@ using TUnit.Core.Exceptions;
 
 namespace TUnit.Engine.Services;
 
-internal class TestFilterService
+internal class TestFilterService(ILoggerFactory loggerFactory)
 {
-    private readonly ILogger<TestFilterService> _logger;
+    private readonly ILogger<TestFilterService> _logger = loggerFactory.CreateLogger<TestFilterService>();
 
-    public TestFilterService(ILoggerFactory loggerFactory)
-    {
-        _logger = loggerFactory.CreateLogger<TestFilterService>();
-    }
-    
     public IEnumerable<DiscoveredTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IEnumerable<DiscoveredTest> testNodes)
     {
 #pragma warning disable TPEXP

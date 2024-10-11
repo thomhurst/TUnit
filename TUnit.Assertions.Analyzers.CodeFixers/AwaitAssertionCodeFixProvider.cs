@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 
-namespace TUnit.Assertions.Analyzers;
+namespace TUnit.Assertions.Analyzers.CodeFixers;
 
 /// <summary>
 /// A sample code fix provider that renames classes with the company name in their definition.

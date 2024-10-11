@@ -45,17 +45,11 @@ public class ParallelTests
         }
     }
 
-    private class DateTimeRange
+    private class DateTimeRange(DateTime start, DateTime end)
     {
-        public DateTime Start { get; }
-        public DateTime End { get; }
-        
-        public DateTimeRange(DateTime start, DateTime end)
-        {
-            Start = start;
-            End = end;
-        }
-        
+        public DateTime Start { get; } = start;
+        public DateTime End { get; } = end;
+
         public bool Overlap(DateTimeRange other)
         {
             return Start <= other.End && other.Start <= End;

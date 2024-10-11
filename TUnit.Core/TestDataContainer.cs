@@ -2,7 +2,6 @@
 using System.Reflection;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 

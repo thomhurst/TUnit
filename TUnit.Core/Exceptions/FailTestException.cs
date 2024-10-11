@@ -1,11 +1,6 @@
 ﻿namespace TUnit.Core.Exceptions;
 
-public class FailTestException : TUnitException
+public class FailTestException(string reason) : TUnitException
 {
-    public string Reason { get; }
-
-    public FailTestException(string reason)
-    {
-        Reason = reason;
-    }
+    public string Reason { get; } = reason;
 }

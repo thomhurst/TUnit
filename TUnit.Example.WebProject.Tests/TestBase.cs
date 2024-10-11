@@ -1,6 +1,4 @@
-﻿using TUnit.Core;
-
-namespace TUnit.Example.WebProject.Tests;
+﻿namespace TUnit.Example.WebProject.Tests;
 
 public class TestBase
 {

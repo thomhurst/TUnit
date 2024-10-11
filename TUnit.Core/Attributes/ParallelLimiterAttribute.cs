@@ -3,13 +3,8 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class ParallelLimiterAttribute<TParallelLimit> : ParallelLimiterAttribute
-    where TParallelLimit : IParallelLimit, new()
-{
-    public ParallelLimiterAttribute() : base(typeof(TParallelLimit))
-    {
-    }
-}
+public sealed class ParallelLimiterAttribute<TParallelLimit>() : ParallelLimiterAttribute(typeof(TParallelLimit))
+    where TParallelLimit : IParallelLimit, new();
 
 public class ParallelLimiterAttribute : TUnitAttribute
 {

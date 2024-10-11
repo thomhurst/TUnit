@@ -7,22 +7,14 @@ using TUnit.Engine.CommandLineProviders;
 namespace TUnit.Engine.Capabilities;
 
 #pragma warning disable TPEXP
-internal class BannerCapability : IBannerMessageOwnerCapability
+internal class BannerCapability(IPlatformInformation platformInformation, ICommandLineOptions commandLineOptions)
+    : IBannerMessageOwnerCapability
 {
     const string Separator = " | ";
 
-    private readonly IPlatformInformation _platformInformation;
-    private readonly ICommandLineOptions _commandLineOptions;
-
-    public BannerCapability(IPlatformInformation platformInformation, ICommandLineOptions commandLineOptions)
-    {
-        _platformInformation = platformInformation;
-        _commandLineOptions = commandLineOptions;
-    }
-    
     public Task<string?> GetBannerMessageAsync()
     {
-        if (_commandLineOptions.IsOptionSet(DisableLogoCommandProvider.DisableLogo))
+        if (commandLineOptions.IsOptionSet(DisableLogoCommandProvider.DisableLogo))
         {
             return Task.FromResult<string?>(GetRuntimeDetails());
         }
@@ -52,7 +44,7 @@ internal class BannerCapability : IBannerMessageOwnerCapability
             RuntimeInformation.OSDescription,
             RuntimeInformation.RuntimeIdentifier,
             RuntimeInformation.FrameworkDescription,
-            $"Microsoft Testing Platform v{_platformInformation.Version}"
+            $"Microsoft Testing Platform v{platformInformation.Version}"
         ];
 
         return string.Join(Separator, segments);

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core.Data;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;

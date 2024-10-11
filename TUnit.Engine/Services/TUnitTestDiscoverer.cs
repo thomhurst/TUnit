@@ -4,26 +4,20 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Services;
 
-internal class TUnitTestDiscoverer
+internal class TUnitTestDiscoverer(
+    TestsLoader testsLoader,
+    TestFilterService testFilterService,
+    ILoggerFactory loggerFactory)
 {
-    private readonly TestsLoader _testsLoader;
-    private readonly TestFilterService _testFilterService;
-    private readonly ILogger<TUnitTestDiscoverer> _logger;
+    private readonly ILogger<TUnitTestDiscoverer> _logger = loggerFactory.CreateLogger<TUnitTestDiscoverer>();
 
-    public TUnitTestDiscoverer(TestsLoader testsLoader, TestFilterService testFilterService, ILoggerFactory loggerFactory)
-    {
-        _testsLoader = testsLoader;
-        _testFilterService = testFilterService;
-        _logger = loggerFactory.CreateLogger<TUnitTestDiscoverer>();
-    }
-    
     public DiscoveredTest[] DiscoverTests(TestExecutionRequest? discoverTestExecutionRequest, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         
-        var tests = _testsLoader.GetTests();
+        var tests = testsLoader.GetTests();
 
-        var discoveredTests = _testFilterService.FilterTests(discoverTestExecutionRequest?.Filter, tests).ToArray();
+        var discoveredTests = testFilterService.FilterTests(discoverTestExecutionRequest?.Filter, tests).ToArray();
         
         _logger.LogTrace($"Found {discoveredTests.Length} tests after filtering.");
         

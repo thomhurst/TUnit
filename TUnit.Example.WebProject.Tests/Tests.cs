@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using FluentAssertions;
-using TUnit.Core;
 
 namespace TUnit.Example.WebProject.Tests;
 

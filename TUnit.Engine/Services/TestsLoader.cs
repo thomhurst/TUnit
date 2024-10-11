@@ -3,15 +3,10 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Services;
 
-internal class TestsLoader
+internal class TestsLoader(ILoggerFactory loggerFactory)
 {
-    private readonly ILogger<TestsLoader> _logger;
+    private readonly ILogger<TestsLoader> _logger = loggerFactory.CreateLogger<TestsLoader>();
 
-    public TestsLoader(ILoggerFactory loggerFactory)
-    {
-        _logger = loggerFactory.CreateLogger<TestsLoader>();
-    }
-    
     public IReadOnlyCollection<DiscoveredTest> GetTests()
     {
         var tests = TestDictionary.GetAllTests();

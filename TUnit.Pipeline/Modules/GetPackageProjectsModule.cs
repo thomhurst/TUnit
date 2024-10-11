@@ -12,13 +12,13 @@ public class GetPackageProjectsModule : Module<List<File>>
     {
         return context.Git().RootDirectory
             .GetFiles(x => x.Extension == ".csproj")
-            .Where(x => !x.Name.Contains("Pipeline"))
-            .Where(x => !x.Name.Contains("Analyzer"))
-            .Where(x => !x.Name.Contains("Generator"))
-            .Where(x => !x.Name.Contains("Sample"))
-            .Where(x => !x.Name.Contains("TestProject"))
-            .Where(x => !x.Name.Contains("Test"))
-            .Where(x => !x.Name.Contains("Timer"))
+            .Where(x => !x.Name.Contains("Pipeline", StringComparison.OrdinalIgnoreCase))
+            .Where(x => !x.Name.Contains("Analyzer", StringComparison.OrdinalIgnoreCase))
+            .Where(x => !x.Name.Contains("Generator", StringComparison.OrdinalIgnoreCase))
+            .Where(x => !x.Name.Contains("Sample", StringComparison.OrdinalIgnoreCase))
+            .Where(x => !x.Name.Contains("Test", StringComparison.OrdinalIgnoreCase))
+            .Where(x => !x.Name.Contains("Timer", StringComparison.OrdinalIgnoreCase))
+            .Where(x => !x.Name.Contains("CodeFix", StringComparison.OrdinalIgnoreCase))
             .ToList()
             .AsTask<List<File>?>();
     }

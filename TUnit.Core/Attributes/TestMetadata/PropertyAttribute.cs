@@ -1,14 +1,8 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
-public class PropertyAttribute : TUnitAttribute
+public class PropertyAttribute(string name, string value) : TUnitAttribute
 {
-    public string Name { get; }
-    public string Value { get; }
-
-    public PropertyAttribute(string name, string value)
-    {
-        Name = name;
-        Value = value;
-    }
+    public string Name { get; } = name;
+    public string Value { get; } = value;
 }

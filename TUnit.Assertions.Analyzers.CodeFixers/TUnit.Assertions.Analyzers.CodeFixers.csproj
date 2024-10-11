@@ -7,8 +7,6 @@
     <IsRoslynComponent>true</IsRoslynComponent>
     <DevelopmentDependency>false</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <RootNamespace>TUnit.Assertions.Analyzers</RootNamespace>
-    <AssemblyName>TUnit.Assertions.Analyzers</AssemblyName>
     <NoWarn>RS2003</NoWarn>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
@@ -16,9 +14,6 @@
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>TUnit.Assertions.Analyzers.Tests</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Assertions.Analyzers.CodeFixers</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
@@ -28,21 +23,16 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <AdditionalFiles Remove="AnalyzerReleases.Unshipped.md" />
+    <AdditionalFiles Remove="AnalyzerReleases.Shipped.md" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
+    <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
   </ItemGroup>
 </Project>
