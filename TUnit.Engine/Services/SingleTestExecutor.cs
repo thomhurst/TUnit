@@ -86,6 +86,8 @@ internal class SingleTestExecutor(
                 {
                     throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
                 }
+                
+                await ExecuteOnTestStartEvents(testContext);
 
                 start = DateTimeOffset.Now;
                 
@@ -188,9 +190,7 @@ internal class SingleTestExecutor(
             await ExecuteBeforeHooks(test, context, testContext);
 
             TestContext.Current = testContext;
-
-            await ExecuteOnTestStartEvents(testContext);
-
+            
             await ExecuteWithRetries(test);
         }
         finally
