@@ -53,7 +53,6 @@ public static class TestRegistrar
 			MethodInfo = methodInfo,
 			TestName = methodInfo.Name,
 			DisplayName = testMetadata.DisplayName,
-			InternalCustomProperties = attributes.OfType<PropertyAttribute>().ToDictionary(x => x.Name, x => x.Value),
 			ReturnType = methodInfo.ReturnType,
 			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = testMetadata.TestFilePath,
@@ -61,9 +60,14 @@ public static class TestRegistrar
 			ParallelLimit = testMetadata.ParallelLimit,
 		};
 
+		foreach (var propertyAttribute in attributes.OfType<PropertyAttribute>())
+		{
+			testDetails.InternalCustomProperties.Add(propertyAttribute.Name, propertyAttribute.Value);
+		}
+
 		var testContext = new TestContext(testDetails, testMetadata.ObjectBag);
 		
-		RunOnTestDiscoveryAttributes(attributes, testContext);
+		RunOnTestDiscoveryAttributeHooks(attributes, testContext);
 		
 		var unInvokedTest = new DiscoveredTest<TClassType>(testMetadata.ResettableClassFactory)
 		{
@@ -78,22 +82,12 @@ public static class TestRegistrar
 		TestDictionary.AddTest(testId, unInvokedTest);
 	}
 
-	private static void RunOnTestDiscoveryAttributes(IEnumerable<Attribute> attributes, TestContext testContext)
+	private static void RunOnTestDiscoveryAttributeHooks(IEnumerable<Attribute> attributes, TestContext testContext)
 	{
 		DiscoveredTestContext? discoveredTestContext = null;
-		foreach (var onTestDiscoveryAttribute in attributes.OfType<IOnTestDiscoveryAttribute>().Reverse()) // Reverse to run assembly, then class, then method
+		foreach (var onTestDiscoveryAttribute in attributes.OfType<ITestDiscoveryEvent>().Reverse()) // Reverse to run assembly, then class, then method
 		{
 			onTestDiscoveryAttribute.OnTestDiscovery(discoveredTestContext ??= new DiscoveredTestContext(testContext));
-		}
-
-		if (discoveredTestContext is null)
-		{
-			return;
-		}
-		
-		foreach (var (key, value) in discoveredTestContext.Properties ?? [])
-		{
-			testContext.TestDetails.InternalCustomProperties.Add(key, value);
 		}
 	}
 

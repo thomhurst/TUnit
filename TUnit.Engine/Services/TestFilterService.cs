@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
@@ -50,7 +51,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
     private string BuildPath(TestDetails testDetails)
     {
         return
-            $"/{testDetails.ClassType.Assembly.FullName}/{testDetails.ClassType.Namespace}/{testDetails.ClassType.Name}/{testDetails.MethodInfo.Name}";
+            $"/{testDetails.ClassType.Assembly.GetName().Name}/{testDetails.ClassType.Namespace}/{testDetails.GetClassTypeName()}/{testDetails.MethodInfo.Name}";
     }
 
     private PropertyBag BuildPropertyBag(TestDetails testDetails)

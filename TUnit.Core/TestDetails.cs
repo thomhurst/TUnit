@@ -40,7 +40,7 @@ public abstract record TestDetails(Type ClassType)
     
     public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
     public IReadOnlyDictionary<string, string> CustomProperties => InternalCustomProperties;
-    public required Dictionary<string, string> InternalCustomProperties { get; init; }
+    internal Dictionary<string, string> InternalCustomProperties { get; } = [];
 
     [JsonIgnore]
     public required Attribute[] AssemblyAttributes { get; init; }
