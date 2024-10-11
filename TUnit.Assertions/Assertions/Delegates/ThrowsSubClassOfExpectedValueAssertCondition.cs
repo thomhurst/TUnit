@@ -14,7 +14,7 @@ public class ThrowsSubClassOfExpectedValueAssertCondition<TActual, TExpectedExce
             () => exception is null,
             $"none was thrown")
         .OrFailIf(
-            () => !exception.GetType().IsSubclassOf(typeof(TExpectedException)),
+            () => !exception.GetType().IsAssignableTo(typeof(TExpectedException)),
             $"{exception?.GetType().Name.PrependAOrAn()} was thrown"
         );
 }
