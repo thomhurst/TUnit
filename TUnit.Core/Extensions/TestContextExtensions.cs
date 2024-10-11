@@ -46,6 +46,7 @@ public static class TestContextExtensions
         return
         [
             ..context.TestDetails.DataAttributes,
+            ..context.TestDetails.Attributes,
             context.TestDetails.ClassInstance,
             context.InternalDiscoveredTest.ClassConstructor
         ];
