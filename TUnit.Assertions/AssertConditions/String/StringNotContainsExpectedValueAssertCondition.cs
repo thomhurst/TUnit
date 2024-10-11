@@ -20,7 +20,7 @@ public class StringNotContainsExpectedValueAssertCondition(string expected, Stri
 
         return AssertionResult
             .FailIf(
-                () => actualValue.Contains(expectedValue, stringComparison),
+                () => actualValue.Contains(expectedValue!, stringComparison),
                 $"it was found in {Format(actualValue).TruncateWithEllipsis(100)}");
     }
 }
