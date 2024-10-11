@@ -91,15 +91,14 @@ public class AssemblyHookOrchestrator(
         }
         
         var context = GetAssemblyHookContext(assembly);
-        
-        await RunHelpers.RunSafelyAsync(async () =>
+
+        foreach (var testEndEventsObject in testContext.GetLastTestInAssemblyEventObjects())
         {
-            foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
-            {
-                await testEndEventsObject.IfLastTestInAssembly(context, testContext);
-            }
-        }, cleanUpExceptions);
-        
+            await RunHelpers.RunValueTaskSafelyAsync(
+                () => testEndEventsObject.IfLastTestInAssembly(context, testContext),
+                cleanUpExceptions);
+        }
+
         // Run global ones last
         await globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
     }

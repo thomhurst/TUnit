@@ -26,9 +26,6 @@ internal class DiscoveredTest<
 internal abstract class DiscoveredTest
 {
     public required TestContext TestContext { get; init; }
-    
-    public required IBeforeTestAttribute[] BeforeTestAttributes { get; init; }
-    public required IAfterTestAttribute[] AfterTestAttributes { get; init; }
 
     public abstract Task ExecuteTest(CancellationToken cancellationToken);
 

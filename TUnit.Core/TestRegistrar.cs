@@ -68,8 +68,6 @@ public static class TestRegistrar
 		var unInvokedTest = new DiscoveredTest<TClassType>(testMetadata.ResettableClassFactory)
 		{
 			TestContext = testContext,
-			BeforeTestAttributes = attributes.OfType<IBeforeTestAttribute>().ToArray(),
-			AfterTestAttributes = attributes.OfType<IAfterTestAttribute>().ToArray(),
 			TestBody = (classInstance, cancellationToken) => testMetadata.TestMethodFactory(classInstance, cancellationToken),
 			TestExecutor = testMetadata.TestExecutor,
 			ClassConstructor = testMetadata.ClassConstructor
