@@ -45,7 +45,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Example.WebProject", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.Tests", "TUnit.Assertions.Tests\TUnit.Assertions.Tests.csproj", "{5BEC27F0-C33B-4BD9-A2D1-75E6158D35DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.Analyzers.CodeFixers", "TUnit.Assertions.Analyzers .CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj", "{D5342747-7A9C-480E-ACA9-D9D6DDBA14A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.Analyzers.CodeFixers", "TUnit.Assertions.Analyzers.CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj", "{D5342747-7A9C-480E-ACA9-D9D6DDBA14A9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.UnitTests", "TUnit.UnitTests\TUnit.UnitTests.csproj", "{541A8198-3D3B-4763-BD20-E39FB043ED07}"
 EndProject
