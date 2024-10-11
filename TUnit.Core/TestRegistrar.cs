@@ -24,7 +24,7 @@ public static class TestRegistrar
 
 		var methodAttributes = testMetadata.AttributeTypes.SelectMany(x => methodInfo.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
 		var dataAttributes = testMetadata.DataAttributes;
-		var typeAttributes = testMetadata.AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
+		var typeAttributes = testMetadata.AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x, true)).Distinct().OfType<Attribute>().Where(x => !x.IsDefaultAttribute()).ToArray();
 		var assemblyAttributes = testMetadata.AttributeTypes.SelectMany(x => classType.Assembly.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
 		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
 		
