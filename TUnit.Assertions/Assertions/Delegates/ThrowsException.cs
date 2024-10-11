@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
@@ -23,13 +22,15 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public ThrowsException<TActual, TException> WithMessageMatching(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        _delegateSource.RegisterAssertion(new ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(expected, StringComparison.Ordinal, _exceptionSelector)
+        _delegateSource.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _exceptionSelector)
             , [doNotPopulateThisValue]);
         return this;
     }
 
-    public ThrowsException<TActual, TException> WithInnerException()
+    public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
+        _delegateSource.RegisterAssertion(new ThrowsWithMessageAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _exceptionSelector)
+            , [doNotPopulateThisValue]);
         return this;
     }
 

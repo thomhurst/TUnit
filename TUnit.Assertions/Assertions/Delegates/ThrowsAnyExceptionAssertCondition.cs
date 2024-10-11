@@ -1,9 +1,8 @@
-
 using TUnit.Assertions.AssertConditions;
 
 namespace TUnit.Assertions.Delegates;
 
-public class ThrowsAnythingExpectedValueAssertCondition<TActual>
+public class ThrowsAnyExceptionAssertCondition<TActual>
     : DelegateAssertCondition<TActual, Exception>
 {
     protected override string GetExpectation()

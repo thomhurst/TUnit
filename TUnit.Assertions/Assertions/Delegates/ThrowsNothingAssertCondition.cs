@@ -3,7 +3,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Delegates;
 
-public class ThrowsNothingExpectedValueAssertCondition<TActual> : DelegateAssertCondition<TActual, Exception>
+public class ThrowsNothingAssertCondition<TActual> : DelegateAssertCondition<TActual, Exception>
 {
     protected override string GetExpectation()
         => "to throw nothing";

@@ -21,13 +21,13 @@ public class Throws<TActual>
 
     public InvokableDelegateAssertionBuilder<TActual> Nothing()
     {
-        return _delegateSource.RegisterAssertion(new ThrowsNothingExpectedValueAssertCondition<TActual>()
+        return _delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>()
             , []);
     }
 
     public ThrowsException<TActual, Exception> Exception()
     {
-        return new(_delegateSource.RegisterAssertion(new ThrowsAnythingExpectedValueAssertCondition<TActual>()
+        return new(_delegateSource.RegisterAssertion(new ThrowsAnyExceptionAssertCondition<TActual>()
             , []), _delegateSource, _exceptionSelector);
     }
 
@@ -38,6 +38,6 @@ public class Throws<TActual>
 
     public ThrowsException<TActual, TException> OfType<TException>() where TException : Exception
     {
-        return new(_delegateSource.RegisterAssertion(new ThrowsSubClassOfExpectedValueAssertCondition<TActual, TException>(), [], $"{nameof(OfType)}<{typeof(TException).Name}>"), _delegateSource, _exceptionSelector);
+        return new(_delegateSource.RegisterAssertion(new ThrowsOfTypeAssertCondition<TActual, TException>(), [], $"{nameof(OfType)}<{typeof(TException).Name}>"), _delegateSource, _exceptionSelector);
     }
 }

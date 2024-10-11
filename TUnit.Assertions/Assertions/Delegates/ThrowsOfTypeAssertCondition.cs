@@ -3,7 +3,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Delegates;
 
-public class ThrowsSubClassOfExpectedValueAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, Exception>
+public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, Exception>
 {
     protected override string GetExpectation()
         => $"to throw {typeof(TExpectedException).Name.PrependAOrAn()}";
@@ -14,7 +14,7 @@ public class ThrowsSubClassOfExpectedValueAssertCondition<TActual, TExpectedExce
             () => exception is null,
             $"none was thrown")
         .OrFailIf(
-            () => !exception.GetType().IsAssignableTo(typeof(TExpectedException)),
+            () => !exception!.GetType().IsAssignableTo(typeof(TExpectedException)),
             $"{exception?.GetType().Name.PrependAOrAn()} was thrown"
         );
 }

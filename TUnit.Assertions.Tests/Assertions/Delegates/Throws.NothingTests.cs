@@ -18,7 +18,7 @@ public partial class Throws
                 => await Assert.That(action).Throws().Nothing();
 
             await Assert.That(sut).Throws().Exception()
-                .WithMessageMatching(expectedMessage);
+                .WithMessage(expectedMessage);
         }
 
         [Test]

@@ -4,14 +4,15 @@ using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Delegates;
 
-public class ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(
+public class ThrowsWithMessageAssertCondition<TActual, TException>(
     string expectedMessage,
     StringComparison stringComparison,
     Func<Exception?, Exception?> exceptionSelector)
     : DelegateAssertCondition<TActual, Exception>
+    where TException : Exception
 {
     protected override string GetExpectation()
-        => $"to have Message equal to \"{expectedMessage.ShowNewLines().TruncateWithEllipsis(100)}\"";
+        => $"to throw {typeof(TException).Name.PrependAOrAn()} which message equals \"{expectedMessage.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
     protected override AssertionResult GetResult(TActual? actualValue, Exception? exception)
     {

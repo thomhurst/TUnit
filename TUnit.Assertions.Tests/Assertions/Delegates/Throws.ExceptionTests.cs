@@ -17,7 +17,18 @@ public partial class Throws
                 => await Assert.That(action).Throws().Exception();
 
             await Assert.That(sut).Throws().Exception()
-                .WithMessageMatching(expectedMessage);
+                .WithMessage(expectedMessage);
+        }
+
+        [Test]
+        public async Task Returns_Exception_When_Awaited()
+        {
+            Exception exception = CustomException.Create();
+            Action action = () => throw exception;
+
+            var result = await Assert.That(action).Throws().Exception();
+
+            await Assert.That((object?)result).IsSameReference(exception);
         }
 
         [Test]
