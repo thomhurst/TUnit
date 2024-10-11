@@ -2,7 +2,7 @@
 
 namespace TUnit.TestProject;
 
-[MyDynamicallyAddedPropertyEvent]
+[MyDynamicallyAddedProperty]
 public class FilterByDynamicAddedPropertyTests
 {
     [Test]
@@ -10,7 +10,7 @@ public class FilterByDynamicAddedPropertyTests
     {
     }
     
-    public class MyDynamicallyAddedPropertyEvent : Attribute, ITestDiscoveryEvent
+    public class MyDynamicallyAddedPropertyAttribute : Attribute, ITestDiscoveryEvent
     {
         public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
         {
