@@ -64,4 +64,6 @@ public class AssertionResult
 
     public static AssertionResult Passed { get; }
         = new AssertionResult(true, null);
+    
+    public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
 }

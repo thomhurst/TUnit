@@ -12,7 +12,7 @@ public class ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(
     protected override string GetExpectation()
         => $"to have Message equal to \"{expectedMessage.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
-    protected override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {
         var actualException = exceptionSelector(exception);
 

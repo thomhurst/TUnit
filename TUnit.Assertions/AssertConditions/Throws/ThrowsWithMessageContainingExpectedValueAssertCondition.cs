@@ -9,7 +9,7 @@ public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(
     protected override string GetExpectation()
         => $"to have Message containing \"{expectedMessage}\"";
 
-    protected override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {
         var actualException = exceptionSelector(exception);
 
@@ -18,7 +18,7 @@ public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(
                 () => actualException is null,
                 "the exception is null")
             .OrFailIf(
-                () => !string.Equals(exception!.Message, expectedMessage, stringComparison),
+                () => !actualException!.Message.Contains(expectedMessage, stringComparison),
                 "it was not found");
     }
 }
