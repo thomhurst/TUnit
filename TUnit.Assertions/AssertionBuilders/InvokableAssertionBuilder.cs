@@ -16,6 +16,12 @@ public class InvokableAssertionBuilder<TActual> :
         }
     }
 
+    internal async Task<T> ProcessAssertionsAsync<T>(Func<AssertionData<TActual>, T> mapper)
+    {
+        var assertionData = await ProcessAssertionsAsync();
+        return mapper(assertionData);
+    }
+
     internal async Task<AssertionData<TActual>> ProcessAssertionsAsync()
     {
         _invokedAssertionData ??= await AssertionDataDelegate();

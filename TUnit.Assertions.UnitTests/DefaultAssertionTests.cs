@@ -18,7 +18,7 @@ public class DefaultAssertionTests
               {
                       string? s = "1";
                       await TUnitAssert.That(s).IsDefault();
-              }).ThrowsException().OfType<TUnitAssertionException>();
+              }).Throws<TUnitAssertionException>();
         }
         
         [Test]
@@ -35,7 +35,7 @@ public class DefaultAssertionTests
               {
                         int x = 1;
                         await TUnitAssert.That(x).IsDefault();
-              }).ThrowsException().OfType<TUnitAssertionException>();
+              }).Throws<TUnitAssertionException>();
         }
         
         [Test]
@@ -52,7 +52,7 @@ public class DefaultAssertionTests
                 {
                         var dt = DateTime.Now;
                         await TUnitAssert.That(dt).IsDefault();
-                }).ThrowsException().OfType<TUnitAssertionException>();
+                }).Throws<TUnitAssertionException>();
         }
         
         [Test]
@@ -62,7 +62,7 @@ public class DefaultAssertionTests
                 {
                         string? s = null;
                         await TUnitAssert.That(s).IsNotDefault();
-                }).ThrowsException().OfType<TUnitAssertionException>();
+                }).Throws<TUnitAssertionException>();
         }
         
         [Test]
@@ -79,7 +79,7 @@ public class DefaultAssertionTests
                 {
                         int x = 0;
                         await TUnitAssert.That(x).IsNotDefault();
-                }).ThrowsException().OfType<TUnitAssertionException>();
+                }).Throws<TUnitAssertionException>();
         }
         
         [Test]
@@ -96,7 +96,7 @@ public class DefaultAssertionTests
                 {
                         DateTime dt = default;
                         await TUnitAssert.That(dt).IsNotDefault();
-                }).ThrowsException().OfType<TUnitAssertionException>();
+                }).Throws<TUnitAssertionException>();
         }
         
         [Test]

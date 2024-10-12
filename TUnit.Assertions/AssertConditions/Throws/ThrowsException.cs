@@ -5,46 +5,42 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsException<TActual>
+public class ThrowsException<TActual, TException>(
+    InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,
+    IDelegateSource<TActual> delegateSource,
+    Func<Exception?, Exception?> exceptionSelector,
+    [CallerMemberName] string callerMemberName = "")
+    where TException : Exception
 {
-    private readonly IDelegateSource<TActual> _delegateSource;
-    private readonly Func<Exception?, Exception?> _exceptionSelector;
+    private readonly IDelegateSource<TActual> _delegateSource = delegateSource;
+    private readonly Func<Exception?, Exception?> _exceptionSelector = exceptionSelector;
+    private IDelegateSource<TActual> delegateSource;
+    private Func<Exception?, TException?> exceptionSelector;
 
-    public ThrowsException(IDelegateSource<TActual> delegateSource,
-        Func<Exception?, Exception?> exceptionSelector,
-        [CallerMemberName] string callerMemberName = "")
+    public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression("match")] string doNotPopulateThisValue = "")
     {
-        _delegateSource = delegateSource;
-        _exceptionSelector = exceptionSelector;
-        
-        AssertionBuilder = delegateSource.AssertionBuilder
-            .AppendExpression(callerMemberName);
+        _delegateSource.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(match, _exceptionSelector)
+            , [doNotPopulateThisValue]);
+        return this;
     }
 
-    protected AssertionBuilder<TActual> AssertionBuilder { get; }
-
-    public ExceptionWith<TActual> With => new(_delegateSource, _exceptionSelector);
-
-    public InvokableDelegateAssertionBuilder<TActual> OfAnyType() =>
-        _delegateSource.RegisterAssertion(new ThrowsAnythingExpectedValueAssertCondition<TActual>()
-            , []);
-
-    public InvokableDelegateAssertionBuilder<TActual> OfType<TExpected>() where TExpected : Exception => _delegateSource.RegisterAssertion(new ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpected>()
-        , [typeof(TExpected).Name]);
-
-    public InvokableDelegateAssertionBuilder<TActual> SubClassOf<TExpected>() =>
-        _delegateSource.RegisterAssertion(new ThrowsSubClassOfExpectedValueAssertCondition<TActual, TExpected>()
-            , [typeof(TExpected).Name]);
-    
-    public InvokableDelegateAssertionBuilder<TActual> WithCustomCondition(Func<Exception?, bool> action, Func<Exception?, string> messageFactory, [CallerArgumentExpression("action")] string expectedExpression = "") =>
-        _delegateSource.RegisterAssertion(new FuncValueAssertCondition<TActual,Exception>(default,
-            (_, exception, _) => action(_exceptionSelector(exception)),
-            (_, exception, _) => messageFactory(_exceptionSelector(exception))
-        ), [expectedExpression]);
-
-    public TaskAwaiter GetAwaiter()
+    public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        Task task = OfAnyType().ProcessAssertionsAsync();
+        _delegateSource.RegisterAssertion(new ThrowsWithMessageAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _exceptionSelector)
+            , [doNotPopulateThisValue]);
+        return this;
+    }
+
+    public ThrowsException<TActual, Exception> WithInnerException()
+    {
+        _delegateSource.AssertionBuilder.AppendExpression($"{nameof(WithInnerException)}()");
+        return new(delegateAssertionBuilder, _delegateSource, e => _exceptionSelector(e)?.InnerException);
+    }
+
+    public TaskAwaiter<TException?> GetAwaiter()
+    {
+        var task = delegateAssertionBuilder.ProcessAssertionsAsync(
+            d => d.Exception as TException);
         return task.GetAwaiter();
     }
 }

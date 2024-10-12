@@ -89,11 +89,8 @@ public class SatisfiesTests
         await Assert.That(async () =>
                 await Assert.That(myModel)
                     .Satisfies(model => model.Value, assert => assert.IsEqualTo("Blah")!)
-            ).ThrowsException()
-            .OfType<AssertionException>()
-            .And
-            .ThrowsException()
-            .With.Message.Containing("Expected model => model.Value to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:");
+            ).Throws<AssertionException>()
+            .WithMessageMatching("*Expected model => model.Value to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:*");
     }
 
     [Test]
@@ -121,13 +118,10 @@ public class SatisfiesTests
                             )
                         )
                     )
-            ).ThrowsException()
-            .OfType<AssertionException>()
-            .And
-            .ThrowsException()
-            .With.Message.Containing(
+            ).Throws<AssertionException>()
+            .WithMessageMatching(
                 """
-                Expected model => model.Nested to satisfy assert =>
+                *Expected model => model.Nested to satisfy assert =>
                                         assert.Satisfies(model => model?.Nested, innerAssert =>
                                             innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
                                                 innerAssert2.IsEqualTo("Blah")!
@@ -136,7 +130,7 @@ public class SatisfiesTests
                      ↓
                    "Baz"
                    "Blah"
-                     ↑.
+                     ↑.*
                 """
                 );
     }
@@ -152,11 +146,8 @@ public class SatisfiesTests
         await Assert.That(async () =>
                 await Assert.That(myModel)
                     .Satisfies(model => model.Value, assert => assert.IsEqualTo("Blah")!)
-            ).ThrowsException()
-            .OfType<AssertionException>()
-            .And
-            .ThrowsException()
-            .With.Message.Containing("Expected model => model.Value to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:");
+            ).Throws<AssertionException>()
+            .WithMessageMatching("*Expected model => model.Value to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:*");
     }
 
     [Test]
@@ -184,13 +175,10 @@ public class SatisfiesTests
                             )
                         )
                     )
-            ).ThrowsException()
-            .OfType<AssertionException>()
-            .And
-            .ThrowsException()
-            .With.Message.Containing(
+            ).Throws<AssertionException>()
+            .WithMessageMatching(
                 """
-                Expected model => model.Nested to satisfy assert =>
+                *Expected model => model.Nested to satisfy assert =>
                                         assert.Satisfies(model => model?.Nested, innerAssert =>
                                             innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
                                                 innerAssert2.IsEqualTo("Baz")!
@@ -201,7 +189,7 @@ public class SatisfiesTests
                    "Baz"
                      ↑.
                 At Assert.That(myModel).Satisfies(model => model.Nested, assert =>
-                                        assert.Sati...
+                                        assert.Sati...*
                 """
                 );
     }

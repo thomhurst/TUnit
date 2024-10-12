@@ -1,13 +1,17 @@
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Helpers;
+
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(
+public class ThrowsWithMessageAssertCondition<TActual, TException>(
     string expectedMessage,
     StringComparison stringComparison,
     Func<Exception?, Exception?> exceptionSelector)
     : DelegateAssertCondition<TActual, Exception>
+    where TException : Exception
 {
     protected override string GetExpectation()
-        => $"to have Message containing \"{expectedMessage}\"";
+        => $"to throw {typeof(TException).Name.PrependAOrAn()} which message equals \"{expectedMessage.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {
@@ -18,7 +22,8 @@ public class ThrowsWithMessageContainingExpectedValueAssertCondition<TActual>(
                 () => actualException is null,
                 "the exception is null")
             .OrFailIf(
-                () => !actualException!.Message.Contains(expectedMessage, stringComparison),
-                "it was not found");
+                () => !string.Equals(actualException!.Message, expectedMessage, stringComparison),
+                new StringDifference(actualException!.Message, expectedMessage)
+                    .ToString("it differs at index"));
     }
 }

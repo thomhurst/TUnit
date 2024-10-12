@@ -38,7 +38,7 @@ public abstract class DelegateAssertCondition<TActual, TException> : BaseAssertC
         return AssertionResult.Passed;
     }
 
-    protected virtual string GetFailureMessage(TException? exception) => "TODO VAB";
+    protected virtual string GetFailureMessage(TException? exception) => "";
 
     protected override string GetExpectation()
     {

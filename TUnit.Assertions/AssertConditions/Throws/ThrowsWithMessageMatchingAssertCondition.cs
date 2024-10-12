@@ -1,16 +1,15 @@
 using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(
-    string expectedMessage,
-    StringComparison stringComparison,
+public class ThrowsWithMessageMatchingAssertCondition<TActual, TException>(
+    StringMatcher match,
     Func<Exception?, Exception?> exceptionSelector)
     : DelegateAssertCondition<TActual, Exception>
+    where TException : Exception
 {
     protected override string GetExpectation()
-        => $"to have Message equal to \"{expectedMessage.ShowNewLines().TruncateWithEllipsis(100)}\"";
+        => $"to throw {typeof(TException).Name.PrependAOrAn()} which message matches \"{match.ToString()?.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {
@@ -21,8 +20,7 @@ public class ThrowsWithMessageEqualToExpectedValueAssertCondition<TActual>(
                 () => actualException is null,
                 "the exception is null")
             .OrFailIf(
-                () => !string.Equals(actualException!.Message, expectedMessage, stringComparison),
-                new StringDifference(actualException!.Message, expectedMessage)
-                    .ToString("it differs at index"));
+                () => !match.Matches(actualException!.Message),
+                $"found \"{actualException!.Message.ShowNewLines().TruncateWithEllipsis(100)}\"");
     }
 }

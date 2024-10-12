@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsNothingExpectedValueAssertCondition<TActual> : DelegateAssertCondition<TActual, Exception>
+public class ThrowsNothingAssertCondition<TActual> : DelegateAssertCondition<TActual, Exception>
 {
     protected override string GetExpectation()
         => "to throw nothing";
@@ -11,5 +11,5 @@ public class ThrowsNothingExpectedValueAssertCondition<TActual> : DelegateAssert
         => AssertionResult
         .FailIf(
             () => exception is not null,
-            $"{exception?.GetType().Name.PrependAOrAn()} was thrown");
+            $"{exception?.GetType().Name.PrependAOrAn()} was thrown:{Environment.NewLine}{exception?.Message}");
 }
