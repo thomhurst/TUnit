@@ -11,7 +11,7 @@ public class AssertMultipleTests
     {
         var assertionException = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
         {
-            await using (TUnitAssert.Multiple())
+            using (TUnitAssert.Multiple())
             {
                 await TUnitAssert.That(1).IsEqualTo(2);
                 await TUnitAssert.That(2).IsEqualTo(3);
@@ -44,7 +44,7 @@ public class AssertMultipleTests
     {
         var assertionException = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
         {
-            await using (TUnitAssert.Multiple())
+            using (TUnitAssert.Multiple())
             {
                 await TUnitAssert.That(1).IsEqualTo(2).Or.IsEqualTo(3);
                 await TUnitAssert.That(2).IsEqualTo(3).And.IsEqualTo(4);
@@ -87,18 +87,18 @@ public class AssertMultipleTests
     {
         var aggregateException = NUnitAssert.ThrowsAsync<AggregateException>(async () =>
         {
-            await using (TUnitAssert.Multiple())
+            using (TUnitAssert.Multiple())
             {
                 await TUnitAssert.That(1).IsEqualTo(2);
                 await TUnitAssert.That(2).IsEqualTo(3);
                 await TUnitAssert.That(3).IsEqualTo(4);
 
-                await using (TUnitAssert.Multiple())
+                using (TUnitAssert.Multiple())
                 {
                     await TUnitAssert.That(4).IsEqualTo(5);
                     await TUnitAssert.That(5).IsEqualTo(6);
                     
-                    await using (TUnitAssert.Multiple())
+                    using (TUnitAssert.Multiple())
                     {
                         await TUnitAssert.That(6).IsEqualTo(7);
                         await TUnitAssert.That(7).IsEqualTo(8);

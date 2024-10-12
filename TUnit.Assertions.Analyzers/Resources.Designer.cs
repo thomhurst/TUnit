@@ -159,7 +159,7 @@ namespace TUnit.Assertions.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it..
+        ///   Looks up a localized string similar to Assert.Multiple needs a `using` before it..
         /// </summary>
         internal static string TUnitAssertions0004Description {
             get {
@@ -168,7 +168,7 @@ namespace TUnit.Assertions.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it.
+        ///   Looks up a localized string similar to Assert.Multiple needs a `using` before it.
         /// </summary>
         internal static string TUnitAssertions0004MessageFormat {
             get {
@@ -177,7 +177,7 @@ namespace TUnit.Assertions.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assert.Multiple needs an `await using` before it.
+        ///   Looks up a localized string similar to Assert.Multiple needs a `using` before it.
         /// </summary>
         internal static string TUnitAssertions0004Title {
             get {

@@ -300,7 +300,7 @@ public class Tests
     {
         var list = new List<int> { 1, 2, 3 };
         
-        await using (Assert.Multiple())
+        using (Assert.Multiple())
         {
             await Assert.That(list).IsEquivalentTo([1, 2, 3, 4, 5]);
             await Assert.That(list).HasCount().EqualTo(5);
@@ -331,7 +331,7 @@ public class Tests
         var one = "";
         var two = "Foo bar!";
         
-        await using (Assert.Multiple())
+        using (Assert.Multiple())
         {
             await Assert.That(one).IsNull().Or.IsEmpty();
             await Assert.That(two).IsEqualTo("Foo bar").Or.IsNull();

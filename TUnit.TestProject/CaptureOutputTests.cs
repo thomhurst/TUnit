@@ -13,7 +13,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(1);
 
-        await using (Assert.Multiple())
+        using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test");
             await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah1");
@@ -25,7 +25,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(2);
 
-        await using (Assert.Multiple())
+        using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test2");
             await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah2");
@@ -37,7 +37,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(3);
 
-        await using (Assert.Multiple())
+        using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test3");
             await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah3");
@@ -49,7 +49,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(4);
 
-        await using (Assert.Multiple())
+        using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test4");
             await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah4");
@@ -61,7 +61,7 @@ public class CaptureOutputTests
     {
         _myClass.DoSomething(5);
 
-        await using (Assert.Multiple())
+        using (Assert.Multiple())
         {
             await Assert.That(TestContext.Current!.TestDetails.TestName).IsEqualTo("Test5");
             await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah5");

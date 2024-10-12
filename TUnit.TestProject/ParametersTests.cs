@@ -9,7 +9,7 @@ public class ParametersTests
     [Test]
     public async Task Test()
     {
-        await using (Assert.Multiple())
+        using (Assert.Multiple())
         {
             await Assert.That(TestContext.Parameters.ToImmutableDictionary()).ContainsKey("TestParam1");
             await Assert.That(TestContext.Parameters["TestParam1"]).IsEqualTo("TestParam1Value");
