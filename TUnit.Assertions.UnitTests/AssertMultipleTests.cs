@@ -42,7 +42,7 @@ public class AssertMultipleTests
     [Test]
     public void MultipleFailures_With_Connectors()
     {
-        var assertionException = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
+        var assertionException = NUnitAssert.ThrowsAsync<AggregateException>(async () =>
         {
             using (TUnitAssert.Multiple())
             {
@@ -54,32 +54,46 @@ public class AssertMultipleTests
             }
         });
 
-        NUnitAssert.That(assertionException!.Message, Is.EqualTo("""
-                                                                Expected 1 to be equal to 2
-                                                                 or
-                                                                to be equal to 3, but the received value 1 is different and the received value 1 is different.
-                                                                At Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
-                                                                
-                                                                Expected 2 to be equal to 3
-                                                                 and
-                                                                to be equal to 4, but the received value 2 is different and the received value 2 is different.
-                                                                At Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
-                                                                
-                                                                Expected 3 to be equal to 4
-                                                                 or
-                                                                to be equal to 5, but the received value 3 is different and the received value 3 is different.
-                                                                At Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
-                                                                
-                                                                Expected 4 to be equal to 5
-                                                                 and
-                                                                to be equal to 6, but the received value 4 is different and the received value 4 is different.
-                                                                At Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
-                                                                
-                                                                Expected 5 to be equal to 6
-                                                                 or
-                                                                to be equal to 7, but the received value 5 is different and the received value 5 is different.
-                                                                At Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
-                                                                """));
+        var exception1 = (TUnitAssertionException)assertionException!.InnerExceptions[0];
+        var exception2 = (TUnitAssertionException)assertionException!.InnerExceptions[1];
+        var exception3 = (TUnitAssertionException)assertionException!.InnerExceptions[2];
+        var exception4 = (TUnitAssertionException)assertionException!.InnerExceptions[3];
+        var exception5 = (TUnitAssertionException)assertionException!.InnerExceptions[4];
+
+        NUnitAssert.That(exception1.Message, Is.EqualTo("""
+                                                         Expected 1 to be equal to 2
+                                                          or
+                                                         to be equal to 3, but the received value 1 is different and the received value 1 is different.
+                                                         At Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
+                                                         """));
+
+        NUnitAssert.That(exception2.Message, Is.EqualTo("""
+                                                         Expected 2 to be equal to 3
+                                                          and
+                                                         to be equal to 4, but the received value 2 is different and the received value 2 is different.
+                                                         At Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
+                                                         """));
+
+        NUnitAssert.That(exception3.Message, Is.EqualTo("""
+                                                         Expected 3 to be equal to 4
+                                                          or
+                                                         to be equal to 5, but the received value 3 is different and the received value 3 is different.
+                                                         At Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
+                                                         """));
+
+        NUnitAssert.That(exception4.Message, Is.EqualTo("""
+                                                         Expected 4 to be equal to 5
+                                                          and
+                                                         to be equal to 6, but the received value 4 is different and the received value 4 is different.
+                                                         At Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
+                                                         """));
+
+        NUnitAssert.That(exception5.Message, Is.EqualTo("""
+                                                         Expected 5 to be equal to 6
+                                                          or
+                                                         to be equal to 7, but the received value 5 is different and the received value 5 is different.
+                                                         At Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
+                                                         """));
     }
     
       [Test]

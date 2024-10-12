@@ -21,8 +21,8 @@ public class InvokableValueAssertionBuilder<TActual>(InvokableAssertionBuilder<T
 
     internal AssertionBuilder<TActual> AssertionBuilder => this;
     
-    public ValueAnd<TActual> And => new(AssertionBuilder.AppendConnector(ChainType.And));
-    public ValueOr<TActual> Or => new(AssertionBuilder.AppendConnector(ChainType.Or));
+    public ValueAnd<TActual> And => new(new AndAssertionBuilder<TActual>(AssertionBuilder.AppendConnector(ChainType.And)));
+    public ValueOr<TActual> Or => new(new OrAssertionBuilder<TActual>(AssertionBuilder.AppendConnector(ChainType.Or)));
     
     public new TaskAwaiter<TActual?> GetAwaiter()
     {
