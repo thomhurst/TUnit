@@ -22,9 +22,7 @@ public class ValueSource<TActual>(AssertionBuilder<TActual> assertionBuilder) : 
 
     public InvokableValueAssertionBuilder<TActual> IsAssignableTo(Type type)
     {
-        return this.RegisterAssertion(new FuncValueAssertCondition<TActual, Type>(default,
-                (value, _, _) => value!.GetType().IsAssignableTo(type),
-                (actual, _, _) => $"{actual?.GetType()} is not assignable to {type.Name}")
+        return this.RegisterAssertion(new AssignableToExpectedValueAssertCondition<TActual>(type)
             , [type.Name]);
     }
 
@@ -36,9 +34,7 @@ public class ValueSource<TActual>(AssertionBuilder<TActual> assertionBuilder) : 
 
     public InvokableValueAssertionBuilder<TActual> IsAssignableFrom(Type type)
     {
-        return this.RegisterAssertion(new FuncValueAssertCondition<TActual, Type>(default,
-                (value, _, _) => value!.GetType().IsAssignableFrom(type),
-                (actual, _, _) => $"{actual?.GetType()} is not assignable from {type.Name}")
+        return this.RegisterAssertion(new AssignableFromExpectedValueAssertCondition<TActual>(type)
             , [type.Name]);
     }
 

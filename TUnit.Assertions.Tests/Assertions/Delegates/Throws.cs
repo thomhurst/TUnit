@@ -32,6 +32,8 @@ public partial class Throws
         {
 
         }
+
+        public string Value => "Foo!";
     }
 
     private class SubCustomException : CustomException

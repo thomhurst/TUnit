@@ -29,9 +29,11 @@ internal class StringDifference(string? actualValue, string? expectedValue, IEqu
 
     private static int IndexOfFirstMismatch(string actualValue, string expectedValue, IEqualityComparer<string> comparer)
     {
-        for (int index = 0; index < actualValue.Length; index++)
+        for (var index = 0; index < Math.Max(actualValue.Length, expectedValue.Length); index++)
         {
-            if (index >= expectedValue.Length || !comparer.Equals(actualValue[index..(index + 1)], expectedValue[index..(index + 1)]))
+            var actualChar = actualValue.ElementAtOrDefault(index).ToString();
+            var expectedChar = expectedValue.ElementAtOrDefault(index).ToString();
+            if (index >= expectedValue.Length || !comparer.Equals(actualChar, expectedChar))
             {
                 return index;
             }

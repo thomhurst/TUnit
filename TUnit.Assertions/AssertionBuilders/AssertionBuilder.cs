@@ -4,11 +4,16 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
+using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 public abstract class AssertionBuilder<TActual>
 {
+    protected IInvokableAssertionBuilder? OtherTypeAssertionBuilder;
+    
+    protected AssertionData<TActual>? InvokedAssertionData;
+
     public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions)
     {
         AssertionDataDelegate = assertionDataDelegate;
@@ -39,7 +44,8 @@ public abstract class AssertionBuilder<TActual>
     internal Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
     
     internal readonly Stack<BaseAssertCondition<TActual>> Assertions = new();
-    
+    protected readonly List<AssertionResult> Results = [];
+
     protected internal AssertionBuilder<TActual> AppendExpression(string expression)
     {
         ExpressionBuilder?.Append($".{expression}");
@@ -80,6 +86,50 @@ public abstract class AssertionBuilder<TActual>
         builder.Assertions.Push(assertCondition);
         
         return builder;
+    }
+    
+    internal virtual async Task<AssertionData<TActual>> ProcessAssertionsAsync()
+    {
+        if (OtherTypeAssertionBuilder is not null)
+        {
+            await OtherTypeAssertionBuilder;
+        }
+        
+        InvokedAssertionData ??= await AssertionDataDelegate();
+
+        var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
+        
+        foreach (var assertion in Assertions.Reverse())
+        {
+            var result = await assertion.Assert(InvokedAssertionData.Result, InvokedAssertionData.Exception, InvokedAssertionData.ActualExpression);
+            
+            Results.Add(result);
+            
+            if (!result.IsPassed)
+            {
+                if (assertion.Subject is null)
+                {
+                    assertion.SetSubject(InvokedAssertionData.ActualExpression);
+                }
+
+                var exception = new AssertionException(
+                    $"""
+                     Expected {assertion.Subject} {assertion.GetExpectationWithReason()}, but {result.Message}.
+                     At {((IInvokableAssertionBuilder)this).GetExpression()}
+                     """
+                );
+                
+                if (currentAssertionScope != null)
+                {
+                    currentAssertionScope.AddException(exception);
+                    continue;
+                }
+                
+                throw exception;
+            }
+        }
+        
+        return InvokedAssertionData;
     }
     
     [Obsolete("This is a base `object` method that should not be called.", true)]
