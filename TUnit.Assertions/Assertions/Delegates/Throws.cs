@@ -19,10 +19,12 @@ public class Throws<TActual>
             .AppendExpression($"{callerMemberName}()");
     }
 
-    public InvokableDelegateAssertionBuilder<TActual> Nothing()
+    public CastableAssertionBuilder<TActual, TActual> Nothing()
     {
-        return _delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>()
-            , []);
+        return new CastableAssertionBuilder<TActual, TActual>(
+            _delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>()
+            , []),
+            a => a);
     }
 
     public ThrowsException<TActual, Exception> Exception()

@@ -38,5 +38,10 @@ public class ThrowsException<TActual, TException>(
         return new(delegateAssertionBuilder, _delegateSource, e => _exceptionSelector(e)?.InnerException);
     }
 
-    public TaskAwaiter<TException?> GetAwaiter() => delegateAssertionBuilder.GetAwaiterWithException<TException>();
+    public TaskAwaiter<TException?> GetAwaiter()
+    {
+        var task = delegateAssertionBuilder.ProcessAssertionsAsync(
+            d => d.Exception as TException);
+        return task.GetAwaiter();
+    }
 }

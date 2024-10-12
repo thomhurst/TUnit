@@ -1,9 +1,9 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿using System.Runtime.CompilerServices;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 public interface IInvokableAssertionBuilder
 {
-    IAsyncEnumerable<(BaseAssertCondition Assertion, AssertionResult Result)> GetFailures();
+    TaskAwaiter GetAwaiter();
     string? GetExpression();
 }

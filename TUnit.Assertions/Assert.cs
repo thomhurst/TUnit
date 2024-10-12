@@ -53,7 +53,7 @@ public static class Assert
         return new AsyncValueDelegateAssertionBuilder<TActual>(async () => await value, doNotPopulateThisValue);
     }
 
-    public static IAsyncDisposable Multiple()
+    public static IDisposable Multiple()
     {
         return new AssertionScope();
     }

@@ -30,8 +30,8 @@ public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expect
         
         if (_tolerance != null)
         {
-            var min = expectedValue - _tolerance;
-            var max = expectedValue + _tolerance;
+            var min = expectedValue ?? TActual.Zero - _tolerance;
+            var max = expectedValue ?? TActual.Zero + _tolerance;
 
             return AssertionResult
                 .FailIf(
