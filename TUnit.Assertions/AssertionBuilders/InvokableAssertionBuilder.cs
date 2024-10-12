@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
@@ -22,9 +21,7 @@ public class InvokableAssertionBuilder<TActual> :
         _invokedAssertionData ??= await AssertionDataDelegate();
 
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
-
-        currentAssertionScope?.Add(this);
-
+        
         foreach (var assertion in Assertions.Reverse())
         {
             var result = assertion.Assert(_invokedAssertionData.Result, _invokedAssertionData.Exception, _invokedAssertionData.ActualExpression);
@@ -50,21 +47,6 @@ public class InvokableAssertionBuilder<TActual> :
         }
         
         return _invokedAssertionData;
-    }
-
-    async IAsyncEnumerable<(BaseAssertCondition Assertion, AssertionResult Result)> IInvokableAssertionBuilder.GetFailures()
-    {
-        var assertionData = await AssertionDataDelegate();
-        
-        foreach (var assertion in Assertions.Reverse())
-        {
-            assertion.SetSubject(assertionData.ActualExpression);
-            var result = assertion.Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
-            if (!result.IsPassed)
-            {
-                yield return (assertion, result);
-            }
-        }
     }
     
     public TaskAwaiter GetAwaiter() => ((Task)ProcessAssertionsAsync()).GetAwaiter();

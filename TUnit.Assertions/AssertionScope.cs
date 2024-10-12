@@ -1,10 +1,9 @@
 using System.Runtime.ExceptionServices;
-using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions;
 
-internal class AssertionScope : IAsyncDisposable
+internal class AssertionScope : IDisposable
 {
     private static readonly AsyncLocal<AssertionScope?> CurrentScope = new();
     private readonly AssertionScope? _parent;
@@ -15,12 +14,8 @@ internal class AssertionScope : IAsyncDisposable
         _parent = GetCurrentAssertionScope();
         SetCurrentAssertionScope(this);
     }
-
-    private readonly HashSet<IInvokableAssertionBuilder> _assertionBuilders = [];
     
-    internal void Add(IInvokableAssertionBuilder assertionBuilder) => _assertionBuilders.Add(assertionBuilder);
-
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
         SetCurrentAssertionScope(_parent);
 
