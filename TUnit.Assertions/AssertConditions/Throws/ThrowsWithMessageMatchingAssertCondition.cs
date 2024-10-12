@@ -1,8 +1,6 @@
-using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.Assertions;
 using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.Delegates;
+namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsWithMessageMatchingAssertCondition<TActual, TException>(
     StringMatcher match,

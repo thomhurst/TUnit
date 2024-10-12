@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace TUnit.Assertions.Assertions;
+namespace TUnit.Assertions.AssertConditions;
 
 /// <summary>
 /// Matches a <see langword="string" /> against a pattern.

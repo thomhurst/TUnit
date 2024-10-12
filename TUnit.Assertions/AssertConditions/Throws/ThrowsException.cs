@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.Assertions;
 using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.Delegates;
+namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsException<TActual, TException>(
     InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,

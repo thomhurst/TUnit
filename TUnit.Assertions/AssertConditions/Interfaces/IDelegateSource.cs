@@ -1,5 +1,5 @@
-﻿using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.Delegates;
+﻿using TUnit.Assertions.AssertConditions.Throws;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Interfaces;
 
