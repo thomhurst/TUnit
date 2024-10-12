@@ -225,7 +225,9 @@ public class ThrowTests
                                     At Assert.That(action).ThrowsException.With.Message.EqualTo($"{longCommonString}{Environment.NewLine}an...
                                     """;
 
+#pragma warning disable TUnitAssertions0003
             Exception exception = CustomException.Create($"{longCommonString}{Environment.NewLine}some value");
+#pragma warning restore TUnitAssertions0003
             Action action = () => throw exception;
 
             var sut = async ()

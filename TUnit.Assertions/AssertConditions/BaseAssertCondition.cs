@@ -75,7 +75,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return assertionBuilder.AppendExpression($"{caller}({string.Join(", ", argumentExpressions)})").WithAssertion(this);
     }
     
-    internal AssertionResult Assert(AssertionData<TActual> assertionData)
+    internal Task<AssertionResult> Assert(AssertionData<TActual> assertionData)
     {
         return Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
     }
@@ -84,7 +84,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     internal Exception? Exception { get; private set; }
     public string? ActualExpression { get; private set; }
     
-    internal AssertionResult Assert(TActual? actualValue, Exception? exception, string? actualExpression)
+    internal Task<AssertionResult> Assert(TActual? actualValue, Exception? exception, string? actualExpression)
     {
         ActualValue = actualValue;
         Exception = exception;
@@ -93,5 +93,5 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return GetResult(actualValue, exception);
     }
 
-    protected abstract AssertionResult GetResult(TActual? actualValue, Exception? exception);
+    protected abstract Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception);
 }

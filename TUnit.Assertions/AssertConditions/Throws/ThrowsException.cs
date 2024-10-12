@@ -34,6 +34,7 @@ public class ThrowsException<TActual>(
 
     public TaskAwaiter GetAwaiter()
     {
+        AssertionBuilder.AppendExpression("ThrowsException");
         Task task = OfAnyType().ProcessAssertionsAsync();
         return task.GetAwaiter();
     }
