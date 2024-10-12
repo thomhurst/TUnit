@@ -1,16 +1,7 @@
 ﻿namespace TUnit.Engine.SourceGenerator.Models;
 
-internal record InheritsTestsDataModel
+internal record InheritsTestsDataModel(string MinimalTypeName, IEnumerable<TestSourceDataModel> TestSourceDataModels)
 {
-    public string MinimalTypeName { get; }
-    public IEnumerable<TestSourceDataModel> TestSourceDataModels { get; }
-
-    public InheritsTestsDataModel(string minimalTypeName, IEnumerable<TestSourceDataModel> testSourceDataModels)
-    {
-        MinimalTypeName = minimalTypeName;
-        TestSourceDataModels = testSourceDataModels;
-    }
-
     public virtual bool Equals(InheritsTestsDataModel? other)
     {
         if (ReferenceEquals(null, other))

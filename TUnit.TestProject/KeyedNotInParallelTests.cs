@@ -45,19 +45,12 @@ public class KeyedNotInParallelTests
         }
     }
 
-    private class ConstraintDateTimeRange
+    private class ConstraintDateTimeRange(string constraintKey, DateTime start, DateTime end)
     {
-        public string ConstraintKey { get; }
-        public DateTime Start { get; }
-        public DateTime End { get; }
-        
-        public ConstraintDateTimeRange(string constraintKey, DateTime start, DateTime end)
-        {
-            ConstraintKey = constraintKey;
-            Start = start;
-            End = end;
-        }
-        
+        public string ConstraintKey { get; } = constraintKey;
+        public DateTime Start { get; } = start;
+        public DateTime End { get; } = end;
+
         public bool Overlap(ConstraintDateTimeRange other)
         {
             return ConstraintKey == other.ConstraintKey && Start <= other.End && other.Start <= End;

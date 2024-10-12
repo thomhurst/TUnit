@@ -15,18 +15,16 @@ namespace TUnit.Pipeline.Modules;
 [RunOnLinuxOnly]
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
-public class UploadToNuGetModule : Module<CommandResult[]>
+public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<CommandResult[]>
 {
-    private readonly IOptions<NuGetOptions> _options;
-
     protected override Task<SkipDecision> ShouldSkip(IPipelineContext context)
     {
-        if (!_options.Value.ShouldPublish)
+        if (!options.Value.ShouldPublish)
         {
             return Task.FromResult<SkipDecision>("Should Publish is false");
         }
 
-        if (string.IsNullOrEmpty(_options.Value.ApiKey))
+        if (string.IsNullOrEmpty(options.Value.ApiKey))
         {
             return Task.FromResult<SkipDecision>("No API key found");
         }
@@ -34,10 +32,6 @@ public class UploadToNuGetModule : Module<CommandResult[]>
         return Task.FromResult<SkipDecision>(false);
     }
 
-    public UploadToNuGetModule(IOptions<NuGetOptions> options)
-    {
-        _options = options;
-    }
     protected override async Task<CommandResult[]?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var nupkgs = context.Git().RootDirectory
@@ -47,7 +41,7 @@ public class UploadToNuGetModule : Module<CommandResult[]>
                 context.DotNet().Nuget.Push(new DotNetNugetPushOptions(file)
                 {
                     Source = "https://api.nuget.org/v3/index.json",
-                    ApiKey = _options.Value.ApiKey
+                    ApiKey = options.Value.ApiKey
                 }, cancellationToken), cancellationToken: cancellationToken)
             .ProcessOneAtATime();
     }

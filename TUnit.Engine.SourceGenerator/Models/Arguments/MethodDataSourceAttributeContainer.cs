@@ -2,19 +2,17 @@ using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record MethodDataSourceAttributeContainer : ArgumentsContainer
+internal record MethodDataSourceAttributeContainer(
+    ArgumentsType ArgumentsType,
+    string TestClassTypeName,
+    string TypeName,
+    string MethodName,
+    bool IsStatic,
+    bool IsEnumerableData,
+    string[] TupleTypes,
+    string MethodReturnType)
+    : ArgumentsContainer(ArgumentsType)
 {
-    public MethodDataSourceAttributeContainer(ArgumentsType ArgumentsType, string TestClassTypeName, string TypeName, string MethodName, bool IsStatic, bool IsEnumerableData, string[] TupleTypes, string MethodReturnType) : base(ArgumentsType)
-    {
-        this.TestClassTypeName = TestClassTypeName;
-        this.TypeName = TypeName;
-        this.MethodName = MethodName;
-        this.IsStatic = IsStatic;
-        this.IsEnumerableData = IsEnumerableData;
-        this.TupleTypes = TupleTypes;
-        this.MethodReturnType = MethodReturnType;
-    }
-
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         if (IsEnumerableData)
@@ -124,12 +122,4 @@ internal record MethodDataSourceAttributeContainer : ArgumentsContainer
         
         return [MethodReturnType];
     }
-
-    public string TestClassTypeName { get; init; }
-    public string TypeName { get; }
-    public string MethodName { get; }
-    public bool IsStatic { get; }
-    public bool IsEnumerableData { get; }
-    public string[] TupleTypes { get; }
-    public string MethodReturnType { get; }
 }

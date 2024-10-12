@@ -5,7 +5,7 @@ using BenchmarkDotNet.Jobs;
 namespace Tests.Benchmark;
 
 [MarkdownExporterAttribute.GitHub]
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net90)]
 public class BenchmarkBase
 {
     protected readonly Stream OutputStream = Console.OpenStandardOutput();

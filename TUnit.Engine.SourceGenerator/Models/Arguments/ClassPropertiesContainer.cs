@@ -3,13 +3,10 @@ using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record ClassPropertiesContainer : ArgumentsContainer
+internal record ClassPropertiesContainer(
+    IReadOnlyCollection<(IPropertySymbol PropertySymbol, ArgumentsContainer ArgumentsContainer)> InnerContainers)
+    : ArgumentsContainer(ArgumentsType.Property)
 {
-    public ClassPropertiesContainer(IReadOnlyCollection<(IPropertySymbol PropertySymbol, ArgumentsContainer ArgumentsContainer)> InnerContainers) : base(ArgumentsType.Property)
-    {
-        this.InnerContainers = InnerContainers;
-    }
-
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         foreach (var (_, argumentsContainer) in InnerContainers)
@@ -53,6 +50,4 @@ internal record ClassPropertiesContainer : ArgumentsContainer
 
         sourceCodeWriter.WriteLine("}");
     }
-
-    public IReadOnlyCollection<(IPropertySymbol PropertySymbol, ArgumentsContainer ArgumentsContainer)> InnerContainers { get; init; }
 }

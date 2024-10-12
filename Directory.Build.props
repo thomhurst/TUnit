@@ -8,7 +8,7 @@
     <LangVersion>latest</LangVersion>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <NoWarn>NU1507;NU1903</NoWarn>
+    <NoWarn>NU1507;NU1903;CS9107</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +23,9 @@
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>TUnit</_Parameter1>
+    </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>TUnit.UnitTests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 

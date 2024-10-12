@@ -6,34 +6,24 @@ using LogLevel = TUnit.Core.Logging.LogLevel;
 
 namespace TUnit.Engine.Logging;
 
-internal class TUnitFrameworkLogger : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
+internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger)
+    : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
 {
-    private readonly IExtension _extension;
-    private readonly IOutputDevice _outputDevice;
-    private readonly ILogger _logger;
-    
-    public TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger)
-    {
-        _extension = extension;
-        _outputDevice = outputDevice;
-        _logger = logger;
-    }
-
     public Task<bool> IsEnabledAsync()
     {
         return Task.FromResult(true);
     }
 
-    public string Uid => _extension.Uid;
-    public string Version => _extension.Version;
-    public string DisplayName => _extension.DisplayName;
-    public string Description => _extension.Description;
+    public string Uid => extension.Uid;
+    public string Version => extension.Version;
+    public string DisplayName => extension.DisplayName;
+    public string Description => extension.Description;
     
     public async Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         var text = formatter(state, exception);
 
-        await _outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
+        await outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
         {
             ForegroundColor = new SystemConsoleColor
             {
@@ -43,11 +33,11 @@ internal class TUnitFrameworkLogger : IOutputDeviceDataProducer, global::TUnit.C
 
         if (exception is not null)
         {
-            await _logger.LogErrorAsync(text, exception);
+            await logger.LogErrorAsync(text, exception);
         }
         else
         {
-            await _logger.LogErrorAsync(text);
+            await logger.LogErrorAsync(text);
         }
     }
 
@@ -55,7 +45,7 @@ internal class TUnitFrameworkLogger : IOutputDeviceDataProducer, global::TUnit.C
     {
         var text = formatter(state, exception);
 
-        _outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
+        outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
         {
             ForegroundColor = new SystemConsoleColor
             {
@@ -65,11 +55,11 @@ internal class TUnitFrameworkLogger : IOutputDeviceDataProducer, global::TUnit.C
 
         if (exception is not null)
         {
-            _logger.LogError(text, exception);
+            logger.LogError(text, exception);
         }
         else
         {
-            _logger.LogError(text);
+            logger.LogError(text);
         }
     }
 
@@ -90,6 +80,6 @@ internal class TUnitFrameworkLogger : IOutputDeviceDataProducer, global::TUnit.C
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return _logger.IsEnabled(MTPLoggerAdapter.Map(logLevel));
+        return logger.IsEnabled(MTPLoggerAdapter.Map(logLevel));
     }
 }

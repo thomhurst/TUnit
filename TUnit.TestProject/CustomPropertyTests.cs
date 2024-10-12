@@ -32,17 +32,7 @@ public class CustomPropertyTests
             ?? ImmutableDictionary<string, string>.Empty;
     }
 
-    public class ClassPropertyAttribute : PropertyAttribute
-    {
-        public ClassPropertyAttribute() : base("ClassProperty2", "ClassPropertyValue2")
-        {
-        }
-    }
+    public class ClassPropertyAttribute() : PropertyAttribute("ClassProperty2", "ClassPropertyValue2");
     
-    public class MethodPropertyAttribute : PropertyAttribute
-    {
-        public MethodPropertyAttribute() : base("MethodProperty2", "MethodPropertyValue2")
-        {
-        }
-    }
+    public class MethodPropertyAttribute() : PropertyAttribute("MethodProperty2", "MethodPropertyValue2");
 }

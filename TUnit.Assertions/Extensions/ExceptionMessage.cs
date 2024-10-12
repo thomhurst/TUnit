@@ -5,17 +5,10 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
-public class ExceptionMessage<TActual>
+public class ExceptionMessage<TActual>(IValueSource<TActual> valueSource)
     where TActual : Exception
 {
-    private readonly IValueSource<TActual> _valueSource;
-    protected internal AssertionBuilder<TActual> AssertionBuilder { get; }
-
-    public ExceptionMessage(IValueSource<TActual> valueSource)
-    {
-        _valueSource = valueSource;
-        AssertionBuilder = valueSource.AssertionBuilder.AppendExpression("HasMessage");
-    }
+    protected internal AssertionBuilder<TActual> AssertionBuilder { get; } = valueSource.AssertionBuilder.AppendExpression("HasMessage");
 
     public InvokableValueAssertionBuilder<TActual> EqualTo(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
@@ -24,7 +17,7 @@ public class ExceptionMessage<TActual>
 
     public InvokableValueAssertionBuilder<TActual> EqualTo(string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
     {
-        return _valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, string>(expected, (actual, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, string>(expected, (actual, _, _) =>
             {
                 ArgumentNullException.ThrowIfNull(actual);
                 return string.Equals(actual.Message, expected, stringComparison);

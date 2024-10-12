@@ -26,18 +26,29 @@ public static class TestContextExtensions
     internal static IEnumerable<ITestRegisteredEvents> GetTestRegisteredEventsObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestRegisteredEvents>();
 
-    internal static IEnumerable<ITestStartEvents> GetTestStartEventsObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<ITestStartEvents>();
+    internal static IEnumerable<ITestStartEvent> GetTestStartEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestStartEvent>();
     
-    internal static IEnumerable<ITestEndEvents> GetTestEndEventsObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<ITestEndEvents>();
+    internal static IEnumerable<ITestEndEvent> GetTestEndEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestEndEvent>();
+    
+    internal static IEnumerable<ILastTestInClassEvent> GetLastTestInClassEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ILastTestInClassEvent>();
+    
+    internal static IEnumerable<ILastTestInAssemblyEvent> GetLastTestInAssemblyEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ILastTestInAssemblyEvent>();
+    
+    internal static IEnumerable<ILastTestInTestSessionEvent> GetLastTestInTestSessionEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ILastTestInTestSessionEvent>();
 
     private static IEnumerable<object?> GetPossibleEventObjects(this TestContext context)
     {
         return
         [
             ..context.TestDetails.DataAttributes,
+            ..context.TestDetails.Attributes,
             context.TestDetails.ClassInstance,
+            context.InternalDiscoveredTest.ClassConstructor
         ];
     }
 }

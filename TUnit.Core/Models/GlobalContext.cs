@@ -9,8 +9,8 @@ public class GlobalContext : Context
     private GlobalContext()
     {
     }
-    
-    internal ILogger GlobalLogger { get; set; }
+
+    internal ILogger GlobalLogger { get; set; } = new NullLogger();
     
     public string? TestFilter { get; internal set; }
 }

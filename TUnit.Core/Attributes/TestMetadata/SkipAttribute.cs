@@ -4,16 +4,11 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class SkipAttribute : TUnitAttribute, IBeforeTestAttribute
+public class SkipAttribute(string reason) : TUnitAttribute, ITestStartEvent
 {
-    public string Reason { get; protected set; }
+    public string Reason { get; protected set; } = reason;
 
-    public SkipAttribute(string reason)
-    {
-        Reason = reason;
-    }
-
-    public async Task OnBeforeTest(BeforeTestContext context)
+    public async ValueTask OnTestStart(BeforeTestContext context)
     {
         if (await ShouldSkip(context))
         {

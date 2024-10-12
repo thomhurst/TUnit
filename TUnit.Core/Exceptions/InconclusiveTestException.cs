@@ -1,8 +1,3 @@
 ﻿namespace TUnit.Core.Exceptions;
 
-public class InconclusiveTestException : TUnitException
-{
-    public InconclusiveTestException(string message, Exception exception) : base(message, exception)
-    {
-    }
-}
+public class InconclusiveTestException(string message, Exception exception) : TUnitException(message, exception);

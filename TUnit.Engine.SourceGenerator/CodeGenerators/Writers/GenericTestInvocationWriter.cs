@@ -22,7 +22,7 @@ internal static class GenericTestInvocationWriter
         
         sourceBuilder.WriteLine();
         
-        sourceBuilder.WriteLine("var objectBag = new global::System.Collections.Generic.Dictionary<string, object?>();");
+        sourceBuilder.WriteLine("var objectBag = new global::System.Collections.Generic.Dictionary<string, object>();");
 
         var classVariablesIndex = 0;
         var methodVariablesIndex = 0;

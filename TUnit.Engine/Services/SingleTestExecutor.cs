@@ -19,40 +19,18 @@ using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 namespace TUnit.Engine.Services;
 
-internal class SingleTestExecutor : IDataProducer
+internal class SingleTestExecutor(
+    IExtension extension,
+    Disposer disposer,
+    CancellationTokenSource cancellationTokenSource,
+    TestInvoker testInvoker,
+    ExplicitFilterService explicitFilterService,
+    ParallelLimitProvider parallelLimitProvider,
+    AssemblyHookOrchestrator assemblyHookOrchestrator,
+    ClassHookOrchestrator classHookOrchestrator,
+    TUnitFrameworkLogger logger)
+    : IDataProducer
 {
-    private readonly IExtension _extension;
-    private readonly Disposer _disposer;
-    private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly TestInvoker _testInvoker;
-    private readonly ExplicitFilterService _explicitFilterService;
-    private readonly ParallelLimitProvider _parallelLimitProvider;
-    private readonly AssemblyHookOrchestrator _assemblyHookOrchestrator;
-    private readonly ClassHookOrchestrator _classHookOrchestrator;
-    private readonly TUnitFrameworkLogger _logger;
-
-    public SingleTestExecutor(
-        IExtension extension,
-        Disposer disposer,
-        CancellationTokenSource cancellationTokenSource,
-        TestInvoker testInvoker,
-        ExplicitFilterService explicitFilterService,
-        ParallelLimitProvider parallelLimitProvider,
-        AssemblyHookOrchestrator assemblyHookOrchestrator,
-        ClassHookOrchestrator classHookOrchestrator,
-        TUnitFrameworkLogger logger)
-    {
-        _extension = extension;
-        _disposer = disposer;
-        _cancellationTokenSource = cancellationTokenSource;
-        _testInvoker = testInvoker;
-        _explicitFilterService = explicitFilterService;
-        _parallelLimitProvider = parallelLimitProvider;
-        _assemblyHookOrchestrator = assemblyHookOrchestrator;
-        _classHookOrchestrator = classHookOrchestrator;
-        _logger = logger;
-    }
-
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
         bool isStartedAsDependencyForAnotherTest)
     {
@@ -83,7 +61,7 @@ internal class SingleTestExecutor : IDataProducer
             var testContext = test.TestContext;
             var timings = testContext.Timings;
 
-            if (_cancellationTokenSource.IsCancellationRequested)
+            if (cancellationTokenSource.IsCancellationRequested)
             {
                 await context.MessageBus.PublishAsync(this,
                     new TestNodeUpdateMessage(context.Request.Session.SessionUid,
@@ -104,10 +82,12 @@ internal class SingleTestExecutor : IDataProducer
             {
                 await WaitForDependsOnTests(test, filter, context);
 
-                if (!_explicitFilterService.CanRun(test.TestDetails, filter))
+                if (!explicitFilterService.CanRun(test.TestDetails, filter))
                 {
                     throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
                 }
+                
+                await ExecuteOnTestStartEvents(testContext);
 
                 start = DateTimeOffset.Now;
                 
@@ -144,7 +124,7 @@ internal class SingleTestExecutor : IDataProducer
             {
                 testContext.TaskCompletionSource.SetException(skipTestException);
 
-                await _logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
+                await logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
 
                 await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
                     context.Request.Session.SessionUid,
@@ -207,19 +187,10 @@ internal class SingleTestExecutor : IDataProducer
     {
         try
         {
-            foreach (var beforeTestAttribute in test.BeforeTestAttributes)
-            {
-                await Timings.Record($"{beforeTestAttribute.GetType().Name}.OnBeforeTest", testContext,
-                    () => beforeTestAttribute.OnBeforeTest(
-                        new BeforeTestContext(testContext.InternalDiscoveredTest)));
-            }
-            
             await ExecuteBeforeHooks(test, context, testContext);
 
             TestContext.Current = testContext;
-
-            await InitializeObjects(testContext);
-
+            
             await ExecuteWithRetries(test);
         }
         finally
@@ -228,24 +199,13 @@ internal class SingleTestExecutor : IDataProducer
             // If skipped, we didn't perform set ups, so also don't perform tear downs
             if (testContext.TestStart != null)
             {
-                foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
+                foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
                 {
-                    await RunHelpers.RunSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
+                    await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
                         cleanUpExceptions);
-                }
-                
-                foreach (var afterTestAttribute in test.AfterTestAttributes)
-                {
-                    await Timings.Record($"{afterTestAttribute.GetType().Name}.OnAfterTest", testContext,
-                        () => RunHelpers.RunSafelyAsync(() => afterTestAttribute.OnAfterTest(testContext),
-                            cleanUpExceptions));
                 }
 
                 await DisposeTest(testContext, cleanUpExceptions);
-
-                await RunHelpers.RunSafelyAsync(
-                    () => test.ClassConstructor?.DisposeAsync(test.TestDetails.ClassInstance) ?? Task.CompletedTask,
-                    cleanUpExceptions);
 
                 TestContext.Current = null;
 
@@ -262,11 +222,11 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async ValueTask InitializeObjects(TestContext testContext)
+    private async ValueTask ExecuteOnTestStartEvents(TestContext testContext)
     {
-        foreach (var testStartEventsObject in testContext.GetTestStartEventsObjects())
+        foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
         {
-            await testStartEventsObject.OnTestStart(testContext);
+            await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
         }
     }
 
@@ -274,11 +234,11 @@ internal class SingleTestExecutor : IDataProducer
     {
         try
         {
-            await _assemblyHookOrchestrator.ExecuteBeforeHooks(context,
+            await assemblyHookOrchestrator.ExecuteBeforeHooks(context,
                 test.TestContext.TestDetails.ClassType.Assembly,
                 testContext);
 
-            await _classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType);
+            await classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType);
         }
         catch (Exception e)
         {
@@ -291,21 +251,20 @@ internal class SingleTestExecutor : IDataProducer
     {
         try
         {
-            await _classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context, testContext,
+            await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context, testContext,
                 test.TestContext.TestDetails.ClassType, cleanUpExceptions);
 
-            await _assemblyHookOrchestrator.ExecuteCleanupsIfLastInstance(context, testContext,
+            await assemblyHookOrchestrator.ExecuteCleanupsIfLastInstance(context, testContext,
                 test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
 
             if (InstanceTracker.IsLastTest())
             {
-                await RunHelpers.RunSafelyAsync(async () =>
+                foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
                 {
-                    foreach (var testEndEventsObject in testContext.GetTestEndEventsObjects())
-                    {
-                        await testEndEventsObject.IfLastTestInTestSession(TestSessionContext.Current!, testContext);
-                    }
-                }, cleanUpExceptions);
+                    await RunHelpers.RunValueTaskSafelyAsync(
+                        () => testEndEventsObject.IfLastTestInTestSession(TestSessionContext.Current!, testContext),
+                        cleanUpExceptions);
+                }
             }
         }
         catch
@@ -314,11 +273,11 @@ internal class SingleTestExecutor : IDataProducer
         }
     }
 
-    private async Task DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
+    private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
     {
         await TestHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
             
-        await RunHelpers.RunValueTaskSafelyAsync(() => _disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
+        await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
         
         await _consoleStandardOutLock.WaitAsync();
 
@@ -336,7 +295,7 @@ internal class SingleTestExecutor : IDataProducer
     {
         if (test.TestDetails.ParallelLimit is { } parallelLimit && !isStartedAsDependencyForAnotherTest)
         {
-            return _parallelLimitProvider.GetLock(parallelLimit);
+            return parallelLimitProvider.GetLock(parallelLimit);
         }
 
         return null;
@@ -372,12 +331,12 @@ internal class SingleTestExecutor : IDataProducer
 
     private async ValueTask Dispose(TestContext testContext)
     {
-        await _disposer.DisposeAsync(testContext);
+        await disposer.DisposeAsync(testContext);
     }
 
     private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
-        return _testInvoker.Invoke(discoveredTest, cancellationToken);
+        return testInvoker.Invoke(discoveredTest, cancellationToken);
     }
 
     private readonly SemaphoreSlim _consoleStandardOutLock = new(1, 1);
@@ -405,7 +364,7 @@ internal class SingleTestExecutor : IDataProducer
                     throw;
                 }
 
-                await _logger.LogWarningAsync($"{testInformation.TestName} failed, retrying... (attempt {i + 1})");
+                await logger.LogWarningAsync($"{testInformation.TestName} failed, retrying... (attempt {i + 1})");
                 await discoveredTest.ResetTestInstance();
                 discoveredTest.TestContext.CurrentRetryAttempt++;
             }
@@ -427,7 +386,7 @@ internal class SingleTestExecutor : IDataProducer
         }
         catch (Exception exception)
         {
-            await _logger.LogErrorAsync(exception);
+            await logger.LogErrorAsync(exception);
             return false;
         }
     }
@@ -439,7 +398,7 @@ internal class SingleTestExecutor : IDataProducer
             throw new SkipTestException("The test session has been cancelled...");
         }
         
-        if (_cancellationTokenSource.IsCancellationRequested)
+        if (cancellationTokenSource.IsCancellationRequested)
         {
             throw new SkipTestException("The test has been cancelled...");
         }
@@ -515,16 +474,16 @@ internal class SingleTestExecutor : IDataProducer
 
     public Task<bool> IsEnabledAsync()
     {
-        return _extension.IsEnabledAsync();
+        return extension.IsEnabledAsync();
     }
 
-    public string Uid => _extension.Uid;
+    public string Uid => extension.Uid;
 
-    public string Version => _extension.Version;
+    public string Version => extension.Version;
 
-    public string DisplayName => _extension.DisplayName;
+    public string DisplayName => extension.DisplayName;
 
-    public string Description => _extension.Description;
+    public string Description => extension.Description;
 
     public Type[] DataTypesProduced { get; } =
     [

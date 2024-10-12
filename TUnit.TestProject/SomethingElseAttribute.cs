@@ -2,10 +2,10 @@
 
 namespace TUnit.TestProject;
 
-public class SomethingElseAttribute : Attribute, IBeforeTestAttribute
+public class SomethingElseAttribute : Attribute, ITestStartEvent
 {
-    public Task OnBeforeTest(BeforeTestContext context)
+    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
     {
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

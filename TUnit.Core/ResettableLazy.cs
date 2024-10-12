@@ -2,25 +2,18 @@
 
 namespace TUnit.Core;
 
-public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : IAsyncDisposable
+public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(Func<T> factory)
+    : IAsyncDisposable
 {
-    private readonly Func<T> _factory;
-
-    private Lazy<T> _lazy;
+    private Lazy<T> _lazy = new Lazy<T>(factory);
 
     public T Value => _lazy.Value;
 
-    public ResettableLazy(Func<T> factory)
-    {
-        _factory = factory;
-        _lazy = new Lazy<T>(factory);
-    }
-    
     public async Task ResetLazy()
     {
         await DisposeAsync();
         
-        _lazy = new Lazy<T>(_factory);
+        _lazy = new Lazy<T>(factory);
     }
     
     public async ValueTask DisposeAsync()

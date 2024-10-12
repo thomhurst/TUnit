@@ -20,8 +20,8 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
                 () => actualValue is null && expectedValue is null,
                 "it is null")
             .OrFailIf(
-                () => actualValue.SequenceEqual(expectedValue, equalityComparer),
-                $"the two Enumerables were equivalent"
+                () => actualValue!.SequenceEqual(expectedValue!, equalityComparer),
+                "the two Enumerables were equivalent"
             );
     }
 }

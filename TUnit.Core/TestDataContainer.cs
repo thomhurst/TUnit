@@ -2,7 +2,6 @@
 using System.Reflection;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -64,7 +63,7 @@ public static class TestDataContainer
         return  (T)instancesForType.GetOrAdd(key, _ => func()!);
     }
     
-    internal static async Task OnLastInstance(Type testClassType)
+    internal static async ValueTask OnLastInstance(Type testClassType)
     {
         var typesPerType = InjectedSharedPerClassType.GetOrAdd(testClassType, _ => new GetOnlyDictionary<Type, object>());
         
@@ -74,7 +73,7 @@ public static class TestDataContainer
         }
     }
     
-    internal static async Task ConsumeKey(string key, Type type)
+    internal static async ValueTask ConsumeKey(string key, Type type)
     {
         lock (Lock)
         {
@@ -97,7 +96,7 @@ public static class TestDataContainer
         await Disposer.DisposeAsync(instancesForType.Remove(key));
     }
 
-    internal static async Task ConsumeGlobalCount(Type type)
+    internal static async ValueTask ConsumeGlobalCount(Type type)
     {
         lock (Lock)
         {

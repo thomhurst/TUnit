@@ -1,12 +1,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Parameter)]
-public sealed class MatrixAttribute : TestDataAttribute
+public sealed class MatrixAttribute(params object?[]? objects) : TestDataAttribute
 {
-    public object?[] Objects { get; }
-
-    public MatrixAttribute(params object?[]? objects)
-    {
-        Objects = objects ?? [ null ];
-    }
+    public object?[] Objects { get; } = objects ?? [ null ];
 }

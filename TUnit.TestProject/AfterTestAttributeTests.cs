@@ -15,9 +15,9 @@ public class AfterTestAttributeTests
         await Assert.That(File.Exists(Filename)).IsFalse();
     }
 
-    public class WriteFileAfterTestAttribute : Attribute, IAfterTestAttribute
+    public class WriteFileAfterTestAttribute : Attribute, ITestEndEvent
     {
-        public async Task OnAfterTest(TestContext testContext)
+        public async ValueTask OnTestEnd(TestContext testContext)
         {
             Console.WriteLine(@"Writing file inside WriteFileAfterTestAttribute!");
             await File.WriteAllTextAsync(Filename, "Foo!");

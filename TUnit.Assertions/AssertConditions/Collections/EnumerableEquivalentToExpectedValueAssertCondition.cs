@@ -23,8 +23,8 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
                 () => expectedValue is null,
                 "it is not null")
             .OrFailIf(
-                () => !actualValue.SequenceEqual(expectedValue, equalityComparer),
-                $"it is {string.Join(',', actualValue)}"
+                () => !actualValue!.SequenceEqual(expectedValue!, equalityComparer),
+                $"it is {string.Join(',', actualValue!)}"
             );
     }
 }

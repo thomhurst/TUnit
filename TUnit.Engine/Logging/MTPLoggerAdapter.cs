@@ -2,28 +2,21 @@
 
 namespace TUnit.Engine.Logging;
 
-internal class MTPLoggerAdapter : ILogger
+internal class MTPLoggerAdapter(global::Microsoft.Testing.Platform.Logging.ILogger logger) : ILogger
 {
-    private readonly global::Microsoft.Testing.Platform.Logging.ILogger _logger;
-
-    public MTPLoggerAdapter(global::Microsoft.Testing.Platform.Logging.ILogger logger)
-    {
-        _logger = logger;
-    }
-
     public Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        return _logger.LogAsync(Map(logLevel), state, exception, formatter);
+        return logger.LogAsync(Map(logLevel), state, exception, formatter);
     }
 
     public void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        _logger.Log(Map(logLevel), state, exception, formatter);
+        logger.Log(Map(logLevel), state, exception, formatter);
     }
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return _logger.IsEnabled(Map(logLevel));
+        return logger.IsEnabled(Map(logLevel));
     }
 
     public static LogLevel Map(global::Microsoft.Testing.Platform.Logging.LogLevel logLevel)

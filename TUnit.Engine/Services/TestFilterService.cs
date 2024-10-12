@@ -3,18 +3,14 @@ using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
-internal class TestFilterService
+internal class TestFilterService(ILoggerFactory loggerFactory)
 {
-    private readonly ILogger<TestFilterService> _logger;
+    private readonly ILogger<TestFilterService> _logger = loggerFactory.CreateLogger<TestFilterService>();
 
-    public TestFilterService(ILoggerFactory loggerFactory)
-    {
-        _logger = loggerFactory.CreateLogger<TestFilterService>();
-    }
-    
     public IEnumerable<DiscoveredTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IEnumerable<DiscoveredTest> testNodes)
     {
 #pragma warning disable TPEXP
@@ -54,8 +50,12 @@ internal class TestFilterService
 
     private string BuildPath(TestDetails testDetails)
     {
+        var assembly = testDetails.ClassType.Assembly.GetName();
+
+        var classTypeName = testDetails.GetClassTypeName().Split('(')[0];
+        
         return
-            $"/{testDetails.ClassType.Assembly.FullName}/{testDetails.ClassType.Namespace}/{testDetails.ClassType.Name}/{testDetails.MethodInfo.Name}";
+            $"/{assembly.Name ?? assembly.FullName}/{testDetails.ClassType.Namespace}/{classTypeName}/{testDetails.MethodInfo.Name}";
     }
 
     private PropertyBag BuildPropertyBag(TestDetails testDetails)

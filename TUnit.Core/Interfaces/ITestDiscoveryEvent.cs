@@ -1,6 +1,6 @@
 namespace TUnit.Core.Interfaces;
 
-public interface IOnTestDiscoveryAttribute
+public interface ITestDiscoveryEvent
 {
     void OnTestDiscovery(DiscoveredTestContext discoveredTestContext);
 }

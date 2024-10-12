@@ -1,14 +1,16 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Assertions.AssertConditions.Generic;
 
-public class EquivalentToExpectedValueAssertCondition<TActual>(TActual expected, string expectedExpression) : ExpectedValueAssertCondition<TActual, TActual>(expected)
+public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual>(TActual expected, string expectedExpression) : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {
     private readonly List<string> _ignoredMembers = [];
 
     protected override string GetExpectation()
         => $"to be equivalent to {expectedExpression}";
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     protected override AssertionResult GetResult(TActual? actualValue, TActual? expectedValue)
     {
         if (actualValue is null && ExpectedValue is null)

@@ -2,13 +2,9 @@ using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record ClassConstructorAttributeContainer : ArgumentsContainer
+internal record ClassConstructorAttributeContainer(ArgumentsType ArgumentsType) : ArgumentsContainer(ArgumentsType)
 {
     public required string ClassConstructorType { get; init; }
-
-    public ClassConstructorAttributeContainer(ArgumentsType argumentsType) : base(argumentsType)
-    {
-    }
 
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {

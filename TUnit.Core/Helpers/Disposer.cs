@@ -2,15 +2,8 @@
 
 namespace TUnit.Core.Helpers;
 
-internal class Disposer
+internal class Disposer(ILogger logger)
 {
-    private readonly ILogger _logger;
-
-    public Disposer(ILogger logger)
-    {
-        _logger = logger;
-    }
-    
     public async ValueTask DisposeAsync(object? obj)
     {
         try
@@ -26,9 +19,9 @@ internal class Disposer
         }
         catch (Exception e)
         {
-            if (_logger != null)
+            if (logger != null)
             {
-                await _logger.LogErrorAsync(e);
+                await logger.LogErrorAsync(e);
             }
         }
     }

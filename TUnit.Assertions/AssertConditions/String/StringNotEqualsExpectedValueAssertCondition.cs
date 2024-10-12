@@ -22,6 +22,6 @@ public class StringNotEqualsExpectedValueAssertCondition(string expected, String
         return AssertionResult
             .FailIf(
                 () => string.Equals(actualValue, expectedValue, stringComparison),
-                $"it was");
+                "it was");
     }
 }

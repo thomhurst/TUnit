@@ -223,16 +223,20 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), Arm64 RyuJIT AdvSIMD
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), Arm64 RyuJIT AdvSIMD
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method       | Mean     | Error    | StdDev    | Median   |
-|------------- |---------:|---------:|----------:|---------:|
-| Build_TUnit  | 993.7 ms | 35.28 ms | 103.46 ms | 966.3 ms |
-| Build_NUnit  | 858.1 ms | 17.05 ms |  40.84 ms | 861.3 ms |
-| Build_xUnit  | 845.8 ms | 16.52 ms |  33.38 ms | 842.4 ms |
-| Build_MSTest | 876.4 ms | 17.44 ms |  37.55 ms | 873.4 ms |
+| Method       | Job      | Runtime  | Mean     | Error    | StdDev    | Median   |
+|------------- |--------- |--------- |---------:|---------:|----------:|---------:|
+| Build_TUnit  | .NET 8.0 | .NET 8.0 | 897.3 ms | 17.82 ms |  24.40 ms | 895.7 ms |
+| Build_NUnit  | .NET 8.0 | .NET 8.0 | 811.7 ms | 14.97 ms |  13.27 ms | 811.5 ms |
+| Build_xUnit  | .NET 8.0 | .NET 8.0 | 810.7 ms | 15.23 ms |  12.72 ms | 810.0 ms |
+| Build_MSTest | .NET 8.0 | .NET 8.0 | 837.0 ms | 12.77 ms |  11.32 ms | 838.5 ms |
+| Build_TUnit  | .NET 9.0 | .NET 9.0 | 886.8 ms | 17.55 ms |  30.27 ms | 873.2 ms |
+| Build_NUnit  | .NET 9.0 | .NET 9.0 | 864.5 ms | 17.22 ms |  48.57 ms | 850.5 ms |
+| Build_xUnit  | .NET 9.0 | .NET 9.0 | 961.9 ms | 55.31 ms | 155.11 ms | 919.2 ms |
+| Build_MSTest | .NET 9.0 | .NET 9.0 | 875.1 ms | 17.45 ms |  27.16 ms | 873.4 ms |
 
 
 
@@ -245,16 +249,20 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method       | Mean    | Error    | StdDev   |
-|------------- |--------:|---------:|---------:|
-| Build_TUnit  | 1.636 s | 0.0324 s | 0.0333 s |
-| Build_NUnit  | 1.494 s | 0.0270 s | 0.0253 s |
-| Build_xUnit  | 1.499 s | 0.0145 s | 0.0129 s |
-| Build_MSTest | 1.556 s | 0.0245 s | 0.0218 s |
+| Method       | Job      | Runtime  | Mean    | Error    | StdDev   |
+|------------- |--------- |--------- |--------:|---------:|---------:|
+| Build_TUnit  | .NET 8.0 | .NET 8.0 | 1.743 s | 0.0341 s | 0.0393 s |
+| Build_NUnit  | .NET 8.0 | .NET 8.0 | 1.564 s | 0.0291 s | 0.0258 s |
+| Build_xUnit  | .NET 8.0 | .NET 8.0 | 1.579 s | 0.0304 s | 0.0285 s |
+| Build_MSTest | .NET 8.0 | .NET 8.0 | 1.640 s | 0.0296 s | 0.0262 s |
+| Build_TUnit  | .NET 9.0 | .NET 9.0 | 1.730 s | 0.0296 s | 0.0262 s |
+| Build_NUnit  | .NET 9.0 | .NET 9.0 | 1.575 s | 0.0302 s | 0.0252 s |
+| Build_xUnit  | .NET 9.0 | .NET 9.0 | 1.536 s | 0.0270 s | 0.0341 s |
+| Build_MSTest | .NET 9.0 | .NET 9.0 | 1.599 s | 0.0171 s | 0.0133 s |
 
 
 
@@ -267,16 +275,20 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method       | Mean    | Error    | StdDev   |
-|------------- |--------:|---------:|---------:|
-| Build_TUnit  | 1.722 s | 0.0338 s | 0.0317 s |
-| Build_NUnit  | 1.586 s | 0.0292 s | 0.0359 s |
-| Build_xUnit  | 1.568 s | 0.0313 s | 0.0335 s |
-| Build_MSTest | 1.629 s | 0.0248 s | 0.0232 s |
+| Method       | Job      | Runtime  | Mean    | Error    | StdDev   |
+|------------- |--------- |--------- |--------:|---------:|---------:|
+| Build_TUnit  | .NET 8.0 | .NET 8.0 | 1.682 s | 0.0231 s | 0.0205 s |
+| Build_NUnit  | .NET 8.0 | .NET 8.0 | 1.515 s | 0.0274 s | 0.0257 s |
+| Build_xUnit  | .NET 8.0 | .NET 8.0 | 1.523 s | 0.0178 s | 0.0158 s |
+| Build_MSTest | .NET 8.0 | .NET 8.0 | 1.582 s | 0.0188 s | 0.0176 s |
+| Build_TUnit  | .NET 9.0 | .NET 9.0 | 1.699 s | 0.0323 s | 0.0302 s |
+| Build_NUnit  | .NET 9.0 | .NET 9.0 | 1.552 s | 0.0255 s | 0.0238 s |
+| Build_xUnit  | .NET 9.0 | .NET 9.0 | 1.560 s | 0.0192 s | 0.0180 s |
+| Build_MSTest | .NET 9.0 | .NET 9.0 | 1.596 s | 0.0197 s | 0.0175 s |
 
 
 ### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
@@ -290,17 +302,22 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), Arm64 RyuJIT AdvSIMD
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), Arm64 RyuJIT AdvSIMD
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method    | Mean     | Error    | StdDev   |
-|---------- |---------:|---------:|---------:|
-| TUnit_AOT | 105.8 ms |  7.37 ms | 21.62 ms |
-| TUnit     | 640.2 ms | 14.43 ms | 41.18 ms |
-| NUnit     | 990.2 ms | 19.70 ms | 51.90 ms |
-| xUnit     | 981.6 ms | 19.37 ms | 47.50 ms |
-| MSTest    | 914.0 ms | 18.07 ms | 40.41 ms |
+| Method    | Job      | Runtime  | Mean     | Error    | StdDev    | Median   |
+|---------- |--------- |--------- |---------:|---------:|----------:|---------:|
+| TUnit_AOT | .NET 8.0 | .NET 8.0 | 176.8 ms | 11.49 ms |  33.70 ms | 167.5 ms |
+| TUnit     | .NET 8.0 | .NET 8.0 | 470.3 ms |  8.29 ms |  19.85 ms | 464.9 ms |
+| NUnit     | .NET 8.0 | .NET 8.0 | 694.4 ms |  4.17 ms |   3.90 ms | 693.7 ms |
+| xUnit     | .NET 8.0 | .NET 8.0 | 803.3 ms | 47.01 ms | 136.39 ms | 742.2 ms |
+| MSTest    | .NET 8.0 | .NET 8.0 | 663.2 ms | 13.17 ms |  27.49 ms | 656.9 ms |
+| TUnit_AOT | .NET 9.0 | .NET 9.0 | 117.5 ms |  0.25 ms |   0.21 ms | 117.4 ms |
+| TUnit     | .NET 9.0 | .NET 9.0 | 461.0 ms |  8.99 ms |  11.37 ms | 457.2 ms |
+| NUnit     | .NET 9.0 | .NET 9.0 | 701.1 ms | 12.89 ms |  11.42 ms | 697.3 ms |
+| xUnit     | .NET 9.0 | .NET 9.0 | 683.3 ms |  8.77 ms |   7.33 ms | 683.5 ms |
+| MSTest    | .NET 9.0 | .NET 9.0 | 626.4 ms | 12.22 ms |  11.43 ms | 625.3 ms |
 
 
 
@@ -313,17 +330,22 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    35.54 ms |  1.180 ms |  3.478 ms |
-| TUnit     |   927.34 ms | 17.380 ms | 20.689 ms |
-| NUnit     | 1,468.65 ms | 17.771 ms | 14.840 ms |
-| xUnit     | 1,456.57 ms | 21.762 ms | 20.357 ms |
-| MSTest    | 1,313.01 ms | 20.273 ms | 18.964 ms |
+| Method    | Job      | Runtime  | Mean        | Error     | StdDev    |
+|---------- |--------- |--------- |------------:|----------:|----------:|
+| TUnit_AOT | .NET 8.0 | .NET 8.0 |    87.16 ms |  1.720 ms |  4.219 ms |
+| TUnit     | .NET 8.0 | .NET 8.0 |   849.04 ms | 16.466 ms | 26.589 ms |
+| NUnit     | .NET 8.0 | .NET 8.0 | 1,334.09 ms | 15.615 ms | 13.040 ms |
+| xUnit     | .NET 8.0 | .NET 8.0 | 1,328.56 ms | 18.563 ms | 16.455 ms |
+| MSTest    | .NET 8.0 | .NET 8.0 | 1,188.48 ms | 16.984 ms | 15.887 ms |
+| TUnit_AOT | .NET 9.0 | .NET 9.0 |    64.06 ms |  0.909 ms |  0.806 ms |
+| TUnit     | .NET 9.0 | .NET 9.0 |   821.84 ms | 16.381 ms | 27.369 ms |
+| NUnit     | .NET 9.0 | .NET 9.0 | 1,319.33 ms | 18.861 ms | 17.643 ms |
+| xUnit     | .NET 9.0 | .NET 9.0 | 1,287.32 ms |  7.951 ms |  7.048 ms |
+| MSTest    | .NET 9.0 | .NET 9.0 | 1,165.25 ms | 12.304 ms | 11.509 ms |
 
 
 
@@ -336,17 +358,22 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    77.61 ms |  1.503 ms |  1.406 ms |
-| TUnit     |   855.02 ms | 16.778 ms | 19.973 ms |
-| NUnit     | 1,345.10 ms | 19.940 ms | 18.651 ms |
-| xUnit     | 1,332.56 ms | 16.032 ms | 14.996 ms |
-| MSTest    | 1,205.47 ms | 15.715 ms | 13.931 ms |
+| Method    | Job      | Runtime  | Mean       | Error    | StdDev   | Median     |
+|---------- |--------- |--------- |-----------:|---------:|---------:|-----------:|
+| TUnit_AOT | .NET 8.0 | .NET 8.0 |   124.3 ms |  2.37 ms |  1.85 ms |   124.9 ms |
+| TUnit     | .NET 8.0 | .NET 8.0 |   850.2 ms | 16.94 ms | 24.29 ms |   851.1 ms |
+| NUnit     | .NET 8.0 | .NET 8.0 | 1,315.3 ms | 10.02 ms |  9.38 ms | 1,317.7 ms |
+| xUnit     | .NET 8.0 | .NET 8.0 | 1,304.1 ms | 10.61 ms |  9.92 ms | 1,303.9 ms |
+| MSTest    | .NET 8.0 | .NET 8.0 | 1,186.5 ms | 17.64 ms | 16.50 ms | 1,184.7 ms |
+| TUnit_AOT | .NET 9.0 | .NET 9.0 |   125.6 ms |  1.37 ms |  1.21 ms |   124.9 ms |
+| TUnit     | .NET 9.0 | .NET 9.0 |   867.0 ms | 17.28 ms | 25.33 ms |   851.3 ms |
+| NUnit     | .NET 9.0 | .NET 9.0 | 1,339.3 ms | 13.95 ms | 12.37 ms | 1,340.3 ms |
+| xUnit     | .NET 9.0 | .NET 9.0 | 1,317.5 ms |  9.31 ms |  8.70 ms | 1,319.0 ms |
+| MSTest    | .NET 9.0 | .NET 9.0 | 1,194.8 ms | 14.55 ms | 13.61 ms | 1,198.2 ms |
 
 
 ### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
@@ -360,17 +387,22 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), Arm64 RyuJIT AdvSIMD
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), Arm64 RyuJIT AdvSIMD
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    251.1 ms |  12.66 ms |  37.13 ms |
-| TUnit     |    611.9 ms |  21.25 ms |  62.65 ms |
-| NUnit     | 14,207.0 ms | 218.33 ms | 182.32 ms |
-| xUnit     | 14,227.8 ms | 210.42 ms | 175.71 ms |
-| MSTest    | 14,550.7 ms | 285.65 ms | 507.75 ms |
+| Method    | Job      | Runtime  | Mean        | Error     | StdDev    |
+|---------- |--------- |--------- |------------:|----------:|----------:|
+| TUnit_AOT | .NET 8.0 | .NET 8.0 |    287.5 ms |  15.18 ms |  44.53 ms |
+| TUnit     | .NET 8.0 | .NET 8.0 |    630.7 ms |  20.78 ms |  60.27 ms |
+| NUnit     | .NET 8.0 | .NET 8.0 | 14,472.7 ms | 280.12 ms | 676.53 ms |
+| xUnit     | .NET 8.0 | .NET 8.0 | 14,554.4 ms | 290.54 ms | 538.54 ms |
+| MSTest    | .NET 8.0 | .NET 8.0 | 14,708.5 ms | 280.04 ms | 572.05 ms |
+| TUnit_AOT | .NET 9.0 | .NET 9.0 |    291.2 ms |  15.71 ms |  46.31 ms |
+| TUnit     | .NET 9.0 | .NET 9.0 |    619.3 ms |  20.14 ms |  59.37 ms |
+| NUnit     | .NET 9.0 | .NET 9.0 | 14,166.0 ms | 275.39 ms | 394.95 ms |
+| xUnit     | .NET 9.0 | .NET 9.0 | 14,356.9 ms | 286.78 ms | 494.68 ms |
+| MSTest    | .NET 9.0 | .NET 9.0 | 14,423.7 ms | 283.26 ms | 532.04 ms |
 
 
 
@@ -383,17 +415,22 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method    | Mean       | Error    | StdDev   |
-|---------- |-----------:|---------:|---------:|
-| TUnit_AOT |   102.1 ms |  2.00 ms |  2.46 ms |
-| TUnit     |   943.2 ms | 18.26 ms | 26.19 ms |
-| NUnit     | 6,551.5 ms | 19.03 ms | 16.87 ms |
-| xUnit     | 6,591.6 ms | 31.41 ms | 29.38 ms |
-| MSTest    | 6,490.2 ms | 14.02 ms | 13.12 ms |
+| Method    | Job      | Runtime  | Mean       | Error    | StdDev   |
+|---------- |--------- |--------- |-----------:|---------:|---------:|
+| TUnit_AOT | .NET 8.0 | .NET 8.0 |   134.9 ms |  2.69 ms |  6.07 ms |
+| TUnit     | .NET 8.0 | .NET 8.0 |   918.3 ms | 18.17 ms | 30.85 ms |
+| NUnit     | .NET 8.0 | .NET 8.0 | 6,556.3 ms | 21.49 ms | 19.05 ms |
+| xUnit     | .NET 8.0 | .NET 8.0 | 6,530.6 ms | 26.33 ms | 24.63 ms |
+| MSTest    | .NET 8.0 | .NET 8.0 | 6,471.2 ms | 10.65 ms |  9.97 ms |
+| TUnit_AOT | .NET 9.0 | .NET 9.0 |   124.2 ms |  2.48 ms |  6.07 ms |
+| TUnit     | .NET 9.0 | .NET 9.0 |   892.6 ms | 17.64 ms | 29.95 ms |
+| NUnit     | .NET 9.0 | .NET 9.0 | 6,499.6 ms | 23.38 ms | 21.87 ms |
+| xUnit     | .NET 9.0 | .NET 9.0 | 6,467.8 ms | 18.79 ms | 16.66 ms |
+| MSTest    | .NET 9.0 | .NET 9.0 | 6,442.9 ms | 28.44 ms | 25.21 ms |
 
 
 
@@ -406,17 +443,22 @@ AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.100-rc.2.24474.11
   [Host]   : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
   .NET 8.0 : .NET 8.0.10 (8.0.1024.46610), X64 RyuJIT AVX2
+  .NET 9.0 : .NET 9.0.0 (9.0.24.47305), X64 RyuJIT AVX2
 
-Job=.NET 8.0  Runtime=.NET 8.0  
 
 ```
-| Method    | Mean       | Error    | StdDev   |
-|---------- |-----------:|---------:|---------:|
-| TUnit_AOT |   139.9 ms |  2.69 ms |  2.25 ms |
-| TUnit     |   915.9 ms | 18.29 ms | 25.64 ms |
-| NUnit     | 7,519.0 ms | 25.67 ms | 22.76 ms |
-| xUnit     | 7,494.6 ms | 19.94 ms | 18.65 ms |
-| MSTest    | 7,498.8 ms | 26.39 ms | 24.68 ms |
+| Method    | Job      | Runtime  | Mean       | Error    | StdDev   |
+|---------- |--------- |--------- |-----------:|---------:|---------:|
+| TUnit_AOT | .NET 8.0 | .NET 8.0 |   186.4 ms |  3.43 ms |  2.87 ms |
+| TUnit     | .NET 8.0 | .NET 8.0 |   924.8 ms | 18.33 ms | 23.83 ms |
+| NUnit     | .NET 8.0 | .NET 8.0 | 7,565.0 ms | 17.16 ms | 15.21 ms |
+| xUnit     | .NET 8.0 | .NET 8.0 | 7,549.5 ms | 19.40 ms | 17.20 ms |
+| MSTest    | .NET 8.0 | .NET 8.0 | 7,511.5 ms | 28.97 ms | 27.10 ms |
+| TUnit_AOT | .NET 9.0 | .NET 9.0 |   178.2 ms |  3.54 ms |  8.33 ms |
+| TUnit     | .NET 9.0 | .NET 9.0 |   968.3 ms | 19.14 ms | 26.83 ms |
+| NUnit     | .NET 9.0 | .NET 9.0 | 7,575.6 ms | 23.91 ms | 21.20 ms |
+| xUnit     | .NET 9.0 | .NET 9.0 | 7,548.2 ms | 21.35 ms | 19.97 ms |
+| MSTest    | .NET 9.0 | .NET 9.0 | 7,485.9 ms | 29.34 ms | 26.01 ms |
 
 
 

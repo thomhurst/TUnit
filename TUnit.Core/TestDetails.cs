@@ -7,7 +7,7 @@ namespace TUnit.Core;
 public record TestDetails<
 [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)] 
     TClassType
-> : TestDetails
+>() : TestDetails(typeof(TClassType))
 {
     [JsonIgnore]
     public required ResettableLazy<TClassType?> LazyClassInstance { get; init; }
@@ -15,7 +15,7 @@ public record TestDetails<
     public override object? ClassInstance => LazyClassInstance.Value;
 } 
 
-public abstract record TestDetails
+public abstract record TestDetails(Type ClassType)
 {
     public required string TestId { get; init; }
     
@@ -31,7 +31,6 @@ public abstract record TestDetails
     public required IReadOnlyList<string> Categories { get; init; }
     
     public required MethodInfo MethodInfo { get; init; }
-    public required Type ClassType { get; init; }
     public abstract object? ClassInstance { get; }
     public required int CurrentRepeatAttempt { get; init; }
     public required int RepeatLimit { get; init; }
@@ -41,7 +40,7 @@ public abstract record TestDetails
     
     public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
     public IReadOnlyDictionary<string, string> CustomProperties => InternalCustomProperties;
-    public required Dictionary<string, string> InternalCustomProperties { get; init; }
+    internal Dictionary<string, string> InternalCustomProperties { get; } = [];
 
     [JsonIgnore]
     public required Attribute[] AssemblyAttributes { get; init; }

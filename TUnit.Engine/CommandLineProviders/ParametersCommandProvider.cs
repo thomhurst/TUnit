@@ -5,29 +5,22 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-internal class ParametersCommandProvider : ICommandLineOptionsProvider
+internal class ParametersCommandProvider(IExtension extension) : ICommandLineOptionsProvider
 {
     public const string TestParameter = "test-parameter";
-    
-    private readonly IExtension _extension;
-
-    public ParametersCommandProvider(IExtension extension)
-    {
-        _extension = extension;
-    }
 
     public Task<bool> IsEnabledAsync()
     {
-        return _extension.IsEnabledAsync();
+        return extension.IsEnabledAsync();
     }
 
-    public string Uid => _extension.Uid;
+    public string Uid => extension.Uid;
 
-    public string Version => _extension.Version;
+    public string Version => extension.Version;
 
-    public string DisplayName => _extension.DisplayName;
+    public string DisplayName => extension.DisplayName;
 
-    public string Description => _extension.Description;
+    public string Description => extension.Description;
 
     public readonly Regex Regex = new("^.+=.*$");
     

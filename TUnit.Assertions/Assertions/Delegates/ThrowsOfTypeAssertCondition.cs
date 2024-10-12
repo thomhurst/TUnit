@@ -12,7 +12,7 @@ public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : Delegate
         => AssertionResult
         .FailIf(
             () => exception is null,
-            $"none was thrown")
+            "none was thrown")
         .OrFailIf(
             () => !exception!.GetType().IsAssignableTo(typeof(TExpectedException)),
             $"{exception?.GetType().Name.PrependAOrAn()} was thrown"

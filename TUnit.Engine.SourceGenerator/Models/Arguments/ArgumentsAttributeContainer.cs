@@ -2,14 +2,9 @@ using TUnit.Engine.SourceGenerator.Enums;
 
 namespace TUnit.Engine.SourceGenerator.Models.Arguments;
 
-internal record ArgumentsAttributeContainer : ArgumentsContainer
+internal record ArgumentsAttributeContainer(ArgumentsType ArgumentsType, Argument[] Arguments)
+    : ArgumentsContainer(ArgumentsType)
 {
-    public Argument[] Arguments { get; }
-    public ArgumentsAttributeContainer(ArgumentsType argumentsType, Argument[] arguments) : base(argumentsType)
-    {
-        Arguments = arguments;
-    }
-
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         foreach (var argument in Arguments)

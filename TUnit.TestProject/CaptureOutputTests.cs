@@ -6,12 +6,7 @@ namespace TUnit.TestProject;
 [Repeat(15)]
 public class CaptureOutputTests
 {
-    private readonly MyClass _myClass;
-
-    public CaptureOutputTests()
-    {
-        _myClass = new MyClass();
-    }
+    private readonly MyClass _myClass = new();
 
     [Test]
     public async Task Test()

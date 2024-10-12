@@ -13,9 +13,9 @@ public class ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpectedExceptio
         => AssertionResult
         .FailIf(
             () => exception is null,
-            $"none was thrown")
+            "none was thrown")
         .OrFailIf(
-            () => exception.GetType() != typeof(TExpectedException),
+            () => exception!.GetType() != typeof(TExpectedException),
             $"{exception?.GetType().Name.PrependAOrAn()} was thrown"
         );
 }

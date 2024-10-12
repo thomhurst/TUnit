@@ -1,18 +1,11 @@
-using System.Reflection;
-
 namespace TUnit.TestProject;
 
 [ClassDataSource<Derived1>]
 [ClassDataSource<Derived2>]
-public class ClassDataSourceDrivenTests2
+public class ClassDataSourceDrivenTests2(ClassDataSourceDrivenTests2.Base @base)
 {
-    private readonly Base _base;
+    private readonly Base _base = @base;
 
-    public ClassDataSourceDrivenTests2(Base @base)
-    {
-        _base = @base;
-    }
-    
     [Test]
     public void Base_Derived1()
     {

@@ -54,7 +54,7 @@ public class MyTests(Tenant tenant)
 }
 ```
 
-With this, I wanted to be able to filter by the tenant. So I tried using a custom attribute with `IApplyToTest` and setting a property based on the constructor argument. This didn't work. I think they're enumerated upon starting, and so you can't set this up beforehand. With TUnit, tests are enumerated and initialised via source-generation so this is all done up-front. So I could set a property in TUnit with an attribute with `IOnTestDiscoveryAttribute`, set a property based constructor arguments, and then run `dotnet run --treenode-filter /*/*/*/*[Tenant=MyTenant]` 
+With this, I wanted to be able to filter by the tenant. So I tried using a custom attribute with `IApplyToTest` and setting a property based on the constructor argument. This didn't work. I think they're enumerated upon starting, and so you can't set this up beforehand. With TUnit, tests are enumerated and initialised via source-generation so this is all done up-front. So I could set a property in TUnit with an attribute with `ITestDiscoveryEvent`, set a property based constructor arguments, and then run `dotnet run --treenode-filter /*/*/*/*[Tenant=MyTenant]` 
 
 ### Assembly & class level attributes
 Want to use the `[Repeat]` or `[Retry]` attributes on a class? Or even an assembly? You can't. They're only supported for test methods. With TUnit, most attributes are supported at Test, Class & Assembly levels. Test takes the highest priority, then class, then assembly. So you could set defaults with an assembly/class attribute, and then override it for certain tests by setting that same attribute on the test.

@@ -21,12 +21,12 @@ public class InheritedPropertySetterTests : TestModule
                     """
                     Initializing Static Property
                     Before Test Session
+                    Initializing Property
+                    Initializing Property
+                    Initializing Property
+                    Initializing Property
                     Before Assembly
                     Before Class
-                    Initializing Property
-                    Initializing Property
-                    Initializing Property
-                    Initializing Property
                     Running Test
                     StaticInnerModel { IsInitialized = True, Foo = Bar }
                     Disposing Property

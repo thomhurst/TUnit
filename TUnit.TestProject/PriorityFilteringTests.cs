@@ -2,14 +2,9 @@
 
 namespace TUnit.TestProject;
 
-public class PriorityAttribute : PropertyAttribute
+public class PriorityAttribute(PriorityLevel priorityLevel) : PropertyAttribute("Priority", priorityLevel.ToString())
 {
-    public PriorityLevel PriorityLevel { get; }
-
-    public PriorityAttribute(PriorityLevel priorityLevel) : base("Priority", priorityLevel.ToString())
-    {
-        PriorityLevel = priorityLevel;
-    }
+    public PriorityLevel PriorityLevel { get; } = priorityLevel;
 }
 
 public class PriorityFilteringTests
