@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.Extensions.Generic;
-
-namespace TUnit.Assertions.Tests.Assertions.Delegates;
+﻿namespace TUnit.Assertions.Tests.Assertions.Delegates;
 
 public partial class Throws
 {
@@ -13,7 +11,7 @@ public partial class Throws
                 Expected action to throw exactly a CustomException, but an OtherException was thrown.
                 At Assert.That(action).Throws().Exactly<CustomException>()
                 """;
-            Exception exception = OtherException.Create();
+            Exception exception = CreateOtherException();
             Action action = () => throw exception;
 
             var sut = async ()
@@ -30,7 +28,7 @@ public partial class Throws
                 Expected action to throw exactly a CustomException, but a SubCustomException was thrown.
                 At Assert.That(action).Throws().Exactly<CustomException>()
                 """;
-            Exception exception = SubCustomException.Create();
+            Exception exception = CreateSubCustomException();
             Action action = () => throw exception;
 
             var sut = async ()
@@ -59,7 +57,7 @@ public partial class Throws
         [Test]
         public async Task Returns_Exception_When_Awaited()
         {
-            Exception exception = CustomException.Create();
+            Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
             var result = await Assert.That(action).Throws().Exactly<CustomException>();
@@ -70,7 +68,7 @@ public partial class Throws
         [Test]
         public async Task Succeeds_For_Code_With_Correct_Exception()
         {
-            Exception exception = CustomException.Create();
+            Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
             var sut = async ()

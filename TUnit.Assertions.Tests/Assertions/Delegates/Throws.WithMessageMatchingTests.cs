@@ -2,7 +2,7 @@
 
 public partial class Throws
 {
-    public class WithMessageTests
+    public class WithMessageMatchingTests
     {
         [Test]
         public async Task Fails_For_Different_Messages()
@@ -10,18 +10,14 @@ public partial class Throws
             string message1 = "foo";
             string message2 = "bar";
             string expectedMessage = """
-                Expected action to throw a CustomException which message equals "bar", but it differs at index 0:
-                    ↓
-                   "foo"
-                   "bar"
-                    ↑.
-                At Assert.That(action).Throws().Exactly<CustomException>().WithMessage(message2)
+                Expected action to throw a CustomException which message matches "bar", but found "foo".
+                At Assert.That(action).Throws().Exactly<CustomException>().WithMessageMatching(message2)
                 """;
             Exception exception = CreateCustomException(message1);
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exactly<CustomException>().WithMessage(message2);
+                => await Assert.That(action).Throws().Exactly<CustomException>().WithMessageMatching(message2);
 
             await Assert.That(sut).Throws().Exception()
                 .WithMessage(expectedMessage);
@@ -34,20 +30,20 @@ public partial class Throws
             Exception exception = CreateCustomException(matchingMessage);
             Action action = () => throw exception;
 
-            var result = await Assert.That(action).Throws().OfType<CustomException>().WithMessage(matchingMessage);
+            var result = await Assert.That(action).Throws().OfType<CustomException>().WithMessageMatching(matchingMessage);
 
             await Assert.That((object?)result).IsSameReference(exception);
         }
 
         [Test]
-        public async Task Succeed_For_Matching_Message()
+        public async Task Succeeds_For_Matching_Message()
         {
             string matchingMessage = "foo";
             Exception exception = CreateCustomException(matchingMessage);
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<CustomException>().WithMessage(matchingMessage);
+                => await Assert.That(action).Throws().OfType<CustomException>().WithMessageMatching(matchingMessage);
 
             await Assert.That(sut).Throws().Nothing();
         }

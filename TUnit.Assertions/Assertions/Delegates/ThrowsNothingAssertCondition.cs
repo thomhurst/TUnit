@@ -12,5 +12,5 @@ public class ThrowsNothingAssertCondition<TActual> : DelegateAssertCondition<TAc
         => AssertionResult
         .FailIf(
             () => exception is not null,
-            $"{exception?.GetType().Name.PrependAOrAn()} was thrown");
+            $"{exception?.GetType().Name.PrependAOrAn()} was thrown:{Environment.NewLine}{exception?.Message}");
 }

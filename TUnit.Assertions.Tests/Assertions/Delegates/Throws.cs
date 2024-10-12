@@ -4,43 +4,51 @@ namespace TUnit.Assertions.Tests.Assertions.Delegates;
 
 public partial class Throws
 {
+    private static CustomException CreateCustomException(
+        [CallerMemberName] string message = "",
+        Exception? innerException = null)
+    {
+        return new CustomException(message, innerException);
+    }
+
+    private static SubCustomException CreateSubCustomException(
+        [CallerMemberName] string message = "",
+        Exception? innerException = null)
+    {
+        return new SubCustomException(message, innerException);
+    }
+
+    private static OtherException CreateOtherException(
+        [CallerMemberName] string message = "",
+        Exception? innerException = null)
+    {
+        return new OtherException(message, innerException);
+    }
+
     private class CustomException : System.Exception
     {
-        public CustomException(string message) : base(message)
+        public CustomException(string message, Exception? innerException = null)
+            : base(message, innerException)
         {
 
-        }
-
-        public static CustomException Create([CallerMemberName] string message = "")
-        {
-            return new CustomException(message);
         }
     }
 
     private class SubCustomException : CustomException
     {
-        public SubCustomException(string message) : base(message)
+        public SubCustomException(string message, Exception? innerException = null)
+            : base(message, innerException)
         {
 
-        }
-
-        public static SubCustomException Create([CallerMemberName] string message = "")
-        {
-            return new SubCustomException(message);
         }
     }
 
     private class OtherException : System.Exception
     {
-        public OtherException(string message) : base(message)
+        public OtherException(string message, Exception? innerException = null)
+            : base(message, innerException)
         {
 
-        }
-
-        public static OtherException Create([CallerMemberName] string message = "")
-        {
-            return new OtherException(message);
         }
     }
-
 }

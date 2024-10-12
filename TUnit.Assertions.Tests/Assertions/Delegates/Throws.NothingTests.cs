@@ -7,11 +7,12 @@ public partial class Throws
         [Test]
         public async Task Fails_For_Code_With_Exceptions()
         {
-            string expectedMessage = """
-                Expected action to throw nothing, but a CustomException was thrown.
+            string expectedMessage = $$"""
+                Expected action to throw nothing, but a CustomException was thrown:
+                {{nameof(Fails_For_Code_With_Exceptions)}}.
                 At Assert.That(action).Throws().Nothing()
                 """;
-            Exception exception = CustomException.Create();
+            Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
             var sut = async ()

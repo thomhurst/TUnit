@@ -5,20 +5,17 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Delegates;
 
-public class ThrowsException<TActual, TException> where TException : Exception
+public class ThrowsException<TActual, TException>(
+    InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,
+    IDelegateSource<TActual> delegateSource,
+    Func<Exception?, Exception?> exceptionSelector,
+    [CallerMemberName] string callerMemberName = "")
+    where TException : Exception
 {
-    private readonly IDelegateSource<TActual> _delegateSource;
-    private readonly Func<Exception?, Exception?> _exceptionSelector;
-    private InvokableDelegateAssertionBuilder<TActual> _delegateAssertionBuilder;
+    private readonly IDelegateSource<TActual> _delegateSource = delegateSource;
+    private readonly Func<Exception?, Exception?> _exceptionSelector = exceptionSelector;
     private IDelegateSource<TActual> delegateSource;
-    private Func<Exception?, Exception?> exceptionSelector;
-
-    public ThrowsException(InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder, IDelegateSource<TActual> delegateSource, Func<Exception?, Exception?> exceptionSelector, [CallerMemberName] string callerMemberName = "")
-    {
-        _delegateAssertionBuilder = delegateAssertionBuilder;
-        _delegateSource = delegateSource;
-        _exceptionSelector = exceptionSelector;
-    }
+    private Func<Exception?, TException?> exceptionSelector;
 
     public ThrowsException<TActual, TException> WithMessageMatching(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
@@ -34,5 +31,11 @@ public class ThrowsException<TActual, TException> where TException : Exception
         return this;
     }
 
-    public TaskAwaiter<TException?> GetAwaiter() => _delegateAssertionBuilder.GetAwaiterWithException<TException>();
+    public ThrowsException<TActual, Exception> WithInnerException()
+    {
+        _delegateSource.AssertionBuilder.AppendExpression($"{nameof(WithInnerException)}()");
+        return new(delegateAssertionBuilder, _delegateSource, e => _exceptionSelector(e)?.InnerException);
+    }
+
+    public TaskAwaiter<TException?> GetAwaiter() => delegateAssertionBuilder.GetAwaiterWithException<TException>();
 }
