@@ -9,14 +9,14 @@ public partial class Throws
         {
             string expectedMessage = """
                 Expected action to throw an exception, but none was thrown.
-                At Assert.That(action).Throws().Exception()
+                At Assert.That(action).ThrowsException()
                 """;
             Action action = () => { };
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exception();
+                => await Assert.That(action).ThrowsException();
 
-            await Assert.That(sut).Throws().Exception()
+            await Assert.That(sut).ThrowsException()
                 .WithMessage(expectedMessage);
         }
 
@@ -26,7 +26,7 @@ public partial class Throws
             Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
-            var result = await Assert.That(action).Throws().Exception();
+            var result = await Assert.That(action).ThrowsException();
 
             await Assert.That((object?)result).IsSameReference(exception);
         }
@@ -38,9 +38,9 @@ public partial class Throws
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exception();
+                => await Assert.That(action).ThrowsException();
 
-            await Assert.That(sut).Throws().Nothing();
+            await Assert.That(sut).ThrowsNothing();
         }
     }
 }

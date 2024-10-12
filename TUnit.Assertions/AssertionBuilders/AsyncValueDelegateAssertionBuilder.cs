@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.Delegates;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
@@ -12,7 +13,27 @@ public class AsyncValueDelegateAssertionBuilder<TActual>
     internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
-    
+
+    public ThrowsException<TActual, TException> Throws<TException>() where TException : Exception
+    {
+        return new DelegateSource<TActual>(this).Throws<TException>();
+    }
+
+    public ThrowsException<TActual, TException> ThrowsExactly<TException>() where TException : Exception
+    {
+        return new DelegateSource<TActual>(this).ThrowsExactly<TException>();
+    }
+
+    public ThrowsException<TActual, Exception> ThrowsException()
+    {
+        return new DelegateSource<TActual>(this).ThrowsException();
+    }
+
+    public CastableAssertionBuilder<TActual, TActual> ThrowsNothing()
+    {
+        return new DelegateSource<TActual>(this).ThrowsNothing();
+    }
+
     AssertionBuilder<TActual> ISource<TActual>.AssertionBuilder => this;
     public InvokableValueAssertionBuilder<TActual> IsTypeOf(Type type)
     {

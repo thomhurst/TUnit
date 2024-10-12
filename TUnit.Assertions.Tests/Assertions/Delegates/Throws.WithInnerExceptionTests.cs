@@ -15,17 +15,17 @@ public partial class Throws
                    "some different inner message"
                    "bar"
                     ↑.
-                At Assert.That(action).Throws().Exception().WithInnerException().WithMessage(expectedInnerMessage)
+                At Assert.That(action).ThrowsException().WithInnerException().WithMessage(expectedInnerMessage)
                 """;
             Exception exception = CreateCustomException(outerMessage,
                 CreateCustomException("some different inner message"));
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exception()
+                => await Assert.That(action).ThrowsException()
                 .WithInnerException().WithMessage(expectedInnerMessage);
 
-            await Assert.That(sut).Throws().Exception()
+            await Assert.That(sut).ThrowsException()
                 .WithMessage(expectedMessage);
         }
 
@@ -36,7 +36,7 @@ public partial class Throws
                 innerException: CreateCustomException());
             Action action = () => throw exception;
 
-            var result = await Assert.That(action).Throws().OfType<CustomException>().WithInnerException();
+            var result = await Assert.That(action).Throws<CustomException>().WithInnerException();
 
             await Assert.That((object?)result).IsSameReference(exception);
         }
@@ -50,10 +50,10 @@ public partial class Throws
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exception()
+                => await Assert.That(action).ThrowsException()
                 .WithInnerException().WithMessage(innerMessage);
 
-            await Assert.That(sut).Throws().Nothing();
+            await Assert.That(sut).ThrowsNothing();
         }
     }
 }

@@ -203,7 +203,7 @@ public class Tests
     [Category("Fail")]
     public async Task Throws1()
     {
-        await Assert.That(() => new string([])).Throws().Exception();
+        await Assert.That(() => new string([])).ThrowsException();
     }
 
     [Test]
@@ -213,14 +213,14 @@ public class Tests
         await Assert.That(async () =>
         {
             await Task.Yield();
-        }).Throws().Exception();
+        }).ThrowsException();
     }
 
     [Test]
     [Category("Pass")]
     public async Task Throws3()
     {
-        await Assert.That(() => throw new ApplicationException()).Throws().Exception();
+        await Assert.That(() => throw new ApplicationException()).ThrowsException();
     }
 
     [Test]
@@ -231,7 +231,7 @@ public class Tests
         {
             await Task.Yield();
             return true;
-        }).Throws().Nothing();
+        }).ThrowsNothing();
     }
 
     [Test, Timeout(500)]

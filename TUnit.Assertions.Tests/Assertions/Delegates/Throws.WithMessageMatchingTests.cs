@@ -20,15 +20,15 @@ public partial class Throws
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<CustomException>().WithMessageMatching(pattern);
+                => await Assert.That(action).Throws<CustomException>().WithMessageMatching(pattern);
 
             if (expectMatch)
             {
-                await Assert.That(sut).Throws().Nothing();
+                await Assert.That(sut).ThrowsNothing();
             }
             else
             {
-                await Assert.That(sut).Throws().Exception();
+                await Assert.That(sut).ThrowsException();
             }
         }
 
@@ -39,15 +39,15 @@ public partial class Throws
             string message2 = "bar";
             string expectedMessage = """
                 Expected action to throw a CustomException which message matches "bar", but found "foo".
-                At Assert.That(action).Throws().Exactly<CustomException>().WithMessageMatching(message2)
+                At Assert.That(action).ThrowsExactly<CustomException>().WithMessageMatching(message2)
                 """;
             Exception exception = CreateCustomException(message1);
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exactly<CustomException>().WithMessageMatching(message2);
+                => await Assert.That(action).ThrowsExactly<CustomException>().WithMessageMatching(message2);
 
-            await Assert.That(sut).Throws().Exception()
+            await Assert.That(sut).ThrowsException()
                 .WithMessage(expectedMessage);
         }
 
@@ -58,7 +58,7 @@ public partial class Throws
             Exception exception = CreateCustomException(matchingMessage);
             Action action = () => throw exception;
 
-            var result = await Assert.That(action).Throws().OfType<CustomException>().WithMessageMatching(matchingMessage);
+            var result = await Assert.That(action).Throws<CustomException>().WithMessageMatching(matchingMessage);
 
             await Assert.That((object?)result).IsSameReference(exception);
         }
@@ -71,9 +71,9 @@ public partial class Throws
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<CustomException>().WithMessageMatching(matchingMessage);
+                => await Assert.That(action).Throws<CustomException>().WithMessageMatching(matchingMessage);
 
-            await Assert.That(sut).Throws().Nothing();
+            await Assert.That(sut).ThrowsNothing();
         }
 
         [Test]
@@ -86,21 +86,21 @@ public partial class Throws
         public async Task Supports_Case_Insensitive_Wildcard_Pattern(
             string message, string pattern, bool expectMatch)
         {
-            string expectedExpression = "*Assert.That(action).Throws().Exception().WithMessageMatching(StringMatcher.AsWildcard(pattern).Ignor*";
+            string expectedExpression = "*Assert.That(action).ThrowsException().WithMessageMatching(StringMatcher.AsWildcard(pattern).Ignor*";
             Exception exception = CreateCustomException(message);
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exception()
+                => await Assert.That(action).ThrowsException()
                 .WithMessageMatching(StringMatcher.AsWildcard(pattern).IgnoringCase());
 
             if (expectMatch)
             {
-                await Assert.That(sut).Throws().Nothing();
+                await Assert.That(sut).ThrowsNothing();
             }
             else
             {
-                await Assert.That(sut).Throws().Exception().WithMessageMatching(expectedExpression);
+                await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression);
             }
         }
 
@@ -115,21 +115,21 @@ public partial class Throws
         public async Task Supports_Regex_Pattern(
             string message, string pattern, bool expectMatch)
         {
-            string expectedExpression = "*Assert.That(action).Throws().Exception().WithMessageMatching(StringMatcher.AsRegex(pattern))*";
+            string expectedExpression = "*Assert.That(action).ThrowsException().WithMessageMatching(StringMatcher.AsRegex(pattern))*";
             Exception exception = CreateCustomException(message);
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exception()
+                => await Assert.That(action).ThrowsException()
                 .WithMessageMatching(StringMatcher.AsRegex(pattern));
 
             if (expectMatch)
             {
-                await Assert.That(sut).Throws().Nothing();
+                await Assert.That(sut).ThrowsNothing();
             }
             else
             {
-                await Assert.That(sut).Throws().Exception().WithMessageMatching(expectedExpression);
+                await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression);
             }
         }
 
@@ -139,21 +139,21 @@ public partial class Throws
         public async Task Supports_Case_Insensitive_Regex_Pattern(
             string message, string pattern, bool expectMatch)
         {
-            string expectedExpression = "*Assert.That(action).Throws().Exception().WithMessageMatching(StringMatcher.AsRegex(pattern).Ignoring*";
+            string expectedExpression = "*Assert.That(action).ThrowsException().WithMessageMatching(StringMatcher.AsRegex(pattern).Ignoring*";
             Exception exception = CreateCustomException(message);
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exception()
+                => await Assert.That(action).ThrowsException()
                 .WithMessageMatching(StringMatcher.AsRegex(pattern).IgnoringCase());
 
             if (expectMatch)
             {
-                await Assert.That(sut).Throws().Nothing();
+                await Assert.That(sut).ThrowsNothing();
             }
             else
             {
-                await Assert.That(sut).Throws().Exception().WithMessageMatching(expectedExpression);
+                await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression);
             }
         }
     }

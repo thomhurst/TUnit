@@ -15,15 +15,15 @@ public partial class Throws
                    "foo"
                    "bar"
                     ↑.
-                At Assert.That(action).Throws().Exactly<CustomException>().WithMessage(message2)
+                At Assert.That(action).ThrowsExactly<CustomException>().WithMessage(message2)
                 """;
             Exception exception = CreateCustomException(message1);
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().Exactly<CustomException>().WithMessage(message2);
+                => await Assert.That(action).ThrowsExactly<CustomException>().WithMessage(message2);
 
-            await Assert.That(sut).Throws().Exception()
+            await Assert.That(sut).ThrowsException()
                 .WithMessage(expectedMessage);
         }
 
@@ -34,7 +34,7 @@ public partial class Throws
             Exception exception = CreateCustomException(matchingMessage);
             Action action = () => throw exception;
 
-            var result = await Assert.That(action).Throws().OfType<CustomException>().WithMessage(matchingMessage);
+            var result = await Assert.That(action).Throws<CustomException>().WithMessage(matchingMessage);
 
             await Assert.That((object?)result).IsSameReference(exception);
         }
@@ -47,9 +47,9 @@ public partial class Throws
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<CustomException>().WithMessage(matchingMessage);
+                => await Assert.That(action).Throws<CustomException>().WithMessage(matchingMessage);
 
-            await Assert.That(sut).Throws().Nothing();
+            await Assert.That(sut).ThrowsNothing();
         }
     }
 }

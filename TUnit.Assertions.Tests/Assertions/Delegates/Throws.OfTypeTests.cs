@@ -9,15 +9,15 @@ public partial class Throws
         {
             string expectedMessage = """
                 Expected action to throw a CustomException, but an OtherException was thrown.
-                At Assert.That(action).Throws().OfType<CustomException>()
+                At Assert.That(action).Throws<CustomException>()
                 """;
             Exception exception = CreateOtherException();
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<CustomException>();
+                => await Assert.That(action).Throws<CustomException>();
 
-            await Assert.That(sut).Throws().Exception()
+            await Assert.That(sut).ThrowsException()
                 .WithMessage(expectedMessage);
         }
 
@@ -26,15 +26,15 @@ public partial class Throws
         {
             string expectedMessage = """
                 Expected action to throw a SubCustomException, but a CustomException was thrown.
-                At Assert.That(action).Throws().OfType<SubCustomException>()
+                At Assert.That(action).Throws<SubCustomException>()
                 """;
             Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<SubCustomException>();
+                => await Assert.That(action).Throws<SubCustomException>();
 
-            await Assert.That(sut).Throws().Exception()
+            await Assert.That(sut).ThrowsException()
                 .WithMessage(expectedMessage);
         }
 
@@ -43,14 +43,14 @@ public partial class Throws
         {
             string expectedMessage = """
                 Expected action to throw a CustomException, but none was thrown.
-                At Assert.That(action).Throws().OfType<CustomException>()
+                At Assert.That(action).Throws<CustomException>()
                 """;
             Action action = () => { };
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<CustomException>();
+                => await Assert.That(action).Throws<CustomException>();
 
-            await Assert.That(sut).Throws().Exception()
+            await Assert.That(sut).ThrowsException()
                 .WithMessage(expectedMessage);
         }
 
@@ -60,7 +60,7 @@ public partial class Throws
             Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
-            var result = await Assert.That(action).Throws().OfType<CustomException>();
+            var result = await Assert.That(action).Throws<CustomException>();
 
             await Assert.That((object?)result).IsSameReference(exception);
         }
@@ -72,9 +72,9 @@ public partial class Throws
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<CustomException>();
+                => await Assert.That(action).Throws<CustomException>();
 
-            await Assert.That(sut).Throws().Nothing();
+            await Assert.That(sut).ThrowsNothing();
         }
 
         [Test]
@@ -84,9 +84,9 @@ public partial class Throws
             Action action = () => throw exception;
 
             var sut = async ()
-                => await Assert.That(action).Throws().OfType<CustomException>();
+                => await Assert.That(action).Throws<CustomException>();
 
-            await Assert.That(sut).Throws().Nothing();
+            await Assert.That(sut).ThrowsNothing();
         }
     }
 }
