@@ -32,5 +32,9 @@ public class ThrowsException<TActual>(
             (_, exception, _) => messageFactory(exceptionSelector(exception))
         ), [expectedExpression]);
 
-    public TaskAwaiter GetAwaiter() => OfAnyType().GetAwaiter();
+    public TaskAwaiter GetAwaiter()
+    {
+        Task task = OfAnyType().ProcessAssertionsAsync();
+        return task.GetAwaiter();
+    }
 }

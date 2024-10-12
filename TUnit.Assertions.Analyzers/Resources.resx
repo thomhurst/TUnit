@@ -52,13 +52,13 @@
         <value>Compiler argument populated</value>
     </data>
     <data name="TUnitAssertions0004Description" xml:space="preserve">
-        <value>Assert.Multiple needs an `await using` before it.</value>
+        <value>Assert.Multiple needs a `using` before it.</value>
     </data>
     <data name="TUnitAssertions0004MessageFormat" xml:space="preserve">
-        <value>Assert.Multiple needs an `await using` before it</value>
+        <value>Assert.Multiple needs a `using` before it</value>
     </data>
     <data name="TUnitAssertions0004Title" xml:space="preserve">
-        <value>Assert.Multiple needs an `await using` before it</value>
+        <value>Assert.Multiple needs a `using` before it</value>
     </data>
     <data name="TUnitAssertions0005Description" xml:space="preserve">
         <value>Assert.That(...) should not be used with a constant value.</value>

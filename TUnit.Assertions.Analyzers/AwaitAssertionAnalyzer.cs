@@ -49,6 +49,7 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.DisposableUsingMultiple, context.Operation.Syntax.GetLocation())
             );
+            
             return;
         }
 

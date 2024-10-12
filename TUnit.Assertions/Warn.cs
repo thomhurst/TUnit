@@ -33,7 +33,7 @@ internal static class Warn
         return new AsyncValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
 
-    public static IAsyncDisposable Multiple()
+    public static IDisposable Multiple()
     {
         return new AssertionScope();
     }

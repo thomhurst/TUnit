@@ -1,10 +1,11 @@
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 public class InvokableValueAssertionBuilder<TActual>(InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
-    : InvokableAssertionBuilder<TActual>(invokableAssertionBuilder.AssertionDataDelegate, invokableAssertionBuilder)
+    : InvokableAssertionBuilder<TActual>(invokableAssertionBuilder)
 {
     /// <summary>
     /// Provide a reason explaining why the assertion is needed.<br />
@@ -20,6 +21,17 @@ public class InvokableValueAssertionBuilder<TActual>(InvokableAssertionBuilder<T
 
     internal AssertionBuilder<TActual> AssertionBuilder => this;
     
-    public ValueAnd<TActual> And => new(AssertionBuilder.AppendConnector(ChainType.And));
-    public ValueOr<TActual> Or => new(AssertionBuilder.AppendConnector(ChainType.Or));
+    public ValueAnd<TActual> And => new(new AndAssertionBuilder<TActual>(AssertionBuilder.AppendConnector(ChainType.And)));
+    public ValueOr<TActual> Or => new(new OrAssertionBuilder<TActual>(AssertionBuilder.AppendConnector(ChainType.Or)));
+    
+    public new TaskAwaiter<TActual?> GetAwaiter()
+    {
+        return AssertAndGet().GetAwaiter();
+    }
+
+    private async Task<TActual?> AssertAndGet()
+    {
+        var data = await ProcessAssertionsAsync();
+        return data.Result;
+    }
 }
