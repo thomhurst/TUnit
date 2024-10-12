@@ -130,12 +130,12 @@ public class SatisfiesTests
                 Expected myModel to satisfy assert =>
                                         assert.Satisfies(model => model?.Nested, innerAssert =>
                                             innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
-                                                innerAssert2.IsEqualTo("Baz")!
+                                                innerAssert2.IsEqualTo("Blah")!
                                             )
-                                        ), but found "Blah" which differs at index 1:
+                                        ), but found "Baz" which differs at index 1:
                      ↓
-                   "Blah"
                    "Baz"
+                   "Blah"
                      ↑.
                 """
                 );
