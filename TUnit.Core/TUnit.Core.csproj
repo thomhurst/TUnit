@@ -1,17 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    
-    <ItemGroup>
-        <Content Include="TUnit.Core.props">
-            <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-        </Content>
-        <Content Include="TUnit.Core.targets">
-            <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
-        </Content>
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Engine.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Engine.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    </ItemGroup>
+
+	<ItemGroup>
+		<Content Include="TUnit.Core.props">
+			<Pack>true</Pack>
+			<PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+		</Content>
+		<Content Include="TUnit.Core.targets">
+			<Pack>true</Pack>
+			<PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+		</Content>
+	</ItemGroup>
+	<ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
+		<PackageReference Include="Backport.System.Threading.Lock" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="$(MSBuildProjectDirectory)\..\TUnit.Engine.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Engine.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
 </Project>

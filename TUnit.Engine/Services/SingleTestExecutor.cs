@@ -305,7 +305,7 @@ internal class SingleTestExecutor(
     {
         var end = DateTimeOffset.Now;
 
-        lock (testContext.Timings)
+        lock (testContext.Lock)
         {
             var stepTimings = testContext.Timings.Select(x =>
                 new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));

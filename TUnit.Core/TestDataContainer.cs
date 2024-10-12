@@ -17,7 +17,7 @@ public static class TestDataContainer
 
     internal static readonly Dictionary<Type, Lazy<Task>> InjectedSharedGloballyInitializations = new();
     
-    private static readonly object Lock = new();
+    private static readonly Lock Lock = new();
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
     private static readonly ConcurrentDictionary<Type, int> CountsPerGlobalType = new();
 

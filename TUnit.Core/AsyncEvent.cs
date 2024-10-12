@@ -3,12 +3,12 @@
 public class AsyncEvent<TEventArgs>
 {
     private readonly List<Func<object, TEventArgs, Task>> _invocationList;
-    private readonly object _locker;
+    private readonly Lock _locker;
 
     private AsyncEvent()
     {
         _invocationList = [];
-        _locker = new object();
+        _locker = new();
     }
 
     public static AsyncEvent<TEventArgs> operator +(
