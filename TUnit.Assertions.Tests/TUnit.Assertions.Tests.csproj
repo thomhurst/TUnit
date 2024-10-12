@@ -3,6 +3,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
   </PropertyGroup>
   
   <ItemGroup>

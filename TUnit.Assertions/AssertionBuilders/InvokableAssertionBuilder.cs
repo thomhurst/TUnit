@@ -30,10 +30,13 @@ public class InvokableAssertionBuilder<TActual> :
         
         foreach (var assertion in Assertions.Reverse())
         {
-            var result = assertion.Assert(_invokedAssertionData.Result, _invokedAssertionData.Exception, _invokedAssertionData.ActualExpression);
+            var result = await assertion.Assert(_invokedAssertionData.Result, _invokedAssertionData.Exception, _invokedAssertionData.ActualExpression);
             if (!result.IsPassed)
             {
-                assertion.SetSubject(_invokedAssertionData.ActualExpression);
+                if (assertion.Subject is null)
+                {
+                    assertion.SetSubject(_invokedAssertionData.ActualExpression);
+                }
 
                 var exception = new AssertionException(
                     $"""

@@ -11,7 +11,6 @@ public class BasicTests
     [Test]
     public async Task AsynchronousTest()
     {
-        Console.WriteLine("Yeehaw");
         await Task.CompletedTask;
     }
 }

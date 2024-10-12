@@ -15,7 +15,7 @@ public abstract class DelegateAssertCondition<TActual, TException> : BaseAssertC
         _customComparers.Add(comparer);
     }
 
-    protected override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {
         if (exception != null && exception is not TException)
         {
@@ -38,7 +38,7 @@ public abstract class DelegateAssertCondition<TActual, TException> : BaseAssertC
         return AssertionResult.Passed;
     }
 
-    protected virtual string GetFailureMessage(TException? exception) => "TODO VAB";
+    protected virtual string GetFailureMessage(TException? exception) => "";
 
     protected override string GetExpectation()
     {

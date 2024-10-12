@@ -11,7 +11,7 @@ public class ThrowsWithMessageMatchingAssertCondition<TActual, TException>(
     protected override string GetExpectation()
         => $"to throw {typeof(TException).Name.PrependAOrAn()} which message matches \"{match.ToString()?.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
-    protected override AssertionResult GetResult(TActual? actualValue, Exception? exception)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {
         var actualException = exceptionSelector(exception);
 
