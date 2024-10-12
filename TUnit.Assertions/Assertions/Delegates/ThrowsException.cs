@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Assertions;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Delegates;
@@ -17,9 +18,9 @@ public class ThrowsException<TActual, TException>(
     private IDelegateSource<TActual> delegateSource;
     private Func<Exception?, TException?> exceptionSelector;
 
-    public ThrowsException<TActual, TException> WithMessageMatching(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression("match")] string doNotPopulateThisValue = "")
     {
-        _delegateSource.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _exceptionSelector)
+        _delegateSource.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(match, _exceptionSelector)
             , [doNotPopulateThisValue]);
         return this;
     }
