@@ -22,14 +22,7 @@ public partial class Throws
             var sut = async ()
                 => await Assert.That(action).Throws<CustomException>().WithMessageMatching(pattern);
 
-            if (expectMatch)
-            {
-                await Assert.That(sut).ThrowsNothing();
-            }
-            else
-            {
-                await Assert.That(sut).ThrowsException();
-            }
+            await Assert.That(sut).ThrowsException().OnlyIf(!expectMatch);
         }
 
         [Test]
@@ -94,14 +87,7 @@ public partial class Throws
                 => await Assert.That(action).ThrowsException()
                 .WithMessageMatching(StringMatcher.AsWildcard(pattern).IgnoringCase());
 
-            if (expectMatch)
-            {
-                await Assert.That(sut).ThrowsNothing();
-            }
-            else
-            {
-                await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression);
-            }
+            await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression).OnlyIf(!expectMatch);
         }
 
         [Test]
@@ -123,14 +109,7 @@ public partial class Throws
                 => await Assert.That(action).ThrowsException()
                 .WithMessageMatching(StringMatcher.AsRegex(pattern));
 
-            if (expectMatch)
-            {
-                await Assert.That(sut).ThrowsNothing();
-            }
-            else
-            {
-                await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression);
-            }
+            await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression).OnlyIf(!expectMatch);
         }
 
         [Test]
@@ -147,14 +126,7 @@ public partial class Throws
                 => await Assert.That(action).ThrowsException()
                 .WithMessageMatching(StringMatcher.AsRegex(pattern).IgnoringCase());
 
-            if (expectMatch)
-            {
-                await Assert.That(sut).ThrowsNothing();
-            }
-            else
-            {
-                await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression);
-            }
+            await Assert.That(sut).ThrowsException().WithMessageMatching(expectedExpression).OnlyIf(!expectMatch);
         }
     }
 }

@@ -81,7 +81,7 @@ public abstract class AssertionBuilder<TActual>
         
         return builder;
     }
-    
+
     [Obsolete("This is a base `object` method that should not be called.", true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     [DebuggerHidden]
