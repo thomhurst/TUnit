@@ -27,7 +27,10 @@ public class InvokableAssertionBuilder<TActual> :
             var result = await assertion.Assert(_invokedAssertionData.Result, _invokedAssertionData.Exception, _invokedAssertionData.ActualExpression);
             if (!result.IsPassed)
             {
-                assertion.SetSubject(_invokedAssertionData.ActualExpression);
+                if (assertion.Subject is null)
+                {
+                    assertion.SetSubject(_invokedAssertionData.ActualExpression);
+                }
 
                 var exception = new AssertionException(
                     $"""

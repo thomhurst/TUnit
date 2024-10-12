@@ -93,7 +93,7 @@ public class SatisfiesTests
             .OfType<AssertionException>()
             .And
             .ThrowsException()
-            .With.Message.Containing("Expected myModel to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:");
+            .With.Message.Containing("Expected model => model.Value to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:");
     }
 
     [Test]
@@ -127,7 +127,7 @@ public class SatisfiesTests
             .ThrowsException()
             .With.Message.Containing(
                 """
-                Expected myModel to satisfy assert =>
+                Expected model => model.Nested to satisfy assert =>
                                         assert.Satisfies(model => model?.Nested, innerAssert =>
                                             innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
                                                 innerAssert2.IsEqualTo("Blah")!
@@ -156,7 +156,7 @@ public class SatisfiesTests
             .OfType<AssertionException>()
             .And
             .ThrowsException()
-            .With.Message.Containing("Expected myModel to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:");
+            .With.Message.Containing("Expected model => model.Value to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:");
     }
 
     [Test]
@@ -190,7 +190,7 @@ public class SatisfiesTests
             .ThrowsException()
             .With.Message.Containing(
                 """
-                Expected myModel to satisfy assert =>
+                Expected model => model.Nested to satisfy assert =>
                                         assert.Satisfies(model => model?.Nested, innerAssert =>
                                             innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
                                                 innerAssert2.IsEqualTo("Baz")!

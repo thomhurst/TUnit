@@ -13,7 +13,7 @@ public static class GenericSatisfiesExtensions
         [CallerArgumentExpression("mapper")] string mapperExpression = "", 
         [CallerArgumentExpression("assert")] string assertionBuilderExpression = "")
     {
-        return valueSource.RegisterAssertion(new SatisfiesAssertCondition<TActual, TExpected>(t => Task.FromResult(mapper(t)), assert, assertionBuilderExpression),
+        return valueSource.RegisterAssertion(new SatisfiesAssertCondition<TActual, TExpected>(t => Task.FromResult(mapper(t)), assert, mapperExpression, assertionBuilderExpression),
             [mapperExpression, assertionBuilderExpression]);
     }
 
@@ -23,7 +23,7 @@ public static class GenericSatisfiesExtensions
         [CallerArgumentExpression("asyncMapper")] string mapperExpression = "", 
         [CallerArgumentExpression("assert")] string assertionBuilderExpression = "")
     {
-        return valueSource.RegisterAssertion(new SatisfiesAssertCondition<TActual, TExpected>(asyncMapper, assert, assertionBuilderExpression),
+        return valueSource.RegisterAssertion(new SatisfiesAssertCondition<TActual, TExpected>(asyncMapper, assert, mapperExpression, assertionBuilderExpression),
             [mapperExpression, assertionBuilderExpression]);
     }
 }
