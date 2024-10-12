@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.Tests.AssertConditions;
+﻿namespace TUnit.Assertions.Tests.Helpers;
 
 public class StringDifferenceTests
 {
@@ -11,7 +11,7 @@ public class StringDifferenceTests
                                     ""
                                     "some text"
                                      ↑.
-                                 At Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
+                                 At Assert.That(actual).IsEqualTo(expected)
                                  """;
         var actual = "";
         var expected = "some text";
@@ -32,7 +32,7 @@ public class StringDifferenceTests
                                     "actual text"
                                     ""
                                      ↑.
-                                 At Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
+                                 At Assert.That(actual).IsEqualTo(expected)
                                  """;
         var actual = "actual text";
         var expected = "";
@@ -53,7 +53,7 @@ public class StringDifferenceTests
                                     "some"
                                     "some text"
                                          ↑.
-                                 At Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
+                                 At Assert.That(actual).IsEqualTo(expected)
                                  """;
         var actual = "some";
         var expected = "some text";
@@ -74,7 +74,7 @@ public class StringDifferenceTests
                                     "some text"
                                     "some"
                                          ↑.
-                                 At Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
+                                 At Assert.That(actual).IsEqualTo(expected)
                                  """;
         var actual = "some text";
         var expected = "some";
