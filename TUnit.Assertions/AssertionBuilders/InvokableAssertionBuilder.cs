@@ -7,38 +7,49 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class InvokableAssertionBuilder<TActual> : 
     AssertionBuilder<TActual>, IInvokableAssertionBuilder 
 {
+    private AssertionData<TActual>? _invokedAssertionData;
+
     internal InvokableAssertionBuilder(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder.AssertionDataDelegate, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
     {
+        if (assertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
+        {
+            _invokedAssertionData = invokableAssertionBuilder._invokedAssertionData;
+        }
     }
 
     internal async Task<AssertionData<TActual>> ProcessAssertionsAsync()
     {
-        var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
-        
-        if (currentAssertionScope != null)
-        {
-            currentAssertionScope.Add(this);
-            return null!;
-        }
+        _invokedAssertionData ??= await AssertionDataDelegate();
 
-        var assertionData = await AssertionDataDelegate();
-        
+        var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
+
+        currentAssertionScope?.Add(this);
+
         foreach (var assertion in Assertions.Reverse())
         {
-            var result = assertion.Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
+            var result = assertion.Assert(_invokedAssertionData.Result, _invokedAssertionData.Exception, _invokedAssertionData.ActualExpression);
             if (!result.IsPassed)
             {
-                assertion.SetSubject(assertionData.ActualExpression);
-                throw new AssertionException(
+                assertion.SetSubject(_invokedAssertionData.ActualExpression);
+
+                var exception = new AssertionException(
                     $"""
                      Expected {assertion.Subject} {assertion.GetExpectationWithReason()}, but {result.Message}.
                      At {((IInvokableAssertionBuilder)this).GetExpression()}
                      """
                 );
+                
+                if (currentAssertionScope != null)
+                {
+                    currentAssertionScope.AddException(exception);
+                    continue;
+                }
+                
+                throw exception;
             }
         }
         
-        return assertionData;
+        return _invokedAssertionData;
     }
 
     async IAsyncEnumerable<(BaseAssertCondition Assertion, AssertionResult Result)> IInvokableAssertionBuilder.GetFailures()
@@ -55,8 +66,8 @@ public class InvokableAssertionBuilder<TActual> :
             }
         }
     }
-
-    public TaskAwaiter GetAwaiter() => ((Task) ProcessAssertionsAsync()).GetAwaiter();
+    
+    public TaskAwaiter GetAwaiter() => ((Task)ProcessAssertionsAsync()).GetAwaiter();
 
     string? IInvokableAssertionBuilder.GetExpression()
     {
