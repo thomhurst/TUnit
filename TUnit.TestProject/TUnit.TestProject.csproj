@@ -2,6 +2,10 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+    <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
   
