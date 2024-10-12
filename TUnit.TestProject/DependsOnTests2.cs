@@ -28,7 +28,7 @@ public class DependsOnTests2
     [Test]
     public async Task Test3()
     {
-        await Assert.That(() => TestContext.Current!.GetTests(nameof(Test1))).ThrowsException().With.Message.EqualTo("Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?");
+        await Assert.That(() => TestContext.Current!.GetTests(nameof(Test1))).Throws().Exception().WithMessage("Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?");
     }
 
     [After(Class)]

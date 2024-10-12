@@ -40,7 +40,7 @@ public partial class Throws
             var sut = async ()
                 => await Assert.That(action).Throws().Exception();
 
-            await Assert.That(sut).ThrowsNothing();
+            await Assert.That(sut).Throws().Nothing();
         }
     }
 }

@@ -74,7 +74,7 @@ public partial class Throws
             var sut = async ()
                 => await Assert.That(action).Throws().OfType<CustomException>();
 
-            await Assert.That(sut).ThrowsNothing();
+            await Assert.That(sut).Throws().Nothing();
         }
 
         [Test]
@@ -86,7 +86,7 @@ public partial class Throws
             var sut = async ()
                 => await Assert.That(action).Throws().OfType<CustomException>();
 
-            await Assert.That(sut).ThrowsNothing();
+            await Assert.That(sut).Throws().Nothing();
         }
     }
 }

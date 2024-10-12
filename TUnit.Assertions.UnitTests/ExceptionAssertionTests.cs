@@ -8,12 +8,12 @@ public class ExceptionAssertionTests
     public async Task Assertion_Message_Has_Correct_doNotPopulateThisValue2()
     {
         await TUnitAssert.That(InnerExceptionThrower.Throw)
-            .ThrowsException()
-            .With.InnerException
-            .With.InnerException
-            .With.InnerException
-            .With.InnerException
-            .With.InnerException
-            .With.Message.EqualTo("Message 6");
+            .Throws().Exception()
+            .WithInnerException()
+            .WithInnerException()
+            .WithInnerException()
+            .WithInnerException()
+            .WithInnerException()
+            .WithMessage("Message 6");
     }
 }
