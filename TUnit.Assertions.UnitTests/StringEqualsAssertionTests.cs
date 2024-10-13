@@ -154,12 +154,15 @@ public class StringEqualsAssertionTests
         
         var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
         NUnitAssert.That(exception!.Message, Is.EqualTo("""
-                                                        Expected value1 to be equal to "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…, but found "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se… which differs at index 556:
+                                                        Expected value1 to be equal to "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…
+                                                        
+                                                        but found "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se… which differs at index 556:
                                                                                     ↓
                                                            "Consequat odio ea veniam. Amet enim in gubergren s…"
                                                            "Consequat odio ea veniam! Amet enim in gubergren s…"
-                                                                                    ↑.
-                                                        At Assert.That(value1).IsEqualTo(value2, StringComparison.Ordinal)
+                                                                                    ↑
+                                                        
+                                                        at Assert.That(value1).IsEqualTo(value2, StringComparison.Ordinal)
                                                         """));
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Assertions.Generics.Conditions;
 
 // ReSharper disable once CheckNamespace
 // This can't go in the main namespace as its generic signature clashes

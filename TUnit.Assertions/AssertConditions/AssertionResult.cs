@@ -17,6 +17,7 @@ public class AssertionResult
         {
             return Passed;
         }
+        
         return new AssertionResult(false, message);
     }
 
@@ -56,14 +57,13 @@ public class AssertionResult
         {
             return this;
         }
+        
         return new AssertionResult(false, message);
     }
 
-    public static AssertionResult Fail(string message)
-        => new AssertionResult(false, message);
+    public static AssertionResult Fail(string message) => new(false, message);
 
-    public static AssertionResult Passed { get; }
-        = new AssertionResult(true, null);
+    public static AssertionResult Passed { get; } = new(true, null);
     
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
 }
