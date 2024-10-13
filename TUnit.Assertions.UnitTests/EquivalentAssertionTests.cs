@@ -35,7 +35,7 @@ public class EquivalentAssertionTests
             Expected object1 to be equivalent to object2, but Property Value did not match
             Expected: "Foo"
             Received: null.
-            At Assert.That(object1).IsEquivalentTo(object2)
+            at Assert.That(object1).IsEquivalentTo(object2)
             """
             ));
     }
@@ -72,7 +72,7 @@ public class EquivalentAssertionTests
             Expected object1 to be equivalent to object2, but Property Inner.Inner.Value did not match
             Expected: "Baz"
             Received: null.
-            At Assert.That(object1).IsEquivalentTo(object2)
+            at Assert.That(object1).IsEquivalentTo(object2)
             """
         ));
     }
@@ -146,7 +146,7 @@ public class EquivalentAssertionTests
             Expected object1 to be equivalent to object2, but EnumerableItem Inner.Inner.Collection.[3] did not match
             Expected: "4"
             Received: null.
-            At Assert.That(object1).IsEquivalentTo(object2)
+            at Assert.That(object1).IsEquivalentTo(object2)
             """
         ));
     }

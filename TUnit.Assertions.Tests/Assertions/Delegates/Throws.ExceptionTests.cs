@@ -7,11 +7,14 @@ public partial class Throws
         [Test]
         public async Task Fails_For_Code_Without_Exceptions()
         {
-            string expectedMessage = """
-                Expected action to throw an exception, but none was thrown.
-                At Assert.That(action).ThrowsException()
-                """;
-            Action action = () => { };
+            var expectedMessage = """
+                                  Expected action to throw an exception
+                                  
+                                  but none was thrown
+                                  
+                                  at Assert.That(action).ThrowsException()
+                                  """;
+            var action = () => { };
 
             var sut = async ()
                 => await Assert.That(action).ThrowsException();

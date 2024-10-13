@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.Extensions;
-
-namespace TUnit.Assertions.UnitTests;
+﻿namespace TUnit.Assertions.UnitTests;
 
 public class ExceptionAssertionTests
 {

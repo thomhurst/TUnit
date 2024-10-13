@@ -24,6 +24,6 @@ where TException : Exception
                 "expected value was null")
             .OrFailIf(
                 () => !match.Matches(actualValue.Message),
-                $"found {Format(actualValue).TruncateWithEllipsis(100)}");
+                $"found message {Format(actualValue.Message).TruncateWithEllipsis(100)}");
     }
 }

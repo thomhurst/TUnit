@@ -1,5 +1,4 @@
 ﻿using TUnit.Assertions.Extensions;
-using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.Exceptions;
 
@@ -25,6 +24,6 @@ where TException : Exception
                 "expected value was null")
             .OrFailIf(
                 () => !actualValue.Message.StartsWith(expectedValue!, stringComparison),
-                $"found {Format(actualValue).TruncateWithEllipsis(100)}");
+                $"found message {Format(actualValue.Message).TruncateWithEllipsis(100)}");
     }
 }

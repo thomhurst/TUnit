@@ -2,9 +2,9 @@
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Assertions.Generics.Conditions;
 
 namespace TUnit.Assertions.Extensions;
 

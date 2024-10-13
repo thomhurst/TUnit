@@ -1,4 +1,6 @@
-namespace TUnit.Assertions.AssertConditions.Generic;
+using TUnit.Assertions.AssertConditions;
+
+namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
 public class AssignableToExpectedValueAssertCondition<TActual>(Type expectedType)
     : BaseAssertCondition<TActual>
@@ -11,6 +13,6 @@ public class AssignableToExpectedValueAssertCondition<TActual>(Type expectedType
             .FailIf(() => actualValue is null,
                 "actual is null")
             .OrFailIf(
-                () => actualValue!.GetType().IsAssignableTo(expectedType),
-                $"{actualValue} it is {ActualValue?.GetType().Name ?? "null"}");
+                () => !actualValue!.GetType().IsAssignableTo(expectedType),
+                $"it is {ActualValue?.GetType().Name ?? "null"}");
 }

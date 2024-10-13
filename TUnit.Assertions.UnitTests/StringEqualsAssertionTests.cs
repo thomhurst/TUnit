@@ -159,7 +159,7 @@ public class StringEqualsAssertionTests
                                                            "Consequat odio ea veniam. Amet enim in gubergren s…"
                                                            "Consequat odio ea veniam! Amet enim in gubergren s…"
                                                                                     ↑.
-                                                        At Assert.That(value1).IsEqualTo(value2, StringComparison.Ordinal)
+                                                        at Assert.That(value1).IsEqualTo(value2, StringComparison.Ordinal)
                                                         """));
     }
 }

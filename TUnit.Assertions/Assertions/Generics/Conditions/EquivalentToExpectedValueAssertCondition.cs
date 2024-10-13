@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Assertions.AssertConditions;
 
-namespace TUnit.Assertions.AssertConditions.Generic;
+namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
 public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual>(TActual expected, string expectedExpression) : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {

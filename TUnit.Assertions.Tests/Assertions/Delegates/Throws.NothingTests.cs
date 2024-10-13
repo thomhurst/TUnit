@@ -7,11 +7,14 @@ public partial class Throws
         [Test]
         public async Task Fails_For_Code_With_Exceptions()
         {
-            string expectedMessage = $$"""
-                Expected action to throw nothing, but a CustomException was thrown:
-                {{nameof(Fails_For_Code_With_Exceptions)}}.
-                At Assert.That(action).ThrowsNothing()
-                """;
+            var expectedMessage = $"""
+                                    Expected action to throw nothing
+                                    
+                                    but a CustomException was thrown:
+                                    {nameof(Fails_For_Code_With_Exceptions)}
+                                    
+                                    at Assert.That(action).ThrowsNothing()
+                                    """;
             Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
@@ -25,7 +28,7 @@ public partial class Throws
         [Test]
         public async Task Succeeds_For_Code_Without_Exceptions()
         {
-            Action action = () => { };
+            var action = () => { };
 
             var sut = async ()
                 => await Assert.That(action).ThrowsNothing();
@@ -36,8 +39,8 @@ public partial class Throws
         [Test]
         public async Task Returns_Awaited_Result()
         {
-            int value = 42;
-            Func<int> action = () => value;
+            var value = 42;
+            var action = () => value;
 
             var result = await Assert.That(action).ThrowsNothing();
 

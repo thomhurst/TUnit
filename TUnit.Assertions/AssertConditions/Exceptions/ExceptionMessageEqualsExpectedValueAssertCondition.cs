@@ -23,6 +23,6 @@ where TException : Exception
         return AssertionResult
             .FailIf(
                 () => !string.Equals(actualValue.Message, expectedValue, stringComparison),
-                $"found {Format(actualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue.Message, expectedValue)}");
+                $"found message {Format(actualValue.Message).TruncateWithEllipsis(100)} which {new StringDifference(actualValue.Message, expectedValue)}");
     }
 }

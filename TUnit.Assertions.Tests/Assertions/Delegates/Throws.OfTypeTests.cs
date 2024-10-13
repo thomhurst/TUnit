@@ -7,10 +7,13 @@ public partial class Throws
         [Test]
         public async Task Fails_For_Code_With_Other_Exceptions()
         {
-            string expectedMessage = """
-                Expected action to throw a CustomException, but an OtherException was thrown.
-                At Assert.That(action).Throws<CustomException>()
-                """;
+            var expectedMessage = """
+                                  Expected action to throw a CustomException
+                                  
+                                  but an OtherException was thrown
+                                  
+                                  at Assert.That(action).Throws<CustomException>()
+                                  """;
             Exception exception = CreateOtherException();
             Action action = () => throw exception;
 
@@ -24,10 +27,13 @@ public partial class Throws
         [Test]
         public async Task Fails_For_Code_With_Supertype_Exceptions()
         {
-            string expectedMessage = """
-                Expected action to throw a SubCustomException, but a CustomException was thrown.
-                At Assert.That(action).Throws<SubCustomException>()
-                """;
+            var expectedMessage = """
+                                  Expected action to throw a SubCustomException
+                                  
+                                  but a CustomException was thrown
+                                  
+                                  at Assert.That(action).Throws<SubCustomException>()
+                                  """;
             Exception exception = CreateCustomException();
             Action action = () => throw exception;
 
@@ -41,11 +47,14 @@ public partial class Throws
         [Test]
         public async Task Fails_For_Code_Without_Exceptions()
         {
-            string expectedMessage = """
-                Expected action to throw a CustomException, but none was thrown.
-                At Assert.That(action).Throws<CustomException>()
-                """;
-            Action action = () => { };
+            var expectedMessage = """
+                                  Expected action to throw a CustomException
+                                  
+                                  but none was thrown
+                                  
+                                  at Assert.That(action).Throws<CustomException>()
+                                  """;
+            var action = () => { };
 
             var sut = async ()
                 => await Assert.That(action).Throws<CustomException>();
