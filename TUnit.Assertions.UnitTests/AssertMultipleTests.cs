@@ -93,7 +93,7 @@ public class AssertMultipleTests
                                                         Expected 1 to be equal to 2
                                                          or to be equal to 3
                                                         
-                                                        but the received value 1 is different and the received value 1 is different
+                                                        but the received value 1 is different
                                                         
                                                         at Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
                                                         """));
@@ -102,7 +102,7 @@ public class AssertMultipleTests
                                                         Expected 2 to be equal to 3
                                                          and to be equal to 4
                                                         
-                                                        but the received value 2 is different and the received value 2 is different
+                                                        but the received value 2 is different
                                                         
                                                         at Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
                                                         """));
@@ -111,7 +111,7 @@ public class AssertMultipleTests
                                                         Expected 3 to be equal to 4
                                                          or to be equal to 5
                                                         
-                                                        but the received value 3 is different and the received value 3 is different
+                                                        but the received value 3 is different
                                                         
                                                         at Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
                                                         """));
@@ -120,7 +120,7 @@ public class AssertMultipleTests
                                                         Expected 4 to be equal to 5
                                                          and to be equal to 6
                                                         
-                                                        but the received value 4 is different and the received value 4 is different
+                                                        but the received value 4 is different
                                                         
                                                         at Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
                                                         """));
@@ -129,7 +129,7 @@ public class AssertMultipleTests
                                                         Expected 5 to be equal to 6
                                                          or to be equal to 7
                                                         
-                                                        but the received value 5 is different and the received value 5 is different
+                                                        but the received value 5 is different
                                                         
                                                         at Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
                                                         """));
