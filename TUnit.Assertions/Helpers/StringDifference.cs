@@ -39,6 +39,11 @@ internal class StringDifference(string? actualValue, string? expectedValue, IEqu
             }
         }
 
+        if (actualValue.Length < expectedValue.Length)
+        {
+            return actualValue.Length;
+        }
+
         return -1;
     }
 
