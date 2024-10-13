@@ -72,7 +72,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     
     internal InvokableAssertionBuilder<TActual> ChainedTo(AssertionBuilder<TActual> assertionBuilder, string[] argumentExpressions, [CallerMemberName] string caller = "")
     {
-        return assertionBuilder.AppendExpression($"{caller}({string.Join(", ", argumentExpressions)})").WithAssertion(this);
+        return assertionBuilder.AppendExpression($"{caller}({string.Join(", ", argumentExpressions.Where(x => !string.IsNullOrEmpty(x)))})").WithAssertion(this);
     }
     
     internal Task<AssertionResult> Assert(AssertionData<TActual> assertionData)
