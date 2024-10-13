@@ -18,13 +18,20 @@ public static class SourceExtensions
     {
         return new InvokableValueAssertionBuilder<TActual>(assertCondition.ChainedToWithoutExpression(source.AssertionBuilder));
     }
-    
+
     public static InvokableDelegateAssertionBuilder<TActual> RegisterAssertion<TActual>(this IDelegateSource<TActual> source,
         BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string caller = "")
     {
         return new InvokableDelegateAssertionBuilder<TActual>(assertCondition.ChainedTo(source.AssertionBuilder, argumentExpressions, caller));
     }
-    
+
+    public static InvokableDelegateAssertionBuilder<TActual> ReplaceAssertionsWith<TActual>(this IDelegateSource<TActual> source,
+        BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string caller = "")
+    {
+        source.AssertionBuilder.Assertions.Clear();
+        return new InvokableDelegateAssertionBuilder<TActual>(assertCondition.ChainedTo(source.AssertionBuilder, argumentExpressions, caller));
+    }
+
     public static InvokableDelegateAssertionBuilder<TActual> RegisterAssertionWithoutExpression<TActual>(this IDelegateSource<TActual> source,
         BaseAssertCondition<TActual> assertCondition)
     {

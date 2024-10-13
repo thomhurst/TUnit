@@ -17,6 +17,17 @@ public class ThrowsException<TActual, TException>(
     private IDelegateSource<TActual> delegateSource;
     private Func<Exception?, TException?> exceptionSelector;
 
+    public ThrowsException<TActual, TException> OnlyIf(bool predicate, [CallerArgumentExpression("predicate")] string doNotPopulateThisValue = "")
+    {
+        if (predicate)
+        {
+            _delegateSource.AssertionBuilder.AppendExpression($"{nameof(OnlyIf)}({doNotPopulateThisValue})");
+            return this;
+        }
+        _delegateSource.ReplaceAssertionsWith(new ThrowsNothingAssertCondition<TActual>(), [doNotPopulateThisValue]);
+        return new(delegateAssertionBuilder, _delegateSource, e => null);
+    }
+
     public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression("match")] string doNotPopulateThisValue = "")
     {
         _delegateSource.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(match, _exceptionSelector)
