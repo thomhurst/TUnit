@@ -61,7 +61,7 @@ public class StringDifferenceTests
                                  "some"
                                  "some text"
                                       ↑
-                                      
+                              
                               at Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
                               """;
         var actual = "some";
