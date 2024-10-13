@@ -1,5 +1,3 @@
-#nullable disable
-
 using TUnit.Assertions.AssertConditions.Interfaces;
 
 namespace TUnit.Assertions.Extensions;

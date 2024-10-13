@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;

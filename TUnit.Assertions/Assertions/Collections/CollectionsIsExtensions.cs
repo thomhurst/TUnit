@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using System.Collections;
+﻿using System.Collections;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Interfaces;
@@ -10,7 +8,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static class CollectionsIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentCollectionTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentCollectionTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner?>? equalityComparer = null, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
         where TActual : IEnumerable<TInner>
     {
         return valueSource.RegisterAssertion(new EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(expected, equalityComparer)

@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Comparable;
 using TUnit.Assertions.AssertConditions.Interfaces;
@@ -16,7 +14,7 @@ public static class ComparableIsExtensions
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, _) =>
             {
-                return value.CompareTo(expected) > 0;
+                return value?.CompareTo(expected) > 0;
             },
             (value, _, _) => $"{value} was not greater than {expected}")
             , [doNotPopulateThisValue]); }
@@ -26,7 +24,7 @@ public static class ComparableIsExtensions
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, _) =>
             {
-                return value.CompareTo(expected) >= 0;
+                return value?.CompareTo(expected) >= 0;
             },
             (value, _, _) => $"{value} was not greater than or equal to {expected}")
             , [doNotPopulateThisValue]); }
@@ -36,7 +34,7 @@ public static class ComparableIsExtensions
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, _) =>
             {
-                return value.CompareTo(expected) < 0;
+                return value?.CompareTo(expected) < 0;
             },
             (value, _, _) => $"{value} was not less than {expected}")
             , [doNotPopulateThisValue]); }
@@ -46,7 +44,7 @@ public static class ComparableIsExtensions
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, _) =>
             {
-                return value.CompareTo(expected) <= 0;
+                return value?.CompareTo(expected) <= 0;
             },
             (value, _, _) => $"{value} was not less than or equal to {expected}")
             , [doNotPopulateThisValue]); }

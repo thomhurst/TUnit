@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using System.Numerics;
+﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;

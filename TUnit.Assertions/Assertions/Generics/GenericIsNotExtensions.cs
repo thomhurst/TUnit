@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
@@ -12,7 +10,7 @@ public static class GenericIsNotExtensions
 {
     public static InvokableValueAssertionBuilder<TActual> IsNotNull<TActual>(this IValueSource<TActual> valueSource)
     {
-        return valueSource!.RegisterAssertion(new NotNullExpectedValueAssertCondition<TActual>()
+        return valueSource.RegisterAssertion(new NotNullExpectedValueAssertCondition<TActual>()
             , []);
     }
     
