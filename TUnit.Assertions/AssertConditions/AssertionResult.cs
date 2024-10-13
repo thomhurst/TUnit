@@ -37,6 +37,11 @@ public class AssertionResult
         {
             return this;
         }
+        
+        if (Message == other.Message)
+        {
+            return Fail(Message!);
+        }
 
         return Fail(Message + " and " + other.Message);
     }
@@ -45,6 +50,11 @@ public class AssertionResult
     {
         if (!IsPassed && !other.IsPassed)
         {
+            if (Message == other.Message)
+            {
+                return Fail(Message!);
+            }
+            
             return Fail(Message + " and " + other.Message);
         }
 
