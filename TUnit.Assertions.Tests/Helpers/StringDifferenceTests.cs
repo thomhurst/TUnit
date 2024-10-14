@@ -5,17 +5,17 @@ public class StringDifferenceTests
     [Test]
     public async Task Works_For_Empty_String_As_Actual()
     {
-        var expectedMessage = """
-                              Expected actual to be equal to "some text"
+        string expectedMessage = """
+                                 Expected actual to be equal to "some text"
 
-                              but found "" which differs at index 0:
-                                  ↓
-                                 ""
-                                 "some text"
-                                  ↑
+                                 but found "" which differs at index 0:
+                                     ↓
+                                    ""
+                                    "some text"
+                                     ↑
 
-                              at Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
-                              """;
+                                 at Assert.That(actual).IsEqualTo(expected)
+                                 """;
         var actual = "";
         var expected = "some text";
 
@@ -29,17 +29,17 @@ public class StringDifferenceTests
     [Test]
     public async Task Works_For_Empty_String_As_Expected()
     {
-        var expectedMessage = """
-                              Expected actual to be equal to ""
+        string expectedMessage = """
+                                 Expected actual to be equal to ""
 
-                              but found "actual text" which differs at index 0:
-                                  ↓
-                                 "actual text"
-                                 ""
-                                  ↑
+                                 but found "actual text" which differs at index 0:
+                                     ↓
+                                    "actual text"
+                                    ""
+                                     ↑
 
-                              at Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
-                              """;
+                                 at Assert.That(actual).IsEqualTo(expected)
+                                 """;
         var actual = "actual text";
         var expected = "";
 
@@ -53,17 +53,17 @@ public class StringDifferenceTests
     [Test]
     public async Task Works_When_Actual_Starts_With_Expected()
     {
-        var expectedMessage = """
-                              Expected actual to be equal to "some text"
+        string expectedMessage = """
+                                 Expected actual to be equal to "some text"
 
-                              but found "some" which differs at index 4:
-                                      ↓
-                                 "some"
-                                 "some text"
-                                      ↑
-                              
-                              at Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
-                              """;
+                                 but found "some" which differs at index 4:
+                                         ↓
+                                    "some"
+                                    "some text"
+                                         ↑
+
+                                 at Assert.That(actual).IsEqualTo(expected)
+                                 """;
         var actual = "some";
         var expected = "some text";
 
@@ -77,17 +77,17 @@ public class StringDifferenceTests
     [Test]
     public async Task Works_When_Expected_Starts_With_Actual()
     {
-        var expectedMessage = """
-                              Expected actual to be equal to "some"
+        string expectedMessage = """
+                                 Expected actual to be equal to "some"
 
-                              but found "some text" which differs at index 4:
-                                      ↓
-                                 "some text"
-                                 "some"
-                                      ↑
+                                 but found "some text" which differs at index 4:
+                                         ↓
+                                    "some text"
+                                    "some"
+                                         ↑
 
-                              at Assert.That(actual).IsEqualTo(expected, StringComparison.Ordinal)
-                              """;
+                                 at Assert.That(actual).IsEqualTo(expected)
+                                 """;
         var actual = "some text";
         var expected = "some";
 

@@ -13,7 +13,7 @@ public static class StringIsExtensions
 {
     public static StringEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        return IsEqualTo(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue1);
+        return IsEqualTo(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue1, null);
     }
     
     public static StringEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
