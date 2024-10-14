@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.Generic;
+﻿using TUnit.Assertions.AssertConditions;
+
+namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
 public class EqualsExpectedValueAssertCondition<TActual>(TActual expected) : ExpectedValueAssertCondition<TActual, TActual>(expected)
 {

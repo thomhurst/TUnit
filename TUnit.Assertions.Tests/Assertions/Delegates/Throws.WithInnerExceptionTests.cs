@@ -7,16 +7,19 @@ public partial class Throws
         [Test]
         public async Task Fails_For_Different_Messages_In_Inner_Exception()
         {
-            string outerMessage = "foo";
-            string expectedInnerMessage = "bar";
-            string expectedMessage = """
-                Expected action to throw an Exception which message equals "bar", but it differs at index 0:
-                    ↓
-                   "some different inner message"
-                   "bar"
-                    ↑.
-                At Assert.That(action).ThrowsException().WithInnerException().WithMessage(expectedInnerMessage)
-                """;
+            var outerMessage = "foo";
+            var expectedInnerMessage = "bar";
+            var expectedMessage = """
+                                  Expected action to throw an Exception which message equals "bar"
+                                  
+                                  but it differs at index 0:
+                                      ↓
+                                     "some different inner message"
+                                     "bar"
+                                      ↑
+                                  
+                                  at Assert.That(action).ThrowsException().WithInnerException().WithMessage(expectedInnerMessage)
+                                  """;
             Exception exception = CreateCustomException(outerMessage,
                 CreateCustomException("some different inner message"));
             Action action = () => throw exception;
@@ -44,8 +47,8 @@ public partial class Throws
         [Test]
         public async Task Succeed_For_Matching_Message()
         {
-            string outerMessage = "foo";
-            string innerMessage = "bar";
+            var outerMessage = "foo";
+            var innerMessage = "bar";
             Exception exception = CreateCustomException(outerMessage, CreateCustomException(innerMessage));
             Action action = () => throw exception;
 

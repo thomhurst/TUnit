@@ -16,14 +16,21 @@ public class CastableAssertionBuilder<TActual, TExpected> : InvokableValueAssert
         _mapper = mapper;
     }
 
-    public new TaskAwaiter<TExpected> GetAwaiter()
+    public new TaskAwaiter<TExpected?> GetAwaiter()
     {
         return AssertType().GetAwaiter();
     }
 
     private static TExpected? DefaultMapper(AssertionData<TActual> data)
     {
-        return (TExpected)Convert.ChangeType(data.Result, typeof(TExpected));
+        try
+        {
+            return (TExpected)Convert.ChangeType(data.Result, typeof(TExpected))!;
+        }
+        catch
+        {
+            return default;
+        }
     }
 
     private async Task<TExpected?> AssertType()

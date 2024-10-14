@@ -17,6 +17,7 @@ public class AssertionResult
         {
             return Passed;
         }
+        
         return new AssertionResult(false, message);
     }
 
@@ -36,6 +37,11 @@ public class AssertionResult
         {
             return this;
         }
+        
+        if (Message == other.Message)
+        {
+            return Fail(Message!);
+        }
 
         return Fail(Message + " and " + other.Message);
     }
@@ -44,6 +50,11 @@ public class AssertionResult
     {
         if (!IsPassed && !other.IsPassed)
         {
+            if (Message == other.Message)
+            {
+                return Fail(Message!);
+            }
+            
             return Fail(Message + " and " + other.Message);
         }
 
@@ -56,14 +67,13 @@ public class AssertionResult
         {
             return this;
         }
+        
         return new AssertionResult(false, message);
     }
 
-    public static AssertionResult Fail(string message)
-        => new AssertionResult(false, message);
+    public static AssertionResult Fail(string message) => new(false, message);
 
-    public static AssertionResult Passed { get; }
-        = new AssertionResult(true, null);
+    public static AssertionResult Passed { get; } = new(true, null);
     
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
 }

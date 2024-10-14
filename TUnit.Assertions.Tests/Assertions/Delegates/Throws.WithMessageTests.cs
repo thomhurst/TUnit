@@ -7,16 +7,19 @@ public partial class Throws
         [Test]
         public async Task Fails_For_Different_Messages()
         {
-            string message1 = "foo";
-            string message2 = "bar";
-            string expectedMessage = """
-                Expected action to throw a CustomException which message equals "bar", but it differs at index 0:
-                    ↓
-                   "foo"
-                   "bar"
-                    ↑.
-                At Assert.That(action).ThrowsExactly<CustomException>().WithMessage(message2)
-                """;
+            var message1 = "foo";
+            var message2 = "bar";
+            var expectedMessage = """
+                                  Expected action to throw a CustomException which message equals "bar"
+                                  
+                                  but it differs at index 0:
+                                      ↓
+                                     "foo"
+                                     "bar"
+                                      ↑
+                                  
+                                  at Assert.That(action).ThrowsExactly<CustomException>().WithMessage(message2)
+                                  """;
             Exception exception = CreateCustomException(message1);
             Action action = () => throw exception;
 
@@ -30,7 +33,7 @@ public partial class Throws
         [Test]
         public async Task Returns_Exception_When_Awaited()
         {
-            string matchingMessage = "foo";
+            var matchingMessage = "foo";
             Exception exception = CreateCustomException(matchingMessage);
             Action action = () => throw exception;
 
@@ -42,7 +45,7 @@ public partial class Throws
         [Test]
         public async Task Succeed_For_Matching_Message()
         {
-            string matchingMessage = "foo";
+            var matchingMessage = "foo";
             Exception exception = CreateCustomException(matchingMessage);
             Action action = () => throw exception;
 

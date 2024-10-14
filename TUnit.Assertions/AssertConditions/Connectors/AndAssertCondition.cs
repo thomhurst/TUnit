@@ -20,7 +20,7 @@ internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
     protected override string GetExpectation() => "";
 
     internal override string GetExpectationWithReason()
-        => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} and{Environment.NewLine}{_condition2.GetExpectationWithReason()}";
+        => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} and {_condition2.GetExpectationWithReason()}";
     
     protected override async Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {

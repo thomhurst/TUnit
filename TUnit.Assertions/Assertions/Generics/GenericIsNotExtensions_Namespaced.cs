@@ -1,9 +1,9 @@
 ﻿#nullable disable
 
 using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Generic;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Assertions.Generics.Conditions;
 
 // ReSharper disable once CheckNamespace
 namespace TUnit.Assertions.Extensions.Generic;

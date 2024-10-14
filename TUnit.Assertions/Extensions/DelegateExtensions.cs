@@ -1,5 +1,8 @@
-﻿namespace TUnit.Assertions.Extensions;
+﻿using System.Diagnostics;
 
+namespace TUnit.Assertions.Extensions;
+
+[StackTraceHidden]
 internal static class DelegateExtensions
 {
     public static Func<Task<AssertionData<object?>>> AsAssertionData(this Action action, string? actualExpression)

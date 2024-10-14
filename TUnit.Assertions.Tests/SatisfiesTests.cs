@@ -90,7 +90,11 @@ public class SatisfiesTests
                 await Assert.That(myModel)
                     .Satisfies(model => model.Value, assert => assert.IsEqualTo("Blah")!)
             ).Throws<AssertionException>()
-            .WithMessageMatching("*Expected model => model.Value to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:*");
+            .WithMessageMatching("""
+                                 *Expected model => model.Value to satisfy assert => assert.IsEqualTo("Blah")!
+                                 
+                                 but found "Hello" which differs at index 0:*
+                                 """);
     }
 
     [Test]
@@ -126,11 +130,13 @@ public class SatisfiesTests
                                             innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
                                                 innerAssert2.IsEqualTo("Blah")!
                                             )
-                                        ), but found "Baz" which differs at index 1:
+                                        )
+                
+                but found "Baz" which differs at index 1:
                      ↓
                    "Baz"
                    "Blah"
-                     ↑.*
+                     ↑*
                 """
                 );
     }
@@ -147,7 +153,11 @@ public class SatisfiesTests
                 await Assert.That(myModel)
                     .Satisfies(model => model.Value, assert => assert.IsEqualTo("Blah")!)
             ).Throws<AssertionException>()
-            .WithMessageMatching("*Expected model => model.Value to satisfy assert => assert.IsEqualTo(\"Blah\")!, but found \"Hello\" which differs at index 0:*");
+            .WithMessageMatching("""
+                                 *Expected model => model.Value to satisfy assert => assert.IsEqualTo("Blah")!
+                                 
+                                 but found "Hello" which differs at index 0:*
+                                 """);
     }
 
     [Test]
@@ -183,12 +193,15 @@ public class SatisfiesTests
                                             innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
                                                 innerAssert2.IsEqualTo("Baz")!
                                             )
-                                        ), but found "Blah" which differs at index 1:
+                                        )
+                
+                but found "Blah" which differs at index 1:
                      ↓
                    "Blah"
                    "Baz"
-                     ↑.
-                At Assert.That(myModel).Satisfies(model => model.Nested, assert =>
+                     ↑
+                
+                at Assert.That(myModel).Satisfies(model => model.Nested, assert =>
                                         assert.Sati...*
                 """
                 );
