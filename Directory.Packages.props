@@ -45,9 +45,9 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.9.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.5" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="3.10.0" />
-    <PackageVersion Include="TUnit" Version="0.1.1010" />
-    <PackageVersion Include="TUnit.Core" Version="0.1.1010" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.1.1010" />
+    <PackageVersion Include="TUnit" Version="0.1.1043" />
+    <PackageVersion Include="TUnit.Core" Version="0.1.1043" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.1.1043" />
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
