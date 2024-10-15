@@ -24,11 +24,11 @@ For example:
 ```csharp
 var value = "CD";
 
-var cd = AssertionGroup.From(value)
+var cd = AssertionGroup.For(value)
     .WithAssertion(assert => assert.Contains('C'))
     .And(assert => assert.Contains('D'));
 
-var ab = AssertionGroup.WithSameValueFrom(cd)
+var ab = AssertionGroup.ForSameValueAs(cd)
     .WithAssertion(assert => assert.Contains('A'))
     .And(assert => assert.Contains('B'));
 

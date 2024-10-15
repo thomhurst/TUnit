@@ -10,11 +10,11 @@ public class AssertionGroupTests
     {
         var value = "CD";
 
-        var cd = AssertionGroup.From(value)
+        var cd = AssertionGroup.For(value)
             .WithAssertion(assert => assert.Contains('C'))
             .And(assert => assert.Contains('D'));
         
-        var ab = AssertionGroup.WithSameValueFrom(cd)
+        var ab = AssertionGroup.ForSameValueAs(cd)
             .WithAssertion(assert => assert.Contains('A'))
             .And(assert => assert.Contains('B'));
 
@@ -26,7 +26,7 @@ public class AssertionGroupTests
     {
         var value = "Foo";
         
-        await AssertionGroup.From(value)
+        await AssertionGroup.For(value)
             .WithAssertion(assert => assert.IsNotNullOrEmpty())
             .And(assert => assert.IsEqualTo("Foo"));
     }
@@ -36,11 +36,11 @@ public class AssertionGroupTests
     {
         var value = "Foo";
         
-        var group1 = AssertionGroup.From(value)
+        var group1 = AssertionGroup.For(value)
             .WithAssertion(assert => assert.IsNullOrEmpty())
             .And(assert => assert.IsEqualTo("Foo"));
         
-        var group2 = AssertionGroup.WithSameValueFrom(group1)
+        var group2 = AssertionGroup.ForSameValueAs(group1)
             .WithAssertion(assert => assert.IsNullOrEmpty())
             .Or(assert => assert.IsEqualTo("Foo"));
 
@@ -52,11 +52,11 @@ public class AssertionGroupTests
     {
         var value = "Foo";
         
-        var group1 = AssertionGroup.From(value)
+        var group1 = AssertionGroup.For(value)
             .WithAssertion(assert => assert.IsNullOrEmpty())
             .And(assert => assert.IsEqualTo("Foo"));
         
-        var group2 = AssertionGroup.WithSameValueFrom(group1)
+        var group2 = AssertionGroup.ForSameValueAs(group1)
             .WithAssertion(assert => assert.IsNullOrEmpty())
             .Or(assert => assert.IsEqualTo("Foo"));
 

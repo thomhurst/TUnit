@@ -24,72 +24,72 @@ public static class AssertionGroup
         return new UnknownAssertionGroupInvoker<TActual, TAssertionBuilder>(group);
     }
     
-    public static AssertionGroupBuilder<TActual, ValueAssertionBuilder<TActual>> From<TActual>(TActual value)
+    public static AssertionGroupBuilder<TActual, ValueAssertionBuilder<TActual>> For<TActual>(TActual value)
     {
         return new AssertionGroupBuilder<TActual, ValueAssertionBuilder<TActual>>(TUnit.Assertions.Assert.That(value));
     }
     
-    public static AssertionGroupBuilder<TActual, ValueAssertionBuilder<TActual>> WithSameValueFrom<TActual>(AssertionGroup<TActual, ValueAssertionBuilder<TActual>> otherGroup)
+    public static AssertionGroupBuilder<TActual, ValueAssertionBuilder<TActual>> ForSameValueAs<TActual>(AssertionGroup<TActual, ValueAssertionBuilder<TActual>> otherGroup)
     {
         return new AssertionGroupBuilder<TActual, ValueAssertionBuilder<TActual>>(otherGroup.AssertionBuilder);
     }
     
-    public static AssertionGroupBuilder<TActual, ValueDelegateAssertionBuilder<TActual>> From<TActual>(Func<TActual> value)
+    public static AssertionGroupBuilder<TActual, ValueDelegateAssertionBuilder<TActual>> For<TActual>(Func<TActual> value)
     {
         return new AssertionGroupBuilder<TActual, ValueDelegateAssertionBuilder<TActual>>(TUnit.Assertions.Assert.That(value));
     }
     
-    public static AssertionGroupBuilder<TActual, ValueDelegateAssertionBuilder<TActual>> WithSameValueFrom<TActual>(AssertionGroup<TActual, ValueDelegateAssertionBuilder<TActual>> otherGroup)
+    public static AssertionGroupBuilder<TActual, ValueDelegateAssertionBuilder<TActual>> ForSameValueAs<TActual>(AssertionGroup<TActual, ValueDelegateAssertionBuilder<TActual>> otherGroup)
     {
         return new AssertionGroupBuilder<TActual, ValueDelegateAssertionBuilder<TActual>>(otherGroup.AssertionBuilder);
     }
     
-    public static AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>> From<TActual>(Task<TActual> value)
+    public static AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>> For<TActual>(Task<TActual> value)
     {
         return new AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>>(TUnit.Assertions.Assert.That(value));
     }
     
-    public static AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>> WithSameValueFrom<TActual>(AssertionGroup<TActual, AsyncValueDelegateAssertionBuilder<TActual>> otherGroup)
+    public static AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>> ForSameValueAs<TActual>(AssertionGroup<TActual, AsyncValueDelegateAssertionBuilder<TActual>> otherGroup)
     {
         return new AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>>(otherGroup.AssertionBuilder);
     }
     
-    public static AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>> From<TActual>(ValueTask<TActual> value)
+    public static AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>> For<TActual>(ValueTask<TActual> value)
     {
         return new AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>>(TUnit.Assertions.Assert.That(value));
     }
     
-    public static AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>> From<TActual>(Func<Task<TActual>> value)
+    public static AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>> For<TActual>(Func<Task<TActual>> value)
     {
         return new AssertionGroupBuilder<TActual, AsyncValueDelegateAssertionBuilder<TActual>>(TUnit.Assertions.Assert.That(value));
     }
     
-    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> From(Action value)
+    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> For(Action value)
     {
         return new AssertionGroupBuilder<object?, DelegateAssertionBuilder>(TUnit.Assertions.Assert.That(value));
     }
     
-    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> WithSameValueFrom(AssertionGroup<object?, DelegateAssertionBuilder> otherGroup)
+    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> ForSameValueAs(AssertionGroup<object?, DelegateAssertionBuilder> otherGroup)
     {
         return new AssertionGroupBuilder<object?, DelegateAssertionBuilder>(otherGroup.AssertionBuilder);
     }
     
-    public static AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder> From(Task value)
+    public static AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder> For(Task value)
     {
         return new AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder>(TUnit.Assertions.Assert.That(value));
     }
     
-    public static AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder> WithSameValueFrom(AssertionGroup<object?, AsyncDelegateAssertionBuilder> otherGroup)
+    public static AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder> ForSameValueAs(AssertionGroup<object?, AsyncDelegateAssertionBuilder> otherGroup)
     {
         return new AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder>(otherGroup.AssertionBuilder);
     }
     
-    public static AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder> From(ValueTask value)
+    public static AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder> For(ValueTask value)
     {
         return new AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder>(TUnit.Assertions.Assert.That(value));
     }
     
-    public static AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder> From(Func<Task> value)
+    public static AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder> For(Func<Task> value)
     {
         return new AssertionGroupBuilder<object?, AsyncDelegateAssertionBuilder>(TUnit.Assertions.Assert.That(value));
     }
