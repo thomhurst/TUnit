@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
@@ -68,13 +69,13 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         {
             if (firstFailure.Type == MemberType.Value)
             {
-                return FailWithMessage(Format(firstFailure.Actual));
+                return FailWithMessage(Formatter.Format(firstFailure.Actual));
             }
 
             return FailWithMessage($"""
                                     {firstFailure.Type} {string.Join('.', firstFailure.NestedMemberNames)} did not match
-                                    Expected: {Format(firstFailure.Expected)}
-                                    Received: {Format(firstFailure.Actual)}
+                                    Expected: {Formatter.Format(firstFailure.Expected)}
+                                    Received: {Formatter.Format(firstFailure.Actual)}
                                     """);
         }
 

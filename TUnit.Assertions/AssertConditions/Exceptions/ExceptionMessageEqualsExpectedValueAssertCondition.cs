@@ -8,7 +8,7 @@ public class ExceptionMessageEqualsExpectedValueAssertCondition<TException>(stri
 where TException : Exception
 {
     protected override string GetExpectation()
-        => $"message to be equal to {Format(expected).TruncateWithEllipsis(100)}";
+        => $"message to be equal to {Formatter.Format(expected).TruncateWithEllipsis(100)}";
 
     protected override AssertionResult GetResult(TException? actualValue, string? expectedValue)
     {
@@ -23,6 +23,6 @@ where TException : Exception
         return AssertionResult
             .FailIf(
                 () => !string.Equals(actualValue.Message, expectedValue, stringComparison),
-                $"found message {Format(actualValue.Message).TruncateWithEllipsis(100)} which {new StringDifference(actualValue.Message, expectedValue)}");
+                $"found message {Formatter.Format(actualValue.Message).TruncateWithEllipsis(100)} which {new StringDifference(actualValue.Message, expectedValue)}");
     }
 }

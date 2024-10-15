@@ -6,6 +6,7 @@ using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.AssertionBuilders.Wrappers;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Extensions;
 
@@ -25,7 +26,7 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value > expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}")
+                    $"{Formatter.Format(value)} was not greater than {Formatter.Format(expected)}")
             , [doNotPopulateThisValue]);
     }
 
@@ -35,7 +36,7 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value >= expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}")
+                    $"{Formatter.Format(value)} was not greater than or equal to {Formatter.Format(expected)}")
             , [doNotPopulateThisValue]);
     }
 
@@ -45,7 +46,7 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value < expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}")
+                    $"{Formatter.Format(value)} was not less than {Formatter.Format(expected)}")
             , [doNotPopulateThisValue]);
     }
 
@@ -55,7 +56,7 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value <= expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}")
+                    $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}")
             , [doNotPopulateThisValue]);
     }
 }
