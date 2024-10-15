@@ -34,7 +34,8 @@ public static partial class DoesNotExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.StartsWith(expected, stringComparison);
             },
-            (actual, _, _) => $"\"{actual}\" does start with \"{expected}\"")
+            (actual, _, _) => $"\"{actual}\" does start with \"{expected}\"",
+            $"not start with {expected}")
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
@@ -52,7 +53,8 @@ public static partial class DoesNotExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 return !actual.EndsWith(expected, stringComparison);
             },
-            (actual, _, _) => $"\"{actual}\" does end with \"{expected}\"")
+            (actual, _, _) => $"\"{actual}\" does end with \"{expected}\"",
+            $"not end with {expected}")
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 }

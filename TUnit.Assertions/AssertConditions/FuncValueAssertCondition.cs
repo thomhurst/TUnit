@@ -3,12 +3,12 @@
 public class FuncValueAssertCondition<TActual, TExpected>(
     TExpected? expected,
     Func<TActual?, TExpected?, FuncValueAssertCondition<TActual, TExpected>, bool> condition,
-    Func<TActual?, Exception?, string?, string> defaultMessageFactory
+    Func<TActual?, Exception?, string?, string> defaultMessageFactory,
+    string expectation
 )
     : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
-    protected override string GetExpectation()
-        => $"to satisfy {GetType().Name}";
+    protected override string GetExpectation() => expectation;
 
     protected override AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue)
     {

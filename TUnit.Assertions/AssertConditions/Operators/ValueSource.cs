@@ -42,4 +42,40 @@ public class ValueSource<TActual>(AssertionBuilder<TActual> assertionBuilder) : 
     {
         return IsAssignableFrom(typeof(TExpected));
     }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotTypeOf(Type type)
+    {
+        return this.RegisterAssertion(new NotTypeOfExpectedValueAssertCondition<TActual>(type)
+            , [type.Name]);
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotTypeOf<TExpected>()
+    {
+        return this.RegisterAssertion(new NotTypeOfExpectedValueAssertCondition<TActual>(typeof(TExpected))
+            , [typeof(TExpected).Name]);
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotAssignableTo(Type type)
+    {
+        return this.RegisterAssertion(new NotAssignableToExpectedValueAssertCondition<TActual>(type)
+            , [type.Name]);
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotAssignableTo<TExpected>()
+    {
+        return this.RegisterAssertion(new NotAssignableToExpectedValueAssertCondition<TActual>(typeof(TExpected))
+            , [typeof(TExpected).Name]);
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom(Type type)
+    {
+        return this.RegisterAssertion(new AssignableFromExpectedValueAssertCondition<TActual>(type)
+            , [type.Name]);
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom<TExpected>()
+    {
+        return this.RegisterAssertion(new AssignableFromExpectedValueAssertCondition<TActual>(typeof(TExpected))
+            , [typeof(TExpected).Name]);
+    }
 }

@@ -8,7 +8,7 @@ public class BetweenAssertionBuilderWrapper<TActual> : InvokableValueAssertionBu
     {
     }
 
-    public BetweenAssertionBuilderWrapper<TActual> Inclusive()
+    public BetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds()
     {
         var assertion = (BetweenAssertCondition<TActual>) Assertions.Peek();
 
@@ -19,7 +19,7 @@ public class BetweenAssertionBuilderWrapper<TActual> : InvokableValueAssertionBu
         return this;
     }
     
-    public BetweenAssertionBuilderWrapper<TActual> Exclusive()
+    public BetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds()
     {
         var assertion = (BetweenAssertCondition<TActual>) Assertions.Peek();
 
