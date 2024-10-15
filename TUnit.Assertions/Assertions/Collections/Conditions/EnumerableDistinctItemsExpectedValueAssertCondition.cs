@@ -12,7 +12,7 @@ public class EnumerableDistinctItemsExpectedValueAssertCondition<TActual, TInner
     {
         if (actualValue is null)
         {
-            return AssertionResult.Fail($"{ActualExpression ?? typeof(TActual).Name} is null");
+            return AssertionResult.Fail(() => $"{ActualExpression ?? typeof(TActual).Name} is null");
         }
 
         var list = actualValue.Cast<TInner>().ToList();
@@ -22,7 +22,7 @@ public class EnumerableDistinctItemsExpectedValueAssertCondition<TActual, TInner
         return AssertionResult
             .FailIf(
                 () => list.Count != distinct.Count(),
-                "duplicate items found in the collection");
+                () => "duplicate items found in the collection");
 
     }
 }

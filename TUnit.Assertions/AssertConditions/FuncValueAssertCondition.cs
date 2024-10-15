@@ -14,6 +14,6 @@ public class FuncValueAssertCondition<TActual, TExpected>(
     {
         return AssertionResult.FailIf(
             () => !condition(actualValue, ExpectedValue, this),
-            defaultMessageFactory(actualValue, Exception, Format(expectedValue)));
+            () => defaultMessageFactory(actualValue, Exception, Format(expectedValue)));
     }
 }

@@ -9,5 +9,5 @@ public class ThrowsAnyExceptionAssertCondition<TActual>
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult.FailIf(
             () => exception is null,
-            "none was thrown");
+            () => "none was thrown");
 }

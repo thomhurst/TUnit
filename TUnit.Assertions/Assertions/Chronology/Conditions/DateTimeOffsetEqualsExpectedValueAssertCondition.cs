@@ -24,13 +24,13 @@ public class DateTimeOffsetEqualsExpectedValueAssertCondition(DateTimeOffset exp
             return AssertionResult
                 .FailIf(
                     () => actualValue < min || actualValue > max,
-                    $"the received value {actualValue} is outside the tolerances");
+                    () => $"the received value {actualValue} is outside the tolerances");
         }
 
         return AssertionResult
             .FailIf(
                 () => actualValue != expected,
-                $"the received value {actualValue} is different");
+                () => $"the received value {actualValue} is different");
     }
 
     public void SetTolerance(TimeSpan tolerance)

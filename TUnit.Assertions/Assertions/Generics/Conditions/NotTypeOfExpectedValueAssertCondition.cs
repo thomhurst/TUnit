@@ -12,5 +12,5 @@ public class NotTypeOfExpectedValueAssertCondition<TActual, TExpected>
         => AssertionResult
             .FailIf(
                 () => actualValue?.GetType() == typeof(TExpected),
-                "it was");
+                () => "it was");
 }

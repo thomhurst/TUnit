@@ -15,10 +15,10 @@ public class EnumerableCountNotEqualToExpectedValueAssertCondition<TActual>(int 
         return AssertionResult
             .FailIf(
                 () => actualValue is null,
-                $"{ActualExpression ?? typeof(TActual).Name} is null")
+                () => $"{ActualExpression ?? typeof(TActual).Name} is null")
             .OrFailIf(
                 () => actualCount == count,
-                $"it was {actualCount}");
+                () => $"it was {actualCount}");
     }
 
     private int GetCount(TActual? actualValue)

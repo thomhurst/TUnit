@@ -14,12 +14,12 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected) : Exp
             return AssertionResult
                 .FailIf(
                     () => !equatable.Equals(expected),
-                    $"found {actualValue}");
+                    () => $"found {actualValue}");
         }
 
         return AssertionResult
             .FailIf(
                 () => !Equals(actualValue, ExpectedValue),
-                $"found {actualValue}");
+                () => $"found {actualValue}");
     }
 }
