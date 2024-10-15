@@ -58,12 +58,6 @@ public static class Assert
         return new AssertionScope();
     }
 
-    [DoesNotReturn]
-    public static void Fail(string reason)
-    {
-        throw new AssertionException(reason);
-    }
-
     public static Task<Exception> ThrowsAsync(Func<Task> @delegate,
         [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
         => ThrowsAsync<Exception>(@delegate, doNotPopulateThisValue);
@@ -81,7 +75,7 @@ public static class Assert
         try
         {
             await @delegate();
-            Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
+            Fail.Test($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
         catch (Exception e) when(e is not AssertionException)
         {
@@ -90,7 +84,7 @@ public static class Assert
                 return exception;
             }
             
-            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+            Fail.Test($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
         catch (TException e)
         {
@@ -118,7 +112,7 @@ public static class Assert
         try
         {
             @delegate();
-            Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
+            Fail.Test($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
         catch (Exception e) when(e is not AssertionException)
         {
@@ -127,7 +121,7 @@ public static class Assert
                 return exception;
             }
             
-            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+            Fail.Test($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
 
         return null!;
