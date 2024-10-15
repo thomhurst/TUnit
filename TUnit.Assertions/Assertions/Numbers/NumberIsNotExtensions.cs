@@ -42,7 +42,8 @@ public static class NumberIsNotExtensions
 
                     return value % expected != TActual.Zero;
                 },
-                (value, _, _) => $"{value} was not divisible by {expected}")
+                (value, _, _) => $"{value} was not divisible by {expected}",
+                $"to not be divisible by {expected}")
             , [doNotPopulateThisValue]);
     }
     
@@ -58,7 +59,8 @@ public static class NumberIsNotExtensions
 
                 return value <= expected;
             },
-            (value, _, _) => $"{value} was greater than {expected}")
+            (value, _, _) => $"{value} was greater than {expected}",
+            $"to not be greater than {expected}")
             , [doNotPopulateThisValue]);
     }
     
@@ -75,7 +77,8 @@ public static class NumberIsNotExtensions
                 
                 return value < expected;
             },
-            (value, _, _) => $"{value} was greater than or equal to {expected}")
+            (value, _, _) => $"{value} was greater than or equal to {expected}",
+            $"to not be greater than or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
     
@@ -92,7 +95,8 @@ public static class NumberIsNotExtensions
                 
                 return value >= expected;
             },
-            (value, _, _) => $"{value} was less than {expected}")
+            (value, _, _) => $"{value} was less than {expected}",
+            $"to not be less than {expected}")
             , [doNotPopulateThisValue]);
     }
     
@@ -109,7 +113,8 @@ public static class NumberIsNotExtensions
                 
                 return value > expected;
             },
-            (value, _, _) => $"{value} was less than or equal to {expected}")
+            (value, _, _) => $"{value} was less than or equal to {expected}",
+            $"to not be less than or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
     
@@ -126,7 +131,8 @@ public static class NumberIsNotExtensions
                 
                 return value % 2 != 0;
             },
-            (value, _, _) => $"{value} was even")
+            (value, _, _) => $"{value} was even",
+            $"to not be even")
             , []);
     }
     
@@ -143,7 +149,8 @@ public static class NumberIsNotExtensions
                 
                 return value % 2 == 0;
             },
-            (value, _, _) => $"{value} was odd")
+            (value, _, _) => $"{value} was odd",
+            $"to not be odd")
             , []);
     }
     
@@ -160,7 +167,8 @@ public static class NumberIsNotExtensions
                 
                 return value >= TActual.Zero;
             },
-            (value, _, _) => $"{value} was negative")
+            (value, _, _) => $"{value} was negative",
+            $"to not be negative")
             , []);
     }
     
@@ -177,7 +185,8 @@ public static class NumberIsNotExtensions
                 
                 return value <= TActual.Zero;
             },
-            (value, _, _) => $"{value} was positive")
+            (value, _, _) => $"{value} was positive",
+            $"to not be positive")
             , []);
     }
 }

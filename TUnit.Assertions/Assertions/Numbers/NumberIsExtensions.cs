@@ -46,7 +46,8 @@ public static class NumberIsExtensions
 
                     return value % expected == TActual.Zero;
                 },
-                (value, _, _) => $"{value} was not divisible by {expected}")
+                (value, _, _) => $"{value} was not divisible by {expected}",
+                $"to be divisible by {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -64,7 +65,8 @@ public static class NumberIsExtensions
 
                     return value % (TActual.One + TActual.One) == TActual.Zero;
                 },
-                (value, _, _) => $"{value} was not even")
+                (value, _, _) => $"{value} was not even",
+                $"to be even")
             , []);
     }
 
@@ -81,7 +83,8 @@ public static class NumberIsExtensions
 
                     return value % (TActual.One + TActual.One) != TActual.Zero;
                 },
-                (value, _, _) => $"{value} was not odd")
+                (value, _, _) => $"{value} was not odd",
+                $"to be odd")
             , []);
     }
 
@@ -99,7 +102,8 @@ public static class NumberIsExtensions
 
                     return value < TActual.Zero;
                 },
-                (value, _, _) => $"{value} was not negative")
+                (value, _, _) => $"{value} was not negative",
+                $"to be negative")
             , []);
     }
 
@@ -117,7 +121,8 @@ public static class NumberIsExtensions
 
                     return value > TActual.Zero;
                 },
-                (value, _, _) => $"{value} was not positive")
+                (value, _, _) => $"{value} was not positive",
+                $"to be positive")
             , []);
     }
 }

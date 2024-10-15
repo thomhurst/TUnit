@@ -21,30 +21,6 @@ public static class GenericIsNotExtensions
         return valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TActual>(expected)
             , [doNotPopulateThisValue]);
     }
-
-    public static InvokableValueAssertionBuilder<TActual> IsNotTypeOf<TActual>(this IValueSource<TActual> valueSource, Type type)
-    {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, Type>(default,
-                (value, _, _) => value!.GetType() != type,
-                (actual, _, _) => $"{actual?.GetType()} is type of {type.Name}")
-            , [type.Name]);
-    }
-
-    public static InvokableValueAssertionBuilder<TActual> IsNotAssignableTo<TActual>(this IValueSource<TActual> valueSource, Type type)
-    {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, Type>(default,
-            (value, _, _) => !value!.GetType().IsAssignableTo(type),
-            (actual, _, _) => $"{actual?.GetType()} is assignable to {type.Name}")
-            , [type.Name]);
-    }
-
-    public static InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom<TActual>(this IValueSource<TActual> valueSource, Type type)
-    {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, Type>(default,
-            (value, _, _) => !value!.GetType().IsAssignableFrom(type),
-            (actual, _, _) => $"{actual?.GetType()} is assignable from {type.Name}")
-            , [type.Name]);
-    }
     
     public static InvokableValueAssertionBuilder<TActual> IsDefault<TActual>(this IValueSource<TActual> valueSource)
     {
