@@ -12,4 +12,13 @@ public interface IValueSource<TActual> : ISource<TActual>
 
     InvokableValueAssertionBuilder<TActual> IsAssignableFrom(Type type); 
     InvokableValueAssertionBuilder<TActual> IsAssignableFrom<TExpected>();
+    
+    InvokableValueAssertionBuilder<TActual> IsNotTypeOf(Type type);
+    InvokableValueAssertionBuilder<TActual> IsNotTypeOf<TExpected>();
+
+    InvokableValueAssertionBuilder<TActual> IsNotAssignableTo(Type type);
+    InvokableValueAssertionBuilder<TActual> IsNotAssignableTo<TExpected>();
+
+    InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom(Type type); 
+    InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom<TExpected>();
 }

@@ -41,6 +41,7 @@
     <PackageVersion Include="NUnit" Version="4.2.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.3.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageVersion Include="Polyfill" Version="7.0.0" />
     <PackageVersion Include="PolySharp" Version="1.14.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.8.1" />
     <PackageVersion Include="System.Text.Json" Version="8.0.5" />

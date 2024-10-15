@@ -25,7 +25,8 @@ public static class StringIsNotExtensions
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => value != string.Empty,
-            (s, _, _) => $"'{s}' is empty")
+            (s, _, _) => $"'{s}' is empty",
+            $"to not be empty")
             , []);
     }
     
@@ -33,14 +34,16 @@ public static class StringIsNotExtensions
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => !string.IsNullOrEmpty(value),
-            (s, _, _) => $"'{s}' is null or empty"), []);
+            (s, _, _) => $"'{s}' is null or empty",
+            $"to not be null or empty"), []);
     }
     
     public static InvokableValueAssertionBuilder<string> IsNotNullOrWhitespace(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => !string.IsNullOrWhiteSpace(value),
-            (s, _, _) => $"'{s}' is null or whitespace")
+            (s, _, _) => $"'{s}' is null or whitespace",
+            $"to not be null or whitespace")
             , []);
     }
 }

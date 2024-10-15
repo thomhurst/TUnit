@@ -64,4 +64,34 @@ public class AsyncValueDelegateAssertionBuilder<TActual>
     {
         return new ValueSource<TActual>(this).IsAssignableFrom<TExpected>();
     }
+    
+    public InvokableValueAssertionBuilder<TActual> IsNotTypeOf(Type type)
+    {
+        return new ValueSource<TActual>(this).IsNotTypeOf(type);
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotTypeOf<TExpected>()
+    {
+        return new ValueSource<TActual>(this).IsNotTypeOf<TExpected>();
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotAssignableTo(Type type)
+    {
+        return new ValueSource<TActual>(this).IsNotAssignableTo(type);
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotAssignableTo<TExpected>()
+    {
+        return new ValueSource<TActual>(this).IsNotAssignableTo<TExpected>();
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom(Type type)
+    {
+        return new ValueSource<TActual>(this).IsNotAssignableFrom(type);
+    }
+
+    public InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom<TExpected>()
+    {
+        return new ValueSource<TActual>(this).IsNotAssignableFrom<TExpected>();
+    }
  }
