@@ -12,5 +12,5 @@ public class TypeOfExpectedValueAssertCondition<TActual>(Type expectedType)
         => AssertionResult
             .FailIf(
                 () => actualValue?.GetType() != expectedType,
-                $"{actualValue} it is {ActualValue?.GetType().Name ?? "null"}");
+                () => $"{actualValue} it is {ActualValue?.GetType().Name ?? "null"}");
 }

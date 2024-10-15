@@ -3,22 +3,29 @@
 public class AssertionResult
 {
     public bool IsPassed { get; }
-    public string? Message { get; }
+    public string Message
+    {
+        get
+        {
+            return _message.Value;
+        }
+    }
+    private Lazy<string> _message;
 
-    private AssertionResult(bool isPassed, string? message)
+    private AssertionResult(bool isPassed, Func<string> messageGenerator)
     {
         IsPassed = isPassed;
-        Message = message;
+        _message = new Lazy<string>(messageGenerator);
     }
 
-    public static AssertionResult FailIf(Func<bool> isFailed, string message)
+    public static AssertionResult FailIf(Func<bool> isFailed, Func<string> messageGenerator)
     {
         if (!isFailed())
         {
             return Passed;
         }
         
-        return new AssertionResult(false, message);
+        return new AssertionResult(false, messageGenerator);
     }
 
     public AssertionResult And(AssertionResult other)
@@ -37,31 +44,37 @@ public class AssertionResult
         {
             return this;
         }
-        
-        if (Message == other.Message)
-        {
-            return Fail(Message!);
-        }
 
-        return Fail(Message + " and " + other.Message);
+        return Fail(() =>
+        {
+            if (Message == other.Message)
+            {
+                return Message;
+            }
+
+            return Message + " and " + other.Message;
+        });
     }
 
     public AssertionResult Or(AssertionResult other)
     {
         if (!IsPassed && !other.IsPassed)
         {
-            if (Message == other.Message)
+            return Fail(() =>
             {
-                return Fail(Message!);
-            }
-            
-            return Fail(Message + " and " + other.Message);
+                if (Message == other.Message)
+                {
+                    return Message;
+                }
+
+                return Message + " and " + other.Message;
+            });
         }
 
         return Passed;
     }
 
-    public AssertionResult OrFailIf(Func<bool> isFailed, string message)
+    public AssertionResult OrFailIf(Func<bool> isFailed, Func<string> message)
     {
         if (!IsPassed || !isFailed())
         {
@@ -71,9 +84,10 @@ public class AssertionResult
         return new AssertionResult(false, message);
     }
 
-    public static AssertionResult Fail(string message) => new(false, message);
+    public static AssertionResult Fail(Func<string> message)
+        => new(false, message);
 
-    public static AssertionResult Passed { get; } = new(true, null);
+    public static AssertionResult Passed { get; } = new(true, () => "");
     
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
 }
