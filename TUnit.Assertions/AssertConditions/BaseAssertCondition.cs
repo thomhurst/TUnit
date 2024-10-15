@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
 
@@ -33,34 +32,6 @@ public abstract class BaseAssertCondition
     
     internal void SetSubject(string? subject)
         => Subject = subject;
-
-
-    protected string Format(object? obj)
-    {
-        if (obj is null)
-        {
-            return "null";
-        }
-
-        if (obj is string)
-        {
-            return $"""
-                    "{obj}"
-                    """;
-        }
-
-        if (obj is char)
-        {
-            return "'{obj}'";
-        }
-
-        if (obj is IEnumerable enumerable)
-        {
-            return $"[{string.Join(", ", enumerable.Cast<object>().Select(Format))}]";
-        }
-
-        return obj.ToString() ?? "null";
-    }
 }
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition

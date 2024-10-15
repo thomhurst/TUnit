@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions;
+﻿using TUnit.Assertions.Helpers;
+
+namespace TUnit.Assertions.AssertConditions;
 
 public class FuncValueAssertCondition<TActual, TExpected>(
     TExpected? expected,
@@ -14,6 +16,6 @@ public class FuncValueAssertCondition<TActual, TExpected>(
     {
         return AssertionResult.FailIf(
             () => !condition(actualValue, ExpectedValue, this),
-            defaultMessageFactory(actualValue, Exception, Format(expectedValue)));
+            defaultMessageFactory(actualValue, Exception, Formatter.Format(expectedValue)));
     }
 }

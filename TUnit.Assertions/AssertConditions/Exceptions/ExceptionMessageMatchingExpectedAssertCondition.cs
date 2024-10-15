@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.Exceptions;
 
@@ -7,7 +8,7 @@ public class ExceptionMessageMatchingExpectedAssertCondition<TException>(StringM
 where TException : Exception
 {
     protected override string GetExpectation()
-        => $"message to match {Format(match).TruncateWithEllipsis(100)}";
+        => $"message to match {Formatter.Format(match).TruncateWithEllipsis(100)}";
 
     protected override AssertionResult GetResult(TException? actualValue, StringMatcher? expectedValue)
     {
@@ -24,6 +25,6 @@ where TException : Exception
                 "expected value was null")
             .OrFailIf(
                 () => !match.Matches(actualValue.Message),
-                $"found message {Format(actualValue.Message).TruncateWithEllipsis(100)}");
+                $"found message {Formatter.Format(actualValue.Message).TruncateWithEllipsis(100)}");
     }
 }
