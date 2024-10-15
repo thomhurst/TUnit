@@ -22,7 +22,8 @@ public class StringLength(IValueSource<string> valueSource)
                 return actual.Length == expected;
             },
             (@string, _, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {expected}")
+                $"was {@string?.Length} characters long",
+            $"to be equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -39,7 +40,8 @@ public class StringLength(IValueSource<string> valueSource)
                     return @string.Length == 0;
                 },
                 (@string, _, _) =>
-                    $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}")
+                    $"\"{@string}\" was {@string?.Length} characters long but expected to be equal to {0}",
+                $"have length of 0")
             , []);
 
     public InvokableValueAssertionBuilder<string> Positive =>
@@ -54,8 +56,8 @@ public class StringLength(IValueSource<string> valueSource)
                 return @string.Length > 0;
             },
             (@string, _, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to empty"
-        ), []);
+                $"\"is empty",
+            $"have a positive string length"), []);
 
 
     public InvokableValueAssertionBuilder<string> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -72,7 +74,8 @@ public class StringLength(IValueSource<string> valueSource)
                 return @string.Length > expected;
             },
             (@string, _, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than {expected}")
+                $"was {@string?.Length} characters long",
+            $"to be greater than {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -89,7 +92,8 @@ public class StringLength(IValueSource<string> valueSource)
                 return @string.Length >= expected;
             },
             (@string, _, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be greater than or equal to {expected}")
+                $"was {@string?.Length} characters long",
+            $"to be greater than or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -106,7 +110,8 @@ public class StringLength(IValueSource<string> valueSource)
                 return @string.Length < expected;
             },
             (@string, _, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than {expected}")
+                $"was {@string?.Length} characters long",
+            $"to be less than {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -123,7 +128,8 @@ public class StringLength(IValueSource<string> valueSource)
                 return @string.Length <= expected;
             },
             (@string, _, _) =>
-                $"\"{@string}\" was {@string?.Length} characters long but expected to be less than or equal to {expected}")
+                $"was {@string?.Length} characters long",
+            $"to be less than or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 }

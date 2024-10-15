@@ -19,7 +19,8 @@ public static partial class DoesExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.Keys.Cast<TKey>().Contains(expected, equalityComparer);
             },
-            (_, _, _) => $"The key \"{expected}\" was not found in the dictionary")
+            (_, _, _) => $"The key \"{expected}\" was not found in the dictionary",
+            $"contain the key '{expected}'")
             , [doNotPopulateThisValue]);
     }
     
@@ -32,7 +33,8 @@ public static partial class DoesExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.Values.Cast<TValue>().Contains(expected, equalityComparer);
             },
-            (_, _, _) => $"The value \"{expected}\" was not found in the dictionary")
+            (_, _, _) => $"The value \"{expected}\" was not found in the dictionary",
+            $"contain the value '{expected}'")
             , [doNotPopulateThisValue]);
     }
 }

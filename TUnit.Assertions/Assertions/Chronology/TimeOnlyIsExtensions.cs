@@ -25,7 +25,8 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value > expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}")
+                    $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}",
+                $"to be after {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -35,7 +36,8 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value >= expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}")
+                    $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}",
+                $"to be after or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -45,7 +47,8 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value < expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}")
+                    $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}",
+                $"be before {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -55,7 +58,8 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value <= expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}")
+                    $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}",
+                $"be before or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 }

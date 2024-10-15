@@ -18,7 +18,8 @@ public static class ComparableIsExtensions
             {
                 return value.CompareTo(expected) > 0;
             },
-            (value, _, _) => $"{value} was not greater than {expected}")
+            (value, _, _) => $"{value} was not greater than {expected}",
+            $"to be greater than {expected}")
             , [doNotPopulateThisValue]); }
     
     public static InvokableValueAssertionBuilder<TActual> IsGreaterThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -28,7 +29,8 @@ public static class ComparableIsExtensions
             {
                 return value.CompareTo(expected) >= 0;
             },
-            (value, _, _) => $"{value} was not greater than or equal to {expected}")
+            (value, _, _) => $"{value} was not greater than or equal to {expected}",
+            $"be greater than or equal to {expected}")
             , [doNotPopulateThisValue]); }
     
     public static InvokableValueAssertionBuilder<TActual> IsLessThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -38,7 +40,8 @@ public static class ComparableIsExtensions
             {
                 return value.CompareTo(expected) < 0;
             },
-            (value, _, _) => $"{value} was not less than {expected}")
+            (value, _, _) => $"{value} was not less than {expected}",
+            $"be less than {expected}")
             , [doNotPopulateThisValue]); }
     
     public static InvokableValueAssertionBuilder<TActual> IsLessThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -48,7 +51,8 @@ public static class ComparableIsExtensions
             {
                 return value.CompareTo(expected) <= 0;
             },
-            (value, _, _) => $"{value} was not less than or equal to {expected}")
+            (value, _, _) => $"{value} was not less than or equal to {expected}",
+            $"be less than or equal to {expected}")
             , [doNotPopulateThisValue]); }
     
     public static BetweenAssertionBuilderWrapper<TActual> IsBetween<TActual>(this IValueSource<TActual> valueSource, TActual lowerBound, TActual upperBound, [CallerArgumentExpression("lowerBound")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("upperBound")] string doNotPopulateThisValue2 = "")

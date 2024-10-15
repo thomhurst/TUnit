@@ -37,20 +37,23 @@ public static class StringIsExtensions
                 
                 return value == string.Empty;
             },
-            (s, _, _) => $"'{s}' was not empty")
+            (s, _, _) => $"'{s}' was not empty with {s.Length} characters",
+            $"to be empty")
             , []); }
     
     public static InvokableValueAssertionBuilder<string> IsNullOrEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => string.IsNullOrEmpty(value),
-            (s, _, _) => $"'{s}' is not null or empty")
+            (s, _, _) => $"'{s}' is not null or empty",
+            $"to be null or empty")
             , []); }
     
     public static InvokableValueAssertionBuilder<string> IsNullOrWhitespace(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => string.IsNullOrWhiteSpace(value),
-            (s, _, _) => $"'{s}' is not null or whitespace")
+            (s, _, _) => $"'{s}' is not null or whitespace",
+            $"to be null or whitespace")
             , []); }
 }

@@ -25,7 +25,8 @@ public static class DateTimeOffsetIsExtensions
             {
                 return value > expected;
             },
-            (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}")
+            (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than {expected.ToLongStringWithMilliseconds()}",
+            $"to be after {expected}")
             , [doNotPopulateThisValue]); }
     
     public static InvokableValueAssertionBuilder<DateTimeOffset> IsAfterOrEqualTo(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -34,7 +35,8 @@ public static class DateTimeOffsetIsExtensions
             {
                 return value >= expected;
             },
-            (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}")
+            (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not greater than or equal to {expected.ToLongStringWithMilliseconds()}",
+            $"to be after or equal to {expected}")
             , [doNotPopulateThisValue]); }
     
     public static InvokableValueAssertionBuilder<DateTimeOffset> IsBefore(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -43,7 +45,8 @@ public static class DateTimeOffsetIsExtensions
             {
                 return value < expected;
             },
-            (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}")
+            (value, _, _) => $"{value.ToLongStringWithMilliseconds()} was not less than {expected.ToLongStringWithMilliseconds()}",
+            $"to be before {expected}")
             , [doNotPopulateThisValue]); }
 
     public static InvokableValueAssertionBuilder<DateTimeOffset> IsBeforeOrEqualTo(
@@ -53,7 +56,8 @@ public static class DateTimeOffsetIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTimeOffset, DateTimeOffset>(default,
                 (value, _, _) => { return value <= expected; },
                 (value, _, _) =>
-                    $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}")
+                    $"{value.ToLongStringWithMilliseconds()} was not less than or equal to {expected.ToLongStringWithMilliseconds()}",
+                $"to be before or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 }
