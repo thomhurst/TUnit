@@ -15,12 +15,12 @@ public class StringContainsExpectedValueAssertCondition(string expected, StringC
             return AssertionResult
                 .FailIf(
                     () => expectedValue is not null,
-                    "it was null");
+                    () => "it was null");
         }
 
         return AssertionResult
             .FailIf(
                 () => !actualValue.Contains(expectedValue!, stringComparison),
-                $"it was not found in {Format(actualValue).TruncateWithEllipsis(100)}");
+                () => $"it was not found in {Format(actualValue).TruncateWithEllipsis(100)}");
     }
 }

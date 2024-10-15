@@ -30,10 +30,10 @@ public class NumericEqualsExpectedValueAssertCondition<TActual>(TActual expected
             return AssertionResult
                 .FailIf(
                     () => actualValue is null,
-                    "it is null")
+                    () => "it is null")
                 .OrFailIf(
                     () => expectedValue is null,
-                    "it is not null");
+                    () => "it is not null");
         }
 
         if (_isToleranceSet && _tolerance is not null)
@@ -44,13 +44,13 @@ public class NumericEqualsExpectedValueAssertCondition<TActual>(TActual expected
             return AssertionResult
                 .FailIf(
                     () => actualValue < min || actualValue > max,
-                    $"the received value {actualValue} is outside the tolerances");
+                    () => $"the received value {actualValue} is outside the tolerances");
         }
 
         return AssertionResult
             .FailIf(
                 () => actualValue != expected,
-                $"the received value {actualValue} is different");
+                () => $"the received value {actualValue} is different");
     }
 
     public void SetTolerance(TActual tolerance)

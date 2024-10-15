@@ -16,12 +16,12 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
             return AssertionResult
                 .FailIf(
                     () => expectedValue is not null,
-                    "it was null");
+                    () => "it was null");
         }
 
         return AssertionResult
             .FailIf(
                 () => !string.Equals(actualValue, expectedValue, stringComparison),
-                $"found {Format(actualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue, expectedValue)}");
+                () => $"found {Format(actualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue, expectedValue)}");
     }
 }

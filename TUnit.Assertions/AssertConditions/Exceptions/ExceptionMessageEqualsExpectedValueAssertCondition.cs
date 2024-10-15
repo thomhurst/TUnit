@@ -17,12 +17,12 @@ where TException : Exception
             return AssertionResult
                 .FailIf(
                     () => expectedValue is not null,
-                    "the exception was null");
+                    () => "the exception was null");
         }
 
         return AssertionResult
             .FailIf(
                 () => !string.Equals(actualValue.Message, expectedValue, stringComparison),
-                $"found message {Format(actualValue.Message).TruncateWithEllipsis(100)} which {new StringDifference(actualValue.Message, expectedValue)}");
+                () => $"found message {Format(actualValue.Message).TruncateWithEllipsis(100)} which {new StringDifference(actualValue.Message, expectedValue)}");
     }
 }

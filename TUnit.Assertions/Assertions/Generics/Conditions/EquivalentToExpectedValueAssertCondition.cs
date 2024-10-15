@@ -24,10 +24,10 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
             return AssertionResult
                 .FailIf(
                     () => actualValue is null,
-                    "it is null")
+                    () => "it is null")
                 .OrFailIf(
                     () => expectedValue is null,
-                    "it is not null");
+                    () => "it is not null");
         }
 
         bool? isEqual = null;
@@ -56,7 +56,7 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
             return AssertionResult
                 .FailIf(
                     () => !isEqual.Value,
-                    $"found {actualValue}");
+                    () => $"found {actualValue}");
         }
 
         var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions

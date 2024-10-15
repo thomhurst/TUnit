@@ -24,7 +24,7 @@ public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expect
             return AssertionResult
                 .FailIf(
                     () => expectedValue is null,
-                    "it is null");
+                    () => "it is null");
 
         }
         
@@ -36,7 +36,7 @@ public class NumericNotEqualExpectedValueAssertCondition<TActual>(TActual expect
             return AssertionResult
                 .FailIf(
                     () => actualValue >= min && actualValue <= max,
-                    $"found {actualValue}");
+                    () => $"found {actualValue}");
         }
 
         return AssertionResult.Passed;
