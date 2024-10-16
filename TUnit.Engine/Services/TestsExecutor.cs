@@ -20,7 +20,7 @@ internal class TestsExecutor
     private readonly ICommandLineOptions _commandLineOptions;
 
     private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
-    private readonly object _notInParallelDictionaryLock = new();
+    private readonly Lock _notInParallelDictionaryLock = new();
     
     private readonly int _maximumParallelTests;
 

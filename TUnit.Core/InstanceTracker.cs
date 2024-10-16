@@ -5,10 +5,10 @@ namespace TUnit.Core;
 
 internal static class InstanceTracker
 {
-    private static readonly object PerClassTypeLock = new();
+    private static readonly Lock PerClassTypeLock = new();
     private static readonly ConcurrentDictionary<Type, int> PerClassType = new();
     
-    private static readonly object PerAssemblyLock = new();
+    private static readonly Lock PerAssemblyLock = new();
     private static readonly ConcurrentDictionary<Assembly, int> PerAssembly = new();
 
     private static int TotalInstances;

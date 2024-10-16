@@ -4,6 +4,7 @@ public partial class TestContext : Context, IDisposable
 {
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
+    public Lock Lock = new();
 
     internal TestContext(TestDetails testDetails, Dictionary<string, object?> objectBag)
     {
