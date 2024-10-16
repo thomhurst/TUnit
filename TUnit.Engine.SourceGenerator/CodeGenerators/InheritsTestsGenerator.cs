@@ -77,7 +77,6 @@ internal class InheritsTestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("using global::TUnit.Core;");
             sourceBuilder.WriteLine("using global::System.Reflection;");
             sourceBuilder.WriteLine("using global::System.Linq;");
-            sourceBuilder.WriteLine("using global::System.Linq.Enumerable;");
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();

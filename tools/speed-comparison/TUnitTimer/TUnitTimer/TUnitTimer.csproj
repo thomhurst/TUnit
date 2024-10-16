@@ -6,7 +6,7 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="TUnit" />
+    <PackageReference Include="TUnit" VersionOverride="*" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Aot)' == true">
