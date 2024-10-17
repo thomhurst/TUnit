@@ -4,6 +4,11 @@ public partial class TestContext : Context, IDisposable
 {
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
+#if NET9_0_OR_GREATER
+    public readonly Lock Lock = new();
+#else
+    public readonly object Lock = new();
+#endif
 
     internal TestContext(TestDetails testDetails, Dictionary<string, object?> objectBag)
     {
