@@ -36,7 +36,8 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             Shared,
-            Key);
+            Key,
+            _item);
     }
 
     public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
