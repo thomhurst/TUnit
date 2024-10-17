@@ -12,7 +12,7 @@ internal class ClassDataSources
     public static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> AssemblyInitializers = new();
     public static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, Task>> KeyedInitializers = new();
     
-    public static Task Initialize(object? item)
+    public static Task InitializeObject(object? item)
     {
         if (item is IAsyncInitializer asyncInitializer)
         {
@@ -22,7 +22,7 @@ internal class ClassDataSources
         return Task.CompletedTask;
     }
     
-    public static async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string key)
+    public static async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
     {
         switch (shared)
         {
@@ -44,7 +44,7 @@ internal class ClassDataSources
 
         if (isStatic)
         {
-            await Initialize(testContext);
+            await Initialize(testContext, shared, key, item);
         }
     }
 
@@ -63,12 +63,12 @@ internal class ClassDataSources
     {
         if (shared == SharedType.Globally)
         {
-            return GlobalInitializers.GetOrAdd(typeof(T), _ => Initialize(item));
+            return GlobalInitializers.GetOrAdd(typeof(T), _ => InitializeObject(item));
         }
 
         if (shared == SharedType.None)
         {
-            return Initialize(item);
+            return InitializeObject(item);
         }
 
         if (shared == SharedType.ForClass)
@@ -77,7 +77,7 @@ internal class ClassDataSources
                 _ => new GetOnlyDictionary<Type, Task>());
             
             return innerDictionary.GetOrAdd(testContext.TestDetails.ClassType,
-                _ => Initialize(item));
+                _ => InitializeObject(item));
         }
 
         if (shared == SharedType.ForAssembly)
@@ -86,7 +86,7 @@ internal class ClassDataSources
                 _ => new GetOnlyDictionary<Assembly, Task>());
             
             return innerDictionary.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
-                _ => Initialize(item));
+                _ => InitializeObject(item));
         }
 
         if (shared == SharedType.Keyed)
@@ -94,7 +94,7 @@ internal class ClassDataSources
             var innerDictionary = KeyedInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<string, Task>());
             
-            return innerDictionary.GetOrAdd(key, _ => Initialize(item));
+            return innerDictionary.GetOrAdd(key, _ => InitializeObject(item));
         }
 
         throw new ArgumentOutOfRangeException(nameof(shared));

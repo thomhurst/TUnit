@@ -63,19 +63,22 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             Shared,
-            Key);
+            Key,
+            _item1);
         
         await ClassDataSources.OnTestRegistered<T2>(
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             Shared,
-            Key);
+            Key,
+            _item2);
         
         await ClassDataSources.OnTestRegistered<T3>(
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             Shared,
-            Key);
+            Key,
+            _item3);
     }
 
     public async ValueTask OnTestStart(BeforeTestContext beforeTestContext)

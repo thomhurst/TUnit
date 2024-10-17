@@ -114,5 +114,5 @@ public class OrAssertionException : AggregateException
     }
 
     public override string Message =>
-        $"{string.Join($"{Environment.NewLine}or ", InnerExceptions.Select(x => x.Message))}";
+        $"{string.Join($"{Environment.NewLine}or ", InnerExceptions.Select(x => x.Message).Distinct())}";
 }
