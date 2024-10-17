@@ -6,8 +6,15 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class TypedConstantParser
 {
-    public static string? GetTypedConstantValue(SemanticModel semanticModel, ExpressionSyntax argumentExpression, ITypeSymbol? type = null)
+    public static string? GetTypedConstantValue(SemanticModel semanticModel,
+        ExpressionSyntax argumentExpression, ITypeSymbol? type = null)
     {
+        // const variables
+        if (argumentExpression is IdentifierNameSyntax or MemberAccessExpressionSyntax)
+        {
+            return semanticModel.GetSymbolInfo(argumentExpression).Symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        }
+        
         var newExpression = argumentExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
 
         if (type?.TypeKind == TypeKind.Enum && !newExpression.IsKind(SyntaxKind.SimpleMemberAccessExpression))
