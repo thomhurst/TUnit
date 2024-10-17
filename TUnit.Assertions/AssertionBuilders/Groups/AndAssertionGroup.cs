@@ -29,6 +29,8 @@ public class AndAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TAct
 
     private async Task<TActual?> GetResult()
     {
+        AssertionBuilder.Assertions.Clear();
+        
         foreach (var condition in _assertConditions)
         {
             AssertionBuilder.Assertions.Push(condition);

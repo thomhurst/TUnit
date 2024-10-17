@@ -65,7 +65,7 @@ public class AssertionGroupTests
             ).Throws<AssertionException>()
             .And
             .HasMessageStartingWith("""
-                                    Expected value be null or empty
+                                    Expected value to be null or empty
                                      and to be equal to "Foo"
 
                                     but 'Foo' is not null or empty

@@ -29,6 +29,8 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
 
     private async Task<TActual?> GetResult()
     {
+        AssertionBuilder.Assertions.Clear();
+        
         foreach (var condition in _assertConditions)
         {
             AssertionBuilder.Assertions.Push(condition);
@@ -39,17 +41,13 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
 
     private void Push(TAssertionBuilder assertionBuilder, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
     {
-        InvokableAssertionBuilder<TActual> invokableAssertionBuilder;
-        
         if (_assertConditions.TryPop(out var assertCondition))
         {
-            invokableAssertionBuilder = assert(assertionBuilder);
-            var assertion2 = invokableAssertionBuilder.Assertions.Pop();
-            _assertConditions.Push(new OrAssertCondition<TActual>(assertCondition, assertion2));
+            _assertConditions.Push(new OrAssertCondition<TActual>(assertCondition, assert(assertionBuilder).Assertions.Pop()));
         }
         else
         {
-            invokableAssertionBuilder = assert(assertionBuilder);
+            var invokableAssertionBuilder = assert(assertionBuilder);
             assertionBuilder.AppendConnector(ChainType.Or);
             _invokableAssertionBuilder = invokableAssertionBuilder;
             _assertConditions.Push(_invokableAssertionBuilder.Assertions.Pop());
