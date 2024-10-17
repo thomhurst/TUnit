@@ -58,14 +58,17 @@ internal static class DataDrivenArgumentsRetriever
             return [new Argument(type, null)];
         }
 
-        return objectArray.Zip(arguments, (o, a) => (o, a)).Select((element, index) =>
-        {
-            var type = GetTypeFromParameters(parameterOrPropertyTypeSymbols, index);
+        return objectArray.Zip(arguments, (typedConstant, a) => (typedConstant, a))
+            .Select((element, index) =>
+            {
+                var type = GetTypeFromParameters(parameterOrPropertyTypeSymbols, index);
 
-            return new Argument(type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
-                                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(element.o),
-            TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element.a.Expression, type));
-        });
+                return new Argument(type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
+                                    TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(
+                                        element.typedConstant),
+                    
+                    TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element.a.Expression, type));
+            });
     }
 
     private static ITypeSymbol? GetTypeFromParameters(ImmutableArray<ITypeSymbol> parameterSymbols, int index)
