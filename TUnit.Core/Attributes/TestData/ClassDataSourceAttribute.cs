@@ -1,7 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using TUnit.Core.Data;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -11,10 +8,6 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 {
     private T? _item;
     private DataGeneratorMetadata? _dataGeneratorMetadata;
-    private static Task? GlobalInitializer;
-    private static readonly GetOnlyDictionary<Type, Task> TestClassTypeInitializers = new();
-    private static readonly GetOnlyDictionary<Assembly, Task> AssemblyInitializers = new();
-    private static readonly GetOnlyDictionary<string, Task> KeyedInitializers = new();
     
     public SharedType Shared { get; set; } = SharedType.None;
     public string Key { get; set; } = string.Empty;
@@ -39,106 +32,46 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async ValueTask OnTestRegistered(TestContext testContext)
     {
-        switch (Shared)
-        {
-            case SharedType.None:
-                break;
-            case SharedType.ForClass:
-                break;
-            case SharedType.Globally:
-                TestDataContainer.IncrementGlobalUsage(typeof(T));
-                break;
-            case SharedType.Keyed:
-                TestDataContainer.IncrementKeyUsage(Key, typeof(T));
-                break;
-            case SharedType.ForAssembly:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        if (_dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true)
-        {
-            await Initialize(testContext);
-        }
+        await ClassDataSources.OnTestRegistered<T>(
+            testContext,
+            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+            Shared,
+            Key,
+            _item);
     }
 
-    public async ValueTask OnTestStart(BeforeTestContext beforeTestContext)
+    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
     {
-        if (_dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true)
-        {
-            // Done already before test start
-            return;
-        }
-        
-        await Initialize(beforeTestContext.TestContext);
+        return ClassDataSources.OnTestStart(
+            beforeTestContext,
+            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+            Shared,
+            Key,
+            _item);
     }
 
     private Task Initialize(TestContext testContext)
     {
-        return Shared switch
-        {
-            SharedType.Globally => GlobalInitializer ??= Initialize(_item),
-            SharedType.None => Initialize(_item),
-            SharedType.ForClass => TestClassTypeInitializers.GetOrAdd(testContext.TestDetails.ClassType,
-                _ => Initialize(_item)),
-            SharedType.ForAssembly => AssemblyInitializers.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
-                _ => Initialize(_item)),
-            SharedType.Keyed => KeyedInitializers.GetOrAdd(Key, _ => Initialize(_item)),
-            _ => throw new ArgumentOutOfRangeException(nameof(Shared))
-        };
+        return ClassDataSources.Initialize(
+            testContext,
+            Shared,
+            Key,
+            _item);
     }
 
     public async ValueTask OnTestEnd(TestContext testContext)
     {
-        if (Shared == SharedType.None)
-        {
-            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(_item);
-        }
-
-        if (Shared == SharedType.Keyed)
-        {
-            await TestDataContainer.ConsumeKey(Key, typeof(T));
-        }
-
-        if (Shared == SharedType.Globally)
-        {
-            await TestDataContainer.ConsumeGlobalCount(typeof(T));
-        }
+        await ClassDataSources.OnTestEnd<T>(Shared,
+            Key, _item);
     }
 
     public async ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext)
     {
-        if (Shared == SharedType.ForClass)
-        {
-            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(TestDataContainer.GetInstanceForType(typeof(T), () => default(T)!));
-        }
+        await ClassDataSources.IfLastTestInClass<T>(Shared);
     }
 
     public async ValueTask IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
     {
-        if (Shared == SharedType.ForAssembly)
-        {
-            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(TestDataContainer.GetInstanceForType(typeof(T), () => default(T)!));
-        }
+        await ClassDataSources.IfLastTestInAssembly<T>(Shared);
     }
-
-    private Task Initialize(T? item)
-    {
-        if (item is IAsyncInitializer asyncInitializer)
-        {
-            return asyncInitializer.InitializeAsync();
-        }
-        
-        return Task.CompletedTask;
-    }
-}
-
-public enum SharedType
-{
-    None,
-    ForClass,
-    ForAssembly,
-    Globally,
-    Keyed,
 }
