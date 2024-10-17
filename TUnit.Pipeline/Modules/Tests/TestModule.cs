@@ -256,10 +256,10 @@ public record TestResult(DotNetTestResult TrxReport)
     public int Skipped => TrxReport.UnitTestResults.Count(x => x.Outcome == TestOutcome.NotExecuted);
     public int Total => TrxReport.UnitTestResults.Count;
 
-    public bool Successful => Failed == 0;
+    public bool Successful => TrxReport.Successful;
 }
 
-public record RunOptions()
+public record RunOptions
 {
     public List<string> AdditionalArguments { get; init; } = [];
     public CommandLogging CommandLogging { get; set; } = CommandLogging.Default;
