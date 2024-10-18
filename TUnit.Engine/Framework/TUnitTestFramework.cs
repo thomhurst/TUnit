@@ -155,6 +155,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         foreach (var failedToInitializeTest in failedToInitializeTests)
         {
+            var testClass = failedToInitializeTest.TestClass!;
             var failedNode = new TestNode
             {
                 Uid = failedToInitializeTest.TestId,
@@ -165,7 +166,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                         new LinePositionSpan(new LinePosition(failedToInitializeTest.TestLineNumber, 0),
                             new LinePosition(failedToInitializeTest.TestLineNumber, 0))
                     ),
-                    
+                    new TestMethodIdentifierProperty(
+                        AssemblyFullName: testClass.Assembly.FullName!,
+                        Namespace: testClass.Namespace!,
+                        TypeName: testClass.Name,
+                        MethodName: failedToInitializeTest.TestName,
+                        ParameterTypeFullNames: failedToInitializeTest.ParameterTypeFullNames.Select(x => x.FullName!).ToArray(),
+                        ReturnTypeFullName: failedToInitializeTest.ReturnType.FullName!
+                        ),
                     // TRX Reports
                     new TrxExceptionProperty(failedToInitializeTest.Exception.Message, failedToInitializeTest.Exception.StackTrace)
                 )

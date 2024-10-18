@@ -32,7 +32,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async ValueTask OnTestRegistered(TestContext testContext)
     {
-        await ClassDataSources.OnTestRegistered<T>(
+        await ClassDataSources.OnTestRegistered(
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             Shared,
@@ -50,18 +50,9 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
             _item);
     }
 
-    private Task Initialize(TestContext testContext)
-    {
-        return ClassDataSources.Initialize(
-            testContext,
-            Shared,
-            Key,
-            _item);
-    }
-
     public async ValueTask OnTestEnd(TestContext testContext)
     {
-        await ClassDataSources.OnTestEnd<T>(Shared,
+        await ClassDataSources.OnTestEnd(Shared,
             Key, _item);
     }
 
