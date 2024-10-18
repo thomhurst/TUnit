@@ -10,10 +10,8 @@
 
     <ItemGroup>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-        <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Microsoft.Build.Utilities.Core" />
-        <PackageReference Include="Swashbuckle.AspNetCore" />
     </ItemGroup>
 
 </Project>

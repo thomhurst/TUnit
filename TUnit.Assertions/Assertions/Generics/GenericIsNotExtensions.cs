@@ -10,6 +10,13 @@ namespace TUnit.Assertions.Extensions;
 
 public static class GenericIsNotExtensions
 {
+    public static InvokableValueAssertionBuilder<TActual> IsNotEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+        where TActual : class
+    {
+        return valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TActual>(expected)
+            , [doNotPopulateThisValue]);
+    }
+    
     public static InvokableValueAssertionBuilder<TActual> IsNotNull<TActual>(this IValueSource<TActual> valueSource)
     {
         return valueSource!.RegisterAssertion(new NotNullExpectedValueAssertCondition<TActual>()
