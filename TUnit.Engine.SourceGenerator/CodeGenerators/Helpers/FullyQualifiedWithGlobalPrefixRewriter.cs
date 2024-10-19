@@ -16,12 +16,13 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
     {
         var symbol = semanticModel.GetSymbolInfo(node);
-            
-        if (symbol.Symbol is IFieldSymbol { IsConst: false })
+
+        if (symbol.Symbol is IFieldSymbol { Type.TypeKind: TypeKind.Enum }
+            or IFieldSymbol { IsConst: false })
         {
             return base.VisitIdentifierName(node);
         }
-            
+
         return node.WithIdentifier(SyntaxFactory.Identifier(symbol.Symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))).WithoutTrivia();
     }
 
