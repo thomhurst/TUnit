@@ -7,7 +7,7 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
     : ExpectedValueAssertCondition<string, string>(expected)
 {
     protected override string GetExpectation()
-        => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
+        => $"to be equal to {Formatter.Format(expected).TruncateWithEllipsis(100)}";
 
     protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
     {
@@ -22,6 +22,6 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
         return AssertionResult
             .FailIf(
                 () => !string.Equals(actualValue, expectedValue, stringComparison),
-                $"found {Format(ActualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue, expectedValue)}");
+                $"found {Formatter.Format(actualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue, expectedValue)}");
     }
 }

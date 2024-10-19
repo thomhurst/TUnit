@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.String;
 
@@ -6,7 +7,7 @@ public class StringNotContainsExpectedValueAssertCondition(string expected, Stri
     : ExpectedValueAssertCondition<string, string>(expected)
 {
     protected override string GetExpectation()
-        => $"to not contain {Format(expected).TruncateWithEllipsis(100)}";
+        => $"to not contain {Formatter.Format(expected).TruncateWithEllipsis(100)}";
 
     protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
     {
@@ -21,6 +22,6 @@ public class StringNotContainsExpectedValueAssertCondition(string expected, Stri
         return AssertionResult
             .FailIf(
                 () => actualValue.Contains(expectedValue!, stringComparison),
-                $"it was found in {Format(actualValue).TruncateWithEllipsis(100)}");
+                $"it was found in {Formatter.Format(actualValue).TruncateWithEllipsis(100)}");
     }
 }
