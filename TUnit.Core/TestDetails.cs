@@ -65,7 +65,7 @@ public abstract record TestDetails(Type ClassType)
     public required int Order { get; init; }
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
-    public required string DisplayName { get; init; }
+    public string DisplayName { get; internal set; } = string.Empty;
     
     public required IParallelLimit? ParallelLimit { get; init; }
 

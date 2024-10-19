@@ -11,7 +11,7 @@ internal class CustomDisplayNameTests : TestsBase<TestsGenerator>
             "CustomDisplayNameTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(4);
+            await Assert.That(generatedFiles.Length).IsEqualTo(5);
             
             await AssertFileContains(generatedFiles[0], "DisplayName = $\"A super important test!\",");
             await AssertFileContains(generatedFiles[1], "DisplayName = $\"Another super important test!\",");
