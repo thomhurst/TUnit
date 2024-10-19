@@ -1,5 +1,8 @@
 ﻿using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
 using TUnit.Engine.SourceGenerator.Models.Arguments;
@@ -50,6 +53,8 @@ internal static class MethodDataSourceRetriever
         {
             innerType = dataSourceMethod.ReturnType!;
         }
+
+        var argumentsExpression = GetArgumentsExpression(context, methodDataAttribute);
         
         if (parameterOrPropertyTypes.Length > 1 && innerType!.IsTupleType && innerType is INamedTypeSymbol typeSymbol)
         {
@@ -69,7 +74,8 @@ internal static class MethodDataSourceRetriever
                     TypeName: typeName,
                     MethodReturnType: dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats
                         .FullyQualifiedGenericWithGlobalPrefix),
-                    TupleTypes: result.ToArray()
+                    TupleTypes: result.ToArray(),
+                    ArgumentsExpression: argumentsExpression
                 )
                 {
                     Attribute = methodDataAttribute,
@@ -89,13 +95,31 @@ internal static class MethodDataSourceRetriever
             TypeName: typeName,
             MethodReturnType: dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats
                 .FullyQualifiedGenericWithGlobalPrefix),
-            TupleTypes: []
+            TupleTypes: [],
+            ArgumentsExpression: argumentsExpression
         )
         {
             Attribute = methodDataAttribute,
             AttributeIndex = index,
             DisposeAfterTest = disposeAfterTest,
         };
+    }
+
+    private static string GetArgumentsExpression(GeneratorAttributeSyntaxContext context, AttributeData methodDataAttribute)
+    {
+        var attributeSyntax = (AttributeSyntax)methodDataAttribute.ApplicationSyntaxReference!.GetSyntax();
+
+        var arguments = attributeSyntax.ArgumentList!.Arguments;
+
+        var argumentsSyntax = arguments.FirstOrDefault(x => x.NameEquals?.Name.Identifier.ToString() == "Arguments")
+            ?.Expression;
+
+        if (argumentsSyntax is null)
+        {
+            return string.Empty;
+        }
+
+        return argumentsSyntax.Accept(new CollectionToArgumentsListRewriter(context.SemanticModel))?.ToFullString() ?? string.Empty;
     }
 
     private static IEnumerable<string> CheckTupleTypes(ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, ImmutableArray<ITypeSymbol> tupleTypes)
