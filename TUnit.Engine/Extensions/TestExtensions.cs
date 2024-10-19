@@ -6,8 +6,10 @@ namespace TUnit.Engine.Extensions;
 
 internal static class TestExtensions
 {
-    public static TestNode ToTestNode(this TestDetails testDetails)
+    public static TestNode ToTestNode(this TestContext testContext)
     {
+        var testDetails = testContext.TestDetails;
+        
         var testNode = new TestNode
         {
             Uid = new TestNodeUid(testDetails.TestId),
@@ -22,7 +24,7 @@ internal static class TestExtensions
                 new TestMethodIdentifierProperty(
                     Namespace: testDetails.ClassType.Namespace!,
                     AssemblyFullName: testDetails.ClassType.Assembly.FullName!,
-                    TypeName: GetClassTypeName(testDetails),
+                    TypeName: GetClassTypeName(testContext),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
@@ -41,8 +43,10 @@ internal static class TestExtensions
         return testNode;
     }
 
-    internal static string GetClassTypeName(this TestDetails testDetails)
+    internal static string GetClassTypeName(this TestContext testContext)
     {
+        var testDetails = testContext.TestDetails;
+        
         var classTypeName = testDetails.ClassType.FullName?
                                 .Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
                                 .LastOrDefault()
@@ -54,11 +58,16 @@ internal static class TestExtensions
         }
         
         return
-            $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(GetConstantValue))})";
+            $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => GetConstantValue(testContext, x)))})";
     }
 
-    private static string GetConstantValue(object? o)
+    private static string GetConstantValue(TestContext testContext, object? o)
     {
+        if (testContext.ArgumentDisplayFormatters.FirstOrDefault(x => x.CanHandle(o)) is { } validFormatter)
+        {
+            return validFormatter.FormatValue(o);
+        }
+
         if (o is null)
         {
             return "null";

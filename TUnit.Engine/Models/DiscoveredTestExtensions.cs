@@ -6,5 +6,5 @@ namespace TUnit.Engine.Models;
 
 internal static class DiscoveredTestExtensions
 {
-    public static TestNode ToTestNode(this DiscoveredTest discoveredTest) => discoveredTest.TestDetails.ToTestNode();
+    public static TestNode ToTestNode(this DiscoveredTest discoveredTest) => discoveredTest.TestContext.ToTestNode();
 }

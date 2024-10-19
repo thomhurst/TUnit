@@ -24,6 +24,8 @@ public partial class TestContext : Context, IDisposable
 
     public int CurrentRetryAttempt { get; internal set; }
 
+    public List<ArgumentDisplayFormatter> ArgumentDisplayFormatters { get; } = [];
+    
     public List<Timing> Timings { get; } = [];
     public Dictionary<string, object?> ObjectBag { get; }
     

@@ -52,7 +52,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
     {
         var assembly = testDetails.ClassType.Assembly.GetName();
 
-        var classTypeName = testDetails.GetClassTypeName().Split('(')[0];
+        var classTypeName = testDetails.ClassType.Name;
         
         return
             $"/{assembly.Name ?? assembly.FullName}/{testDetails.ClassType.Namespace}/{classTypeName}/{testDetails.MethodInfo.Name}";
