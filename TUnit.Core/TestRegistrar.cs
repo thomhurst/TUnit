@@ -67,7 +67,7 @@ public static class TestRegistrar
 
 		var testContext = new TestContext(testDetails, testMetadata.ObjectBag);
 		
-		RunOnTestDiscoveryAttributeHooks(attributes, testContext);
+		RunOnTestDiscoveryAttributeHooks([..dataAttributes, ..attributes], testContext);
 		
 		var unInvokedTest = new DiscoveredTest<TClassType>(testMetadata.ResettableClassFactory)
 		{

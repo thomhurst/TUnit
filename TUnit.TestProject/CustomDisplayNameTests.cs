@@ -1,19 +1,23 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Core.Interfaces;
+
+namespace TUnit.TestProject;
 
 public class CustomDisplayNameTests
 {
     [Test]
     [DisplayName("A super important test!")]
-    public void Test()
+    public async Task Test()
     {
-        // Dummy method
+        await Assert.That(TestContext.Current!.TestDetails.DisplayName).IsEqualTo("A super important test!");
     }
     
     [Test]
     [DisplayName("Another super important test!")]
     public async Task Test2()
     {
-        await Task.CompletedTask;
+        await Assert.That(TestContext.Current!.TestDetails.DisplayName).IsEqualTo("Another super important test!");
     }
     
     [Test]
@@ -22,6 +26,27 @@ public class CustomDisplayNameTests
     [DisplayName("Test with: $value1 $value2 $value3!")]
     public async Task Test3(string value1, int value2, bool value3)
     {
-        await Task.CompletedTask;
+        await Assert.That(TestContext.Current!.TestDetails.DisplayName).IsEqualTo("Test with: foo 1 True!")
+            .Or.IsEqualTo("Test with: bar 2 False!");
+    }
+    
+    [Test]
+    [MyGenerator]
+    public async Task PasswordTest(string password)
+    {
+        await Assert.That(TestContext.Current!.TestDetails.DisplayName).IsEqualTo("PasswordTest(REDACTED)");
+    }
+    
+    public class MyGenerator : DataSourceGeneratorAttribute<string>, ITestDiscoveryEvent
+    {
+        public override IEnumerable<string> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        {
+            yield return "Super Secret Password";
+        }
+
+        public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+        {
+            discoveredTestContext.SetDisplayName($"{discoveredTestContext.TestDetails.TestName}(REDACTED)");
+        }
     }
 }
