@@ -11,12 +11,15 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
             "MethodDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(2);
+            await Assert.That(generatedFiles.Length).IsEqualTo(3);
             
             await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();");
             await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Method(methodArg)");
-            
+
             await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();");
             await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Method2(methodArg)");
+
+            await AssertFileContains(generatedFiles[2], "global::System.Action methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction();");
+            await AssertFileContains(generatedFiles[2], "classInstance.DataSource_Method_WithAction(methodArg)");
         });
 }
