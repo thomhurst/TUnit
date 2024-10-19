@@ -20,7 +20,7 @@ public sealed class DisplayNameAttribute(string displayName) : TUnitAttribute, I
         
         foreach (var parameter in parameters)
         {
-            mutableDisplayName = displayName.Replace($"${parameter.ParameterInfo.Name}",
+            mutableDisplayName = mutableDisplayName.Replace($"${parameter.ParameterInfo.Name}",
                 ArgumentFormatter.GetConstantValue(discoveredTestContext.TestContext, parameter.TestArgument));
         }
 
