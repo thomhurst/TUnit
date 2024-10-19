@@ -1,6 +1,7 @@
 ﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Extensions;
 
@@ -13,7 +14,7 @@ internal static class TestExtensions
         var testNode = new TestNode
         {
             Uid = new TestNodeUid(testDetails.TestId),
-            DisplayName = testDetails.DisplayName,
+            DisplayName = GetTestDisplayName(testContext),
             Properties = new PropertyBag(
             [
                 new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan
@@ -58,27 +59,25 @@ internal static class TestExtensions
         }
         
         return
-            $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => GetConstantValue(testContext, x)))})";
+            $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
     }
-
-    private static string GetConstantValue(TestContext testContext, object? o)
+    
+    internal static string GetTestDisplayName(this TestContext testContext)
     {
-        if (testContext.ArgumentDisplayFormatters.FirstOrDefault(x => x.CanHandle(o)) is { } validFormatter)
-        {
-            return validFormatter.FormatValue(o);
-        }
+        var testDetails = testContext.TestDetails;
 
-        if (o is null)
+        if (!string.IsNullOrWhiteSpace(testDetails.DisplayName))
         {
-            return "null";
+            return testDetails.DisplayName;
         }
         
-        if (o.GetType().IsEnum || o.GetType().IsPrimitive || o is string)
+        if (testDetails.TestMethodArguments.Length == 0)
         {
-            return o.ToString()!;
+            return testDetails.TestName;
         }
-
-        return o.GetType().Name;
+        
+        return
+            $"{testDetails.TestName}({string.Join(", ", testDetails.TestMethodArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
     }
 
     public static TestNode WithProperty(this TestNode testNode, IProperty property)

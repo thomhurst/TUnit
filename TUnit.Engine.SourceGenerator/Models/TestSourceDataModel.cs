@@ -37,7 +37,6 @@ internal record TestSourceDataModel
             hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
             hashCode = (hashCode * 397) ^ LineNumber;
             hashCode = (hashCode * 397) ^ HasTimeoutAttribute.GetHashCode();
-            hashCode = (hashCode * 397) ^ (CustomDisplayName != null ? CustomDisplayName.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ RepeatLimit;
             return hashCode;
         }
@@ -62,7 +61,6 @@ internal record TestSourceDataModel
     
     public required bool HasTimeoutAttribute { get; init; }
     
-    public required string? CustomDisplayName { get; init; }
     public required int RepeatLimit { get; init; }
     public required string? TestExecutor { get; init; }
     public required string? ParallelLimit { get; init; }

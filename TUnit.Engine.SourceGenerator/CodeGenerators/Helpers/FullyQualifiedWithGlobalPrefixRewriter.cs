@@ -6,7 +6,7 @@ namespace TUnit.Engine.SourceGenerator.CodeGenerators.Helpers;
 
 public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanticModel) : CSharpSyntaxRewriter
 {
-    public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+    public override SyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var symbol = semanticModel.GetSymbolInfo(node);
 
@@ -15,7 +15,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             .WithoutTrivia();
     }
 
-    public override SyntaxNode? VisitPredefinedType(PredefinedTypeSyntax node)
+    public override SyntaxNode VisitPredefinedType(PredefinedTypeSyntax node)
     {
         var symbol = semanticModel.GetSymbolInfo(node);
         
@@ -24,31 +24,13 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             .WithoutTrivia();
     }
     
-    public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
+    public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
     {
         var symbol = semanticModel.GetSymbolInfo(node);
 
         return SyntaxFactory
             .IdentifierName(symbol.Symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
             .WithoutTrivia();
-    }
-
-    private static bool ShouldWriteSimpleName(SymbolInfo symbol)
-    {
-        if (symbol.Symbol is IFieldSymbol fieldSymbol)
-        {
-            if (fieldSymbol.Type.TypeKind == TypeKind.Enum)
-            {
-                return true;
-            }
-
-            if (fieldSymbol.IsConst)
-            {
-                return false;
-            }
-        }
-        
-        return symbol.Symbol!.Kind != SymbolKind.NamedType;
     }
 
     public override SyntaxNode VisitTypeOfExpression(TypeOfExpressionSyntax node)

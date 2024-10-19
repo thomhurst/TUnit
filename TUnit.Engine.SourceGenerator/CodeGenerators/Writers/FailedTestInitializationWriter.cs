@@ -17,7 +17,6 @@ internal static class FailedTestInitializationWriter
         sourceBuilder.WriteLine($"ReturnType = typeof({testSourceDataModel.FullyQualifiedTypeName}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})").ToCommaSeparatedString()}]).ReturnType,");
         sourceBuilder.WriteLine($"ParameterTypeFullNames = [{string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"))}],");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
-        sourceBuilder.WriteLine($"DisplayName = \"{DisplayNameWriter.GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine("Exception = exception,");

@@ -12,6 +12,7 @@ public abstract class ArgumentDisplayFormatterAttribute : TUnitAttribute, ITestD
     }
 }
 
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
 public class ArgumentDisplayFormatterAttribute<T> : ArgumentDisplayFormatterAttribute
     where T : ArgumentDisplayFormatter, new()
 {
