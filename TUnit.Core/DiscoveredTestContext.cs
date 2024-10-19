@@ -16,4 +16,9 @@ public class DiscoveredTestContext
     {
         TestContext.TestDetails.InternalCustomProperties.Add(key, value);
     }
+    
+    public void SetDisplayName(string displayName)
+    {
+        TestContext.TestDetails.DisplayName = displayName;
+    }
 }
