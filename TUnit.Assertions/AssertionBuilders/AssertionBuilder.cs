@@ -88,7 +88,7 @@ public abstract class AssertionBuilder<TActual>
         return builder;
     }
     
-    internal virtual async Task<AssertionData<TActual>> ProcessAssertionsAsync()
+    internal async Task<AssertionData<TActual>> ProcessAssertionsAsync()
     {
         if (OtherTypeAssertionBuilder is not null)
         {

@@ -26,7 +26,8 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value > expected; },
                 (value, _, _) =>
-                    $"{Formatter.Format(value)} was not greater than {Formatter.Format(expected)}")
+                    $"{Formatter.Format(value)} was not greater than {Formatter.Format(expected)}",
+                $"to be after {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -36,7 +37,8 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value >= expected; },
                 (value, _, _) =>
-                    $"{Formatter.Format(value)} was not greater than or equal to {Formatter.Format(expected)}")
+                    $"{Formatter.Format(value)} was not greater than or equal to {Formatter.Format(expected)}",
+                $"to be after or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -46,7 +48,8 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value < expected; },
                 (value, _, _) =>
-                    $"{Formatter.Format(value)} was not less than {Formatter.Format(expected)}")
+                    $"{Formatter.Format(value)} was not less than {Formatter.Format(expected)}",
+                $"be before {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -56,7 +59,8 @@ public static class TimeOnlyIsExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
                 (value, _, _) => { return value <= expected; },
                 (value, _, _) =>
-                    $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}")
+                    $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}",
+                $"be before or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 }

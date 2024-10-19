@@ -24,7 +24,8 @@ public class EnumerableCount<TActual>(IValueSource<TActual> valueSource)
                 return GetCount(enumerable) == expected;
             },
             (enumerable, _, _) =>
-                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {expected}")
+                $"has a count of {GetCount(enumerable)}",
+            $"to be equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -40,7 +41,8 @@ public class EnumerableCount<TActual>(IValueSource<TActual> valueSource)
                     return GetCount(enumerable) == 0;
                 },
                 (enumerable, _, _) =>
-                    $"{enumerable} has a count of {GetCount(enumerable)} but expected to be equal to {0}")
+                    $"{enumerable} has a count of {GetCount(enumerable)}",
+                $"to be empty")
         , []);
     
     public InvokableValueAssertionBuilder<TActual> GreaterThan(int expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
@@ -57,7 +59,8 @@ public class EnumerableCount<TActual>(IValueSource<TActual> valueSource)
                 return GetCount(enumerable) > expected;
             },
             (enumerable, _, _) =>
-                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than {expected}")
+                $"has a count of {GetCount(enumerable)}",
+            $"to be greater than {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -74,7 +77,8 @@ public class EnumerableCount<TActual>(IValueSource<TActual> valueSource)
                 return GetCount(enumerable) >= expected;
             },
             (enumerable, _, _) =>
-                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be greater than or equal to {expected}")
+                $"has a count of {GetCount(enumerable)}",
+            $"to be greater than or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -91,7 +95,8 @@ public class EnumerableCount<TActual>(IValueSource<TActual> valueSource)
                 return GetCount(enumerable) < expected;
             },
             (enumerable, _, _) =>
-                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than {expected}")
+                $"has a count of {GetCount(enumerable)}",
+            $"to be less than {expected}")
             , [doNotPopulateThisValue]);
     }
 
@@ -108,7 +113,8 @@ public class EnumerableCount<TActual>(IValueSource<TActual> valueSource)
                 return GetCount(enumerable) <= expected;
             },
             (enumerable, _, _) =>
-                $"{enumerable} has a count of {GetCount(enumerable)} but expected to be less than or equal to {expected}")
+                $"has a count of {GetCount(enumerable)}",
+            $"to be less than or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
     

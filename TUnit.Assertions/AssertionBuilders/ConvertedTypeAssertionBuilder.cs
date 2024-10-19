@@ -49,4 +49,34 @@ public abstract class ConvertedTypeAssertionBuilder<TFromType, TToType> : Assert
     {
         return new ValueSource<TToType>(this).IsAssignableFrom<TExpected>();
     }
+    
+    public InvokableValueAssertionBuilder<TToType> IsNotTypeOf(Type type)
+    {
+        return new ValueSource<TToType>(this).IsNotTypeOf(type);
+    }
+
+    public InvokableValueAssertionBuilder<TToType> IsNotTypeOf<TExpected>()
+    {
+        return new ValueSource<TToType>(this).IsNotTypeOf<TExpected>();
+    }
+
+    public InvokableValueAssertionBuilder<TToType> IsNotAssignableTo(Type type)
+    {
+        return new ValueSource<TToType>(this).IsNotAssignableTo(type);
+    }
+
+    public InvokableValueAssertionBuilder<TToType> IsNotAssignableTo<TExpected>()
+    {
+        return new ValueSource<TToType>(this).IsNotAssignableTo<TExpected>();
+    }
+
+    public InvokableValueAssertionBuilder<TToType> IsNotAssignableFrom(Type type)
+    {
+        return new ValueSource<TToType>(this).IsNotAssignableFrom(type);
+    }
+
+    public InvokableValueAssertionBuilder<TToType> IsNotAssignableFrom<TExpected>()
+    {
+        return new ValueSource<TToType>(this).IsNotAssignableFrom<TExpected>();
+    }
 }

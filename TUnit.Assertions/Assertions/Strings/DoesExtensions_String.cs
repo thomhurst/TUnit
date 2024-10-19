@@ -43,7 +43,8 @@ public static partial class DoesExtensions
                 
                 return actual.StartsWith(expected, stringComparison);
             },
-            (actual, _, _) => $"\"{actual}\" does not start with \"{expected}\"")
+            (actual, _, _) => $"\"{actual}\" does not start with \"{expected}\"",
+            $"to start with {expected}")
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
@@ -61,7 +62,8 @@ public static partial class DoesExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 return actual.EndsWith(expected, stringComparison);
             },
-            (actual, _, _) => $"\"{actual}\" does not end with \"{expected}\"")
+            (actual, _, _) => $"\"{actual}\" does not end with \"{expected}\"",
+            $"end with {expected}")
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
     
@@ -78,7 +80,8 @@ public static partial class DoesExtensions
                 ArgumentNullException.ThrowIfNull(actual);
                 return regex.IsMatch(actual);
             },
-            (actual, _, _) => $"The regex \"{regex}\" does not match with \"{actual}\"")
+            (actual, _, _) => $"The regex \"{regex}\" does not match with \"{actual}\"",
+            $"match {expression}")
             , [expression]);
     }
 }

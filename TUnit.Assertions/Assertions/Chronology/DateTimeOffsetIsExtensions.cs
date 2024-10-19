@@ -26,7 +26,8 @@ public static class DateTimeOffsetIsExtensions
             {
                 return value > expected;
             },
-            (value, _, _) => $"{Formatter.Format(value)} was not greater than {Formatter.Format(expected)}")
+            (value, _, _) => $"{Formatter.Format(value)} was not greater than {Formatter.Format(expected)}",
+            $"to be after {expected}")
             , [doNotPopulateThisValue]); }
     
     public static InvokableValueAssertionBuilder<DateTimeOffset> IsAfterOrEqualTo(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -35,7 +36,8 @@ public static class DateTimeOffsetIsExtensions
             {
                 return value >= expected;
             },
-            (value, _, _) => $"{Formatter.Format(value)} was not greater than or equal to {Formatter.Format(expected)}")
+            (value, _, _) => $"{Formatter.Format(value)} was not greater than or equal to {Formatter.Format(expected)}",
+            $"to be after or equal to {expected}")
             , [doNotPopulateThisValue]); }
     
     public static InvokableValueAssertionBuilder<DateTimeOffset> IsBefore(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
@@ -44,7 +46,8 @@ public static class DateTimeOffsetIsExtensions
             {
                 return value < expected;
             },
-            (value, _, _) => $"{Formatter.Format(value)} was not less than {Formatter.Format(expected)}")
+            (value, _, _) => $"{Formatter.Format(value)} was not less than {Formatter.Format(expected)}",
+            $"to be before {expected}")
             , [doNotPopulateThisValue]); }
 
     public static InvokableValueAssertionBuilder<DateTimeOffset> IsBeforeOrEqualTo(
@@ -53,8 +56,8 @@ public static class DateTimeOffsetIsExtensions
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTimeOffset, DateTimeOffset>(default,
                 (value, _, _) => { return value <= expected; },
-                (value, _, _) =>
-                    $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}")
+                (value, _, _) => $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}",
+                $"to be before or equal to {expected}")
             , [doNotPopulateThisValue]);
     }
 }

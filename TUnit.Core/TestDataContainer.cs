@@ -17,7 +17,11 @@ public static class TestDataContainer
 
     internal static readonly Dictionary<Type, Lazy<Task>> InjectedSharedGloballyInitializations = new();
     
+#if NET9_0_OR_GREATER
+    private static readonly Lock Lock = new();
+#else
     private static readonly object Lock = new();
+#endif
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
     private static readonly ConcurrentDictionary<Type, int> CountsPerGlobalType = new();
 

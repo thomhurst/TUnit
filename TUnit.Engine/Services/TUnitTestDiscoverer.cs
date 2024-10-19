@@ -28,7 +28,7 @@ internal class TUnitTestDiscoverer(
     {
         var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
 
-        _logger.LogTrace($"{failedToInitializeTests.Length} tests failed to initialize.");
+        _logger.LogWarning($"{failedToInitializeTests.Length} tests failed to initialize.");
         
         return failedToInitializeTests;
     }
