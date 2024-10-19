@@ -17,4 +17,13 @@ public class MethodDataSourceDrivenTests
     }
 
     public static int SomeMethod() => 1;
+
+    [Test]
+    [MethodDataSource(nameof(SomeAction))]
+    public void DataSource_Method_WithAction(Action action)
+    {
+        // Dummy method
+    }
+
+    public static Action SomeAction() => () => { };
 }
