@@ -21,4 +21,9 @@ public class DiscoveredTestContext
     {
         TestContext.TestDetails.DisplayName = displayName;
     }
+    
+    public void AddArgumentDisplayFormatter(ArgumentDisplayFormatter formatter)
+    {
+        TestContext.ArgumentDisplayFormatters.Add(formatter);
+    }
 }

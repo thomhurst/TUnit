@@ -1,6 +1,7 @@
 using AutoFixture;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
+using TestContext = TUnit.Core.TestContext;
 
 namespace TUnit.UnitTests;
 
@@ -23,7 +24,9 @@ public class TestExtensionsTests
             .With(x => x.TestClassArguments, [])
             .Create();
 
-        var name = TestExtensions.GetClassTypeName(testDetails);
+        var context = new TestContext(testDetails, []);
+
+        var name = context.GetClassTypeName();
         
         Assert.That(name, Is.EqualTo("TestExtensionsTests"));
     }
@@ -43,7 +46,9 @@ public class TestExtensionsTests
             .With(x => x.TestClassArguments, [])
             .Create();
 
-        var name = TestExtensions.GetClassTypeName(testDetails);
+        var context = new TestContext(testDetails, []);
+
+        var name = context.GetClassTypeName();
         
         Assert.That(name, Is.EqualTo("TestExtensionsTests+InnerClass"));
     }
