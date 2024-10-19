@@ -11,7 +11,8 @@ internal static class TypedConstantParser
     {
         var newExpression = argumentExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
 
-        if (type?.TypeKind == TypeKind.Enum && !newExpression.IsKind(SyntaxKind.SimpleMemberAccessExpression))
+        if (type?.TypeKind == TypeKind.Enum && 
+            (newExpression.IsKind(SyntaxKind.UnaryMinusExpression) || newExpression.IsKind(SyntaxKind.UnaryPlusExpression)))
         {
             return $"({type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({newExpression})";
         }
