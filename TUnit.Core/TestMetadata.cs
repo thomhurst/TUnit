@@ -7,7 +7,6 @@ namespace TUnit.Core;
 public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>
 {
     public required string TestId { get; init; }
-    public required string DisplayName { get; init; }
     public required MethodInfo MethodInfo { get; init; }
     
     public required int RepeatLimit { get; init; }

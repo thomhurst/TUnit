@@ -18,7 +18,6 @@ internal class TupleDataSourceDrivenTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[0], "global::System.String methodArg1 = methodArgTuples.Item2;");
             await AssertFileContains(generatedFiles[0], "global::System.Boolean methodArg2 = methodArgTuples.Item3;");
             await AssertFileContains(generatedFiles[0], "TestMethodArguments = [methodArg, methodArg1, methodArg2],");
-            await AssertFileContains(generatedFiles[0], "DisplayName = $\"DataSource_TupleMethod({methodArg}, {methodArg1}, {methodArg2})\",");
             await AssertFileContains(generatedFiles[0], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2))");
         });
 }

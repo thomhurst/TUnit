@@ -52,7 +52,6 @@ public static class TestRegistrar
 			RetryLimit = AttributeHelper.GetAttribute<RetryAttribute>(attributes)?.Times ?? 0,
 			MethodInfo = methodInfo,
 			TestName = methodInfo.Name,
-			DisplayName = testMetadata.DisplayName,
 			ReturnType = methodInfo.ReturnType,
 			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = testMetadata.TestFilePath,

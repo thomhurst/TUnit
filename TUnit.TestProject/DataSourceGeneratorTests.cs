@@ -33,7 +33,7 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     {
         public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata metadata)
         {
-            return [default];
+            return [default!];
         }
     }
     

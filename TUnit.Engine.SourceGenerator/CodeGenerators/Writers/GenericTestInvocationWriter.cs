@@ -78,7 +78,6 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestExecutor = {GetTestExecutor(testSourceDataModel.TestExecutor)},");
         sourceBuilder.WriteLine($"ClassConstructor = { GetClassConstructor(testSourceDataModel) },");
         sourceBuilder.WriteLine($"ParallelLimit = {GetParallelLimit(testSourceDataModel.ParallelLimit)},");
-        sourceBuilder.WriteLine($"DisplayName = $\"{DisplayNameWriter.GetDisplayName(testSourceDataModel)}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine($"AttributeTypes = [ {testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})").ToCommaSeparatedString()} ],");

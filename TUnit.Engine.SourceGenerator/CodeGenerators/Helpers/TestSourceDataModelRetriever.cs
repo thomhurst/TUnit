@@ -143,7 +143,6 @@ internal static class TestSourceDataModelRetriever
             MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
             MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            CustomDisplayName = allAttributes.FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == WellKnownFullyQualifiedClassNames.DisplayNameAttribute.WithGlobalPrefix)?.ConstructorArguments.First().Value as string,
             HasTimeoutAttribute = allAttributes.Any(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix) == true),
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.ParallelLimiterAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),

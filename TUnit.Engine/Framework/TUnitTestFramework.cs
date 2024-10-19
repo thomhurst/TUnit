@@ -159,7 +159,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             var failedNode = new TestNode
             {
                 Uid = failedToInitializeTest.TestId,
-                DisplayName = failedToInitializeTest.DisplayName,
+                DisplayName = failedToInitializeTest.TestName,
                 Properties = new PropertyBag(
                     isDiscovered ? DiscoveredTestNodeStateProperty.CachedInstance : new ErrorTestNodeStateProperty(failedToInitializeTest.Exception, "Test failed to initialize"),
                     new TestFileLocationProperty(failedToInitializeTest.TestFilePath,
