@@ -30,7 +30,7 @@ public class AssertMultipleTests
         NUnitAssert.That(exception1.Message, Is.EqualTo("""
                                                         Expected 1 to be equal to 2
                                                         
-                                                        but the received value 1 is different
+                                                        but found 1
                                                         
                                                         at Assert.That(1).IsEqualTo(2)
                                                         """));
@@ -38,7 +38,7 @@ public class AssertMultipleTests
         NUnitAssert.That(exception2.Message, Is.EqualTo("""
                                                         Expected 2 to be equal to 3
                                                         
-                                                        but the received value 2 is different
+                                                        but found 2
                                                         
                                                         at Assert.That(2).IsEqualTo(3)
                                                         """));
@@ -46,7 +46,7 @@ public class AssertMultipleTests
         NUnitAssert.That(exception3.Message, Is.EqualTo("""
                                                         Expected 3 to be equal to 4
                                                         
-                                                        but the received value 3 is different
+                                                        but found 3
                                                         
                                                         at Assert.That(3).IsEqualTo(4)
                                                         """));
@@ -54,7 +54,7 @@ public class AssertMultipleTests
         NUnitAssert.That(exception4.Message, Is.EqualTo("""
                                                         Expected 4 to be equal to 5
                                                         
-                                                        but the received value 4 is different
+                                                        but found 4
                                                         
                                                         at Assert.That(4).IsEqualTo(5)
                                                         """));
@@ -62,7 +62,7 @@ public class AssertMultipleTests
         NUnitAssert.That(exception5.Message, Is.EqualTo("""
                                                         Expected 5 to be equal to 6
                                                         
-                                                        but the received value 5 is different
+                                                        but found 5
                                                         
                                                         at Assert.That(5).IsEqualTo(6)
                                                         """));
@@ -93,7 +93,7 @@ public class AssertMultipleTests
                                                         Expected 1 to be equal to 2
                                                          or to be equal to 3
                                                         
-                                                        but the received value 1 is different
+                                                        but found 1
                                                         
                                                         at Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
                                                         """));
@@ -102,7 +102,7 @@ public class AssertMultipleTests
                                                         Expected 2 to be equal to 3
                                                          and to be equal to 4
                                                         
-                                                        but the received value 2 is different
+                                                        but found 2
                                                         
                                                         at Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
                                                         """));
@@ -111,7 +111,7 @@ public class AssertMultipleTests
                                                         Expected 3 to be equal to 4
                                                          or to be equal to 5
                                                         
-                                                        but the received value 3 is different
+                                                        but found 3
                                                         
                                                         at Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
                                                         """));
@@ -120,7 +120,7 @@ public class AssertMultipleTests
                                                         Expected 4 to be equal to 5
                                                          and to be equal to 6
                                                         
-                                                        but the received value 4 is different
+                                                        but found 4
                                                         
                                                         at Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
                                                         """));
@@ -129,7 +129,7 @@ public class AssertMultipleTests
                                                         Expected 5 to be equal to 6
                                                          or to be equal to 7
                                                         
-                                                        but the received value 5 is different
+                                                        but found 5
                                                         
                                                         at Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
                                                         """));
@@ -179,7 +179,7 @@ public class AssertMultipleTests
         NUnitAssert.That(assertionException1.Message, Is.EqualTo("""
                                                         Expected 1 to be equal to 2
                                                         
-                                                        but the received value 1 is different
+                                                        but found 1
                                                         
                                                         at Assert.That(1).IsEqualTo(2)
                                                         """));
@@ -187,7 +187,7 @@ public class AssertMultipleTests
         NUnitAssert.That(assertionException2.Message, Is.EqualTo("""
                                                         Expected 2 to be equal to 3
                                                         
-                                                        but the received value 2 is different
+                                                        but found 2
                                                         
                                                         at Assert.That(2).IsEqualTo(3)
                                                         """));
@@ -195,7 +195,7 @@ public class AssertMultipleTests
         NUnitAssert.That(assertionException3.Message, Is.EqualTo("""
                                                         Expected 3 to be equal to 4
                                                         
-                                                        but the received value 3 is different
+                                                        but found 3
                                                         
                                                         at Assert.That(3).IsEqualTo(4)
                                                         """));
@@ -203,7 +203,7 @@ public class AssertMultipleTests
         NUnitAssert.That(assertionException4.Message, Is.EqualTo("""
                                                         Expected 4 to be equal to 5
                                                         
-                                                        but the received value 4 is different
+                                                        but found 4
                                                         
                                                         at Assert.That(4).IsEqualTo(5)
                                                         """));
@@ -211,7 +211,7 @@ public class AssertMultipleTests
         NUnitAssert.That(assertionException5.Message, Is.EqualTo("""
                                                         Expected 5 to be equal to 6
                                                         
-                                                        but the received value 5 is different
+                                                        but found 5
                                                         
                                                         at Assert.That(5).IsEqualTo(6)
                                                         """));
@@ -219,7 +219,7 @@ public class AssertMultipleTests
         NUnitAssert.That(assertionException6.Message, Is.EqualTo("""
                                                         Expected 6 to be equal to 7
                                                         
-                                                        but the received value 6 is different
+                                                        but found 6
                                                         
                                                         at Assert.That(6).IsEqualTo(7)
                                                         """));
@@ -227,7 +227,7 @@ public class AssertMultipleTests
         NUnitAssert.That(assertionException7.Message, Is.EqualTo("""
                                                         Expected 7 to be equal to 8
                                                         
-                                                        but the received value 7 is different
+                                                        but found 7
                                                         
                                                         at Assert.That(7).IsEqualTo(8)
                                                         """));
