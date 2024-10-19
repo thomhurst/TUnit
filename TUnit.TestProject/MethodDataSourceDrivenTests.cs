@@ -21,6 +21,13 @@ public class MethodDataSourceDrivenTests
     }
     
     [Test]
+    [MethodDataSource(nameof(SomeAction))]
+    public void DataSource_Method_WithAction(Action action)
+    {
+        // Dummy method
+    }
+    
+    [Test]
     [MethodDataSource(nameof(SomeMethod), Arguments = [5], DisposeAfterTest = false)]
     [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { 5 }, DisposeAfterTest = false)]
     public void DataSource_Method3(int value)
@@ -41,6 +48,8 @@ public class MethodDataSourceDrivenTests
     }
 
     public static int SomeMethod() => 1;
+
+    public static Action SomeAction() => () => { };
     
     public static int SomeMethod(int input) => input * 2;
     public static int SomeMethod(string input1, int input2, bool input3) => input2 * 2;

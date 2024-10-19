@@ -21,7 +21,7 @@ public class DisplayFormats
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
         SymbolDisplayGenericsOptions.IncludeTypeParameters,
         SymbolDisplayMemberOptions.IncludeContainingType,
-        SymbolDisplayDelegateStyle.NameAndSignature,
+        SymbolDisplayDelegateStyle.NameOnly,
         SymbolDisplayExtensionMethodStyle.Default,
         SymbolDisplayParameterOptions.IncludeType,
         SymbolDisplayPropertyStyle.NameOnly,
