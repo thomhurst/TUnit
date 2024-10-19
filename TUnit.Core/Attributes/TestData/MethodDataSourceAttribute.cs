@@ -5,6 +5,8 @@ public class MethodDataSourceAttribute : TestDataAttribute
 {
     public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }
+
+    public object[] Arguments { get; set; } = [];
     
     public MethodDataSourceAttribute(string methodNameProvidingDataSource)
     {
@@ -19,17 +21,12 @@ public class MethodDataSourceAttribute : TestDataAttribute
     public MethodDataSourceAttribute(Type classProvidingDataSource, 
         string methodNameProvidingDataSource)
     {
-        if (classProvidingDataSource == null)
-        {
-            throw new ArgumentNullException(nameof(classProvidingDataSource), "No class type was provided");
-        }
-
         if (methodNameProvidingDataSource is null or { Length: < 1 })
         {
             throw new ArgumentException("No method name was provided");
         }
 
-        ClassProvidingDataSource = classProvidingDataSource;
+        ClassProvidingDataSource = classProvidingDataSource ?? throw new ArgumentNullException(nameof(classProvidingDataSource), "No class type was provided");
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
 }

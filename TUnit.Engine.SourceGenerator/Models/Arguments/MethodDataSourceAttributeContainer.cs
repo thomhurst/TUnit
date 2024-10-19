@@ -10,7 +10,8 @@ internal record MethodDataSourceAttributeContainer(
     bool IsStatic,
     bool IsEnumerableData,
     string[] TupleTypes,
-    string MethodReturnType)
+    string MethodReturnType,
+    string ArgumentsExpression)
     : ArgumentsContainer(ArgumentsType)
 {
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
@@ -94,10 +95,10 @@ internal record MethodDataSourceAttributeContainer(
     {
         if (IsStatic)
         {
-            return $"{TypeName}.{MethodName}()";
+            return $"{TypeName}.{MethodName}({ArgumentsExpression})";
         }
         
-        return $"resettableClassFactory.Value.{MethodName}()";
+        return $"resettableClassFactory.Value.{MethodName}({ArgumentsExpression})";
     }
 
     public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)

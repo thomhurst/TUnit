@@ -22,6 +22,6 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
         return AssertionResult
             .FailIf(
                 () => !string.Equals(actualValue, expectedValue, stringComparison),
-                $"found {Formatter.Format(actualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue, expectedValue)}");
+                $"found {Formatter.Format(ActualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue, expectedValue)}");
     }
 }

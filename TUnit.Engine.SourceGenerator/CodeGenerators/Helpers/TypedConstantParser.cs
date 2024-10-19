@@ -9,12 +9,6 @@ internal static class TypedConstantParser
     public static string? GetTypedConstantValue(SemanticModel semanticModel,
         ExpressionSyntax argumentExpression, ITypeSymbol? type = null)
     {
-        // const variables
-        if (argumentExpression is IdentifierNameSyntax or MemberAccessExpressionSyntax)
-        {
-            return semanticModel.GetSymbolInfo(argumentExpression).Symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-        }
-        
         var newExpression = argumentExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
 
         if (type?.TypeKind == TypeKind.Enum && !newExpression.IsKind(SyntaxKind.SimpleMemberAccessExpression))
@@ -23,31 +17,6 @@ internal static class TypedConstantParser
         }
 
         return newExpression.ToString();
-    }
-
-    private sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanticModel) : CSharpSyntaxRewriter
-    {
-        public override SyntaxNode? VisitPredefinedType(PredefinedTypeSyntax node)
-        {
-            var symbol = semanticModel.GetSymbolInfo(node);
-            return SyntaxFactory.IdentifierName(symbol.Symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix));
-        }
-
-        public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
-        {
-            var symbol = semanticModel.GetSymbolInfo(node);
-            if (symbol.Symbol!.Kind != SymbolKind.NamedType)
-            {
-                return base.VisitIdentifierName(node);
-            }
-            return node.WithIdentifier(SyntaxFactory.Identifier(symbol.Symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)));
-        }
-
-        public override SyntaxNode? VisitTypeOfExpression(TypeOfExpressionSyntax node)
-        {
-            var symbol = semanticModel.GetSymbolInfo(node.Type);
-            return node.WithType(SyntaxFactory.ParseTypeName(symbol.Symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)));
-        }
     }
 
     public static string GetFullyQualifiedTypeNameFromTypedConstantValue(TypedConstant typedConstant)

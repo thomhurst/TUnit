@@ -22,6 +22,6 @@ public class StringNotContainsExpectedValueAssertCondition(string expected, Stri
         return AssertionResult
             .FailIf(
                 () => actualValue.Contains(expectedValue!, stringComparison),
-                $"it was found in {Formatter.Format(actualValue).TruncateWithEllipsis(100)}");
+                $"it was found in {Formatter.Format(ActualValue).TruncateWithEllipsis(100)}");
     }
 }
