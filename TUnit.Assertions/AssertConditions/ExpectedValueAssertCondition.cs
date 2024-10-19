@@ -7,7 +7,7 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
 
     private readonly List<Func<TActual?, TExpected?, AssertionDecision>> _customComparers = [];
 
-    protected TExpected? ExpectedValue { get; } = expected;
+    public TExpected? ExpectedValue { get; } = expected;
 
     public void WithTransform(Func<TActual?, TActual?> actualTransformation,
         Func<TExpected?, TExpected?> expectedTransformation)

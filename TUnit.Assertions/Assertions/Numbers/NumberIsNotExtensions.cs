@@ -12,14 +12,26 @@ namespace TUnit.Assertions.Extensions;
 
 public static class NumberIsNotExtensions
 {
-    public static NumberNotEqualToAssertionBuilderWrapper<TActual> IsNotEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "") 
+    public static GenericNotEqualToAssertionBuilderWrapper<TActual> Within<TActual>(
+        this GenericNotEqualToAssertionBuilderWrapper<TActual> assertionBuilder, TActual tolerance, [CallerArgumentExpression("tolerance")] string doNotPopulateThis = "")
         where TActual : INumber<TActual>
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TActual>(expected)
-            , [doNotPopulateThisValue]);
+        var assertion = (NotEqualsExpectedValueAssertCondition<TActual>) assertionBuilder.Assertions.Peek();
+
+        assertion.WithComparer((actual, expected) =>
+        {
+            if (!actual.IsBetween(expected - tolerance, expected + tolerance))
+            {
+                return AssertionDecision.Pass;
+            }
+            
+            return AssertionDecision.Fail($"Expected {actual} to be equal to {expected} +={tolerance}.");
+        });
         
-        return new NumberNotEqualToAssertionBuilderWrapper<TActual>(assertionBuilder);
-    }
+        assertionBuilder.AppendCallerMethod([doNotPopulateThis]);
+        
+        return assertionBuilder;
+    } 
     
     public static InvokableValueAssertionBuilder<TActual> IsNotZero<TActual>(this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>

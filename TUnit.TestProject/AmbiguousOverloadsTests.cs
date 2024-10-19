@@ -18,5 +18,8 @@ public class AmbiguousOverloadsTests
         await Assert.That(TimeSpan.FromSeconds(1)).IsEqualTo(TimeSpan.FromSeconds(1));
         await Assert.That(new DateTime(2000,1,1)).IsEqualTo(new DateTime(2000,1,1));
         await Assert.That(new object()).IsEqualTo(new object());
+        await Assert.That(new MyStruct()).IsEqualTo(new MyStruct());
     }
+
+    private struct MyStruct;
 }

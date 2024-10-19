@@ -4,7 +4,6 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Numbers;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.AssertionBuilders.Wrappers;
 using TUnit.Assertions.Assertions.Generics.Conditions;
@@ -13,16 +12,26 @@ namespace TUnit.Assertions.Extensions;
 
 public static class NumberIsExtensions
 {
-    public static NumberEqualToAssertionBuilderWrapper<TActual> IsEqualTo<TActual>(
-        this IValueSource<TActual> valueSource, TActual expected,
-        [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
+    public static GenericEqualToAssertionBuilderWrapper<TActual> Within<TActual>(
+        this GenericEqualToAssertionBuilderWrapper<TActual> assertionBuilder, TActual tolerance, [CallerArgumentExpression("tolerance")] string doNotPopulateThis = "")
         where TActual : INumber<TActual>
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new NumericEqualsExpectedValueAssertCondition<TActual>(expected)
-            , [doNotPopulateThisValue1]);
+        var assertion = (EqualsExpectedValueAssertCondition<TActual>) assertionBuilder.Assertions.Peek();
+
+        assertion.WithComparer((actual, expected) =>
+        {
+            if (actual.IsBetween(expected - tolerance, expected + tolerance))
+            {
+                return AssertionDecision.Pass;
+            }
+            
+            return AssertionDecision.Fail($"Expected {actual} to be not equal to {expected} +={tolerance}.");
+        });
         
-        return new NumberEqualToAssertionBuilderWrapper<TActual>(assertionBuilder);
-    }
+        assertionBuilder.AppendCallerMethod([doNotPopulateThis]);
+        
+        return assertionBuilder;
+    } 
 
     public static InvokableValueAssertionBuilder<TActual> IsZero<TActual>(
         this IValueSource<TActual> valueSource)

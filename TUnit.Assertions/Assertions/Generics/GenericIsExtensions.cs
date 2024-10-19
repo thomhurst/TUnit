@@ -12,11 +12,12 @@ namespace TUnit.Assertions.Extensions;
 
 public static class GenericIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "") 
-        where TActual : class
+    public static GenericEqualToAssertionBuilderWrapper<TActual> IsEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
     {
-        return valueSource
+        var assertionBuilder = valueSource
             .RegisterAssertion(new EqualsExpectedValueAssertCondition<TActual>(expected), [doNotPopulateThisValue1]);
+        
+        return new GenericEqualToAssertionBuilderWrapper<TActual>(assertionBuilder);
     }
     
     public static InvokableValueAssertionBuilder<TActual> IsEquatableOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "")
