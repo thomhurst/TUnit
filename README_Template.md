@@ -39,6 +39,14 @@ Rider is supported. The [Enable Testing Platform support](https://www.jetbrains.
 
 <img src="/docs/static/img/rider.png" height="300px">
 
+#### Test Discovery Issue
+
+There is a known issue where Rider may fail to discover tests when used with certain versions of TUnit (see [#576](https://github.com/thomhurst/TUnit/issues/576)). This problem has been observed across different TUnit versions in combination with Rider.
+
+If you encounter this issue, try downgrading TUnit by minor versions (e.g., from 0.1.10xx to 0.1.9xx) and rebuild the test project between each version until the tests are successfully discovered.
+
+As of this update, Rider 2024.2.6 has been confirmed to be compatible with TUnit 0.1.1082.
+
 ## VS Code
 Visual Studio Code is supported.
 
