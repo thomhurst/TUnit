@@ -2,7 +2,8 @@
 <Project>
   <PropertyGroup>
     <TargetFrameworks Condition="'$(SDKVersion)' == ''">net8.0;net9.0</TargetFrameworks>
-    <TargetFramework Condition="'$(SDKVersion)' == 'net8'">net8.0</TargetFramework>
+    <!--suppress MsbuildTargetFrameworkTagInspection -->
+    <TargetFrameworks Condition="'$(SDKVersion)' == 'net8'">net8.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(SDKVersion)' == 'net9'">net8.0;net9.0</TargetFrameworks>
 
     <ImplicitUsings>enable</ImplicitUsings>
