@@ -3,8 +3,8 @@
 public class GenericMethodTests
 {
     [Test]
-    [MethodDataSource(nameof(AggregateBy_String_TestData))]
     [MethodDataSource(nameof(AggregateBy_Numeric_TestData))]
+    [MethodDataSource(nameof(AggregateBy_String_TestData))]
     public void AggregateBy_HasExpectedOutput<TSource, TKey, TAccumulate>(
         IEnumerable<TSource> source,
         Func<TSource, TKey> keySelector,
