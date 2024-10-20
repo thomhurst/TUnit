@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(SDKVersion)' == ''">net8.0;net9.0</TargetFrameworks>
+    <TargetFramework Condition="'$(SDKVersion)' == 'net8'">net8.0</TargetFramework>
+    <TargetFrameworks Condition="'$(SDKVersion)' == 'net9'">net8.0;net9.0</TargetFrameworks>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

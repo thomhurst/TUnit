@@ -32,7 +32,7 @@ jobs:
           dotnet-version: 8.0.x
           
       - name: Build .NET 8 
-        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:TargetFrameworks=net8.0
+        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:SDKVersion=net8
 
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
@@ -40,7 +40,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Build .NET 9
-        run: dotnet build -c Release -p:TreatWarningsAsErrors=true
+        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:SDKVersion=net9
 
       - name: Run Pipeline
         run: dotnet run -c Release
