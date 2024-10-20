@@ -39,6 +39,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                             [
                                 new KeyValue("Version", version.SemVer!),
                                 new KeyValue("PackageVersion", packageVersion!),
+                                new KeyValue("AssemblyFileVersion", version.SemVer!),
                                 new KeyValue("IsPackTarget", "true"),
                                 new KeyValue("ROSLYN_VERSION", roslynVersion)
                             ],
