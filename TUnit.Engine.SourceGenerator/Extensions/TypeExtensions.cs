@@ -119,7 +119,7 @@ internal static class TypeExtensions
                 var tupleType = tupleTypes.ElementAtOrDefault(index);
                 var parameterType = parameterTypes.ElementAtOrDefault(index);
 
-                if (parameterType is INamedTypeSymbol { IsGenericType: true })
+                if (parameterType?.IsGenericDefinition() == true)
                 {
                     continue;
                 }
@@ -141,4 +141,19 @@ internal static class TypeExtensions
     
     public static string GloballyQualifiedNonGeneric(this ITypeSymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+    
+    public static bool IsGenericDefinition(this ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is ITypeParameterSymbol)
+        {
+            return true;
+        }
+        
+        if (typeSymbol is not INamedTypeSymbol namedTypeSymbol)
+        {
+            return false;
+        }
+
+        return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
+    }
 }
