@@ -13,7 +13,7 @@ namespace TUnit.Pipeline.Modules;
 [DependsOnAllModulesInheritingFrom<TestModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
-    private static readonly string[] RoslynVersions = ["4.4", "4.10"];
+    private static readonly string[] RoslynVersions = ["4.4", "4.7"];
     
     protected override async Task<List<PackedProject>?> ExecuteAsync(IPipelineContext context,
         CancellationToken cancellationToken)

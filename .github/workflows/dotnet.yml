@@ -63,5 +63,5 @@ jobs:
         uses: actions/upload-artifact@v4.4.3
         if: always()
         with:
-          name: NuGetPackages${{matrix.os}}
+          name: 'NuGetPackages-${{matrix.os}}'
           path: '**/*.*nupkg'

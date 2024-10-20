@@ -18,8 +18,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common"  VersionOverride="$(ROSLYN_VERSION).*"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"  VersionOverride="$(ROSLYN_VERSION).*"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="$(ROSLYN_VERSION).*"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(ROSLYN_VERSION).*"/>
     <PackageReference Include="PolySharp">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
