@@ -42,7 +42,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                                 new KeyValue("IsPackTarget", "true"),
                                 new KeyValue("ROSLYN_VERSION", roslynVersion)
                             ],
-                            OutputDirectory = $"roslyn-${roslynVersion}",
+                            OutputDirectory = $"roslyn-{roslynVersion}",
                             IncludeSource = true,
                             Configuration = Configuration.Release,
                         }, cancellationToken);

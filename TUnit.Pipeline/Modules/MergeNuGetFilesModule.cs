@@ -23,7 +23,7 @@ public class MergeNuGetFilesModule : Module<List<File>>
         
         foreach (var grouping in gitDirectory
                      .GetFiles(x => x.Extension == ".nupkg")
-                     .GroupBy(x => x.Name))
+                     .GroupBy(x => x.NameWithoutExtension))
         {
             var packageFolder = output.CreateFolder(grouping.Key);
 
