@@ -1,4 +1,5 @@
 ﻿
+#pragma warning disable CS9113 // Parameter is unread.
 namespace TUnit.TestProject;
 
 [AutoFixtureGenerator<int, string, bool>]

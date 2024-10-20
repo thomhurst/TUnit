@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+#pragma warning disable CS9113 // Parameter is unread.
 
 namespace TUnit.TestProject;
 
