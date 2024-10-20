@@ -6,46 +6,57 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertConditions.Throws;
 
-public class ThrowsException<TActual, TException>(
-    InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,
-    IDelegateSource<TActual> source,
-    Func<Exception?, Exception?> selector,
-    [CallerMemberName] string callerMemberName = "")
-    where TException : Exception
+public class ThrowsException<TActual, TException> where TException : Exception
 {
+    private readonly InvokableDelegateAssertionBuilder<TActual> _delegateAssertionBuilder;
+    private readonly IDelegateSource<TActual> _source;
+    private readonly Func<Exception?, Exception?> _selector;
+
+    public ThrowsException(InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,
+        IDelegateSource<TActual> source,
+        Func<Exception?, Exception?> selector,
+        [CallerMemberName] string callerMemberName = "")
+    {
+        _delegateAssertionBuilder = delegateAssertionBuilder;
+        _source = source;
+        _selector = selector;
+
+        delegateAssertionBuilder.AppendExpression(callerMemberName);
+    }
+
     public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression("match")] string doNotPopulateThisValue = "")
     {
-        source.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(match, selector)
+        _source.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(match, _selector)
             , [doNotPopulateThisValue]);
         return this;
     }
 
     public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
     {
-        source.RegisterAssertion(new ThrowsWithMessageAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, selector)
+        _source.RegisterAssertion(new ThrowsWithMessageAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _selector)
             , [doNotPopulateThisValue]);
         return this;
     }
 
     public ThrowsException<TActual, Exception> WithInnerException()
     {
-        source.AssertionBuilder.AppendExpression($"{nameof(WithInnerException)}()");
-        return new(delegateAssertionBuilder, source, e => selector(e)?.InnerException);
+        _source.AssertionBuilder.AppendExpression($"{nameof(WithInnerException)}()");
+        return new(_delegateAssertionBuilder, _source, e => _selector(e)?.InnerException);
     }
 
     public TaskAwaiter<TException?> GetAwaiter()
     {
-        var task = delegateAssertionBuilder.ProcessAssertionsAsync(
+        var task = _delegateAssertionBuilder.ProcessAssertionsAsync(
             d => d.Exception as TException);
         return task.GetAwaiter();
     }
     
-    public AndConvertedTypeAssertionBuilder<TActual, TException> And => new(delegateAssertionBuilder, async () =>
+    public AndConvertedTypeAssertionBuilder<TActual, TException> And => new(_delegateAssertionBuilder, async () =>
     {
         var value = await this;
-        return new AssertionData<TException>(value, null, delegateAssertionBuilder.ActualExpression);
+        return new AssertionData<TException>(value, null, _delegateAssertionBuilder.ActualExpression);
 
-    }, delegateAssertionBuilder.ActualExpression!, delegateAssertionBuilder.ExpressionBuilder!.Append(".And"));
+    }, _delegateAssertionBuilder.ActualExpression!, _delegateAssertionBuilder.ExpressionBuilder!.Append(".And"));
     
-    public DelegateOr<TActual> Or => delegateAssertionBuilder.Or;
+    public DelegateOr<TActual> Or => _delegateAssertionBuilder.Or;
 }
