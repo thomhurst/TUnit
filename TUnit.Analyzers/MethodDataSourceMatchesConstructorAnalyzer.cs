@@ -82,6 +82,11 @@ public class MethodDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAn
                 {
                     var tupleType = tupleTypes.ElementAtOrDefault(index);
                     var parameterType = parameters.WithoutTimeoutParameter().ElementAtOrDefault(index)?.Type;
+                    
+                    if (parameterType is INamedTypeSymbol { IsGenericType: true })
+                    {
+                        continue;
+                    }
 
                     if (!context.Compilation.HasImplicitConversion(tupleType, parameterType))
                     {

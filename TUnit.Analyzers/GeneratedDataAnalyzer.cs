@@ -63,6 +63,11 @@ public class GeneratedDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 continue;
             }
 
+            if (parameterOrPropertyTypes.Any(x => x is INamedTypeSymbol { IsGenericType: true }))
+            {
+                continue;
+            }
+
             if (baseGeneratorAttribute.TypeArguments.SequenceEqual(parameterOrPropertyTypes, SelfOrBaseEqualityComparer.Instance))
             {
                 continue;

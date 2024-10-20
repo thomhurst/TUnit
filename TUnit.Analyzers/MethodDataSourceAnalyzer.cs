@@ -163,6 +163,11 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 var parameterType = parameterOrPropertyTypeSymbols.ElementAtOrDefault(i);
                 var argumentType = returnTupleTypes.ElementAtOrDefault(i);
 
+                if (parameterType is INamedTypeSymbol { IsGenericType: true })
+                {
+                    continue;
+                }
+                
                 if (!context.Compilation.HasImplicitConversion(argumentType, parameterType))
                 {
                     context.ReportDiagnostic(

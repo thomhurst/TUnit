@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using TUnit.Engine.SourceGenerator.Enums;
 using TUnit.Engine.SourceGenerator.Extensions;
@@ -127,6 +128,16 @@ internal static class TestSourceDataModelRetriever
             .Select(x => x.PropertySymbol)
             .SelectMany(x => x.GetAttributes())
             .Where(x => x.IsDataSourceAttribute());
+
+        var hasTimeoutAttribute = allAttributes.Any(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix) == true);
+
+        var methodNonGenericTypes = GetNonGenericTypes(testGenerationContext.MethodSymbol.Parameters,
+            testArguments.GetArgumentTypes());
+
+        var classNonGenericTypes =
+            GetNonGenericTypes(
+                testGenerationContext.ClassSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? [],
+                classArguments.GetArgumentTypes());
         
         return new TestSourceDataModel
         {
@@ -137,18 +148,66 @@ internal static class TestSourceDataModelRetriever
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
+            ClassParameterOrArgumentNonGenericTypes = classNonGenericTypes.ToArray(),
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
             MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
+            MethodParameterOrArgumentNonGenericTypes = methodNonGenericTypes.ToArray(),
             MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            HasTimeoutAttribute = allAttributes.Any(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix) == true),
+            HasTimeoutAttribute = hasTimeoutAttribute,
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.ParallelLimiterAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             AttributeTypes = allAttributes.Where(x => !x.IsDataSourceAttribute()).Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(),
             PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
         };
+    }
+
+    private static IEnumerable<string> GetNonGenericTypes(ImmutableArray<IParameterSymbol> methodSymbolParameters,
+        string[] argumentTypes)
+    {
+        for (var i = 0; i < methodSymbolParameters.Length; i++)
+        {
+            var parameter = methodSymbolParameters[i];
+
+            if (HasUnSubstitutedGeneric(parameter.Type))
+            {
+                yield return argumentTypes.ElementAt(i);
+            }
+            else
+            {
+                yield return parameter.Type.GloballyQualified();
+            }
+        }
+    }
+
+    private static bool HasUnSubstitutedGeneric(ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is ITypeParameterSymbol)
+        {
+            return true;
+        }
+        
+        if (typeSymbol is not INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
+        {
+            return false;
+        }
+        
+        if (namedTypeSymbol.TypeArguments.Any(x => x is ITypeParameterSymbol))
+        {
+            return true;
+        }
+        
+        foreach (var typeArgument in namedTypeSymbol.TypeArguments)
+        {
+            if (HasUnSubstitutedGeneric(typeArgument))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
