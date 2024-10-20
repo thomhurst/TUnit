@@ -31,7 +31,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         {
             foreach (var project in projects.Value!)
             {
-                var result = await context.DotNet()
+                await context.DotNet()
                     .Pack(
                         new DotNetPackOptions(project)
                         {
@@ -42,6 +42,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                                 new KeyValue("IsPackTarget", "true"),
                                 new KeyValue("ROSLYN_VERSION", roslynVersion)
                             ],
+                            OutputDirectory = $"roslyn-${roslynVersion}",
                             IncludeSource = true,
                             Configuration = Configuration.Release,
                         }, cancellationToken);
