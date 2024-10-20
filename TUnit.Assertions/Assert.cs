@@ -74,23 +74,18 @@ public static class Assert
         try
         {
             await @delegate();
-            Fail.Test($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
-        }
-        catch (Exception e) when(e is not AssertionException)
-        {
-            if (e is TException exception)
-            {
-                return exception;
-            }
-            
-            Fail.Test($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
         catch (TException e)
         {
-            // In case we want to assert to catch an AssertionException
             return e;
         }
+        catch (Exception e)
+        {
+            TUnit.Assertions.Fail.Test($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+        }
 
+        TUnit.Assertions.Fail.Test($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
+        
         return null!;
     }
 
@@ -111,18 +106,21 @@ public static class Assert
         try
         {
             @delegate();
-            Fail.Test($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
-        catch (Exception e) when(e is not AssertionException)
+        catch (TException e)
         {
-            if (e is TException exception)
-            {
-                return exception;
-            }
-            
-            Fail.Test($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+            return e;
         }
+        catch (Exception e)
+        {
+            TUnit.Assertions.Fail.Test($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+        }
+        
+        TUnit.Assertions.Fail.Test($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
+
 
         return null!;
     }
+
+    public static void Fail(string reason) => TUnit.Assertions.Fail.Test(reason);
 }
