@@ -78,7 +78,7 @@ internal static class TypeExtensions
         var genericEnumerableType =
             context.SemanticModel.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T).ConstructUnboundGenericType();
 
-        if (enumerable is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsGenericType && namedTypeSymbol
+        if (enumerable is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol
                 .ConstructUnboundGenericType().Equals(genericEnumerableType, SymbolEqualityComparer.Default))
         {
             enumerableInnerType = namedTypeSymbol.TypeArguments.First();
@@ -98,8 +98,14 @@ internal static class TypeExtensions
             return false;
         }
 
-        if (context.SemanticModel.Compilation.HasImplicitConversion(enumerableInnerType,
-                parameterTypes.FirstOrDefault()))
+        var firstParameterType = parameterTypes.FirstOrDefault();
+        
+        if (context.SemanticModel.Compilation.HasImplicitConversion(enumerableInnerType, firstParameterType))
+        {
+            return true;
+        }
+        
+        if (!enumerableInnerType.IsTupleType && firstParameterType is INamedTypeSymbol { IsGenericType:true })
         {
             return true;
         }
@@ -113,6 +119,11 @@ internal static class TypeExtensions
                 var tupleType = tupleTypes.ElementAtOrDefault(index);
                 var parameterType = parameterTypes.ElementAtOrDefault(index);
 
+                if (parameterType is INamedTypeSymbol { IsGenericType: true })
+                {
+                    continue;
+                }
+                
                 if (!context.SemanticModel.Compilation.HasImplicitConversion(tupleType, parameterType))
                 {
                     return false;

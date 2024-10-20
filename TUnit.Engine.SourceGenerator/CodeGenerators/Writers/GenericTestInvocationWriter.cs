@@ -13,12 +13,11 @@ internal static class GenericTestInvocationWriter
 
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
         
-        var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"));
+        var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterOrArgumentNonGenericTypes.Select(x => $"typeof({x})"));
         
         sourceBuilder.WriteLine($"var testClassType = typeof({fullyQualifiedClassType});");
         
-        sourceBuilder.WriteLine(
-            $"var methodInfo = testClassType.GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}]);");
+        sourceBuilder.WriteLine($"var methodInfo = {MethodInfoWriter.Write(testSourceDataModel, methodParameterTypesList)};");
         
         sourceBuilder.WriteLine();
         
