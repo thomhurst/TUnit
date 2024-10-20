@@ -13,16 +13,15 @@ public class MergeNuGetFilesModule : Module<List<File>>
     protected override Task<List<File>?> ExecuteAsync(IPipelineContext context,
         CancellationToken cancellationToken)
     {
-        var output = context.Git()
+        var gitDirectory = context.Git()
             .RootDirectory
-            .AssertExists()
-            .CreateFolder("package-output");
+            .AssertExists();
+        
+        var output = gitDirectory.CreateFolder("package-output");
 
         var packages = new List<File>();
         
-        foreach (var grouping in context.Git()
-                     .RootDirectory
-                     .AssertExists()
+        foreach (var grouping in gitDirectory
                      .GetFiles(x => x.Extension == ".nupkg")
                      .GroupBy(x => x.Name))
         {
@@ -41,13 +40,16 @@ public class MergeNuGetFilesModule : Module<List<File>>
             packages.Add(nugetPackage);
         }
 
-        foreach (var file in context.Git()
-                     .RootDirectory
-                     .AssertExists()
+        foreach (var file in gitDirectory
                      .GetFiles(x => x.Extension == ".snupkg")
                      .DistinctBy(x => x.Name))
         {
             file.MoveTo(output);
+            
+            foreach (var fileToDelete in gitDirectory.GetFiles(x => x.Name == file.Name).Except([file]))
+            {
+                fileToDelete.Delete();
+            }
         }
         
         return Task.FromResult<List<File>?>(packages);
