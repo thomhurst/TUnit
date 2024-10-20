@@ -32,7 +32,7 @@ jobs:
           dotnet-version: 8.0.x
           
       - name: Build .NET 8 
-        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:TargetFramework=net8.0
+        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:TargetFrameworks=net8.0
 
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
