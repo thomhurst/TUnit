@@ -81,10 +81,10 @@ public static class Assert
         }
         catch (Exception e)
         {
-            TUnit.Assertions.Fail.Test($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
 
-        TUnit.Assertions.Fail.Test($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
+        Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
         
         return null!;
     }
@@ -113,10 +113,10 @@ public static class Assert
         }
         catch (Exception e)
         {
-            TUnit.Assertions.Fail.Test($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
         
-        TUnit.Assertions.Fail.Test($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
+        Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
 
 
         return null!;
