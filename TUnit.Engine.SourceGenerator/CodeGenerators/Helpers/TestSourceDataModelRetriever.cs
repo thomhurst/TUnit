@@ -172,7 +172,7 @@ internal static class TestSourceDataModelRetriever
         {
             var parameter = methodSymbolParameters[i];
 
-            if (HasUnSubstitutedGeneric(parameter.Type))
+            if (parameter.Type.IsGenericDefinition())
             {
                 yield return argumentTypes.ElementAt(i);
             }
@@ -181,33 +181,5 @@ internal static class TestSourceDataModelRetriever
                 yield return parameter.Type.GloballyQualified();
             }
         }
-    }
-
-    private static bool HasUnSubstitutedGeneric(ITypeSymbol typeSymbol)
-    {
-        if (typeSymbol is ITypeParameterSymbol)
-        {
-            return true;
-        }
-        
-        if (typeSymbol is not INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
-        {
-            return false;
-        }
-        
-        if (namedTypeSymbol.TypeArguments.Any(x => x is ITypeParameterSymbol))
-        {
-            return true;
-        }
-        
-        foreach (var typeArgument in namedTypeSymbol.TypeArguments)
-        {
-            if (HasUnSubstitutedGeneric(typeArgument))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

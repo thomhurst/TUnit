@@ -71,4 +71,19 @@ public static class TypeExtensions
     
     public static string GloballyQualifiedNonGeneric(this ITypeSymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+    
+    public static bool IsGenericDefinition(this ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is ITypeParameterSymbol)
+        {
+            return true;
+        }
+        
+        if (typeSymbol is not INamedTypeSymbol namedTypeSymbol)
+        {
+            return false;
+        }
+
+        return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
+    }
 }
