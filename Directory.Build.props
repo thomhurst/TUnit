@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(SDK_VERSION)' == ''">net8.0;net9.0</TargetFrameworks>
+    <!--suppress MsbuildTargetFrameworkTagInspection -->
+    <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net8'">net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net9'">net8.0;net9.0</TargetFrameworks>
 
+    <ROSLYN_VERSION Condition="'$(ROSLYN_VERSION)' == ''">4.7</ROSLYN_VERSION>
+    <DefineConstants Condition="$(ROSLYN_VERSION) >= 4.7">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
+    
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>

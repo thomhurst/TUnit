@@ -26,13 +26,21 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Setup .NET
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          
+      - name: Build .NET 8 
+        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:SDK_VERSION=net8
+
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-          
-      - name: Build
-        run: dotnet build -c Release
+
+      - name: Build .NET 9
+        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:SDK_VERSION=net9
 
       - name: Run Pipeline
         run: dotnet run -c Release
@@ -55,5 +63,5 @@ jobs:
         uses: actions/upload-artifact@v4.4.3
         if: always()
         with:
-          name: NuGetPackages${{matrix.os}}
+          name: 'NuGetPackages-${{matrix.os}}'
           path: '**/*.*nupkg'

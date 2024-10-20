@@ -136,7 +136,7 @@ internal static class TestSourceDataModelRetriever
 
         var classNonGenericTypes =
             GetNonGenericTypes(
-                testGenerationContext.ClassSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? [],
+                testGenerationContext.ClassSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty,
                 classArguments.GetArgumentTypes());
         
         return new TestSourceDataModel

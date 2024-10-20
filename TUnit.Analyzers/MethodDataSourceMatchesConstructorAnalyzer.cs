@@ -83,7 +83,7 @@ public class MethodDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAn
                     var tupleType = tupleTypes.ElementAtOrDefault(index);
                     var parameterType = parameters.WithoutTimeoutParameter().ElementAtOrDefault(index)?.Type;
                     
-                    if (parameterType.IsGenericDefinition())
+                    if (parameterType?.IsGenericDefinition() == true)
                     {
                         continue;
                     }

@@ -163,7 +163,7 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 var parameterType = parameterOrPropertyTypeSymbols.ElementAtOrDefault(i);
                 var argumentType = returnTupleTypes.ElementAtOrDefault(i);
 
-                if (parameterType.IsGenericDefinition())
+                if (parameterType?.IsGenericDefinition() == true)
                 {
                     continue;
                 }

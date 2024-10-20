@@ -1,4 +1,5 @@
 ﻿using TUnit.Core.Interfaces;
+#pragma warning disable CS9113 // Parameter is unread.
 
 namespace TUnit.TestProject;
 

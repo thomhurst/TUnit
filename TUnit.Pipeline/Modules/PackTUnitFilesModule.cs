@@ -1,5 +1,4 @@
-﻿using EnumerableAsyncProcessor.Extensions;
-using ModularPipelines.Attributes;
+﻿using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -14,6 +13,8 @@ namespace TUnit.Pipeline.Modules;
 [DependsOnAllModulesInheritingFrom<TestModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
+    private static readonly string[] RoslynVersions = ["4.4", "4.7"];
+    
     protected override async Task<List<PackedProject>?> ExecuteAsync(IPipelineContext context,
         CancellationToken cancellationToken)
     {
@@ -23,22 +24,33 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         var version = versionResult.Value!;
 
         var packageVersion = version.SemVer!;
-
-        await projects.Value!.SelectAsync(
-            async project => await context.DotNet()
-                .Pack(
-                    new DotNetPackOptions(project)
-                    {
-                        Properties =
-                        [
-                            new KeyValue("Version", version.SemVer!),
-                            new KeyValue("PackageVersion", packageVersion!),
-                            new KeyValue("IsPackTarget", "true")
-                        ],
-                        IncludeSource = true,
-                        Configuration = Configuration.Release,
-                    }, cancellationToken), cancellationToken: cancellationToken).ProcessOneAtATime();
         
-        return projects.Value!.Select(x => new PackedProject(x.NameWithoutExtension, version.SemVer!)).ToList();
+        var packedProjects = new List<PackedProject>();
+
+        foreach (var roslynVersion in RoslynVersions)
+        {
+            foreach (var project in projects.Value!)
+            {
+                await context.DotNet()
+                    .Pack(
+                        new DotNetPackOptions(project)
+                        {
+                            Properties =
+                            [
+                                new KeyValue("Version", version.SemVer!),
+                                new KeyValue("PackageVersion", packageVersion!),
+                                new KeyValue("IsPackTarget", "true"),
+                                new KeyValue("ROSLYN_VERSION", roslynVersion)
+                            ],
+                            OutputDirectory = $"roslyn-{roslynVersion}",
+                            IncludeSource = true,
+                            Configuration = Configuration.Release,
+                        }, cancellationToken);
+                
+                packedProjects.Add(new PackedProject(project.NameWithoutExtension, version.SemVer!));
+            }
+        }
+        
+        return packedProjects;
     }
 }

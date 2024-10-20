@@ -13,7 +13,7 @@ namespace TUnit.Pipeline.Modules;
 
 [RunOnlyOnBranch("main")]
 [RunOnLinuxOnly]
-[DependsOn<PackTUnitFilesModule>]
+[DependsOn<MergeNuGetFilesModule>]
 [DependsOn<TestNugetPackageModule>]
 public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<CommandResult[]>
 {

@@ -1,4 +1,5 @@
-﻿namespace TUnit.TestProject;
+﻿#pragma warning disable CS9113 // Parameter is unread.
+namespace TUnit.TestProject;
 
     [Arguments("1")]
     [Arguments("2")]
