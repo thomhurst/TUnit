@@ -31,8 +31,11 @@ jobs:
         with:
           dotnet-version: 9.0.x
           
-      - name: Build
-        run: dotnet build -c Release
+      - name: Build .NET 8 
+        run: dotnet build -c Release -p:TreatWarningsAsErrors=true
+
+      - name: Build .NET 9
+        run: dotnet build -c Release -p:TreatWarningsAsErrors=true
 
       - name: Run Pipeline
         run: dotnet run -c Release
