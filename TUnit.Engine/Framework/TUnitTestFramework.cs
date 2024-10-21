@@ -80,14 +80,19 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             
             foreach (var test in organisedTests.AllTests)
             {
-                var exception = await TestRegistrar.RegisterInstance(test.TestContext);
+                await TestRegistrar.RegisterInstance(testContext: test.TestContext,
 
-                if (exception != null)
-                {
-                    await context.MessageBus.PublishAsync(this, 
-                        new TestNodeUpdateMessage(context.Request.Session.SessionUid, 
-                            test.TestContext.ToTestNode().WithProperty(new ErrorTestNodeStateProperty(exception, "Error initializing test"))));
-                }
+                    onFailureToInitialize: exception => context.MessageBus.PublishAsync(
+                        dataProducer: this,
+                        data: new TestNodeUpdateMessage(
+                            sessionUid: context.Request.Session.SessionUid,
+                            testNode: test.TestContext
+                                .ToTestNode()
+                                .WithProperty(new ErrorTestNodeStateProperty(exception, "Error initializing test")
+                                )
+                        )
+                    )
+                );
             }
 
             await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(

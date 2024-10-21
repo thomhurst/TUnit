@@ -95,7 +95,7 @@ public static class TestRegistrar
 		TestDictionary.RegisterFailedTest(testId, failedInitializationTest);
 	}
 	
-	internal static async Task<Exception?> RegisterInstance(TestContext testContext)
+	internal static async Task RegisterInstance(TestContext testContext, Func<Exception, Task> onFailureToInitialize)
 	{
 		try
 		{
@@ -111,12 +111,10 @@ public static class TestRegistrar
 			{
 				await testRegisteredEventsObject.OnTestRegistered(testContext);
 			}
-
-			return null;
 		}
 		catch (Exception e)
 		{
-			return e;
+			await onFailureToInitialize(e);
 		}
 	}
 	
