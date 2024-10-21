@@ -104,12 +104,7 @@ internal record MethodDataSourceAttributeContainer(
     public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
     {
         if (IsEnumerableData)
-        {
-            if (ArgumentsType == ArgumentsType.Method)
-            {
-                sourceCodeWriter.WriteLine("resettableClassFactory = resettableClassFactoryDelegate();");
-            }
-            
+        { 
             sourceCodeWriter.WriteLine("}");
         }
     }
