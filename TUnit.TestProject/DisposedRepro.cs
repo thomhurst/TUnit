@@ -1,4 +1,5 @@
-﻿namespace TUnit.TestProject;
+﻿#pragma warning disable CS9113 // Parameter is unread.
+namespace TUnit.TestProject;
 
 public abstract class DisposedReproTestBase : IDisposable
 {
