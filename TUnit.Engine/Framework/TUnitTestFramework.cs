@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Logging;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Models;
 
@@ -79,7 +80,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             
             foreach (var test in organisedTests.AllTests)
             {
-                await TestRegistrar.RegisterInstance(test.TestContext);
+                var exception = await TestRegistrar.RegisterInstance(test.TestContext);
+
+                if (exception != null)
+                {
+                    await context.MessageBus.PublishAsync(this, 
+                        new TestNodeUpdateMessage(context.Request.Session.SessionUid, 
+                            test.TestContext.ToTestNode().WithProperty(new ErrorTestNodeStateProperty(exception, "Error initializing test"))));
+                }
             }
 
             await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(

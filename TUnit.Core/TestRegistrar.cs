@@ -95,17 +95,28 @@ public static class TestRegistrar
 		TestDictionary.RegisterFailedTest(testId, failedInitializationTest);
 	}
 	
-	internal static async Task RegisterInstance(TestContext testContext)
+	internal static async Task<Exception?> RegisterInstance(TestContext testContext)
 	{
-		var classType = testContext.TestDetails.ClassType;
-		
-		InstanceTracker.Register(classType);
-		
-		RegisterTestContext(classType, testContext);
-		
-		foreach (var testRegisteredEventsObject in testContext.GetTestRegisteredEventsObjects())
+		try
 		{
-			await testRegisteredEventsObject.OnTestRegistered(testContext);
+			var testRegisteredEventsObjects = testContext.GetTestRegisteredEventsObjects();
+
+			var classType = testContext.TestDetails.ClassType;
+		
+			InstanceTracker.Register(classType);
+		
+			RegisterTestContext(classType, testContext);
+
+			foreach (var testRegisteredEventsObject in testRegisteredEventsObjects)
+			{
+				await testRegisteredEventsObject.OnTestRegistered(testContext);
+			}
+
+			return null;
+		}
+		catch (Exception e)
+		{
+			return e;
 		}
 	}
 	
