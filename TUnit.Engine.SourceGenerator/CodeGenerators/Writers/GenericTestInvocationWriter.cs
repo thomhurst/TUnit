@@ -84,6 +84,9 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("ObjectBag = objectBag,");
         sourceBuilder.WriteLine("});");
         
+        sourceBuilder.WriteLine(
+            "resettableClassFactory = resettableClassFactoryDelegate();");
+        
         testSourceDataModel.ClassArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
         testSourceDataModel.MethodArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
     }
