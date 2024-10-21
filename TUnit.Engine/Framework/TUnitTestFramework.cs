@@ -154,6 +154,16 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         catch (Exception e)
         {
             await _serviceProvider.Logger.LogErrorAsync(e);
+            await context.MessageBus.PublishAsync(
+                dataProducer: this,
+                data: new TestNodeUpdateMessage(
+                    sessionUid: context.Request.Session.SessionUid,
+                    testNode: new TestNode
+                    {
+                        DisplayName = $"Unhandled exception - {e.GetType().Name}: {e.Message}",
+                        Uid = Guid.NewGuid().ToString(),
+                        Properties = new PropertyBag(new ErrorTestNodeStateProperty(e))
+                    }));
         }
         finally
         {
