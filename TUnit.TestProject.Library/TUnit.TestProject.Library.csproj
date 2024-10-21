@@ -10,7 +10,7 @@
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
 
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 
     </ItemGroup>
 

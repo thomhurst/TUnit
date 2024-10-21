@@ -12,6 +12,6 @@
     </ItemGroup>
     <ItemGroup>
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn$(ROSLYN_VERSION)/cs" Visible="false" />
-        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Engine.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Engine.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn$(ROSLYN_VERSION)/cs" Visible="false" />
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn$(ROSLYN_VERSION)/cs" Visible="false" />
     </ItemGroup>
 </Project>

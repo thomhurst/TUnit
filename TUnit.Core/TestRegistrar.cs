@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -14,71 +12,19 @@ namespace TUnit.Core;
 [StackTraceHidden]
 public static class TestRegistrar
 {
-	private const int DefaultOrder = int.MaxValue / 2;
-
-	public static void RegisterTest<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType>(TestMetadata<TClassType> testMetadata)
+	public static void RegisterTest(TestMetadata testMetadata)
 	{
-		var testId = testMetadata.TestId;
-		var methodInfo = testMetadata.MethodInfo;
-		var classType = typeof(TClassType);
-
-		var methodAttributes = testMetadata.AttributeTypes.SelectMany(x => methodInfo.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
-		var dataAttributes = testMetadata.DataAttributes;
-		var typeAttributes = testMetadata.AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x, true)).Distinct().OfType<Attribute>().Where(x => !x.IsDefaultAttribute()).ToArray();
-		var assemblyAttributes = testMetadata.AttributeTypes.SelectMany(x => classType.Assembly.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
-		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
-		
-		
-		var testDetails = new TestDetails<TClassType>
-		{
-			TestId = testId,
-			Categories = attributes.OfType<CategoryAttribute>().Select(x => x.Category).ToArray(),
-			LazyClassInstance = testMetadata.ResettableClassFactory!,
-			ClassType = classType,
-			Timeout = AttributeHelper.GetAttribute<TimeoutAttribute>(attributes)?.Timeout,
-			AssemblyAttributes = assemblyAttributes,
-			ClassAttributes = typeAttributes,
-			TestAttributes = methodAttributes,
-			DataAttributes = dataAttributes,
-			Attributes = attributes,
-			TestClassArguments = testMetadata.TestClassArguments,
-			TestMethodArguments = testMetadata.TestMethodArguments,
-			TestClassProperties = testMetadata.TestClassProperties,
-			TestClassParameterTypes = classType.GetConstructors().FirstOrDefault()?.GetParameters().Select(x => x.ParameterType).ToArray() ?? [],
-			TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
-			NotInParallelConstraintKeys = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.ConstraintKeys,
-			CurrentRepeatAttempt = testMetadata.CurrentRepeatAttempt,
-			RepeatLimit = testMetadata.RepeatLimit,
-			RetryLimit = AttributeHelper.GetAttribute<RetryAttribute>(attributes)?.Times ?? 0,
-			MethodInfo = methodInfo,
-			TestName = methodInfo.Name,
-			ReturnType = methodInfo.ReturnType,
-			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
-			TestFilePath = testMetadata.TestFilePath,
-			TestLineNumber = testMetadata.TestLineNumber,
-			ParallelLimit = testMetadata.ParallelLimit,
-		};
-
-		foreach (var propertyAttribute in attributes.OfType<PropertyAttribute>())
-		{
-			testDetails.InternalCustomProperties.Add(propertyAttribute.Name, propertyAttribute.Value);
-		}
+		var testDetails = testMetadata.BuildTestDetails();
 
 		var testContext = new TestContext(testDetails, testMetadata.ObjectBag);
 		
-		RunOnTestDiscoveryAttributeHooks([..dataAttributes, ..attributes], testContext);
-		
-		var unInvokedTest = new DiscoveredTest<TClassType>(testMetadata.ResettableClassFactory)
-		{
-			TestContext = testContext,
-			TestBody = (classInstance, cancellationToken) => testMetadata.TestMethodFactory(classInstance, cancellationToken),
-			TestExecutor = testMetadata.TestExecutor,
-			ClassConstructor = testMetadata.ClassConstructor
-		};
+		RunOnTestDiscoveryAttributeHooks([..testDetails.DataAttributes, ..testDetails.Attributes], testContext);
+
+		var unInvokedTest = testMetadata.BuildDiscoveredTest(testContext);
 
 		testContext.InternalDiscoveredTest = unInvokedTest;
 
-		TestDictionary.AddTest(testId, unInvokedTest);
+		TestDictionary.AddTest(testDetails.TestId, unInvokedTest);
 	}
 
 	private static void RunOnTestDiscoveryAttributeHooks(IEnumerable<Attribute> attributes, TestContext testContext)

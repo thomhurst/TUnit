@@ -17,7 +17,7 @@
         <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
         <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
     
-        <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Engine.SourceGenerator\TUnit.Engine.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     
