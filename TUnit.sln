@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.Analyzers.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.UnitTests", "TUnit.UnitTests\TUnit.UnitTests.csproj", "{541A8198-3D3B-4763-BD20-E39FB043ED07}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.RpcTests", "TUnit.RpcTests\TUnit.RpcTests.csproj", "{BD0CDBA0-8A38-45A2-8581-043A13A34D67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -131,6 +133,10 @@ Global
 		{541A8198-3D3B-4763-BD20-E39FB043ED07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{541A8198-3D3B-4763-BD20-E39FB043ED07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{541A8198-3D3B-4763-BD20-E39FB043ED07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD0CDBA0-8A38-45A2-8581-043A13A34D67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD0CDBA0-8A38-45A2-8581-043A13A34D67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD0CDBA0-8A38-45A2-8581-043A13A34D67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD0CDBA0-8A38-45A2-8581-043A13A34D67}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -149,6 +155,7 @@ Global
 		{5BEC27F0-C33B-4BD9-A2D1-75E6158D35DE} = {62AD1EAF-43C4-4AC0-B9FA-CD59739B3850}
 		{D5342747-7A9C-480E-ACA9-D9D6DDBA14A9} = {503DA9FA-045D-4910-8AF6-905E6048B1F1}
 		{541A8198-3D3B-4763-BD20-E39FB043ED07} = {62AD1EAF-43C4-4AC0-B9FA-CD59739B3850}
+		{BD0CDBA0-8A38-45A2-8581-043A13A34D67} = {62AD1EAF-43C4-4AC0-B9FA-CD59739B3850}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {109D285A-36B3-4503-BCDF-8E26FB0E2C5B}
