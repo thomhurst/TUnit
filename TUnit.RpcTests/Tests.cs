@@ -87,12 +87,14 @@ public class Tests
 
         await executeTestsResponse.WaitCompletion();
 
-        var passed = executionResults.Where(x => x.Node.ExecutionState == "passed").ToList();
-        var failed = executionResults.Where(x => x.Node.ExecutionState == "failed").ToList();
-        var skipped = executionResults.Where(x => x.Node.ExecutionState == "skipped").ToList();
+        var finished = executionResults.Where(x => x.Node.ExecutionState != "in-progress").ToList();
+        var passed = finished.Where(x => x.Node.ExecutionState == "passed").ToList();
+        var failed = finished.Where(x => x.Node.ExecutionState == "failed").ToList();
+        var skipped = finished.Where(x => x.Node.ExecutionState == "skipped").ToList();
 
         Assert.Multiple(() =>
         {
+            Assert.That(finished, Has.Count.EqualTo(2381));
             Assert.That(passed, Has.Count.EqualTo(2129));
             Assert.That(failed, Has.Count.EqualTo(236));
             Assert.That(skipped, Has.Count.EqualTo(8));
