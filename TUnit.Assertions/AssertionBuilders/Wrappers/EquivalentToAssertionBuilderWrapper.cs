@@ -9,7 +9,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual> : InvokableValueAssert
     {
     }
     
-    public EquivalentToAssertionBuilderWrapper<TActual> IgnoringMember(string propertyName, [CallerArgumentExpression("propertyName")] string doNotPopulateThis = "")
+    public EquivalentToAssertionBuilderWrapper<TActual> IgnoringMember(string propertyName, [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
     {
         var assertion = (EquivalentToExpectedValueAssertCondition<TActual>) Assertions.Peek();
 

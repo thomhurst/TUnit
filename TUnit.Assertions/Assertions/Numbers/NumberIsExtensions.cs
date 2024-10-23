@@ -13,7 +13,7 @@ namespace TUnit.Assertions.Extensions;
 public static class NumberIsExtensions
 {
     public static GenericEqualToAssertionBuilderWrapper<TActual> Within<TActual>(
-        this GenericEqualToAssertionBuilderWrapper<TActual> assertionBuilder, TActual tolerance, [CallerArgumentExpression("tolerance")] string doNotPopulateThis = "")
+        this GenericEqualToAssertionBuilderWrapper<TActual> assertionBuilder, TActual tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
         where TActual : INumber<TActual>
     {
         var assertion = (EqualsExpectedValueAssertCondition<TActual>) assertionBuilder.Assertions.Peek();
@@ -42,7 +42,7 @@ public static class NumberIsExtensions
     }
     
     public static InvokableValueAssertionBuilder<TActual> IsDivisibleBy<TActual>(
-        this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+        this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>

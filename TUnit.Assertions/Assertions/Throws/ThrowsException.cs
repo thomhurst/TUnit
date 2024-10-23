@@ -24,14 +24,14 @@ public class ThrowsException<TActual, TException> where TException : Exception
         delegateAssertionBuilder.AppendExpression(callerMemberName);
     }
 
-    public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression("match")] string doNotPopulateThisValue = "")
+    public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression(nameof(match))] string doNotPopulateThisValue = "")
     {
         _source.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(match, _selector)
             , [doNotPopulateThisValue]);
         return this;
     }
 
-    public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression("expected")] string doNotPopulateThisValue = "")
+    public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
     {
         _source.RegisterAssertion(new ThrowsWithMessageAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _selector)
             , [doNotPopulateThisValue]);

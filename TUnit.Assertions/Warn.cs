@@ -8,27 +8,27 @@ namespace TUnit.Assertions;
 
 internal static class Warn
 {
-    public static ValueAssertionBuilder<TActual> Unless<TActual>(TActual value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "") 
+    public static ValueAssertionBuilder<TActual> Unless<TActual>(TActual value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "") 
     {
         return new ValueAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static DelegateAssertionBuilder Unless(Action value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static DelegateAssertionBuilder Unless(Action value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
     {
         return new DelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static ValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<TActual> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static ValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<TActual> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
     {
         return new ValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static AsyncDelegateAssertionBuilder Unless(Func<Task> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static AsyncDelegateAssertionBuilder Unless(Func<Task> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
     {
         return new AsyncDelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static AsyncValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression("value")] string doNotPopulateThisValue = "")
+    public static AsyncValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
     {
         return new AsyncValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
@@ -45,10 +45,10 @@ internal static class Warn
     }
 
     public static Task<Exception> ThrowsAsync(Func<Task> @delegate,
-        [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        [CallerArgumentExpression(nameof(delegate))] string? doNotPopulateThisValue = null)
         => ThrowsAsync<Exception>(@delegate, doNotPopulateThisValue);
     
-    public static async Task<TException> ThrowsAsync<TException>(Func<Task> @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
+    public static async Task<TException> ThrowsAsync<TException>(Func<Task> @delegate, [CallerArgumentExpression(nameof(delegate))] string? doNotPopulateThisValue = null) where TException : Exception
     {
         try
         {
@@ -69,10 +69,10 @@ internal static class Warn
     }
 
     public static Exception ThrowsAsync(Action @delegate,
-        [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null)
+        [CallerArgumentExpression(nameof(delegate))] string? doNotPopulateThisValue = null)
         => ThrowsAsync<Exception>(@delegate, doNotPopulateThisValue);
     
-    public static TException ThrowsAsync<TException>(Action @delegate, [CallerArgumentExpression("delegate")] string? doNotPopulateThisValue = null) where TException : Exception
+    public static TException ThrowsAsync<TException>(Action @delegate, [CallerArgumentExpression(nameof(delegate))] string? doNotPopulateThisValue = null) where TException : Exception
     {
         try
         {
