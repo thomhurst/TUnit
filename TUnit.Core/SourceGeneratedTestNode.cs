@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-public record SourceGeneratedTestNode
+public record struct SourceGeneratedTestNode
 {
     public FailedInitializationTest? FailedInitializationTest { get; }
     public TestMetadata? TestMetadata { get; }
