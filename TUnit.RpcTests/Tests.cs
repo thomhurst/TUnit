@@ -1,10 +1,9 @@
 using System.Net;
 using System.Net.Sockets;
 using CliWrap;
-using CliWrap.Buffered;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using StreamJsonRpc;
-using TUnit.RpcTests.RpcModels;
+using TUnit.RpcTests.Clients;
+using TUnit.RpcTests.Models;
 
 namespace TUnit.RpcTests;
 
@@ -24,8 +23,12 @@ public class Tests
         // Open a port that the test could listen on
         var listener = new TcpListener(new IPEndPoint(IPAddress.Any, 0));
         listener.Start();
-
+        
         await using var _ = cancellationToken.Register(() => listener.Stop());
+
+        await using var output = new MemoryStream();
+        
+        var outputPipe = PipeTarget.ToStream(output);
         
         // Start the test host and accept the connection from the test host
         var cliProcess = Cli.Wrap("dotnet")
@@ -37,31 +40,16 @@ public class Tests
                 "--client-port",
                 ((IPEndPoint)listener.LocalEndpoint).Port.ToString()
             ])
-            .ExecuteBufferedAsync(cancellationToken: cancellationToken);
+            .WithStandardOutputPipe(outputPipe)
+            .WithStandardErrorPipe(outputPipe)
+            .ExecuteAsync(cancellationToken: cancellationToken);
 
-        var sendRequestsTask = SendRequests(listener, cancellationToken);
-
-        await cliProcess;
-
-        var testNodeUpdates = await sendRequestsTask;
+        var tcpClientTask = listener.AcceptTcpClientAsync(cancellationToken).AsTask();
         
-        var discovered = testNodeUpdates.Where(x => GetState(x.TestNode) is DiscoveredTestNodeStateProperty).ToList();
-        var passed = testNodeUpdates.Where(x => GetState(x.TestNode) is PassedTestNodeStateProperty).ToList();
-        var failed = testNodeUpdates.Where(x => GetState(x.TestNode) is FailedTestNodeStateProperty).ToList();
-        var skipped = testNodeUpdates.Where(x => GetState(x.TestNode) is SkippedTestNodeStateProperty).ToList();
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(discovered, Has.Count.EqualTo(10));
-            Assert.That(passed, Has.Count.EqualTo(10));
-            Assert.That(failed, Has.Count.EqualTo(10));
-            Assert.That(skipped, Has.Count.EqualTo(10));
-        });
-    }
-
-    private static async Task<List<TestNodeUpdateMessage>> SendRequests(TcpListener listener, CancellationToken cancellationToken)
-    {
-        using var tcpClient = await listener.AcceptTcpClientAsync(cancellationToken);
+        // Will throw if either the server fails or the TCP call fails
+        await await Task.WhenAny(cliProcess.Task, tcpClientTask);
+        
+        using var tcpClient = await tcpClientTask;
 
         var stream = tcpClient.GetStream();
         var rpc = new JsonRpc(new HeaderDelimitedMessageHandler(stream, stream, new SystemTextJsonFormatter
@@ -69,46 +57,47 @@ public class Tests
             JsonSerializerOptions = RpcJsonSerializerOptions.Default
         }));
         
-        var callback = new CallbackHandler();
-        rpc.AddLocalRpcTarget(callback);
-        rpc.StartListening();
-
-        // Send the initialize request alongside the discovery request:
-        // https://github.com/microsoft/testfx/blob/main/src/Platform/Microsoft.Testing.Platform/ServerMode/JsonRpc/RpcMessages.cs
-        // contains the shapes of payloads
+        using var client = new TestingPlatformClient(rpc, tcpClient, new ProcessHandle(cliProcess, output));
+        
+        await client.Initialize();
+        
         var discoveryId = Guid.NewGuid();
-        await rpc.InvokeWithParameterObjectAsync<InitializeResponseArgs>("initialize", new InitializeRequestArgs(Environment.ProcessId, new ClientInfo("RpcTests", "1.0.0"), new ClientCapabilities(new ClientTestingCapabilities(false, false))), cancellationToken);
-        await rpc.InvokeWithParameterObjectAsync("testing/discoverTests", new DiscoverRequestArgs(discoveryId, null, null), cancellationToken);
 
-        // Wait for callback handler to send back the empty message.
-        // Verify the messages received.
-        
-        // Request the server to shutdown and wait for the process to exit.
-        await rpc.NotifyWithParameterObjectAsync("exit", new object());
-        
-        await rpc.Completion;
-
-        return callback.TestNodeUpdates;
-    }
-
-    private static TestNodeStateProperty GetState(TestNode node) =>
-        node.Properties.OfType<TestNodeStateProperty>().First()!;
-
-    public class CallbackHandler
-    {
-        public readonly List<TestNodeUpdateMessage> TestNodeUpdates = [];
-        
-        [JsonRpcMethod("testing/testUpdates/tests", UseSingleObjectParameterDeserialization = true)]
-        public Task TestsUpdateAsync(TestNodeStateChangedEventArgs testNodeStateChangedEventArgs)
+        TestNodeUpdate[] discovered = [];
+        var discoverTestsResponse = await client.DiscoverTests(discoveryId, updates =>
         {
-            TestNodeUpdates.AddRange(testNodeStateChangedEventArgs.Changes ?? []);
+            discovered = updates;
             return Task.CompletedTask;
-        }
+        });
 
-        [JsonRpcMethod("exit")]
-        public void Exit(object? obj)
+        await discoverTestsResponse.WaitCompletion();
+        
+        Assert.Multiple(() =>
         {
-            Console.WriteLine("Exit notification received. Shutting down...");
-        }
+            Assert.That(discovered.All(x => x.Node.ExecutionState == "discovered"));
+            Assert.That(discovered, Has.Length.EqualTo(1183));
+        });
+        
+        TestNodeUpdate[] executionResults = [];
+        var executeTestsResponse = await client.RunTests(discoveryId, updates =>
+        {
+            executionResults = updates;
+            return Task.CompletedTask;
+        });
+
+        await executeTestsResponse.WaitCompletion();
+
+        var passed = executionResults.Where(x => x.Node.ExecutionState == "passed").ToList();
+        var failed = executionResults.Where(x => x.Node.ExecutionState == "failed").ToList();
+        var skipped = executionResults.Where(x => x.Node.ExecutionState == "skipped").ToList();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(passed, Has.Count.EqualTo(10));
+            Assert.That(failed, Has.Count.EqualTo(10));
+            Assert.That(skipped, Has.Count.EqualTo(10));
+        });
+
+        await client.Exit();
     }
 }
