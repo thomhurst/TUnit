@@ -9,7 +9,7 @@ public class DateTimeEqualToAssertionBuilderWrapper : InvokableValueAssertionBui
     {
     }
 
-    public DateTimeEqualToAssertionBuilderWrapper Within(TimeSpan tolerance, [CallerArgumentExpression("tolerance")] string doNotPopulateThis = "")
+    public DateTimeEqualToAssertionBuilderWrapper Within(TimeSpan tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
     {
         var assertion = (DateTimeEqualsExpectedValueAssertCondition) Assertions.Peek();
 

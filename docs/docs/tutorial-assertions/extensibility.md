@@ -75,7 +75,7 @@ In your assertion class, that'd be set up like:
 Here's a fully fledged assertion in action:
 
 ```csharp
-public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression("expected")] string doNotPopulateThisValue1 = "", [CallerArgumentExpression("stringComparison")] string doNotPopulateThisValue2 = "")
+public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "", [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = "")
     {
         return valueSource.RegisterAssertion(
             assertCondition: new StringEqualsAssertCondition(expected, stringComparison),

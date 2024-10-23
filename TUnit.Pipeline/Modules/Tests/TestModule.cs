@@ -27,14 +27,14 @@ public abstract class TestModule : Module<TestResult>
     protected Task<TestResult?> RunTestsWithFilter(IPipelineContext context, string filter,
         List<Action<TestResult>> assertions,
         CancellationToken cancellationToken = default,
-        [CallerArgumentExpression("assertions")] string assertionExpression = "")
+        [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
         return RunTestsWithFilter(context, filter, assertions, new RunOptions(), cancellationToken, assertionExpression);
     }
 
     protected async Task<TestResult?> RunTestsWithFilter(IPipelineContext context, string filter,
         List<Action<TestResult>> assertions, RunOptions runOptions, CancellationToken cancellationToken = default,
-        [CallerArgumentExpression("assertions")] string assertionExpression = "")
+        [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
         await SubModule("WithoutAot", async () =>
         {
