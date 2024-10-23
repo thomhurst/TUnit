@@ -2,5 +2,15 @@
 
 public interface ITestSource
 {
-    IReadOnlyList<SourceGeneratedTestNode> Tests { get; }
+    IReadOnlyList<SourceGeneratedTestNode> CollectTests();
 }
+
+public interface IStaticHookSource
+{
+    IReadOnlyList<StaticHookMethod> Tests { get; }
+}
+
+// public interface IInstanceHookSource
+// {
+//     IReadOnlyList<InstanceHookMethod> Tests { get; }
+// }

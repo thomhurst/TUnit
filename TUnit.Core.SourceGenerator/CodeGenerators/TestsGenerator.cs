@@ -96,7 +96,7 @@ internal class TestsGenerator : IIncrementalGenerator
     private void GenerateTests(SourceProductionContext context, (ImmutableArray<TestCollectionDataModel> Standard, ImmutableArray<TestCollectionDataModel> Inherited) testCollections)
     {
         IEnumerable<TestCollectionDataModel> allTestCollections = [..testCollections.Standard, ..testCollections.Inherited];
-        
+
         foreach (var classGrouping in allTestCollections
                      .SelectMany(x => x.TestSourceDataModels)
                      .GroupBy(x => x.ClassNameToGenerate))
@@ -114,16 +114,22 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.WriteLine($"file partial static class {className}");
+            sourceBuilder.WriteLine($"file partial class {className} : ITestSource");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine(
                 "private static System.Collections.Generic.List<SourceGeneratedTestNode> _tests = [];");
             sourceBuilder.WriteLine(
-                "public static System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> Tests => _tests;");
-            
+                "public System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> Tests => _tests;");
+
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
+            sourceBuilder.WriteLine($"TestRegistrar.RegisterTestSource(new {className}());");
+            sourceBuilder.WriteLine("}");
+
+            sourceBuilder.WriteLine("public IReadOnlyList<SourceGeneratedTestNode> CollectTests()");
+            sourceBuilder.WriteLine("{");
+            sourceBuilder.WriteLine("List<SourceGeneratedTestNode> nodes = [];");
 
             foreach (var model in classGrouping)
             {
@@ -139,14 +145,9 @@ internal class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("{");
                 FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, model);
                 sourceBuilder.WriteLine("}");
-                
-                sourceBuilder.WriteLine("}");
-
-                sourceBuilder.WriteLine("}");
-                sourceBuilder.WriteLine("}");
             }
             
-            context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
+            sourceBuilder.WriteLine("return nodes;");
         }
     }
 }

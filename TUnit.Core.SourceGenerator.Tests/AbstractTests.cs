@@ -4,7 +4,7 @@ using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class AbstractTests : TestsBase<InheritsTestsGenerator>
+internal class AbstractTests : TestsBase<TestsGenerator>
 {
     [Test]
     public Task AbstractClass() => RunTest(Path.Combine(Git.RootDirectory.FullName,
