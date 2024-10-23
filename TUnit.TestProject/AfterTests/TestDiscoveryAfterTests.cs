@@ -17,7 +17,7 @@ public class TestDiscoveryAfterHooks
     {
         await File.WriteAllTextAsync($"TestDiscoveryAfterTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests found");
         
-        var test = context.AllTests.FirstOrDefault(x =>
+        var test = context.AllTests.First(x =>
             x.TestDetails.TestName == nameof(TestDiscoveryAfterTests.EnsureAfterEveryTestDiscovoryHit));
 
         test.ObjectBag.Add("AfterEveryTestDiscoveryHit", true);
