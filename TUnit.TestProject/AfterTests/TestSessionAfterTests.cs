@@ -5,7 +5,6 @@ namespace TUnit.TestProject.AfterTests;
 
 public class TestSessionAfterHooksTests
 {
-    // TODO: The "After(TestSession)" hook is currently not being called/source generated
     [After(TestSession)]
     public static async Task AfterTestSession(TestSessionContext context)
     {

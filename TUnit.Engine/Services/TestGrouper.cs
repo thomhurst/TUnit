@@ -5,7 +5,7 @@ namespace TUnit.Engine.Services;
 
 internal class TestGrouper
 {
-    public GroupedTests OrganiseTests(DiscoveredTest[] testCases)
+    public GroupedTests OrganiseTests(DiscoveredTest[] testCases, FailedInitializationTest[] failedInitializationTestCases)
     {
         var allTestsOrderedByClass = testCases
             .GroupBy(x => x.TestDetails.ClassType)
@@ -41,13 +41,15 @@ internal class TestGrouper
 
         return new GroupedTests
         {
-            AllTests = allTestsOrderedByClass,
+            AllValidTests = allTestsOrderedByClass,
             
             Parallel = parallel,
             
             KeyedNotInParallel = keyedNotInParallel,
             
             NotInParallel = notInParallel,
+            
+            FailedInitialization = failedInitializationTestCases
         };
     }
 }

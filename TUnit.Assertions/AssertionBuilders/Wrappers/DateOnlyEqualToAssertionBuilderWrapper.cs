@@ -9,7 +9,7 @@ public class DateOnlyEqualToAssertionBuilderWrapper : InvokableValueAssertionBui
     {
     }
 
-    public DateOnlyEqualToAssertionBuilderWrapper WithinDays(int days, [CallerArgumentExpression("days")] string doNotPopulateThis = "")
+    public DateOnlyEqualToAssertionBuilderWrapper WithinDays(int days, [CallerArgumentExpression(nameof(days))] string doNotPopulateThis = "")
     {
         var assertion = (DateOnlyEqualsExpectedValueAssertCondition) Assertions.Peek();
 

@@ -5,7 +5,6 @@ namespace TUnit.TestProject.BeforeTests;
 
 public class TestSessionBeforeHooks
 {
-    // TODO: The "Before(TestSession)" hook is currently not being called/source generated
     [Before(TestSession)]
     public static async Task BeforeTestSession(TestSessionContext context)
     {

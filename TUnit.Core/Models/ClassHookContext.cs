@@ -15,7 +15,7 @@ public class ClassHookContext : Context
     
     public required Type ClassType { get; init; }
     
-    public List<TestContext> Tests { get; } = [];
+    public List<TestContext> Tests { get; init; } = [];
 
     public int TestCount => Tests.Count;
 

@@ -9,7 +9,7 @@ public class TimeOnlyEqualToAssertionBuilderWrapper : InvokableValueAssertionBui
     {
     }
 
-    public TimeOnlyEqualToAssertionBuilderWrapper Within(TimeSpan tolerance, [CallerArgumentExpression("tolerance")] string doNotPopulateThis = "")
+    public TimeOnlyEqualToAssertionBuilderWrapper Within(TimeSpan tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
     {
         var assertion = (TimeOnlyEqualsExpectedValueAssertCondition) Assertions.Peek();
 

@@ -26,6 +26,9 @@ internal class TUnitServiceProvider : IAsyncDisposable
     public TestGrouper TestGrouper { get; }
     public TestsExecutor TestsExecutor { get; }
     public OnEndExecutor OnEndExecutor { get; }
+    public FilterParser FilterParser { get; }
+    public FailedInitializationTestPublisher FailedInitializationTestPublisher { get; }
+
 
     public TUnitServiceProvider(IExtension extension,
         IMessageBus messageBus,
@@ -44,13 +47,18 @@ internal class TUnitServiceProvider : IAsyncDisposable
         StandardOutConsoleInterceptor = new StandardOutConsoleInterceptor(CommandLineOptions);
         
         StandardErrorConsoleInterceptor = new StandardErrorConsoleInterceptor(CommandLineOptions);
+
+        FilterParser = new FilterParser();
+
+        FailedInitializationTestPublisher = new FailedInitializationTestPublisher(extension);
         
         var testsLoader = new TestsLoader(LoggerFactory);
         var testFilterService = new TestFilterService(LoggerFactory);
         
-        TestDiscoverer = new TUnitTestDiscoverer(testsLoader, testFilterService, LoggerFactory);
-       
         TestGrouper = new TestGrouper();
+
+        TestDiscoverer = new TUnitTestDiscoverer(testsLoader, testFilterService, TestGrouper, LoggerFactory, extension);
+        
         var disposer = new Disposer(Logger);
         var cancellationTokenSource = EngineCancellationToken.CancellationTokenSource;
         var testInvoker = new TestInvoker();

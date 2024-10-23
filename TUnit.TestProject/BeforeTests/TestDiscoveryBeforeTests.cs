@@ -2,7 +2,6 @@
 
 public class TestDiscoveryBeforeHooks
 {
-    // TODO: The "Before(TestDiscovery)" hook is currently not being called/source generated
     [Before(TestDiscovery)]
     public static async Task BeforeTestDiscovery(BeforeTestDiscoveryContext context)
     {
