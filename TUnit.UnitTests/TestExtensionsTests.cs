@@ -24,7 +24,7 @@ public class TestExtensionsTests
             .With(x => x.TestClassArguments, [])
             .Create();
 
-        var context = new TestContext(testDetails, []);
+        var context = new TestContext(null!, testDetails, []);
 
         var name = context.GetClassTypeName();
         
@@ -46,7 +46,7 @@ public class TestExtensionsTests
             .With(x => x.TestClassArguments, [])
             .Create();
 
-        var context = new TestContext(testDetails, []);
+        var context = new TestContext(null!, testDetails, []);
 
         var name = context.GetClassTypeName();
         
