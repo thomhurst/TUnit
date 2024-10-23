@@ -1,16 +1,12 @@
 ﻿using System.Collections.Concurrent;
-using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
-using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Logging;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Hooks;
-using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Framework;
 
@@ -19,7 +15,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly IExtension _extension;
     private readonly IServiceProvider _frameworkServiceProvider;
     private readonly ITestFrameworkCapabilities _capabilities;
-    private readonly ConcurrentDictionary<string, TUnitServiceProvider> _serviceProviders;
+    private static readonly ConcurrentDictionary<string, TUnitServiceProvider> ServiceProviders = [];
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
@@ -51,7 +47,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         System.Diagnostics.Debugger.Launch();
 #endif
 
-        var serviceProvider = _serviceProviders.GetOrAdd(context.Request.Session.SessionUid.Value,
+        var serviceProvider = ServiceProviders.GetOrAdd(context.Request.Session.SessionUid.Value,
             _ => new TUnitServiceProvider(_extension, context, context.MessageBus, _frameworkServiceProvider)
         );
         
@@ -138,7 +134,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         try
         {
-            await using var _ = _serviceProviders[context.SessionUid.Value];
+            await using var _ = ServiceProviders[context.SessionUid.Value];
             
             return new CloseTestSessionResult
             {
