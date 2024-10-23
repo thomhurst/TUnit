@@ -19,7 +19,7 @@ internal class TUnitTestDiscoverer(
 {
     private readonly ILogger<TUnitTestDiscoverer> _logger = loggerFactory.CreateLogger<TUnitTestDiscoverer>();
     
-    private IReadOnlyCollection<DiscoveredTest>? _cachedTests;
+    private static IReadOnlyCollection<DiscoveredTest>? _cachedTests;
     
     public async Task<GroupedTests> FilterTests(ExecuteRequestContext context, string? stringTestFilter, CancellationToken cancellationToken)
     {
@@ -36,7 +36,17 @@ internal class TUnitTestDiscoverer(
         await _logger.LogTraceAsync($"Found {filteredTests.Length} tests after filtering.");
         
         var organisedTests = testGrouper.OrganiseTests(filteredTests, GetFailedToInitializeTests());
-            
+        
+        if (context.Request is TestExecutionRequest)
+        {
+            await RegisterInstances(context, organisedTests);
+        }
+
+        return organisedTests;
+    }
+
+    private async Task RegisterInstances(ExecuteRequestContext context, GroupedTests organisedTests)
+    {
         foreach (var test in organisedTests.AllValidTests)
         {
             await TestRegistrar.RegisterInstance(testContext: test.TestContext,
@@ -53,8 +63,6 @@ internal class TUnitTestDiscoverer(
                 )
             );
         }
-        
-        return organisedTests;
     }
 
     private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(string? stringTestFilter)
