@@ -45,22 +45,6 @@ public class AssemblyHookOrchestrator(
         }
     }
 
-    private static LazyHook<string, IHookMessagePublisher> Convert(Assembly assembly, StaticHookMethod<AssemblyHookContext> staticMethod)
-    {
-        return new LazyHook<string, IHookMessagePublisher>(async (executeRequestContext, hookPublisher) =>
-        {
-            var context = GetAssemblyHookContext(assembly);
-            
-            var timeout = staticMethod.Timeout;
-
-            await hookPublisher.Push(executeRequestContext, $"Before Assembly: {staticMethod.Name}", staticMethod, () =>
-                RunHelpers.RunWithTimeoutAsync(
-                    token => staticMethod.HookExecutor.ExecuteBeforeAssemblyHook(staticMethod.MethodInfo, context,
-                        () => staticMethod.Body(context, token)), timeout)
-            );
-        });
-    }
-
     internal async Task ExecuteBeforeHooks(ExecuteRequestContext executeRequestContext, Assembly assembly, TestContext testContext)
     {
         var context = GetAssemblyHookContext(assembly);
@@ -77,7 +61,7 @@ public class AssemblyHookOrchestrator(
         }
     }
 
-    internal async Task ExecuteCleanupsIfLastInstance(ExecuteRequestContext executeRequestContext, TestContext testContext1,
+    internal async Task ExecuteCleanupsIfLastInstance(ExecuteRequestContext executeRequestContext,
         Assembly assembly, TestContext testContext, List<Exception> cleanUpExceptions)
     {
         if (!InstanceTracker.IsLastTestForAssembly(assembly))

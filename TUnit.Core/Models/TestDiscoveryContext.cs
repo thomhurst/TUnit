@@ -9,12 +9,30 @@ public class TestDiscoveryContext : Context
         internal set => Contexts.Value = value;
     }
     
-    internal TestDiscoveryContext(IEnumerable<AssemblyHookContext> assemblies)
+    internal TestDiscoveryContext(IEnumerable<DiscoveredTest> discoveredTests)
     {
-        Assemblies = assemblies;
+        var classContexts = discoveredTests.GroupBy(x => x.TestDetails.ClassType).Select(x => new ClassHookContext()
+        {
+            ClassType = x.Key,
+            Tests = [..x.Select(dt => dt.TestContext)]
+        });
+
+        var assemblyContexts = classContexts.GroupBy(x => x.ClassType.Assembly).Select(x => new AssemblyHookContext()
+        {
+            Assembly = x.Key,
+            TestClasses = [..x]
+        });
+
+        Assemblies = assemblyContexts;
         Current = this;
     }
-    
+
+    protected TestDiscoveryContext(IEnumerable<AssemblyHookContext> assemblyHookContexts)
+    {
+        Assemblies = assemblyHookContexts;
+        Current = this;
+    }
+
     public required string? TestFilter { get; init; }
 
     public IEnumerable<AssemblyHookContext> Assemblies { get; }
