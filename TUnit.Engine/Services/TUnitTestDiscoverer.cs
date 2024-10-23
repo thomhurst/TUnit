@@ -27,7 +27,7 @@ internal class TUnitTestDiscoverer(
 
         cancellationToken.ThrowIfCancellationRequested();
                 
-        var allDiscoveredTests = _cachedTests ??= await FetchTests(stringTestFilter);
+        var allDiscoveredTests = _cachedTests ??= await DiscoverTests(stringTestFilter);
 
         var executionRequest = context.Request as TestExecutionRequest;
         
@@ -57,7 +57,7 @@ internal class TUnitTestDiscoverer(
         return organisedTests;
     }
 
-    private async Task<IReadOnlyCollection<DiscoveredTest>> FetchTests(string? stringTestFilter)
+    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(string? stringTestFilter)
     {
         await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
         {
@@ -67,7 +67,7 @@ internal class TUnitTestDiscoverer(
         var allDiscoveredTests = testsLoader.GetTests();
 
         await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
-            new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
+            new TestDiscoveryContext(allDiscoveredTests)
             {
                 TestFilter = stringTestFilter
             });
@@ -75,7 +75,7 @@ internal class TUnitTestDiscoverer(
         return allDiscoveredTests;
     }
 
-    public FailedInitializationTest[] GetFailedToInitializeTests()
+    private FailedInitializationTest[] GetFailedToInitializeTests()
     {
         var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
 

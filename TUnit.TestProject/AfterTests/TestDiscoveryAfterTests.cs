@@ -20,12 +20,6 @@ public class TestDiscoveryAfterHooks
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(TestDiscoveryAfterTests.EnsureAfterEveryTestDiscovoryHit));
 
-        if (test == null)
-        {
-            // This test might not have been executed due to filters, so the below exception would cause problems.
-            return;
-        }
-
         test.ObjectBag.Add("AfterEveryTestDiscoveryHit", true);
     }
 }

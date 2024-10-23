@@ -17,7 +17,7 @@ public class AssemblyHookContext : Context
 
     public required Assembly Assembly { get; init; }
 
-    public HashSet<ClassHookContext> TestClasses { get; } = [];
+    public HashSet<ClassHookContext> TestClasses { get; init; } = [];
 
     public IEnumerable<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests);
 
