@@ -254,7 +254,7 @@ internal class SingleTestExecutor(
             await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context, testContext,
                 test.TestContext.TestDetails.ClassType, cleanUpExceptions);
 
-            await assemblyHookOrchestrator.ExecuteCleanupsIfLastInstance(context, testContext,
+            await assemblyHookOrchestrator.ExecuteCleanupsIfLastInstance(context,
                 test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
 
             if (InstanceTracker.IsLastTest())
