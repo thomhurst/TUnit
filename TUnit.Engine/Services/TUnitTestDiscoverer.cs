@@ -11,7 +11,7 @@ using TUnit.Engine.Models;
 namespace TUnit.Engine.Services;
 
 internal class TUnitTestDiscoverer(
-    TestsLoader testsLoader,
+    TestsCollector testsCollector,
     TestFilterService testFilterService,
     TestGrouper testGrouper,
     ILoggerFactory loggerFactory,
@@ -19,7 +19,7 @@ internal class TUnitTestDiscoverer(
 {
     private readonly ILogger<TUnitTestDiscoverer> _logger = loggerFactory.CreateLogger<TUnitTestDiscoverer>();
     
-    private static IReadOnlyCollection<DiscoveredTest>? _cachedTests;
+    private IReadOnlyCollection<DiscoveredTest>? _cachedTests;
     
     public async Task<GroupedTests> FilterTests(ExecuteRequestContext context, string? stringTestFilter, CancellationToken cancellationToken)
     {
@@ -27,7 +27,7 @@ internal class TUnitTestDiscoverer(
 
         cancellationToken.ThrowIfCancellationRequested();
                 
-        var allDiscoveredTests = _cachedTests ??= await DiscoverTests(stringTestFilter);
+        var allDiscoveredTests = _cachedTests ??= await DiscoverTests(context, stringTestFilter);
 
         var executionRequest = context.Request as TestExecutionRequest;
         
@@ -65,14 +65,14 @@ internal class TUnitTestDiscoverer(
         }
     }
 
-    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(string? stringTestFilter)
+    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(ExecuteRequestContext context, string? stringTestFilter)
     {
         await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
         {
             TestFilter = stringTestFilter
         });
         
-        var allDiscoveredTests = testsLoader.GetTests();
+        var allDiscoveredTests = testsCollector.GetTests(context).ToArray();
 
         await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
             new TestDiscoveryContext(allDiscoveredTests)

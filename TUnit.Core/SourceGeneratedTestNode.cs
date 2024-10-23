@@ -2,17 +2,17 @@
 
 public record SourceGeneratedTestNode
 {
-    private readonly FailedInitializationTest? _failedInitializationTest;
-    private readonly TestMetadata? _testMetadata;
+    public FailedInitializationTest? FailedInitializationTest { get; }
+    public TestMetadata? TestMetadata { get; }
 
     public SourceGeneratedTestNode(FailedInitializationTest failedInitializationTest)
     {
-        _failedInitializationTest = failedInitializationTest;
+        FailedInitializationTest = failedInitializationTest;
     }
     
     public SourceGeneratedTestNode(TestMetadata testMetadata)
     {
-        _testMetadata = testMetadata;
+        TestMetadata = testMetadata;
     }
     
     public static implicit operator SourceGeneratedTestNode(FailedInitializationTest failedInitializationTest) => new(failedInitializationTest);

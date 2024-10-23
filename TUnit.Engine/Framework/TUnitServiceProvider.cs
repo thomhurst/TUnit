@@ -52,7 +52,7 @@ internal class TUnitServiceProvider : IAsyncDisposable
 
         FailedInitializationTestPublisher = new FailedInitializationTestPublisher(extension);
         
-        var testsLoader = new TestsLoader(LoggerFactory);
+        var testsLoader = new TestsCollector(extension, LoggerFactory);
         var testFilterService = new TestFilterService(LoggerFactory);
         
         TestGrouper = new TestGrouper();

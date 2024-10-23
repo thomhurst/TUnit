@@ -13,11 +13,9 @@ namespace TUnit.Core;
 [StackTraceHidden]
 public static class TestRegistrar
 {
-	private static readonly List<ITestSource> TestSources = [];
-
 	public static void RegisterTestSource(ITestSource testSource)
 	{
-		TestSources.Add(testSource);
+		TestDictionary.TestSources.Add(testSource);
 	}
 	
 	public static void RegisterTest(TestMetadata testMetadata)

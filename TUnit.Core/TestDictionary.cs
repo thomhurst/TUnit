@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using TUnit.Core.Data;
+using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
 
@@ -9,6 +10,8 @@ namespace TUnit.Core;
 #endif
 internal static class TestDictionary
 {
+    public static readonly List<ITestSource> TestSources = [];
+
     public static readonly Dictionary<string, DiscoveredTest> Tests = new();
     public static readonly Dictionary<string, FailedInitializationTest> FailedInitializationTests = new();
     
