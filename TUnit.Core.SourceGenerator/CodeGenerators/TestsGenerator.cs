@@ -114,14 +114,15 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.WriteLine($"file partial class {className}");
+            sourceBuilder.WriteLine($"file partial static class {className}");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine(
-                "public static System.Collections.Generic.List<SourceGeneratedTestNode> _tests = [];");
+                "private static System.Collections.Generic.List<SourceGeneratedTestNode> _tests = [];");
             sourceBuilder.WriteLine(
                 "public static System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> Tests => _tests;");
             
-            sourceBuilder.WriteLine($"public {className}()");
+            sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+            sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
 
             foreach (var model in classGrouping)
