@@ -71,6 +71,10 @@ internal record TestSourceDataModel
     public required string[] AttributeTypes { get; init; }
     public required string[] PropertyAttributeTypes { get; init; }
     public required ClassPropertiesContainer PropertyArguments { get; init; }
+    public required string AssemblyName { get; init; }
+    public required string Namespace { get; init; }
+
+    public string ClassNameToGenerate => new string([..MinimalTypeName, '_', ..Namespace, '_', ..AssemblyName]).Replace('.', '_');
 
     public string MethodVariablesWithCancellationToken()
     {

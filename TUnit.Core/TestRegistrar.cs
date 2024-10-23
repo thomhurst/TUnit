@@ -3,6 +3,7 @@ using System.Reflection;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
 
@@ -12,6 +13,13 @@ namespace TUnit.Core;
 [StackTraceHidden]
 public static class TestRegistrar
 {
+	private static readonly List<ITestSource> TestSources = [];
+
+	public static void RegisterTestSource(ITestSource testSource)
+	{
+		TestSources.Add(testSource);
+	}
+	
 	public static void RegisterTest(TestMetadata testMetadata)
 	{
 		var testDetails = testMetadata.BuildTestDetails();

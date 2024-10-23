@@ -10,7 +10,7 @@ internal static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
         
-        sourceBuilder.WriteLine("nodes.Add(new FailedInitializationTest");
+        sourceBuilder.WriteLine("_tests.Add(new FailedInitializationTest");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestClass = typeof({testSourceDataModel.FullyQualifiedTypeName}),");

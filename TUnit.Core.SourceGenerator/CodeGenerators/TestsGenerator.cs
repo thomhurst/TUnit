@@ -1,7 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
@@ -14,20 +15,25 @@ internal class TestsGenerator : IIncrementalGenerator
         var basicTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
-                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
+                predicate: static (s, _) => true,
                 transform: static (ctx, _) =>
-                    new TestCollectionDataModel(GetSemanticTargetForGeneration(ctx)))
-            .Where(static m => m is not null);
+                    new TestCollectionDataModel(GetSemanticTargetForTestMethodGeneration(ctx)))
+            .Where(static m => m is not null)
+            .Collect();
         
-        context.RegisterSourceOutput(basicTests, Execute);
+        var inheritsTestsClasses = context.SyntaxProvider
+            .ForAttributeWithMetadataName("TUnit.Core.InheritsTestsAttribute",
+                predicate: static (s, _) => true,
+                transform: static (ctx, _) => GetSemanticTargetForInheritedTestsGeneration(ctx))
+            .Where(static m => m is not null)
+            .Collect();
+
+        var combined = basicTests.Combine(inheritsTestsClasses);
+        
+        context.RegisterSourceOutput(combined, GenerateTests!);
     }
 
-    static bool IsSyntaxTargetForGeneration(SyntaxNode node)
-    {
-        return node is MethodDeclarationSyntax;
-    }
-
-    static IEnumerable<TestSourceDataModel> GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context)
+    static IEnumerable<TestSourceDataModel> GetSemanticTargetForTestMethodGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
@@ -54,13 +60,48 @@ internal class TestsGenerator : IIncrementalGenerator
             yield return testSourceDataModel;
         }
     }
-
-    private void Execute(SourceProductionContext context, TestCollectionDataModel testCollection)
+    
+    static TestCollectionDataModel? GetSemanticTargetForInheritedTestsGeneration(GeneratorAttributeSyntaxContext context)
     {
-        foreach (var model in testCollection.TestSourceDataModels)
+        if (context.TargetSymbol is not INamedTypeSymbol namedTypeSymbol)
         {
-            var className = $"{model.MinimalTypeName}__{model.MethodName}";
-            var fileName = $"{className}__{Guid.NewGuid():N}";
+            return null;
+        }
+        
+        if (namedTypeSymbol.IsAbstract)
+        {
+            return null;
+        }
+
+        if (namedTypeSymbol.IsStatic)
+        {
+            return null;
+        }
+
+        if (namedTypeSymbol.DeclaredAccessibility != Accessibility.Public)
+        {
+            return null;
+        }
+
+        return new TestCollectionDataModel(
+            namedTypeSymbol.GetMembersIncludingBase()
+                .OfType<IMethodSymbol>()
+                .Where(x => !x.IsAbstract)
+                .Where(x => x.MethodKind != MethodKind.Constructor)
+                .Where(x => x.IsTest())
+                .SelectMany(x => x.ParseTestDatas(context, namedTypeSymbol))
+        );
+    }
+
+    private void GenerateTests(SourceProductionContext context, (ImmutableArray<TestCollectionDataModel> Standard, ImmutableArray<TestCollectionDataModel> Inherited) testCollections)
+    {
+        IEnumerable<TestCollectionDataModel> allTestCollections = [..testCollections.Standard, ..testCollections.Inherited];
+        
+        foreach (var classGrouping in allTestCollections
+                     .SelectMany(x => x.TestSourceDataModels)
+                     .GroupBy(x => x.ClassNameToGenerate))
+        {
+            var className = classGrouping.Key;
 
             using var sourceBuilder = new SourceCodeWriter();
 
@@ -73,32 +114,38 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.WriteLine($"file class {className}");
+            sourceBuilder.WriteLine($"file partial class {className}");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine("[SourceGeneratedTestNodeAttribute]");
-            sourceBuilder.WriteLine("public static System.Collections.Generic.List<SourceGeneratedTestNode> TestNodes()");
+            sourceBuilder.WriteLine(
+                "public static System.Collections.Generic.List<SourceGeneratedTestNode> _tests = [];");
+            sourceBuilder.WriteLine(
+                "public static System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> Tests => _tests;");
+            
+            sourceBuilder.WriteLine($"public {className}()");
             sourceBuilder.WriteLine("{");
 
-            sourceBuilder.WriteLine("var nodes = new global::System.Collections.Generic.List<SourceGeneratedTestNode>();");
-            sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
-            sourceBuilder.WriteLine($"var {VariableNames.TestMethodDataIndex} = 0;");
-            
-            sourceBuilder.WriteLine("try");
-            sourceBuilder.WriteLine("{");
-            GenericTestInvocationWriter.GenerateTestInvocationCode(sourceBuilder, model);
-            sourceBuilder.WriteLine("}");
-            sourceBuilder.WriteLine("catch (global::System.Exception exception)");
-            sourceBuilder.WriteLine("{");
-            FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, model);
-            sourceBuilder.WriteLine("}");
-            
-            sourceBuilder.WriteLine("return nodes;");
-            
-            sourceBuilder.WriteLine("}");
-            
-            sourceBuilder.WriteLine("}");
+            foreach (var model in classGrouping)
+            {
+                sourceBuilder.WriteLine("{");
+                sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
+                sourceBuilder.WriteLine($"var {VariableNames.TestMethodDataIndex} = 0;");
 
-            context.AddSource($"{fileName}.Generated.cs", sourceBuilder.ToString());
+                sourceBuilder.WriteLine("try");
+                sourceBuilder.WriteLine("{");
+                GenericTestInvocationWriter.GenerateTestInvocationCode(sourceBuilder, model);
+                sourceBuilder.WriteLine("}");
+                sourceBuilder.WriteLine("catch (global::System.Exception exception)");
+                sourceBuilder.WriteLine("{");
+                FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, model);
+                sourceBuilder.WriteLine("}");
+                
+                sourceBuilder.WriteLine("}");
+
+                sourceBuilder.WriteLine("}");
+                sourceBuilder.WriteLine("}");
+            }
+            
+            context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
         }
     }
 }

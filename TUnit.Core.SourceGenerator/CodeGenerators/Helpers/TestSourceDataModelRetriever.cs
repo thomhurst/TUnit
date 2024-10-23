@@ -145,6 +145,8 @@ internal static class TestSourceDataModelRetriever
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             MinimalTypeName = namedTypeSymbol.Name,
+            AssemblyName = namedTypeSymbol.ContainingAssembly.Name,
+            Namespace = namedTypeSymbol.ContainingNamespace.Name,
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
