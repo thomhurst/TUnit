@@ -146,7 +146,6 @@ public sealed class TestingPlatformClient : IDisposable
     {
         JsonRpcClient.Dispose();
         _tcpClient.Dispose();
-        _processHandler.Dispose();
     }
 
     public record Log(LogLevel LogLevel, string Message);

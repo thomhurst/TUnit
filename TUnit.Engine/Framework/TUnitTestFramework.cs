@@ -29,6 +29,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _serviceProvider = new TUnitServiceProvider(extension, frameworkServiceProvider.GetMessageBus(), frameworkServiceProvider);
         
         GlobalContext.Current.GlobalLogger = _serviceProvider.Logger;
+        
+        _serviceProvider.StandardOutConsoleInterceptor.Initialize();
+        _serviceProvider.StandardErrorConsoleInterceptor.Initialize();
+        
+        _serviceProvider.Initializer.Initialize();
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -51,61 +56,22 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 #if LAUNCH_DEBUGGER
         System.Diagnostics.Debugger.Launch();
 #endif
-        
-        EngineCancellationToken.Initialise(context.CancellationToken);
-        
-        _serviceProvider.StandardOutConsoleInterceptor.Initialize();
-        _serviceProvider.StandardErrorConsoleInterceptor.Initialize();
+
+        var stringFilter = _serviceProvider.FilterParser.GetTestFilter(context);
 
         TestSessionContext? testSessionContext = null;
         try
         {
-            _serviceProvider.Initializer.Initialize();
-
-            var currentTestFilter = GetTestFilter(context);
+            EngineCancellationToken.Initialise(context.CancellationToken);
             
-            GlobalContext.Current.TestFilter = currentTestFilter;
-            
-            await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
-            {
-                TestFilter = currentTestFilter
-            });
-            
-            var discoveredTests = _serviceProvider.TestDiscoverer.DiscoverTests(context.Request as TestExecutionRequest,
-                context.CancellationToken);
-
-            var failedToInitializeTests = _serviceProvider.TestDiscoverer.GetFailedToInitializeTests();
-
-            var organisedTests = _serviceProvider.TestGrouper.OrganiseTests(discoveredTests);
-            
-            foreach (var test in organisedTests.AllTests)
-            {
-                await TestRegistrar.RegisterInstance(testContext: test.TestContext,
-
-                    onFailureToInitialize: exception => context.MessageBus.PublishAsync(
-                        dataProducer: this,
-                        data: new TestNodeUpdateMessage(
-                            sessionUid: context.Request.Session.SessionUid,
-                            testNode: test.TestContext
-                                .ToTestNode()
-                                .WithProperty(new ErrorTestNodeStateProperty(exception, "Error initializing test")
-                                )
-                        )
-                    )
-                );
-            }
-
-            await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
-                new TestDiscoveryContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
-                {
-                    TestFilter = currentTestFilter
-                });
+            var filteredTests = await _serviceProvider.TestDiscoverer
+                .FilterTests(context, stringFilter, EngineCancellationToken.Token);
 
             switch (context.Request)
             {
                 case DiscoverTestExecutionRequest:
                 {
-                    foreach (var testNode in discoveredTests.Select(testInformation => testInformation.ToTestNode()))
+                    foreach (var testNode in filteredTests.AllValidTests.Select(testInformation => testInformation.ToTestNode()))
                     {
                         testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
 
@@ -115,21 +81,25 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                         );
                     }
 
-                    await NotifyFailedTests(context, failedToInitializeTests, true);
+                    await _serviceProvider.FailedInitializationTestPublisher.NotifyFailedTests(context,
+                        filteredTests.FailedInitialization, true);
+
                     break;
                 }
                 case RunTestExecutionRequest runTestExecutionRequest:
-                    await NotifyFailedTests(context, failedToInitializeTests, false);
+                    
+                    await _serviceProvider.FailedInitializationTestPublisher.NotifyFailedTests(context,
+                        filteredTests.FailedInitialization, false);
 
                     testSessionContext =
                         new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
                         {
-                            TestFilter = currentTestFilter
+                            TestFilter = stringFilter
                         };
 
                     await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
 
-                    await _serviceProvider.TestsExecutor.ExecuteAsync(organisedTests, runTestExecutionRequest.Filter,
+                    await _serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context);
 
                     await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
@@ -173,42 +143,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
     }
 
-    private async Task NotifyFailedTests(ExecuteRequestContext context,
-        IEnumerable<FailedInitializationTest> failedToInitializeTests, bool isDiscovered)
-    {
-        foreach (var failedToInitializeTest in failedToInitializeTests)
-        {
-            var testClass = failedToInitializeTest.TestClass!;
-            var failedNode = new TestNode
-            {
-                Uid = failedToInitializeTest.TestId,
-                DisplayName = failedToInitializeTest.TestName,
-                Properties = new PropertyBag(
-                    isDiscovered ? DiscoveredTestNodeStateProperty.CachedInstance : new ErrorTestNodeStateProperty(failedToInitializeTest.Exception, "Test failed to initialize"),
-                    new TestFileLocationProperty(failedToInitializeTest.TestFilePath,
-                        new LinePositionSpan(new LinePosition(failedToInitializeTest.TestLineNumber, 0),
-                            new LinePosition(failedToInitializeTest.TestLineNumber, 0))
-                    ),
-                    new TestMethodIdentifierProperty(
-                        AssemblyFullName: testClass.Assembly.FullName!,
-                        Namespace: testClass.Namespace!,
-                        TypeName: testClass.Name,
-                        MethodName: failedToInitializeTest.TestName,
-                        ParameterTypeFullNames: failedToInitializeTest.ParameterTypeFullNames.Select(x => x.FullName!).ToArray(),
-                        ReturnTypeFullName: failedToInitializeTest.ReturnType.FullName!
-                        ),
-                    // TRX Reports
-                    new TrxExceptionProperty(failedToInitializeTest.Exception.Message, failedToInitializeTest.Exception.StackTrace)
-                )
-            };
-                        
-            await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-                sessionUid: context.Request.Session.SessionUid,
-                testNode: failedNode)
-            );
-        }
-    }
-
     public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {
         try
@@ -235,32 +169,4 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         typeof(TestNodeUpdateMessage),
         typeof(SessionFileArtifact)
     ];
-
-    private static string? GetTestFilter(ExecuteRequestContext context)
-    {
-        var filter = context.Request switch
-        {
-            RunTestExecutionRequest runTestExecutionRequest => runTestExecutionRequest.Filter,
-            DiscoverTestExecutionRequest discoverTestExecutionRequest => discoverTestExecutionRequest.Filter,
-            TestExecutionRequest testExecutionRequest => testExecutionRequest.Filter,
-            _ => throw new ArgumentException(nameof(context.Request))
-        };
-
-        return StringifyFilter(filter);
-    }
-
-#pragma warning disable TPEXP
-    private static string? StringifyFilter(ITestExecutionFilter filter)
-    {
-        return filter switch
-        {
-            NopFilter => null,
-            TestNodeUidListFilter testNodeUidListFilter => string.Join(",",
-                testNodeUidListFilter.TestNodeUids.Select(x => x.Value)),
-            TreeNodeFilter treeNodeFilter => treeNodeFilter.Filter,
-            _ => throw new ArgumentOutOfRangeException(nameof(filter))
-        };
-    }
-#pragma warning restore TPEXP
-
 }

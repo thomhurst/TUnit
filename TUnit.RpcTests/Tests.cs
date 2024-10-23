@@ -63,10 +63,10 @@ public class Tests
         
         var discoveryId = Guid.NewGuid();
 
-        TestNodeUpdate[] discovered = [];
+        List<TestNodeUpdate> discovered = [];
         var discoverTestsResponse = await client.DiscoverTests(discoveryId, updates =>
         {
-            discovered = updates;
+            discovered.AddRange(updates);
             return Task.CompletedTask;
         });
 
@@ -75,13 +75,13 @@ public class Tests
         Assert.Multiple(() =>
         {
             Assert.That(discovered.All(x => x.Node.ExecutionState == "discovered"));
-            Assert.That(discovered, Has.Length.EqualTo(1183));
+            Assert.That(discovered, Has.Count.EqualTo(1183));
         });
         
-        TestNodeUpdate[] executionResults = [];
+        List<TestNodeUpdate> executionResults = [];
         var executeTestsResponse = await client.RunTests(discoveryId, updates =>
         {
-            executionResults = updates;
+            executionResults.AddRange(updates);
             return Task.CompletedTask;
         });
 
@@ -93,9 +93,9 @@ public class Tests
 
         Assert.Multiple(() =>
         {
-            Assert.That(passed, Has.Count.EqualTo(10));
-            Assert.That(failed, Has.Count.EqualTo(10));
-            Assert.That(skipped, Has.Count.EqualTo(10));
+            Assert.That(passed, Has.Count.EqualTo(2129));
+            Assert.That(failed, Has.Count.EqualTo(236));
+            Assert.That(skipped, Has.Count.EqualTo(8));
         });
 
         await client.Exit();
