@@ -2,7 +2,6 @@
 using System.Reflection;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -17,36 +16,7 @@ public static class TestRegistrar
 	{
 		TestDictionary.TestSources.Add(testSource);
 	}
-	
-	public static void RegisterTest(TestMetadata testMetadata)
-	{
-		var testDetails = testMetadata.BuildTestDetails();
 
-		var testContext = new TestContext(testDetails, testMetadata.ObjectBag);
-		
-		RunOnTestDiscoveryAttributeHooks([..testDetails.DataAttributes, ..testDetails.Attributes], testContext);
-
-		var unInvokedTest = testMetadata.BuildDiscoveredTest(testContext);
-
-		testContext.InternalDiscoveredTest = unInvokedTest;
-
-		TestDictionary.AddTest(testDetails.TestId, unInvokedTest);
-	}
-
-	private static void RunOnTestDiscoveryAttributeHooks(IEnumerable<Attribute> attributes, TestContext testContext)
-	{
-		DiscoveredTestContext? discoveredTestContext = null;
-		foreach (var onTestDiscoveryAttribute in attributes.OfType<ITestDiscoveryEvent>().Reverse()) // Reverse to run assembly, then class, then method
-		{
-			onTestDiscoveryAttribute.OnTestDiscovery(discoveredTestContext ??= new DiscoveredTestContext(testContext));
-		}
-	}
-
-	public static void Failed(string testId, FailedInitializationTest failedInitializationTest)
-	{
-		TestDictionary.RegisterFailedTest(testId, failedInitializationTest);
-	}
-	
 	internal static async Task RegisterInstance(TestContext testContext, Func<Exception, Task> onFailureToInitialize)
 	{
 		try

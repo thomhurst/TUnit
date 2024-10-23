@@ -11,9 +11,11 @@ public static class TestContextExtensions
     
     public static TestContext[] GetTests(this TestContext context, string testName, Type[] parameterTypes)
     {
-        var tests = TestDictionary.GetTestsByNameAndParameters(testName, parameterTypes, context.TestDetails.ClassType, context.TestDetails.TestClassParameterTypes)
-            .Select(x => x.TestContext)
-            .ToArray();
+        var tests = context.TestFinder.GetTestsByNameAndParameters(
+            testName: testName, 
+            methodParameterTypes: parameterTypes, 
+            classType: context.TestDetails.ClassType, 
+            classParameterTypes: context.TestDetails.TestClassParameterTypes);
 
         if (tests.Any(x => !x.TestTask.IsCompleted))
         {

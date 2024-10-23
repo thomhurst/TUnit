@@ -13,8 +13,7 @@ internal static class TestDictionary
     public static readonly List<ITestSource> TestSources = [];
 
     public static readonly Dictionary<string, DiscoveredTest> Tests = new();
-    public static readonly Dictionary<string, FailedInitializationTest> FailedInitializationTests = new();
-    
+
     public static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
     public static readonly ConcurrentDictionary<Type, List<(string Name, StaticHookMethod HookMethod, LazyHook<string, IHookMessagePublisher> Action)>> ClassSetUps = new();
     public static readonly ConcurrentDictionary<Type, List<(string Name, StaticHookMethod HookMethod, Func<Task> Action)>> ClassCleanUps = new();
@@ -40,42 +39,4 @@ internal static class TestDictionary
     
     public static readonly List<(string Name, StaticHookMethod HookMethod, Func<TestSessionContext, Task> Action)> BeforeTestSession = [];
     public static readonly List<(string Name, StaticHookMethod HookMethod, Func<TestSessionContext, Task> Action)> AfterTestSession = [];
-    
-    internal static void AddTest(string testId, DiscoveredTest discoveredTest)
-    {
-        Tests[testId] = discoveredTest;
-    }
-
-    public static void RegisterFailedTest(string testId, FailedInitializationTest failedInitializationTest)
-    {
-        FailedInitializationTests[testId] = failedInitializationTest;
-    }
-    
-    internal static IReadOnlyCollection<DiscoveredTest> GetAllTests()
-    {
-        return Tests.Values;
-    }
-
-    internal static DiscoveredTest[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes, Type classType, IEnumerable<Type> classParameterTypes)
-    {
-        var testsWithoutMethodParameterTypesMatching = Tests.Values.Where(x =>
-            x.TestContext.TestDetails.TestName == testName &&
-            x.TestContext.TestDetails.ClassType == classType &&
-            x.TestContext.TestDetails.TestClassParameterTypes.SequenceEqual(classParameterTypes))
-            .ToArray();
-
-        if (testsWithoutMethodParameterTypesMatching.GroupBy(x => string.Join(", ", x.TestContext.TestDetails.TestMethodParameterTypes.Select(t => t.FullName)))
-                .Count() > 1)
-        {
-            return testsWithoutMethodParameterTypesMatching.Where(x =>
-                    x.TestContext.TestDetails.TestMethodParameterTypes.SequenceEqual(methodParameterTypes)).ToArray();
-        }
-        
-        return testsWithoutMethodParameterTypesMatching;
-    }
-    
-    internal static FailedInitializationTest[] GetFailedToInitializeTests()
-    {
-        return FailedInitializationTests.Values.ToArray();
-    }
 }

@@ -8,6 +8,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
@@ -28,6 +29,7 @@ internal class SingleTestExecutor(
     ParallelLimitProvider parallelLimitProvider,
     AssemblyHookOrchestrator assemblyHookOrchestrator,
     ClassHookOrchestrator classHookOrchestrator,
+    ITestFinder testFinder,
     TUnitFrameworkLogger logger)
     : IDataProducer
 {
@@ -435,7 +437,7 @@ internal class SingleTestExecutor(
     {
         foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
         {
-            var dependencies = TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
+            var dependencies = testFinder.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
                 dependsOnAttribute.ParameterTypes, testDetails.ClassType,
                 testDetails.TestClassParameterTypes);
 
@@ -448,7 +450,7 @@ internal class SingleTestExecutor(
                     throw new DependencyConflictException(currentChain);
                 }
                 
-                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
+                yield return (dependency.InternalDiscoveredTest, dependsOnAttribute.ProceedOnFailure);
 
                 foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails, currentChain))
                 {
