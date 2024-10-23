@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <PackageReference Include="CliWrap" />
+        <PackageReference Include="MessagePack" />
         <PackageReference Include="Microsoft.NET.Test.Sdk"/>
         <PackageReference Include="Microsoft.Testing.Platform" />
         <PackageReference Include="NUnit"/>
