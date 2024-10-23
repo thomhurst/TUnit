@@ -15,7 +15,7 @@ internal class TestsGenerator : IIncrementalGenerator
         var basicTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
-                predicate: static (s, _) => true,
+                predicate: static (_, _) => true,
                 transform: static (ctx, _) =>
                     new TestCollectionDataModel(GetSemanticTargetForTestMethodGeneration(ctx)))
             .Where(static m => m is not null)
@@ -23,14 +23,13 @@ internal class TestsGenerator : IIncrementalGenerator
         
         var inheritsTestsClasses = context.SyntaxProvider
             .ForAttributeWithMetadataName("TUnit.Core.InheritsTestsAttribute",
-                predicate: static (s, _) => true,
+                predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForInheritedTestsGeneration(ctx))
             .Where(static m => m is not null)
             .Collect();
-
-        var combined = basicTests.Combine(inheritsTestsClasses);
         
-        context.RegisterSourceOutput(combined, GenerateTests!);
+        context.RegisterSourceOutput(basicTests, (sourceContext, data) => GenerateTests(sourceContext, data));
+        context.RegisterSourceOutput(inheritsTestsClasses, (sourceContext, data) => GenerateTests(sourceContext, data!, "Inherited_"));
     }
 
     static IEnumerable<TestSourceDataModel> GetSemanticTargetForTestMethodGeneration(GeneratorAttributeSyntaxContext context)
@@ -93,13 +92,11 @@ internal class TestsGenerator : IIncrementalGenerator
         );
     }
 
-    private void GenerateTests(SourceProductionContext context, (ImmutableArray<TestCollectionDataModel> Standard, ImmutableArray<TestCollectionDataModel> Inherited) testCollections)
+    private void GenerateTests(SourceProductionContext context, ImmutableArray<TestCollectionDataModel> testCollections, string? prefix = null)
     {
-        IEnumerable<TestCollectionDataModel> allTestCollections = [..testCollections.Standard, ..testCollections.Inherited];
-
-        foreach (var classGrouping in allTestCollections
+        foreach (var classGrouping in testCollections
                      .SelectMany(x => x.TestSourceDataModels)
-                     .GroupBy(x => x.ClassNameToGenerate))
+                     .GroupBy(x => $"{prefix}{x.ClassNameToGenerate}"))
         {
             var className = classGrouping.Key;
 
@@ -114,7 +111,7 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.WriteLine($"file partial class {className} : ITestSource");
+            sourceBuilder.WriteLine($"file partial class {className} : TUnit.Core.Interfaces.SourceGenerator.ITestSource");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine(
                 "private static System.Collections.Generic.List<SourceGeneratedTestNode> _tests = [];");
@@ -129,11 +126,21 @@ internal class TestsGenerator : IIncrementalGenerator
 
             sourceBuilder.WriteLine("public IReadOnlyList<SourceGeneratedTestNode> CollectTests()");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine("List<SourceGeneratedTestNode> nodes = [];");
+            sourceBuilder.WriteLine("return");
+            sourceBuilder.WriteLine("[");
+            for (var i = 0; i < classGrouping.Count(); i++)
+            {
+                sourceBuilder.WriteLine($"..Tests{i}(),");
+            }
+            sourceBuilder.WriteLine("];");
+            sourceBuilder.WriteLine("}");
 
+            var index = 0;
             foreach (var model in classGrouping)
             {
+                sourceBuilder.WriteLine($"private List<SourceGeneratedTestNode> Tests{index++}()");
                 sourceBuilder.WriteLine("{");
+                sourceBuilder.WriteLine("List<SourceGeneratedTestNode> nodes = [];");
                 sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
                 sourceBuilder.WriteLine($"var {VariableNames.TestMethodDataIndex} = 0;");
 
@@ -145,9 +152,14 @@ internal class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("{");
                 FailedTestInitializationWriter.GenerateFailedTestCode(sourceBuilder, model);
                 sourceBuilder.WriteLine("}");
+                
+                sourceBuilder.WriteLine("return nodes;");
+                sourceBuilder.WriteLine("}");
             }
-            
-            sourceBuilder.WriteLine("return nodes;");
+
+            sourceBuilder.WriteLine("}");
+
+            context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
         }
     }
 }
