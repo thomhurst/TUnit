@@ -2,27 +2,16 @@
 
 namespace TUnit.RpcTests.Clients;
 
-public class ProcessHandle : IProcessHandle
+public class ProcessHandle(CommandTask<CommandResult> commandTask, Stream output) : IProcessHandle
 {
-    private readonly CommandTask<CommandResult> _commandTask;
-    private readonly Stream _output;
-
-    public ProcessHandle(CommandTask<CommandResult> commandTask, Stream output)
-    {
-        _commandTask = commandTask;
-        _output = output;
-        Id = commandTask.ProcessId;
-        ProcessName = "dotnet";
-    }
-    
-    public int Id { get; }
-    public string ProcessName { get; }
+    public int Id { get; } = commandTask.ProcessId;
+    public string ProcessName { get; } = "dotnet";
     public int ExitCode { get; private set; }
     public TextWriter StandardInput  => new StringWriter();
-    public TextReader StandardOutput => new StreamReader(_output);
+    public TextReader StandardOutput => new StreamReader(output);
     public void Dispose()
     {
-        _commandTask.Dispose();
+        commandTask.Dispose();
     }
 
     public void Kill()
@@ -37,7 +26,7 @@ public class ProcessHandle : IProcessHandle
 
     public async Task<int> WaitForExitAsync()
     {
-        var commandResult = await _commandTask;
+        var commandResult = await commandTask;
         return ExitCode = commandResult.ExitCode;
     }
 

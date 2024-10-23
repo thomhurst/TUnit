@@ -11,15 +11,13 @@ public class Tests
 {
     [CancelAfter(300_000)]
     [Test]
-    public async Task Test1(CancellationToken cancellationToken)
+    public async Task TestAsync(CancellationToken cancellationToken)
     {
-        await RunTests(cancellationToken);
+        await RunTestsAsync(cancellationToken);
     }
 
-    private async Task RunTests(CancellationToken cancellationToken)
+    private async Task RunTestsAsync(CancellationToken cancellationToken)
     {
-        using var signalEvent = new ManualResetEventSlim(false);
-
         // Open a port that the test could listen on
         var listener = new TcpListener(new IPEndPoint(IPAddress.Any, 0));
         listener.Start();
@@ -59,18 +57,18 @@ public class Tests
         
         using var client = new TestingPlatformClient(rpc, tcpClient, new ProcessHandle(cliProcess, output));
         
-        await client.Initialize();
+        await client.InitializeAsync();
         
         var discoveryId = Guid.NewGuid();
 
         List<TestNodeUpdate> discovered = [];
-        var discoverTestsResponse = await client.DiscoverTests(discoveryId, updates =>
+        var discoverTestsResponse = await client.DiscoverTestsAsync(discoveryId, updates =>
         {
             discovered.AddRange(updates);
             return Task.CompletedTask;
         });
 
-        await discoverTestsResponse.WaitCompletion();
+        await discoverTestsResponse.WaitCompletionAsync();
         
         Assert.Multiple(() =>
         {
@@ -79,13 +77,13 @@ public class Tests
         });
         
         List<TestNodeUpdate> executionResults = [];
-        var executeTestsResponse = await client.RunTests(discoveryId, updates =>
+        var executeTestsResponse = await client.RunTestsAsync(discoveryId, updates =>
         {
             executionResults.AddRange(updates);
             return Task.CompletedTask;
         });
 
-        await executeTestsResponse.WaitCompletion();
+        await executeTestsResponse.WaitCompletionAsync();
 
         var finished = executionResults.Where(x => x.Node.ExecutionState != "in-progress").ToList();
         var passed = finished.Where(x => x.Node.ExecutionState == "passed").ToList();
@@ -100,6 +98,6 @@ public class Tests
             Assert.That(skipped, Has.Count.EqualTo(8));
         });
 
-        await client.Exit();
+        await client.ExitAsync();
     }
 }

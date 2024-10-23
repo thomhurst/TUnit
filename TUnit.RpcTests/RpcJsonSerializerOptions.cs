@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.Testing.Platform.Extensions.Messages;
 
 namespace TUnit.RpcTests;
 
