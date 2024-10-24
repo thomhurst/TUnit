@@ -14,27 +14,27 @@ public class SourceRegistrar
         Sources.TestSources.Add(testSource);
     }
 	
-    public static void Register(ITestHookSource testSource)
+    public static void RegisterTestHookSource(ITestHookSource testSource)
     {
         Sources.TestHookSources.Add(testSource);
     }
 	
-    public static void Register(IClassHookSource testSource)
+    public static void RegisterClassHookSource(IClassHookSource testSource)
     {
         Sources.ClassHookSources.Add(testSource);
     }
 	
-    public static void Register(IAssemblyHookSource testSource)
+    public static void RegisterAssemblyHookSource(IAssemblyHookSource testSource)
     {
         Sources.AssemblyHookSources.Add(testSource);
     }
 	
-    public static void Register(ITestSessionHookSource testSource)
+    public static void RegisterTestSessionHookSource(ITestSessionHookSource testSource)
     {
         Sources.TestSessionHookSources.Add(testSource);
     }
 	
-    public static void Register(ITestDiscoveryHookSource testSource)
+    public static void RegisterTestDiscoveryHookSource(ITestDiscoveryHookSource testSource)
     {
         Sources.TestDiscoveryHookSources.Add(testSource);
     }

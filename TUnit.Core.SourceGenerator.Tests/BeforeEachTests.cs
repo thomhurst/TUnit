@@ -77,7 +77,7 @@ internal class BeforeTests : TestsBase<TestHooksGenerator>
                     },
                     """);
             
-            await AssertFileContains(generatedFiles[0], 
+            await AssertFileContains(generatedFiles[3], 
                 """
                     new InstanceHookMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                     { 

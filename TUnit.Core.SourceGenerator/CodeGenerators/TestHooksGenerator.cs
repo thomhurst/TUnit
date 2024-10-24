@@ -124,12 +124,21 @@ internal class TestHooksGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.WriteLine($"file partial class {className} : {string.Join(", ", hooks.Select(x => x.HookLevel).Distinct().Select(GetInterfaceType))}");
+            
+            var distinctHookLevelsForClass = groupedByTypeName.Select(x => x.HookLevel).Distinct().ToList();
+            
+            sourceBuilder.WriteLine($"file partial class {className} : {string.Join(", ", distinctHookLevelsForClass.Select(GetInterfaceType))}");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"SourceRegistrar.Register(new {className}());");
+            
+            sourceBuilder.WriteLine($"var instance = new {className}();");
+            foreach (var hookLevel in distinctHookLevelsForClass)
+            {
+                sourceBuilder.WriteLine($"SourceRegistrar.{GetSourceRegisterMethodName(hookLevel)}(instance);");
+            }
+
             sourceBuilder.WriteLine("}");
 
             foreach (var hooksGroupedByLevel in groupedByTypeName.GroupBy(x => x.HookLevel))
@@ -176,6 +185,19 @@ internal class TestHooksGenerator : IIncrementalGenerator
                 
             productionContext.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
         }
+    }
+
+    private string GetSourceRegisterMethodName(string hookLevel)
+    {
+        return hookLevel switch
+        {
+            "TUnit.Core.HookType.TestDiscovery" => "RegisterTestDiscoveryHookSource",
+            "TUnit.Core.HookType.TestSession" => "RegisterTestSessionHookSource", 
+            "TUnit.Core.HookType.Assembly" => "RegisterAssemblyHookSource", 
+            "TUnit.Core.HookType.Class" => "RegisterClassHookSource", 
+            "TUnit.Core.HookType.Test" => "RegisterTestHookSource", 
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     private static string GetInterfaceType(string hookLevel)
