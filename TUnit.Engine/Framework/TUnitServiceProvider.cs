@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.OutputDevice;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
@@ -86,6 +87,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, LoggerFactory, extension));
         
         TestFinder = Register(new TestsFinder(TestDiscoverer));
+        Register<ITestFinder>(TestFinder);
         
         var disposer = Register(new Disposer(Logger));
         var cancellationTokenSource = Register(EngineCancellationToken.CancellationTokenSource);
@@ -110,7 +112,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private T Register<T>(T t)
     {
-        _services.Add(t!.GetType(), t);
+        _services.Add(typeof(T), t!);
+        
         return t;
     }
 
