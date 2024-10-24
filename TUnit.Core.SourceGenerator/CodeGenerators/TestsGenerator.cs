@@ -27,9 +27,17 @@ internal class TestsGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetSemanticTargetForInheritedTestsGeneration(ctx))
             .Where(static m => m is not null)
             .Collect();
+
+        var testsData = basicTests
+            .Combine(inheritsTestsClasses)
+            .SelectMany((x, _) =>
+            {
+                IEnumerable<TestCollectionDataModel> enumerable = [..x.Left, ..x.Right!];
+                return enumerable;
+            })
+            .Collect();
         
-        context.RegisterSourceOutput(basicTests, (sourceContext, data) => GenerateTests(sourceContext, data));
-        context.RegisterSourceOutput(inheritsTestsClasses, (sourceContext, data) => GenerateTests(sourceContext, data!, "Inherited_"));
+        context.RegisterSourceOutput(testsData, (sourceContext, data) => GenerateTests(sourceContext, data));
     }
 
     static IEnumerable<TestSourceDataModel> GetSemanticTargetForTestMethodGeneration(GeneratorAttributeSyntaxContext context)
@@ -83,7 +91,8 @@ internal class TestsGenerator : IIncrementalGenerator
         }
 
         return new TestCollectionDataModel(
-            namedTypeSymbol.GetMembersIncludingBase()
+            namedTypeSymbol.GetBaseTypes()
+                .SelectMany(x => x.GetMembers())
                 .OfType<IMethodSymbol>()
                 .Where(x => !x.IsAbstract)
                 .Where(x => x.MethodKind != MethodKind.Constructor)

@@ -35,10 +35,15 @@ internal static class TypeExtensions
 
         return list;
     }
-
+    
     public static IEnumerable<ITypeSymbol> GetSelfAndBaseTypes(this ITypeSymbol namedTypeSymbol)
     {
-        var type = namedTypeSymbol;
+        return [namedTypeSymbol, ..GetBaseTypes(namedTypeSymbol)];
+    }
+
+    public static IEnumerable<ITypeSymbol> GetBaseTypes(this ITypeSymbol namedTypeSymbol)
+    {
+        var type = namedTypeSymbol.BaseType;
         
         while (type != null)
         {

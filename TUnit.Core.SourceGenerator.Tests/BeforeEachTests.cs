@@ -71,7 +71,7 @@ internal class BeforeTests : TestsBase<TestHooksGenerator>
                     new InstanceHookMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                     { 
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(testContext)),
+                    Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(context)),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
                     },
@@ -82,7 +82,7 @@ internal class BeforeTests : TestsBase<TestHooksGenerator>
                     new InstanceHookMethod<global::TUnit.TestProject.BeforeTests.SetupTests>
                     { 
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.SetupTests).GetMethod("SetupWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-                    Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(testContext, cancellationToken)),
+                    Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.SetupWithContext(context, cancellationToken)),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
                     },
