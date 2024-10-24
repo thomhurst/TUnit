@@ -134,123 +134,42 @@ internal class TestHooksGenerator : IIncrementalGenerator
 
             foreach (var hooksGroupedByLevel in groupedByTypeName.GroupBy(x => x.HookLevel))
             {
-
-                sourceBuilder.WriteLine(
-                    $"public IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, HookLocationType.Before, false)}> CollectBeforeHooks()");
-                sourceBuilder.WriteLine("{");
-                sourceBuilder.WriteLine("return");
-                sourceBuilder.WriteLine("[");
-
-                foreach (var model in hooksGroupedByLevel.Where(x =>
-                             x.HookLocationType == HookLocationType.Before && !x.IsEveryHook))
+                foreach (var groupedByIsEvery in hooksGroupedByLevel.GroupBy(x => x.IsEveryHook))
                 {
-                    if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Test")
+                    foreach (var hookLocationType in new[] { HookLocationType.Before, HookLocationType.After })
                     {
-                        TestHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Class")
-                    {
-                        ClassHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Assembly")
-                    {
-                        AssemblyHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key is "TUnit.Core.HookType.TestDiscovery"
-                             or "TUnit.Core.HookType.TestSession")
-                    {
-                        GlobalTestHooksWriter.Execute(sourceBuilder, model, model.HookLocationType);
+                        sourceBuilder.WriteLine(
+                            $"public IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, groupedByIsEvery.Key)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, groupedByIsEvery.Key)}()");
+
+                        sourceBuilder.WriteLine("{");
+                        sourceBuilder.WriteLine("return");
+                        sourceBuilder.WriteLine("[");
+
+                        foreach (var model in groupedByIsEvery.Where(x => x.HookLocationType == hookLocationType))
+                        {
+                            if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Test")
+                            {
+                                TestHooksWriter.Execute(sourceBuilder, model);
+                            }
+                            else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Class")
+                            {
+                                ClassHooksWriter.Execute(sourceBuilder, model);
+                            }
+                            else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Assembly")
+                            {
+                                AssemblyHooksWriter.Execute(sourceBuilder, model);
+                            }
+                            else if (hooksGroupedByLevel.Key is "TUnit.Core.HookType.TestDiscovery"
+                                     or "TUnit.Core.HookType.TestSession")
+                            {
+                                GlobalTestHooksWriter.Execute(sourceBuilder, model, model.HookLocationType);
+                            }
+                        }
+
+                        sourceBuilder.WriteLine("];");
+                        sourceBuilder.WriteLine("}");
                     }
                 }
-
-                sourceBuilder.WriteLine("];");
-                sourceBuilder.WriteLine("}");
-                sourceBuilder.WriteLine();
-
-                sourceBuilder.WriteLine(
-                    $"public IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, HookLocationType.After, false)}> CollectAfterHooks()");
-                sourceBuilder.WriteLine("{");
-                sourceBuilder.WriteLine("return");
-                sourceBuilder.WriteLine("[");
-
-                foreach (var model in hooksGroupedByLevel.Where(x =>
-                             x.HookLocationType == HookLocationType.After && !x.IsEveryHook))
-                {
-                    if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Test")
-                    {
-                        TestHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Class")
-                    {
-                        ClassHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Assembly")
-                    {
-                        AssemblyHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key is "TUnit.Core.HookType.TestDiscovery"
-                             or "TUnit.Core.HookType.TestSession")
-                    {
-                        GlobalTestHooksWriter.Execute(sourceBuilder, model, model.HookLocationType);
-                    }
-                }
-
-                sourceBuilder.WriteLine("];");
-                sourceBuilder.WriteLine("}");
-
-                sourceBuilder.WriteLine(
-                    $"public IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, HookLocationType.Before, true)}> CollectBeforeEveryHooks()");
-                sourceBuilder.WriteLine("{");
-                sourceBuilder.WriteLine("return");
-                sourceBuilder.WriteLine("[");
-
-                foreach (var model in groupedByTypeName.Where(x =>
-                             x.HookLocationType == HookLocationType.Before && x.IsEveryHook))
-                {
-                    if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Test")
-                    {
-                        TestHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Class")
-                    {
-                        ClassHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Assembly")
-                    {
-                        AssemblyHooksWriter.Execute(sourceBuilder, model);
-                    }
-                }
-
-                sourceBuilder.WriteLine("];");
-                sourceBuilder.WriteLine("}");
-                sourceBuilder.WriteLine();
-
-                sourceBuilder.WriteLine(
-                    $"public IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, HookLocationType.After, true)}> CollectAfterEveryHooks()");
-                sourceBuilder.WriteLine("{");
-                sourceBuilder.WriteLine("return");
-                sourceBuilder.WriteLine("[");
-
-                foreach (var model in groupedByTypeName.Where(x =>
-                             x.HookLocationType == HookLocationType.After && x.IsEveryHook))
-                {
-                    if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Test")
-                    {
-                        TestHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Class")
-                    {
-                        ClassHooksWriter.Execute(sourceBuilder, model);
-                    }
-                    else if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Assembly")
-                    {
-                        AssemblyHooksWriter.Execute(sourceBuilder, model);
-                    }
-                }
-
-                sourceBuilder.WriteLine("];");
-                sourceBuilder.WriteLine("}");
-
             }
 
             sourceBuilder.WriteLine("}");
@@ -284,6 +203,51 @@ internal class TestHooksGenerator : IIncrementalGenerator
             "TUnit.Core.HookType.Class" => "StaticHookMethod<ClassHookContext>",
             "TUnit.Core.HookType.Test" when isEvery => "StaticHookMethod<TestContext>",
             "TUnit.Core.HookType.Test" => "InstanceHookMethod",
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+    
+    private static string GetMethodName(string hookLevel, HookLocationType hookLocationType, bool isEvery)
+    {
+        return hookLevel switch
+        {
+            "TUnit.Core.HookType.TestDiscovery" 
+                when hookLocationType == HookLocationType.Before => "CollectBeforeTestDiscoveryHooks",
+            "TUnit.Core.HookType.TestDiscovery" 
+                when hookLocationType == HookLocationType.After => "CollectAfterTestDiscoveryHooks",
+            
+            "TUnit.Core.HookType.TestSession" 
+                when hookLocationType == HookLocationType.Before => "CollectBeforeTestSessionHooks",
+            "TUnit.Core.HookType.TestSession" 
+                when hookLocationType == HookLocationType.After => "CollectAfterTestSessionHooks",
+            
+            "TUnit.Core.HookType.Assembly"
+                when hookLocationType == HookLocationType.Before && isEvery => "CollectBeforeEveryAssemblyHooks",
+            "TUnit.Core.HookType.Assembly"
+                when hookLocationType == HookLocationType.Before => "CollectBeforeAssemblyHooks",
+            "TUnit.Core.HookType.Assembly"
+                when hookLocationType == HookLocationType.After && isEvery => "CollectAfterEveryAssemblyHooks",
+            "TUnit.Core.HookType.Assembly"
+                when hookLocationType == HookLocationType.After => "CollectAfterAssemblyHooks",
+            
+            "TUnit.Core.HookType.Class"
+                when hookLocationType == HookLocationType.Before && isEvery => "CollectBeforeEveryClassHooks",
+            "TUnit.Core.HookType.Class"
+                when hookLocationType == HookLocationType.Before => "CollectBeforeClassHooks",
+            "TUnit.Core.HookType.Class"
+                when hookLocationType == HookLocationType.After && isEvery => "CollectAfterEveryClassHooks",
+            "TUnit.Core.HookType.Class"
+                when hookLocationType == HookLocationType.After => "CollectAfterClassHooks",
+            
+            "TUnit.Core.HookType.Test"
+                when hookLocationType == HookLocationType.Before && isEvery => "CollectBeforeEveryTestHooks",
+            "TUnit.Core.HookType.Test"
+                when hookLocationType == HookLocationType.Before => "CollectBeforeTestHooks",
+            "TUnit.Core.HookType.Test"
+                when hookLocationType == HookLocationType.After && isEvery => "CollectAfterEveryTestHooks",
+            "TUnit.Core.HookType.Test"
+                when hookLocationType == HookLocationType.After => "CollectAfterTestHooks",
+            
             _ => throw new ArgumentOutOfRangeException()
         };
     }
