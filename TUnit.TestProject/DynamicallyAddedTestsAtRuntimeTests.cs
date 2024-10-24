@@ -1,4 +1,5 @@
-﻿namespace TUnit.TestProject;
+﻿#pragma warning disable
+namespace TUnit.TestProject;
 
 public class DynamicallyAddedTestsAtRuntimeTests
 {

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Core.Interfaces;
+#pragma warning disable
 
 namespace TUnit.TestProject;
 
