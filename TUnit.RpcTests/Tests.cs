@@ -19,7 +19,7 @@ public class Tests
     private async Task RunTestsAsync(CancellationToken cancellationToken)
     {
         // Open a port that the test could listen on
-        var listener = new TcpListener(new IPEndPoint(IPAddress.Any, 0));
+        var listener = new TcpListener(new IPEndPoint(IPAddress.Loopback, 0));
         listener.Start();
         
         await using var _ = cancellationToken.Register(() => listener.Stop());
@@ -61,37 +61,35 @@ public class Tests
         
         var discoveryId = Guid.NewGuid();
 
-        List<TestNodeUpdate> discovered = [];
+        List<TestNodeUpdate> results = [];
         var discoverTestsResponse = await client.DiscoverTestsAsync(discoveryId, updates =>
         {
-            discovered.AddRange(updates);
+            results.AddRange(updates);
             return Task.CompletedTask;
         });
 
         await discoverTestsResponse.WaitCompletionAsync();
-        
-        Assert.Multiple(() =>
-        {
-            Assert.That(discovered.All(x => x.Node.ExecutionState == "discovered"));
-            Assert.That(discovered, Has.Count.EqualTo(1183));
-        });
-        
-        List<TestNodeUpdate> executionResults = [];
+
+        var originalDiscovered = results.Where(x => x.Node.ExecutionState is "discovered").ToList();
+
         var executeTestsResponse = await client.RunTestsAsync(discoveryId, updates =>
         {
-            executionResults.AddRange(updates);
+            results.AddRange(updates);
             return Task.CompletedTask;
         });
 
         await executeTestsResponse.WaitCompletionAsync();
 
-        var finished = executionResults.Where(x => x.Node.ExecutionState != "in-progress").ToList();
+        var discovered = results.Where(x => x.Node.ExecutionState is "discovered").ToList();
+        var finished = results.Where(x => x.Node.ExecutionState is not "in-progress" and not "discovered").ToList();
         var passed = finished.Where(x => x.Node.ExecutionState == "passed").ToList();
         var failed = finished.Where(x => x.Node.ExecutionState == "failed").ToList();
         var skipped = finished.Where(x => x.Node.ExecutionState == "skipped").ToList();
 
         Assert.Multiple(() =>
         {
+            Assert.That(originalDiscovered, Has.Count.EqualTo(1194));
+            Assert.That(discovered, Has.Count.EqualTo(1194));
             Assert.That(finished, Has.Count.EqualTo(2381));
             Assert.That(passed, Has.Count.EqualTo(2129));
             Assert.That(failed, Has.Count.EqualTo(236));
