@@ -145,6 +145,14 @@ internal class TestHooksGenerator : IIncrementalGenerator
             {
                 foreach (var isEvery in new[] { true, false})
                 {
+                    if (isEvery && hooksGroupedByLevel.Key 
+                            is "TUnit.Core.HookType.TestDiscovery"
+                            or "TUnit.Core.HookType.TestSession")
+                    {
+                        // These don't have an 'isEvery' option
+                        continue;
+                    }
+                    
                     foreach (var hookLocationType in new[] { HookLocationType.Before, HookLocationType.After })
                     {
                         sourceBuilder.WriteLine(
