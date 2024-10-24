@@ -137,6 +137,11 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
     
     private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
     {
+        if (overallStart == default)
+        {
+            return new TimingProperty(new TimingInfo(default, default, TimeSpan.Zero));
+        }
+        
         var end = DateTimeOffset.Now;
 
         lock (testContext.Lock)
