@@ -48,7 +48,11 @@ public abstract class AssertionBuilder<TActual>
 
     protected internal AssertionBuilder<TActual> AppendExpression(string expression)
     {
-        ExpressionBuilder?.Append($".{expression}");
+        if (!string.IsNullOrEmpty(expression))
+        {
+            ExpressionBuilder?.Append($".{expression}");
+        }
+
         return this;
     }
     

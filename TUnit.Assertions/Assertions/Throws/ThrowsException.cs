@@ -14,14 +14,11 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public ThrowsException(InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,
         IDelegateSource<TActual> source,
-        Func<Exception?, Exception?> selector,
-        [CallerMemberName] string callerMemberName = "")
+        Func<Exception?, Exception?> selector)
     {
         _delegateAssertionBuilder = delegateAssertionBuilder;
         _source = source;
         _selector = selector;
-
-        delegateAssertionBuilder.AppendExpression(callerMemberName);
     }
 
     public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression(nameof(match))] string doNotPopulateThisValue = "")
