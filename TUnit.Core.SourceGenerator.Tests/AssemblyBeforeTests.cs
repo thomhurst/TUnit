@@ -1,4 +1,3 @@
-using TUnit.Assertions.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -14,7 +13,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
         {
             await AssertFileContains(generatedFiles[0], 
                 """
-                TestRegistrar.RegisterBeforeHook(typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase1).Assembly, new StaticHookMethod<AssemblyHookContext>
+                SourceRegistrar.Register(typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase1).Assembly, new StaticHookMethod<AssemblyHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase1).GetMethod("BeforeAll1", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblyBase1.BeforeAll1()),
@@ -27,7 +26,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                TestRegistrar.RegisterBeforeHook(typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase2).Assembly, new StaticHookMethod<AssemblyHookContext>
+                SourceRegistrar.Register(typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase2).Assembly, new StaticHookMethod<AssemblyHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase2).GetMethod("BeforeAll2", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblyBase2.BeforeAll2()),
@@ -40,7 +39,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                TestRegistrar.RegisterBeforeHook(typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase3).Assembly, new StaticHookMethod<AssemblyHookContext>
+                SourceRegistrar.Register(typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase3).Assembly, new StaticHookMethod<AssemblyHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase3).GetMethod("BeforeAll3", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblyBase3.BeforeAll3()),
@@ -53,7 +52,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                            TestRegistrar.RegisterBeforeHook(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
+                            SourceRegistrar.Register(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUp", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUp()),
@@ -66,7 +65,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                            TestRegistrar.RegisterBeforeHook(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
+                            SourceRegistrar.Register(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(context)),
@@ -79,7 +78,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                            TestRegistrar.RegisterBeforeHook(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
+                            SourceRegistrar.Register(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUp", 0, [typeof(global::System.Threading.CancellationToken)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUp(cancellationToken)),
@@ -92,7 +91,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                            TestRegistrar.RegisterBeforeHook(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
+                            SourceRegistrar.Register(typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(context, cancellationToken)),
