@@ -143,18 +143,18 @@ internal class TestHooksGenerator : IIncrementalGenerator
 
             foreach (var hooksGroupedByLevel in groupedByTypeName.GroupBy(x => x.HookLevel))
             {
-                foreach (var groupedByIsEvery in hooksGroupedByLevel.GroupBy(x => x.IsEveryHook))
+                foreach (var isEvery in new[] { true, false})
                 {
                     foreach (var hookLocationType in new[] { HookLocationType.Before, HookLocationType.After })
                     {
                         sourceBuilder.WriteLine(
-                            $"public IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, groupedByIsEvery.Key)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, groupedByIsEvery.Key)}()");
+                            $"public IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}()");
 
                         sourceBuilder.WriteLine("{");
                         sourceBuilder.WriteLine("return");
                         sourceBuilder.WriteLine("[");
 
-                        foreach (var model in groupedByIsEvery.Where(x => x.HookLocationType == hookLocationType))
+                        foreach (var model in hooksGroupedByLevel.Where(x => x.HookLocationType == hookLocationType && x.IsEveryHook == isEvery))
                         {
                             if (hooksGroupedByLevel.Key == "TUnit.Core.HookType.Test")
                             {
