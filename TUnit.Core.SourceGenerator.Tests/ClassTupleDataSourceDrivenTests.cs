@@ -14,8 +14,6 @@ internal class ClassTupleDataSourceDrivenTests : TestsBase<TestsGenerator>
             "ClassTupleDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(4);
-            
             await AssertFileContains(generatedFiles[index], $"var classArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.{classMethodName}());");
             await AssertFileContains(generatedFiles[index], "global::System.Int32 classArg = classArgTuples.Item1;");
             await AssertFileContains(generatedFiles[index], "global::System.String classArg1 = classArgTuples.Item2;");

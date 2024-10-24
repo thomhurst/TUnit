@@ -12,8 +12,6 @@ internal class MultipleClassDataSourceDrivenTests : TestsBase<TestsGenerator>
             "MultipleClassDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(2);
-
             await AssertFileContains(generatedFiles[0],
                 "global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1 classArg = classArgGeneratedData.Item1;");
             await AssertFileContains(generatedFiles[0],

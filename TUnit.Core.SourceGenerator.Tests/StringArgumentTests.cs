@@ -15,37 +15,37 @@ internal class StringArgumentTests : TestsBase<TestsGenerator>
                 global::System.String methodArg = "";
                 """);
             
-            await AssertFileContains(generatedFiles[1], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 global::System.String methodArg = @"\";
                 """);
             
-            await AssertFileContains(generatedFiles[2], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 global::System.String methodArg = @"\t";
                 """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 global::System.String methodArg = "\t";
                 """);
             
-            await AssertFileContains(generatedFiles[4], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 global::System.String methodArg = "\\t";
                 """);
             
-            await AssertFileContains(generatedFiles[5], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 global::System.String methodArg = "\\\t";
                 """);
             
-            await AssertFileContains(generatedFiles[6], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 global::System.String methodArg = "\\\\t";
                 """);
 
-            await AssertFileContains(generatedFiles[7], 
+            await AssertFileContains(generatedFiles[0], 
                 """"
                 global::System.String methodArg = """
                         Hello

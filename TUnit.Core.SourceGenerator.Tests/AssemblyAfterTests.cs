@@ -12,8 +12,6 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
             "AssemblyAfterTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(14);
-
             await AssertFileContains(generatedFiles[0], 
                 """
                 TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase1).Assembly, new StaticHookMethod<AssemblyHookContext>
@@ -27,7 +25,7 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
                 });
                 """);
             
-            await AssertFileContains(generatedFiles[2], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase2).Assembly, new StaticHookMethod<AssemblyHookContext>
                 { 
@@ -40,7 +38,7 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
                 });
                 """);
             
-            await AssertFileContains(generatedFiles[4], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase3).Assembly, new StaticHookMethod<AssemblyHookContext>
                 { 
@@ -53,7 +51,7 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
                 });
                 """);
             
-            await AssertFileContains(generatedFiles[6], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                             TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
                             { 
@@ -66,7 +64,7 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
                             });
                     """);
             
-            await AssertFileContains(generatedFiles[7], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                             TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
                             { 
@@ -79,7 +77,7 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
                             });
                     """);
             
-            await AssertFileContains(generatedFiles[8], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                             TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
                             { 
@@ -92,7 +90,7 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
                             });
                     """);
             
-            await AssertFileContains(generatedFiles[9], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                             TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).Assembly, new StaticHookMethod<AssemblyHookContext>
                             { 

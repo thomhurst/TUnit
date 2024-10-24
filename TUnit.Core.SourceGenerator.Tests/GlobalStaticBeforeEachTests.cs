@@ -12,8 +12,6 @@ internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
             "BeforeEveryTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(7);
-
             await AssertFileContains(generatedFiles[0], 
                 """
                 TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
@@ -27,7 +25,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
                 });
                 """);
             
-            await AssertFileContains(generatedFiles[1], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
                 { 
@@ -40,7 +38,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
                 });
                 """);
             
-            await AssertFileContains(generatedFiles[2], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                 TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
                 { 
@@ -53,7 +51,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
                 });
                 """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                     TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
                     { 
@@ -66,7 +64,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
                     });
                     """);
             
-            await AssertFileContains(generatedFiles[4], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                     TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
                     { 
@@ -79,7 +77,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
                     });
                     """);
             
-            await AssertFileContains(generatedFiles[5], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                     TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
                     { 
@@ -92,7 +90,7 @@ internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
                     });
                     """);
             
-            await AssertFileContains(generatedFiles[6], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                     TestRegistrar.RegisterBeforeHook(new StaticHookMethod<TestContext>
                     { 

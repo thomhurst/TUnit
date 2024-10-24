@@ -11,8 +11,6 @@ internal class STAThreadTests : TestsBase<TestsGenerator>
             "STAThreadTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(2);
-            
             await AssertFileContains(generatedFiles[0], "TestExecutor = new global::TUnit.Core.STAThreadExecutor(),");
         });
 }

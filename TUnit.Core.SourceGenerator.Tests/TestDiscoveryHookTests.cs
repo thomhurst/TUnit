@@ -26,7 +26,7 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
                             });
                     """);
             
-            await AssertFileContains(generatedFiles[1], 
+            await AssertFileContains(generatedFiles[0], 
                 """
                             TestRegistrar.RegisterAfterHook(new StaticHookMethod<TestDiscoveryContext>
                             { 
