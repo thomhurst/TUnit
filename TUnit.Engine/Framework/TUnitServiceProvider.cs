@@ -36,12 +36,15 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TestDiscoveryHookOrchestrator TestDiscoveryHookOrchestrator { get; }
     public TestSessionHookOrchestrator TestSessionHookOrchestrator { get; }
     public AssemblyHookOrchestrator AssemblyHookOrchestrator { get; }
+    public EngineCancellationToken EngineCancellationToken { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
         IMessageBus messageBus,
         IServiceProvider frameworkServiceProvider)
     {
+        EngineCancellationToken = Register(new EngineCancellationToken());
+        
         LoggerFactory = Register(frameworkServiceProvider.GetLoggerFactory());
         
         OutputDevice = Register(frameworkServiceProvider.GetOutputDevice());
@@ -92,9 +95,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var hookMessagePublisher = Register(new HookMessagePublisher(extension, messageBus));
         
         var singleTestExecutor = Register(new SingleTestExecutor(extension, disposer, cancellationTokenSource, testInvoker,
-            explicitFilterService, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, testHookOrchestrator, TestFinder, TUnitMessageBus, Logger));
+            explicitFilterService, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, testHookOrchestrator, TestFinder, TUnitMessageBus, Logger, EngineCancellationToken));
         
-        TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions));
+        TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken));
         
         OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }

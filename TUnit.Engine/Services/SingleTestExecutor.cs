@@ -32,7 +32,8 @@ internal class SingleTestExecutor(
     TestHookOrchestrator testHookOrchestrator,
     ITestFinder testFinder,
     ITUnitMessageBus messageBus,
-    TUnitFrameworkLogger logger)
+    TUnitFrameworkLogger logger,
+    EngineCancellationToken engineCancellationToken)
     : IDataProducer
 {
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
@@ -370,7 +371,7 @@ internal class SingleTestExecutor(
 
     private async ValueTask ExecuteCore(DiscoveredTest discoveredTest)
     {
-        if (EngineCancellationToken.Token.IsCancellationRequested)
+        if (engineCancellationToken.Token.IsCancellationRequested)
         {
             throw new SkipTestException("The test session has been cancelled...");
         }
@@ -441,11 +442,11 @@ internal class SingleTestExecutor(
         
         if (testDetails.Timeout == null || testDetails.Timeout.Value == default)
         {
-            await RunTest(discoveredTest, EngineCancellationToken.Token);
+            await RunTest(discoveredTest, engineCancellationToken.Token);
             return;
         }
 
-        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout);
+        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout, engineCancellationToken);
     }
 
 

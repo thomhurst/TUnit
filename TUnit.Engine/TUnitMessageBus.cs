@@ -43,10 +43,10 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
         ));
     }
 
-    public Task Failed(TestContext testContext, Exception exception, DateTimeOffset? start = null)
+    public Task Failed(TestContext testContext, Exception exception, DateTimeOffset start)
     {
         var updateType = GetFailureStateProperty(testContext, exception,
-            GetTimingProperty(testContext, start ?? testContext.TestStart ?? DateTimeOffset.UtcNow).GlobalTiming.Duration);
+            GetTimingProperty(testContext, start).GlobalTiming.Duration);
         
         return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,

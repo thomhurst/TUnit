@@ -67,10 +67,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         TestSessionContext? testSessionContext = null;
         try
         {
-            EngineCancellationToken.Initialise(context.CancellationToken);
+            serviceProvider.EngineCancellationToken.Initialise(context.CancellationToken);
             
             var filteredTests = await serviceProvider.TestDiscoverer
-                .FilterTests(context, stringFilter, EngineCancellationToken.Token);
+                .FilterTests(context, stringFilter, serviceProvider.EngineCancellationToken.Token);
 
             switch (context.Request)
             {

@@ -7,9 +7,9 @@ namespace TUnit.Core;
 
 internal static class RunHelpers
 {
-    internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan? timeout)
+    internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan? timeout, EngineCancellationToken engineCancellationToken)
     {
-        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(EngineCancellationToken.Token);
+        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(engineCancellationToken.Token);
 
         var cancellationToken = cancellationTokenSource.Token;
 
@@ -35,7 +35,7 @@ internal static class RunHelpers
         {
             cancellationTokenRegistration = cancellationToken.Register(() =>
             {
-                if (EngineCancellationToken.Token.IsCancellationRequested)
+                if (engineCancellationToken.Token.IsCancellationRequested)
                 {
                     taskCompletionSource.TrySetException(new TestRunCanceledException());
                     return;

@@ -56,7 +56,7 @@ internal class TUnitTestDiscoverer(
         foreach (var test in organisedTests.AllValidTests)
         {
             await testRegistrar.RegisterInstance(testContext: test.TestContext,
-                onFailureToInitialize: exception => tUnitMessageBus.Failed(test.TestContext, exception)
+                onFailureToInitialize: exception => tUnitMessageBus.Failed(test.TestContext, exception, default)
             );
         }
     }
