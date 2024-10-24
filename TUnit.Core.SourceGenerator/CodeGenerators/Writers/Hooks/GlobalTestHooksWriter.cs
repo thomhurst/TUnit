@@ -26,16 +26,16 @@ internal static class GlobalTestHooksWriter
     {
         if (hookType == "TUnit.Core.HookType.TestDiscovery" && hookLocationType == HookLocationType.Before)
         {
-            return "BeforeTestDiscoveryContext";
+            return "global::TUnit.Core.BeforeTestDiscoveryContext";
         }
         
         return hookType switch
         {
-            "TUnit.Core.HookType.Test" => "TestContext",
-            "TUnit.Core.HookType.Class" => "ClassHookContext",
-            "TUnit.Core.HookType.Assembly" => "AssemblyHookContext",
-            "TUnit.Core.HookType.TestSession" => "TestSessionContext",
-            "TUnit.Core.HookType.TestDiscovery" => "TestDiscoveryContext",
+            "TUnit.Core.HookType.Test" => "global::TUnit.Core.TestContext",
+            "TUnit.Core.HookType.Class" => "global::TUnit.Core.ClassHookContext",
+            "TUnit.Core.HookType.Assembly" => "global::TUnit.Core.AssemblyHookContext",
+            "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.TestSessionContext",
+            "TUnit.Core.HookType.TestDiscovery" => "global::TUnit.Core.TestDiscoveryContext",
             _ => throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null)
         };
     }

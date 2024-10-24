@@ -12,12 +12,13 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
         {
             await AssertFileContains(generatedFiles[0],
                 """
-                        SourceRegistrar.Register(new TestDiscoveryHooks_TUnit_TestProject_TestDiscoveryHookTests());
+                        var instance = new Hooks_TUnit_TestProject_TestDiscoveryHookTests();
+                        SourceRegistrar.RegisterTestDiscoveryHookSource(instance);
                 """);
 
             await AssertFileContains(generatedFiles[0],
                 """
-                new StaticHookMethod<BeforeTestDiscoveryContext>
+                new StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>
                 { 
                    MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
                    Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
@@ -31,7 +32,7 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                    new StaticHookMethod<TestDiscoveryContext>
+                    new StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>
                     { 
                        MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
                        Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),

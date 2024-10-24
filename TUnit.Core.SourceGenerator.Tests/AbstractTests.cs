@@ -50,7 +50,7 @@ internal class AbstractTests : TestsBase<TestsGenerator>
         async generatedFiles =>
         {
             // Extra generation because we added ConcreteClass1 to the compilation (because it's a base class and therefore a required dependency)
-            await Assert.That(generatedFiles.Length).IsEqualTo(3);
+            await Assert.That(generatedFiles.Length).IsEqualTo(2);
             // await AssertFileContains(generatedFiles[0], "ReturnType = typeof(void),");
         });
 }

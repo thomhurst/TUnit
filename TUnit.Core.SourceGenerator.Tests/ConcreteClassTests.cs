@@ -33,7 +33,7 @@ internal class ConcreteClassTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[0], "TestId = $\"TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest:0\",");
             await AssertFileContains(generatedFiles[0], "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass2>(() => new global::TUnit.TestProject.AbstractTests.ConcreteClass2());");
             
-            await AssertFileContains(generatedFiles[0], "TestId = $\"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0\",");
-            await AssertFileContains(generatedFiles[0], "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => new global::TUnit.TestProject.AbstractTests.ConcreteClass1());");
+            await AssertFileContains(generatedFiles[1], "TestId = $\"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0\",");
+            await AssertFileContains(generatedFiles[1], "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(() => new global::TUnit.TestProject.AbstractTests.ConcreteClass1());");
         });
 }
