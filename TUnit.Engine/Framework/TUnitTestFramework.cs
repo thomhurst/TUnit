@@ -50,16 +50,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         var serviceProvider = ServiceProvidersPerSession.GetOrAdd(context.Request.Session.SessionUid.Value,
             _ => new TUnitServiceProvider(_extension, context, context.MessageBus, _frameworkServiceProvider)
         );
-        
-        GlobalContext.Current.GlobalLogger = serviceProvider.Logger;
+
+        var stringFilter = serviceProvider.FilterParser.GetTestFilter(context);
+
+        GlobalContext.Current = new GlobalContext
+        {
+            TestFilter = stringFilter,
+            GlobalLogger = serviceProvider.Logger
+        };
         
         serviceProvider.StandardOutConsoleInterceptor.Initialize();
         serviceProvider.StandardErrorConsoleInterceptor.Initialize();
         
         serviceProvider.Initializer.Initialize();
-
-        var stringFilter = serviceProvider.FilterParser.GetTestFilter(context);
-
+        
         TestSessionContext? testSessionContext = null;
         try
         {
@@ -80,21 +84,21 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 }
                 case RunTestExecutionRequest runTestExecutionRequest:
                     testSessionContext =
-                        new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
+                        new TestSessionContext(serviceProvider.AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
                         {
                             TestFilter = stringFilter
                         };
 
-                    await TestDiscoveryHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
+                    await serviceProvider.TestSessionHookOrchestrator.ExecuteBeforeHooks();
 
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context);
 
-                    await TestDiscoveryHookOrchestrator.ExecuteAfterHooks(testSessionContext);
+                    await serviceProvider.TestSessionHookOrchestrator.ExecuteAfterHooks();
 
                     foreach (var artifact in testSessionContext.Artifacts)
                     {
-                        await serviceProvider.TUnitMessageBus.Artifact(artifact);
+                        await serviceProvider.TUnitMessageBus.SessionArtifact(artifact);
                     }
 
                     break;

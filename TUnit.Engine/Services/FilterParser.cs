@@ -5,6 +5,8 @@ namespace TUnit.Engine.Services;
 
 public class FilterParser
 {
+    private string? _stringFilter;
+
     public string? GetTestFilter(ExecuteRequestContext context)
     {
         var filter = context.Request switch
@@ -15,7 +17,7 @@ public class FilterParser
             _ => throw new ArgumentException(nameof(context.Request))
         };
 
-        return StringifyFilter(filter);
+        return _stringFilter ??= StringifyFilter(filter);
     }
 
 #pragma warning disable TPEXP

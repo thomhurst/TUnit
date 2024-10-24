@@ -27,12 +27,6 @@ public class TestDiscoveryContext : Context
         Current = this;
     }
 
-    protected TestDiscoveryContext(IEnumerable<AssemblyHookContext> assemblyHookContexts)
-    {
-        Assemblies = assemblyHookContexts;
-        Current = this;
-    }
-
     public required string? TestFilter { get; init; }
 
     public IEnumerable<AssemblyHookContext> Assemblies { get; }

@@ -3,7 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Services;
 
-internal class TestsFinder(TUnitTestDiscoverer testDiscoverer, ITUnitMessageBus messageBus) : ITestFinder
+internal class TestsFinder(TUnitTestDiscoverer testDiscoverer) : ITestFinder
 {
     public TestContext[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes, Type classType, IEnumerable<Type> classParameterTypes)
     {

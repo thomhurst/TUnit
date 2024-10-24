@@ -19,7 +19,7 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
                 TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base1>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base1>
                 {
                     MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base1).GetMethod("AfterEach1", 0, []),
-                    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach1()),
+                    Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach1()),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
                 });
@@ -30,7 +30,7 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
                  TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base2>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base2>
                  {
                      MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base2).GetMethod("AfterEach2", 0, []),
-                     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach2()),
+                     Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach2()),
                      HookExecutor = DefaultExecutor.Instance,
                      Order = 0,
                  });
@@ -41,7 +41,7 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
                  TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base3>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base3>
                  {
                      MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base3).GetMethod("AfterEach3", 0, []),
-                        Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach3()),
+                        Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach3()),
                         HookExecutor = DefaultExecutor.Instance,
                         Order = 0,
                  });
@@ -52,7 +52,7 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
                      TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                      {
                             MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, []),
-                            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup()),
+                            Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup()),
                             HookExecutor = DefaultExecutor.Instance,
                             Order = 0,
                      });
@@ -63,7 +63,7 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
                      TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                      {
                             MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, [typeof(global::System.Threading.CancellationToken)]),
-                            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup(cancellationToken)),
+                            Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup(cancellationToken)),
                             HookExecutor = DefaultExecutor.Instance,
                             Order = 0,
                      });
@@ -74,7 +74,7 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
                      TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                      {
                             MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext)),
+                            Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext)),
                             HookExecutor = DefaultExecutor.Instance,
                             Order = 0,
                      });
@@ -85,7 +85,7 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
                      TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                      {
                             MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-                            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext, cancellationToken)),
+                            Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext, cancellationToken)),
                             HookExecutor = DefaultExecutor.Instance,
                             Order = 0,
                      });

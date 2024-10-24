@@ -1,5 +1,6 @@
-﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
-using TUnit.Core;
+﻿using TUnit.Core;
+using TUnit.Core.Data;
+using TUnit.Core.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
@@ -8,43 +9,56 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public class TestDiscoveryHookOrchestrator(HookMessagePublisher hookMessagePublisher)
+internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, string? stringFilter)
 {
-    public static async Task ExecuteBeforeHooks(BeforeTestDiscoveryContext context)
-    {
-        foreach (var setUp in TestDictionary.BeforeTestDiscovery.OrderBy(x => x.HookMethod.Order))
-        {
-            BeforeTestDiscoveryContext.Current = context;
+    private BeforeTestDiscoveryContext? _beforeContext;
+    private TestDiscoveryContext? _afterContext;
 
-            try
-            {
-                await setUp.Action(context);
-            }
-            finally
-            {
-                BeforeTestDiscoveryContext.Current = null;
-            }
+    public async Task ExecuteBeforeHooks()
+    {
+        var context = GetBeforeContext();
+        
+        BeforeTestDiscoveryContext.Current = context;
+
+        foreach (var staticHookMethod in hooksCollector.BeforeTestDiscoveryHooks)
+        {
+            await staticHookMethod.Body(context, default);
         }
+        
+        BeforeTestDiscoveryContext.Current = null;
     }
 
-    public static async Task ExecuteAfterHooks(TestDiscoveryContext context)
+    public async Task ExecuteAfterHooks(IEnumerable<DiscoveredTest> discoveredTests)
     {
-        List<Exception> exceptions = []; 
-        
-        foreach (var cleanUp in TestDictionary.AfterTestDiscovery.OrderBy(x => x.HookMethod.Order))
-        {
-            try
-            {
-                TestDiscoveryContext.Current = context;
+        List<Exception> cleanUpExceptions = [];
 
-                await RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), exceptions);
-            }
-            finally
-            {
-                TestDiscoveryContext.Current = null;
-            }
+        var context = GetAfterContext(discoveredTests);
+        
+        TestDiscoveryContext.Current = context;
+        
+        foreach (var staticHookMethod in hooksCollector.AfterTestDiscoveryHooks)
+        {
+            await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
         }
         
-        ExceptionsHelper.ThrowIfAny(exceptions);
+        TestDiscoveryContext.Current = null;
+        
+        ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
+    }
+    
+    private BeforeTestDiscoveryContext GetBeforeContext()
+    {
+        return _beforeContext ??= new BeforeTestDiscoveryContext
+        {
+            TestFilter = stringFilter
+        };
+    }
+
+    private TestDiscoveryContext GetAfterContext(IEnumerable<DiscoveredTest> discoveredTests)
+    {
+        return _afterContext ??= new TestDiscoveryContext(discoveredTests)
+        {
+            TestFilter = stringFilter
+        };
     }
 }

@@ -10,9 +10,12 @@ using TUnit.Engine.Models;
 namespace TUnit.Engine.Services;
 
 internal class TUnitTestDiscoverer(
+    HooksCollector hooksCollector,
     TestsConstructor testsConstructor,
     TestFilterService testFilterService,
     TestGrouper testGrouper,
+    TestRegistrar testRegistrar,
+    TestDiscoveryHookOrchestrator testDiscoveryHookOrchestrator,
     ITUnitMessageBus tUnitMessageBus,
     ILoggerFactory loggerFactory,
     IExtension extension) : IDataProducer
@@ -28,11 +31,9 @@ internal class TUnitTestDiscoverer(
     
     public async Task<GroupedTests> FilterTests(ExecuteRequestContext context, string? stringTestFilter, CancellationToken cancellationToken)
     {
-        GlobalContext.Current.TestFilter = stringTestFilter;
-
         cancellationToken.ThrowIfCancellationRequested();
                 
-        var allDiscoveredTests = _cachedTests ??= await DiscoverTests(stringTestFilter);
+        var allDiscoveredTests = _cachedTests ??= await DiscoverTests();
 
         var executionRequest = context.Request as TestExecutionRequest;
         
@@ -54,26 +55,21 @@ internal class TUnitTestDiscoverer(
     {
         foreach (var test in organisedTests.AllValidTests)
         {
-            await TestRegistrar.RegisterInstance(testContext: test.TestContext,
-                onFailureToInitialize: exception => tUnitMessageBus.Errored(test.TestContext, exception)
+            await testRegistrar.RegisterInstance(testContext: test.TestContext,
+                onFailureToInitialize: exception => tUnitMessageBus.Failed(test.TestContext, exception)
             );
         }
     }
 
-    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(string? stringTestFilter)
+    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests()
     {
-        await TestDiscoveryHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
-        {
-            TestFilter = stringTestFilter
-        });
+        hooksCollector.CollectHooks();
+        
+        await testDiscoveryHookOrchestrator.ExecuteBeforeHooks();
         
         var allDiscoveredTests = testsConstructor.GetTests().ToArray();
 
-        await TestDiscoveryHookOrchestrator.ExecuteAfterHooks(
-            new TestDiscoveryContext(allDiscoveredTests)
-            {
-                TestFilter = stringTestFilter
-            });
+        await testDiscoveryHookOrchestrator.ExecuteAfterHooks(allDiscoveredTests);
         
         return allDiscoveredTests;
     }

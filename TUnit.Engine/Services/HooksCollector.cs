@@ -1,16 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using EnumerableAsyncProcessor.Extensions;
-using Microsoft.Testing.Platform.Logging;
 using TUnit.Core;
 using TUnit.Core.Data;
 
 namespace TUnit.Engine.Services;
 
-internal class HooksCollector(ITUnitMessageBus messageBus, ILoggerFactory loggerFactory)
+internal class HooksCollector
 {
-    internal readonly ILogger<TestsConstructor> Logger = loggerFactory.CreateLogger<TestsConstructor>();
-    
     internal readonly List<StaticHookMethod<BeforeTestDiscoveryContext>> BeforeTestDiscoveryHooks = []; 
     internal readonly List<StaticHookMethod<TestSessionContext>> BeforeTestSessionHooks = []; 
     internal readonly GetOnlyDictionary<Assembly, List<StaticHookMethod<AssemblyHookContext>>> BeforeAssemblyHooks = new (); 
@@ -33,7 +30,7 @@ internal class HooksCollector(ITUnitMessageBus messageBus, ILoggerFactory logger
     
     public void CollectHooks()
     {
-        TestDictionary.TestHookSources.ForEach(hookSource =>
+        foreach (var hookSource in Sources.TestHookSources)
         {
             foreach (var beforeHook in hookSource.CollectBeforeHooks())
             {
@@ -46,9 +43,19 @@ internal class HooksCollector(ITUnitMessageBus messageBus, ILoggerFactory logger
                 var afterList = BeforeTestHooks.GetOrAdd(afterHook.ClassType, _ => []);
                 afterList.Add(afterHook);
             }
-        });
-        
-        TestDictionary.ClassHookSources.ForEach(hookSource =>
+            
+            foreach (var beforeHook in hookSource.CollectBeforeEveryHooks())
+            {
+                BeforeEveryTestHooks.Add(beforeHook);
+            }
+
+            foreach (var afterHook in hookSource.CollectAfterEveryHooks())
+            {
+                AfterEveryTestHooks.Add(afterHook);
+            }
+        }
+
+        foreach (var hookSource in Sources.ClassHookSources)
         {
             foreach (var beforeHook in hookSource.CollectBeforeHooks())
             {
@@ -61,9 +68,19 @@ internal class HooksCollector(ITUnitMessageBus messageBus, ILoggerFactory logger
                 var afterList = AfterClassHooks.GetOrAdd(afterHook.ClassType, _ => []);
                 afterList.Add(afterHook);
             }
-        });
-        
-        TestDictionary.AssemblyHookSources.ForEach(hookSource =>
+            
+            foreach (var beforeHook in hookSource.CollectBeforeEveryHooks())
+            {
+                BeforeEveryClassHooks.Add(beforeHook);
+            }
+
+            foreach (var afterHook in hookSource.CollectAfterEveryHooks())
+            {
+                AfterEveryClassHooks.Add(afterHook);
+            }
+        }
+
+        foreach (var hookSource in Sources.AssemblyHookSources)
         {
             foreach (var beforeHook in hookSource.CollectBeforeHooks())
             {
@@ -76,9 +93,19 @@ internal class HooksCollector(ITUnitMessageBus messageBus, ILoggerFactory logger
                 var afterList = AfterAssemblyHooks.GetOrAdd(afterHook.Assembly, _ => []);
                 afterList.Add(afterHook);
             }
-        });
-        
-        TestDictionary.TestSessionHookSources.ForEach(hookSource =>
+            
+            foreach (var beforeHook in hookSource.CollectBeforeEveryHooks())
+            {
+                BeforeEveryAssemblyHooks.Add(beforeHook);
+            }
+
+            foreach (var afterHook in hookSource.CollectAfterEveryHooks())
+            {
+                AfterEveryAssemblyHooks.Add(afterHook);
+            }
+        }
+
+        foreach (var hookSource in Sources.TestSessionHookSources)
         {
             foreach (var beforeHook in hookSource.CollectBeforeHooks())
             {
@@ -89,9 +116,9 @@ internal class HooksCollector(ITUnitMessageBus messageBus, ILoggerFactory logger
             {
                 AfterTestSessionHooks.Add(afterHook);
             }
-        });
-        
-        TestDictionary.TestDiscoveryHookSources.ForEach(hookSource =>
+        }
+
+        foreach (var hookSource in Sources.TestDiscoveryHookSources)
         {
             foreach (var beforeHook in hookSource.CollectBeforeHooks())
             {
@@ -102,6 +129,6 @@ internal class HooksCollector(ITUnitMessageBus messageBus, ILoggerFactory logger
             {
                 AfterTestDiscoveryHooks.Add(afterHook);
             }
-        });
+        }
     }
 }

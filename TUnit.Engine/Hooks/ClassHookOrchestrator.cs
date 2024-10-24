@@ -1,4 +1,5 @@
-﻿using TUnit.Core;
+﻿using System.Collections.Concurrent;
+using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Services;
@@ -10,15 +11,19 @@ namespace TUnit.Engine.Hooks;
 #endif
 internal class ClassHookOrchestrator(HooksCollector hooksCollector)
 {
+    private readonly ConcurrentDictionary<Type, ClassHookContext> _classHookContexts = new();
+
     private readonly GetOnlyDictionary<Type, Task> _before = new();
     private readonly GetOnlyDictionary<Type, Task> _after = new();
 
     public async Task ExecuteBeforeHooks(Type testClassType)
     {
-        var context = GetClassHookContext(testClassType);
-        
         await _before.GetOrAdd(testClassType, async _ =>
             {
+                var context = GetContext(testClassType);
+                
+                ClassHookContext.Current = context;
+
                 // Reverse so base types are first - We'll run those ones first
                 var typesIncludingBase = GetTypesIncludingBase(testClassType).Reverse();
 
@@ -36,6 +41,8 @@ internal class ClassHookOrchestrator(HooksCollector hooksCollector)
                         await staticHookMethod.Body(context, default);
                     }
                 }
+                
+                ClassHookContext.Current = null;
             });
     }
 
@@ -53,7 +60,9 @@ internal class ClassHookOrchestrator(HooksCollector hooksCollector)
         
         await _after.GetOrAdd(testClassType, async _ =>
         {
-            var context = GetClassHookContext(testClassType);
+            var context = GetContext(testClassType);
+            
+            ClassHookContext.Current = context;
 
             var typesIncludingBase = GetTypesIncludingBase(testClassType);
 
@@ -65,9 +74,7 @@ internal class ClassHookOrchestrator(HooksCollector hooksCollector)
                         () => testEndEventsObject.IfLastTestInClass(context, testContext),
                         cleanUpExceptions);
                 }
-
-                await TestDataContainer.OnLastInstance(testClassType);
-
+                
                 var list = hooksCollector.AfterClassHooks.GetOrAdd(type, _ => []);
 
                 foreach (var staticHookMethod in list)
@@ -79,6 +86,8 @@ internal class ClassHookOrchestrator(HooksCollector hooksCollector)
                 {
                     await RunHelpers.RunSafelyAsync(() => afterEveryClass.Body(context, default), cleanUpExceptions);
                 }
+                
+                ClassHookContext.Current = null;
             }
         });
     }
@@ -94,14 +103,11 @@ internal class ClassHookOrchestrator(HooksCollector hooksCollector)
         }
     }
 
-    private static ClassHookContext GetClassHookContext(Type type)
+    public ClassHookContext GetContext(Type type)
     {
-        lock (type)
+        return _classHookContexts.GetOrAdd(type, _ => new ClassHookContext
         {
-            return TestDictionary.ClassHookContexts.GetOrAdd(type, _ => new ClassHookContext
-            {
-                ClassType = type
-            });
-        }
+            ClassType = type
+        });
     }
 }

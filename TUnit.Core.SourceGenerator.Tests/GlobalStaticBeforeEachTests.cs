@@ -3,7 +3,7 @@ using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class GlobalStaticBeforeEachTests : TestsBase<GlobalTestHooksGenerator>
+internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,

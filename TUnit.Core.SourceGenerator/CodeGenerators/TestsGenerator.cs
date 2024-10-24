@@ -117,7 +117,7 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"TestRegistrar.RegisterTestSource(new {className}());");
+            sourceBuilder.WriteLine($"SourceRegistrar.Register(new {className}());");
             sourceBuilder.WriteLine("}");
 
             sourceBuilder.WriteLine("public IReadOnlyList<SourceGeneratedTestNode> CollectTests()");

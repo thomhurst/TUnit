@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine;
 
@@ -30,21 +31,30 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
         ));
     }
 
-    public Task Passed(TestContext testContext)
+    public Task Passed(TestContext testContext, DateTimeOffset start)
     {
         return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(PassedTestNodeStateProperty.CachedInstance)
+                .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
+                .WithProperty(GetTimingProperty(testContext, start))
         ));
     }
 
-    public Task Failed(TestContext testContext, Exception exception)
+    public Task Failed(TestContext testContext, Exception exception, DateTimeOffset? start = null)
     {
+        var updateType = GetFailureStateProperty(testContext, exception,
+            GetTimingProperty(testContext, start ?? testContext.TestStart ?? DateTimeOffset.UtcNow).GlobalTiming.Duration);
+        
         return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
-                .WithProperty(new FailedTestNodeStateProperty(exception))
+                .WithProperty(updateType)
+                .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
+                .WithProperty(new TrxExceptionProperty(exception.Message, exception.StackTrace))
         ));
     }
 
@@ -80,34 +90,27 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
         ));
     }
 
-    public Task Errored(TestContext testContext, Exception exception)
-    {
-        return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: testContext.ToTestNode()
-                .WithProperty(new ErrorTestNodeStateProperty(exception))
-        ));
-    }
-
     public Task Skipped(TestContext testContext, string reason)
     {
         return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(new SkippedTestNodeStateProperty(reason))
+                .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
+                .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
         ));
     }
 
-    public Task Cancelled(TestContext testContext, Exception exception)
+    public Task Cancelled(TestContext testContext)
     {
         return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
-                .WithProperty(new CancelledTestNodeStateProperty(exception))
+                .WithProperty(new CancelledTestNodeStateProperty())
         ));
     }
 
-    public Task Artifact(Artifact artifact)
+    public Task SessionArtifact(Artifact artifact)
     {
         return context.MessageBus.PublishAsync(this,
             new SessionFileArtifact(
@@ -118,7 +121,52 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
             )
         );
     }
+    
+    public Task TestArtifact(TestContext testContext, Artifact artifact)
+    {
+        return context.MessageBus.PublishAsync(this,
+            new TestNodeFileArtifact(
+                context.Request.Session.SessionUid,
+                testContext.ToTestNode(),
+                artifact.File,
+                artifact.DisplayName,
+                artifact.Description
+            )
+        );
+    }
+    
+    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
+    {
+        var end = DateTimeOffset.Now;
 
+        lock (testContext.Lock)
+        {
+            var stepTimings = testContext.Timings.Select(x =>
+                new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
+
+            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [..stepTimings]);
+        }
+    }
+    
+    private static IProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
+    {
+        if (testContext.TestDetails.Timeout.HasValue
+            && e is TaskCanceledException or OperationCanceledException or TimeoutException
+            && duration >= testContext.TestDetails.Timeout.Value)
+        {
+            return new TimeoutTestNodeStateProperty(e)
+            {
+                Timeout = testContext.TestDetails.Timeout,
+            };
+        }
+
+        if (e.GetType().Name.Contains("Assertion", StringComparison.InvariantCulture))
+        {
+            return new FailedTestNodeStateProperty(e);
+        }
+        
+        return new ErrorTestNodeStateProperty(e);
+    }
 
     public Task<bool> IsEnabledAsync()
     {
@@ -129,5 +177,5 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
     public string Version => extension.Version;
     public string DisplayName => extension.DisplayName;
     public string Description => extension.Description;
-    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage), typeof(SessionFileArtifact), typeof(FileArtifact)];
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage), typeof(SessionFileArtifact), typeof(TestNodeFileArtifact)];
 }

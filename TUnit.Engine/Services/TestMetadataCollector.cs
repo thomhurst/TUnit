@@ -11,7 +11,7 @@ internal class TestMetadataCollector(ITUnitMessageBus messageBus, ILoggerFactory
     {
         var count = 0;
         
-        foreach (var sourceGeneratedTestNode in TestDictionary.TestSources
+        foreach (var sourceGeneratedTestNode in Sources.TestSources
                      .AsParallel()
                      .SelectMany(x => x.CollectTests()))
         {

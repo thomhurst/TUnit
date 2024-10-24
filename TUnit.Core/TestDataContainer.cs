@@ -65,16 +65,6 @@ public static class TestDataContainer
         return  (T)instancesForType.GetOrAdd(key, _ => func()!);
     }
     
-    internal static async ValueTask OnLastInstance(Type testClassType)
-    {
-        var typesPerType = InjectedSharedPerClassType.GetOrAdd(testClassType, _ => new GetOnlyDictionary<Type, object>());
-        
-        foreach (var key in typesPerType.Keys)
-        {
-            await Disposer.DisposeAsync(typesPerType.Remove(key));
-        }
-    }
-    
     internal static async ValueTask ConsumeKey(string key, Type type)
     {
         lock (Lock)

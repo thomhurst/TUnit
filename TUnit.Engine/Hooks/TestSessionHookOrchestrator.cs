@@ -1,5 +1,6 @@
-﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
-using TUnit.Core;
+﻿using TUnit.Core;
+using TUnit.Core.Data;
+using TUnit.Core.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
@@ -8,43 +9,39 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public class TestSessionHookOrchestrator(HookMessagePublisher hookMessagePublisher)
+internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, AssemblyHookOrchestrator assemblyHookOrchestrator, string? stringFilter)
 {
-    public static async Task ExecuteBeforeHooks(TestSessionContext context)
+    private TestSessionContext? _context;
+    
+    public async Task ExecuteBeforeHooks()
     {
-        foreach (var setUp in TestDictionary.BeforeTestSession.OrderBy(x => x.HookMethod.Order))
-        {
-            try
-            {
-                TestSessionContext.Current = context;
+        var context = GetContext();
 
-                await setUp.Action(context);
-            }
-            finally
-            {
-                TestSessionContext.Current = null;
-            }
+        foreach (var staticHookMethod in hooksCollector.BeforeTestSessionHooks)
+        {
+            await staticHookMethod.Body(context, default);
         }
     }
 
-    public static async Task ExecuteAfterHooks(TestSessionContext context)
+    public async Task ExecuteAfterHooks()
     {
-        List<Exception> exceptions = []; 
-
-        foreach (var cleanUp in TestDictionary.AfterTestSession.OrderBy(x => x.HookMethod.Order))
+        List<Exception> cleanUpExceptions = [];
+        
+        var context = GetContext();
+        
+        foreach (var staticHookMethod in hooksCollector.AfterTestSessionHooks)
         {
-            try
-            {
-                TestSessionContext.Current = context;
-                
-                await RunHelpers.RunSafelyAsync(() => cleanUp.Action(context), exceptions);
-            }
-            finally
-            {
-                TestSessionContext.Current = null;
-            }
+            await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
         }
         
-        ExceptionsHelper.ThrowIfAny(exceptions);
+        ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
+    }
+    
+    private TestSessionContext GetContext()
+    {
+        return _context ??= new TestSessionContext(assemblyHookOrchestrator.GetAllAssemblyHookContexts())
+        {
+            TestFilter = stringFilter
+        };
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Testing.Platform.CommandLine;
+﻿using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Logging;
@@ -34,6 +33,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TestsExecutor TestsExecutor { get; }
     public OnEndExecutor OnEndExecutor { get; }
     public FilterParser FilterParser { get; }
+    public TestDiscoveryHookOrchestrator TestDiscoveryHookOrchestrator { get; }
+    public TestSessionHookOrchestrator TestSessionHookOrchestrator { get; }
+    public AssemblyHookOrchestrator AssemblyHookOrchestrator { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -56,30 +58,41 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         FilterParser = Register(new FilterParser());
 
+        var stringFilter = FilterParser.GetTestFilter(context);
+
         TUnitMessageBus = Register(new TUnitMessageBus(extension, context));
+        
+        var hooksCollector = Register(new HooksCollector());
         
         var testMetadataCollector = Register(new TestMetadataCollector(TUnitMessageBus, LoggerFactory));
         var testsLoader = Register(new TestsConstructor(extension, testMetadataCollector, this));
         var testFilterService = Register(new TestFilterService(LoggerFactory));
         
         TestGrouper = Register(new TestGrouper());
-
-        TestDiscoverer = Register(new TUnitTestDiscoverer(testsLoader, testFilterService, TestGrouper, TUnitMessageBus, LoggerFactory, extension));
         
-        TestFinder = Register(new TestsFinder(TestDiscoverer, TUnitMessageBus));
+        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(hooksCollector));
+
+        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(hooksCollector, stringFilter));
+        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(hooksCollector, AssemblyHookOrchestrator, stringFilter));
+        
+        var classHookOrchestrator = Register(new ClassHookOrchestrator(hooksCollector));
+        
+        var testHookOrchestrator = Register(new TestHookOrchestrator(hooksCollector));
+
+        var testRegistrar = Register(new TestRegistrar(AssemblyHookOrchestrator, classHookOrchestrator));
+        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, LoggerFactory, extension));
+        
+        TestFinder = Register(new TestsFinder(TestDiscoverer));
         
         var disposer = Register(new Disposer(Logger));
         var cancellationTokenSource = Register(EngineCancellationToken.CancellationTokenSource);
-        var testInvoker = Register(new TestInvoker());
+        var testInvoker = Register(new TestInvoker(testHookOrchestrator));
         var explicitFilterService = Register(new ExplicitFilterService());
         var parallelLimitProvider = Register(new ParallelLimitProvider());
         var hookMessagePublisher = Register(new HookMessagePublisher(extension, messageBus));
-        var globalStaticTestHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(hookMessagePublisher));
-        var assemblyHookOrchestrator =
-            Register(new AssemblyHookOrchestrator(hookMessagePublisher, globalStaticTestHookOrchestrator));
-        var classHookOrchestrator = Register(new ClassHookOrchestrator(hookMessagePublisher));
+        
         var singleTestExecutor = Register(new SingleTestExecutor(extension, disposer, cancellationTokenSource, testInvoker,
-            explicitFilterService, parallelLimitProvider, assemblyHookOrchestrator, classHookOrchestrator, TestFinder, Logger));
+            explicitFilterService, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, testHookOrchestrator, TestFinder, TUnitMessageBus, Logger));
         
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions));
         
