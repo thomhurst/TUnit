@@ -63,7 +63,7 @@ internal class TUnitTestDiscoverer(
 
     private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests()
     {
-        hooksCollector.CollectHooks();
+        hooksCollector.CollectDiscoveryHooks();
         
         await testDiscoveryHookOrchestrator.ExecuteBeforeHooks();
         
@@ -71,6 +71,8 @@ internal class TUnitTestDiscoverer(
 
         await testDiscoveryHookOrchestrator.ExecuteAfterHooks(allDiscoveredTests);
         
+        hooksCollector.CollectHooks();
+
         return allDiscoveredTests;
     }
 

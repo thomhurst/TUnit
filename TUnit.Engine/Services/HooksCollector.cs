@@ -26,8 +26,24 @@ internal class HooksCollector
     
     internal readonly List<StaticHookMethod<AssemblyHookContext>> AfterEveryAssemblyHooks = []; 
     internal readonly List<StaticHookMethod<ClassHookContext>> AfterEveryClassHooks = []; 
-    internal readonly List<StaticHookMethod<TestContext>> AfterEveryTestHooks = []; 
-    
+    internal readonly List<StaticHookMethod<TestContext>> AfterEveryTestHooks = [];
+
+    public void CollectDiscoveryHooks()
+    {
+        foreach (var hookSource in Sources.TestDiscoveryHookSources)
+        {
+            foreach (var beforeHook in hookSource.CollectBeforeTestDiscoveryHooks())
+            {
+                BeforeTestDiscoveryHooks.Add(beforeHook);
+            }
+
+            foreach (var afterHook in hookSource.CollectAfterTestDiscoveryHooks())
+            {
+                AfterTestDiscoveryHooks.Add(afterHook);
+            }
+        }
+    }
+
     public void CollectHooks()
     {
         foreach (var hookSource in Sources.TestHookSources)
@@ -40,7 +56,7 @@ internal class HooksCollector
 
             foreach (var afterHook in hookSource.CollectAfterTestHooks())
             {
-                var afterList = BeforeTestHooks.GetOrAdd(afterHook.ClassType, _ => []);
+                var afterList = AfterTestHooks.GetOrAdd(afterHook.ClassType, _ => []);
                 afterList.Add(afterHook);
             }
             
@@ -115,19 +131,6 @@ internal class HooksCollector
             foreach (var afterHook in hookSource.CollectAfterTestSessionHooks())
             {
                 AfterTestSessionHooks.Add(afterHook);
-            }
-        }
-
-        foreach (var hookSource in Sources.TestDiscoveryHookSources)
-        {
-            foreach (var beforeHook in hookSource.CollectBeforeTestDiscoveryHooks())
-            {
-                BeforeTestDiscoveryHooks.Add(beforeHook);
-            }
-
-            foreach (var afterHook in hookSource.CollectAfterTestDiscoveryHooks())
-            {
-                AfterTestDiscoveryHooks.Add(afterHook);
             }
         }
     }
