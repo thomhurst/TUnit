@@ -2,9 +2,9 @@
 
 public interface ITestHookSource
 {
-    IReadOnlyList<InstanceHookMethod> CollectBeforeHooks();
-    IReadOnlyList<InstanceHookMethod> CollectAfterHooks();
+    IReadOnlyList<InstanceHookMethod> CollectBeforeTestHooks();
+    IReadOnlyList<InstanceHookMethod> CollectAfterTestHooks();
     
-    IReadOnlyList<StaticHookMethod<TestContext>> CollectBeforeEveryHooks();
-    IReadOnlyList<StaticHookMethod<TestContext>> CollectAfterEveryHooks();
+    IReadOnlyList<StaticHookMethod<TestContext>> CollectBeforeEveryTestHooks();
+    IReadOnlyList<StaticHookMethod<TestContext>> CollectAfterEveryTestHooks();
 }

@@ -2,9 +2,9 @@
 
 public interface IClassHookSource
 {
-    IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectBeforeHooks();
-    IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectAfterHooks();
+    IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectBeforeClassHooks();
+    IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectAfterClassHooks();
     
-    IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectBeforeEveryHooks();
-    IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectAfterEveryHooks();
+    IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectBeforeEveryClassHooks();
+    IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectAfterEveryClassHooks();
 }

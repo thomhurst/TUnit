@@ -2,9 +2,9 @@
 
 public interface IAssemblyHookSource
 {
-    IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectBeforeHooks();
-    IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectAfterHooks();
+    IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectBeforeAssemblyHooks();
+    IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectAfterAssemblyHooks();
     
-    IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryHooks();
-    IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryHooks();
+    IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryAssemblyHooks();
+    IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryAssemblyHooks();
 }
