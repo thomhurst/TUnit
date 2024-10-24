@@ -113,10 +113,6 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
             sourceBuilder.WriteLine($"file partial class {className} : TUnit.Core.Interfaces.SourceGenerator.ITestSource");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine(
-                "private static System.Collections.Generic.List<SourceGeneratedTestNode> _tests = [];");
-            sourceBuilder.WriteLine(
-                "public System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> Tests => _tests;");
 
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");

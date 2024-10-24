@@ -8,12 +8,12 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-internal class ClassHookOrchestrator(HooksCollector hooksCollector)
+internal class TestHookOrchestrator2(HooksCollector hooksCollector)
 {
     private readonly GetOnlyDictionary<Type, Task> _before = new();
     private readonly GetOnlyDictionary<Type, Task> _after = new();
 
-    public async Task ExecuteBeforeHooks(Type testClassType)
+    public async Task ExecuteBeforeHooks(object classInstance, DiscoveredTest discoveredTest)
     {
         var context = GetClassHookContext(testClassType);
         
@@ -39,18 +39,8 @@ internal class ClassHookOrchestrator(HooksCollector hooksCollector)
             });
     }
 
-    public async Task ExecuteCleanUpsIfLastInstance(
-        TestContext testContext, 
-        Type testClassType,
-        List<Exception> cleanUpExceptions
-        )
+    public async Task ExecuteAfterHooks(object classInstance, DiscoveredTest testContext, List<Exception> cleanUpExceptions)
     {
-        if (!InstanceTracker.IsLastTestForType(testClassType))
-        {
-            // Only run one time clean downs when no instances are left!
-           return;
-        }
-        
         await _after.GetOrAdd(testClassType, async _ =>
         {
             var context = GetClassHookContext(testClassType);

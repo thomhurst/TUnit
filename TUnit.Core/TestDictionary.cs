@@ -11,8 +11,12 @@ namespace TUnit.Core;
 internal static class TestDictionary
 {
     public static readonly List<ITestSource> TestSources = [];
-
-    public static readonly Dictionary<string, DiscoveredTest> Tests = new();
+    
+    public static readonly List<ITestHookSource> TestHookSources = [];
+    public static readonly List<IClassHookSource> ClassHookSources = [];
+    public static readonly List<IAssemblyHookSource> AssemblyHookSources = [];
+    public static readonly List<ITestSessionHookSource> TestSessionHookSources = [];
+    public static readonly List<ITestDiscoveryHookSource> TestDiscoveryHookSources = [];
 
     public static readonly ConcurrentDictionary<Type, ClassHookContext> ClassHookContexts = new();
     public static readonly ConcurrentDictionary<Type, List<(string Name, StaticHookMethod HookMethod, LazyHook<string, IHookMessagePublisher> Action)>> ClassSetUps = new();

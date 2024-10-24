@@ -1,8 +1,11 @@
-﻿namespace TUnit.Core.SourceGenerator.Models;
+﻿using TUnit.Core.SourceGenerator.Enums;
+
+namespace TUnit.Core.SourceGenerator.Models;
 
 public record HooksDataModel
 {
     public required string FullyQualifiedTypeName { get; init; }
+    public required HookLocationType HookLocationType { get; init; }
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
     public required string[] ParameterTypes { get; init; }

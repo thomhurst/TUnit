@@ -34,15 +34,15 @@ internal class TestHooksGenerator : IIncrementalGenerator
                 {
                     if (model.HookLevel == "TUnit.Core.HookType.Test")
                     {
-                        TestHooksWriter.Execute(productionContext, model, HookLocationType.Before);
+                        TestHooksWriter.Execute(productionContext, model);
                     }
                     else if (model.HookLevel == "TUnit.Core.HookType.Class")
                     {
-                        ClassHooksWriter.Execute(productionContext, model, HookLocationType.Before);
+                        ClassHooksWriter.Execute(productionContext, model);
                     }
                     else if (model.HookLevel == "TUnit.Core.HookType.Assembly")
                     {
-                        AssemblyHooksWriter.Execute(productionContext, model, HookLocationType.Before);
+                        AssemblyHooksWriter.Execute(productionContext, model);
                     }
                     else if (model.HookLevel is "TUnit.Core.HookType.TestDiscovery" or "TUnit.Core.HookType.TestSession")
                     {
@@ -58,15 +58,15 @@ internal class TestHooksGenerator : IIncrementalGenerator
                 {
                     if (model.HookLevel == "TUnit.Core.HookType.Test")
                     {
-                        TestHooksWriter.Execute(productionContext, model, HookLocationType.After);
+                        TestHooksWriter.Execute(productionContext, model);
                     }
                     else if (model.HookLevel == "TUnit.Core.HookType.Class")
                     {
-                        ClassHooksWriter.Execute(productionContext, model, HookLocationType.After);
+                        ClassHooksWriter.Execute(productionContext, model);
                     }
                     else if (model.HookLevel == "TUnit.Core.HookType.Assembly")
                     {
-                        AssemblyHooksWriter.Execute(productionContext, model, HookLocationType.After);
+                        AssemblyHooksWriter.Execute(productionContext, model);
                     }
                     else if (model.HookLevel is "TUnit.Core.HookType.TestDiscovery" or "TUnit.Core.HookType.TestSession")
                     {

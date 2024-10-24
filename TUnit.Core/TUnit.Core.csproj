@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
+    <PropertyGroup>
+      <LangVersion>preview</LangVersion>
+    </PropertyGroup>
+    
     <ItemGroup>
         <Content Include="TUnit.Core.props">
             <Pack>true</Pack>

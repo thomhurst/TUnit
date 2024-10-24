@@ -15,8 +15,6 @@ public static class TestDataContainer
     private static readonly GetOnlyDictionary<Assembly, GetOnlyDictionary<Type, object>> InjectedSharedPerAssembly = new();
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
 
-    internal static readonly Dictionary<Type, Lazy<Task>> InjectedSharedGloballyInitializations = new();
-    
 #if NET9_0_OR_GREATER
     private static readonly Lock Lock = new();
 #else

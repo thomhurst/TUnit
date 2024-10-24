@@ -11,7 +11,7 @@ namespace TUnit.Engine.Hooks;
 #endif
 public class AssemblyHookOrchestrator(
     HookMessagePublisher hookMessagePublisher,
-    GlobalStaticTestHookOrchestrator globalStaticTestHookOrchestrator)
+    TestDiscoveryHookOrchestrator testDiscoveryHookOrchestrator)
 {
     public async Task DiscoverHooks(ExecuteRequestContext context)
     {
@@ -50,7 +50,7 @@ public class AssemblyHookOrchestrator(
         var context = GetAssemblyHookContext(assembly);
         
         // Run global ones first
-        await globalStaticTestHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context);
+        await testDiscoveryHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context);
             
         foreach (var setUp in TestDictionary.AssemblySetUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.HookMethod.Order))
         {
@@ -84,6 +84,6 @@ public class AssemblyHookOrchestrator(
         }
 
         // Run global ones last
-        await globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
+        await testDiscoveryHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
     }
 }

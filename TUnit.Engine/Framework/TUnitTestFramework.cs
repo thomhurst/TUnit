@@ -15,7 +15,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly IExtension _extension;
     private readonly IServiceProvider _frameworkServiceProvider;
     private readonly ITestFrameworkCapabilities _capabilities;
-    private static readonly ConcurrentDictionary<string, TUnitServiceProvider> ServiceProviders = [];
+    private static readonly ConcurrentDictionary<string, TUnitServiceProvider> ServiceProvidersPerSession = [];
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
@@ -47,7 +47,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         System.Diagnostics.Debugger.Launch();
 #endif
 
-        var serviceProvider = ServiceProviders.GetOrAdd(context.Request.Session.SessionUid.Value,
+        var serviceProvider = ServiceProvidersPerSession.GetOrAdd(context.Request.Session.SessionUid.Value,
             _ => new TUnitServiceProvider(_extension, context, context.MessageBus, _frameworkServiceProvider)
         );
         
@@ -85,12 +85,12 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                             TestFilter = stringFilter
                         };
 
-                    await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
+                    await TestDiscoveryHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
 
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context);
 
-                    await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
+                    await TestDiscoveryHookOrchestrator.ExecuteAfterHooks(testSessionContext);
 
                     foreach (var artifact in testSessionContext.Artifacts)
                     {
@@ -134,7 +134,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         try
         {
-            await using var _ = ServiceProviders[context.SessionUid.Value];
+            await using var _ = ServiceProvidersPerSession[context.SessionUid.Value];
             
             return new CloseTestSessionResult
             {

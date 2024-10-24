@@ -15,7 +15,7 @@ public record StaticHookMethod<T> : StaticHookMethod
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public record StaticHookMethod
+public abstract record StaticHookMethod
 {
     public required MethodInfo MethodInfo { get; init; }
     

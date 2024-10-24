@@ -240,7 +240,7 @@ internal class SingleTestExecutor(
                 test.TestContext.TestDetails.ClassType.Assembly,
                 testContext);
 
-            await classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType);
+            await classHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType);
         }
         catch (Exception e)
         {
@@ -253,7 +253,7 @@ internal class SingleTestExecutor(
     {
         try
         {
-            await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context, testContext,
+            await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
                 test.TestContext.TestDetails.ClassType, cleanUpExceptions);
 
             await assemblyHookOrchestrator.ExecuteCleanupsIfLastInstance(context,

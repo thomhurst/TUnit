@@ -62,14 +62,14 @@ internal class TUnitTestDiscoverer(
 
     private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(string? stringTestFilter)
     {
-        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
+        await TestDiscoveryHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
         {
             TestFilter = stringTestFilter
         });
         
         var allDiscoveredTests = testsConstructor.GetTests().ToArray();
 
-        await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
+        await TestDiscoveryHookOrchestrator.ExecuteAfterHooks(
             new TestDiscoveryContext(allDiscoveredTests)
             {
                 TestFilter = stringTestFilter

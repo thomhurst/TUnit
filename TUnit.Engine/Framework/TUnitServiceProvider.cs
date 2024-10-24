@@ -74,10 +74,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var explicitFilterService = Register(new ExplicitFilterService());
         var parallelLimitProvider = Register(new ParallelLimitProvider());
         var hookMessagePublisher = Register(new HookMessagePublisher(extension, messageBus));
-        var globalStaticTestHookOrchestrator = Register(new GlobalStaticTestHookOrchestrator(hookMessagePublisher));
+        var globalStaticTestHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(hookMessagePublisher));
         var assemblyHookOrchestrator =
             Register(new AssemblyHookOrchestrator(hookMessagePublisher, globalStaticTestHookOrchestrator));
-        var classHookOrchestrator = Register(new ClassHookOrchestrator(hookMessagePublisher, globalStaticTestHookOrchestrator));
+        var classHookOrchestrator = Register(new ClassHookOrchestrator(hookMessagePublisher));
         var singleTestExecutor = Register(new SingleTestExecutor(extension, disposer, cancellationTokenSource, testInvoker,
             explicitFilterService, parallelLimitProvider, assemblyHookOrchestrator, classHookOrchestrator, TestFinder, Logger));
         
