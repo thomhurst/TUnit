@@ -42,7 +42,7 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (argumentOperation.Parent?.Type?.ContainingAssembly.Name is not "TUnit.Assertions")
+        if (argumentOperation.Parent?.Type?.ContainingAssembly?.Name is not "TUnit.Assertions")
         {
             return;
         }
