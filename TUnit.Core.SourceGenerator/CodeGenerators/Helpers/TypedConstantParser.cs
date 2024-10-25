@@ -7,17 +7,17 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 internal static class TypedConstantParser
 {
     public static string? GetTypedConstantValue(SemanticModel semanticModel,
-        ExpressionSyntax argumentExpression, ITypeSymbol? type = null)
+        ExpressionSyntax argumentExpression, ITypeSymbol? parameterType)
     {
         var newExpression = argumentExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
 
-        if (type?.TypeKind == TypeKind.Enum && 
+        if (parameterType?.TypeKind == TypeKind.Enum && 
             (newExpression.IsKind(SyntaxKind.UnaryMinusExpression) || newExpression.IsKind(SyntaxKind.UnaryPlusExpression)))
         {
-            return $"({type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({newExpression})";
+            return $"({parameterType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({newExpression})";
         }
 
-        if (type?.SpecialType == SpecialType.System_Decimal)
+        if (parameterType?.SpecialType == SpecialType.System_Decimal)
         {
             return $"{newExpression.ToString().TrimEnd('d')}m";
         }
