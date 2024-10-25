@@ -22,11 +22,11 @@ using TUnit.Core;
 
 namespace MyTestProject;
 
-public class DependencyInjectionClassConstructor : IClassConstructor
+public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEvent
 {
     private static readonly IServiceProvider _serviceProvider = CreateServiceProvider();
-    
-    private static readonly ConditionalWeakTable<object, IServiceScope> Scopes = new();
+
+    private AsyncServiceScope _scope;
 
     public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()    where T : class
     {
