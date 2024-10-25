@@ -405,7 +405,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
         var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
             .WithLocation(0)
-            .WithArguments("bool", "string", "for the `Arguments` array");
+            .WithArguments("bool", "string");
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
