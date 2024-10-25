@@ -32,6 +32,35 @@ public class AwaitAssertionAnalyzerTests
     }
     
     [Test]
+    public async Task Assert_That_Is_Flagged_When_Not_Awaited_Within_Scope()
+    {
+        const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Assertions;
+                            using TUnit.Assertions.Extensions;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                            
+                                public async Task MyTest()
+                                {
+                                    var one = 1;
+                                    using (Assert.Multiple())
+                                    {
+                                        {|#0:Assert.That(one)|}.IsEqualTo(1);
+                                    }
+                                }
+
+                            }
+                            """;
+
+        var expected = Verifier.Diagnostic(Rules.AwaitAssertion).WithLocation(0);
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+    }
+    
+    [Test]
     public async Task Assert_That_Is_Flagged_When_Generic_Type_Parameters_And_Not_Awaited()
     {
         const string text = """
