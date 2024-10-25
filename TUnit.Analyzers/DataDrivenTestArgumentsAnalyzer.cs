@@ -100,8 +100,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
                 continue;
             }
             
-            if (!argument.IsNull &&
-                !context.Compilation.HasImplicitConversion(argument.Type, methodParameterType))
+            if (!argument.IsNull && !CanConvert(context, argument, methodParameterType))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
@@ -112,6 +111,20 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
         }
+    }
+
+    private static bool CanConvert(SymbolAnalysisContext context, TypedConstant argument, ITypeSymbol? methodParameterType)
+    {
+        if (methodParameterType?.SpecialType == SpecialType.System_Decimal &&
+            argument.Type?.SpecialType == SpecialType.System_Double &&
+            decimal.TryParse(argument.Value?.ToString(), out _))
+        {
+            // Decimals can't technically be used in attributes, but we can still write it as a double
+            // e.g. [Arguments(1.55)]
+            return true;
+        }
+        
+        return context.Compilation.HasImplicitConversion(argument.Type, methodParameterType);
     }
 
     private bool IsEnumAndInteger(ITypeSymbol? type1, ITypeSymbol? type2)
