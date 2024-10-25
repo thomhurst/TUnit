@@ -27,14 +27,16 @@ internal class SourceCodeWriter : IDisposable
             return;
         }
         
-        if (value[0] == '}')
+        if (value[0] is '}' or ']')
         {
             _tabLevel--;
         }
         
+        WriteTabs();
+        
         _stringBuilder.AppendLine(value);
 
-        if (value[0] == '{')
+        if (value[0] is '{' or '[')
         {
             _tabLevel++;
         }
