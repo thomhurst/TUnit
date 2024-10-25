@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>TUnit.Core.SourceGenerator.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="TUnit.Assertions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="..\TUnit.Core\bin\$(Configuration)\$(TargetFramework)\TUnit.Core.dll">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

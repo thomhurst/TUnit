@@ -1,85 +1,124 @@
 ﻿using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.OutputDevice;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
 
-internal class TUnitServiceProvider : IAsyncDisposable
+internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 {
+    private readonly Dictionary<Type, object> _services = [];
+
     public ILoggerFactory LoggerFactory;
     public IOutputDevice OutputDevice;
     public ICommandLineOptions CommandLineOptions;
 
     public TUnitFrameworkLogger Logger { get; }
+    public TUnitMessageBus TUnitMessageBus { get; }
+
     public TUnitInitializer Initializer { get; }
     public StandardOutConsoleInterceptor StandardOutConsoleInterceptor { get; }
     public StandardErrorConsoleInterceptor StandardErrorConsoleInterceptor { get; }
     public TUnitTestDiscoverer TestDiscoverer { get; }
     public TestGrouper TestGrouper { get; }
+    public TestsFinder TestFinder { get; }
     public TestsExecutor TestsExecutor { get; }
     public OnEndExecutor OnEndExecutor { get; }
     public FilterParser FilterParser { get; }
-    public FailedInitializationTestPublisher FailedInitializationTestPublisher { get; }
-
+    public TestDiscoveryHookOrchestrator TestDiscoveryHookOrchestrator { get; }
+    public TestSessionHookOrchestrator TestSessionHookOrchestrator { get; }
+    public AssemblyHookOrchestrator AssemblyHookOrchestrator { get; }
+    public EngineCancellationToken EngineCancellationToken { get; }
 
     public TUnitServiceProvider(IExtension extension,
+        ExecuteRequestContext context,
         IMessageBus messageBus,
         IServiceProvider frameworkServiceProvider)
     {
-        LoggerFactory = frameworkServiceProvider.GetLoggerFactory();
+        EngineCancellationToken = Register(new EngineCancellationToken());
         
-        OutputDevice = frameworkServiceProvider.GetOutputDevice();
+        LoggerFactory = Register(frameworkServiceProvider.GetLoggerFactory());
         
-        CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
+        OutputDevice = Register(frameworkServiceProvider.GetOutputDevice());
+        
+        CommandLineOptions = Register(frameworkServiceProvider.GetCommandLineOptions());
 
-        Logger = new TUnitFrameworkLogger(extension, OutputDevice, LoggerFactory.CreateLogger<TUnitFrameworkLogger>());
+        Logger = Register(new TUnitFrameworkLogger(extension, OutputDevice, LoggerFactory.CreateLogger<TUnitFrameworkLogger>()));
         
-        Initializer = new TUnitInitializer(CommandLineOptions);
+        Initializer = Register(new TUnitInitializer(CommandLineOptions));
         
-        StandardOutConsoleInterceptor = new StandardOutConsoleInterceptor(CommandLineOptions);
+        StandardOutConsoleInterceptor = Register(new StandardOutConsoleInterceptor(CommandLineOptions));
         
-        StandardErrorConsoleInterceptor = new StandardErrorConsoleInterceptor(CommandLineOptions);
+        StandardErrorConsoleInterceptor = Register(new StandardErrorConsoleInterceptor(CommandLineOptions));
 
-        FilterParser = new FilterParser();
+        FilterParser = Register(new FilterParser());
 
-        FailedInitializationTestPublisher = new FailedInitializationTestPublisher(extension);
-        
-        var testsLoader = new TestsLoader(LoggerFactory);
-        var testFilterService = new TestFilterService(LoggerFactory);
-        
-        TestGrouper = new TestGrouper();
+        var stringFilter = FilterParser.GetTestFilter(context);
 
-        TestDiscoverer = new TUnitTestDiscoverer(testsLoader, testFilterService, TestGrouper, LoggerFactory, extension);
+        TUnitMessageBus = Register(new TUnitMessageBus(extension, context));
         
-        var disposer = new Disposer(Logger);
-        var cancellationTokenSource = EngineCancellationToken.CancellationTokenSource;
-        var testInvoker = new TestInvoker();
-        var explicitFilterService = new ExplicitFilterService();
-        var parallelLimitProvider = new ParallelLimitProvider();
-        var hookMessagePublisher = new HookMessagePublisher(extension, messageBus);
-        var globalStaticTestHookOrchestrator = new GlobalStaticTestHookOrchestrator(hookMessagePublisher);
-        var assemblyHookOrchestrator =
-            new AssemblyHookOrchestrator(hookMessagePublisher, globalStaticTestHookOrchestrator);
-        var classHookOrchestrator = new ClassHookOrchestrator(hookMessagePublisher, globalStaticTestHookOrchestrator);
-        var singleTestExecutor = new SingleTestExecutor(extension, disposer, cancellationTokenSource, testInvoker,
-            explicitFilterService, parallelLimitProvider, assemblyHookOrchestrator, classHookOrchestrator, Logger);
+        var hooksCollector = Register(new HooksCollector());
         
-        TestsExecutor = new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions);
+        var testMetadataCollector = Register(new TestMetadataCollector(TUnitMessageBus, LoggerFactory));
+        var testsLoader = Register(new TestsConstructor(extension, testMetadataCollector, this));
+        var testFilterService = Register(new TestFilterService(LoggerFactory));
         
-        OnEndExecutor = new OnEndExecutor(CommandLineOptions, Logger);
+        TestGrouper = Register(new TestGrouper());
+        
+        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(hooksCollector));
+
+        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(hooksCollector, stringFilter));
+        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(hooksCollector, AssemblyHookOrchestrator, stringFilter));
+        
+        var classHookOrchestrator = Register(new ClassHookOrchestrator(hooksCollector));
+        
+        var testHookOrchestrator = Register(new TestHookOrchestrator(hooksCollector));
+
+        var testRegistrar = Register(new TestRegistrar(AssemblyHookOrchestrator, classHookOrchestrator));
+        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, LoggerFactory, extension));
+        
+        TestFinder = Register(new TestsFinder(TestDiscoverer));
+        Register<ITestFinder>(TestFinder);
+        
+        var disposer = Register(new Disposer(Logger));
+        var cancellationTokenSource = Register(EngineCancellationToken.CancellationTokenSource);
+        var testInvoker = Register(new TestInvoker(testHookOrchestrator));
+        var explicitFilterService = Register(new ExplicitFilterService());
+        var parallelLimitProvider = Register(new ParallelLimitProvider());
+        var hookMessagePublisher = Register(new HookMessagePublisher(extension, messageBus));
+        
+        var singleTestExecutor = Register(new SingleTestExecutor(extension, disposer, cancellationTokenSource, testInvoker,
+            explicitFilterService, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, testHookOrchestrator, TestFinder, TUnitMessageBus, Logger, EngineCancellationToken));
+        
+        TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken));
+        
+        OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }
     
     public async ValueTask DisposeAsync()
     {
         await StandardOutConsoleInterceptor.DisposeAsync();
         await StandardErrorConsoleInterceptor.DisposeAsync();
+    }
+
+    private T Register<T>(T t)
+    {
+        _services.Add(typeof(T), t!);
+        
+        return t;
+    }
+
+    public object? GetService(Type serviceType)
+    {
+        return _services.GetValueOrDefault(serviceType);
     }
 }

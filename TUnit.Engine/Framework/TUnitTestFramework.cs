@@ -1,39 +1,29 @@
-﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using System.Collections.Concurrent;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
-using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Logging;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Hooks;
-using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Framework;
 
 internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 {
     private readonly IExtension _extension;
+    private readonly IServiceProvider _frameworkServiceProvider;
     private readonly ITestFrameworkCapabilities _capabilities;
-    private readonly TUnitServiceProvider _serviceProvider;
+    private static readonly ConcurrentDictionary<string, TUnitServiceProvider> ServiceProvidersPerSession = [];
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
         ITestFrameworkCapabilities capabilities)
     {
         _extension = extension;
+        _frameworkServiceProvider = frameworkServiceProvider;
         _capabilities = capabilities;
-        
-        _serviceProvider = new TUnitServiceProvider(extension, frameworkServiceProvider.GetMessageBus(), frameworkServiceProvider);
-        
-        GlobalContext.Current.GlobalLogger = _serviceProvider.Logger;
-        
-        _serviceProvider.StandardOutConsoleInterceptor.Initialize();
-        _serviceProvider.StandardErrorConsoleInterceptor.Initialize();
-        
-        _serviceProvider.Initializer.Initialize();
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -57,58 +47,58 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         System.Diagnostics.Debugger.Launch();
 #endif
 
-        var stringFilter = _serviceProvider.FilterParser.GetTestFilter(context);
+        var serviceProvider = ServiceProvidersPerSession.GetOrAdd(context.Request.Session.SessionUid.Value,
+            _ => new TUnitServiceProvider(_extension, context, context.MessageBus, _frameworkServiceProvider)
+        );
 
+        var stringFilter = serviceProvider.FilterParser.GetTestFilter(context);
+
+        GlobalContext.Current = new GlobalContext
+        {
+            TestFilter = stringFilter,
+            GlobalLogger = serviceProvider.Logger
+        };
+        
+        serviceProvider.StandardOutConsoleInterceptor.Initialize();
+        serviceProvider.StandardErrorConsoleInterceptor.Initialize();
+        
+        serviceProvider.Initializer.Initialize();
+        
         TestSessionContext? testSessionContext = null;
         try
         {
-            EngineCancellationToken.Initialise(context.CancellationToken);
+            serviceProvider.EngineCancellationToken.Initialise(context.CancellationToken);
             
-            var filteredTests = await _serviceProvider.TestDiscoverer
-                .FilterTests(context, stringFilter, EngineCancellationToken.Token);
+            var filteredTests = await serviceProvider.TestDiscoverer
+                .FilterTests(context, stringFilter, serviceProvider.EngineCancellationToken.Token);
 
             switch (context.Request)
             {
                 case DiscoverTestExecutionRequest:
                 {
-                    foreach (var testNode in filteredTests.AllValidTests.Select(testInformation => testInformation.ToTestNode()))
+                    foreach (var test in filteredTests.AllValidTests)
                     {
-                        testNode.Properties.Add(DiscoveredTestNodeStateProperty.CachedInstance);
-
-                        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-                            sessionUid: context.Request.Session.SessionUid,
-                            testNode: testNode)
-                        );
+                        await serviceProvider.TUnitMessageBus.Discovered(test.TestContext);
                     }
-
-                    await _serviceProvider.FailedInitializationTestPublisher.NotifyFailedTests(context,
-                        filteredTests.FailedInitialization, true);
-
                     break;
                 }
                 case RunTestExecutionRequest runTestExecutionRequest:
-                    
-                    await _serviceProvider.FailedInitializationTestPublisher.NotifyFailedTests(context,
-                        filteredTests.FailedInitialization, false);
-
                     testSessionContext =
-                        new TestSessionContext(AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
+                        new TestSessionContext(serviceProvider.AssemblyHookOrchestrator.GetAllAssemblyHookContexts())
                         {
                             TestFilter = stringFilter
                         };
 
-                    await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(testSessionContext);
+                    await serviceProvider.TestSessionHookOrchestrator.ExecuteBeforeHooks();
 
-                    await _serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
+                    await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context);
 
-                    await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(testSessionContext);
+                    await serviceProvider.TestSessionHookOrchestrator.ExecuteAfterHooks();
 
                     foreach (var artifact in testSessionContext.Artifacts)
                     {
-                        await context.MessageBus.PublishAsync(this,
-                            new SessionFileArtifact(context.Request.Session.SessionUid, artifact.File,
-                                artifact.DisplayName, artifact.Description));
+                        await serviceProvider.TUnitMessageBus.SessionArtifact(artifact);
                     }
 
                     break;
@@ -119,11 +109,12 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         catch (Exception e) when (e is TaskCanceledException or OperationCanceledException &&
                                   context.CancellationToken.IsCancellationRequested)
         {
-            await _serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
+            await serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
         }
         catch (Exception e)
         {
-            await _serviceProvider.Logger.LogErrorAsync(e);
+            await serviceProvider.Logger.LogErrorAsync(e);
+            
             await context.MessageBus.PublishAsync(
                 dataProducer: this,
                 data: new TestNodeUpdateMessage(
@@ -137,7 +128,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         finally
         {
-            await _serviceProvider.OnEndExecutor.ExecuteAsync(testSessionContext);
+            await serviceProvider.OnEndExecutor.ExecuteAsync(testSessionContext);
 
             context.Complete();
         }
@@ -147,7 +138,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         try
         {
-            await using var _ = _serviceProvider;
+            await using var _ = ServiceProvidersPerSession[context.SessionUid.Value];
             
             return new CloseTestSessionResult
             {

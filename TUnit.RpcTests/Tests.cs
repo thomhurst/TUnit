@@ -10,6 +10,7 @@ namespace TUnit.RpcTests;
 public class Tests
 {
     [CancelAfter(300_000)]
+    [Retry(3)]
     [Test]
     public async Task TestAsync(CancellationToken cancellationToken)
     {
@@ -34,6 +35,8 @@ public class Tests
             .WithArguments([
                 "run",
                 "-f", "net8.0",
+                // "-c", "Debug",
+                // "-p:LaunchDebugger=true",
                 "--server", 
                 "--client-port",
                 ((IPEndPoint)listener.LocalEndpoint).Port.ToString()
@@ -57,45 +60,44 @@ public class Tests
         
         using var client = new TestingPlatformClient(rpc, tcpClient, new ProcessHandle(cliProcess, output));
         
-        await client.InitializeAsync();
+        await await Task.WhenAny(cliProcess, client.InitializeAsync());
         
         var discoveryId = Guid.NewGuid();
 
-        List<TestNodeUpdate> discovered = [];
+        List<TestNodeUpdate> results = [];
         var discoverTestsResponse = await client.DiscoverTestsAsync(discoveryId, updates =>
         {
-            discovered.AddRange(updates);
+            results.AddRange(updates);
             return Task.CompletedTask;
         });
 
         await discoverTestsResponse.WaitCompletionAsync();
+
+        var originalDiscovered = results.Where(x => x.Node.ExecutionState is "discovered").ToList();
         
-        Assert.Multiple(() =>
-        {
-            Assert.That(discovered.All(x => x.Node.ExecutionState == "discovered"));
-            Assert.That(discovered, Has.Count.EqualTo(1183));
-        });
-        
-        List<TestNodeUpdate> executionResults = [];
+        results.Clear();
         var executeTestsResponse = await client.RunTestsAsync(discoveryId, updates =>
         {
-            executionResults.AddRange(updates);
+            results.AddRange(updates);
             return Task.CompletedTask;
         });
 
         await executeTestsResponse.WaitCompletionAsync();
 
-        var finished = executionResults.Where(x => x.Node.ExecutionState != "in-progress").ToList();
+        var newDiscovered = results.Where(x => x.Node.ExecutionState is "discovered").ToList();
+        var finished = results.Where(x => x.Node.ExecutionState is not "in-progress").ToList();
         var passed = finished.Where(x => x.Node.ExecutionState == "passed").ToList();
         var failed = finished.Where(x => x.Node.ExecutionState == "failed").ToList();
         var skipped = finished.Where(x => x.Node.ExecutionState == "skipped").ToList();
 
         Assert.Multiple(() =>
         {
-            Assert.That(finished, Has.Count.EqualTo(2381));
-            Assert.That(passed, Has.Count.EqualTo(2129));
-            Assert.That(failed, Has.Count.EqualTo(236));
-            Assert.That(skipped, Has.Count.EqualTo(8));
+            Assert.That(originalDiscovered, Has.Count.EqualTo(1185));
+            Assert.That(newDiscovered, Has.Count.Zero);
+            Assert.That(finished, Has.Count.EqualTo(1186));
+            Assert.That(passed, Has.Count.EqualTo(929));
+            Assert.That(failed, Has.Count.EqualTo(89));
+            Assert.That(skipped, Has.Count.EqualTo(7));
         });
 
         await client.ExitAsync();

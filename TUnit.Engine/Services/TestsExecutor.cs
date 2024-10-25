@@ -18,6 +18,7 @@ internal class TestsExecutor
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
+    private readonly EngineCancellationToken _engineCancellationToken;
 
     private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
 #if NET9_0_OR_GREATER
@@ -30,11 +31,13 @@ internal class TestsExecutor
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
         TUnitFrameworkLogger logger,
-        ICommandLineOptions commandLineOptions)
+        ICommandLineOptions commandLineOptions,
+        EngineCancellationToken engineCancellationToken)
     {
         _singleTestExecutor = singleTestExecutor;
         _logger = logger;
         _commandLineOptions = commandLineOptions;
+        _engineCancellationToken = engineCancellationToken;
 
         _maximumParallelTests = GetParallelTestsLimit();
     }
@@ -129,7 +132,7 @@ internal class TestsExecutor
             
             if (_commandLineOptions.IsOptionSet(FailFastCommandProvider.FailFast))
             {
-                await EngineCancellationToken.CancellationTokenSource.CancelAsync();
+                await _engineCancellationToken.CancellationTokenSource.CancelAsync();
             }
         }
         finally

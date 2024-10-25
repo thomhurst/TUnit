@@ -4,9 +4,17 @@ namespace TUnit.Core;
 
 public class GlobalContext : Context
 {
-    public new static GlobalContext Current { get; } = new();
+    private static readonly AsyncLocal<GlobalContext?> Contexts = new();
+    public new static GlobalContext Current
+    {
+        get
+        {
+            return Contexts.Value ??= new GlobalContext();
+        }
+        internal set => Contexts.Value = value;
+    }
     
-    private GlobalContext()
+    internal GlobalContext()
     {
     }
 

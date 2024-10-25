@@ -1,6 +1,7 @@
-﻿using System.Reflection;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Data;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Services;
 
@@ -9,81 +10,88 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public class AssemblyHookOrchestrator(
-    HookMessagePublisher hookMessagePublisher,
-    GlobalStaticTestHookOrchestrator globalStaticTestHookOrchestrator)
+internal class AssemblyHookOrchestrator(HooksCollector hooksCollector)
 {
-    public async Task DiscoverHooks(ExecuteRequestContext context)
-    {
-        foreach (var list in TestDictionary.AssemblySetUps.Values)
-        {
-            foreach (var (name, hookMethod, _) in list)
-            {
-                await hookMessagePublisher.Discover(context.Request.Session.SessionUid.Value, $"Before Assembly: {name}", hookMethod);
-            }
-        }
+    private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyHookContexts = new();
 
-        foreach (var list in TestDictionary.AssemblyCleanUps.Values)
-        {
-            foreach (var (name, hookMethod, _) in list)
-            {
-                await hookMessagePublisher.Discover(context.Request.Session.SessionUid.Value, $"After Assembly: {name}", hookMethod);
-            }
-        }
-    }
-    
-    public static IEnumerable<AssemblyHookContext> GetAllAssemblyHookContexts() => TestDictionary.AssemblyHookContexts.Values;
+    private readonly GetOnlyDictionary<Assembly, Task> _before = new();
+    private readonly GetOnlyDictionary<Assembly, Task> _after = new();
 
-    internal static AssemblyHookContext GetAssemblyHookContext(Assembly assembly)
+    public async Task ExecuteBeforeHooks(Assembly assembly)
     {
-        lock (assembly)
-        {
-            return TestDictionary.AssemblyHookContexts.GetOrAdd(assembly, _ => new AssemblyHookContext
+        await _before.GetOrAdd(assembly, async _ =>
             {
-                Assembly = assembly
+                var context = GetContext(assembly);
+                
+                AssemblyHookContext.Current = context;
+
+                foreach (var beforeEveryClass in hooksCollector.BeforeEveryAssemblyHooks)
+                {
+                    await beforeEveryClass.Body(context, default);
+                }
+
+                var list = hooksCollector.BeforeAssemblyHooks.GetOrAdd(assembly, _ => []);
+
+                foreach (var staticHookMethod in list)
+                {
+                    await staticHookMethod.Body(context, default);
+                }
+                
+                AssemblyHookContext.Current = null;
             });
-        }
     }
 
-    internal async Task ExecuteBeforeHooks(ExecuteRequestContext executeRequestContext, Assembly assembly, TestContext testContext)
-    {
-        var context = GetAssemblyHookContext(assembly);
-        
-        // Run global ones first
-        await globalStaticTestHookOrchestrator.ExecuteBeforeHooks(executeRequestContext, context);
-            
-        foreach (var setUp in TestDictionary.AssemblySetUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.HookMethod.Order))
-        {
-            // As these are lazy we should always get the same Task
-            // So we await the same Task to ensure it's finished first
-            // and also gives the benefit of rethrowing the same exception if it failed
-            await setUp.Action.Value(executeRequestContext.Request.Session.SessionUid.Value, hookMessagePublisher); 
-        }
-    }
-
-    internal async Task ExecuteCleanupsIfLastInstance(ExecuteRequestContext executeRequestContext,
-        Assembly assembly, TestContext testContext, List<Exception> cleanUpExceptions)
+    public async Task ExecuteCleanUpsIfLastInstance(
+        TestContext testContext, 
+        Assembly assembly,
+        List<Exception> cleanUpExceptions
+        )
     {
         if (!InstanceTracker.IsLastTestForAssembly(assembly))
         {
-            return;
+            // Only run one time clean downs when no instances are left!
+           return;
         }
         
-        foreach (var cleanUp in TestDictionary.AssemblyCleanUps.GetOrAdd(assembly, _ => []).OrderBy(x => x.HookMethod.Order))
+        await _after.GetOrAdd(assembly, async _ =>
         {
-            await hookMessagePublisher.Push(executeRequestContext.Request.Session.SessionUid.Value, $"After Assembly: {cleanUp.Name}", cleanUp.HookMethod, () => RunHelpers.RunSafelyAsync(cleanUp.Action, cleanUpExceptions));
-        }
-        
-        var context = GetAssemblyHookContext(assembly);
+            var context = GetContext(assembly);
+            
+            AssemblyHookContext.Current = context;
+            
+            foreach (var testEndEventsObject in testContext.GetLastTestInAssemblyEventObjects())
+            {
+                await RunHelpers.RunValueTaskSafelyAsync(
+                    () => testEndEventsObject.IfLastTestInAssembly(context, testContext),
+                    cleanUpExceptions);
+            }
+            
+            var list = hooksCollector.AfterAssemblyHooks.GetOrAdd(assembly, _ => []);
 
-        foreach (var testEndEventsObject in testContext.GetLastTestInAssemblyEventObjects())
+            foreach (var staticHookMethod in list)
+            {
+                await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
+            }
+                
+            foreach (var afterEveryAssembly in hooksCollector.AfterEveryAssemblyHooks)
+            {
+                await RunHelpers.RunSafelyAsync(() => afterEveryAssembly.Body(context, default), cleanUpExceptions);
+            }
+            
+            AssemblyHookContext.Current = null;
+        });
+    }
+
+    public AssemblyHookContext GetContext(Assembly assembly)
+    {
+        return _assemblyHookContexts.GetOrAdd(assembly, _ => new AssemblyHookContext
         {
-            await RunHelpers.RunValueTaskSafelyAsync(
-                () => testEndEventsObject.IfLastTestInAssembly(context, testContext),
-                cleanUpExceptions);
-        }
+            Assembly = assembly
+        });
+    }
 
-        // Run global ones last
-        await globalStaticTestHookOrchestrator.ExecuteAfterHooks(executeRequestContext, context, cleanUpExceptions);
+    public IEnumerable<AssemblyHookContext> GetAllAssemblyHookContexts()
+    {
+        return _assemblyHookContexts.Values;
     }
 }

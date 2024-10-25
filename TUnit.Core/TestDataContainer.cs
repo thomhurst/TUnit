@@ -15,8 +15,6 @@ public static class TestDataContainer
     private static readonly GetOnlyDictionary<Assembly, GetOnlyDictionary<Type, object>> InjectedSharedPerAssembly = new();
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
 
-    internal static readonly Dictionary<Type, Lazy<Task>> InjectedSharedGloballyInitializations = new();
-    
 #if NET9_0_OR_GREATER
     private static readonly Lock Lock = new();
 #else
@@ -65,16 +63,6 @@ public static class TestDataContainer
         var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
 
         return  (T)instancesForType.GetOrAdd(key, _ => func()!);
-    }
-    
-    internal static async ValueTask OnLastInstance(Type testClassType)
-    {
-        var typesPerType = InjectedSharedPerClassType.GetOrAdd(testClassType, _ => new GetOnlyDictionary<Type, object>());
-        
-        foreach (var key in typesPerType.Keys)
-        {
-            await Disposer.DisposeAsync(typesPerType.Remove(key));
-        }
     }
     
     internal static async ValueTask ConsumeKey(string key, Type type)

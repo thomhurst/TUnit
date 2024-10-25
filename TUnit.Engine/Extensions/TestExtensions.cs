@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Helpers;
@@ -84,5 +85,30 @@ internal static class TestExtensions
     {
         testNode.Properties.Add(property);
         return testNode;
+    }
+    
+    public static void ReRegisterTestWithArguments<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TTestClass>(this TestContext testContext, Func<TTestClass> classFactory, object[] methodArguments)
+    {
+        // TODO:
+        // TestRegistrar.RegisterTest(new TestMetadata<TTestClass>
+        // {
+        //     TestId = Guid.NewGuid().ToString(),
+        //     AttributeTypes = [],
+        //     ClassConstructor = null,
+        //     CurrentRepeatAttempt = 0,
+        //     DataAttributes = [],
+        //     MethodInfo = testContext.TestDetails.MethodInfo,
+        //     ResettableClassFactory = new ResettableLazy<TTestClass>(classFactory),
+        //     TestClassArguments = [],
+        //     TestMethodArguments = methodArguments,
+        //     ObjectBag = [],
+        //     ParallelLimit = testContext.TestDetails.ParallelLimit,
+        //     RepeatLimit = 0,
+        //     TestExecutor = testContext.InternalDiscoveredTest.TestExecutor,
+        //     TestClassProperties = [],
+        //     TestFilePath = testContext.TestDetails.TestFilePath,
+        //     TestLineNumber = testContext.TestDetails.TestLineNumber,
+        //     TestMethodFactory = (@class, token) => AsyncConvert.Convert(testContext.TestDetails.MethodInfo.Invoke(@class, [..methodArguments, token]))
+        // });
     }
 }

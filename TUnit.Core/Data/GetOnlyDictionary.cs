@@ -7,27 +7,35 @@ namespace TUnit.Core.Data;
 #endif
 public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
 {
-    internal ConcurrentDictionary<TKey, TValue> InnerDictionary { get; } = new();
+    private ConcurrentDictionary<TKey, TValue> InnerDictionary { get; } = new();
 
+#if NET9_0_OR_GREATER
+    private static readonly Lock Lock = new();
+#else
+    private static readonly object Lock = new();
+#endif
+    
     public ICollection<TKey> Keys => InnerDictionary.Keys;
     public ICollection<TValue> Values => InnerDictionary.Values;
 
-    public TValue GetOrAdd(TKey key, Func<TKey, TValue> func) => InnerDictionary.GetOrAdd(key, func);
+    public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
+    {
+        lock (Lock)
+        {
+            return InnerDictionary.GetOrAdd(key, func);
+        }
+    }
 
     public TValue? Remove(TKey key)
     {
-        if (InnerDictionary.TryRemove(key, out var value))
+        lock (Lock)
         {
-            return value;
+            if (InnerDictionary.TryRemove(key, out var value))
+            {
+                return value;
+            }
+
+            return default;
         }
-
-        return default;
-    }
-    
-    public TValue this[TKey key] => InnerDictionary[key];
-
-    public bool TryGet(TKey key, out TValue? o)
-    {
-        return InnerDictionary.TryGetValue(key, out o);
     }
 }

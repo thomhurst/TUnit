@@ -9,8 +9,6 @@ internal record GroupedTests
     public required List<NotInParallelTestCase> KeyedNotInParallel { get; init; }
 
     public required Queue<DiscoveredTest> Parallel { get; init; }
-
-    public required FailedInitializationTest[] FailedInitialization { get; init; }
     
     public int TestCount => AllValidTests.Count;
 }

@@ -35,7 +35,7 @@ internal abstract class DiscoveredTest
     
     public required ITestExecutor TestExecutor { get; internal set; }
     
-    public required IClassConstructor? ClassConstructor { get; set; }
+    public required IClassConstructor? ClassConstructor { get; init; }
     
     public IHookExecutor? HookExecutor { get; internal set; }
     

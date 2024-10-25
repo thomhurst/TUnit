@@ -8,6 +8,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
@@ -28,7 +29,11 @@ internal class SingleTestExecutor(
     ParallelLimitProvider parallelLimitProvider,
     AssemblyHookOrchestrator assemblyHookOrchestrator,
     ClassHookOrchestrator classHookOrchestrator,
-    TUnitFrameworkLogger logger)
+    TestHookOrchestrator testHookOrchestrator,
+    ITestFinder testFinder,
+    ITUnitMessageBus messageBus,
+    TUnitFrameworkLogger logger,
+    EngineCancellationToken engineCancellationToken)
     : IDataProducer
 {
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
@@ -63,16 +68,13 @@ internal class SingleTestExecutor(
 
             if (cancellationTokenSource.IsCancellationRequested)
             {
-                await context.MessageBus.PublishAsync(this,
-                    new TestNodeUpdateMessage(context.Request.Session.SessionUid,
-                        test.ToTestNode().WithProperty(new CancelledTestNodeStateProperty())));
+                await messageBus.Cancelled(testContext);
+                
                 testContext.TaskCompletionSource.SetCanceled();
                 return;
             }
 
-            await context.MessageBus.PublishAsync(this,
-                new TestNodeUpdateMessage(context.Request.Session.SessionUid,
-                    test.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
+            await messageBus.InProgress(testContext);
 
             var cleanUpExceptions = new List<Exception>();
 
@@ -96,15 +98,8 @@ internal class SingleTestExecutor(
                 ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
 
                 var timingProperty = GetTimingProperty(testContext, start);
-
-                await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-                    context.Request.Session.SessionUid,
-                    test.ToTestNode()
-                        .WithProperty(PassedTestNodeStateProperty.CachedInstance)
-                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
-                        .WithProperty(timingProperty)
-                ));
+                
+                await messageBus.Passed(testContext, start);
 
                 testContext.Result = new TestResult
                 {
@@ -126,13 +121,7 @@ internal class SingleTestExecutor(
 
                 await logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
 
-                await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-                    context.Request.Session.SessionUid,
-                    test.ToTestNode()
-                        .WithProperty(new SkippedTestNodeStateProperty(skipTestException.Reason))
-                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
-                ));
+                await messageBus.Skipped(testContext, skipTestException.Reason);
 
                 var now = DateTimeOffset.Now;
 
@@ -152,13 +141,7 @@ internal class SingleTestExecutor(
 
                 var timingProperty = GetTimingProperty(testContext, start);
 
-                await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-                    context.Request.Session.SessionUid, test.ToTestNode()
-                        .WithProperty(GetFailureStateProperty(testContext, e, timingProperty.GlobalTiming.Duration))
-                        .WithProperty(timingProperty)
-                        .WithProperty(new StandardOutputProperty(testContext.GetStandardOutput()))
-                        .WithProperty(new StandardErrorProperty(testContext.GetErrorOutput()))
-                        .WithProperty(new TrxExceptionProperty(e.Message, e.StackTrace))));
+                await messageBus.Failed(testContext, e, start);
 
                 testContext.Result = new TestResult
                 {
@@ -213,10 +196,7 @@ internal class SingleTestExecutor(
 
                 foreach (var artifact in testContext.Artifacts)
                 {
-                    await context.MessageBus.PublishAsync(this,
-                        new TestNodeFileArtifact(context.Request.Session.SessionUid, test.ToTestNode(),
-                            artifact.File,
-                            artifact.DisplayName, artifact.Description));
+                    await messageBus.TestArtifact(testContext, artifact);
                 }
             }
         }
@@ -234,11 +214,9 @@ internal class SingleTestExecutor(
     {
         try
         {
-            await assemblyHookOrchestrator.ExecuteBeforeHooks(context,
-                test.TestContext.TestDetails.ClassType.Assembly,
-                testContext);
+            await assemblyHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly);
 
-            await classHookOrchestrator.ExecuteBeforeHooks(context, test.TestContext.TestDetails.ClassType);
+            await classHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType);
         }
         catch (Exception e)
         {
@@ -251,11 +229,11 @@ internal class SingleTestExecutor(
     {
         try
         {
-            await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(context, testContext,
+            await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
                 test.TestContext.TestDetails.ClassType, cleanUpExceptions);
 
-            await assemblyHookOrchestrator.ExecuteCleanupsIfLastInstance(context,
-                test.TestContext.TestDetails.ClassType.Assembly, testContext, cleanUpExceptions);
+            await assemblyHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
+                test.TestContext.TestDetails.ClassType.Assembly, cleanUpExceptions);
 
             if (InstanceTracker.IsLastTest())
             {
@@ -275,7 +253,7 @@ internal class SingleTestExecutor(
 
     private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
     {
-        await TestHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
+        await testHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
             
         await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
         
@@ -393,7 +371,7 @@ internal class SingleTestExecutor(
 
     private async ValueTask ExecuteCore(DiscoveredTest discoveredTest)
     {
-        if (EngineCancellationToken.Token.IsCancellationRequested)
+        if (engineCancellationToken.Token.IsCancellationRequested)
         {
             throw new SkipTestException("The test session has been cancelled...");
         }
@@ -435,7 +413,7 @@ internal class SingleTestExecutor(
     {
         foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
         {
-            var dependencies = TestDictionary.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
+            var dependencies = testFinder.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
                 dependsOnAttribute.ParameterTypes, testDetails.ClassType,
                 testDetails.TestClassParameterTypes);
 
@@ -448,7 +426,7 @@ internal class SingleTestExecutor(
                     throw new DependencyConflictException(currentChain);
                 }
                 
-                yield return (dependency, dependsOnAttribute.ProceedOnFailure);
+                yield return (dependency.InternalDiscoveredTest, dependsOnAttribute.ProceedOnFailure);
 
                 foreach (var nestedDependency in GetDependencies(original, dependency.TestDetails, currentChain))
                 {
@@ -464,11 +442,11 @@ internal class SingleTestExecutor(
         
         if (testDetails.Timeout == null || testDetails.Timeout.Value == default)
         {
-            await RunTest(discoveredTest, EngineCancellationToken.Token);
+            await RunTest(discoveredTest, engineCancellationToken.Token);
             return;
         }
 
-        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout);
+        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout, engineCancellationToken);
     }
 
 

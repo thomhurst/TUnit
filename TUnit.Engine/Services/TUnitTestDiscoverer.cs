@@ -4,30 +4,36 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
 
 internal class TUnitTestDiscoverer(
-    TestsLoader testsLoader,
+    HooksCollector hooksCollector,
+    TestsConstructor testsConstructor,
     TestFilterService testFilterService,
     TestGrouper testGrouper,
+    TestRegistrar testRegistrar,
+    TestDiscoveryHookOrchestrator testDiscoveryHookOrchestrator,
+    ITUnitMessageBus tUnitMessageBus,
     ILoggerFactory loggerFactory,
     IExtension extension) : IDataProducer
 {
     private readonly ILogger<TUnitTestDiscoverer> _logger = loggerFactory.CreateLogger<TUnitTestDiscoverer>();
     
-    private static IReadOnlyCollection<DiscoveredTest>? _cachedTests;
+    private IReadOnlyCollection<DiscoveredTest>? _cachedTests;
+
+    public IReadOnlyCollection<DiscoveredTest> GetCachedTests()
+    {
+        return _cachedTests!;
+    }
     
     public async Task<GroupedTests> FilterTests(ExecuteRequestContext context, string? stringTestFilter, CancellationToken cancellationToken)
     {
-        GlobalContext.Current.TestFilter = stringTestFilter;
-
         cancellationToken.ThrowIfCancellationRequested();
                 
-        var allDiscoveredTests = _cachedTests ??= await DiscoverTests(stringTestFilter);
+        var allDiscoveredTests = _cachedTests ??= await DiscoverTests();
 
         var executionRequest = context.Request as TestExecutionRequest;
         
@@ -35,61 +41,39 @@ internal class TUnitTestDiscoverer(
         
         await _logger.LogTraceAsync($"Found {filteredTests.Length} tests after filtering.");
         
-        var organisedTests = testGrouper.OrganiseTests(filteredTests, GetFailedToInitializeTests());
+        var organisedTests = testGrouper.OrganiseTests(filteredTests);
         
         if (context.Request is TestExecutionRequest)
         {
-            await RegisterInstances(context, organisedTests);
+            await RegisterInstances(organisedTests);
         }
 
         return organisedTests;
     }
 
-    private async Task RegisterInstances(ExecuteRequestContext context, GroupedTests organisedTests)
+    private async Task RegisterInstances(GroupedTests organisedTests)
     {
         foreach (var test in organisedTests.AllValidTests)
         {
-            await TestRegistrar.RegisterInstance(testContext: test.TestContext,
-
-                onFailureToInitialize: exception => context.MessageBus.PublishAsync(
-                    dataProducer: this,
-                    data: new TestNodeUpdateMessage(
-                        sessionUid: context.Request.Session.SessionUid,
-                        testNode: test.TestContext
-                            .ToTestNode()
-                            .WithProperty(new ErrorTestNodeStateProperty(exception, "Error initializing test")
-                            )
-                    )
-                )
+            await testRegistrar.RegisterInstance(testContext: test.TestContext,
+                onFailureToInitialize: exception => tUnitMessageBus.Failed(test.TestContext, exception, default)
             );
         }
     }
 
-    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests(string? stringTestFilter)
+    private async Task<IReadOnlyCollection<DiscoveredTest>> DiscoverTests()
     {
-        await GlobalStaticTestHookOrchestrator.ExecuteBeforeHooks(new BeforeTestDiscoveryContext
-        {
-            TestFilter = stringTestFilter
-        });
+        hooksCollector.CollectDiscoveryHooks();
         
-        var allDiscoveredTests = testsLoader.GetTests();
+        await testDiscoveryHookOrchestrator.ExecuteBeforeHooks();
+        
+        var allDiscoveredTests = testsConstructor.GetTests().ToArray();
 
-        await GlobalStaticTestHookOrchestrator.ExecuteAfterHooks(
-            new TestDiscoveryContext(allDiscoveredTests)
-            {
-                TestFilter = stringTestFilter
-            });
+        await testDiscoveryHookOrchestrator.ExecuteAfterHooks(allDiscoveredTests);
         
+        hooksCollector.CollectHooks();
+
         return allDiscoveredTests;
-    }
-
-    private FailedInitializationTest[] GetFailedToInitializeTests()
-    {
-        var failedToInitializeTests = TestDictionary.GetFailedToInitializeTests();
-
-        _logger.LogWarning($"{failedToInitializeTests.Length} tests failed to initialize.");
-        
-        return failedToInitializeTests;
     }
 
     public Task<bool> IsEnabledAsync()

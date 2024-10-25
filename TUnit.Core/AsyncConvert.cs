@@ -20,4 +20,19 @@ public static class AsyncConvert
     {
         await action();
     }
+
+    public static Task Convert(object? invoke)
+    {
+        if (invoke is Task task)
+        {
+            return task;
+        }
+
+        if (invoke is ValueTask valueTask)
+        {
+            return valueTask.AsTask();
+        }
+        
+        return Task.CompletedTask;
+    }
 }

@@ -1,7 +1,13 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core.Interfaces;
+
+namespace TUnit.Core;
 
 public partial class TestContext : Context, IDisposable
 {
+    internal readonly IServiceProvider ServiceProvider;
+
+    internal ITestFinder TestFinder => (ITestFinder) ServiceProvider.GetService(typeof(ITestFinder))!;
+    
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
 #if NET9_0_OR_GREATER
@@ -10,8 +16,9 @@ public partial class TestContext : Context, IDisposable
     public readonly object Lock = new();
 #endif
 
-    internal TestContext(TestDetails testDetails, Dictionary<string, object?> objectBag)
+    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, Dictionary<string, object?> objectBag)
     {
+        ServiceProvider = serviceProvider;
         TestDetails = testDetails;
         ObjectBag = objectBag;
     }
