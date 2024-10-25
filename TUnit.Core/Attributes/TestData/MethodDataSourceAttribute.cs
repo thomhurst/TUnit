@@ -6,7 +6,7 @@ public class MethodDataSourceAttribute : TestDataAttribute
     public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }
 
-    public object[] Arguments { get; set; } = [];
+    public object?[] Arguments { get; set; } = [];
     
     public MethodDataSourceAttribute(string methodNameProvidingDataSource)
     {

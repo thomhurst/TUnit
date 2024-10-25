@@ -382,4 +382,54 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
     }
+    
+    [Test]
+    public async Task Arguments_Are_Flagged_When_Does_Not_Match_Parameter_Type()
+    {
+        const string text = """
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data), Arguments = [ "Hi" ])|}]
+                                public void MyTest(int value)
+                                {
+                                }
+                            
+                                public static int Data(bool flag)
+                                {
+                                    return 1;
+                                }
+                            }
+                            """;
+
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
+            .WithLocation(0)
+            .WithArguments("string", "bool");
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Arguments_Are_Not_Flagged_When_Does_Match_Parameter_Types()
+    {
+        const string text = """
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data), Arguments = [ true ])|}]
+                                public void MyTest(int value)
+                                {
+                                }
+                            
+                                public static int Data(bool flag)
+                                {
+                                    return 1;
+                                }
+                            }
+                            """;
+        
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+    }
 }
