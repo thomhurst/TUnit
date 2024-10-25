@@ -87,7 +87,7 @@ internal static class TestExtensions
         return testNode;
     }
     
-    public static void ReRegisterTestWithArguments<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TTestClass>(this TestContext testContext, Func<TTestClass> classFactory, object[] methodArguments)
+    internal static void ReRegisterTestWithArguments<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TTestClass>(this TestContext testContext, Func<TTestClass> classFactory, object[] methodArguments)
     {
         // TODO:
         // TestRegistrar.RegisterTest(new TestMetadata<TTestClass>
