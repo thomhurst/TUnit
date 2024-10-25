@@ -156,7 +156,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
                     foreach (var hookLocationType in new[] { HookLocationType.Before, HookLocationType.After })
                     {
                         sourceBuilder.WriteLine(
-                            $"public IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}()");
+                            $"public global::System.Collections.Generic.IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}()");
 
                         sourceBuilder.WriteLine("{");
                         sourceBuilder.WriteLine("return");

@@ -129,7 +129,7 @@ internal class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine($"SourceRegistrar.Register(new {className}());");
             sourceBuilder.WriteLine("}");
 
-            sourceBuilder.WriteLine("public IReadOnlyList<SourceGeneratedTestNode> CollectTests()");
+            sourceBuilder.WriteLine("public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests()");
             sourceBuilder.WriteLine("{");
             sourceBuilder.WriteLine("return");
             sourceBuilder.WriteLine("[");
@@ -143,7 +143,7 @@ internal class TestsGenerator : IIncrementalGenerator
             var index = 0;
             foreach (var model in classGrouping)
             {
-                sourceBuilder.WriteLine($"private List<SourceGeneratedTestNode> Tests{index++}()");
+                sourceBuilder.WriteLine($"private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests{index++}()");
                 sourceBuilder.WriteLine("{");
                 sourceBuilder.WriteLine("List<SourceGeneratedTestNode> nodes = [];");
                 sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
