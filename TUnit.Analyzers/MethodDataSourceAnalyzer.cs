@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.EqualityComparers;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
@@ -17,7 +18,6 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.NoMethodFound,
             Rules.MethodMustBeStatic,
             Rules.MethodMustBePublic,
-            Rules.MethodMustBeParameterless,
             Rules.WrongArgumentTypeTestDataSource,
             Rules.TooManyArgumentsInTestMethod
         );
@@ -79,122 +79,140 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 .FirstOrDefault(x => x.Name == methodName);
             
             if (methodContainingTestData is null)
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.NoMethodFound,
-                    attributeData.GetLocation())
-            );
-            return;
-        }
-        
-        if (methodContainingTestData.ReturnsVoid)
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.MethodMustReturnData,
-                    attributeData.GetLocation())
-            );
-            return;
-        }
-
-        var canBeInstanceMethod = context.Symbol is IPropertySymbol;
-        if (!canBeInstanceMethod && !methodContainingTestData.IsStatic && attributeData.ConstructorArguments.Length != 1) 
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.MethodMustBeStatic,
-                    attributeData.GetLocation())
-            );
-            return;
-        }
-        
-        if (methodContainingTestData.DeclaredAccessibility != Accessibility.Public)
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.MethodMustBePublic,
-                    attributeData.GetLocation())
-            );
-            return;
-        }
-        
-        if (methodContainingTestData.Parameters.Any())
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.MethodMustBeParameterless,
-                    attributeData.GetLocation())
-            );
-            return;
-        }
-        
-        if (context.Symbol is IPropertySymbol 
-            || !methodContainingTestData.ReturnType.IsEnumerable(context, out var testDataMethodNonEnumerableReturnType))
-        {
-            testDataMethodNonEnumerableReturnType = methodContainingTestData.ReturnType;
-        }
-        
-        if (context.Compilation.HasImplicitConversion(testDataMethodNonEnumerableReturnType, parameterOrPropertyTypeSymbols.FirstOrDefault()))
-        {
-            return;
-        }
-
-        if (testDataMethodNonEnumerableReturnType.IsTupleType)
-        {
-            var namedTypeSymbol = (INamedTypeSymbol) testDataMethodNonEnumerableReturnType;
-            
-            var returnTupleTypes = namedTypeSymbol.TupleUnderlyingType?.TypeArguments
-                                  ?? namedTypeSymbol.TypeArguments;
-
-            if (returnTupleTypes.Length != parameterOrPropertyTypeSymbols.Length)
             {
-                context.ReportDiagnostic(Diagnostic.Create(
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.NoMethodFound,
+                        attributeData.GetLocation())
+                );
+                return;
+            }
+        
+            if (methodContainingTestData.ReturnsVoid)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.MethodMustReturnData,
+                        attributeData.GetLocation())
+                );
+                return;
+            }
+
+            var canBeInstanceMethod = context.Symbol is IPropertySymbol;
+            if (!canBeInstanceMethod && !methodContainingTestData.IsStatic && attributeData.ConstructorArguments.Length != 1) 
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.MethodMustBeStatic,
+                        attributeData.GetLocation())
+                );
+                return;
+            }
+        
+            if (methodContainingTestData.DeclaredAccessibility != Accessibility.Public)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.MethodMustBePublic,
+                        attributeData.GetLocation())
+                );
+                return;
+            }
+        
+            if (context.Symbol is IPropertySymbol 
+                || !methodContainingTestData.ReturnType.IsEnumerable(context, out var testDataMethodNonEnumerableReturnType))
+            {
+                testDataMethodNonEnumerableReturnType = methodContainingTestData.ReturnType;
+            }
+
+            var argumentsNamedArgument = attributeData.NamedArguments
+                .FirstOrDefault(x => x.Key == "Arguments")
+                .Value;
+
+            var argumentTypes =
+                argumentsNamedArgument.Kind == TypedConstantKind.Array
+                    ? argumentsNamedArgument
+                        .Values
+                        .Select(x => x.Type)
+                        .OfType<ITypeSymbol>()
+                        .ToArray()
+                    : [];
+
+            var parameterTypes = methodContainingTestData.Parameters.Select(x => x.Type).ToArray();
+                
+            if (!parameterTypes.SequenceEqual(argumentTypes, SelfOrBaseEqualityComparer.Instance))
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestDataSource,
+                        attributeData.GetLocation(),
+                        string.Join<ITypeSymbol>(", ", parameterTypes),
+                        string.Join<ITypeSymbol>(", ", argumentTypes),
+                        "for the `Arguments` array")
+                );
+                return;
+            }
+        
+            if (context.Compilation.HasImplicitConversion(testDataMethodNonEnumerableReturnType, parameterOrPropertyTypeSymbols.FirstOrDefault()))
+            {
+                return;
+            }
+
+            if (testDataMethodNonEnumerableReturnType.IsTupleType)
+            {
+                var namedTypeSymbol = (INamedTypeSymbol) testDataMethodNonEnumerableReturnType;
+            
+                var returnTupleTypes = namedTypeSymbol.TupleUnderlyingType?.TypeArguments
+                                       ?? namedTypeSymbol.TypeArguments;
+
+                if (returnTupleTypes.Length != parameterOrPropertyTypeSymbols.Length)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
                         Rules.WrongArgumentTypeTestDataSource,
                         attributeData.GetLocation(),
                         string.Join(", ", returnTupleTypes),
                         string.Join(", ", parameterOrPropertyTypeSymbols))
                     );
-                return;
-            }
-            
-            for (var i = 0; i < parameterOrPropertyTypeSymbols.Length; i++)
-            {
-                var parameterType = parameterOrPropertyTypeSymbols.ElementAtOrDefault(i);
-                var argumentType = returnTupleTypes.ElementAtOrDefault(i);
-
-                if (parameterType?.IsGenericDefinition() == true)
-                {
-                    continue;
-                }
-                
-                if (!context.Compilation.HasImplicitConversion(argumentType, parameterType))
-                {
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(
-                            Rules.WrongArgumentTypeTestDataSource,
-                            attributeData.GetLocation(),
-                            argumentType,
-                            parameterType)
-                    );
                     return;
                 }
-            }
             
-            return;
-        }
+                for (var i = 0; i < parameterOrPropertyTypeSymbols.Length; i++)
+                {
+                    var parameterType = parameterOrPropertyTypeSymbols.ElementAtOrDefault(i);
+                    var argumentType = returnTupleTypes.ElementAtOrDefault(i);
+
+                    if (parameterType?.IsGenericDefinition() == true)
+                    {
+                        continue;
+                    }
+                
+                    if (!context.Compilation.HasImplicitConversion(argumentType, parameterType))
+                    {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(
+                                Rules.WrongArgumentTypeTestDataSource,
+                                attributeData.GetLocation(),
+                                argumentType,
+                                parameterType)
+                        );
+                        return;
+                    }
+                }
+            
+                return;
+            }
         
-        if (parameterOrPropertyTypeSymbols.Length > 1)
-        {
+            if (parameterOrPropertyTypeSymbols.Length > 1)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.TooManyArgumentsInTestMethod,
+                        attributeData.GetLocation())
+                );
+                return;
+            }
+        
             context.ReportDiagnostic(
-                Diagnostic.Create(
-                    Rules.TooManyArgumentsInTestMethod,
-                    attributeData.GetLocation())
-            );
-            return;
-        }
-        
-        context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.WrongArgumentTypeTestDataSource,
                     attributeData.GetLocation(),

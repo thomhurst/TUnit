@@ -204,7 +204,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The data source type `{0}` doesn&apos;t match the parameter type `{1}`.
+        ///   Looks up a localized string similar to The data source type `{0}` doesn&apos;t match the parameter type `{1}` {2}.
         /// </summary>
         internal static string TUnit0006MessageFormat {
             get {

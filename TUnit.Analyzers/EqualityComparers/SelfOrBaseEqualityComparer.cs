@@ -10,13 +10,13 @@ public class SelfOrBaseEqualityComparer : EqualityComparer<ITypeSymbol?>
     {
     }
     
-    public override bool Equals(ITypeSymbol? x, ITypeSymbol? y)
+    public override bool Equals(ITypeSymbol? superType, ITypeSymbol? subType)
     {
-        var type = x;
+        var type = superType;
         
         while (type != null)
         {
-            if (SymbolEqualityComparer.Default.Equals(type, y))
+            if (SymbolEqualityComparer.Default.Equals(type, subType))
             {
                 return true;
             }
