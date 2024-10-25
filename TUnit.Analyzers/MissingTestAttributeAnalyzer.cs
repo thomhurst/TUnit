@@ -27,7 +27,9 @@ public class MissingTestAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
         var methods = namedTypeSymbol
             .GetSelfAndBaseTypes()
             .SelectMany(x => x.GetMembers())
-            .OfType<IMethodSymbol>();
+            .OfType<IMethodSymbol>()
+            .Where(x => x.MethodKind == MethodKind.Ordinary)
+            .Where(x => !x.IsStatic);
 
         foreach (var method in methods.Where(x => x.HasDataDrivenAttributes() && !x.IsTestMethod()))
         {
