@@ -145,7 +145,7 @@ internal class TestsGenerator : IIncrementalGenerator
             {
                 sourceBuilder.WriteLine($"private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests{index++}()");
                 sourceBuilder.WriteLine("{");
-                sourceBuilder.WriteLine("List<SourceGeneratedTestNode> nodes = [];");
+                sourceBuilder.WriteLine("global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];");
                 sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");
                 sourceBuilder.WriteLine($"var {VariableNames.TestMethodDataIndex} = 0;");
 
