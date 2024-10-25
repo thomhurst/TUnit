@@ -17,6 +17,11 @@ internal static class TypedConstantParser
             return $"({type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({newExpression})";
         }
 
+        if (type?.SpecialType == SpecialType.System_Decimal)
+        {
+            return $"{newExpression.ToString().TrimEnd('d')}m";
+        }
+
         return newExpression.ToString();
     }
 
