@@ -7,9 +7,13 @@ sidebar_position: 13
 Some test suites might be more complex than others, and a user may want control over 'newing' up their test classes.
 This control is given to you by the `[ClassConstructorAttribute<T>]` - Where `T` is a class that implements `IClassConstructor`.
 
-This interface is very generic so you have freedom to construct and dispose as you please.
+This interface simply requires you to generate a `T` object - How you do that is up to you!
 
 By giving the freedom of how classes are created, we can tap into things like Dependency Injection.
+
+You can also the [event-subscribing interfaces](event-subscribing.md) to get notified for things like when the test has finished. This functionality can be used to dispose your object afterwards.
+
+Attributes are new'd up per test, so you can store state within them.
 
 Here's an example of that using the Microsoft.Extensions.DependencyInjection library
 
@@ -18,45 +22,22 @@ using TUnit.Core;
 
 namespace MyTestProject;
 
-public class DependencyInjectionClassConstructor : IClassConstructor
+public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEvent
 {
     private static readonly IServiceProvider _serviceProvider = CreateServiceProvider();
-    
-    private static readonly ConditionalWeakTable<object, IServiceScope> Scopes = new();
 
-    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : class
+    private AsyncServiceScope _scope;
+
+    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()    where T : class
     {
-        var scope = _serviceProvider.CreateAsyncScope();
+        _scope = _serviceProvider.CreateAsyncScope();
         
-        var instance = ActivatorUtilities.GetServiceOrCreateInstance<T>(scope.ServiceProvider);
-        
-        Scopes.Add(instance, scope);
-        
-        return instance;
+        return ActivatorUtilities.GetServiceOrCreateInstance<T>(_scope.ServiceProvider);
     }
 
-    public async Task DisposeAsync<T>(T t)
-    {
-        if (t is IAsyncDisposable asyncDisposable)
-        {
-            await asyncDisposable.DisposeAsync();
-        }
-        else if (t is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-        
-        if (t != null && Scopes.TryGetValue(t, out var scope))
-        {
-            if (scope is IAsyncDisposable asyncScope)
-            {
-                await asyncScope.DisposeAsync();
-            }
-            else
-            {
-                scope.Dispose();
-            }
-        }
+    public ValueTask OnTestEnd(TestContext testContext)
+    { 
+        return _scope.DisposeAsync();
     }
 
     private static IServiceProvider CreateServiceProvider()
