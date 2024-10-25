@@ -11,7 +11,7 @@ This interface simply requires you to generate a `T` object - How you do that is
 
 By giving the freedom of how classes are created, we can tap into things like Dependency Injection.
 
-You can also the [event-subscribing interfaces](event-subscribing.md) to get notified for things like when the test has finished. This functionality can be used to dispose your object afterwards.
+You can also add [event-subscribing interfaces](event-subscribing.md) to get notified for things like when the test has finished. This functionality can be used to dispose your object afterwards.
 
 Attributes are new'd up per test, so you can store state within them.
 
