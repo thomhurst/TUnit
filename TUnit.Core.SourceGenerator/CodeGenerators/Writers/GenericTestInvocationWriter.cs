@@ -48,7 +48,7 @@ internal static class GenericTestInvocationWriter
                 ..testSourceDataModel.PropertyArguments.InnerContainers.Select(x => x.ArgumentsContainer)
             ];
         
-        sourceBuilder.Write($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
+        sourceBuilder.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
         
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
         
