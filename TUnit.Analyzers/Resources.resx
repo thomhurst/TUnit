@@ -396,4 +396,22 @@
     <data name="TUnit0042Title" xml:space="preserve">
         <value>Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.</value>
     </data>
+    <data name="TUnit0043Description" xml:space="preserve">
+        <value>Property must use `required` keyword.</value>
+    </data>
+    <data name="TUnit0043MessageFormat" xml:space="preserve">
+        <value>Property must use `required` keyword</value>
+    </data>
+    <data name="TUnit0043Title" xml:space="preserve">
+        <value>Property must use `required` keyword</value>
+    </data>
+    <data name="TUnit0044Description" xml:space="preserve">
+        <value>Property must have a setter.</value>
+    </data>
+    <data name="TUnit0044MessageFormat" xml:space="preserve">
+        <value>Property must have a setters.</value>
+    </data>
+    <data name="TUnit0044Title" xml:space="preserve">
+        <value>Property must have a setter</value>
+    </data>
 </root>

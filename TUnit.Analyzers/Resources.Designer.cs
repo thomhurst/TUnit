@@ -1192,5 +1192,59 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0042Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property must use `required` keyword..
+        /// </summary>
+        internal static string TUnit0043Description {
+            get {
+                return ResourceManager.GetString("TUnit0043Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property must use `required` keyword.
+        /// </summary>
+        internal static string TUnit0043MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0043MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property must use `required` keyword.
+        /// </summary>
+        internal static string TUnit0043Title {
+            get {
+                return ResourceManager.GetString("TUnit0043Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property must have a setter..
+        /// </summary>
+        internal static string TUnit0044Description {
+            get {
+                return ResourceManager.GetString("TUnit0044Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property must have a setters..
+        /// </summary>
+        internal static string TUnit0044MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0044MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property must have a setter.
+        /// </summary>
+        internal static string TUnit0044Title {
+            get {
+                return ResourceManager.GetString("TUnit0044Title", resourceCulture);
+            }
+        }
     }
 }

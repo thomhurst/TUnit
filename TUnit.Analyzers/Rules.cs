@@ -132,6 +132,12 @@ internal static class Rules
     public static readonly DiagnosticDescriptor GlobalHooksSeparateClass =
         CreateDescriptor("TUnit0042", UsageCategory, DiagnosticSeverity.Warning);
     
+    public static readonly DiagnosticDescriptor PropertyRequiredNotSet =
+        CreateDescriptor("TUnit0043", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor MustHavePropertySetter =
+        CreateDescriptor("TUnit0044", UsageCategory, DiagnosticSeverity.Error);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

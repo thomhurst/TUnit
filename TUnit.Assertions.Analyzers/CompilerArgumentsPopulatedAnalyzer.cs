@@ -42,6 +42,11 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        if (argumentOperation.Parent?.Type?.ContainingAssembly.Name is not "TUnit.Assertions")
+        {
+            return;
+        }
+
         if (argumentOperation.Parameter?.GetAttributes().Any(x =>
                 x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
                     is "global::System.Runtime.CompilerServices.CallerMemberNameAttribute"
