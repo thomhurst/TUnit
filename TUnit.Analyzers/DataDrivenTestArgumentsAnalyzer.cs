@@ -10,7 +10,7 @@ namespace TUnit.Analyzers;
 public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability, Rules.MissingTestAttribute);
+        ImmutableArray.Create(Rules.WrongArgumentTypeTestData, Rules.NoTestDataProvided, Rules.MethodParameterBadNullability);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -41,14 +41,6 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
     private void CheckAttributeAgainstMethod(SymbolAnalysisContext context, IMethodSymbol methodSymbol,
         AttributeData argumentsAttribute)
     {
-        if (!methodSymbol.IsTestMethod())
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(Rules.MissingTestAttribute,
-                    argumentsAttribute.GetLocation() ?? methodSymbol.Locations.FirstOrDefault())
-            );
-        }
-        
         if (argumentsAttribute.ConstructorArguments.IsDefaultOrEmpty)
         {
             context.ReportDiagnostic(

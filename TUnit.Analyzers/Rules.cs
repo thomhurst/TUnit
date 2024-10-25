@@ -131,7 +131,7 @@ internal static class Rules
     
     public static readonly DiagnosticDescriptor GlobalHooksSeparateClass =
         CreateDescriptor("TUnit0042", UsageCategory, DiagnosticSeverity.Warning);
-
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

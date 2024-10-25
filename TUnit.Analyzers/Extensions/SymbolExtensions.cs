@@ -5,21 +5,12 @@ namespace TUnit.Analyzers.Extensions;
 
 internal static class SymbolExtensions
 {
-    private static readonly string[] DataDrivenAttributes =
-    [
-        WellKnown.AttributeFullyQualifiedClasses.ClassDataSource,
-        WellKnown.AttributeFullyQualifiedClasses.MethodDataSource,
-        WellKnown.AttributeFullyQualifiedClasses.Arguments,
-        WellKnown.AttributeFullyQualifiedClasses.ClassConstructor
-    ];
-    
     public static bool HasDataDrivenAttributes(this ISymbol symbol)
     {
         var attributes = symbol.GetAttributes();
 
         return attributes.Any(a => a.AttributeClass?.AllInterfaces.Any(x =>
-            x.GloballyQualified() ==
-            WellKnown.AttributeFullyQualifiedClasses.IDataAttribute) == true)
+            x.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataAttribute) == true)
                || HasMatrixValues(symbol);
     }
 
