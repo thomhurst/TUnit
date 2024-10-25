@@ -73,10 +73,29 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             var methodName = attributeData.ConstructorArguments[0].Value as string
                          ?? attributeData.ConstructorArguments[1].Value as string;
 
-            var methodContainingTestData = type.GetSelfAndBaseTypes()
+            var argumentsNamedArgument = attributeData.NamedArguments
+                .FirstOrDefault(x => x.Key == "Arguments")
+                .Value;
+
+            var argumentTypes =
+                argumentsNamedArgument.Kind == TypedConstantKind.Array
+                    ? argumentsNamedArgument
+                        .Values
+                        .Select(x => x.Type)
+                        .OfType<ITypeSymbol>()
+                        .ToArray()
+                    : [];
+
+            var methodSymbols = type.GetSelfAndBaseTypes()
                 .SelectMany(x => x.GetMembers())
                 .OfType<IMethodSymbol>()
-                .FirstOrDefault(x => x.Name == methodName);
+                .ToArray();
+
+            var methodContainingTestData = methodSymbols
+                                               .FirstOrDefault(x =>
+                                                   x.Name == methodName && x.Parameters.Select(x => x.Type)
+                                                       .SequenceEqual(argumentTypes, SelfOrBaseEqualityComparer.Instance))
+                                           ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
             
             if (methodContainingTestData is null)
             {
@@ -125,19 +144,6 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 testDataMethodNonEnumerableReturnType = methodContainingTestData.ReturnType;
             }
 
-            var argumentsNamedArgument = attributeData.NamedArguments
-                .FirstOrDefault(x => x.Key == "Arguments")
-                .Value;
-
-            var argumentTypes =
-                argumentsNamedArgument.Kind == TypedConstantKind.Array
-                    ? argumentsNamedArgument
-                        .Values
-                        .Select(x => x.Type)
-                        .OfType<ITypeSymbol>()
-                        .ToArray()
-                    : [];
-
             var parameterTypes = methodContainingTestData.Parameters.Select(x => x.Type).ToArray();
                 
             if (!parameterTypes.SequenceEqual(argumentTypes, SelfOrBaseEqualityComparer.Instance))
@@ -146,8 +152,8 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestDataSource,
                         attributeData.GetLocation(),
-                        string.Join<ITypeSymbol>(", ", parameterTypes),
                         string.Join<ITypeSymbol>(", ", argumentTypes),
+                        string.Join<ITypeSymbol>(", ", parameterTypes),
                         "for the `Arguments` array")
                 );
                 return;
