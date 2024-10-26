@@ -15,7 +15,7 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<BeforeTestDiscoveryContext>
+                            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
@@ -23,12 +23,12 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
                                Order = 5,
                                FilePath = @"", 
                                LineNumber = 5,
-                            });
+                            },
                     """);
             
             await AssertFileContains(generatedFiles[1], 
                 """
-                            TestRegistrar.RegisterAfterHook(new StaticHookMethod<TestDiscoveryContext>
+                            TestRegistrar.RegisterAfterHook(new StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
@@ -36,7 +36,7 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"{}", 
                                LineNumber = 10,
-                            });
+                            },
                     """);
         });
 }

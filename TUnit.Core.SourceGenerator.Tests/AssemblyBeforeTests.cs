@@ -16,7 +16,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
 
             await AssertFileContains(generatedFiles[0], 
                 """
-                new StaticHookMethod<AssemblyHookContext>
+                new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase1).GetMethod("BeforeAll1", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblyBase1.BeforeAll1()),
@@ -24,12 +24,12 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
                     Order = 0,
                     FilePath = @"", 
                     LineNumber = 5,
-                };
+                },
                 """);
             
             await AssertFileContains(generatedFiles[2], 
                 """
-                new StaticHookMethod<AssemblyHookContext>
+                new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase2).GetMethod("BeforeAll2", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblyBase2.BeforeAll2()),
@@ -37,12 +37,12 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
                     Order = 0,
                     FilePath = @"", 
                     LineNumber = 20,
-                };
+                },
                 """);
             
             await AssertFileContains(generatedFiles[4], 
                 """
-                new StaticHookMethod<AssemblyHookContext>
+                new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblyBase3).GetMethod("BeforeAll3", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblyBase3.BeforeAll3()),
@@ -50,12 +50,12 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
                     Order = 0,
                     FilePath = @"", 
                     LineNumber = 35,
-                };
+                },
                 """);
             
             await AssertFileContains(generatedFiles[6], 
                 """
-                            new StaticHookMethod<AssemblyHookContext>
+                            new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUp", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUp()),
@@ -63,12 +63,12 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"", 
                                LineNumber = 50,
-                            });
+                            },
                     """);
             
             await AssertFileContains(generatedFiles[7], 
                 """
-                            new StaticHookMethod<AssemblyHookContext>
+                            new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(context)),
@@ -76,12 +76,12 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"", 
                                LineNumber = 56,
-                            });
+                            },
                     """);
             
             await AssertFileContains(generatedFiles[8], 
                 """
-                            new StaticHookMethod<AssemblyHookContext>
+                            new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUp", 0, [typeof(global::System.Threading.CancellationToken)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUp(cancellationToken)),
@@ -89,12 +89,12 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"", 
                                LineNumber = 62,
-                            });
+                            },
                     """);
             
             await AssertFileContains(generatedFiles[9], 
                 """
-                            new StaticHookMethod<AssemblyHookContext>
+                            new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(context, cancellationToken)),
@@ -102,7 +102,7 @@ internal class AssemblyBeforeTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"", 
                                LineNumber = 68,
-                            });
+                            },
                     """);
         });
 }
