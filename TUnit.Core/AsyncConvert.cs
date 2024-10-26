@@ -30,7 +30,7 @@ public static class AsyncConvert
 
         if (invoke is ValueTask valueTask)
         {
-            await valueTask.AsTask();
+            await valueTask;
         }
     }
 }
