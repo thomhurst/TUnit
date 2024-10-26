@@ -87,7 +87,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
             var className =
                 $"Hooks_{groupedByTypeName.Key
                     .Replace("global::", string.Empty)
-                    .Replace('.', '_')}";
+                    .Replace('.', '_')}_{Guid.NewGuid():N}";
                 
             using var sourceBuilder = new SourceCodeWriter();
 

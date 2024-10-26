@@ -21,7 +21,7 @@ internal class SourceCodeWriter : IDisposable
         }
     }
     
-    public void WriteLine([StringSyntax("c#-test")] string value)
+    public void WriteLine([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string value)
     {
         if (string.IsNullOrEmpty(value))
         {
