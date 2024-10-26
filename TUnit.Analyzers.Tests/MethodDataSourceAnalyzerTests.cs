@@ -434,7 +434,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
-    public async Task Arguments_Are_Not_Flagged_When_Parameter_Type_Implements_Interface()
+    public async Task Arguments_Are_Not_Flagged_When_Argument_Is_Convertible()
     {
         const string text = """
                             using System.Collections.Generic;
@@ -448,6 +448,30 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                 }
                             
                                 public static int Data(IEnumerable<int> values)
+                                {
+                                    return 1;
+                                }
+                            }
+                            """;
+
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task Arguments_Are_Not_Flagged_When_Argument_Is_Convertible_Generic()
+    {
+        const string text = """
+                            using System.Collections.Generic;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data), Arguments = [ new[] { 1, 2 } ])|}]
+                                public void MyTest(int value)
+                                {
+                                }
+                            
+                                public static int Data<T>(IEnumerable<T> values)
                                 {
                                     return 1;
                                 }
