@@ -5,7 +5,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType> : TestMetadata
+public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType> : TestMetadata where TClassType : class
 {
 	private const int DefaultOrder = int.MaxValue / 2;
 
@@ -69,8 +69,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 	    {
 		    TestContext = testContext,
 		    TestBody = (classInstance, cancellationToken) => TestMethodFactory(classInstance, cancellationToken),
-		    TestExecutor = TestExecutor,
-		    ClassConstructor = ClassConstructor
+		    TestExecutor = TestExecutor
 	    };
     }
 
@@ -100,8 +99,6 @@ public abstract record TestMetadata
     public required object?[] TestClassProperties { get; init; }
     
     public required ITestExecutor TestExecutor { get; init; }
-
-    public required IClassConstructor? ClassConstructor { get; init; }
     
     public required IParallelLimit? ParallelLimit { get; init; }
     

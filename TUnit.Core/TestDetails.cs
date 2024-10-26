@@ -7,12 +7,12 @@ namespace TUnit.Core;
 public record TestDetails<
 [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)] 
     TClassType
->() : TestDetails(typeof(TClassType))
+>() : TestDetails(typeof(TClassType)) where TClassType : class
 {
     [JsonIgnore]
-    public required ResettableLazy<TClassType?> LazyClassInstance { get; init; }
+    public required ResettableLazy<TClassType> LazyClassInstance { get; init; }
 
-    public override object? ClassInstance => LazyClassInstance.Value;
+    public override object ClassInstance => LazyClassInstance.Value;
 } 
 
 public abstract record TestDetails(Type ClassType)
