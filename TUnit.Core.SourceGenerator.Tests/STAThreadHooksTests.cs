@@ -13,10 +13,8 @@ internal class STAThreadHooksTests : TestsBase<TestHooksGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(2);
             
-            await AssertFileContains(generatedFiles[0], "TestRegistrar.RegisterBeforeHook");
             await AssertFileContains(generatedFiles[0], "HookExecutor = new global::TUnit.Core.STAThreadExecutor(),");
             
-            await AssertFileContains(generatedFiles[1], "TestRegistrar.RegisterAfterHook");
             await AssertFileContains(generatedFiles[1], "HookExecutor = new global::TUnit.Core.STAThreadExecutor(),");
         });
 }

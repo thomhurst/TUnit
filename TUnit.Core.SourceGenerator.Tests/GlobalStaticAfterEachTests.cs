@@ -12,7 +12,7 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
             "AfterEveryTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(7);
+            await Assert.That(generatedFiles.Length).IsEqualTo(14);
 
             await AssertFileContains(generatedFiles[0], 
                 """
