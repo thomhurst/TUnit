@@ -12,7 +12,6 @@ using TUnit.Core.Logging;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
-using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
 
 #pragma warning disable TPEXP
 
