@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyModel;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 [ClassConstructor<DependencyInjectionClassConstructor>]
 public class ClassConstructorTest(DummyReferenceTypeClass dummyReferenceTypeClass)

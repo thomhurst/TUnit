@@ -6,7 +6,6 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Logging;
-using TUnit.Engine.Hooks;
 
 namespace TUnit.Engine.Framework;
 
