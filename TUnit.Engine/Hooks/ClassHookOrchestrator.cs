@@ -9,7 +9,7 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-internal class ClassHookOrchestrator(HooksCollector hooksCollector)
+internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector)
 {
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classHookContexts = new();
 
@@ -52,7 +52,7 @@ internal class ClassHookOrchestrator(HooksCollector hooksCollector)
         List<Exception> cleanUpExceptions
         )
     {
-        if (!InstanceTracker.IsLastTestForType(testClassType))
+        if (!instanceTracker.IsLastTestForType(testClassType))
         {
             // Only run one time clean downs when no instances are left!
            return;

@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Enums;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 
@@ -27,7 +28,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
 
     public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
     {
-        if (!beforeTestContext.TestContext.ObjectBag.ContainsKey("DynamicDataGeneratorRetry"))
+        if (!IsReregisteredTest(beforeTestContext.TestContext))
         {
             beforeTestContext.AddLinkedCancellationToken(_cancellationTokenSource.Token);
         }
@@ -35,6 +36,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
         return ValueTask.CompletedTask;
     }
 
+    [Experimental("WIP")]
     public async ValueTask OnTestEnd(TestContext testContext)
     {
         if (testContext.Result?.Status == Status.Failed)
@@ -42,19 +44,27 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
             await _cancellationTokenSource.CancelAsync();
             
             // We need a condition to end execution at some point otherwise we could go forever recursively
-            if (_count++ > 5)
+            if (Interlocked.Increment(ref _count) > 5)
             {
                 throw new Exception();
-                return;
+            }
+
+            if (IsReregisteredTest(testContext))
+            {
+                // Optional to reduce noise
+                // testContext.SuppressReportingResult();
             }
 
             await testContext.ReregisterTestWithArguments<DynamicallyRegisteredTests>(methodArguments: [Random.Shared.Next()],
                 objectBag: new()
                 {
                     ["DynamicDataGeneratorRetry"] = true
-                },
-                dataAttributes: [this]
-            );
+                });
         }
+    }
+
+    private static bool IsReregisteredTest(TestContext testContext)
+    {
+        return testContext.ObjectBag.ContainsKey("DynamicDataGeneratorRetry");
     }
 }

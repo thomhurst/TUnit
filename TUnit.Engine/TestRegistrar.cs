@@ -5,7 +5,7 @@ using TUnit.Engine.Hooks;
 
 namespace TUnit.Engine;
 
-internal class TestRegistrar(AssemblyHookOrchestrator assemblyHookOrchestrator, ClassHookOrchestrator classHookOrchestrator)
+internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrchestrator assemblyHookOrchestrator, ClassHookOrchestrator classHookOrchestrator)
 {
 	internal async Task RegisterInstance(TestContext testContext, Func<Exception, ValueTask> onFailureToInitialize)
 	{
@@ -15,7 +15,7 @@ internal class TestRegistrar(AssemblyHookOrchestrator assemblyHookOrchestrator, 
 
 			var classType = testContext.TestDetails.ClassType;
 		
-			InstanceTracker.Register(classType);
+			instanceTracker.Register(classType);
 		
 			RegisterTestContext(classType, testContext);
 

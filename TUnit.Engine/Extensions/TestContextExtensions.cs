@@ -10,18 +10,17 @@ namespace TUnit.Engine.Extensions;
 
 public static class TestContextExtensions
 {
+    [Experimental("WIP")]
     public static async Task ReregisterTestWithArguments<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TTestClass>(
         this TestContext testContext, 
         object?[]? methodArguments, 
-        Dictionary<string, object?>? objectBag = null,
-        Attribute[]? dataAttributes = null)
+        Dictionary<string, object?>? objectBag = null)
     {
-        var testMetadata = (TestMetadata<TTestClass>)testContext.OriginalMetadata;
+        var testMetadata = (TestMetadata<TTestClass>) testContext.OriginalMetadata;
         
         var newTestMetaData = testMetadata with
         {
             TestId = Guid.NewGuid().ToString(),
-            DataAttributes = dataAttributes ?? testContext.TestDetails.DataAttributes,
             TestMethodArguments = methodArguments ?? [],
             ObjectBag = objectBag ?? [],
             ResettableClassFactory = testMetadata.ResettableClassFactory.Clone(),

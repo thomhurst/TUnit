@@ -21,6 +21,7 @@ internal class SingleTestExecutor(
     IExtension extension,
     Disposer disposer,
     CancellationTokenSource cancellationTokenSource,
+    InstanceTracker instanceTracker, 
     TestInvoker testInvoker,
     ExplicitFilterService explicitFilterService,
     ParallelLimitProvider parallelLimitProvider,
@@ -262,7 +263,7 @@ internal class SingleTestExecutor(
         await assemblyHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
             test.TestContext.TestDetails.ClassType.Assembly, cleanUpExceptions);
 
-        if (InstanceTracker.IsLastTest())
+        if (instanceTracker.IsLastTest())
         {
             foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
             {
