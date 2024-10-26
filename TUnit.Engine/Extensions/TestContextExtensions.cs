@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
 using TUnit.Engine.Models;
@@ -23,14 +25,20 @@ public static class TestContextExtensions
             TestMethodArguments = methodArguments ?? [],
             ObjectBag = objectBag ?? [],
             ResettableClassFactory = testMetadata.ResettableClassFactory.Clone(),
-            TestMethodFactory = (@class, token) =>
+            TestMethodFactory = async (@class, token) =>
             {
                 var hasTimeout = testContext.TestDetails.Timeout != null;
                 
                 var args = GetArgs(methodArguments, hasTimeout, token);
-                
-                return AsyncConvert.Convert(
-                    testContext.TestDetails.MethodInfo.Invoke(@class, args));
+
+                try
+                {
+                    await AsyncConvert.Convert(testContext.TestDetails.MethodInfo.Invoke(@class, args));
+                }
+                catch (TargetInvocationException e)
+                {
+                    ExceptionDispatchInfo.Throw(e.InnerException ?? e);
+                }
             }
         };
         
