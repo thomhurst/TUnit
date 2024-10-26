@@ -22,7 +22,7 @@ internal class BeforeTests : TestsBase<TestHooksGenerator>
                 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach1()),
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
-                });
+                },
                 """);
             
             await AssertFileContains(generatedFiles[3], 
@@ -33,7 +33,7 @@ internal class BeforeTests : TestsBase<TestHooksGenerator>
                 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach2()),
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
-                });
+                },
                 """);
             
             await AssertFileContains(generatedFiles[5], 
@@ -44,7 +44,7 @@ internal class BeforeTests : TestsBase<TestHooksGenerator>
                 Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.BeforeEach3()),
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
-                });
+                },
                 """);
             
             await AssertFileContains(generatedFiles[10], 
