@@ -24,7 +24,7 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                 Order = 0,
                 FilePath = @"{}", 
                 LineNumber = 5,
-                });
+                };
                 """);
             
             await AssertFileContains(generatedFiles[1], 
@@ -37,7 +37,7 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                 Order = 0,
                 FilePath = @"{}", 
                 LineNumber = 20,
-                });
+                };
                 """);
             
             await AssertFileContains(generatedFiles[2], 
@@ -50,7 +50,7 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                 Order = 0,
                 FilePath = @"{}", 
                 LineNumber = 35,
-                });
+                };
                 """);
             
             await AssertFileContains(generatedFiles[3], 
