@@ -28,7 +28,7 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[1], 
                 """
-                            TestRegistrar.RegisterAfterHook(new StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>
+                            new StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
