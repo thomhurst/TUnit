@@ -6,10 +6,10 @@ internal record ClassConstructorAttributeContainer(ArgumentsType ArgumentsType) 
 {
     public required string ClassConstructorType { get; init; }
 
+    public string Invocation => $"new {ClassConstructorType}()";
+    
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
-        sourceCodeWriter.WriteLine(GenerateVariable(ClassConstructorType, $"new {ClassConstructorType}()", ref variableIndex).ToString());
-        sourceCodeWriter.WriteLine();
     }
 
     public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)

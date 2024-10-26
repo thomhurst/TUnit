@@ -48,11 +48,7 @@ internal static class GenericTestInvocationWriter
                 ..testSourceDataModel.PropertyArguments.InnerContainers.Select(x => x.ArgumentsContainer)
             ];
         
-        sourceBuilder.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{fullyQualifiedClassType}>(() => ");
-        
         NewClassWriter.ConstructClass(sourceBuilder, testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.ClassArguments, testSourceDataModel.PropertyArguments);
-        
-        sourceBuilder.Write(");");
         
         sourceBuilder.WriteLine();
         
@@ -75,7 +71,6 @@ internal static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
         sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
         sourceBuilder.WriteLine($"TestExecutor = {GetTestExecutor(testSourceDataModel.TestExecutor)},");
-        sourceBuilder.WriteLine($"ClassConstructor = { GetClassConstructor(testSourceDataModel) },");
         sourceBuilder.WriteLine($"ParallelLimit = {GetParallelLimit(testSourceDataModel.ParallelLimit)},");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
@@ -89,11 +84,6 @@ internal static class GenericTestInvocationWriter
         
         testSourceDataModel.ClassArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
         testSourceDataModel.MethodArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
-    }
-
-    private static string GetClassConstructor(TestSourceDataModel testSourceDataModel)
-    {
-        return testSourceDataModel.ClassArguments is ClassConstructorAttributeContainer classConstructorAttributeContainer ? classConstructorAttributeContainer.DataVariables.ElementAt(0).Name : "null";
     }
 
     private static string GetTestExecutor(string? testExecutor)

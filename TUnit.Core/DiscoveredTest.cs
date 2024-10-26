@@ -6,7 +6,7 @@ internal class DiscoveredTest<
     [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis
         .DynamicallyAccessedMemberTypes.All)]
     TTestClass
->(ResettableLazy<TTestClass> resettableLazyTestClassFactory) : DiscoveredTest
+>(ResettableLazy<TTestClass> resettableLazyTestClassFactory) : DiscoveredTest where TTestClass : class
 {
     public TTestClass TestClass => resettableLazyTestClassFactory.Value;
     

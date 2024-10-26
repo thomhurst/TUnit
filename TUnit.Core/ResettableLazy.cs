@@ -1,19 +1,55 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(Func<T> factory)
-    : IAsyncDisposable
+public class ResettableLazy<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    TClassConstructor,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    T> : ResettableLazy<T>
+    where TClassConstructor : IClassConstructor, new()
+    where T : class
 {
-    private Lazy<T> _lazy = new Lazy<T>(factory);
+    public ResettableLazy() : base(new TClassConstructor())
+    {
+    }
+    
+    public override Task ResetLazy()
+    {
+        ClassConstructor = new TClassConstructor();
+        _factory = () => ClassConstructor.Create<T>();
+        return base.ResetLazy();
+    }
+}
+
+public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : IAsyncDisposable where T : class
+{
+    public IClassConstructor? ClassConstructor { get; protected set; }
+    
+    private Lazy<T> _lazy;
+    protected Func<T> _factory;
+    
+    protected ResettableLazy(IClassConstructor classConstructor)
+    {
+        ClassConstructor = classConstructor;
+        _factory = classConstructor.Create<T>;
+        _lazy = new Lazy<T>(_factory);
+    }
+
+    public ResettableLazy(Func<T> factory)
+    {
+        _factory = factory;
+        _lazy = new Lazy<T>(factory);
+    }
 
     public T Value => _lazy.Value;
 
-    public async Task ResetLazy()
+    public virtual async Task ResetLazy()
     {
         await DisposeAsync();
         
-        _lazy = new Lazy<T>(factory);
+        _lazy = new Lazy<T>(_factory);
     }
     
     public async ValueTask DisposeAsync()
