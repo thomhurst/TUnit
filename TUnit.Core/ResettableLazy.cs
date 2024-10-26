@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -15,11 +16,12 @@ public class ResettableLazy<
     {
     }
     
-    public override Task ResetLazy()
+    public override async Task ResetLazy()
     {
+        await DisposeAsync(ClassConstructor);
         ClassConstructor = new TClassConstructor();
         _factory = () => ClassConstructor.Create<T>();
-        return base.ResetLazy();
+        await base.ResetLazy();
     }
 }
 
@@ -56,11 +58,17 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
     {
         if (_lazy.IsValueCreated)
         {
-            if(_lazy.Value is IAsyncDisposable asyncDisposable)
-            {
-                await asyncDisposable.DisposeAsync();
-            }
-        } else if (_lazy.Value is IDisposable disposable)
+            await DisposeAsync(_lazy.Value);
+        }
+    }
+
+    protected static async ValueTask DisposeAsync(object? obj)
+    {
+        if (obj is IAsyncDisposable asyncDisposable)
+        {
+            await asyncDisposable.DisposeAsync();
+        }
+        else if (obj is IDisposable disposable)
         {
             disposable.Dispose();
         }
