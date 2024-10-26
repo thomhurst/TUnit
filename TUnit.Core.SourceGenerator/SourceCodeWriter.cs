@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace TUnit.Core.SourceGenerator;
 
@@ -20,7 +21,7 @@ internal class SourceCodeWriter : IDisposable
         }
     }
     
-    public void WriteLine(string value)
+    public void WriteLine([StringSyntax("c#-test")] string value)
     {
         if (string.IsNullOrEmpty(value))
         {
