@@ -6,14 +6,14 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 
 internal static class GlobalTestHooksWriter
 {
-    public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model, HookLocationType hookLocationType)
+    public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model)
     { 
         sourceBuilder.WriteLine(
                 $$"""
-                   new StaticHookMethod<{{GetClassType(model.HookLevel, hookLocationType)}}>
+                   new StaticHookMethod<{{GetClassType(model.HookLevel, model.HookLocationType)}}>
                            { 
                               MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model, hookLocationType)}})),
+                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model, model.HookLocationType)}})),
                               HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
                               Order = {{model.Order}},
                               FilePath = @"{{model.FilePath}}",

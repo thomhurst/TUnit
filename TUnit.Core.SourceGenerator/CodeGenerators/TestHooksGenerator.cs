@@ -18,54 +18,33 @@ internal class TestHooksGenerator : IIncrementalGenerator
                 "TUnit.Core.BeforeAttribute",
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, HookLocationType.Before, false))
-            .Where(static m => m is not null)
-            .SelectMany((x, _) => x)
-            .Collect();
+            .Where(static m => m is not null);
 
         var cleanUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.AfterAttribute",
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, HookLocationType.After, false))
-            .Where(static m => m is not null)
-            .SelectMany((x, _) => x)
-            .Collect();
+            .Where(static m => m is not null);
         
         var beforeEveryMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.BeforeEveryAttribute",
                 predicate: static (s, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, HookLocationType.Before, true))
-            .Where(static m => m is not null)
-            .Collect();
+            .Where(static m => m is not null);
         
         var afterEveryMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.AfterEveryAttribute",
                 predicate: static (s, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx, HookLocationType.After, true))
-            .Where(static m => m is not null)
-            .Collect();
+            .Where(static m => m is not null);
 
-        context.RegisterSourceOutput(
-            setUpMethods
-                .Combine(beforeEveryMethods)
-                .Combine(cleanUpMethods)
-                .Combine(afterEveryMethods)
-                .SelectMany((x, _) =>
-                {
-                    IEnumerable<HooksDataModel> model =
-                    [
-                        ..x.Left.Left.Left,
-                        ..x.Left.Left.Right.SelectMany(h => h),
-                        ..x.Left.Right,
-                        ..x.Right.SelectMany(h => h)
-                    ];
-
-                    return model;
-                })
-                .Collect(), 
-            Generate);
+        context.RegisterSourceOutput(setUpMethods, Generate);
+        context.RegisterSourceOutput(cleanUpMethods, Generate);
+        context.RegisterSourceOutput(beforeEveryMethods, Generate);
+        context.RegisterSourceOutput(afterEveryMethods, Generate);
     }
 
     static IEnumerable<HooksDataModel> GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext context,
@@ -101,8 +80,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
         }
     }
 
-    private void Generate(SourceProductionContext productionContext,
-        ImmutableArray<HooksDataModel> hooks)
+    private void Generate(SourceProductionContext productionContext, IEnumerable<HooksDataModel> hooks)
     {
         foreach (var groupedByTypeName in hooks.GroupBy(x => x.FullyQualifiedTypeName))
         {
@@ -179,7 +157,7 @@ internal class TestHooksGenerator : IIncrementalGenerator
                             else if (hooksGroupedByLevel.Key is "TUnit.Core.HookType.TestDiscovery"
                                      or "TUnit.Core.HookType.TestSession")
                             {
-                                GlobalTestHooksWriter.Execute(sourceBuilder, model, model.HookLocationType);
+                                GlobalTestHooksWriter.Execute(sourceBuilder, model);
                             }
                         }
 
