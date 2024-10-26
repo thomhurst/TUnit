@@ -409,7 +409,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text, expected).ConfigureAwait(false);
     }
-    
+
     [Test]
     public async Task Arguments_Are_Not_Flagged_When_Does_Match_Parameter_Types()
     {
@@ -429,7 +429,31 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                 }
                             }
                             """;
-        
+
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task Arguments_Are_Not_Flagged_When_Parameter_Type_Implements_Interface()
+    {
+        const string text = """
+                            using System.Collections.Generic;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [{|#0:MethodDataSource(nameof(Data), Arguments = [ new[] { 1, 2 } ])|}]
+                                public void MyTest(int value)
+                                {
+                                }
+                            
+                                public static int Data(IEnumerable<int> values)
+                                {
+                                    return 1;
+                                }
+                            }
+                            """;
+
         await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
     }
 }

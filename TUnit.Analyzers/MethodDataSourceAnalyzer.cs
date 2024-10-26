@@ -94,7 +94,7 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             var methodContainingTestData = methodSymbols
                                                .FirstOrDefault(x =>
                                                    x.Name == methodName && x.Parameters.Select(x => x.Type)
-                                                       .SequenceEqual(argumentTypes, SelfOrBaseEqualityComparer.Instance))
+                                                       .SequenceEqual(argumentTypes, new SelfOrBaseEqualityComparer(context.Compilation)))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
             
             if (methodContainingTestData is null)
@@ -146,7 +146,7 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var parameterTypes = methodContainingTestData.Parameters.Select(x => x.Type).ToArray();
                 
-            if (!parameterTypes.SequenceEqual(argumentTypes, SelfOrBaseEqualityComparer.Instance))
+            if (!parameterTypes.SequenceEqual(argumentTypes, new SelfOrBaseEqualityComparer(context.Compilation)))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
