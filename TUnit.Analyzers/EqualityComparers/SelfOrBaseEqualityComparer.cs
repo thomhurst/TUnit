@@ -2,29 +2,11 @@
 
 namespace TUnit.Analyzers.EqualityComparers;
 
-public class SelfOrBaseEqualityComparer : EqualityComparer<ITypeSymbol?>
+public class SelfOrBaseEqualityComparer(Compilation compilation) : EqualityComparer<ITypeSymbol?>
 {
-    public static SelfOrBaseEqualityComparer Instance { get; } = new();
-    
-    private SelfOrBaseEqualityComparer()
-    {
-    }
-    
     public override bool Equals(ITypeSymbol? superType, ITypeSymbol? subType)
     {
-        var type = superType;
-        
-        while (type != null)
-        {
-            if (SymbolEqualityComparer.Default.Equals(type, subType))
-            {
-                return true;
-            }
-            
-            type = type.BaseType;
-        }
-
-        return false;
+        return compilation.HasImplicitConversion(subType, superType);
     }
 
     public override int GetHashCode(ITypeSymbol? obj)

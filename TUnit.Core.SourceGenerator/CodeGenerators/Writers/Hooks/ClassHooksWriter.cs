@@ -9,7 +9,7 @@ internal static class ClassHooksWriter
     { 
         sourceBuilder.WriteLine(
                 $$$"""
-                   new StaticHookMethod<ClassHookContext>
+                   new StaticHookMethod<global::TUnit.Core.ClassHookContext>
                            { 
                               MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),

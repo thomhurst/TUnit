@@ -68,7 +68,7 @@ public class GeneratedDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 continue;
             }
 
-            if (baseGeneratorAttribute.TypeArguments.SequenceEqual(parameterOrPropertyTypes, SelfOrBaseEqualityComparer.Instance))
+            if (parameterOrPropertyTypes.SequenceEqual(baseGeneratorAttribute.TypeArguments, new SelfOrBaseEqualityComparer(context.Compilation)))
             {
                 continue;
             }

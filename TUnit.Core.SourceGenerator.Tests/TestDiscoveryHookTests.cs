@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -10,37 +11,32 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
             "TestDiscoveryHookTests.cs"),
         async generatedFiles =>
         {
-            await AssertFileContains(generatedFiles[0],
-                """
-                        var instance = new Hooks_TUnit_TestProject_TestDiscoveryHookTests();
-                        SourceRegistrar.RegisterTestDiscoveryHookSource(instance);
-                """);
-
-            await AssertFileContains(generatedFiles[0],
-                """
-                new StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>
-                { 
-                   MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
-                   Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
-                   HookExecutor = DefaultExecutor.Instance,
-                   Order = 5,
-                   FilePath = @"",
-                   LineNumber = 5,
-                },
-                """
-            );
+            await Assert.That(generatedFiles).HasCount().EqualTo(2);
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                    new StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>
-                    { 
-                       MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
-                       Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
-                       HookExecutor = DefaultExecutor.Instance,
-                       Order = 0,
-                       FilePath = @"",
-                       LineNumber = 10,
-                    },
+                            new StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>
+                            { 
+                               MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
+                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
+                               HookExecutor = DefaultExecutor.Instance,
+                               Order = 5,
+                               FilePath = @"", 
+                               LineNumber = 5,
+                            },
+                    """);
+            
+            await AssertFileContains(generatedFiles[1], 
+                """
+                            new StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>
+                            { 
+                               MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
+                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
+                               HookExecutor = DefaultExecutor.Instance,
+                               Order = 0,
+                               FilePath = @"", 
+                               LineNumber = 10,
+                            },
                     """);
         });
 }
