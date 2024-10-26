@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -10,6 +11,8 @@ internal class TupleDataSourceDrivenTests : TestsBase<TestsGenerator>
             "TupleDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
+            
             await AssertFileContains(generatedFiles[0], "var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod());");
             await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = methodArgTuples.Item1;");
             await AssertFileContains(generatedFiles[0], "global::System.String methodArg1 = methodArgTuples.Item2;");

@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -11,9 +12,11 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
             "AfterTests.cs"),
         async generatedFiles =>
         {
+            await Assert.That(generatedFiles.Length).IsEqualTo(14);
+
             await AssertFileContains(generatedFiles[0], 
                 """
-                new StaticHookMethod<ClassHookContext>
+                TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.Base1), new StaticHookMethod<ClassHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base1).GetMethod("AfterAll1", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base1.AfterAll1()),
@@ -21,12 +24,12 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
                     Order = 0, 
                     FilePath = @"", 
                     LineNumber = 5,
-                },
+                });
                 """);
             
-            await AssertFileContains(generatedFiles[1], 
+            await AssertFileContains(generatedFiles[2], 
                 """
-                new StaticHookMethod<ClassHookContext>
+                TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.Base2), new StaticHookMethod<ClassHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base2).GetMethod("AfterAll2", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base2.AfterAll2()),
@@ -34,12 +37,12 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
                     Order = 0,
                     FilePath = @"", 
                     LineNumber = 20,
-                },
+                });
                 """);
             
-            await AssertFileContains(generatedFiles[2], 
+            await AssertFileContains(generatedFiles[4], 
                 """
-                new StaticHookMethod<ClassHookContext>
+                TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.Base3), new StaticHookMethod<ClassHookContext>
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base3).GetMethod("AfterAll3", 0, []),
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.Base3.AfterAll3()),
@@ -47,12 +50,12 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
                     Order = 0,
                     FilePath = @"", 
                     LineNumber = 35,
-                },
+                });
                 """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[6], 
                 """
-                            new StaticHookMethod<ClassHookContext>
+                            TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticHookMethod<ClassHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUp", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUp()),
@@ -60,12 +63,12 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"", 
                                LineNumber = 50,
-                            },
+                            });
                     """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[7], 
                 """
-                            new StaticHookMethod<ClassHookContext>
+                            TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticHookMethod<ClassHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.ClassHookContext)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUpWithContext(context)),
@@ -73,12 +76,12 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"", 
                                LineNumber = 56,
-                            },
+                            });
                     """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[8], 
                 """
-                            new StaticHookMethod<ClassHookContext>
+                            TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticHookMethod<ClassHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUp", 0, [typeof(global::System.Threading.CancellationToken)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUp(cancellationToken)),
@@ -86,12 +89,12 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"", 
                                LineNumber = 62,
-                            },
+                            });
                     """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[9], 
                 """
-                            new StaticHookMethod<ClassHookContext>
+                            TestRegistrar.RegisterAfterHook(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), new StaticHookMethod<ClassHookContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.ClassHookContext), typeof(global::System.Threading.CancellationToken)]),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.CleanupTests.AfterAllCleanUpWithContext(context, cancellationToken)),
@@ -99,7 +102,7 @@ internal class AfterAllTests : TestsBase<TestHooksGenerator>
                                Order = 0,
                                FilePath = @"", 
                                LineNumber = 68,
-                            },
+                            });
                     """);
         });
 }

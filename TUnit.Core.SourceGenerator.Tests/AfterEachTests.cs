@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -11,81 +12,83 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
             "AfterTests.cs"),
         async generatedFiles =>
         {
-            await AssertFileContains(generatedFiles[0], 
-                """
-                new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base1>
-                {
-                    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base1).GetMethod("AfterEach1", 0, []),
-                    Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach1()),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                },
-                """);
-            
+            await Assert.That(generatedFiles.Length).IsEqualTo(14);
+
             await AssertFileContains(generatedFiles[1], 
                 """
-                 new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base2>
+                TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base1>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base1>
+                {
+                    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base1).GetMethod("AfterEach1", 0, []),
+                    Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach1()),
+                    HookExecutor = DefaultExecutor.Instance,
+                    Order = 0,
+                });
+                """);
+            
+            await AssertFileContains(generatedFiles[3], 
+                """
+                 TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base2>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base2>
                  {
                      MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base2).GetMethod("AfterEach2", 0, []),
-                     Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach2()),
+                     Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach2()),
                      HookExecutor = DefaultExecutor.Instance,
                      Order = 0,
-                 },
+                 });
                 """);
             
-            await AssertFileContains(generatedFiles[2], 
+            await AssertFileContains(generatedFiles[5], 
                 """
-                 new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base3>
+                 TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.Base3>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base3>
                  {
                      MethodInfo = typeof(global::TUnit.TestProject.AfterTests.Base3).GetMethod("AfterEach3", 0, []),
-                        Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach3()),
+                        Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach3()),
                         HookExecutor = DefaultExecutor.Instance,
                         Order = 0,
-                 },
+                 });
                 """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[10], 
                 """
-                     new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+                     TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                      {
                             MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, []),
-                            Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup()),
+                            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup()),
                             HookExecutor = DefaultExecutor.Instance,
                             Order = 0,
-                     },
+                     });
                     """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[11], 
                 """
-                     new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+                     TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                      {
                             MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("Cleanup", 0, [typeof(global::System.Threading.CancellationToken)]),
-                            Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup(cancellationToken)),
+                            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup(cancellationToken)),
                             HookExecutor = DefaultExecutor.Instance,
                             Order = 0,
-                     },
+                     });
                     """);
             
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[12], 
                 """
-                     new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+                     TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                      {
                             MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                            Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(context)),
+                            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext)),
                             HookExecutor = DefaultExecutor.Instance,
                             Order = 0,
-                     },
+                     });
                     """);
                         
-            await AssertFileContains(generatedFiles[3], 
+            await AssertFileContains(generatedFiles[13], 
                 """
-                     new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+                     TestRegistrar.RegisterAfterHook<global::TUnit.TestProject.AfterTests.CleanupTests>(new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
                      {
                             MethodInfo = typeof(global::TUnit.TestProject.AfterTests.CleanupTests).GetMethod("CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-                            Body = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(context, cancellationToken)),
+                            Body = (classInstance, testContext, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(testContext, cancellationToken)),
                             HookExecutor = DefaultExecutor.Instance,
                             Order = 0,
-                     },
+                     });
                     """);
         });
 }

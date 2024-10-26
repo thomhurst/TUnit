@@ -21,6 +21,6 @@ internal class InheritedPropertySetterTests : TestsBase<TestsGenerator>
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(2);
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
         });
 }
