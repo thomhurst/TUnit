@@ -7,7 +7,7 @@ namespace TUnit.Engine;
 
 internal class TestRegistrar(AssemblyHookOrchestrator assemblyHookOrchestrator, ClassHookOrchestrator classHookOrchestrator)
 {
-	internal async Task RegisterInstance(TestContext testContext, Func<Exception, Task> onFailureToInitialize)
+	internal async Task RegisterInstance(TestContext testContext, Func<Exception, ValueTask> onFailureToInitialize)
 	{
 		try
 		{

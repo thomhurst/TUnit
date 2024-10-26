@@ -29,4 +29,9 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
             disposable.Dispose();
         }
     }
+
+    public ResettableLazy<T> Clone()
+    {
+        return new ResettableLazy<T>(factory);
+    }
 }

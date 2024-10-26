@@ -2,14 +2,14 @@
 
 internal interface ITUnitMessageBus
 {
-    Task Discovered(TestContext testContext);
-    Task InProgress(TestContext testContext);
-    Task Passed(TestContext testContext, DateTimeOffset start);
-    Task Failed(TestContext testContext, Exception exception, DateTimeOffset start);
-    Task FailedInitialization(FailedInitializationTest failedInitializationTest);
-    Task Skipped(TestContext testContext, string reason);
-    Task Cancelled(TestContext testContext);
+    ValueTask Discovered(TestContext testContext);
+    ValueTask InProgress(TestContext testContext);
+    ValueTask Passed(TestContext testContext, DateTimeOffset start);
+    ValueTask Failed(TestContext testContext, Exception exception, DateTimeOffset start);
+    ValueTask FailedInitialization(FailedInitializationTest failedInitializationTest);
+    ValueTask Skipped(TestContext testContext, string reason);
+    ValueTask Cancelled(TestContext testContext);
     
-    Task SessionArtifact(Artifact artifact);
-    Task TestArtifact(TestContext testContext, Artifact artifact);
+    ValueTask SessionArtifact(Artifact artifact);
+    ValueTask TestArtifact(TestContext testContext, Artifact artifact);
 }

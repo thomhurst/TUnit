@@ -14,11 +14,11 @@ internal class TestsConstructor(IExtension extension, TestMetadataCollector test
         return testMetadatas.Select(ConstructTest);
     }
     
-    private DiscoveredTest ConstructTest(TestMetadata testMetadata)
+    public DiscoveredTest ConstructTest(TestMetadata testMetadata)
     {
         var testDetails = testMetadata.BuildTestDetails();
 
-        var testContext = new TestContext(serviceProvider, testDetails, testMetadata.ObjectBag);
+        var testContext = new TestContext(serviceProvider, testDetails, testMetadata);
 
         RunOnTestDiscoveryAttributeHooks([..testDetails.DataAttributes, ..testDetails.Attributes], testContext);
 

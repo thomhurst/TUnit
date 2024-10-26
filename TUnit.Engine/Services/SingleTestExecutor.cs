@@ -1,5 +1,4 @@
-﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
-using Microsoft.Testing.Platform.Extensions;
+﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
@@ -10,12 +9,10 @@ using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
-using TUnit.Engine.Models;
-using TimeoutException = TUnit.Core.Exceptions.TimeoutException;
+
 #pragma warning disable TPEXP
 
 namespace TUnit.Engine.Services;
@@ -168,13 +165,45 @@ internal class SingleTestExecutor(
     private async Task ExecuteTest(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
+        var start = DateTimeOffset.Now;
+
         try
         {
             await ExecuteBeforeHooks(test, context, testContext);
 
             TestContext.Current = testContext;
-            
+
             await ExecuteWithRetries(test);
+
+            var timingProperty = GetTimingProperty(testContext, start);
+
+            testContext.Result = new TestResult
+            {
+                Duration = timingProperty.GlobalTiming.Duration,
+                Start = timingProperty.GlobalTiming.StartTime,
+                End = timingProperty.GlobalTiming.EndTime,
+                ComputerName = Environment.MachineName,
+                Exception = null,
+                Status = Status.Passed,
+                Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}"
+            };
+        }
+        catch (Exception e)
+        {
+            var timingProperty = GetTimingProperty(testContext, start);
+
+            testContext.Result = new TestResult
+            {
+                Duration = timingProperty.GlobalTiming.Duration,
+                Start = timingProperty.GlobalTiming.StartTime,
+                End = timingProperty.GlobalTiming.EndTime,
+                ComputerName = Environment.MachineName,
+                Exception = e,
+                Status = Status.Failed,
+                Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}"
+            };
+
+            throw;
         }
         finally
         {
@@ -227,28 +256,23 @@ internal class SingleTestExecutor(
     private async Task ExecuteAfterHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
-        try
-        {
-            await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
+        await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
                 test.TestContext.TestDetails.ClassType, cleanUpExceptions);
 
-            await assemblyHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
-                test.TestContext.TestDetails.ClassType.Assembly, cleanUpExceptions);
+        await assemblyHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
+            test.TestContext.TestDetails.ClassType.Assembly, cleanUpExceptions);
 
-            if (InstanceTracker.IsLastTest())
+        if (InstanceTracker.IsLastTest())
+        {
+            foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
             {
-                foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
-                {
-                    await RunHelpers.RunValueTaskSafelyAsync(
-                        () => testEndEventsObject.IfLastTestInTestSession(TestSessionContext.Current!, testContext),
-                        cleanUpExceptions);
-                }
+                await RunHelpers.RunValueTaskSafelyAsync(
+                    () => testEndEventsObject.IfLastTestInTestSession(TestSessionContext.Current!, testContext),
+                    cleanUpExceptions);
             }
         }
-        catch
-        {
-            // Ignored - Will be counted as its own test failure - We don't need to bind it to this test
-        }
+            
+        ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
     }
 
     private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
@@ -290,21 +314,6 @@ internal class SingleTestExecutor(
 
             return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [..stepTimings]);
         }
-    }
-
-    private static IProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
-    {
-        if (testContext.TestDetails.Timeout.HasValue
-            && e is TaskCanceledException or OperationCanceledException or TimeoutException
-            && duration >= testContext.TestDetails.Timeout.Value)
-        {
-            return new TimeoutTestNodeStateProperty(e)
-            {
-                Timeout = testContext.TestDetails.Timeout,
-            };
-        }
-        
-        return new FailedTestNodeStateProperty(e);
     }
 
     private async ValueTask Dispose(TestContext testContext)
@@ -380,8 +389,31 @@ internal class SingleTestExecutor(
         {
             throw new SkipTestException("The test has been cancelled...");
         }
-        
-        await ExecuteTestMethodWithTimeout(discoveredTest);
+
+        var linkedTokenSource = CreateLinkedToken(discoveredTest.TestContext, engineCancellationToken.CancellationTokenSource);
+
+        try
+        {
+            await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token);
+        }
+        finally
+        {
+            if (linkedTokenSource != engineCancellationToken.CancellationTokenSource)
+            {
+                linkedTokenSource.Dispose();
+            }
+        }
+    }
+
+    private static CancellationTokenSource CreateLinkedToken(TestContext testContext,
+        CancellationTokenSource cancellationTokenSource)
+    {
+        if (testContext.LinkedCancellationTokens.Count == 0)
+        {
+            return cancellationTokenSource;
+        }
+
+        return CancellationTokenSource.CreateLinkedTokenSource([cancellationTokenSource.Token, ..testContext.LinkedCancellationTokens.ToArray()]);
     }
 
     private async ValueTask WaitForDependsOnTests(DiscoveredTest testContext, ITestExecutionFilter? filter,
@@ -436,17 +468,17 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest)
+    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
     {
         var testDetails = discoveredTest.TestDetails;
         
         if (testDetails.Timeout == null || testDetails.Timeout.Value == default)
         {
-            await RunTest(discoveredTest, engineCancellationToken.Token);
+            await RunTest(discoveredTest, cancellationToken);
             return;
         }
 
-        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout, engineCancellationToken);
+        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout, cancellationToken);
     }
 
 

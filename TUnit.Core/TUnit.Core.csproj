@@ -18,4 +18,7 @@
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn$(ROSLYN_VERSION)/cs" Visible="false" />
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn$(ROSLYN_VERSION)/cs" Visible="false" />
     </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="BetterCancellationTokenSource.cs" />
+    </ItemGroup>
 </Project>
