@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
@@ -21,6 +22,8 @@ internal class ParallelLimiterTests : TestsBase<TestsGenerator>
         },
         async generatedFiles =>
         {
+            await Assert.That(generatedFiles.Length).IsEqualTo(12);
+            
             await AssertFileContains(generatedFiles[0], "ParallelLimit = TUnit.Core.ParallelLimitProvider.GetParallelLimit<global::TUnit.TestProject.Dummy.ParallelLimit3>(),");
         });
 }

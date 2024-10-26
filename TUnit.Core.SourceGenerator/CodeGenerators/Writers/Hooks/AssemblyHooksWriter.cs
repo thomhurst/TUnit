@@ -14,7 +14,7 @@ internal static class AssemblyHooksWriter
 
         sourceBuilder.WriteLine(
             $$$"""
-               new StaticHookMethod<AssemblyHookContext>
+               new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
                        { 
                           MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
                           Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),
