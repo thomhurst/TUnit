@@ -21,6 +21,8 @@ internal class DiscoveredTest<
     {
         await resettableLazyTestClassFactory.ResetLazy();
     }
+
+    public override IClassConstructor? ClassConstructor => resettableLazyTestClassFactory.ClassConstructor;
 }
 
 internal abstract class DiscoveredTest
@@ -35,7 +37,7 @@ internal abstract class DiscoveredTest
     
     public required ITestExecutor TestExecutor { get; internal set; }
     
-    public required IClassConstructor? ClassConstructor { get; init; }
+    public abstract IClassConstructor? ClassConstructor { get; }
     
     public IHookExecutor? HookExecutor { get; internal set; }
     

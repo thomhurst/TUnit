@@ -69,8 +69,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 	    {
 		    TestContext = testContext,
 		    TestBody = (classInstance, cancellationToken) => TestMethodFactory(classInstance, cancellationToken),
-		    TestExecutor = TestExecutor,
-		    ClassConstructor = ResettableClassFactory.ClassConstructor
+		    TestExecutor = TestExecutor
 	    };
     }
 }
