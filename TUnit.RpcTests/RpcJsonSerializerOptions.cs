@@ -12,6 +12,7 @@ public static class RpcJsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true,
+            ReferenceHandler = ReferenceHandler.Preserve,
         };
     }
 }
