@@ -11,35 +11,34 @@ namespace TUnit.Engine.Extensions;
 public static class TestContextExtensions
 {
     [Experimental("WIP")]
-    public static async Task ReregisterTestWithArguments<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TTestClass>(
+    public static async Task ReregisterTestWithArguments(
         this TestContext testContext, 
         object?[]? methodArguments, 
         Dictionary<string, object?>? objectBag = null)
     {
-        var testMetadata = (TestMetadata<TTestClass>) testContext.OriginalMetadata;
-        
-        var newTestMetaData = testMetadata with
-        {
-            TestId = Guid.NewGuid().ToString(),
-            TestMethodArguments = methodArguments ?? [],
-            ObjectBag = objectBag ?? [],
-            ResettableClassFactory = testMetadata.ResettableClassFactory.Clone(),
-            TestMethodFactory = async (@class, token) =>
-            {
-                var hasTimeout = testContext.TestDetails.Timeout != null;
-                
-                var args = GetArgs(methodArguments, hasTimeout, token);
+        var testMetadata = testContext.OriginalMetadata;
 
-                try
+        var newTestMetaData = testMetadata.CloneWithNewMethodFactory(async (@class, token) =>
                 {
-                    await AsyncConvert.Convert(testContext.TestDetails.MethodInfo.Invoke(@class, args));
+                    var hasTimeout = testContext.TestDetails.Timeout != null;
+
+                    var args = GetArgs(methodArguments, hasTimeout, token);
+
+                    try
+                    {
+                        await AsyncConvert.Convert(testContext.TestDetails.MethodInfo.Invoke(@class, args));
+                    }
+                    catch (TargetInvocationException e)
+                    {
+                        ExceptionDispatchInfo.Throw(e.InnerException ?? e);
+                    }
                 }
-                catch (TargetInvocationException e)
-                {
-                    ExceptionDispatchInfo.Throw(e.InnerException ?? e);
-                }
-            }
-        };
+            ) with
+            {
+                TestId = Guid.NewGuid().ToString(),
+                TestMethodArguments = methodArguments ?? [],
+                ObjectBag = objectBag ?? [],
+            };
         
         var newTest = testContext.GetService<TestsConstructor>().ConstructTest(newTestMetaData);
         

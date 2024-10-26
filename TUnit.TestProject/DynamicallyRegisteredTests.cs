@@ -55,7 +55,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
                 // testContext.SuppressReportingResult();
             }
 
-            await testContext.ReregisterTestWithArguments<DynamicallyRegisteredTests>(methodArguments: [Random.Shared.Next()],
+            await testContext.ReregisterTestWithArguments(methodArguments: [Random.Shared.Next()],
                 objectBag: new()
                 {
                     ["DynamicDataGeneratorRetry"] = true
