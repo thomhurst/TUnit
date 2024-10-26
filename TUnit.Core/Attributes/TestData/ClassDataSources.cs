@@ -5,12 +5,45 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-internal class ClassDataSources
+internal static class ClassDataSources
 {
     public static GetOnlyDictionary<Type, Task> GlobalInitializers = new();
     public static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, Task>> TestClassTypeInitializers = new();
     public static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> AssemblyInitializers = new();
     public static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, Task>> KeyedInitializers = new();
+    
+    public static (T, SharedType, string) GetItemForIndex<T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys) where T : new()
+    {
+        var shared = sharedTypes.ElementAtOrDefault(index);
+        var key = shared == SharedType.Keyed ? GetKey(index, sharedTypes, keys) : string.Empty;
+
+        return
+        (
+            Get<T>(shared, testClassType, key),
+            shared,
+            key
+        );
+    }
+
+    private static string GetKey(int index, SharedType[] sharedTypes, string[] keys)
+    {
+        var keyedIndex = sharedTypes.Take(index + 1).Count(x => x == SharedType.Keyed) - 1;
+
+        return keys.ElementAtOrDefault(keyedIndex) ?? throw new ArgumentException($"Key at index {keyedIndex} not found");
+    }
+    
+    public static T Get<T>(SharedType sharedType, Type testClassType, string key) where T : new()
+    {
+        return sharedType switch
+        {
+            SharedType.None => new T(),
+            SharedType.Globally => TestDataContainer.GetGlobalInstance(() => new T()),
+            SharedType.ForClass => TestDataContainer.GetInstanceForType(testClassType, () => new T()),
+            SharedType.Keyed => TestDataContainer.GetInstanceForKey(key, () => new T()),
+            SharedType.ForAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, () => new T()),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
     
     public static Task InitializeObject(object? item)
     {

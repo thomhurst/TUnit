@@ -1,10 +1,15 @@
-using TUnit.TestProject.Dummy;
 #pragma warning disable CS9113 // Parameter is unread.
 
 namespace TUnit.TestProject;
 
-[ClassDataSource<Inject1, Inject2, Inject3, Inject4, Inject5>]
-public class MultipleClassDataSourceDrivenTests(MultipleClassDataSourceDrivenTests.Inject1 inject1, MultipleClassDataSourceDrivenTests.Inject2 inject2, MultipleClassDataSourceDrivenTests.Inject3 inject3, MultipleClassDataSourceDrivenTests.Inject4 inject4, MultipleClassDataSourceDrivenTests.Inject5 inject5)
+[ClassDataSource<Inject1, Inject2, Inject3, Inject4, Inject5>(Shared = [SharedType.None, SharedType.None, SharedType.None, SharedType.None, SharedType.None])]
+public class MultipleClassDataSourceDrivenTests(
+    MultipleClassDataSourceDrivenTests.Inject1 inject1, 
+    MultipleClassDataSourceDrivenTests.Inject2 inject2, 
+    MultipleClassDataSourceDrivenTests.Inject3 inject3, 
+    MultipleClassDataSourceDrivenTests.Inject4 inject4, 
+    MultipleClassDataSourceDrivenTests.Inject5 inject5
+    )
 {
     [Test]
     public void Test1()
