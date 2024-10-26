@@ -78,7 +78,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     {
 	    return this with
 	    {
-		    TestMethodFactory = (@class, token) => testMethodFactory.Invoke(@class, token),
+		    TestMethodFactory = (@class, token) => testMethodFactory.Invoke(@class!, token),
 		    ResettableClassFactory = ResettableClassFactory.Clone()
 	    };
     }

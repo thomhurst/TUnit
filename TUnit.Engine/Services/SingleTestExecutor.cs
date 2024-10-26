@@ -391,29 +391,14 @@ internal class SingleTestExecutor(
             throw new SkipTestException("The test has been cancelled...");
         }
 
-        var linkedTokenSource = CreateLinkedToken(discoveredTest.TestContext, engineCancellationToken.CancellationTokenSource);
+        using var linkedTokenSource = CreateLinkedToken(discoveredTest.TestContext, engineCancellationToken.CancellationTokenSource);
 
-        try
-        {
-            await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token);
-        }
-        finally
-        {
-            if (linkedTokenSource != engineCancellationToken.CancellationTokenSource)
-            {
-                linkedTokenSource.Dispose();
-            }
-        }
+        await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token);
     }
 
     private static CancellationTokenSource CreateLinkedToken(TestContext testContext,
         CancellationTokenSource cancellationTokenSource)
     {
-        if (testContext.LinkedCancellationTokens.Count == 0)
-        {
-            return cancellationTokenSource;
-        }
-
         return CancellationTokenSource.CreateLinkedTokenSource([cancellationTokenSource.Token, ..testContext.LinkedCancellationTokens.ToArray()]);
     }
 
