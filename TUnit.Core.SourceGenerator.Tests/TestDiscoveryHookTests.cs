@@ -15,7 +15,7 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                            TestRegistrar.RegisterBeforeHook(new StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>
+                            new StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
@@ -34,7 +34,7 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
                                Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 0,
-                               FilePath = @"{}", 
+                               FilePath = @"", 
                                LineNumber = 10,
                             },
                     """);

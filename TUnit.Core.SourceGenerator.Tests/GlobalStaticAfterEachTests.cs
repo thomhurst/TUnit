@@ -22,7 +22,7 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                 Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase1.AfterAll1(context)),
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
-                FilePath = @"{}", 
+                FilePath = @"", 
                 LineNumber = 5,
                 },
                 """);
@@ -35,7 +35,7 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                 Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase2.AfterAll2(context)),
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
-                FilePath = @"{}", 
+                FilePath = @"", 
                 LineNumber = 20,
                 },
                 """);
@@ -48,7 +48,7 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                 Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase3.AfterAll3(context)),
                 HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
-                FilePath = @"{}", 
+                FilePath = @"", 
                 LineNumber = 35,
                 },
                 """);
@@ -61,9 +61,9 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context)),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
-                    FilePath = @"{}", 
+                    FilePath = @"", 
                     LineNumber = 50,
-                    });
+                    },
                     """);
             
             await AssertFileContains(generatedFiles[4], 
@@ -74,9 +74,9 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context, cancellationToken)),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
-                    FilePath = @"{}", 
+                    FilePath = @"", 
                     LineNumber = 56,
-                    });
+                    },
                     """);
             
             await AssertFileContains(generatedFiles[5], 
@@ -87,9 +87,9 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context)),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
-                    FilePath = @"{}", 
+                    FilePath = @"", 
                     LineNumber = 62,
-                    });
+                    },
                     """);
             
             await AssertFileContains(generatedFiles[6], 
@@ -100,9 +100,9 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
                     Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context, cancellationToken)),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
-                    FilePath = @"{}", 
+                    FilePath = @"", 
                     LineNumber = 68,
-                    });
+                    },
                     """);
         });
 }
