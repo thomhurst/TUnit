@@ -9,12 +9,16 @@ internal static class NewClassWriter
     {
         if (argumentsContainer is ClassConstructorAttributeContainer classConstructorAttributeContainer)
         {
-            sourceCodeWriter.Write($"{classConstructorAttributeContainer.DataVariables.Select(x => x.Name).ElementAt(0)}.Create<{typeName}>()");
+            sourceCodeWriter.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>();");
             return;
         }
         
+        sourceCodeWriter.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{typeName}>(() => ");
+
         sourceCodeWriter.Write($"new {typeName}({argumentsContainer.DataVariables.Select(x => x.Name).ToCommaSeparatedString()})");
 
         classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
+        
+        sourceCodeWriter.WriteLine(");");
     }
 }

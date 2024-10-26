@@ -6,7 +6,7 @@ internal class DiscoveredTest<
     [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis
         .DynamicallyAccessedMemberTypes.All)]
     TTestClass
->(ResettableLazy<TTestClass> resettableLazyTestClassFactory) : DiscoveredTest
+>(ResettableLazy<TTestClass> resettableLazyTestClassFactory) : DiscoveredTest where TTestClass : class
 {
     public TTestClass TestClass => resettableLazyTestClassFactory.Value;
     
@@ -21,6 +21,8 @@ internal class DiscoveredTest<
     {
         await resettableLazyTestClassFactory.ResetLazy();
     }
+
+    public override IClassConstructor? ClassConstructor => resettableLazyTestClassFactory.ClassConstructor;
 }
 
 internal abstract class DiscoveredTest
@@ -35,7 +37,7 @@ internal abstract class DiscoveredTest
     
     public required ITestExecutor TestExecutor { get; internal set; }
     
-    public required IClassConstructor? ClassConstructor { get; init; }
+    public abstract IClassConstructor? ClassConstructor { get; }
     
     public IHookExecutor? HookExecutor { get; internal set; }
     
