@@ -75,6 +75,6 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
 
     public ResettableLazy<T> Clone()
     {
-        return new ResettableLazy<T>(factory);
+        return new ResettableLazy<T>(_factory);
     }
 }
