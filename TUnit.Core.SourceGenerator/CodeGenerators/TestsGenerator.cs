@@ -12,32 +12,22 @@ internal class TestsGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var basicTests = context.SyntaxProvider
+        var standardTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) =>
                     new TestCollectionDataModel(GetSemanticTargetForTestMethodGeneration(ctx)))
-            .Where(static m => m is not null)
-            .Collect();
+            .Where(static m => m is not null);
         
-        var inheritsTestsClasses = context.SyntaxProvider
+        var inheritedTests = context.SyntaxProvider
             .ForAttributeWithMetadataName("TUnit.Core.InheritsTestsAttribute",
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForInheritedTestsGeneration(ctx))
-            .Where(static m => m is not null)
-            .Collect();
-
-        var testsData = basicTests
-            .Combine(inheritsTestsClasses)
-            .SelectMany((x, _) =>
-            {
-                IEnumerable<TestCollectionDataModel> enumerable = [..x.Left, ..x.Right!];
-                return enumerable;
-            })
-            .Collect();
+            .Where(static m => m is not null);
         
-        context.RegisterSourceOutput(testsData, (sourceContext, data) => GenerateTests(sourceContext, data));
+        context.RegisterSourceOutput(standardTests, (sourceContext, data) => GenerateTests(sourceContext, data));
+        context.RegisterSourceOutput(inheritedTests, (sourceContext, data) => GenerateTests(sourceContext, data!, "Inherited_"));
     }
 
     static IEnumerable<TestSourceDataModel> GetSemanticTargetForTestMethodGeneration(GeneratorAttributeSyntaxContext context)
@@ -101,11 +91,11 @@ internal class TestsGenerator : IIncrementalGenerator
         );
     }
 
-    private void GenerateTests(SourceProductionContext context, ImmutableArray<TestCollectionDataModel> testCollections, string? prefix = null)
+    private void GenerateTests(SourceProductionContext context, TestCollectionDataModel testCollection, string? prefix = null)
     {
-        foreach (var classGrouping in testCollections
-                     .SelectMany(x => x.TestSourceDataModels)
-                     .GroupBy(x => $"{prefix}{x.ClassNameToGenerate}"))
+        foreach (var classGrouping in testCollection
+                     .TestSourceDataModels
+                     .GroupBy(x => $"{prefix}{x.ClassNameToGenerate}_{Guid.NewGuid():N}"))
         {
             var className = classGrouping.Key;
 
