@@ -2,6 +2,6 @@
 
 public interface ITestSessionHookSource
 {
-    IReadOnlyList<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks();
-    IReadOnlyList<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks();
+    IReadOnlyList<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks(string sessionId);
+    IReadOnlyList<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks(string sessionId);
 }

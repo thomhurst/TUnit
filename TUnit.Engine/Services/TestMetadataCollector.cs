@@ -3,7 +3,7 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Services;
 
-internal class TestMetadataCollector(ITUnitMessageBus messageBus, ILoggerFactory loggerFactory)
+internal class TestMetadataCollector(string sessionId, ITUnitMessageBus messageBus, ILoggerFactory loggerFactory)
 {
     private readonly ILogger<TestsConstructor> _logger = loggerFactory.CreateLogger<TestsConstructor>();
 
@@ -13,7 +13,7 @@ internal class TestMetadataCollector(ITUnitMessageBus messageBus, ILoggerFactory
         
         foreach (var sourceGeneratedTestNode in Sources.TestSources
                      .AsParallel()
-                     .SelectMany(x => x.CollectTests()))
+                     .SelectMany(x => x.CollectTests(sessionId)))
         {
             count++;
 

@@ -2,5 +2,5 @@
 
 public interface ITestSource
 {
-    IReadOnlyList<SourceGeneratedTestNode> CollectTests();
+    IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId);
 }

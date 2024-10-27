@@ -15,14 +15,14 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     {
         _dataGeneratorMetadata = dataGeneratorMetadata;
         
-        _item = ClassDataSources.Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key);
+        _item = ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key);
 
         yield return _item;
     }
 
     public async ValueTask OnTestRegistered(TestContext testContext)
     {
-        await ClassDataSources.OnTestRegistered(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             Shared,
@@ -32,7 +32,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
     {
-        return ClassDataSources.OnTestStart(
+        return ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
             beforeTestContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             Shared,
@@ -42,16 +42,16 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async ValueTask OnTestEnd(TestContext testContext)
     {
-        await ClassDataSources.OnTestEnd(Shared, Key, _item);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, _item);
     }
 
     public async ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext)
     {
-        await ClassDataSources.IfLastTestInClass<T>(Shared);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInClass<T>(Shared);
     }
 
     public async ValueTask IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
     {
-        await ClassDataSources.IfLastTestInAssembly<T>(Shared);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInAssembly<T>(Shared);
     }
 }

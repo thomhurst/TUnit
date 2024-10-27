@@ -70,9 +70,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var instanceTracker = Register(new InstanceTracker());
         
-        var hooksCollector = Register(new HooksCollector());
+        var hooksCollector = Register(new HooksCollector(context.Request.Session.SessionUid.Value));
         
-        var testMetadataCollector = Register(new TestMetadataCollector(TUnitMessageBus, LoggerFactory));
+        var testMetadataCollector = Register(new TestMetadataCollector(context.Request.Session.SessionUid.Value, TUnitMessageBus, LoggerFactory));
         var testsLoader = Register(new TestsConstructor(extension, testMetadataCollector, this));
         var testFilterService = Register(new TestFilterService(LoggerFactory));
         
