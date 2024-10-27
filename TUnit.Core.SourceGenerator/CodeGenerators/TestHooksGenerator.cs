@@ -10,7 +10,7 @@ using TUnit.Core.SourceGenerator.Models;
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
 [Generator]
-internal class TestHooksGenerator : IIncrementalGenerator
+public class TestHooksGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {

@@ -7,7 +7,7 @@ using TUnit.Core.SourceGenerator.Models;
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
 [Generator]
-internal class TestsGenerator : IIncrementalGenerator
+public class TestsGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -91,9 +91,9 @@ internal class TestsGenerator : IIncrementalGenerator
     {
         foreach (var classGrouping in testCollection
                      .TestSourceDataModels
-                     .GroupBy(x => FilenameSanitizer.Sanitize($"{prefix}{x.ClassNameToGenerate}")))
+                     .GroupBy(x => $"{prefix}{x.ClassNameToGenerate}"))
         {
-            var className = classGrouping.Key;
+            var className = FilenameSanitizer.Sanitize(classGrouping.Key);
             var count = classGrouping.Count();
 
             using var sourceBuilder = new SourceCodeWriter();
