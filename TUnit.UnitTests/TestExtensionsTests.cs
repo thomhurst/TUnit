@@ -59,7 +59,6 @@ public class TestExtensionsTests
             .Without(x => x.MethodInfo)
             .Without(x => x.ResettableClassFactory)
             .Without(x => x.ParallelLimit)
-            .Without(x => x.ClassConstructor)
             .Without(x => x.TestExecutor)
             .With(x => x.AttributeTypes, [])
             .With(x => x.DataAttributes, [])
