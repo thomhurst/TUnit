@@ -30,7 +30,7 @@ public class DependencyInjectionClassConstructor2 : IClassConstructor, ITestEndE
     private IServiceProvider? _serviceProvider;
     private AsyncServiceScope _scope;
 
-    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : class
+    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(ClassConstructorMetadata classConstructorMetadata) where T : class
     {
         _serviceProvider = CreateServiceProvider();
         _scope = _serviceProvider.CreateAsyncScope();

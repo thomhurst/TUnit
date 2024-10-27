@@ -4,5 +4,5 @@ namespace TUnit.Core.Interfaces;
 
 public interface IClassConstructor
 {
-    T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : class;
+    T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(ClassConstructorMetadata classConstructorMetadata) where T : class;
 }

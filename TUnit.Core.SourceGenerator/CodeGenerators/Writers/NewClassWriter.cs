@@ -9,7 +9,7 @@ internal static class NewClassWriter
     {
         if (argumentsContainer is ClassConstructorAttributeContainer classConstructorAttributeContainer)
         {
-            sourceCodeWriter.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>();");
+            sourceCodeWriter.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{classConstructorAttributeContainer.ClassConstructorType}, {typeName}>(sessionId);");
             return;
         }
         
@@ -19,6 +19,6 @@ internal static class NewClassWriter
 
         classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
         
-        sourceCodeWriter.WriteLine(");");
+        sourceCodeWriter.WriteLine(", sessionId);");
     }
 }

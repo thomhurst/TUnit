@@ -11,7 +11,7 @@ public class ResettableLazy<
     where TClassConstructor : IClassConstructor, new()
     where T : class
 {
-    public ResettableLazy() : base(new TClassConstructor())
+    public ResettableLazy(string sessionId) : base(new TClassConstructor(), sessionId)
     {
     }
     
@@ -19,7 +19,10 @@ public class ResettableLazy<
     {
         await DisposeAsync(ClassConstructor);
         ClassConstructor = new TClassConstructor();
-        _factory = () => ClassConstructor.Create<T>();
+        _factory = () => ClassConstructor.Create<T>(new ClassConstructorMetadata
+        {
+            TestSessionId = SessionId
+        });
         await base.ResetLazy();
     }
 }
@@ -31,16 +34,23 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
     private Lazy<T> _lazy;
     protected Func<T> _factory;
     
-    protected ResettableLazy(IClassConstructor classConstructor)
+    protected readonly string SessionId;
+
+    protected ResettableLazy(IClassConstructor classConstructor, string sessionId)
     {
+        SessionId = sessionId;
         ClassConstructor = classConstructor;
-        _factory = classConstructor.Create<T>;
+        _factory = () => classConstructor.Create<T>(new ClassConstructorMetadata
+        {
+            TestSessionId = sessionId
+        });
         _lazy = new Lazy<T>(_factory);
     }
 
-    public ResettableLazy(Func<T> factory)
+    public ResettableLazy(Func<T> factory, string sessionId)
     {
         _factory = factory;
+        SessionId = sessionId;
         _lazy = new Lazy<T>(factory);
     }
 
@@ -75,6 +85,6 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
 
     public ResettableLazy<T> Clone()
     {
-        return new ResettableLazy<T>(_factory);
+        return new ResettableLazy<T>(_factory, SessionId);
     }
 }
