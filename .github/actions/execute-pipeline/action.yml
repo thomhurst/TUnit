@@ -1,0 +1,21 @@
+name: 'Hello World'
+description: 'Greet someone'
+inputs:
+  categories:
+    description: Categories to run
+    required: false
+    default: ''
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run Pipeline
+      shell: bash
+      run: dotnet run -c Release --categories ${{ github.event.inputs.categories }}
+      working-directory: "TUnit.Pipeline"
+      env:
+        ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
+        DOTNET_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
+        NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
+        NuGet__ShouldPublish: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}

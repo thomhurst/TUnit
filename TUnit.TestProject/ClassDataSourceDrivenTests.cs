@@ -2,7 +2,7 @@ using TUnit.TestProject.Dummy;
 
 namespace TUnit.TestProject;
 
-public class ClassDataSourceDrivenTests55
+public class ClassDataSourceDrivenTests
 {
     [Test]
     [ClassDataSource<SomeAsyncDisposableClass, SomeAsyncDisposableClass, SomeAsyncDisposableClass,
