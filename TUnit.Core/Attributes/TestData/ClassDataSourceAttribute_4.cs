@@ -29,10 +29,10 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
         _itemsWithMetadata = 
         (
-            ClassDataSources.GetItemForIndex<T1>(0, dataGeneratorMetadata.TestClassType, Shared, Keys),
-            ClassDataSources.GetItemForIndex<T2>(1, dataGeneratorMetadata.TestClassType, Shared, Keys),
-            ClassDataSources.GetItemForIndex<T3>(2, dataGeneratorMetadata.TestClassType, Shared, Keys),
-            ClassDataSources.GetItemForIndex<T4>(3, dataGeneratorMetadata.TestClassType, Shared, Keys)
+            ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).GetItemForIndex<T1>(0, dataGeneratorMetadata.TestClassType, Shared, Keys),
+            ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).GetItemForIndex<T2>(1, dataGeneratorMetadata.TestClassType, Shared, Keys),
+            ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).GetItemForIndex<T3>(2, dataGeneratorMetadata.TestClassType, Shared, Keys),
+            ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).GetItemForIndex<T4>(3, dataGeneratorMetadata.TestClassType, Shared, Keys)
         );
 
         yield return 
@@ -46,28 +46,28 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async ValueTask OnTestRegistered(TestContext testContext)
     {
-        await ClassDataSources.OnTestRegistered(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             _itemsWithMetadata.Item1.SharedType,
             _itemsWithMetadata.Item1.Key,
             _itemsWithMetadata.Item1.T);
         
-        await ClassDataSources.OnTestRegistered(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             _itemsWithMetadata.Item2.SharedType,
             _itemsWithMetadata.Item2.Key,
             _itemsWithMetadata.Item2.T);
         
-        await ClassDataSources.OnTestRegistered(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             _itemsWithMetadata.Item3.SharedType,
             _itemsWithMetadata.Item3.Key,
             _itemsWithMetadata.Item3.T);
         
-        await ClassDataSources.OnTestRegistered(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             _itemsWithMetadata.Item4.SharedType,
@@ -77,28 +77,28 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async ValueTask OnTestStart(BeforeTestContext beforeTestContext)
     {
-        await ClassDataSources.OnTestStart(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
             beforeTestContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             _itemsWithMetadata.Item1.SharedType,
             _itemsWithMetadata.Item1.Key,
             _itemsWithMetadata.Item1.Key);
         
-        await ClassDataSources.OnTestStart(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
             beforeTestContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             _itemsWithMetadata.Item2.SharedType,
             _itemsWithMetadata.Item2.Key,
             _itemsWithMetadata.Item2.Key);
         
-        await ClassDataSources.OnTestStart(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
             beforeTestContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             _itemsWithMetadata.Item3.SharedType,
             _itemsWithMetadata.Item3.Key,
             _itemsWithMetadata.Item3.Key);
         
-        await ClassDataSources.OnTestStart(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
             beforeTestContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             _itemsWithMetadata.Item4.SharedType,
@@ -108,22 +108,22 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async ValueTask OnTestEnd(TestContext testContext)
     {
-        await ClassDataSources.OnTestEnd(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(
             _itemsWithMetadata.Item1.SharedType,
             _itemsWithMetadata.Item1.Key,
             _itemsWithMetadata.Item1.T);
 
-        await ClassDataSources.OnTestEnd(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(
             _itemsWithMetadata.Item2.SharedType,
             _itemsWithMetadata.Item2.Key,
             _itemsWithMetadata.Item2.T);
         
-        await ClassDataSources.OnTestEnd(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(
             _itemsWithMetadata.Item3.SharedType,
             _itemsWithMetadata.Item3.Key,
             _itemsWithMetadata.Item3.T);
         
-        await ClassDataSources.OnTestEnd(
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(
             _itemsWithMetadata.Item4.SharedType,
             _itemsWithMetadata.Item4.Key,
             _itemsWithMetadata.Item4.T);
@@ -131,17 +131,17 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext)
     {
-        await ClassDataSources.IfLastTestInClass<T1>(_itemsWithMetadata.Item1.SharedType);
-        await ClassDataSources.IfLastTestInClass<T2>(_itemsWithMetadata.Item2.SharedType);
-        await ClassDataSources.IfLastTestInClass<T3>(_itemsWithMetadata.Item3.SharedType);
-        await ClassDataSources.IfLastTestInClass<T4>(_itemsWithMetadata.Item4.SharedType);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInClass<T1>(_itemsWithMetadata.Item1.SharedType);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInClass<T2>(_itemsWithMetadata.Item2.SharedType);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInClass<T3>(_itemsWithMetadata.Item3.SharedType);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInClass<T4>(_itemsWithMetadata.Item4.SharedType);
     }
 
     public async ValueTask IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
     {
-        await ClassDataSources.IfLastTestInAssembly<T1>(_itemsWithMetadata.Item1.SharedType);
-        await ClassDataSources.IfLastTestInAssembly<T2>(_itemsWithMetadata.Item2.SharedType);
-        await ClassDataSources.IfLastTestInAssembly<T3>(_itemsWithMetadata.Item3.SharedType);
-        await ClassDataSources.IfLastTestInAssembly<T4>(_itemsWithMetadata.Item4.SharedType);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInAssembly<T1>(_itemsWithMetadata.Item1.SharedType);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInAssembly<T2>(_itemsWithMetadata.Item2.SharedType);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInAssembly<T3>(_itemsWithMetadata.Item3.SharedType);
+        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInAssembly<T4>(_itemsWithMetadata.Item4.SharedType);
     }
 }

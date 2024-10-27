@@ -48,6 +48,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
                                         ParameterInfos = {{parameterInfos}},
                                         PropertyInfo = {{propertyName}},
                                         TestObjectBag = objectBag,
+                                        TestSessionId = sessionId,
                                      }
                                      """;
         

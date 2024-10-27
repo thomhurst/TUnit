@@ -116,11 +116,11 @@ public class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine($"SourceRegistrar.Register(new {className}());");
             sourceBuilder.WriteLine("}");
 
-            sourceBuilder.WriteLine("public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests()");
+            sourceBuilder.WriteLine("public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)");
             sourceBuilder.WriteLine("{");
             if (count == 1)
             {
-                sourceBuilder.WriteLine("return Tests0();");
+                sourceBuilder.WriteLine("return Tests0(sessionId);");
             }
             else
             {
@@ -128,7 +128,7 @@ public class TestsGenerator : IIncrementalGenerator
                 sourceBuilder.WriteLine("[");
                 for (var i = 0; i < count; i++)
                 {
-                    sourceBuilder.WriteLine($"..Tests{i}(),");
+                    sourceBuilder.WriteLine($"..Tests{i}(sessionId),");
                 }
                 sourceBuilder.WriteLine("];");
             }
@@ -137,7 +137,7 @@ public class TestsGenerator : IIncrementalGenerator
             var index = 0;
             foreach (var model in classGrouping)
             {
-                sourceBuilder.WriteLine($"private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests{index++}()");
+                sourceBuilder.WriteLine($"private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests{index++}(string sessionId)");
                 sourceBuilder.WriteLine("{");
                 sourceBuilder.WriteLine("global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];");
                 sourceBuilder.WriteLine($"var {VariableNames.ClassDataIndex} = 0;");

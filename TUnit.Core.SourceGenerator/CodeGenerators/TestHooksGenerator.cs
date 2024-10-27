@@ -131,7 +131,7 @@ public class TestHooksGenerator : IIncrementalGenerator
                     foreach (var hookLocationType in new[] { HookLocationType.Before, HookLocationType.After })
                     {
                         sourceBuilder.WriteLine(
-                            $"public global::System.Collections.Generic.IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}()");
+                            $"public global::System.Collections.Generic.IReadOnlyList<{GetReturnType(hooksGroupedByLevel.Key, hookLocationType, isEvery)}> {GetMethodName(hooksGroupedByLevel.Key, hookLocationType, isEvery)}(string sessionId)");
 
                         sourceBuilder.WriteLine("{");
                         sourceBuilder.WriteLine("return");

@@ -5,14 +5,22 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-internal static class ClassDataSources
+internal class ClassDataSources
 {
-    public static GetOnlyDictionary<Type, Task> GlobalInitializers = new();
-    public static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, Task>> TestClassTypeInitializers = new();
-    public static readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> AssemblyInitializers = new();
-    public static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, Task>> KeyedInitializers = new();
+    private ClassDataSources()
+    {
+    }
     
-    public static (T, SharedType, string) GetItemForIndex<T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys) where T : new()
+    public GetOnlyDictionary<Type, Task> GlobalInitializers = new();
+    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<Type, Task>> TestClassTypeInitializers = new();
+    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<Assembly, Task>> AssemblyInitializers = new();
+    public readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, Task>> KeyedInitializers = new();
+
+    public static readonly GetOnlyDictionary<string, ClassDataSources> SourcesPerSession = new();
+
+    public static ClassDataSources Get(string sessionId) => SourcesPerSession.GetOrAdd(sessionId, _ => new());
+    
+    public (T, SharedType, string) GetItemForIndex<T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys) where T : new()
     {
         var shared = sharedTypes.ElementAtOrDefault(index);
         var key = shared == SharedType.Keyed ? GetKey(index, sharedTypes, keys) : string.Empty;
@@ -25,14 +33,14 @@ internal static class ClassDataSources
         );
     }
 
-    private static string GetKey(int index, SharedType[] sharedTypes, string[] keys)
+    private string GetKey(int index, SharedType[] sharedTypes, string[] keys)
     {
         var keyedIndex = sharedTypes.Take(index + 1).Count(x => x == SharedType.Keyed) - 1;
 
         return keys.ElementAtOrDefault(keyedIndex) ?? throw new ArgumentException($"Key at index {keyedIndex} not found");
     }
     
-    public static T Get<T>(SharedType sharedType, Type testClassType, string key) where T : new()
+    public T Get<T>(SharedType sharedType, Type testClassType, string key) where T : new()
     {
         return sharedType switch
         {
@@ -45,7 +53,7 @@ internal static class ClassDataSources
         };
     }
     
-    public static Task InitializeObject(object? item)
+    public Task InitializeObject(object? item)
     {
         if (item is IAsyncInitializer asyncInitializer)
         {
@@ -55,7 +63,7 @@ internal static class ClassDataSources
         return Task.CompletedTask;
     }
     
-    public static async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
+    public async ValueTask OnTestRegistered<T>(TestContext testContext, bool isStatic, SharedType shared, string key, T? item)
     {
         switch (shared)
         {
@@ -81,7 +89,7 @@ internal static class ClassDataSources
         }
     }
 
-    public static async ValueTask OnTestStart<T>(BeforeTestContext beforeTestContext, bool isStatic, SharedType shared, string key, T? item)
+    public async ValueTask OnTestStart<T>(BeforeTestContext beforeTestContext, bool isStatic, SharedType shared, string key, T? item)
     {
         if (isStatic)
         {
@@ -92,7 +100,7 @@ internal static class ClassDataSources
         await Initialize(beforeTestContext.TestContext, shared, key, item);
     }
 
-    public static Task Initialize<T>(TestContext testContext, SharedType shared, string key, T? item)
+    public Task Initialize<T>(TestContext testContext, SharedType shared, string key, T? item)
     {
         if (shared == SharedType.Globally)
         {
@@ -133,7 +141,7 @@ internal static class ClassDataSources
         throw new ArgumentOutOfRangeException(nameof(shared));
     }
 
-    public static async ValueTask OnTestEnd<T>(SharedType shared, string key, T? item)
+    public async ValueTask OnTestEnd<T>(SharedType shared, string key, T? item)
     {
         if (shared == SharedType.None)
         {
@@ -151,7 +159,7 @@ internal static class ClassDataSources
         }
     }
 
-    public static async ValueTask IfLastTestInClass<T>(SharedType shared)
+    public async ValueTask IfLastTestInClass<T>(SharedType shared)
     {
         if (shared == SharedType.ForClass)
         {
@@ -159,7 +167,7 @@ internal static class ClassDataSources
         }
     }
 
-    public static async ValueTask IfLastTestInAssembly<T>(SharedType shared)
+    public async ValueTask IfLastTestInAssembly<T>(SharedType shared)
     {
         if (shared == SharedType.ForAssembly)
         {

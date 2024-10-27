@@ -4,7 +4,7 @@ using TUnit.Core.Data;
 
 namespace TUnit.Engine.Services;
 
-internal class HooksCollector
+internal class HooksCollector(string sessionId)
 {
     internal readonly List<StaticHookMethod<BeforeTestDiscoveryContext>> BeforeTestDiscoveryHooks = []; 
     internal readonly List<StaticHookMethod<TestSessionContext>> BeforeTestSessionHooks = []; 
@@ -30,12 +30,12 @@ internal class HooksCollector
     {
         foreach (var hookSource in Sources.TestDiscoveryHookSources)
         {
-            foreach (var beforeHook in hookSource.CollectBeforeTestDiscoveryHooks())
+            foreach (var beforeHook in hookSource.CollectBeforeTestDiscoveryHooks(sessionId))
             {
                 BeforeTestDiscoveryHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterTestDiscoveryHooks())
+            foreach (var afterHook in hookSource.CollectAfterTestDiscoveryHooks(sessionId))
             {
                 AfterTestDiscoveryHooks.Add(afterHook);
             }
@@ -46,24 +46,24 @@ internal class HooksCollector
     {
         foreach (var hookSource in Sources.TestHookSources)
         {
-            foreach (var beforeHook in hookSource.CollectBeforeTestHooks())
+            foreach (var beforeHook in hookSource.CollectBeforeTestHooks(sessionId))
             {
                 var beforeList = BeforeTestHooks.GetOrAdd(beforeHook.ClassType, _ => []);
                 beforeList.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterTestHooks())
+            foreach (var afterHook in hookSource.CollectAfterTestHooks(sessionId))
             {
                 var afterList = AfterTestHooks.GetOrAdd(afterHook.ClassType, _ => []);
                 afterList.Add(afterHook);
             }
             
-            foreach (var beforeHook in hookSource.CollectBeforeEveryTestHooks())
+            foreach (var beforeHook in hookSource.CollectBeforeEveryTestHooks(sessionId))
             {
                 BeforeEveryTestHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterEveryTestHooks())
+            foreach (var afterHook in hookSource.CollectAfterEveryTestHooks(sessionId))
             {
                 AfterEveryTestHooks.Add(afterHook);
             }
@@ -71,24 +71,24 @@ internal class HooksCollector
 
         foreach (var hookSource in Sources.ClassHookSources)
         {
-            foreach (var beforeHook in hookSource.CollectBeforeClassHooks())
+            foreach (var beforeHook in hookSource.CollectBeforeClassHooks(sessionId))
             {
                 var beforeList = BeforeClassHooks.GetOrAdd(beforeHook.ClassType, _ => []);
                 beforeList.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterClassHooks())
+            foreach (var afterHook in hookSource.CollectAfterClassHooks(sessionId))
             {
                 var afterList = AfterClassHooks.GetOrAdd(afterHook.ClassType, _ => []);
                 afterList.Add(afterHook);
             }
             
-            foreach (var beforeHook in hookSource.CollectBeforeEveryClassHooks())
+            foreach (var beforeHook in hookSource.CollectBeforeEveryClassHooks(sessionId))
             {
                 BeforeEveryClassHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterEveryClassHooks())
+            foreach (var afterHook in hookSource.CollectAfterEveryClassHooks(sessionId))
             {
                 AfterEveryClassHooks.Add(afterHook);
             }
@@ -96,24 +96,24 @@ internal class HooksCollector
 
         foreach (var hookSource in Sources.AssemblyHookSources)
         {
-            foreach (var beforeHook in hookSource.CollectBeforeAssemblyHooks())
+            foreach (var beforeHook in hookSource.CollectBeforeAssemblyHooks(sessionId))
             {
                 var beforeList = BeforeAssemblyHooks.GetOrAdd(beforeHook.Assembly, _ => []);
                 beforeList.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterAssemblyHooks())
+            foreach (var afterHook in hookSource.CollectAfterAssemblyHooks(sessionId))
             {
                 var afterList = AfterAssemblyHooks.GetOrAdd(afterHook.Assembly, _ => []);
                 afterList.Add(afterHook);
             }
             
-            foreach (var beforeHook in hookSource.CollectBeforeEveryAssemblyHooks())
+            foreach (var beforeHook in hookSource.CollectBeforeEveryAssemblyHooks(sessionId))
             {
                 BeforeEveryAssemblyHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterEveryAssemblyHooks())
+            foreach (var afterHook in hookSource.CollectAfterEveryAssemblyHooks(sessionId))
             {
                 AfterEveryAssemblyHooks.Add(afterHook);
             }
@@ -121,12 +121,12 @@ internal class HooksCollector
 
         foreach (var hookSource in Sources.TestSessionHookSources)
         {
-            foreach (var beforeHook in hookSource.CollectBeforeTestSessionHooks())
+            foreach (var beforeHook in hookSource.CollectBeforeTestSessionHooks(sessionId))
             {
                 BeforeTestSessionHooks.Add(beforeHook);
             }
 
-            foreach (var afterHook in hookSource.CollectAfterTestSessionHooks())
+            foreach (var afterHook in hookSource.CollectAfterTestSessionHooks(sessionId))
             {
                 AfterTestSessionHooks.Add(afterHook);
             }
