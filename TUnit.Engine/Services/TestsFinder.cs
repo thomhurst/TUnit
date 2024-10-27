@@ -5,6 +5,13 @@ namespace TUnit.Engine.Services;
 
 internal class TestsFinder(TUnitTestDiscoverer testDiscoverer) : ITestFinder
 {
+    public IEnumerable<TestContext> GetTests(Type classType)
+    {
+        return testDiscoverer.GetCachedTests()
+            .Where(x => x.TestDetails.ClassType == classType)
+            .Select(x => x.TestContext);
+    }
+
     public TestContext[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes, Type classType, IEnumerable<Type> classParameterTypes)
     {
         var testsWithoutMethodParameterTypesMatching = testDiscoverer.GetCachedTests().Where(x =>

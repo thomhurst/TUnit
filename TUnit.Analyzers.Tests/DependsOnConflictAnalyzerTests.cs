@@ -40,6 +40,45 @@ public class DependsOnConflictAnalyzerTests
     }
     
     [Test]
+    public async Task Direct_Conflict_Other_Class_Raises_Error()
+    {
+        const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Core;
+
+                            [DependsOn(typeof(MyClass2))]
+                            public class MyClass1
+                            {
+                                [Test]
+                                public void {|#0:Test|}()
+                                {
+                                }
+                            }
+                            
+                            [DependsOn(typeof(MyClass1))]
+                            public class MyClass2
+                            {
+                                [Test]
+                                public void {|#1:Test2|}()
+                                {
+                                }
+                            }
+                            """;
+
+        var expected = Verifier
+            .Diagnostic(Rules.DependsOnConflicts)
+            .WithMessage("DependsOn Conflicts: Test > Test2 > Test")
+            .WithLocation(0);
+        
+        var expected2 = Verifier
+            .Diagnostic(Rules.DependsOnConflicts)
+            .WithMessage("DependsOn Conflicts: Test2 > Test > Test2")
+            .WithLocation(1);
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected, expected2).ConfigureAwait(false);
+    }
+    
+    [Test]
     public async Task Not_Found_Test_Raises_Error()
     {
         const string text = """
