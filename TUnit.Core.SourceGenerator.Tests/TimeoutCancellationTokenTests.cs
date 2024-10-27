@@ -11,7 +11,7 @@ internal class TimeoutCancellationTokenTests : TestsBase<TestsGenerator>
             "TimeoutCancellationTokenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(7);
+            await Assert.That(generatedFiles.Length).IsEqualTo(5);
             
             await AssertFileContains(generatedFiles[0], "TestName = \"BasicTest\"");
             await AssertFileContains(generatedFiles[0], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.BasicTest(cancellationToken))");
@@ -31,12 +31,12 @@ internal class TimeoutCancellationTokenTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[4], "global::System.Int32 methodArg = 1;");
             await AssertFileContains(generatedFiles[4], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken))");
             
-            await AssertFileContains(generatedFiles[5], "TestName = \"MatrixTest\"");
-            await AssertFileContains(generatedFiles[5], "global::System.Int32 methodArg = 2;");
-            await AssertFileContains(generatedFiles[5], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken))");
+            await AssertFileContains(generatedFiles[4], "TestName = \"MatrixTest\"");
+            await AssertFileContains(generatedFiles[4], "global::System.Int32 methodArg = 2;");
+            await AssertFileContains(generatedFiles[4], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken))");
             
-            await AssertFileContains(generatedFiles[6], "TestName = \"MatrixTest\"");
-            await AssertFileContains(generatedFiles[6], "global::System.Int32 methodArg = 3;");
-            await AssertFileContains(generatedFiles[6], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken))");
+            await AssertFileContains(generatedFiles[4], "TestName = \"MatrixTest\"");
+            await AssertFileContains(generatedFiles[4], "global::System.Int32 methodArg = 3;");
+            await AssertFileContains(generatedFiles[4], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken))");
         });
 }

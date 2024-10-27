@@ -24,11 +24,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Core.SourceGenerator.Tests</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn$(ROSLYN_VERSION)/cs" Visible="false" />
     <None Remove="compiler-diagnostics.sarif" />
   </ItemGroup>

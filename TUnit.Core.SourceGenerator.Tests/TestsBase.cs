@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.Extensions;
@@ -104,8 +105,8 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         return false;
     }
 
-    protected async Task AssertFileContains(string file, string expected)
+    protected async Task AssertFileContains(string file, string expected, [CallerArgumentExpression("file")] string fileExpression = "", [CallerArgumentExpression("expected")] string expectedExpression = "")
     {
-        await Assert.That(file).Contains(expected).IgnoringWhitespace();
+        await Assert.That(file, fileExpression).Contains(expected, expectedExpression).IgnoringWhitespace();
     }
 }
