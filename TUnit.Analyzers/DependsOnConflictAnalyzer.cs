@@ -18,6 +18,15 @@ public record Chain(IMethodSymbol OriginalMethod)
     {
         Dependencies.Add(dependency);
     }
+
+    public IMethodSymbol[] GetCompleteChain()
+    {
+        return
+        [
+            OriginalMethod,
+            ..Dependencies.TakeUntil(d => SymbolEqualityComparer.Default.Equals(d, OriginalMethod))
+        ];
+    }
 }
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -43,12 +52,10 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-
-        IMethodSymbol[] completeChain = [dependencies.OriginalMethod, ..dependencies.Dependencies];
         
         context.ReportDiagnostic(Diagnostic.Create(Rules.DependsOnConflicts,
             method.Locations.FirstOrDefault(),
-                string.Join(" > ", [..completeChain.Select(x => $"{(x.ReceiverType ?? x.ContainingType).Name}.{x.Name}")])));
+                string.Join(" > ", [..dependencies.GetCompleteChain().Select(x => $"{(x.ReceiverType ?? x.ContainingType).Name}.{x.Name}")])));
     }
 
     private AttributeData[] GetDependsOnAttributes(ISymbol methodSymbol)
