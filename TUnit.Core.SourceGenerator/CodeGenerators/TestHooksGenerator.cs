@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -9,9 +10,9 @@ using TUnit.Core.SourceGenerator.Models;
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
 [Generator]
-internal class TestHooksGenerator : GeneratorBase
+internal class TestHooksGenerator : IIncrementalGenerator
 {
-    public override void Initialize(IncrementalGeneratorInitializationContext context)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
@@ -84,7 +85,7 @@ internal class TestHooksGenerator : GeneratorBase
     {
         foreach (var groupedByTypeName in hooks.GroupBy(x => x.MinimalTypeName))
         {
-            var className = ToFileNameString($"Hooks_{groupedByTypeName.Key}");
+            var className = FilenameSanitizer.Sanitize($"Hooks_{groupedByTypeName.Key}");
                 
             using var sourceBuilder = new SourceCodeWriter();
 
