@@ -16,9 +16,9 @@ namespace TUnit.Pipeline.Modules;
 [RunOnlyOnBranch("main")]
 [RunOnLinuxOnly]
 [SkipIfDependabot]
+[ModuleCategory("ReadMe")]
 public class GenerateReadMeModule : Module<File>
 {
-    private readonly object _stringBuilderLock = new(); //unused?
     protected override async Task<File?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var template = await context.Git()

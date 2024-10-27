@@ -14,5 +14,6 @@
     <PackageReference Include="ModularPipelines.DotNet" />
     <PackageReference Include="ModularPipelines.Git" />
     <PackageReference Include="ModularPipelines.GitHub" />
+    <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 </Project>

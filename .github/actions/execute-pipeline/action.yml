@@ -1,0 +1,36 @@
+name: 'Hello World'
+description: 'Greet someone'
+inputs:
+  categories:
+    description: Categories to run
+    required: false
+    default: ''
+  admin-token:
+    description: 'Admin token'
+    required: true
+  publish-packages:
+    description: Publish packages?
+    required: false
+    default: 'false'
+  nuget-apikey:
+    description: 'NuGet API Key'
+    required: false
+    default: ''
+  environment:
+    description: 'Environment'
+    required: false
+    default: 'Development'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run Pipeline
+      shell: bash
+      run: dotnet run -c Release --categories ${{ inputs.categories }}
+      working-directory: "TUnit.Pipeline"
+      env:
+        ADMIN_TOKEN: ${{ inputs.admin-token }}
+        GITHUB_TOKEN: ${{ github.token }}
+        DOTNET_ENVIRONMENT: ${{ inputs.environment }}
+        NuGet__ApiKey: ${{ inputs.nuget-apikey }}
+        NuGet__ShouldPublish: ${{ inputs.publish-packages }}

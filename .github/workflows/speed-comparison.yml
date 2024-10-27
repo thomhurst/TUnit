@@ -108,6 +108,13 @@ jobs:
         run: ${{ matrix.os != 'windows-latest' && 'sudo -E ' || '' }}dotnet run -c Release --allCategories=Build --framework net9.0
         working-directory: "tools/speed-comparison/Tests.Benchmark"
 
+      - name: Generate ReadMe
+        uses: ./.github/actions/execute-pipeline
+        with:
+          categories: ReadMe
+          admin-token: ${{ secrets.ADMIN_TOKEN }}
+          environment: Development
+
       - name: Upload Markdown
         uses: actions/upload-artifact@v4
         if: always()

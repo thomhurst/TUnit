@@ -7,6 +7,10 @@ on:
     branches: ["main"]
   workflow_dispatch:
     inputs:
+      categories:
+        description: Categories to run
+        type: string
+        required: false
       publish-packages:
         description: Publish packages?    
         type: boolean
@@ -43,14 +47,12 @@ jobs:
         run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:SDK_VERSION=net9
 
       - name: Run Pipeline
-        run: dotnet run -c Release
-        working-directory: "TUnit.Pipeline"
-        env:
-          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-          GITHUB_TOKEN: ${{ github.token }}
-          DOTNET_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
-          NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
-          NuGet__ShouldPublish: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
+        uses: ./.github/actions/execute-pipeline
+        with:
+          admin-token: ${{ secrets.ADMIN_TOKEN }}
+          environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
+          nuget-apikey: ${{ secrets.NUGET__APIKEY }}
+          publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
       
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4.4.3
