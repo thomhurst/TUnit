@@ -5,17 +5,32 @@ inputs:
     description: Categories to run
     required: false
     default: ''
+  admin-token:
+    description: 'Admin token'
+    required: true
+  publish-packages:
+    description: Publish packages?
+    required: false
+    default: 'false'
+  nuget-apikey:
+    description: 'NuGet API Key'
+    required: false
+    default: ''
+  environment:
+    description: 'Environment'
+    required: false
+    default: 'Development'
 
 runs:
   using: "composite"
   steps:
     - name: Run Pipeline
       shell: bash
-      run: dotnet run -c Release --categories ${{ github.event.inputs.categories }}
+      run: dotnet run -c Release --categories ${{ inputs.categories }}
       working-directory: "TUnit.Pipeline"
       env:
-        ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        ADMIN_TOKEN: ${{ inputs.admin-token }}
         GITHUB_TOKEN: ${{ github.token }}
-        DOTNET_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
-        NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
-        NuGet__ShouldPublish: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
+        DOTNET_ENVIRONMENT: ${{ inputs.environment }}
+        NuGet__ApiKey: ${{ inputs.nuget-apikey }}
+        NuGet__ShouldPublish: ${{ inputs.publish-packages }}

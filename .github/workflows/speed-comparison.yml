@@ -112,6 +112,8 @@ jobs:
         uses: ./.github/actions/execute-pipeline
         with:
           categories: ReadMe
+          admin-token: ${{ secrets.ADMIN_TOKEN }}
+          environment: Development
 
       - name: Upload Markdown
         uses: actions/upload-artifact@v4

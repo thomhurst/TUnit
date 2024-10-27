@@ -48,6 +48,11 @@ jobs:
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
+        with:
+          admin-token: ${{ secrets.ADMIN_TOKEN }}
+          environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
+          nuget-apikey: ${{ secrets.NUGET__APIKEY }}
+          publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
       
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4.4.3
