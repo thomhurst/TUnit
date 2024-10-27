@@ -8,9 +8,9 @@ internal class TestGrouper
     public GroupedTests OrganiseTests(DiscoveredTest[] testCases)
     {
         var allTestsOrderedByClass = testCases
+            .OrderBy(x => x.TestDetails.Order)
             .GroupBy(x => x.TestDetails.ClassType)
             .SelectMany(x => x)
-            .OrderByDescending(x => x.TestDetails.Order)
             .ToList();
 
         var notInParallel = new Queue<DiscoveredTest>();
