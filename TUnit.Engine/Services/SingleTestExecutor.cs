@@ -431,9 +431,7 @@ internal class SingleTestExecutor(
     {
         foreach (var dependsOnAttribute in testDetails.Attributes.OfType<DependsOnAttribute>())
         {
-            var dependencies = testFinder.GetTestsByNameAndParameters(dependsOnAttribute.TestName,
-                dependsOnAttribute.ParameterTypes, testDetails.ClassType,
-                testDetails.TestClassParameterTypes);
+            var dependencies = GetDependencies(testDetails, dependsOnAttribute);
 
             foreach (var dependency in dependencies)
             {
@@ -452,6 +450,30 @@ internal class SingleTestExecutor(
                 }
             }
         }
+    }
+
+    private TestContext[] GetDependencies(TestDetails testDetails, DependsOnAttribute dependsOnAttribute)
+    {
+        var testsForClass = testFinder.GetTests(dependsOnAttribute.TestClass ?? testDetails.ClassType);
+
+        if (dependsOnAttribute.TestClass == null)
+        {
+            testsForClass = testsForClass
+                .Where(x => x.TestDetails.TestClassArguments.SequenceEqual(testDetails.TestClassArguments));
+        }
+        
+        if (dependsOnAttribute.TestName != null)
+        {
+            testsForClass = testsForClass.Where(x => x.TestDetails.TestName == dependsOnAttribute.TestName);
+        }
+
+        if (dependsOnAttribute.ParameterTypes != null)
+        {
+            testsForClass = testsForClass.Where(x =>
+                x.TestDetails.TestMethodParameterTypes.SequenceEqual(dependsOnAttribute.ParameterTypes));
+        }
+        
+        return testsForClass.ToArray();
     }
 
     private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken)

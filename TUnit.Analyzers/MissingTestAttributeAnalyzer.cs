@@ -30,7 +30,7 @@ public class MissingTestAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
             .Where(x => x.MethodKind == MethodKind.Ordinary)
             .Where(x => !x.IsStatic);
 
-        foreach (var method in methods.Where(x => x.HasDataDrivenAttributes() && !x.IsTestMethod()))
+        foreach (var method in methods.Where(x => x.HasDataDrivenAttributes() && !x.IsTestMethod(context.Compilation)))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MissingTestAttribute,
                 method.Locations.FirstOrDefault())

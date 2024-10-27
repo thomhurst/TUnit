@@ -6,6 +6,29 @@ using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
+public record Chain(IMethodSymbol OriginalMethod)
+{
+    public List<IMethodSymbol> Dependencies { get; } = [];
+    
+    public bool MethodTraversed(IMethodSymbol method) => Dependencies.Contains(method, SymbolEqualityComparer.Default);
+    
+    public bool Any() => Dependencies.Any();
+
+    public void Add(IMethodSymbol dependency)
+    {
+        Dependencies.Add(dependency);
+    }
+
+    public IMethodSymbol[] GetCompleteChain()
+    {
+        return
+        [
+            OriginalMethod,
+            ..Dependencies.TakeUntil(d => SymbolEqualityComparer.Default.Equals(d, OriginalMethod))
+        ];
+    }
+}
+
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
 {
@@ -13,94 +36,130 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(Rules.DependsOnConflicts, Rules.NoMethodFound);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
-        if (context.Symbol is not IMethodSymbol methodSymbol)
-        {
-            return;
-        }
+    {
+        var method = (IMethodSymbol) context.Symbol;
+        
+        AttributeData[] dependsOnAttributes = [..GetDependsOnAttributes(method), ..GetDependsOnAttributes(method.ReceiverType ?? method.ContainingType)];
+        
+        var dependencies = GetDependencies(context, new Chain(method), method, dependsOnAttributes);
 
-        var dependencies = GetDependencies(context, methodSymbol, methodSymbol).ToArray();
-
-        if (!dependencies.Any() || !dependencies.Contains(methodSymbol, SymbolEqualityComparer.Default))
+        if (!dependencies.Any() || !dependencies.MethodTraversed(method))
         {
             return;
         }
         
-        context.ReportDiagnostic(Diagnostic.Create(Rules.DependsOnConflicts, methodSymbol.Locations.FirstOrDefault(), string.Join(" > ", [methodSymbol.Name, ..dependencies.Select(x => x.Name)])));
+        context.ReportDiagnostic(Diagnostic.Create(Rules.DependsOnConflicts,
+            method.Locations.FirstOrDefault(),
+                string.Join(" > ", [..dependencies.GetCompleteChain().Select(x => $"{(x.ReceiverType ?? x.ContainingType).Name}.{x.Name}")])));
     }
 
-    private IEnumerable<IMethodSymbol> GetDependencies(SymbolAnalysisContext context, IMethodSymbol originalMethod, IMethodSymbol methodToGetDependenciesFor)
+    private AttributeData[] GetDependsOnAttributes(ISymbol methodSymbol)
     {
-        if (!methodToGetDependenciesFor.IsTestMethod())
-        {
-            yield break;
-        }
-        
-        var attributes = methodToGetDependenciesFor.GetAttributes();
+        var attributes = methodSymbol.GetAttributes();
 
-        var dependsOnAttributes = attributes.Where(x =>
+        return attributes.Where(x =>
                 x.AttributeClass?.IsOrInherits(WellKnown.AttributeFullyQualifiedClasses.DependsOnAttribute) == true)
             .ToArray();
+    }
+
+    private Chain GetDependencies(SymbolAnalysisContext context, Chain chain,
+        IMethodSymbol methodToGetDependenciesFor, AttributeData[] dependsOnAttributes)
+    {
+        if (!methodToGetDependenciesFor.IsTestMethod(context.Compilation))
+        {
+            return chain;
+        }
 
         if (!dependsOnAttributes.Any())
         {
-            yield break;
-        }
-
-        var dependencyNames = dependsOnAttributes.Select(x => x.ConstructorArguments.First().Value).OfType<string>().ToArray();
-        var parameterTypesArray = dependsOnAttributes.Select(x =>
-        {
-            var parameterArgs = x.ConstructorArguments.ElementAtOrDefault(1);
-            return parameterArgs.Kind == TypedConstantKind.Array ? parameterArgs.Values.Select(tc => (INamedTypeSymbol)tc.Value!).ToArray() : [];
-        }).ToArray();
-
-        var methods = methodToGetDependenciesFor.ReceiverType?.GetMembers().OfType<IMethodSymbol>().ToArray() ?? [];
-
-        if (!methods.Any())
-        {
-            foreach (var dependsOnAttribute in dependsOnAttributes)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMethodFound, dependsOnAttribute.GetLocation()));
-            }
-
-            yield break;
+            return chain;
         }
         
-        for (var i = 0; i < dependencyNames.Length; i++)
+        foreach (var dependsOnAttribute in dependsOnAttributes)
         {
-            var name = dependencyNames.ElementAtOrDefault(i);
-            var parameterTypes = parameterTypesArray.ElementAtOrDefault(i) ?? [];
+            var dependencyType = dependsOnAttribute.ConstructorArguments
+                                     .FirstOrNull(x => x.Kind == TypedConstantKind.Type)?.Value as INamedTypeSymbol
+                                 ?? methodToGetDependenciesFor.ReceiverType
+                                 ?? methodToGetDependenciesFor.ContainingType;
 
-            var foundDependency = methods.SingleOrDefault(x => x.Name == name)
-                                  ?? methods.FirstOrDefault(x => x.Name == name && x.Parameters.Select(p => p.Type).SequenceEqual(parameterTypes, SymbolEqualityComparer.Default));
+            var dependencyMethodName = dependsOnAttribute.ConstructorArguments
+                .FirstOrNull(x => x.Kind == TypedConstantKind.Primitive)?.Value as string;
 
-            if (foundDependency == null)
+            var dependencyParameterTypes = dependsOnAttribute.ConstructorArguments
+                .FirstOrNull(x => x.Kind == TypedConstantKind.Array)
+                ?.Values
+                .Select(x => (INamedTypeSymbol)x.Value!)
+                .ToArray();
+
+            var methods = dependencyType.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(x => x.MethodKind == MethodKind.Ordinary)
+                .ToArray();
+
+            if (!methods.Any())
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMethodFound, dependsOnAttributes[i].GetLocation()));
-                continue;
+                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMethodFound, dependsOnAttribute.GetLocation()));
+
+                return chain;
             }
 
-            yield return foundDependency;
-            
-            if (SymbolEqualityComparer.Default.Equals(originalMethod, foundDependency))
+            var foundDependencies = FilterMethods(dependencyMethodName, methods, dependencyParameterTypes);
+
+            if (!foundDependencies.Any())
             {
-                yield break;
+                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMethodFound, dependsOnAttribute.GetLocation()));
+                return chain;
             }
-            
-            foreach (var nestedDependency in GetDependencies(context, originalMethod, foundDependency))
+
+            foreach (var foundDependency in foundDependencies)
             {
-                yield return nestedDependency;
-                
-                if (SymbolEqualityComparer.Default.Equals(originalMethod, nestedDependency))
+                if (chain.MethodTraversed(foundDependency))
                 {
-                    yield break;
+                    chain.Add(foundDependency);
+                    return chain;
+                }
+                
+                chain.Add(foundDependency);
+
+                var nestedChain = GetDependencies(context, chain, foundDependency, [..GetDependsOnAttributes(foundDependency), ..GetDependsOnAttributes(foundDependency.ReceiverType ?? foundDependency.ContainingType)]);
+                
+                foreach (var nestedDependency in nestedChain.Dependencies)
+                {
+                    if (chain.MethodTraversed(nestedDependency))
+                    {
+                        chain.Add(nestedDependency);
+                        return chain;
+                    }
+                    
+                    chain.Add(nestedDependency);
                 }
             }
         }
+
+        return chain;
+    }
+
+    private static IMethodSymbol[] FilterMethods(string? dependencyMethodName, IMethodSymbol[] methods,
+        INamedTypeSymbol[]? dependencyParameterTypes)
+    {
+        if (dependencyMethodName == null)
+        {
+            return methods;
+        }
+        
+        var filtered = methods.Where(x => x.Name == dependencyMethodName);
+
+        if (dependencyParameterTypes != null)
+        {
+            filtered = filtered.Where(x => x.Parameters.Select(p => p.Type)
+                .SequenceEqual(dependencyParameterTypes, SymbolEqualityComparer.Default));
+        }
+        
+        return filtered.ToArray();
     }
 }

@@ -37,7 +37,7 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!namedTypeSymbol.IsTestClass())
+        if (!namedTypeSymbol.IsTestClass(context.Compilation))
         {
             return;
         }

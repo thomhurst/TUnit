@@ -28,12 +28,100 @@ public class DependsOnConflictAnalyzerTests
 
         var expected = Verifier
             .Diagnostic(Rules.DependsOnConflicts)
-            .WithMessage("DependsOn Conflicts: Test > Test2 > Test")
+            .WithMessage("DependsOn Conflicts: MyClass.Test > MyClass.Test2 > MyClass.Test")
             .WithLocation(0);
         
         var expected2 = Verifier
             .Diagnostic(Rules.DependsOnConflicts)
-            .WithMessage("DependsOn Conflicts: Test2 > Test > Test2")
+            .WithMessage("DependsOn Conflicts: MyClass.Test2 > MyClass.Test > MyClass.Test2")
+            .WithLocation(1);
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected, expected2).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Direct_Conflict_Other_Class_Raises_Error()
+    {
+        const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Core;
+
+                            [DependsOn(typeof(MyClass2))]
+                            public class MyClass1
+                            {
+                                [Test]
+                                public void {|#0:Test|}()
+                                {
+                                }
+
+                                [Test]
+                                public void {|#1:Test2|}()
+                                {
+                                }
+                            }
+                            
+                            [DependsOn(typeof(MyClass1))]
+                            public class MyClass2
+                            {
+                                [Test]
+                                public void {|#2:Test|}()
+                                {
+                                }
+                                                                
+                                [Test]
+                                public void {|#3:Test2|}()
+                                {
+                                }
+                            }
+                            """;
+
+        var expected = Verifier
+            .Diagnostic(Rules.DependsOnConflicts)
+            .WithMessage("DependsOn Conflicts: MyClass1.Test > MyClass2.Test > MyClass1.Test")
+            .WithLocation(0);
+        
+        var expected2 = Verifier
+            .Diagnostic(Rules.DependsOnConflicts)
+            .WithMessage("DependsOn Conflicts: MyClass2.Test > MyClass1.Test > MyClass2.Test")
+            .WithLocation(2);
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected, expected2).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Direct_Conflict_Other_Class_Raises_Error2()
+    {
+        const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Core;
+
+                            public class MyClass1
+                            {
+                                [DependsOn(typeof(MyClass2), nameof(MyClass2.Test2))]
+                                [Test]
+                                public void {|#0:Test|}()
+                                {
+                                }
+                            }
+
+                            public class MyClass2
+                            {
+                                [DependsOn(typeof(MyClass1), nameof(MyClass1.Test))]
+                                [Test]
+                                public void {|#1:Test2|}()
+                                {
+                                }
+                            }
+                            """;
+
+        var expected = Verifier
+            .Diagnostic(Rules.DependsOnConflicts)
+            .WithMessage("DependsOn Conflicts: MyClass1.Test > MyClass2.Test2 > MyClass1.Test")
+            .WithLocation(0);
+        
+        var expected2 = Verifier
+            .Diagnostic(Rules.DependsOnConflicts)
+            .WithMessage("DependsOn Conflicts: MyClass2.Test2 > MyClass1.Test > MyClass2.Test2")
             .WithLocation(1);
         
         await Verifier.VerifyAnalyzerAsync(text, expected, expected2).ConfigureAwait(false);
@@ -106,27 +194,27 @@ public class DependsOnConflictAnalyzerTests
 
         var expected = Verifier
             .Diagnostic(Rules.DependsOnConflicts)
-            .WithMessage("DependsOn Conflicts: Test > Test5 > Test4 > Test3 > Test2 > Test")
+            .WithMessage("DependsOn Conflicts: MyClass.Test > MyClass.Test5 > MyClass.Test4 > MyClass.Test3 > MyClass.Test2 > MyClass.Test")
             .WithLocation(0);
         
         var expected2 = Verifier
             .Diagnostic(Rules.DependsOnConflicts)
-            .WithMessage("DependsOn Conflicts: Test2 > Test > Test5 > Test4 > Test3 > Test2")
+            .WithMessage("DependsOn Conflicts: MyClass.Test2 > MyClass.Test > MyClass.Test5 > MyClass.Test4 > MyClass.Test3 > MyClass.Test2")
             .WithLocation(1);
         
         var expected3 = Verifier
             .Diagnostic(Rules.DependsOnConflicts)
-            .WithMessage("DependsOn Conflicts: Test3 > Test2 > Test > Test5 > Test4 > Test3")
+            .WithMessage("DependsOn Conflicts: MyClass.Test3 > MyClass.Test2 > MyClass.Test > MyClass.Test5 > MyClass.Test4 > MyClass.Test3")
             .WithLocation(2);
         
         var expected4 = Verifier
             .Diagnostic(Rules.DependsOnConflicts)
-            .WithMessage("DependsOn Conflicts: Test4 > Test3 > Test2 > Test > Test5 > Test4")
+            .WithMessage("DependsOn Conflicts: MyClass.Test4 > MyClass.Test3 > MyClass.Test2 > MyClass.Test > MyClass.Test5 > MyClass.Test4")
             .WithLocation(3);
         
         var expected5 = Verifier
             .Diagnostic(Rules.DependsOnConflicts)
-            .WithMessage("DependsOn Conflicts: Test5 > Test4 > Test3 > Test2 > Test > Test5")
+            .WithMessage("DependsOn Conflicts: MyClass.Test5 > MyClass.Test4 > MyClass.Test3 > MyClass.Test2 > MyClass.Test > MyClass.Test5")
             .WithLocation(4);
         
         await Verifier.VerifyAnalyzerAsync(text, expected, expected2, expected3, expected4, expected5).ConfigureAwait(false);

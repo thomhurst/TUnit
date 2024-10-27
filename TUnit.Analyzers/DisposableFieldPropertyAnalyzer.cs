@@ -27,7 +27,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var field = (IFieldSymbol) context.SemanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables[0])!;
 
-        if (!field.ContainingType.IsTestClass())
+        if (!field.ContainingType.IsTestClass(context.Compilation))
         {
             return;
         }
@@ -89,7 +89,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var property = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration)!;
 
-        if (!property.ContainingType.IsTestClass())
+        if (!property.ContainingType.IsTestClass(context.Compilation))
         {
             return;
         }

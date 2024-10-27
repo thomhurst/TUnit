@@ -33,12 +33,12 @@ public static class TypeExtensions
             .Any(x => x.GloballyQualified() == typeName);
     }
     
-    public static bool IsTestClass(this INamedTypeSymbol namedTypeSymbol)
+    public static bool IsTestClass(this INamedTypeSymbol namedTypeSymbol, Compilation compilation)
     {
         return namedTypeSymbol
             .GetMembers()
             .OfType<IMethodSymbol>()
-            .Any(x => x.IsTestMethod());
+            .Any(x => x.IsTestMethod(compilation));
     }
     
     public static bool IsEnumerable(this ITypeSymbol type, SymbolAnalysisContext context, [NotNullWhen(true)] out ITypeSymbol? innerType)

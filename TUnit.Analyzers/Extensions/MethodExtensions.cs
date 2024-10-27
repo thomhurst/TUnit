@@ -5,9 +5,10 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class MethodExtensions
 {
-    public static bool IsTestMethod(this IMethodSymbol methodSymbol)
+    public static bool IsTestMethod(this IMethodSymbol methodSymbol, Compilation compilation)
     {
-        return methodSymbol.GetAttributes().Any(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.Test);
+        var testAttribute = compilation.GetTypeByMetadataName("TUnit.Core.TestAttribute")!;
+        return methodSymbol.GetAttributes().Any(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, testAttribute));
     }
     
     public static bool IsHookMethod(this IMethodSymbol methodSymbol)

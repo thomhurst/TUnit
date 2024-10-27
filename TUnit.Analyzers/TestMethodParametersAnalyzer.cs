@@ -26,7 +26,7 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (methodSymbol.IsAbstract || !methodSymbol.IsTestMethod())
+        if (methodSymbol.IsAbstract || !methodSymbol.IsTestMethod(context.Compilation))
         {
             return;
         }

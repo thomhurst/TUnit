@@ -37,7 +37,7 @@ public class InheritsTestsAnalyzer : ConcurrentDiagnosticAnalyzer
             .SelectMany(x => x.GetMembers())
             .OfType<IMethodSymbol>();
 
-        if (methods.Any(x => x.IsTestMethod()))
+        if (methods.Any(x => x.IsTestMethod(context.Compilation)))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.DoesNotInheritTestsWarning,
                 namedTypeSymbol.Locations.FirstOrDefault())
