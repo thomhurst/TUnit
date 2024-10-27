@@ -7,17 +7,38 @@ namespace TUnit.Core;
 
 internal static class RunHelpers
 {
-    internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan? timeout, EngineCancellationToken engineCancellationToken)
+    internal static async Task RunWithTimeoutAsync(Func<CancellationToken, Task> taskDelegate, TimeSpan? timeout, CancellationToken token)
     {
-        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(engineCancellationToken.Token);
+        using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
 
         var cancellationToken = cancellationTokenSource.Token;
 
         var taskCompletionSource = new TaskCompletionSource();
 
-        var task = taskDelegate(cancellationToken);
+        await using var cancellationTokenRegistration = cancellationToken.Register(() =>
+        {
+            if (token.IsCancellationRequested)
+            {
+                taskCompletionSource.TrySetException(new TestRunCanceledException());
+                return;
+            }
 
-        _ = task.ContinueWith(async t =>
+            if (timeout.HasValue)
+            {
+                taskCompletionSource.TrySetException(new TimeoutException(timeout.Value));
+            }
+            else
+            {
+                taskCompletionSource.TrySetCanceled(cancellationToken);
+            }
+        });
+        
+        if (timeout != null)
+        {
+            cancellationTokenSource.CancelAfter(timeout.Value);
+        }
+        
+        _ = taskDelegate(cancellationToken).ContinueWith(async t =>
         {
             try
             {
@@ -30,37 +51,7 @@ internal static class RunHelpers
             }
         }, CancellationToken.None);
 
-        CancellationTokenRegistration? cancellationTokenRegistration = null;
-        if (cancellationToken.CanBeCanceled)
-        {
-            cancellationTokenRegistration = cancellationToken.Register(() =>
-            {
-                if (engineCancellationToken.Token.IsCancellationRequested)
-                {
-                    taskCompletionSource.TrySetException(new TestRunCanceledException());
-                    return;
-                }
-
-                if (timeout.HasValue)
-                {
-                    taskCompletionSource.TrySetException(new TimeoutException(timeout.Value));
-                }
-                else
-                {
-                    taskCompletionSource.TrySetCanceled(cancellationToken);
-                }
-            });
-        }
-
-        if (timeout != null)
-        {
-            cancellationTokenSource.CancelAfter(timeout.Value);
-        }
-
-        await using (cancellationTokenRegistration)
-        {
-            await taskCompletionSource.Task;
-        }
+        await taskCompletionSource.Task;
     }
     
     [StackTraceHidden]

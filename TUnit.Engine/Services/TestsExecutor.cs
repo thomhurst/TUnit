@@ -19,6 +19,9 @@ internal class TestsExecutor
     private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly EngineCancellationToken _engineCancellationToken;
+    
+    private readonly Counter _executionCounter = new();
+    private readonly TaskCompletionSource _onFinished = new();
 
     private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
 #if NET9_0_OR_GREATER
@@ -40,16 +43,37 @@ internal class TestsExecutor
         _engineCancellationToken = engineCancellationToken;
 
         _maximumParallelTests = GetParallelTestsLimit();
+
+        _executionCounter.OnCountChanged += (sender, count) =>
+        {
+            if (count == 0)
+            {
+                _onFinished.TrySetResult();
+            }
+        };
     }
 
     public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter,  ExecuteRequestContext context)
     {
-        await ProcessParallelTests(tests.Parallel, filter, context);
+        await using var _ = _engineCancellationToken.Token.Register(() => _onFinished.TrySetCanceled());
 
-        await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context);
+        try
+        {
+            _executionCounter.Increment();
+            
+            await ProcessParallelTests(tests.Parallel, filter, context);
 
-        await ProcessNotInParallelTests(tests.NotInParallel, filter, context);
+            await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context);
+
+            await ProcessNotInParallelTests(tests.NotInParallel, filter, context);
+        }
+        finally
+        {
+            _executionCounter.Decrement();
+        }
     }
+    
+    public Task WaitForFinishAsync() => _onFinished.Task;
 
     private async Task ProcessNotInParallelTests(Queue<DiscoveredTest> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {

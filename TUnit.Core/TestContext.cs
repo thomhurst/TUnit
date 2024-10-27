@@ -1,26 +1,30 @@
-﻿using TUnit.Core.Interfaces;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public partial class TestContext : Context, IDisposable
 {
-    internal readonly IServiceProvider ServiceProvider;
+    private readonly IServiceProvider _serviceProvider;
 
-    internal ITestFinder TestFinder => (ITestFinder) ServiceProvider.GetService(typeof(ITestFinder))!;
+    internal T GetService<T>() => (T) _serviceProvider.GetService(typeof(T))!;
     
     internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
+    internal readonly List<CancellationToken> LinkedCancellationTokens = [];
+    internal readonly TestMetadata OriginalMetadata;
+    
 #if NET9_0_OR_GREATER
     public readonly Lock Lock = new();
 #else
     public readonly object Lock = new();
 #endif
 
-    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, Dictionary<string, object?> objectBag)
+    internal bool ReportResult = true;
+    
+    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestMetadata originalMetadata)
     {
-        ServiceProvider = serviceProvider;
+        _serviceProvider = serviceProvider;
+        OriginalMetadata = originalMetadata;
         TestDetails = testDetails;
-        ObjectBag = objectBag;
+        ObjectBag = originalMetadata.ObjectBag;
     }
     
     public DateTimeOffset? TestStart { get; internal set; }
@@ -38,6 +42,11 @@ public partial class TestContext : Context, IDisposable
     
     public TestResult? Result { get; internal set; }
     internal DiscoveredTest InternalDiscoveredTest { get; set; } = null!;
+
+    public void SuppressReportingResult()
+    {
+        ReportResult = false;
+    }
     
     public void AddArtifact(Artifact artifact)
     {

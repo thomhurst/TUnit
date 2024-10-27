@@ -14,20 +14,10 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         _dataGeneratorMetadata = dataGeneratorMetadata;
-
-        var t = Shared switch
-        {
-            SharedType.None => new T(),
-            SharedType.Globally => TestDataContainer.GetGlobalInstance(() => new T()),
-            SharedType.ForClass => TestDataContainer.GetInstanceForType<T>(dataGeneratorMetadata.TestClassType, () => new T()),
-            SharedType.Keyed => TestDataContainer.GetInstanceForKey(Key, () => new T()),
-            SharedType.ForAssembly => TestDataContainer.GetInstanceForAssembly(dataGeneratorMetadata.TestClassType.Assembly, () => new T()),
-            _ => throw new ArgumentOutOfRangeException()
-        };
         
-        _item = t;
+        _item = ClassDataSources.Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key);
 
-        yield return t;
+        yield return _item;
     }
 
     public async ValueTask OnTestRegistered(TestContext testContext)
@@ -52,8 +42,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     public async ValueTask OnTestEnd(TestContext testContext)
     {
-        await ClassDataSources.OnTestEnd(Shared,
-            Key, _item);
+        await ClassDataSources.OnTestEnd(Shared, Key, _item);
     }
 
     public async ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext)

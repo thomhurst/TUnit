@@ -32,6 +32,8 @@ The instance is shared for every test that also has this setting, and also uses 
 ## Initialization and TearDown
 If you need to do some initialization or teardown for when this object is created/disposed, simply implement the `IAsyncInitializer` and/or `IAsyncDisposable` interfaces
 
+# Example
+
 ```csharp
 public class MyTestClass
 {
@@ -56,4 +58,23 @@ public class MyTestClass
         }
     }
 }
+```
+
+# Class Data Source Overloads
+
+If you are using an overload that supports injecting multiple classes at once (e.g. `ClassDataSource<T1, T2, T3>`) then you should specify multiple SharedTypes in an array and keys where applicable.
+
+E.g.
+
+```csharp
+[Test]
+    [ClassDataSource<Value1, Value2, Value3, Value4, Value5>
+        (
+        Shared = [SharedType.Globally, SharedType.Keyed, SharedType.ForClass, SharedType.Keyed, SharedType.None],
+        Keys = [ "Value2Key", "Value4Key" ]
+        )]
+    public class MyType(Value1 value1, Value2 value2, Value3 value3, Value4 value4, Value5 value5)
+    {
+
+    }
 ```

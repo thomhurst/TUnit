@@ -93,6 +93,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context);
 
+                    // Tests could reschedule separate invocations - This allows us to wait for all invocations
+                    await serviceProvider.TestsExecutor.WaitForFinishAsync();
+
                     await serviceProvider.TestSessionHookOrchestrator.ExecuteAfterHooks();
 
                     foreach (var artifact in testSessionContext.Artifacts)
@@ -156,7 +159,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public Type[] DataTypesProduced { get; } =
     [
-        typeof(TestNodeUpdateMessage),
-        typeof(SessionFileArtifact)
+        typeof(TestNodeUpdateMessage)
     ];
 }

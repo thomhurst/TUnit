@@ -10,7 +10,7 @@ namespace TUnit.Engine.Hooks;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-internal class AssemblyHookOrchestrator(HooksCollector hooksCollector)
+internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector)
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyHookContexts = new();
 
@@ -47,7 +47,7 @@ internal class AssemblyHookOrchestrator(HooksCollector hooksCollector)
         List<Exception> cleanUpExceptions
         )
     {
-        if (!InstanceTracker.IsLastTestForAssembly(assembly))
+        if (!instanceTracker.IsLastTestForAssembly(assembly))
         {
             // Only run one time clean downs when no instances are left!
            return;

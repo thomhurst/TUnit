@@ -72,6 +72,15 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 		    TestExecutor = TestExecutor
 	    };
     }
+
+    public override TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, Task> testMethodFactory)
+    {
+	    return this with
+	    {
+		    TestMethodFactory = (@class, token) => testMethodFactory.Invoke(@class!, token),
+		    ResettableClassFactory = ResettableClassFactory.Clone()
+	    };
+    }
 }
 
 public abstract record TestMetadata
@@ -102,4 +111,6 @@ public abstract record TestMetadata
     
     public abstract TestDetails BuildTestDetails();
     internal abstract DiscoveredTest BuildDiscoveredTest(TestContext testContext);
+
+    public abstract TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, Task> testMethodFactory);
 }

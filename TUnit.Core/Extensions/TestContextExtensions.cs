@@ -11,7 +11,7 @@ public static class TestContextExtensions
     
     public static TestContext[] GetTests(this TestContext context, string testName, Type[] parameterTypes)
     {
-        var tests = context.TestFinder.GetTestsByNameAndParameters(
+        var tests = context.GetService<ITestFinder>().GetTestsByNameAndParameters(
             testName: testName, 
             methodParameterTypes: parameterTypes, 
             classType: context.TestDetails.ClassType, 

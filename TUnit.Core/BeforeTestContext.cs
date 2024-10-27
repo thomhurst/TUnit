@@ -23,4 +23,9 @@ public class BeforeTestContext
     {
         _discoveredTest.HookExecutor = hookExecutor;
     }
+    
+    public void AddLinkedCancellationToken(CancellationToken cancellationToken)
+    {
+        _discoveredTest.TestContext.LinkedCancellationTokens.Add(cancellationToken);
+    }
 }

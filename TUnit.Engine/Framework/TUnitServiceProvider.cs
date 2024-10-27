@@ -44,13 +44,15 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         IMessageBus messageBus,
         IServiceProvider frameworkServiceProvider)
     {
+        Register(context);
+        
         EngineCancellationToken = Register(new EngineCancellationToken());
         
-        LoggerFactory = Register(frameworkServiceProvider.GetLoggerFactory());
+        LoggerFactory = frameworkServiceProvider.GetLoggerFactory();
         
-        OutputDevice = Register(frameworkServiceProvider.GetOutputDevice());
+        OutputDevice = frameworkServiceProvider.GetOutputDevice();
         
-        CommandLineOptions = Register(frameworkServiceProvider.GetCommandLineOptions());
+        CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
 
         Logger = Register(new TUnitFrameworkLogger(extension, OutputDevice, LoggerFactory.CreateLogger<TUnitFrameworkLogger>()));
         
@@ -65,6 +67,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var stringFilter = FilterParser.GetTestFilter(context);
 
         TUnitMessageBus = Register(new TUnitMessageBus(extension, context));
+
+        var instanceTracker = Register(new InstanceTracker());
         
         var hooksCollector = Register(new HooksCollector());
         
@@ -74,40 +78,48 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         
         TestGrouper = Register(new TestGrouper());
         
-        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(hooksCollector));
+        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, hooksCollector));
 
         TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(hooksCollector, stringFilter));
         TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(hooksCollector, AssemblyHookOrchestrator, stringFilter));
         
-        var classHookOrchestrator = Register(new ClassHookOrchestrator(hooksCollector));
+        var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, hooksCollector));
         
         var testHookOrchestrator = Register(new TestHookOrchestrator(hooksCollector));
 
-        var testRegistrar = Register(new TestRegistrar(AssemblyHookOrchestrator, classHookOrchestrator));
+        var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
         TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, LoggerFactory, extension));
         
         TestFinder = Register(new TestsFinder(TestDiscoverer));
         Register<ITestFinder>(TestFinder);
         
-        var disposer = Register(new Disposer(Logger));
+        Disposer = Register(new Disposer(Logger));
+        
         var cancellationTokenSource = Register(EngineCancellationToken.CancellationTokenSource);
         var testInvoker = Register(new TestInvoker(testHookOrchestrator));
         var explicitFilterService = Register(new ExplicitFilterService());
         var parallelLimitProvider = Register(new ParallelLimitProvider());
         var hookMessagePublisher = Register(new HookMessagePublisher(extension, messageBus));
         
-        var singleTestExecutor = Register(new SingleTestExecutor(extension, disposer, cancellationTokenSource, testInvoker,
+        var singleTestExecutor = Register(new SingleTestExecutor(extension, Disposer, cancellationTokenSource, instanceTracker, testInvoker,
             explicitFilterService, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, testHookOrchestrator, TestFinder, TUnitMessageBus, Logger, EngineCancellationToken));
         
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken));
         
         OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
     }
-    
+
+    public Disposer Disposer { get; }
+
     public async ValueTask DisposeAsync()
     {
         await StandardOutConsoleInterceptor.DisposeAsync();
         await StandardErrorConsoleInterceptor.DisposeAsync();
+        
+        foreach (var servicesValue in _services.Values)
+        {
+            await Disposer.DisposeAsync(servicesValue);
+        }
     }
 
     private T Register<T>(T t)

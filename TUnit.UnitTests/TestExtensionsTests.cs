@@ -24,13 +24,13 @@ public class TestExtensionsTests
             .With(x => x.TestClassArguments, [])
             .Create();
 
-        var context = new TestContext(null!, testDetails, []);
+        var context = new TestContext(null!, testDetails, CreateDummyMetadata());
 
         var name = context.GetClassTypeName();
         
         Assert.That(name, Is.EqualTo("TestExtensionsTests"));
     }
-    
+
     [Test]
     public void NestedClass()
     {
@@ -46,11 +46,23 @@ public class TestExtensionsTests
             .With(x => x.TestClassArguments, [])
             .Create();
 
-        var context = new TestContext(null!, testDetails, []);
+        var context = new TestContext(null!, testDetails, CreateDummyMetadata());
 
         var name = context.GetClassTypeName();
         
         Assert.That(name, Is.EqualTo("TestExtensionsTests+InnerClass"));
+    }
+
+    private TestMetadata<TestExtensionsTests> CreateDummyMetadata()
+    {
+        return _fixture.Build<TestMetadata<TestExtensionsTests>>()
+            .Without(x => x.MethodInfo)
+            .Without(x => x.ResettableClassFactory)
+            .Without(x => x.ParallelLimit)
+            .Without(x => x.TestExecutor)
+            .With(x => x.AttributeTypes, [])
+            .With(x => x.DataAttributes, [])
+            .Create();
     }
 
     public class InnerClass;

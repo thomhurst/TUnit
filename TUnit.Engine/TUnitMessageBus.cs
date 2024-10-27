@@ -13,27 +13,32 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
 {
     private readonly SessionUid _sessionSessionUid = context.Request.Session.SessionUid;
 
-    public Task Discovered(TestContext testContext)
+    public async ValueTask Discovered(TestContext testContext)
     {
-        return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(DiscoveredTestNodeStateProperty.CachedInstance)
         ));
     }
     
-    public Task InProgress(TestContext testContext)
+    public async ValueTask InProgress(TestContext testContext)
     {
-        return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(InProgressTestNodeStateProperty.CachedInstance)
         ));
     }
 
-    public Task Passed(TestContext testContext, DateTimeOffset start)
+    public async ValueTask Passed(TestContext testContext, DateTimeOffset start)
     {
-        return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+        if (!testContext.ReportResult)
+        {
+            return;
+        }
+        
+        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(PassedTestNodeStateProperty.CachedInstance)
@@ -43,14 +48,19 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
         ));
     }
 
-    public Task Failed(TestContext testContext, Exception exception, DateTimeOffset start)
+    public async ValueTask Failed(TestContext testContext, Exception exception, DateTimeOffset start)
     {
+        if (!testContext.ReportResult)
+        {
+            return;
+        }
+        
         var timingProperty = GetTimingProperty(testContext, start);
         
         var updateType = GetFailureStateProperty(testContext, exception,
             timingProperty.GlobalTiming.Duration);
         
-        return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(updateType)
@@ -61,11 +71,11 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
         ));
     }
 
-    public Task FailedInitialization(FailedInitializationTest failedInitializationTest)
+    public async ValueTask FailedInitialization(FailedInitializationTest failedInitializationTest)
     {
         var testClass = failedInitializationTest.TestClass;
         
-        return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: new TestNode
                 {
@@ -93,9 +103,9 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
         ));
     }
 
-    public Task Skipped(TestContext testContext, string reason)
+    public async ValueTask Skipped(TestContext testContext, string reason)
     {
-        return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(new SkippedTestNodeStateProperty(reason))
@@ -104,18 +114,18 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
         ));
     }
 
-    public Task Cancelled(TestContext testContext)
+    public async ValueTask Cancelled(TestContext testContext)
     {
-        return context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
+        await context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
             sessionUid: _sessionSessionUid,
             testNode: testContext.ToTestNode()
                 .WithProperty(new CancelledTestNodeStateProperty())
         ));
     }
 
-    public Task SessionArtifact(Artifact artifact)
+    public async ValueTask SessionArtifact(Artifact artifact)
     {
-        return context.MessageBus.PublishAsync(this,
+        await context.MessageBus.PublishAsync(this,
             new SessionFileArtifact(
                 context.Request.Session.SessionUid,
                 artifact.File,
@@ -125,9 +135,9 @@ public class TUnitMessageBus(IExtension extension, ExecuteRequestContext context
         );
     }
     
-    public Task TestArtifact(TestContext testContext, Artifact artifact)
+    public async ValueTask TestArtifact(TestContext testContext, Artifact artifact)
     {
-        return context.MessageBus.PublishAsync(this,
+        await context.MessageBus.PublishAsync(this,
             new TestNodeFileArtifact(
                 context.Request.Session.SessionUid,
                 testContext.ToTestNode(),
