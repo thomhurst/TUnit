@@ -15,7 +15,7 @@ internal static class NewClassWriter
         
         sourceCodeWriter.WriteLine($"var resettableClassFactoryDelegate = () => new ResettableLazy<{typeName}>(() => ");
 
-        sourceCodeWriter.Write($"new {typeName}({argumentsContainer.DataVariables.Select(x => x.Name).ToCommaSeparatedString()})");
+        sourceCodeWriter.WriteLine($"new {typeName}({argumentsContainer.DataVariables.Select(x => x.Name).ToCommaSeparatedString()})");
 
         classPropertiesContainer.WriteObjectInitializer(sourceCodeWriter);
         
