@@ -75,7 +75,7 @@ internal record GeneratedArgumentsContainer : ArgumentsContainer
         
         sourceCodeWriter.WriteLine();
         
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata});;");
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata});");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");
