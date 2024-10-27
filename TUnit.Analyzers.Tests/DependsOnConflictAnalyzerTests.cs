@@ -53,11 +53,80 @@ public class DependsOnConflictAnalyzerTests
                                 public void {|#0:Test|}()
                                 {
                                 }
+
+                                [Test]
+                                public void {|#1:Test2|}()
+                                {
+                                }
+                                
+                                [Test]
+                                public void {|#2:Test3|}()
+                                {
+                                }
+                                
+                                [Test]
+                                public void {|#3:Test4|}()
+                                {
+                                }                                                                
                             }
                             
                             [DependsOn(typeof(MyClass1))]
                             public class MyClass2
                             {
+                                [Test]
+                                public void {|#4:Test|}()
+                                {
+                                }
+                                                                
+                                [Test]
+                                public void {|#5:Test2|}()
+                                {
+                                }
+                                
+                                [Test]
+                                public void {|#6:Test3|}()
+                                {
+                                }
+                                
+                                [Test]
+                                public void {|#7:Test4|}()
+                                {
+                                }                                                                
+                            }
+                            """;
+
+        var expected = Verifier
+            .Diagnostic(Rules.DependsOnConflicts)
+            .WithMessage("DependsOn Conflicts: Test > Test2 > Test")
+            .WithLocation(0);
+        
+        var expected2 = Verifier
+            .Diagnostic(Rules.DependsOnConflicts)
+            .WithMessage("DependsOn Conflicts: Test2 > Test > Test2")
+            .WithLocation(1);
+        
+        await Verifier.VerifyAnalyzerAsync(text, expected, expected2).ConfigureAwait(false);
+    }
+    
+    [Test]
+    public async Task Direct_Conflict_Other_Class_Raises_Error2()
+    {
+        const string text = """
+                            using System.Threading.Tasks;
+                            using TUnit.Core;
+
+                            public class MyClass1
+                            {
+                                [DependsOn(typeof(MyClass2), nameof(MyClass2.Test2))]
+                                [Test]
+                                public void {|#0:Test|}()
+                                {
+                                }
+                            }
+
+                            public class MyClass2
+                            {
+                                [DependsOn(typeof(MyClass1), nameof(MyClass1.Test))]
                                 [Test]
                                 public void {|#1:Test2|}()
                                 {

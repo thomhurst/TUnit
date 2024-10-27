@@ -11,7 +11,7 @@ public class ConflictingDependsOnTests
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
     
-    [Test, DependsOn(nameof(Test1)), DependsOn("Blah")]
+    [Test, DependsOn(nameof(Test1))]
     public async Task Test2()
     {
         await Task.CompletedTask;

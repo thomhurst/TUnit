@@ -28,7 +28,7 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
 
         var methods = namedTypeSymbol.GetMembers().OfType<IMethodSymbol>().ToArray();
         
-        if (!methods.Any(x => x.IsTestMethod()))
+        if (!methods.Any(x => x.IsTestMethod(context.Compilation)))
         {
             return;
         }
@@ -39,7 +39,7 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
                      .Where(x => !x.IsStatic)
                      .Where(x => !x.IsOverride)
                      .Where(x => x.DeclaredAccessibility == Accessibility.Public)
-                     .Where(x => !x.IsTestMethod())
+                     .Where(x => !x.IsTestMethod(context.Compilation))
                      .Where(x => !x.IsHookMethod())
                      .Where(x => !IsDisposableDispose(x))
                      .Where(x => !IsAsyncDisposableDispose(x)))

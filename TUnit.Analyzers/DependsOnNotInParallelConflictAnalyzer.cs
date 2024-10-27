@@ -25,7 +25,7 @@ public class DependsOnNotInParallelConflictAnalyzer : ConcurrentDiagnosticAnalyz
             return;
         }
 
-        if (!methodSymbol.IsTestMethod())
+        if (!methodSymbol.IsTestMethod(context.Compilation))
         {
             return;
         }

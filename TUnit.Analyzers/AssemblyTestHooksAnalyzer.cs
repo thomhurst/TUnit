@@ -64,7 +64,7 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             );
         }
 
-        if (methodSymbol.ContainingType.IsTestClass())
+        if (methodSymbol.ContainingType.IsTestClass(context.Compilation))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.GlobalHooksSeparateClass,
                 context.Symbol.Locations.FirstOrDefault())
