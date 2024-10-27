@@ -9,9 +9,9 @@ using TUnit.Core.SourceGenerator.Models;
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
 [Generator]
-internal class TestHooksGenerator : IIncrementalGenerator
+internal class TestHooksGenerator : GeneratorBase
 {
-    public void Initialize(IncrementalGeneratorInitializationContext context)
+    public override void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var setUpMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
@@ -82,12 +82,9 @@ internal class TestHooksGenerator : IIncrementalGenerator
 
     private void Generate(SourceProductionContext productionContext, IEnumerable<HooksDataModel> hooks)
     {
-        foreach (var groupedByTypeName in hooks.GroupBy(x => x.FullyQualifiedTypeName))
+        foreach (var groupedByTypeName in hooks.GroupBy(x => x.MinimalTypeName))
         {
-            var className =
-                $"Hooks_{groupedByTypeName.Key
-                    .Replace("global::", string.Empty)
-                    .Replace('.', '_')}_{Guid.NewGuid():N}";
+            var className = ToFileNameString($"Hooks_{groupedByTypeName.Key}");
                 
             using var sourceBuilder = new SourceCodeWriter();
 
