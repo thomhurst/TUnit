@@ -15,46 +15,43 @@ internal class TestsGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
                 predicate: static (_, _) => true,
-                transform: static (ctx, _) =>
-                    new TestCollectionDataModel(GetSemanticTargetForTestMethodGeneration(ctx)))
+                transform: static (ctx, _) => GetSemanticTargetForTestMethodGeneration(ctx))
             .Where(static m => m is not null);
         
         var inheritedTests = context.SyntaxProvider
-            .ForAttributeWithMetadataName("TUnit.Core.InheritsTestsAttribute",
+            .ForAttributeWithMetadataName(
+                "TUnit.Core.InheritsTestsAttribute",
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForInheritedTestsGeneration(ctx))
             .Where(static m => m is not null);
         
-        context.RegisterSourceOutput(standardTests, (sourceContext, data) => GenerateTests(sourceContext, data));
+        context.RegisterSourceOutput(standardTests, (sourceContext, data) => GenerateTests(sourceContext, data!));
         context.RegisterSourceOutput(inheritedTests, (sourceContext, data) => GenerateTests(sourceContext, data!, "Inherited_"));
     }
 
-    static IEnumerable<TestSourceDataModel> GetSemanticTargetForTestMethodGeneration(GeneratorAttributeSyntaxContext context)
+    static TestCollectionDataModel? GetSemanticTargetForTestMethodGeneration(GeneratorAttributeSyntaxContext context)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
-            yield break;
+            return null;
         }
 
         if (methodSymbol.ContainingType.IsAbstract)
         {
-            yield break;
+            return null;
         }
 
         if (methodSymbol.IsStatic)
         {
-            yield break;
+            return null;
         }
 
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
-            yield break;
+            return null;
         }
 
-        foreach (var testSourceDataModel in methodSymbol.ParseTestDatas(context, methodSymbol.ContainingType))
-        {
-            yield return testSourceDataModel;
-        }
+        return new TestCollectionDataModel(methodSymbol.ParseTestDatas(context, methodSymbol.ContainingType));
     }
     
     static TestCollectionDataModel? GetSemanticTargetForInheritedTestsGeneration(GeneratorAttributeSyntaxContext context)
