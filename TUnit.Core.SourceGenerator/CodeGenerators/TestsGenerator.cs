@@ -94,6 +94,7 @@ internal class TestsGenerator : IIncrementalGenerator
                      .GroupBy(x => $"{prefix}{x.ClassNameToGenerate}_{Guid.NewGuid():N}"))
         {
             var className = classGrouping.Key;
+            var count = classGrouping.Count();
 
             using var sourceBuilder = new SourceCodeWriter();
 
@@ -117,13 +118,20 @@ internal class TestsGenerator : IIncrementalGenerator
 
             sourceBuilder.WriteLine("public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests()");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine("return");
-            sourceBuilder.WriteLine("[");
-            for (var i = 0; i < classGrouping.Count(); i++)
+            if (count == 1)
             {
-                sourceBuilder.WriteLine($"..Tests{i}(),");
+                sourceBuilder.WriteLine("return Tests0();");
             }
-            sourceBuilder.WriteLine("];");
+            else
+            {
+                sourceBuilder.WriteLine("return");
+                sourceBuilder.WriteLine("[");
+                for (var i = 0; i < count; i++)
+                {
+                    sourceBuilder.WriteLine($"..Tests{i}(),");
+                }
+                sourceBuilder.WriteLine("];");
+            }
             sourceBuilder.WriteLine("}");
 
             var index = 0;
