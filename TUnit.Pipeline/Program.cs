@@ -11,8 +11,8 @@ var fileOption = new Option<string[]>(
     description: "The categories to run.", 
     getDefaultValue: () => [])
 {
-    Arity = ArgumentArity.OneOrMore,
-    AllowMultipleArgumentsPerToken = true
+    Arity = ArgumentArity.ZeroOrMore,
+    AllowMultipleArgumentsPerToken = true,
 };
 
 var rootCommand = new RootCommand("The pipeline for building, testing and packaging TUnit");
