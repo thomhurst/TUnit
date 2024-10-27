@@ -95,7 +95,7 @@ internal class TestsExecutor
     private async Task ProcessGroup(ITestExecutionFilter? filter, ExecuteRequestContext context,
         IEnumerable<NotInParallelTestCase> tests)
     {
-        foreach (var test in tests.OrderBy(x => x.Test.TestDetails.Order))
+        foreach (var test in tests)
         {
             var keys = test.ConstraintKeys;
 
