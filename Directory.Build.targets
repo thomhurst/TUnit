@@ -8,6 +8,10 @@
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
         <IsTestProject>true</IsTestProject>
       </PropertyGroup>
+
+      <PropertyGroup>
+          <DefineConstants Condition="$(RoslynVersion) >= 4.7">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
+      </PropertyGroup>
     
       <ItemGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
         <Using Include="TUnit.Core.HookType" Static="True" />

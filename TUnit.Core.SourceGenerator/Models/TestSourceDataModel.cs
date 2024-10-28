@@ -3,7 +3,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.Models;
 
-internal record TestSourceDataModel
+public record TestSourceDataModel
 {
     public virtual bool Equals(TestSourceDataModel? other)
     {

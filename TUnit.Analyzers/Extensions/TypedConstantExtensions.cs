@@ -2,7 +2,7 @@
 
 namespace TUnit.Analyzers.Extensions;
 
-internal static class TypedConstantExtensions
+public static class TypedConstantExtensions
 {
     public static IEnumerable<object?> SafeGetValues(this TypedConstant typedConstant)
     {

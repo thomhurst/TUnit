@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class HookExecutorHelper
+public static class HookExecutorHelper
 {
     public static string GetHookExecutor(string? hookExecutor)
     {

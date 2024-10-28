@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.SourceGenerator.Models;
 
-internal record TestHookCollectionDataModel(IEnumerable<HooksDataModel> HooksDataModels)
+public record TestHookCollectionDataModel(IEnumerable<HooksDataModel> HooksDataModels)
 {
     public virtual bool Equals(TestHookCollectionDataModel? other)
     {

@@ -1,6 +1,6 @@
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal abstract record BaseContainer
+public abstract record BaseContainer
 {
     public HashSet<Variable> DataAttributesVariables { get; } = [];
     public HashSet<Variable> DataVariables { get; } = [];

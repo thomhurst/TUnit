@@ -2,7 +2,7 @@
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
-internal static class StringExtensions
+public static class StringExtensions
 {
     public static string ReplaceFirstOccurrence(this string source, string find, string replace)
     {

@@ -2,7 +2,7 @@
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
-internal static class SymbolExtensions
+public static class SymbolExtensions
 {
     public static bool HasDataSourceAttribute(this ISymbol symbol)
     {

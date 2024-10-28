@@ -4,7 +4,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal class ClassConstructorRetriever
+public class ClassConstructorRetriever
 {
     public static ArgumentsContainer Parse(AttributeData dataAttribute, int index)
     {

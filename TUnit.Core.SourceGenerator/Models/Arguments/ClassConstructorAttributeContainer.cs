@@ -2,7 +2,7 @@ using TUnit.Core.SourceGenerator.Enums;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal record ClassConstructorAttributeContainer(ArgumentsType ArgumentsType) : ArgumentsContainer(ArgumentsType)
+public record ClassConstructorAttributeContainer(ArgumentsType ArgumentsType) : ArgumentsContainer(ArgumentsType)
 {
     public required string ClassConstructorType { get; init; }
 

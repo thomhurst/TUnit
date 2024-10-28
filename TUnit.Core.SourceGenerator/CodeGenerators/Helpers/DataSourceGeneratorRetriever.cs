@@ -5,7 +5,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class DataSourceGeneratorRetriever
+public static class DataSourceGeneratorRetriever
 {
     public static ArgumentsContainer Parse(
         INamedTypeSymbol namedTypeSymbol, 

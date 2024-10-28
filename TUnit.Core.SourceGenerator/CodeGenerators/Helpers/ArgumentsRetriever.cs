@@ -6,7 +6,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class ArgumentsRetriever
+public static class ArgumentsRetriever
 {
     public static IEnumerable<BaseContainer> GetArguments(GeneratorAttributeSyntaxContext context,
         ImmutableArray<IParameterSymbol> parameters,

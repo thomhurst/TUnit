@@ -7,7 +7,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class MatrixRetriever
+public static class MatrixRetriever
 {
     // We return a List of a List. Inner List is for each test.
     public static IEnumerable<ArgumentsContainer> Parse(GeneratorAttributeSyntaxContext context, ImmutableArray<IParameterSymbol> parameters, ArgumentsType argumentsType)

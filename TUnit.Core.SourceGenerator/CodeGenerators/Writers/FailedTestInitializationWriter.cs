@@ -3,7 +3,7 @@ using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
-internal static class FailedTestInitializationWriter
+public static class FailedTestInitializationWriter
 {
     public static void GenerateFailedTestCode(SourceCodeWriter sourceBuilder,
         TestSourceDataModel testSourceDataModel)

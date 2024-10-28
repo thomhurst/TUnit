@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
-internal static class ParameterExtensions
+public static class ParameterExtensions
 {
     public static bool HasMatrixAttribute(this ImmutableArray<IParameterSymbol> parameterSymbols)
     {

@@ -3,7 +3,7 @@ using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 
-internal static class AssemblyHooksWriter
+public static class AssemblyHooksWriter
 {
     public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel? model)
     {

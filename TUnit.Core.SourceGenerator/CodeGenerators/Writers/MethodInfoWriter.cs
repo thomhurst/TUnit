@@ -2,7 +2,7 @@
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
-internal static class MethodInfoWriter
+public static class MethodInfoWriter
 {
     public static string Write(TestSourceDataModel testSourceDataModel, string methodParameterTypesList)
     {

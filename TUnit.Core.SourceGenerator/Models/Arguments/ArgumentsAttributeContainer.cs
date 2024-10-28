@@ -2,7 +2,7 @@ using TUnit.Core.SourceGenerator.Enums;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal record ArgumentsAttributeContainer(ArgumentsType ArgumentsType, Argument[] Arguments)
+public record ArgumentsAttributeContainer(ArgumentsType ArgumentsType, Argument[] Arguments)
     : ArgumentsContainer(ArgumentsType)
 {
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)

@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class TypedConstantParser
+public static class TypedConstantParser
 {
     public static string? GetTypedConstantValue(SemanticModel semanticModel,
         ExpressionSyntax argumentExpression, ITypeSymbol? parameterType)

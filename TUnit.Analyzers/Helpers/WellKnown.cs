@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Analyzers.Helpers;
 
-internal static class WellKnown
+public static class WellKnown
 {
     public static class AttributeFullyQualifiedClasses
     {

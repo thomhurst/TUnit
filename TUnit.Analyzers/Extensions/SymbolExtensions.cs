@@ -3,7 +3,7 @@ using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;
 
-internal static class SymbolExtensions
+public static class SymbolExtensions
 {
     public static bool HasDataDrivenAttributes(this ISymbol symbol)
     {

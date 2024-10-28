@@ -16,15 +16,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="$(ROSLYN_VERSION).*" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(ROSLYN_VERSION).*" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="PolySharp">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn$(ROSLYN_VERSION)/cs" Visible="false" />
-    <None Remove="compiler-diagnostics.sarif" />
   </ItemGroup>
 </Project>

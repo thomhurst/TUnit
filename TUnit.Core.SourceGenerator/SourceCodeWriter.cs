@@ -3,7 +3,7 @@ using System.Text;
 
 namespace TUnit.Core.SourceGenerator;
 
-internal class SourceCodeWriter : IDisposable
+public class SourceCodeWriter : IDisposable
 {
     private int _tabLevel;
     private readonly StringBuilder _stringBuilder = new();

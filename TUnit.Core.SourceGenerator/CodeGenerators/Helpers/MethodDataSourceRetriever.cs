@@ -7,7 +7,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class MethodDataSourceRetriever
+public static class MethodDataSourceRetriever
 {
     public static ArgumentsContainer ParseMethodData(GeneratorAttributeSyntaxContext context,
         ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
