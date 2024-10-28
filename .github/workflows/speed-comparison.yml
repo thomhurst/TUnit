@@ -108,13 +108,6 @@ jobs:
         run: ${{ matrix.os != 'windows-latest' && 'sudo -E ' || '' }}dotnet run -c Release --allCategories=Build --framework net9.0
         working-directory: "tools/speed-comparison/Tests.Benchmark"
 
-      - name: Generate ReadMe
-        uses: ./.github/actions/execute-pipeline
-        with:
-          categories: ReadMe
-          admin-token: ${{ secrets.ADMIN_TOKEN }}
-          environment: Development
-
       - name: Upload Markdown
         uses: actions/upload-artifact@v4
         if: always()
@@ -122,3 +115,25 @@ jobs:
           name: ${{ matrix.os }}_markdown_build_time
           path: |
             **/BenchmarkDotNet.Artifacts/**
+
+  generate-readme:
+    runs-on: ubuntu-latest
+    needs: [run-time-benchmarks, build-time-benchmarks]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Generate ReadMe
+        uses: ./.github/actions/execute-pipeline
+        with:
+          categories: ReadMe
+          admin-token: ${{ secrets.ADMIN_TOKEN }}
+          environment: Development
