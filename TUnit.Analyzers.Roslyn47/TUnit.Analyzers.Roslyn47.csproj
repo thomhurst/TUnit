@@ -4,6 +4,7 @@
         <RootNamespace>TUnit.Analyzers</RootNamespace>
         <TargetFramework>netstandard2.0</TargetFramework>
         <IsPackable>false</IsPackable>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <RoslynVersion>4.7</RoslynVersion>
     </PropertyGroup>
 
