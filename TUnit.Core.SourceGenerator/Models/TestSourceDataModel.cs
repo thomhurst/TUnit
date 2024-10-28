@@ -36,7 +36,6 @@ internal record TestSourceDataModel
             hashCode = (hashCode * 397) ^ CurrentRepeatAttempt;
             hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
             hashCode = (hashCode * 397) ^ LineNumber;
-            hashCode = (hashCode * 397) ^ HasTimeoutAttribute.GetHashCode();
             hashCode = (hashCode * 397) ^ RepeatLimit;
             return hashCode;
         }
@@ -62,9 +61,7 @@ internal record TestSourceDataModel
     
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
-    
-    public required bool HasTimeoutAttribute { get; init; }
-    
+
     public required int RepeatLimit { get; init; }
     public required string? TestExecutor { get; init; }
     public required string? ParallelLimit { get; init; }
@@ -78,15 +75,13 @@ internal record TestSourceDataModel
 
     public string MethodVariablesWithCancellationToken()
     {
-        var variables = MethodArguments is ArgumentsContainer argumentsContainer
-            ? argumentsContainer.DataVariables
+        var variableNames = MethodArguments is ArgumentsContainer argumentsContainer
+            ? argumentsContainer.DataVariables.Select(x => x.Name)
             : [];
         
-        var variableNames = variables.Select(x => x.Name).ToArray();
-        
-        if (HasTimeoutAttribute)
+        if (MethodParameterTypes.Any(type => type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix))
         {
-            return !variableNames.Any() ? "cancellationToken" : $"{variableNames.ToCommaSeparatedString()}, cancellationToken";
+            variableNames = [..variableNames, "cancellationToken"];
         }
         
         return variableNames.ToCommaSeparatedString();

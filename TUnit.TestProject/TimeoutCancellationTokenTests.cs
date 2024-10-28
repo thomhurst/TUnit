@@ -11,7 +11,13 @@ public class TimeoutCancellationTokenTests
     {
         // Dummy method
     }
-    
+
+    [Test]
+    public async Task DefaultTest(CancellationToken cancellationToken)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+    }
+
     [Test]
     [Timeout(5_000)]
     [Category("Blah")]
