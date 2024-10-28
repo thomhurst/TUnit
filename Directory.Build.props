@@ -10,7 +10,6 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
-    <EnableTrimAnalyzer Condition="'$(TargetFramework)' != 'netstandard2.0'">true</EnableTrimAnalyzer>
     <NoWarn>NU1507;NU1903;CS9107</NoWarn>
   </PropertyGroup>
 
