@@ -38,7 +38,7 @@ public class MethodDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAn
     {
         var attributeClass = attributeData.AttributeClass?.GloballyQualified();
 
-        if (attributeClass == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource)
+        if (attributeClass == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithGlobalPrefix)
         {
             var hasSpecifiedClass = attributeData.ConstructorArguments.Length > 1;
 
@@ -119,7 +119,7 @@ public class MethodDataSourceMatchesConstructorAnalyzer : ConcurrentDiagnosticAn
                 );
             }
         }
-        else if (attributeClass == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource)
+        else if (attributeClass == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource.WithGlobalPrefix)
         {
             var type = attributeData.AttributeClass?.TypeArguments.ElementAtOrDefault(0) ??
                        (INamedTypeSymbol)attributeData.ConstructorArguments.First().Value!;

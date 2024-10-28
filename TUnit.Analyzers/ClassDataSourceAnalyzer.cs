@@ -37,7 +37,7 @@ public class ClassDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (!context.Symbol.GetAttributes().Any(x =>
                 x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource))
+                == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource.WithGlobalPrefix))
         {
             return;
         }
@@ -74,7 +74,7 @@ public class ClassDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         foreach (var attributeData in context.Symbol.GetAttributes().Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                                    == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource))
+                                                                    == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource.WithGlobalPrefix))
         {
             var type = attributeData.ConstructorArguments.FirstOrDefault().Value as INamedTypeSymbol
                        ?? attributeData.AttributeClass!.TypeArguments.First();

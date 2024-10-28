@@ -29,7 +29,7 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         var tests = classMembers
             .OfType<IMethodSymbol>()
             .Where(x => x.GetAttributes()
-                .Any(a => WellKnown.AttributeFullyQualifiedClasses.Test == a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
+                .Any(a => WellKnown.AttributeFullyQualifiedClasses.Test.WithGlobalPrefix == a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
             )
             .ToList();
 

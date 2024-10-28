@@ -38,7 +38,7 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (!context.Symbol.GetAttributes().Any(x =>
                 x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
+                == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithGlobalPrefix))
         {
             return;
         }
@@ -47,7 +47,7 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray<ITypeSymbol> parameterOrPropertyTypeSymbols;
         if (context.Symbol is IMethodSymbol methodSymbol)
         {
-            parameterOrPropertyTypeSymbols = methodSymbol.Parameters.Select(x => x.Type).ToImmutableArray().WithoutTimeoutParameter().ToImmutableArray();
+            parameterOrPropertyTypeSymbols = methodSymbol.Parameters.WithoutTimeoutParameter().Select(x => x.Type).ToImmutableArray();
             testClassType = methodSymbol.ContainingType;
         }
         else if (context.Symbol is INamedTypeSymbol namedTypeSymbol)
@@ -67,7 +67,7 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         foreach (var attributeData in context.Symbol.GetAttributes().Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                                    == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource))
+                                                                    == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithGlobalPrefix))
         {
             var type = attributeData.ConstructorArguments[0].Value as INamedTypeSymbol ?? testClassType;
             var methodName = attributeData.ConstructorArguments[0].Value as string

@@ -167,7 +167,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
         
-        return method.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.AfterAttribute && a.GetHookType() == expectedHookType);
+        return method.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.AfterAttribute.WithGlobalPrefix && a.GetHookType() == expectedHookType);
     }
 
     private static bool IsDisposable(ITypeSymbol type)

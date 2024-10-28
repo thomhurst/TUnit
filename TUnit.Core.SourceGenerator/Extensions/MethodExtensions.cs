@@ -28,6 +28,11 @@ public static class MethodExtensions
     {
         return methodSymbol.GetTestAttribute() != null;
     }
+    
+    public static bool IsHook(this IMethodSymbol methodSymbol, Compilation compilation)
+    {
+        return methodSymbol.GetAttributes().Any(x => x.IsNonGlobalHook(compilation) || x.IsGlobalHook(compilation));
+    }
 
     public static AttributeData[] GetAttributesIncludingClass(this IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
     {

@@ -32,7 +32,7 @@ public class DataDrivenTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
         
         foreach (var argumentsAttribute in attributes.Where(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                                == WellKnown.AttributeFullyQualifiedClasses.Arguments))
+                                                == WellKnown.AttributeFullyQualifiedClasses.Arguments.WithGlobalPrefix))
         {
             CheckAttributeAgainstMethod(context, methodSymbol, argumentsAttribute);
         }

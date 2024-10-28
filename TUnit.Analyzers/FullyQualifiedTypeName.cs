@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.SourceGenerator.Models;
+﻿namespace TUnit.Analyzers;
 
 public record FullyQualifiedTypeName
 {
@@ -11,6 +11,4 @@ public record FullyQualifiedTypeName
     public string WithoutGlobalPrefix { get; }
 
     public string WithGlobalPrefix { get; }
-    
-    public static implicit operator FullyQualifiedTypeName(string name) => new(name);
 }

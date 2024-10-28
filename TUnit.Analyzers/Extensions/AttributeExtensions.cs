@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;
@@ -24,18 +25,24 @@ public static class AttributeExtensions
         return attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
     
-    public static bool IsNonGlobalHook(this AttributeData attributeData)
+    public static bool IsNonGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
-        var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-        return displayString == WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute ||
-               displayString == WellKnown.AttributeFullyQualifiedClasses.AfterAttribute;
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute
+                       .WithoutGlobalPrefix)) ||
+               SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
+                       .WithoutGlobalPrefix));
     }
     
-    public static bool IsGlobalHook(this AttributeData attributeData)
+    public static bool IsGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
-        var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-        return displayString == WellKnown.AttributeFullyQualifiedClasses.BeforeEveryAttribute ||
-               displayString == WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute;
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeEveryAttribute
+                       .WithoutGlobalPrefix)) ||
+               SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute
+                       .WithoutGlobalPrefix));
     }
 
     public static string GetHookType(this AttributeData attributeData)

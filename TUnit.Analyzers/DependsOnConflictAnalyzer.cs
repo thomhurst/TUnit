@@ -63,7 +63,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         return attributes.Where(x =>
-                x.AttributeClass?.IsOrInherits(WellKnown.AttributeFullyQualifiedClasses.DependsOnAttribute) == true)
+                x.AttributeClass?.IsOrInherits(WellKnown.AttributeFullyQualifiedClasses.DependsOnAttribute.WithGlobalPrefix) == true)
             .ToArray();
     }
 
