@@ -13,6 +13,13 @@
     <NoWarn>NU1507;NU1903;CS9107</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Analyzers.Roslyn'))">
+    <AssemblyName>TUnit.Analyzers</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Core.SourceGenerator.Roslyn'))">
+    <AssemblyName>TUnit.Core.SourceGenerator</AssemblyName>
+  </PropertyGroup>
+
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>TUnit.Core</_Parameter1>
