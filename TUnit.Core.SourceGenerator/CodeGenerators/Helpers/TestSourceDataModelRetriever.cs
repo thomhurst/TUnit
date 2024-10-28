@@ -128,8 +128,6 @@ internal static class TestSourceDataModelRetriever
             .SelectMany(x => x.GetAttributes())
             .Where(x => x.IsDataSourceAttribute());
 
-        var hasTimeoutAttribute = allAttributes.Any(x => x.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames.TimeoutAttribute.WithGlobalPrefix) == true);
-
         var methodNonGenericTypes = GetNonGenericTypes(testGenerationContext.MethodSymbol.Parameters,
             testArguments.GetArgumentTypes());
 
@@ -157,7 +155,6 @@ internal static class TestSourceDataModelRetriever
             MethodParameterOrArgumentNonGenericTypes = methodNonGenericTypes.ToArray(),
             MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            HasTimeoutAttribute = hasTimeoutAttribute,
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.ParallelLimiterAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             AttributeTypes = allAttributes.Where(x => !x.IsDataSourceAttribute()).Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(),
