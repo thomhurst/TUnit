@@ -2,7 +2,7 @@
 
 namespace TUnit.Analyzers;
 
-internal static class Rules
+public static class Rules
 {
     private const string UsageCategory = "Usage";
     

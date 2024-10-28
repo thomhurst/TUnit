@@ -15,7 +15,7 @@ namespace TUnit.Pipeline.Modules;
 
 [RunOnlyOnBranch("main")]
 [RunOnLinuxOnly]
-[DependsOn<MergeNuGetFilesModule>]
+[DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
 [DependsOn<GenerateReadMeModule>(IgnoreIfNotRegistered = true)]
 [SkipIfDependabot]

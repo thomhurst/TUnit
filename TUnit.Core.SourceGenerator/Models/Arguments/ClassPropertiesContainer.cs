@@ -3,7 +3,7 @@ using TUnit.Core.SourceGenerator.Enums;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal record ClassPropertiesContainer(
+public record ClassPropertiesContainer(
     IReadOnlyCollection<(IPropertySymbol PropertySymbol, ArgumentsContainer ArgumentsContainer)> InnerContainers)
     : ArgumentsContainer(ArgumentsType.Property)
 {

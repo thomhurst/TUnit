@@ -2,7 +2,7 @@ using TUnit.Core.SourceGenerator.Enums;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal record GeneratedArgumentsContainer : ArgumentsContainer
+public record GeneratedArgumentsContainer : ArgumentsContainer
 {
     public GeneratedArgumentsContainer(ArgumentsType ArgumentsType, int AttributeIndex, string TestClassTypeName, string[] GenericArguments, string AttributeDataGeneratorType) : base(ArgumentsType)
     {

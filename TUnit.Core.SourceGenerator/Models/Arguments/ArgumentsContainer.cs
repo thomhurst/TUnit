@@ -2,7 +2,7 @@
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataAttributeContainer(ArgumentsType)
+public abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataAttributeContainer(ArgumentsType)
 {
     public required bool DisposeAfterTest { get; init; }
 

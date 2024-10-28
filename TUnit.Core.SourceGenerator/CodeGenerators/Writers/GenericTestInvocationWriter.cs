@@ -4,7 +4,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
-internal static class GenericTestInvocationWriter
+public static class GenericTestInvocationWriter
 {
     public static void GenerateTestInvocationCode(SourceCodeWriter sourceBuilder,
         TestSourceDataModel testSourceDataModel)

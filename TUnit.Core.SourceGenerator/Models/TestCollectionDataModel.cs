@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.SourceGenerator.Models;
 
-internal record TestCollectionDataModel(IEnumerable<TestSourceDataModel> TestSourceDataModels)
+public record TestCollectionDataModel(IEnumerable<TestSourceDataModel> TestSourceDataModels)
 {
     public virtual bool Equals(TestCollectionDataModel? other)
     {

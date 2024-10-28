@@ -3,7 +3,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.Models;
 
-internal record TestGenerationContext
+public record TestGenerationContext
 {
     public required AttributeData TestAttribute { get; init; }
     public required INamedTypeSymbol ClassSymbol { get; init; }

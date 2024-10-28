@@ -7,7 +7,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class TestSourceDataModelRetriever
+public static class TestSourceDataModelRetriever
 {
     public static IEnumerable<TestSourceDataModel> ParseTestDatas(this IMethodSymbol methodSymbol,
         GeneratorAttributeSyntaxContext context,

@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
-internal static class TypeExtensions
+public static class TypeExtensions
 {
     public static IEnumerable<ISymbol> GetMembersIncludingBase(this ITypeSymbol namedTypeSymbol, bool reverse = true)
     {

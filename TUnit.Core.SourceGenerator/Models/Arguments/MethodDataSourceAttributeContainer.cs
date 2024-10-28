@@ -2,7 +2,7 @@ using TUnit.Core.SourceGenerator.Enums;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal record MethodDataSourceAttributeContainer(
+public record MethodDataSourceAttributeContainer(
     ArgumentsType ArgumentsType,
     string TestClassTypeName,
     string TypeName,

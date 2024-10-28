@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Analyzers.Extensions;
 
-internal static class EnumerableExtensions
+public static class EnumerableExtensions
 {
     public static T? FirstOrNull<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate) where T : struct
     {

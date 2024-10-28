@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.SourceGenerator.Models;
 
-internal record InheritsTestsDataModel(string MinimalTypeName, IEnumerable<TestSourceDataModel> TestSourceDataModels)
+public record InheritsTestsDataModel(string MinimalTypeName, IEnumerable<TestSourceDataModel> TestSourceDataModels)
 {
     public virtual bool Equals(InheritsTestsDataModel? other)
     {

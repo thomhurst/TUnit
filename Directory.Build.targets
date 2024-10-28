@@ -8,6 +8,11 @@
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
         <IsTestProject>true</IsTestProject>
       </PropertyGroup>
+
+      <PropertyGroup>
+          <DefineConstants Condition="$(RoslynVersion) >= 4.7">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
+          <EnableTrimAnalyzer Condition="'$(TargetFramework)' != 'netstandard2.0'">true</EnableTrimAnalyzer>
+      </PropertyGroup>
     
       <ItemGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
         <Using Include="TUnit.Core.HookType" Static="True" />

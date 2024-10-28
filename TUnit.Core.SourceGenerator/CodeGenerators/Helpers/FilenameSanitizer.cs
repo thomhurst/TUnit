@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class FilenameSanitizer
+public static class FilenameSanitizer
 {
     public static string Sanitize(string filename)
     {

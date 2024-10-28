@@ -7,11 +7,15 @@ public class SelfOrBaseEqualityComparer(Compilation compilation) : EqualityCompa
     public override bool Equals(ITypeSymbol? superType, ITypeSymbol? subType)
     {
         if (compilation.HasImplicitConversion(subType, superType))
+        {
             return true;
+        }
 
         // cannot be valid subType if superType is not named generic type like `IEnumerable<>`
         if (superType is not INamedTypeSymbol { IsGenericType: true } namedType)
+        {
             return false;
+        }
 
         if (subType is IArrayTypeSymbol { ElementType: { } elementType })
         {

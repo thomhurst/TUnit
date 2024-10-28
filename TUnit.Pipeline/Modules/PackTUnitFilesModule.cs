@@ -13,8 +13,6 @@ namespace TUnit.Pipeline.Modules;
 [DependsOnAllModulesInheritingFrom<TestModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
-    private static readonly string[] RoslynVersions = ["4.4", "4.7"];
-    
     protected override async Task<List<PackedProject>?> ExecuteAsync(IPipelineContext context,
         CancellationToken cancellationToken)
     {
@@ -27,29 +25,24 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         
         var packedProjects = new List<PackedProject>();
 
-        foreach (var roslynVersion in RoslynVersions)
+        foreach (var project in projects.Value!)
         {
-            foreach (var project in projects.Value!)
-            {
-                await context.DotNet()
-                    .Pack(
-                        new DotNetPackOptions(project)
-                        {
-                            Properties =
-                            [
-                                new KeyValue("Version", version.SemVer!),
-                                new KeyValue("PackageVersion", packageVersion!),
-                                new KeyValue("AssemblyFileVersion", version.SemVer!),
-                                new KeyValue("IsPackTarget", "true"),
-                                new KeyValue("ROSLYN_VERSION", roslynVersion)
-                            ],
-                            OutputDirectory = $"roslyn-{roslynVersion}",
-                            IncludeSource = true,
-                            Configuration = Configuration.Release,
-                        }, cancellationToken);
+            await context.DotNet()
+                .Pack(
+                    new DotNetPackOptions(project)
+                    {
+                        Properties =
+                        [
+                            new KeyValue("Version", version.SemVer!),
+                            new KeyValue("PackageVersion", packageVersion!),
+                            new KeyValue("AssemblyFileVersion", version.SemVer!),
+                            new KeyValue("IsPackTarget", "true")
+                        ],
+                        IncludeSource = true,
+                        Configuration = Configuration.Release,
+                    }, cancellationToken);
                 
-                packedProjects.Add(new PackedProject(project.NameWithoutExtension, version.SemVer!));
-            }
+            packedProjects.Add(new PackedProject(project.NameWithoutExtension, version.SemVer!));
         }
         
         return packedProjects;

@@ -2,7 +2,7 @@
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
-internal static class SyntaxExtensions
+public static class SyntaxExtensions
 {
     public static ISymbol? GetSymbolInfo(this SyntaxNode syntaxNode, SemanticModel semanticModel)
     {

@@ -7,7 +7,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class TestInformationRetriever
+public static class TestInformationRetriever
 {
     public static int GetRepeatCount(AttributeData[] methodAndClassAttributes)
     {

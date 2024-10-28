@@ -1,6 +1,6 @@
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal record EmptyArgumentsContainer : BaseContainer
+public record EmptyArgumentsContainer : BaseContainer
 {
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {

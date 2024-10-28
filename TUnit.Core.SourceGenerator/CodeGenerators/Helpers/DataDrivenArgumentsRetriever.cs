@@ -7,7 +7,7 @@ using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-internal static class DataDrivenArgumentsRetriever
+public static class DataDrivenArgumentsRetriever
 {
     public static ArgumentsContainer ParseArguments(GeneratorAttributeSyntaxContext context,
         AttributeData argumentAttribute, 

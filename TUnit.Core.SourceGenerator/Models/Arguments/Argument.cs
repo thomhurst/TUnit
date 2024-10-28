@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
-internal record Argument
+public record Argument
 {
     public Argument(string type, string? invocation)
     {

@@ -5,16 +5,19 @@
     <!--suppress MsbuildTargetFrameworkTagInspection -->
     <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net8'">net8.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net9'">net8.0;net9.0</TargetFrameworks>
-
-    <ROSLYN_VERSION Condition="'$(ROSLYN_VERSION)' == ''">4.7</ROSLYN_VERSION>
-    <DefineConstants Condition="$(ROSLYN_VERSION) >= 4.7">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
     
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <NoWarn>NU1507;NU1903;CS9107</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Analyzers.Roslyn'))">
+    <AssemblyName>TUnit.Analyzers</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Core.SourceGenerator.Roslyn'))">
+    <AssemblyName>TUnit.Core.SourceGenerator</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -50,6 +53,10 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageTags>testing;unit;integration;component;test;assert;tester;framework</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RoslynVersion Condition="'$(RoslynVersion)' == ''">4.7</RoslynVersion>
   </PropertyGroup>
 
   <PropertyGroup>

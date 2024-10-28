@@ -4,7 +4,7 @@ using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 
-internal static class GlobalTestHooksWriter
+public static class GlobalTestHooksWriter
 {
     public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model)
     { 
