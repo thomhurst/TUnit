@@ -19,6 +19,7 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<TestNugetPackageModule>]
 [DependsOn<GenerateReadMeModule>(IgnoreIfNotRegistered = true)]
 [SkipIfDependabot]
+[ModuleCategory("ReadMe")]
 public class CommitFilesModule : Module<CommandResult>
 {
     protected override async Task<SkipDecision> ShouldSkip(IPipelineContext context)
