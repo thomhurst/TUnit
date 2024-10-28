@@ -27,7 +27,7 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var onlyOnceAttributes = attributes
-                .Where(x => x.IsNonGlobalHook() && x.GetHookType() == "TUnit.Core.HookType.Class")
+                .Where(x => x.IsNonGlobalHook(context.Compilation) && x.GetHookType() == "TUnit.Core.HookType.Class")
                 .ToList();
 
         if (!onlyOnceAttributes.Any())
@@ -75,13 +75,13 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         foreach (var parameter in methodSymbol.Parameters)
         {
             if (parameter.Type.GloballyQualified() ==
-                WellKnown.AttributeFullyQualifiedClasses.ClassHookContext)
+                WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix)
             {
                 continue;
             }
 
             if (parameter.Type.GloballyQualified() ==
-                WellKnown.AttributeFullyQualifiedClasses.CancellationToken)
+                WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
             {
                 continue;
             }

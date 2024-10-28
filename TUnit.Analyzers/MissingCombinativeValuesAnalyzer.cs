@@ -55,7 +55,7 @@ public class MissingMatrixAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var matrixAttribute = parameterSymbol.GetAttributes().FirstOrDefault(attribute =>
                 attribute.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                == WellKnown.AttributeFullyQualifiedClasses.Matrix);
+                == WellKnown.AttributeFullyQualifiedClasses.Matrix.WithGlobalPrefix);
 
             if (matrixAttribute is null
                 || matrixAttribute.ConstructorArguments.IsDefaultOrEmpty

@@ -45,17 +45,23 @@ public static class AttributeDataExtensions
         return WellKnownFullyQualifiedClassNames.MatrixAttribute.WithGlobalPrefix == displayString;
     }
     
-    public static bool IsNonGlobalHook(this AttributeData attributeData)
+    public static bool IsNonGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
-        var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-        return displayString == WellKnownFullyQualifiedClassNames.BeforeAttribute.WithGlobalPrefix ||
-               displayString == WellKnownFullyQualifiedClassNames.AfterAttribute.WithGlobalPrefix;
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.BeforeAttribute
+                       .WithoutGlobalPrefix))
+               || SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.AfterAttribute
+                       .WithoutGlobalPrefix));
     }
     
-    public static bool IsGlobalHook(this AttributeData attributeData)
+    public static bool IsGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
-        var displayString = attributeData.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-        return displayString == WellKnownFullyQualifiedClassNames.BeforeEveryAttribute.WithGlobalPrefix ||
-               displayString == WellKnownFullyQualifiedClassNames.AfterEveryAttribute.WithGlobalPrefix;
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.BeforeEveryAttribute
+                       .WithoutGlobalPrefix))
+               || SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.AfterEveryAttribute
+                       .WithoutGlobalPrefix));
     }
 }

@@ -33,9 +33,9 @@ public class DependsOnNotInParallelConflictAnalyzer : ConcurrentDiagnosticAnalyz
         var attributes = methodSymbol.GetAttributes();
 
         if (attributes.Any(x =>
-                x.AttributeClass?.IsOrInherits(WellKnown.AttributeFullyQualifiedClasses.NotInParallelAttribute) == true)
+                x.AttributeClass?.IsOrInherits(WellKnown.AttributeFullyQualifiedClasses.NotInParallelAttribute.WithGlobalPrefix) == true)
             && attributes.Any(x =>
-                x.AttributeClass?.IsOrInherits(WellKnown.AttributeFullyQualifiedClasses.DependsOnAttribute) == true))
+                x.AttributeClass?.IsOrInherits(WellKnown.AttributeFullyQualifiedClasses.DependsOnAttribute.WithGlobalPrefix) == true))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.DependsOnNotInParallelConflict, methodSymbol.Locations.FirstOrDefault()));
         }

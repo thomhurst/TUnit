@@ -26,7 +26,7 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
 
         var methodExplicitAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-            == WellKnown.AttributeFullyQualifiedClasses.Explicit);
+            == WellKnown.AttributeFullyQualifiedClasses.Explicit.WithGlobalPrefix);
 
         if (methodExplicitAttribute == null)
         {
@@ -35,7 +35,7 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
         
         var classExplicitAttribute = methodSymbol.ContainingType.GetAttributes()
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                                 == WellKnown.AttributeFullyQualifiedClasses.Explicit);
+                                 == WellKnown.AttributeFullyQualifiedClasses.Explicit.WithGlobalPrefix);
         
         if (classExplicitAttribute == null)
         {

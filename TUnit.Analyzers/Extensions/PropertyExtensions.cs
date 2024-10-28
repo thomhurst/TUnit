@@ -11,7 +11,7 @@ public static class PropertyExtensions
     {
         attributeData = propertySymbol.GetAttributes()
             .FirstOrDefault(x =>
-                x.AttributeClass?.GloballyQualifiedNonGeneric() == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource);
+                x.AttributeClass?.GloballyQualifiedNonGeneric() == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource.WithGlobalPrefix);
 
         return attributeData != null;
     }

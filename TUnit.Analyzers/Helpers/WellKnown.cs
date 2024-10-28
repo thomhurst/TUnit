@@ -4,35 +4,36 @@ internal static class WellKnown
 {
     public static class AttributeFullyQualifiedClasses
     {
-        public static readonly string TimeoutAttribute = GetTypeName("TimeoutAttribute");
-        public static readonly string Explicit = GetTypeName("ExplicitAttribute");
-        public static readonly string Matrix = GetTypeName("MatrixAttribute");
+        public static readonly FullyQualifiedTypeName TimeoutAttribute = GetTypeName("TimeoutAttribute");
+        public static readonly FullyQualifiedTypeName Explicit = GetTypeName("ExplicitAttribute");
+        public static readonly FullyQualifiedTypeName Matrix = GetTypeName("MatrixAttribute");
 
-        public static readonly string BeforeAttribute = GetTypeName("BeforeAttribute");
-        public static readonly string AfterAttribute = GetTypeName("AfterAttribute");
+        public static readonly FullyQualifiedTypeName BeforeAttribute = GetTypeName("BeforeAttribute");
+        public static readonly FullyQualifiedTypeName AfterAttribute = GetTypeName("AfterAttribute");
 
-        public static readonly string BeforeEveryAttribute = GetTypeName("BeforeEveryAttribute");
-        public static readonly string AfterEveryAttribute = GetTypeName("AfterEveryAttribute");
+        public static readonly FullyQualifiedTypeName BeforeEveryAttribute = GetTypeName("BeforeEveryAttribute");
+        public static readonly FullyQualifiedTypeName AfterEveryAttribute = GetTypeName("AfterEveryAttribute");
         
-        public static readonly string Test = GetTypeName("TestAttribute");
-        public static readonly string Arguments = GetTypeName("ArgumentsAttribute");
-        public static readonly string MethodDataSource = GetTypeName("MethodDataSourceAttribute");
-        public static readonly string ClassDataSource = GetTypeName("ClassDataSourceAttribute");
-        public static readonly string ClassConstructor = GetTypeName("ClassConstructorAttribute");
+        public static readonly FullyQualifiedTypeName Test = GetTypeName("TestAttribute");
+        public static readonly FullyQualifiedTypeName Arguments = GetTypeName("ArgumentsAttribute");
+        public static readonly FullyQualifiedTypeName MethodDataSource = GetTypeName("MethodDataSourceAttribute");
+        public static readonly FullyQualifiedTypeName ClassDataSource = GetTypeName("ClassDataSourceAttribute");
+        public static readonly FullyQualifiedTypeName ClassConstructor = GetTypeName("ClassConstructorAttribute");
 
-        public static readonly string TestContext = GetTypeName("TestContext");
-        public static readonly string ClassHookContext = GetTypeName("ClassHookContext");
-        public static readonly string AssemblyHookContext = GetTypeName("AssemblyHookContext");
+        public static readonly FullyQualifiedTypeName TestContext = GetTypeName("TestContext");
+        public static readonly FullyQualifiedTypeName ClassHookContext = GetTypeName("ClassHookContext");
+        public static readonly FullyQualifiedTypeName AssemblyHookContext = GetTypeName("AssemblyHookContext");
 
-        public static readonly string InheritsTestsAttribute = GetTypeName("InheritsTestsAttribute");
+        public static readonly FullyQualifiedTypeName InheritsTestsAttribute = GetTypeName("InheritsTestsAttribute");
 
-        public static readonly string NotInParallelAttribute = GetTypeName("NotInParallelAttribute");
-        public static readonly string DependsOnAttribute = GetTypeName("DependsOnAttribute");
-        public static readonly string CancellationToken = "global::System.Threading.CancellationToken";
+        public static readonly FullyQualifiedTypeName NotInParallelAttribute = GetTypeName("NotInParallelAttribute");
+        public static readonly FullyQualifiedTypeName DependsOnAttribute = GetTypeName("DependsOnAttribute");
         
-        public static readonly string IDataAttribute = GetTypeName("IDataAttribute");
-        public static readonly string IDataSourceGeneratorAttribute = GetTypeName("IDataSourceGeneratorAttribute");
+        public static readonly FullyQualifiedTypeName IDataAttribute = GetTypeName("IDataAttribute");
+        public static readonly FullyQualifiedTypeName IDataSourceGeneratorAttribute = GetTypeName("IDataSourceGeneratorAttribute");
 
-        private static string GetTypeName(string className) => $"global::TUnit.Core.{className}";
+        public static readonly FullyQualifiedTypeName CancellationToken = new("System.Threading.CancellationToken");
+
+        private static FullyQualifiedTypeName GetTypeName(string className) => new($"TUnit.Core.{className}");
     }
 }

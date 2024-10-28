@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <IsTestProject>false</IsTestProject>
-    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
-
+      <PackageReference Include="Microsoft.Playwright" />
+    </ItemGroup>
+    
+    <ItemGroup>
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>

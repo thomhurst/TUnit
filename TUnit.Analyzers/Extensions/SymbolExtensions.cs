@@ -10,7 +10,7 @@ internal static class SymbolExtensions
         var attributes = symbol.GetAttributes();
 
         return attributes.Any(a => a.AttributeClass?.AllInterfaces.Any(x =>
-            x.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataAttribute) == true)
+            x.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataAttribute.WithGlobalPrefix) == true)
                || HasMatrixValues(symbol);
     }
 
@@ -30,6 +30,6 @@ internal static class SymbolExtensions
 
         return parameters.Value.Any(p => p.GetAttributes().Any(a =>
             a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
-            WellKnown.AttributeFullyQualifiedClasses.Matrix));
+            WellKnown.AttributeFullyQualifiedClasses.Matrix.WithGlobalPrefix));
     }
 }

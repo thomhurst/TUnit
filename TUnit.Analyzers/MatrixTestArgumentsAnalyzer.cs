@@ -26,7 +26,7 @@ public class MatrixTestArgumentsAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var matrixAttribute = parameterSymbol.GetAttributes()
             .FirstOrDefault(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
-                        == WellKnown.AttributeFullyQualifiedClasses.Matrix);
+                        == WellKnown.AttributeFullyQualifiedClasses.Matrix.WithGlobalPrefix);
 
         if (matrixAttribute is null)
         {

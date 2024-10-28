@@ -36,7 +36,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var globalHooks = attributes
-            .Where(x => x.IsGlobalHook())
+            .Where(x => x.IsGlobalHook(context.Compilation))
             .ToList();
 
         if (!globalHooks.Any())
@@ -68,19 +68,19 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         foreach (var attributeData in globalHooks)
         {
             if (attributeData.GetHookType() == "TUnit.Core.HookType.Test"
-                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext))
+                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext.WithGlobalPrefix))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
             
             if (attributeData.GetHookType() == "TUnit.Core.HookType.Class"
-                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.ClassHookContext))
+                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
             
             if (attributeData.GetHookType() == "TUnit.Core.HookType.Assembly"
-                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext))
+                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }

@@ -56,7 +56,7 @@ public class GeneratedDataAnalyzer : ConcurrentDiagnosticAnalyzer
             var selfAndBaseTypes = attributeData.AttributeClass?.GetSelfAndBaseTypes() ?? [];
             
             var baseGeneratorAttribute = selfAndBaseTypes
-                .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute));
+                .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithGlobalPrefix));
 
             if (baseGeneratorAttribute is null)
             {

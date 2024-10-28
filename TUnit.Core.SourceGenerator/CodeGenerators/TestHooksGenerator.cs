@@ -256,4 +256,11 @@ public class TestHooksGenerator : IIncrementalGenerator
             _ => throw new ArgumentOutOfRangeException()
         };
     }
+    
+    private static bool IsPartOfCompilation(Compilation compilation, ITypeSymbol x)
+    {
+        var syntaxTree = x.DeclaringSyntaxReferences.FirstOrDefault()?.SyntaxTree;
+        
+        return syntaxTree is not null && compilation.ContainsSyntaxTree(syntaxTree);
+    }
 }
