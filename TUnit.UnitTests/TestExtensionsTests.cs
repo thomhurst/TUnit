@@ -20,7 +20,6 @@ public class TestExtensionsTests
             .Without(x => x.ClassAttributes)
             .Without(x => x.DataAttributes)
             .Without(x => x.TestAttributes)
-            .Without(x => x.ParallelLimit)
             .With(x => x.TestClassArguments, [])
             .Create();
 
@@ -42,7 +41,6 @@ public class TestExtensionsTests
             .Without(x => x.ClassAttributes)
             .Without(x => x.DataAttributes)
             .Without(x => x.TestAttributes)
-            .Without(x => x.ParallelLimit)
             .With(x => x.TestClassArguments, [])
             .Create();
 
