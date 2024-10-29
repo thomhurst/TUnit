@@ -10,20 +10,21 @@ public class GlobalTestHooksAnalyzerTests
     [TestCase("Assembly", "AssemblyHookContext")]
     public async Task Before_No_Error(string hookType, string classType)
     {
-        var text = $$"""
-                            using TUnit.Core;
-                            using static TUnit.Core.HookType;
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
                             
-                            public class Tests
-                            {
-                                [BeforeEvery({{hookType}})]
-                                public static void SetUp({{classType}} context)
-                                {
-                                }
-                            }
-                            """;
-        
-        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+                public class Tests
+                {
+                    [BeforeEvery({{hookType}})]
+                    public static void SetUp({{classType}} context)
+                    {
+                    }
+                }
+                """
+            );
     }
     
     [TestCase("Test", "TestContext")]
@@ -31,19 +32,20 @@ public class GlobalTestHooksAnalyzerTests
     [TestCase("Assembly", "AssemblyHookContext")]
     public async Task After_No_Error(string hookType, string classType)
     {
-        var text = $$"""
-                     using TUnit.Core;
-                     using static TUnit.Core.HookType;
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
                      
-                     public class Tests
-                     {
-                         [AfterEvery({{hookType}})]
-                         public static void CleanUp({{classType}} context)
-                         {
-                         }
-                     }
-                     """;
-        
-        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+                public class Tests
+                {
+                    [AfterEvery({{hookType}})]
+                    public static void CleanUp({{classType}} context)
+                    {
+                    }
+                }
+                """
+            );
     }
 }

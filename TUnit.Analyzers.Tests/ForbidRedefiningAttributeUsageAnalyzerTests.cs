@@ -8,38 +8,41 @@ public class ForbidRedefiningAttributeUsageAnalyzerTests
     [Test]
     public async Task No_Error()
     {
-        const string text = """
-                            using TUnit.Core;
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
 
-                            public class InheritedNotInParallelAttribute : NotInParallelAttribute
-                            {
-                                public InheritedNotInParallelAttribute() : base("Blah")
-                                {
-                                }
-                            }
-                            """;
-        
-        await Verifier.VerifyAnalyzerAsync(text);
+                public class InheritedNotInParallelAttribute : NotInParallelAttribute
+                {
+                    public InheritedNotInParallelAttribute() : base("Blah")
+                    {
+                    }
+                }
+                """
+            );
     }
-    
+
     [Test]
     public async Task AttributeUsage_ReturnsError()
     {
-        const string text = """
-                            using System;
-                            using TUnit.Core;
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using TUnit.Core;
                             
-                            [{|#0:AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)|}]
-                            public class InheritedNotInParallelAttribute : NotInParallelAttribute
-                            {
-                                public InheritedNotInParallelAttribute() : base("Blah")
-                                {
-                                }
-                            }
-                            """;
-        
-        var expected = Verifier.Diagnostic(Rules.DoNotOverrideAttributeUsageMetadata).WithLocation(0);
-        
-        await Verifier.VerifyAnalyzerAsync(text, expected);
+                [{|#0:AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)|}]
+                public class InheritedNotInParallelAttribute : NotInParallelAttribute
+                {
+                    public InheritedNotInParallelAttribute() : base("Blah")
+                    {
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.DoNotOverrideAttributeUsageMetadata).
+                    WithLocation(0)
+            );
     }
 }
