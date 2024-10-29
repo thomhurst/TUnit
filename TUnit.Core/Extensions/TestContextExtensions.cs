@@ -50,7 +50,9 @@ public static class TestContextExtensions
             ..context.TestDetails.DataAttributes,
             ..context.TestDetails.Attributes,
             context.TestDetails.ClassInstance,
-            context.InternalDiscoveredTest.ClassConstructor
+            context.InternalDiscoveredTest.ClassConstructor,
+            ..context.TestDetails.TestClassArguments,
+            ..context.TestDetails.TestMethodArguments
         ];
     }
 }
