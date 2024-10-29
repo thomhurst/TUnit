@@ -156,7 +156,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text);
     }
-    
+
+    [Test]
     [TestCase(true)]
     [TestCase(false)]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Matching_Tuple(bool includeTimeoutToken)
@@ -182,7 +183,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text);
     }
-    
+
+    [Test]
     [TestCase(true)]
     [TestCase(false)]
     public async Task Method_Data_Source_Is_Flagged_When_Tuple_Count_Mismatch(bool includeTimeoutToken)
@@ -212,7 +214,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         
         await Verifier.VerifyAnalyzerAsync(text, expected);
     }
-    
+
+    [Test]
     [TestCase(true)]
     [TestCase(false)]
     public async Task Method_Data_Source_Is_Flagged_When_Non_Matching_Tuple(bool includeTimeoutToken)
@@ -482,49 +485,53 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
-    public async Task Method_Data_Source_Is_Not_Flagged_When_Matches_Parameter_Type_Generic()
+    [TestCase("new int[0]")]
+    [TestCase("\"hello\"")]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Matches_Parameter_Type_Generic(string argument)
     {
-        const string text = """
-                            using System.Collections.Generic;
-                            using TUnit.Core;
+        string text = $$"""
+                      using System.Collections.Generic;
+                      using TUnit.Core;
 
-                            public class MyClass
-                            {
-                                [MethodDataSource(nameof(Data), Arguments = [ new int[0] ])]
-                                public void MyTest(int value)
-                                {
-                                }
-                            
-                                public static T Data<T>(T[] values)
-                                {
-                                    return values[0];
-                                }
-                            }
-                            """;
+                      public class MyClass
+                      {
+                          [MethodDataSource(nameof(Data), Arguments = [ {{argument}} ])]
+                          public void MyTest(int value)
+                          {
+                          }
+                      
+                          public static T Data<T>(T[] values)
+                          {
+                              return values[0];
+                          }
+                      }
+                      """;
 
         await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
     }
 
     [Test]
-    public async Task Method_Data_Source_Is_Not_Flagged_When_Enumerable_Inner_Type_Matches_Parameter_Type_Generic()
+    [TestCase("new int[0]")]
+    [TestCase("\"hello\"")]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Enumerable_Inner_Type_Matches_Parameter_Type_Generic(string argument)
     {
-        const string text = """
-                            using System.Collections.Generic;
-                            using TUnit.Core;
-                            
-                            public class MyClass
-                            {
-                                [MethodDataSource(nameof(Data), Arguments = [ new int[0] ])]
-                                public void MyTest(int value)
-                                {
-                                }
-                            
-                                public static IEnumerable<T> Data<T>(T[] values)
-                                {
-                                    return values;
-                                }
-                            }
-                            """;
+        string text = $$"""
+                      using System.Collections.Generic;
+                      using TUnit.Core;
+                      
+                      public class MyClass
+                      {
+                          [MethodDataSource(nameof(Data), Arguments = [ {{argument}} ])]
+                          public void MyTest(int value)
+                          {
+                          }
+                      
+                          public static IEnumerable<T> Data<T>(T[] values)
+                          {
+                              return values;
+                          }
+                      }
+                      """;
 
         await Verifier.VerifyAnalyzerAsync(text);
     }
