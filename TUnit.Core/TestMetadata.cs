@@ -68,7 +68,6 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 	    {
 		    TestContext = testContext,
 		    TestBody = (classInstance, cancellationToken) => TestMethodFactory(classInstance, cancellationToken),
-		    TestExecutor = TestExecutor
 	    };
     }
 
@@ -96,8 +95,6 @@ public abstract record TestMetadata
     public required object?[] TestClassArguments { get; init; }
     public required object?[] TestMethodArguments { get; init; }
     public required object?[] TestClassProperties { get; init; }
-    
-    public required ITestExecutor TestExecutor { get; init; }
     
     // Need to be referenced statically for AOT
     public required Type[] AttributeTypes { get; init; }
