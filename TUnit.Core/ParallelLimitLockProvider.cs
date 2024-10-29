@@ -3,15 +3,9 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-public class ParallelLimitProvider
+public class ParallelLimitLockProvider
 {
-    private static readonly GetOnlyDictionary<Type, IParallelLimit> Limits = new();
     private static readonly GetOnlyDictionary<Type, SemaphoreSlim> Locks = new();
-
-    public static TParallelLimit GetParallelLimit<TParallelLimit>() where TParallelLimit : IParallelLimit, new()
-    {
-        return (TParallelLimit) Limits.GetOrAdd(typeof(TParallelLimit), _ => new TParallelLimit());
-    }
     
     internal SemaphoreSlim GetLock(IParallelLimit parallelLimit)
     {
