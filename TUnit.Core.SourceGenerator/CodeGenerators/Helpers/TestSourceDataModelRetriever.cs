@@ -140,7 +140,7 @@ public static class TestSourceDataModelRetriever
         {
             TestId = TestInformationRetriever.GetTestId(testGenerationContext),
             MethodName = methodSymbol.Name,
-            FullyQualifiedTypeName = namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            FullyQualifiedTypeName = namedTypeSymbol.GloballyQualified(),
             MinimalTypeName = namedTypeSymbol.Name,
             AssemblyName = namedTypeSymbol.ContainingAssembly.Name,
             Namespace = namedTypeSymbol.ContainingNamespace.Name,
@@ -151,14 +151,14 @@ public static class TestSourceDataModelRetriever
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))],
+            MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.GloballyQualified())],
             MethodParameterOrArgumentNonGenericTypes = methodNonGenericTypes.ToArray(),
             MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.ParallelLimiterAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-            AttributeTypes = allAttributes.Where(x => !x.IsDataSourceAttribute()).Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().Distinct().ToArray(),
-            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).OfType<string>().ToArray(),
+            TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
+            ParallelLimit = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.ParallelLimiterAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
+            AttributeTypes = allAttributes.Where(x => !x.IsDataSourceAttribute()).Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().Distinct().ToArray(),
+            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
         };
     }
