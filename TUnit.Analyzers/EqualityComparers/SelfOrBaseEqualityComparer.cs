@@ -11,7 +11,7 @@ public class SelfOrBaseEqualityComparer(Compilation compilation) : EqualityCompa
             return true;
         }
 
-        if (superType is INamedTypeSymbol { IsGenericType: true } namedType)
+        if (superType is INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ TypeKind: TypeKind.TypeParameter }] } namedType)
         {
             // `IEnumerable<>`
             if (subType is IArrayTypeSymbol { ElementType: { } elementType })
