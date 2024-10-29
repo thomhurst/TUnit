@@ -5,8 +5,6 @@ namespace TUnit.Playwright;
 
 public class PlaywrightTest : WorkerAwareTest
 {
-    internal const string PlaywrightBrowserNameKey = "PlaywrightBrowserName";
-    
     public virtual string BrowserName { get; } = Microsoft.Playwright.BrowserType.Chromium;
     public IBrowserType BrowserType => Playwright[BrowserName];
 
@@ -15,12 +13,10 @@ public class PlaywrightTest : WorkerAwareTest
     public IPlaywright Playwright { get; private set; } = null!;
 
     [Before(HookType.Test)]
-    public async Task PlaywrightSetup(TestContext context)
+    public async Task PlaywrightSetup()
     {
         Playwright = await PlaywrightTask.ConfigureAwait(false);
         Playwright.Selectors.SetTestIdAttribute("data-testid");
-        
-        context.ObjectBag.Add(PlaywrightBrowserNameKey, BrowserName);
     }
 
     public static void SetDefaultExpectTimeout(float timeout) => Microsoft.Playwright.Assertions.SetDefaultExpectTimeout(timeout);
