@@ -118,7 +118,7 @@ internal class SingleTestExecutor(
             {
                 testContext.TaskCompletionSource.SetException(skipTestException);
 
-                await logger.LogInformationAsync($"Skipping {testContext.GetTestDisplayName()}...");
+                await logger.LogInformationAsync($"Skipping {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}...");
 
                 await messageBus.Skipped(testContext, skipTestException.Reason);
 
@@ -353,7 +353,7 @@ internal class SingleTestExecutor(
                     throw;
                 }
 
-                await logger.LogWarningAsync($"{discoveredTest.TestContext.GetTestDisplayName()} failed, retrying... (attempt {i + 1})");
+                await logger.LogWarningAsync($"{discoveredTest.TestContext.GetClassTypeName()}.{discoveredTest.TestContext.GetTestDisplayName()} failed, retrying... (attempt {i + 1})");
                 await logger.LogWarningAsync($"Error was {e.GetType().Name}: {e.Message}");
                 await discoveredTest.ResetTestInstance();
                 discoveredTest.TestContext.CurrentRetryAttempt++;
