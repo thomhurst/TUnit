@@ -19,6 +19,20 @@ TUnit is designed to aid with all testing types:
 
 See here: <https://thomhurst.github.io/TUnit/>
 
+## Modern and Fast
+TUnit leverages source generators to locate and register your tests as opposed to reflection. You'll have a slight bump in build time, but a speedier runtime.
+
+TUnit also builds upon the newer Microsoft.Testing.Platform, whereas most other frameworks you'll have used will use VSTest. The new platform was reconstructed from the ground up to address pain points, be more extensible, and be faster.
+
+## Hooks, Events and Lifecycles
+One of the most powerful parts of TUnit is the information you have available to you because of the source generation and the events you can subscribe to.
+Because tests are constructed at the point of discovery, and not at runtime, you know all your arguments, properties, etc. upfront.
+
+You can then register to be notified about various events such as test registered (scheduled to run in this test session at some point in the future), test started, test finished, etc.
+
+Say we injected an external object into our tests:
+By knowing how many tests are registered, we could count them up, and then on a test end event, we could decrease the count. When hitting 0, we know our object isn't going to be used by any other tests, so we can dispose of it. We know when we can handle the lifecycle, and this prevents it from living till the end of the test session where it could be hanging on to precious resources.
+
 ## IDE
 
 TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the older VSTest platform. Because the infrastructure behind the scenes is new and different, you may need to enable some settings. This should just be a one time thing.
