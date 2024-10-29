@@ -40,9 +40,9 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         );
     }
 
-    public async ValueTask OnTestRegistered(TestRegisterContext testRegisterContext)
+    public async ValueTask OnTestRegistered(TestRegisteredContext testRegisteredContext)
     {
-        var testContext = testRegisterContext.TestContext;
+        var testContext = testRegisteredContext.TestContext;
 
         await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,

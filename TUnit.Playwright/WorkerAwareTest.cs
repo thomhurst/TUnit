@@ -67,7 +67,7 @@ public class WorkerAwareTest : ITestRegisteredEvents
         return TestContext.Current?.Result?.Status is Status.Passed or Status.Skipped;
     }
 
-    public ValueTask OnTestRegistered(TestRegisterContext context)
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         if (UseDefaultParallelLimiter)
         {

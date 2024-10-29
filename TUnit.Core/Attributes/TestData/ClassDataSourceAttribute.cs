@@ -20,10 +20,10 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         yield return _item;
     }
 
-    public async ValueTask OnTestRegistered(TestRegisterContext testRegisterContext)
+    public async ValueTask OnTestRegistered(TestRegisteredContext testRegisteredContext)
     {
         await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
-            testRegisterContext.TestContext,
+            testRegisteredContext.TestContext,
             _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
             Shared,
             Key,

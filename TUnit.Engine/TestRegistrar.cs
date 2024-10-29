@@ -23,7 +23,7 @@ internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrches
 
 			foreach (var testRegisteredEventsObject in testRegisteredEventsObjects)
 			{
-				await testRegisteredEventsObject.OnTestRegistered(new TestRegisterContext(discoveredTest));
+				await testRegisteredEventsObject.OnTestRegistered(new TestRegisteredContext(discoveredTest));
 			}
 		}
 		catch (Exception e)

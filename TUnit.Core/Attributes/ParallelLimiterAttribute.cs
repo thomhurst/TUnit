@@ -6,9 +6,9 @@ namespace TUnit.Core;
 public sealed class ParallelLimiterAttribute<TParallelLimit> : TUnitAttribute, ITestRegisteredEvents
     where TParallelLimit : IParallelLimit, new()
 {
-    public ValueTask OnTestRegistered(TestRegisterContext testRegisterContext)
+    public ValueTask OnTestRegistered(TestRegisteredContext testRegisteredContext)
     {
-        testRegisterContext.SetParallelLimiter(new TParallelLimit());
+        testRegisteredContext.SetParallelLimiter(new TParallelLimit());
         return ValueTask.CompletedTask;
     }
 };

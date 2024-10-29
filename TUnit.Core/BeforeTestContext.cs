@@ -2,9 +2,9 @@
 
 namespace TUnit.Core;
 
-public class TestRegisterContext : BeforeTestContext
+public class TestRegisteredContext : BeforeTestContext
 {
-    internal TestRegisterContext(DiscoveredTest discoveredTest) : base(discoveredTest)
+    internal TestRegisteredContext(DiscoveredTest discoveredTest) : base(discoveredTest)
     {
     }
 
