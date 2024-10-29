@@ -7,7 +7,7 @@ public class ContextTest : BrowserTest
 {
     public IBrowserContext Context { get; private set; } = null!;
 
-    public virtual BrowserNewContextOptions ContextOptions()
+    public virtual BrowserNewContextOptions ContextOptions(TestContext testContext)
     {
         return new()
         {
@@ -17,8 +17,8 @@ public class ContextTest : BrowserTest
     }
 
     [Before(HookType.Test)]
-    public async Task ContextSetup()
+    public async Task ContextSetup(TestContext testContext)
     {
-        Context = await NewContext(ContextOptions()).ConfigureAwait(false);
+        Context = await NewContext(ContextOptions(testContext)).ConfigureAwait(false);
     }
 }

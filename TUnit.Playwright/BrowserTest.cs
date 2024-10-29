@@ -3,16 +3,23 @@ using TUnit.Core;
 
 namespace TUnit.Playwright;
 
-public class BrowserTest(BrowserTypeLaunchOptions options) : PlaywrightTest
+public class BrowserTest : PlaywrightTest
 {
     public BrowserTest() : this(new BrowserTypeLaunchOptions())
     {
     }
-    
-    public IBrowser Browser { get; internal set; } = null!;
-    private readonly List<IBrowserContext> _contexts = new();
 
-    public async Task<IBrowserContext> NewContext(BrowserNewContextOptions? options = null)
+    public BrowserTest(BrowserTypeLaunchOptions options)
+    {
+        _options = options;
+    }
+
+    public IBrowser Browser { get; internal set; } = null!;
+
+    private readonly List<IBrowserContext> _contexts = new();
+    private readonly BrowserTypeLaunchOptions _options;
+
+    public async Task<IBrowserContext> NewContext(BrowserNewContextOptions options)
     {
         var context = await Browser.NewContextAsync(options).ConfigureAwait(false);
         _contexts.Add(context);
@@ -22,7 +29,7 @@ public class BrowserTest(BrowserTypeLaunchOptions options) : PlaywrightTest
     [Before(HookType.Test)]
     public async Task BrowserSetup()
     {
-        var service = await BrowserService.Register(this, Playwright, BrowserType, options).ConfigureAwait(false);
+        var service = await BrowserService.Register(this, Playwright, BrowserType, _options).ConfigureAwait(false);
         Browser = service.Browser;
     }
 
