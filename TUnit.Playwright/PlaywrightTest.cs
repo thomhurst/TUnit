@@ -10,13 +10,19 @@ public class PlaywrightTest : WorkerAwareTest
 
     private static readonly Task<IPlaywright> PlaywrightTask = Microsoft.Playwright.Playwright.CreateAsync();
 
-    public IPlaywright Playwright { get; private set; } = null!;
+    public static IPlaywright Playwright { get; private set; } = null!;
 
-    [Before(HookType.Test)]
-    public async Task PlaywrightSetup()
+    [Before(HookType.TestSession)]
+    public static async Task PlaywrightSetup()
     {
         Playwright = await PlaywrightTask.ConfigureAwait(false);
         Playwright.Selectors.SetTestIdAttribute("data-testid");
+    }
+    
+    [After(HookType.TestSession)]
+    public static void PlaywrightCleanup()
+    {
+        Playwright.Dispose();
     }
 
     public static void SetDefaultExpectTimeout(float timeout) => Microsoft.Playwright.Assertions.SetDefaultExpectTimeout(timeout);
