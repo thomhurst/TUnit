@@ -2,17 +2,12 @@
 
 namespace TUnit.Core.Executors;
 
-public abstract class TestExecutorAttribute : TUnitAttribute
-{
-    public abstract Type TestExecutorType { get; }
-
-    internal TestExecutorAttribute()
-    {
-    }
-}
-
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class TestExecutorAttribute<T> : TestExecutorAttribute where T : ITestExecutor, new()
+public sealed class TestExecutorAttribute<T> : TUnitAttribute, ITestRegisteredEvents where T : ITestExecutor, new()
 {
-    public override Type TestExecutorType { get; } = typeof(T);
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    {
+        context.SetTestExecutor(new T());
+        return ValueTask.CompletedTask;
+    }
 }

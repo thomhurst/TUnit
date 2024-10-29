@@ -35,7 +35,7 @@ internal abstract class DiscoveredTest
     
     public TestDetails TestDetails => TestContext.TestDetails;
     
-    public required ITestExecutor TestExecutor { get; internal set; }
+    public ITestExecutor TestExecutor { get; internal set; } = DefaultExecutor.Instance;
     
     public abstract IClassConstructor? ClassConstructor { get; }
     
