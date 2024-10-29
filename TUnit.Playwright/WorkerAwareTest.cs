@@ -1,11 +1,11 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Playwright;
 
-[ParallelLimiter<DefaultPlaywrightParallelLimiter>]
-public class WorkerAwareTest
+public class WorkerAwareTest : ITestRegisteredEvents
 {
     internal class Worker
     {
@@ -13,6 +13,8 @@ public class WorkerAwareTest
         public int WorkerIndex = Interlocked.Increment(ref _lastWorkedIndex);
         public Dictionary<string, IWorkerService> Services = new();
     }
+    
+    public virtual bool UseDefaultParallelLimiter { get; } = true;
 
     private static readonly ConcurrentStack<Worker> AllWorkers = new();
     private Worker _currentWorker = null!;
@@ -63,5 +65,15 @@ public class WorkerAwareTest
     public bool TestOk()
     {
         return TestContext.Current?.Result?.Status is Status.Passed or Status.Skipped;
+    }
+
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    {
+        if (UseDefaultParallelLimiter)
+        {
+            context.SetParallelLimiter(new DefaultPlaywrightParallelLimiter());
+        }
+        
+        return ValueTask.CompletedTask;
     }
 }

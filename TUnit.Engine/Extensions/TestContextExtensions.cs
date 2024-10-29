@@ -44,7 +44,7 @@ public static class TestContextExtensions
         
         var startTime = DateTimeOffset.UtcNow;
         
-        await testContext.GetService<TestRegistrar>().RegisterInstance(newTest.TestContext,
+        await testContext.GetService<TestRegistrar>().RegisterInstance(newTest,
             onFailureToInitialize: exception => testContext.GetService<ITUnitMessageBus>().Failed(newTest.TestContext, exception, startTime));
         
         _ = testContext.GetService<TestsExecutor>().ExecuteAsync(new GroupedTests

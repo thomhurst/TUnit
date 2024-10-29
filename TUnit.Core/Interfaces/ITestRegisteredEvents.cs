@@ -2,5 +2,5 @@ namespace TUnit.Core.Interfaces;
 
 public interface ITestRegisteredEvents
 {
-    public ValueTask OnTestRegistered(TestContext testContext);
+    public ValueTask OnTestRegistered(TestRegisteredContext context);
 }
