@@ -7,10 +7,12 @@ namespace TUnit.Engine;
 
 internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrchestrator assemblyHookOrchestrator, ClassHookOrchestrator classHookOrchestrator)
 {
-	internal async Task RegisterInstance(TestContext testContext, Func<Exception, ValueTask> onFailureToInitialize)
+	internal async Task RegisterInstance(DiscoveredTest discoveredTest, Func<Exception, ValueTask> onFailureToInitialize)
 	{
 		try
 		{
+			var testContext = discoveredTest.TestContext;
+			
 			var testRegisteredEventsObjects = testContext.GetTestRegisteredEventsObjects();
 
 			var classType = testContext.TestDetails.ClassType;
@@ -21,7 +23,7 @@ internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrches
 
 			foreach (var testRegisteredEventsObject in testRegisteredEventsObjects)
 			{
-				await testRegisteredEventsObject.OnTestRegistered(testContext);
+				await testRegisteredEventsObject.OnTestRegistered(new TestRegisterContext(discoveredTest));
 			}
 		}
 		catch (Exception e)

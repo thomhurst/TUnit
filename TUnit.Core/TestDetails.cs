@@ -67,7 +67,7 @@ public abstract record TestDetails(Type ClassType)
     public required int TestLineNumber { get; init; }
     public string? DisplayName { get; internal set; }
     
-    public required IParallelLimit? ParallelLimit { get; init; }
+    public IParallelLimit? ParallelLimit { get; internal set; }
 
 
     internal bool IsSameTest(TestDetails testDetails) => TestName == testDetails.TestName &&
