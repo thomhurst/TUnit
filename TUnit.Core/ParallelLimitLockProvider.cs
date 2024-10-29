@@ -5,7 +5,7 @@ namespace TUnit.Core;
 
 public class ParallelLimitLockProvider
 {
-    private static readonly GetOnlyDictionary<Type, SemaphoreSlim> Locks = new();
+    private readonly GetOnlyDictionary<Type, SemaphoreSlim> _locks = new();
     
     internal SemaphoreSlim GetLock(IParallelLimit parallelLimit)
     {
@@ -14,6 +14,6 @@ public class ParallelLimitLockProvider
             throw new Exception("Parallel Limit must be positive");
         }
         
-        return Locks.GetOrAdd(parallelLimit.GetType(), _ => new SemaphoreSlim(parallelLimit.Limit, parallelLimit.Limit));
+        return _locks.GetOrAdd(parallelLimit.GetType(), _ => new SemaphoreSlim(parallelLimit.Limit, parallelLimit.Limit));
     }
 }
