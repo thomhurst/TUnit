@@ -71,7 +71,6 @@ public class TestHooksGenerator : IIncrementalGenerator
                 ParameterTypes = methodSymbol.Parameters
                     .Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
                     .ToArray(),
-                HasTimeoutAttribute = methodSymbol.HasTimeoutAttribute(),
                 HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.HookExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
                 Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
                 FilePath = contextAttribute.ConstructorArguments[1].Value?.ToString() ?? string.Empty,

@@ -9,7 +9,6 @@ public record HooksDataModel
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
     public required string[] ParameterTypes { get; init; }
-    public required bool HasTimeoutAttribute { get; init; }
     public required string HookLevel { get; init; }
     public required string? HookExecutor { get; init; }
     
@@ -32,7 +31,7 @@ public record HooksDataModel
             return true;
         }
 
-        return FullyQualifiedTypeName == other.FullyQualifiedTypeName && MinimalTypeName == other.MinimalTypeName && MethodName == other.MethodName && ParameterTypes.SequenceEqual(other.ParameterTypes) && HasTimeoutAttribute == other.HasTimeoutAttribute && HookLevel == other.HookLevel;
+        return FullyQualifiedTypeName == other.FullyQualifiedTypeName && MinimalTypeName == other.MinimalTypeName && MethodName == other.MethodName && ParameterTypes.SequenceEqual(other.ParameterTypes) && HookLevel == other.HookLevel;
     }
 
     public override int GetHashCode()
@@ -43,7 +42,6 @@ public record HooksDataModel
             hashCode = (hashCode * 397) ^ MinimalTypeName.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodName.GetHashCode();
             hashCode = (hashCode * 397) ^ ParameterTypes.GetHashCode();
-            hashCode = (hashCode * 397) ^ HasTimeoutAttribute.GetHashCode();
             hashCode = (hashCode * 397) ^ HookLevel.GetHashCode();
             return hashCode;
         }
