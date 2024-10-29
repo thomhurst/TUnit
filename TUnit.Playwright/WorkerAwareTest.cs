@@ -4,6 +4,7 @@ using TUnit.Core.Enums;
 
 namespace TUnit.Playwright;
 
+[ParallelLimiter<DefaultPlaywrightParallelLimiter>]
 public class WorkerAwareTest
 {
     internal class Worker
