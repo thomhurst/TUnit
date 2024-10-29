@@ -52,7 +52,6 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = TestFilePath,
 			TestLineNumber = TestLineNumber,
-			ParallelLimit = ParallelLimit,
 		};
 
 		foreach (var propertyAttribute in attributes.OfType<PropertyAttribute>())
