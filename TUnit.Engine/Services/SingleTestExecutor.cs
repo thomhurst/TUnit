@@ -353,9 +353,13 @@ internal class SingleTestExecutor(
                     throw;
                 }
 
-                await logger.LogWarningAsync($"{discoveredTest.TestContext.GetClassTypeName()}.{discoveredTest.TestContext.GetTestDisplayName()} failed, retrying... (attempt {i + 1})");
-                await logger.LogWarningAsync($"Error was {e.GetType().Name}: {e.Message}");
+                await logger.LogWarningAsync($"""
+                                              {discoveredTest.TestContext.GetClassTypeName()}.{discoveredTest.TestContext.GetTestDisplayName()} attempt {i + 1} failed, retrying...");
+                                              Error was {e.GetType().Name}: {e.Message}
+                                             """);
+
                 await discoveredTest.ResetTestInstance();
+                
                 discoveredTest.TestContext.CurrentRetryAttempt++;
             }
         }

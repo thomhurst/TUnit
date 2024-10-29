@@ -117,9 +117,9 @@ public static class TestSourceDataModelRetriever
 
         AttributeData[] allAttributes =
         [
-            ..methodSymbol.GetAttributes(),
-            ..namedTypeSymbol.GetAttributesIncludingBaseTypes(),
-            ..namedTypeSymbol.ContainingAssembly.GetAttributes()
+            ..methodSymbol.GetAttributes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime"),
+            ..namedTypeSymbol.GetAttributesIncludingBaseTypes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime"),
+            ..namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime")
         ];
 
         var propertyAttributes = testGenerationContext.PropertyArguments
