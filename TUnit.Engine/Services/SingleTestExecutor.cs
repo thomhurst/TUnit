@@ -9,6 +9,7 @@ using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
@@ -117,7 +118,7 @@ internal class SingleTestExecutor(
             {
                 testContext.TaskCompletionSource.SetException(skipTestException);
 
-                await logger.LogInformationAsync($"Skipping {test.TestDetails.DisplayName}...");
+                await logger.LogInformationAsync($"Skipping {testContext.GetTestDisplayName()}...");
 
                 await messageBus.Skipped(testContext, skipTestException.Reason);
 
@@ -352,7 +353,7 @@ internal class SingleTestExecutor(
                     throw;
                 }
 
-                await logger.LogWarningAsync($"{testInformation.TestName} failed, retrying... (attempt {i + 1})");
+                await logger.LogWarningAsync($"{discoveredTest.TestContext.GetTestDisplayName()} failed, retrying... (attempt {i + 1})");
                 await discoveredTest.ResetTestInstance();
                 discoveredTest.TestContext.CurrentRetryAttempt++;
             }

@@ -13,8 +13,13 @@ internal static class ArgumentFormatter
         {
             return "null";
         }
+
+        if (o is Enum @enum)
+        {
+            return @enum.ToString();
+        }
         
-        if (o.GetType().IsEnum || o.GetType().IsPrimitive || o is string)
+        if (o.GetType().IsPrimitive || o is string)
         {
             return o.ToString()!;
         }
