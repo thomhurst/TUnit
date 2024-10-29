@@ -1,10 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>TUnit.Core.SourceGenerator</RootNamespace>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
-        <IsPackable>false</IsPackable>
-        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <RoslynVersion>4.4</RoslynVersion>
     </PropertyGroup>
 

@@ -1,10 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>TUnit.Analyzers</RootNamespace>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
-        <IsPackable>false</IsPackable>
-        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <RoslynVersion>4.7</RoslynVersion>
     </PropertyGroup>
 
@@ -19,6 +15,7 @@
 
     <ItemGroup>
         <Compile Include="..\TUnit.Analyzers\**\*.cs" Exclude="..\TUnit.Analyzers\obj\**\*.cs" />
+        <EmbeddedResource Include="..\TUnit.Analyzers\**\*.resx" />
     </ItemGroup>
 
 </Project>

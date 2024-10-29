@@ -1,10 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>TUnit.Core.SourceGenerator</RootNamespace>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
-        <IsPackable>false</IsPackable>
-        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <RoslynVersion>4.7</RoslynVersion>
     </PropertyGroup>
     
@@ -19,20 +15,6 @@
 
     <ItemGroup>
         <Compile Include="..\TUnit.Core.SourceGenerator\**\*.cs" Exclude="..\TUnit.Core.SourceGenerator\obj\**\*.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Update="Resources.resx">
-            <Generator>ResXFileCodeGenerator</Generator>
-            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Update="Resources.Designer.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Resources.resx</DependentUpon>
-        </Compile>
     </ItemGroup>
 
 </Project>

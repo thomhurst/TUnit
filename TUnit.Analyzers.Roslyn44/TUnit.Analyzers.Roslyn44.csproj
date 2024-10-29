@@ -1,10 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>TUnit.Analyzers</RootNamespace>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
-        <IsPackable>false</IsPackable>
-        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <RoslynVersion>4.4</RoslynVersion>
     </PropertyGroup>
 
@@ -19,20 +15,7 @@
 
     <ItemGroup>
         <Compile Include="..\TUnit.Analyzers\**\*.cs" Exclude="..\TUnit.Analyzers\obj\**\*.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Update="Resources.resx">
-            <Generator>ResXFileCodeGenerator</Generator>
-            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Update="Resources.Designer.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Resources.resx</DependentUpon>
-        </Compile>
+        <EmbeddedResource Include="..\TUnit.Analyzers\**\*.resx" />
     </ItemGroup>
 
 </Project>

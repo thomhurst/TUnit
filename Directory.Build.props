@@ -14,10 +14,18 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Analyzers.Roslyn'))">
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>TUnit.Analyzers</AssemblyName>
+    <RootNamespace>TUnit.Analyzers</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
   <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Core.SourceGenerator.Roslyn'))">
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>TUnit.Core.SourceGenerator</AssemblyName>
+    <RootNamespace>TUnit.Core.SourceGenerator</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <ItemGroup>
