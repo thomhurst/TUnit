@@ -98,7 +98,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var cancellationTokenSource = Register(EngineCancellationToken.CancellationTokenSource);
         var testInvoker = Register(new TestInvoker(testHookOrchestrator));
         var explicitFilterService = Register(new ExplicitFilterService());
-        var parallelLimitProvider = Register(new ParallelLimitProvider());
+        var parallelLimitProvider = Register(new ParallelLimitLockProvider());
         var hookMessagePublisher = Register(new HookMessagePublisher(extension, messageBus));
         
         var singleTestExecutor = Register(new SingleTestExecutor(extension, Disposer, cancellationTokenSource, instanceTracker, testInvoker,

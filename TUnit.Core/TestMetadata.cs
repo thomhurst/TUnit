@@ -52,7 +52,6 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = TestFilePath,
 			TestLineNumber = TestLineNumber,
-			ParallelLimit = ParallelLimit,
 		};
 
 		foreach (var propertyAttribute in attributes.OfType<PropertyAttribute>())
@@ -99,8 +98,6 @@ public abstract record TestMetadata
     public required object?[] TestClassProperties { get; init; }
     
     public required ITestExecutor TestExecutor { get; init; }
-    
-    public required IParallelLimit? ParallelLimit { get; init; }
     
     // Need to be referenced statically for AOT
     public required Type[] AttributeTypes { get; init; }

@@ -71,7 +71,6 @@ public static class GenericTestInvocationWriter
         sourceBuilder.WriteLine("ResettableClassFactory = resettableClassFactory,");
         sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
         sourceBuilder.WriteLine($"TestExecutor = {GetTestExecutor(testSourceDataModel.TestExecutor)},");
-        sourceBuilder.WriteLine($"ParallelLimit = {GetParallelLimit(testSourceDataModel.ParallelLimit)},");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine($"AttributeTypes = [ {testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})").ToCommaSeparatedString()} ],");
@@ -94,15 +93,5 @@ public static class GenericTestInvocationWriter
         }
 
         return $"new {testExecutor}()";
-    }
-    
-    private static string GetParallelLimit(string? parallelLimit)
-    {
-        if (string.IsNullOrEmpty(parallelLimit))
-        {
-            return "null";
-        }
-
-        return $"TUnit.Core.ParallelLimitProvider.GetParallelLimit<{parallelLimit}>()";
     }
 }

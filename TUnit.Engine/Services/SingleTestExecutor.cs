@@ -25,7 +25,7 @@ internal class SingleTestExecutor(
     InstanceTracker instanceTracker, 
     TestInvoker testInvoker,
     ExplicitFilterService explicitFilterService,
-    ParallelLimitProvider parallelLimitProvider,
+    ParallelLimitLockProvider parallelLimitLockProvider,
     AssemblyHookOrchestrator assemblyHookOrchestrator,
     ClassHookOrchestrator classHookOrchestrator,
     TestHookOrchestrator testHookOrchestrator,
@@ -299,7 +299,7 @@ internal class SingleTestExecutor(
     {
         if (test.TestDetails.ParallelLimit is { } parallelLimit && !isStartedAsDependencyForAnotherTest)
         {
-            return parallelLimitProvider.GetLock(parallelLimit);
+            return parallelLimitLockProvider.GetLock(parallelLimit);
         }
 
         return null;
