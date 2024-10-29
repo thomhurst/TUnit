@@ -33,6 +33,9 @@ You can then register to be notified about various events such as test registere
 Say we injected an external object into our tests:
 By knowing how many tests are registered, we could count them up, and then on a test end event, we could decrease the count. When hitting 0, we know our object isn't going to be used by any other tests, so we can dispose of it. We know when we can handle the lifecycle, and this prevents it from living till the end of the test session where it could be hanging on to precious resources.
 
+## Built in Analyzers
+TUnit tries to help you write your tests correctly with analyzers. If something isn't quite right, an analyzer should tell you what's wrong.
+
 ## IDE
 
 TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the older VSTest platform. Because the infrastructure behind the scenes is new and different, you may need to enable some settings. This should just be a one time thing.
@@ -64,6 +67,23 @@ Visual Studio Code is supported.
 
 ### CLI
 `dotnet` CLI - Fully supported. Tests should be runnable with `dotnet test`, `dotnet run`, `dotnet exec` or executing an executable directly. See the docs for more information!
+
+## Packages
+
+### TUnit.Core
+To be used when you want to define re-useable components, such as a test library, but it wouldn't be run as its own test suite.
+
+### TUnit.Engine
+For test suites. This contains the test execution logic and test adapter. Only install this on actual test projects you intend to run, not class libraries.
+
+### TUnit.Assertions
+This is independent from the framework and can be used wherever - Even in other test frameworks. It is just an assertion library used to assert data is as you expect. It uses an asychronous syntax which may be different to other assertion libraries you may have used.
+
+### TUnit
+This is a helper package to combine the above 3 packages. If you just want a standard test app where you can write, run and assert tests, just install this!
+
+### TUnit.Playwright
+This provides you base classes, similarly to Microsoft.Playwright.NUnit or Microsoft.Playwright.MSTest, to automatically create and dispose of Playwright objects in tests, to make it easier for you to write tests without worrying about lifecycles or disposing. The base classes are named the same as the other libraries: `PageTest`,  `ContextTest`, `BrowserTest`, and `PlaywrightTest`.
 
 ## Features
 
