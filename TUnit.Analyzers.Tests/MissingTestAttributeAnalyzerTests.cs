@@ -8,83 +8,90 @@ public class MissingTestAttributeAnalyzerTests
     [Test]
     public async Task Not_Flagged_When_Test_Attribute()
     {
-        const string text = """
-                            using TUnit.Core;
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
 
-                            public class BaseClass
-                            {
-                                [Test]
-                                [Arguments(1)]
-                                public void Test(int value)
-                                {
-                                }
-                            }
-                            """;
-        
-        await Verifier.VerifyAnalyzerAsync(text);
+                public class BaseClass
+                {
+                    [Test]
+                    [Arguments(1)]
+                    public void Test(int value)
+                    {
+                    }
+                }
+                """
+            );
     }
-    
+
     [Test]
     public async Task Flagged_Error_For_Arguments()
     {
-        const string text = """
-                            using TUnit.Core;
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
                             
-                            public class BaseClass
-                            {
-                                [Arguments(1)]
-                                public void {|#0:Test|}(int value)
-                                {
-                                }
-                            }
-                            """;
+                public class BaseClass
+                {
+                    [Arguments(1)]
+                    public void {|#0:Test|}(int value)
+                    {
+                    }
+                }
+                """,
 
-        var expected = Verifier.Diagnostic(Rules.MissingTestAttribute).WithLocation(0);
-        
-        await Verifier.VerifyAnalyzerAsync(text, expected);
+                Verifier.Diagnostic(Rules.MissingTestAttribute)
+                    .WithLocation(0)
+            );
     }
-    
+
     [Test]
     public async Task Flagged_Error_For_MethodDataSource()
     {
-        const string text = """
-                            using TUnit.Core;
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
 
-                            public class BaseClass
-                            {
-                                [MethodDataSource(nameof(Method))]
-                                public void {|#0:Test|}(int value)
-                                {
-                                }
+                public class BaseClass
+                {
+                    [MethodDataSource(nameof(Method))]
+                    public void {|#0:Test|}(int value)
+                    {
+                    }
                                 
-                                public static int Method() => 1;
-                            }
-                            """;
+                    public static int Method() => 1;
+                }
+                """,
 
-        var expected = Verifier.Diagnostic(Rules.MissingTestAttribute).WithLocation(0);
-        
-        await Verifier.VerifyAnalyzerAsync(text, expected);
+                Verifier.Diagnostic(Rules.MissingTestAttribute)
+                    .WithLocation(0)
+            );
     }
-    
+
     [Test]
     public async Task Flagged_Error_For_ClassDataSource()
     {
-        const string text = """
-                            using TUnit.Core;
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
 
-                            public class BaseClass
-                            {
-                                [ClassDataSource<MyClass>]
-                                public void {|#0:Test|}(MyClass value)
-                                {
-                                }
-                            }
+                public class BaseClass
+                {
+                    [ClassDataSource<MyClass>]
+                    public void {|#0:Test|}(MyClass value)
+                    {
+                    }
+                }
                             
-                            public class MyClass;
-                            """;
+                public class MyClass;
+                """,
 
-        var expected = Verifier.Diagnostic(Rules.MissingTestAttribute).WithLocation(0);
-        
-        await Verifier.VerifyAnalyzerAsync(text, expected);
+                Verifier.Diagnostic(Rules.MissingTestAttribute)
+                    .WithLocation(0)
+            );
     }
 }
