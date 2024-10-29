@@ -480,4 +480,52 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
         await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
     }
+
+    [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Matches_Parameter_Type_Generic()
+    {
+        const string text = """
+                            using System.Collections.Generic;
+                            using TUnit.Core;
+
+                            public class MyClass
+                            {
+                                [MethodDataSource(nameof(Data), Arguments = [ new int[0] ])]
+                                public void MyTest(int value)
+                                {
+                                }
+                            
+                                public static T Data<T>(T[] values)
+                                {
+                                    return values[0];
+                                }
+                            }
+                            """;
+
+        await Verifier.VerifyAnalyzerAsync(text).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Enumerable_Inner_Type_Matches_Parameter_Type_Generic()
+    {
+        const string text = """
+                            using System.Collections.Generic;
+                            using TUnit.Core;
+                            
+                            public class MyClass
+                            {
+                                [MethodDataSource(nameof(Data), Arguments = [ new int[0] ])]
+                                public void MyTest(int value)
+                                {
+                                }
+                            
+                                public static IEnumerable<T> Data<T>(T[] values)
+                                {
+                                    return values;
+                                }
+                            }
+                            """;
+
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
 }

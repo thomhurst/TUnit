@@ -11,22 +11,25 @@ public class SelfOrBaseEqualityComparer(Compilation compilation) : EqualityCompa
             return true;
         }
 
-        // cannot be valid subType if superType is not named generic type like `IEnumerable<>`
-        if (superType is not INamedTypeSymbol { IsGenericType: true } namedType)
+        if (superType is INamedTypeSymbol { IsGenericType: true } namedType)
         {
-            return false;
-        }
+            // `IEnumerable<>`
+            if (subType is IArrayTypeSymbol { ElementType: { } elementType })
+            {
+                var specializedSuper = namedType.OriginalDefinition.Construct(elementType);
+                return compilation.HasImplicitConversion(subType, specializedSuper);
+            }
 
-        if (subType is IArrayTypeSymbol { ElementType: { } elementType })
-        {
-            var specializedSuper = namedType.OriginalDefinition.Construct(elementType);
-            return compilation.HasImplicitConversion(subType, specializedSuper);
+            if (subType is INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ } genericArgument] })
+            {
+                var specializedSuper = namedType.OriginalDefinition.Construct(genericArgument);
+                return compilation.HasImplicitConversion(subType, specializedSuper);
+            }
         }
-
-        if (subType is INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ } genericArgument] })
+        else if (superType is IArrayTypeSymbol { ElementType.Kind: SymbolKind.TypeParameter })
         {
-            var specializedSuper = namedType.OriginalDefinition.Construct(genericArgument);
-            return compilation.HasImplicitConversion(subType, specializedSuper);
+            // `T[]`
+            return true;
         }
 
         return false;

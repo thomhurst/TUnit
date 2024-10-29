@@ -166,6 +166,11 @@ public class MethodDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
+            if (testDataMethodNonEnumerableReturnType.IsGenericDefinition())
+            {
+                return;
+            }
+
             if (testDataMethodNonEnumerableReturnType.IsTupleType)
             {
                 var namedTypeSymbol = (INamedTypeSymbol) testDataMethodNonEnumerableReturnType;
