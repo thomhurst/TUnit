@@ -52,7 +52,8 @@ public static class TestContextExtensions
             context.TestDetails.ClassInstance,
             context.InternalDiscoveredTest.ClassConstructor,
             ..context.TestDetails.TestClassArguments,
-            ..context.TestDetails.TestMethodArguments
+            ..context.TestDetails.TestMethodArguments,
+            ..context.TestDetails.TestClassInjectedPropertyArguments
         ];
     }
 }

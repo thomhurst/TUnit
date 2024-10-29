@@ -39,7 +39,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 			Attributes = attributes,
 			TestClassArguments = TestClassArguments,
 			TestMethodArguments = TestMethodArguments,
-			TestClassProperties = TestClassProperties,
+			TestClassInjectedPropertyArguments = TestClassProperties,
 			TestClassParameterTypes = classType.GetConstructors().FirstOrDefault()?.GetParameters().Select(x => x.ParameterType).ToArray() ?? [],
 			TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
 			NotInParallelConstraintKeys = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.ConstraintKeys,

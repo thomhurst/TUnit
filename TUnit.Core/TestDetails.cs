@@ -26,7 +26,7 @@ public abstract record TestDetails(Type ClassType)
     
     public required Type[] TestClassParameterTypes { get; init; }
     public required object?[] TestClassArguments { get; init; }
-    public required object?[] TestClassProperties { get; init; }
+    public required object?[] TestClassInjectedPropertyArguments { get; init; }
     
     public required IReadOnlyList<string> Categories { get; init; }
     
