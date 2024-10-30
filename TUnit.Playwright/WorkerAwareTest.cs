@@ -14,7 +14,7 @@ public class WorkerAwareTest : ITestRegisteredEvents
         public Dictionary<string, IWorkerService> Services = new();
     }
     
-    public virtual bool UseDefaultParallelLimiter { get; } = true;
+    public virtual bool UseDefaultParallelLimiter => true;
 
     private static readonly ConcurrentStack<Worker> AllWorkers = new();
     private Worker _currentWorker = null!;

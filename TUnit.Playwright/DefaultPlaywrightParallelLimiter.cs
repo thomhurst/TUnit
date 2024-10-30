@@ -4,15 +4,15 @@ namespace TUnit.Playwright;
 
 public class DefaultPlaywrightParallelLimiter : IParallelLimit
 {
-    private static int? _limit;
-
-    public int Limit => _limit ??= GetLimit() ;
+    private static readonly int StaticallyInitializedLimit = GetLimit();
+    
+    public int Limit => StaticallyInitializedLimit;
 
     private static int GetLimit()
     {
-        var limit = Environment.ProcessorCount * 2;
+        var limit = Math.Max(Environment.ProcessorCount, 2);
         
-        Console.WriteLine($"Default playwright parallel limiter set to {limit}");
+        Console.WriteLine(@$"Default playwright parallel limiter set to {limit}");
 
         return limit;
     }
