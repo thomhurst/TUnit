@@ -2,7 +2,7 @@
 
 namespace TUnit.Playwright;
 
-public class DefaultPlaywrightParallelLimiter : IParallelLimit
+public sealed class DefaultPlaywrightParallelLimiter : IParallelLimit
 {
     private static readonly int StaticallyInitializedLimit = GetLimit();
     
