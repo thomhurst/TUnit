@@ -5,9 +5,9 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Extensions;
 
-internal static class TestExtensions
+public static class TestExtensions
 {
-    public static TestNode ToTestNode(this TestContext testContext)
+    internal static TestNode ToTestNode(this TestContext testContext)
     {
         var testDetails = testContext.TestDetails;
         
@@ -44,7 +44,7 @@ internal static class TestExtensions
         return testNode;
     }
 
-    internal static string GetClassTypeName(this TestContext testContext)
+    public static string GetClassTypeName(this TestContext testContext)
     {
         var testDetails = testContext.TestDetails;
         
@@ -62,7 +62,7 @@ internal static class TestExtensions
             $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
     }
     
-    internal static string GetTestDisplayName(this TestContext testContext)
+    public static string GetTestDisplayName(this TestContext testContext)
     {
         var testDetails = testContext.TestDetails;
 
@@ -80,7 +80,7 @@ internal static class TestExtensions
             $"{testDetails.TestName}({string.Join(", ", testDetails.TestMethodArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
     }
 
-    public static TestNode WithProperty(this TestNode testNode, IProperty property)
+    internal static TestNode WithProperty(this TestNode testNode, IProperty property)
     {
         testNode.Properties.Add(property);
         return testNode;

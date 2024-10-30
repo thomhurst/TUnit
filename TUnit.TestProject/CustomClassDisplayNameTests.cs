@@ -1,5 +1,7 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Engine.Extensions;
+
 #pragma warning disable CS9113 // Parameter is unread.
 
 namespace TUnit.TestProject;
@@ -13,7 +15,7 @@ public class CustomClassDisplayNameTests(Base1 base1)
     [Test]
     public async Task Test()
     {
-        await Assert.That(TestContext.Current!.TestDetails.DisplayName).IsEqualTo("A super important test!");
+        await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("A super important test!");
     }
 }
 
