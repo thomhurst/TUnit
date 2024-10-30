@@ -25,7 +25,7 @@ public class ExampleTestFixture(Class1 c1)
     }
 }
 
-public class DependencyInjectionClassConstructor2 : IClassConstructor, ITestEndEvent
+public class DependencyInjectionClassConstructor2 : IClassConstructor, ITestEndEventReceiver
 {
     private IServiceProvider? _serviceProvider;
     private AsyncServiceScope _scope;

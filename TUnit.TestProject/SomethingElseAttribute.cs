@@ -2,7 +2,7 @@
 
 namespace TUnit.TestProject;
 
-public class SomethingElseAttribute : Attribute, ITestStartEvent
+public class SomethingElseAttribute : Attribute, ITestStartEventReceiver
 {
     public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
     {

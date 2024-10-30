@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.Interfaces;
 
-public interface ILastTestInClassEvent
+public interface ILastTestInClassEventReceiver : IEventReceiver
 {
     ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext);
 }

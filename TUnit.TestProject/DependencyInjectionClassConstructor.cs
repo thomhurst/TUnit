@@ -4,7 +4,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 
-public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEvent
+public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEventReceiver
 {
     private readonly IServiceProvider _serviceProvider = CreateServiceProvider();
     private AsyncServiceScope? _scope;

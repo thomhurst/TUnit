@@ -3,7 +3,7 @@
 namespace TUnit.Core.Executors;
 
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class TestExecutorAttribute<T> : TUnitAttribute, ITestRegisteredEvents where T : ITestExecutor, new()
+public sealed class TestExecutorAttribute<T> : TUnitAttribute, ITestRegisteredEventReceiver where T : ITestExecutor, new()
 {
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {

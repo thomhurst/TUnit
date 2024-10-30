@@ -1,6 +1,6 @@
 namespace TUnit.Core.Interfaces;
 
-public interface ITestRegisteredEvents
+public interface ITestRegisteredEventReceiver : IEventReceiver
 {
     public ValueTask OnTestRegistered(TestRegisteredContext context);
 }

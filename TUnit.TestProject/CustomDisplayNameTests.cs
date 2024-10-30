@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 
@@ -38,7 +39,7 @@ public class CustomDisplayNameTests
         await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("PasswordTest(REDACTED)");
     }
     
-    public class MyGenerator : DataSourceGeneratorAttribute<string>, ITestDiscoveryEvent
+    public class MyGenerator : DataSourceGeneratorAttribute<string>, ITestDiscoveryEventReceiver
     {
         public override IEnumerable<string> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {

@@ -4,7 +4,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T1, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T2, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T3, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T4, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T5> : DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>, ITestRegisteredEvents, ITestStartEvent, ITestEndEvent, ILastTestInClassEvent, ILastTestInAssemblyEvent 
+public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T1, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T2, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T3, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T4, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T5> : DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>, ITestRegisteredEventReceiver, ITestStartEventReceiver, ITestEndEventReceiver, ILastTestInClassEventReceiver, ILastTestInAssemblyEventReceiver 
     where T1 : new()
     where T2 : new()
     where T3 : new()

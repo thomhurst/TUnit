@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.Interfaces;
 
-public interface ILastTestInAssemblyEvent
+public interface ILastTestInAssemblyEventReceiver : IEventReceiver
 {
     ValueTask IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext);
 }

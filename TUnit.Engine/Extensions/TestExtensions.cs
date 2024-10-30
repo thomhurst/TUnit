@@ -1,11 +1,11 @@
 ﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
-using TUnit.Core.Helpers;
+using TUnit.Core.Extensions;
 
 namespace TUnit.Engine.Extensions;
 
-public static class TestExtensions
+internal static class TestExtensions
 {
     internal static TestNode ToTestNode(this TestContext testContext)
     {
@@ -14,7 +14,7 @@ public static class TestExtensions
         var testNode = new TestNode
         {
             Uid = new TestNodeUid(testDetails.TestId),
-            DisplayName = GetTestDisplayName(testContext),
+            DisplayName = testContext.GetTestDisplayName(),
             Properties = new PropertyBag(
             [
                 new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan
@@ -25,7 +25,7 @@ public static class TestExtensions
                 new TestMethodIdentifierProperty(
                     Namespace: testDetails.ClassType.Namespace!,
                     AssemblyFullName: testDetails.ClassType.Assembly.FullName!,
-                    TypeName: GetClassTypeName(testContext),
+                    TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
@@ -42,42 +42,6 @@ public static class TestExtensions
         };
         
         return testNode;
-    }
-
-    public static string GetClassTypeName(this TestContext testContext)
-    {
-        var testDetails = testContext.TestDetails;
-        
-        var classTypeName = testDetails.ClassType.FullName?
-                                .Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                                .LastOrDefault()
-            ?? testDetails.ClassType.Name;
-        
-        if (testDetails.TestClassArguments.Length == 0)
-        {
-            return classTypeName;
-        }
-        
-        return
-            $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
-    }
-    
-    public static string GetTestDisplayName(this TestContext testContext)
-    {
-        var testDetails = testContext.TestDetails;
-
-        if (!string.IsNullOrWhiteSpace(testDetails.DisplayName))
-        {
-            return testDetails.DisplayName;
-        }
-        
-        if (testDetails.TestMethodArguments.Length == 0)
-        {
-            return testDetails.TestName;
-        }
-        
-        return
-            $"{testDetails.TestName}({string.Join(", ", testDetails.TestMethodArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
     }
 
     internal static TestNode WithProperty(this TestNode testNode, IProperty property)

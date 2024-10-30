@@ -32,7 +32,7 @@ internal class TestsConstructor(IExtension extension, TestMetadataCollector test
     private static void RunOnTestDiscoveryAttributeHooks(IEnumerable<Attribute> attributes, TestContext testContext)
     {
         DiscoveredTestContext? discoveredTestContext = null;
-        foreach (var onTestDiscoveryAttribute in attributes.OfType<ITestDiscoveryEvent>().Reverse()) // Reverse to run assembly, then class, then method
+        foreach (var onTestDiscoveryAttribute in attributes.OfType<ITestDiscoveryEventReceiver>().Reverse()) // Reverse to run assembly, then class, then method
         {
             onTestDiscoveryAttribute.OnTestDiscovery(discoveredTestContext ??= new DiscoveredTestContext(testContext));
         }

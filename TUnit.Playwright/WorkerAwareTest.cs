@@ -5,7 +5,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Playwright;
 
-public class WorkerAwareTest : ITestRegisteredEvents
+public class WorkerAwareTest : ITestRegisteredEventReceiver
 {
     internal class Worker
     {

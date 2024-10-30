@@ -6,7 +6,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-public sealed class DisplayNameAttribute(string displayName) : TUnitAttribute, ITestDiscoveryEvent
+public sealed class DisplayNameAttribute(string displayName) : TUnitAttribute, ITestDiscoveryEventReceiver
 {
     public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
     {

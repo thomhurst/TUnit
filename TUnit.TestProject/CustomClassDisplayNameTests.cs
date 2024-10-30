@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Core.Extensions;
 using TUnit.Engine.Extensions;
 
 #pragma warning disable CS9113 // Parameter is unread.

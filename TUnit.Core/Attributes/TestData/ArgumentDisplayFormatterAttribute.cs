@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-public abstract class ArgumentDisplayFormatterAttribute : TUnitAttribute, ITestDiscoveryEvent
+public abstract class ArgumentDisplayFormatterAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
 {
     public abstract ArgumentDisplayFormatter Formatter { get; }
     

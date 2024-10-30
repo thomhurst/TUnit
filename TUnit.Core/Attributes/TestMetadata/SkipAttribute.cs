@@ -4,7 +4,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class SkipAttribute(string reason) : TUnitAttribute, ITestStartEvent
+public class SkipAttribute(string reason) : TUnitAttribute, ITestStartEventReceiver
 {
     public string Reason { get; protected set; } = reason;
 

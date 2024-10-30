@@ -15,7 +15,7 @@ public class DynamicallyRegisteredTests
     }
 }
 
-public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStartEvent, ITestEndEvent
+public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStartEventReceiver, ITestEndEventReceiver
 {
     private static int _count;
 

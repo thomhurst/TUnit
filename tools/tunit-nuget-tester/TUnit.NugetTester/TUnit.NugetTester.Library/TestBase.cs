@@ -1,4 +1,4 @@
-﻿using TUnit.Engine.Extensions;
+﻿using TUnit.Core.Extensions;
 
 namespace TUnit.NugetTester.Library;
 

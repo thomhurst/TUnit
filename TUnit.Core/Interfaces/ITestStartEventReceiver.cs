@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.Interfaces;
 
-public interface ITestStartEvent
+public interface ITestStartEventReceiver : IEventReceiver
 {
     ValueTask OnTestStart(BeforeTestContext beforeTestContext);
 }

@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Extensions;
 
@@ -25,27 +26,63 @@ public static class TestContextExtensions
         return tests;
     }
     
-    internal static IEnumerable<ITestRegisteredEvents> GetTestRegisteredEventsObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<ITestRegisteredEvents>();
+    public static string GetClassTypeName(this TestContext testContext)
+    {
+        var testDetails = testContext.TestDetails;
+        
+        var classTypeName = testDetails.ClassType.FullName?
+                                .Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                                .LastOrDefault()
+                            ?? testDetails.ClassType.Name;
+        
+        if (testDetails.TestClassArguments.Length == 0)
+        {
+            return classTypeName;
+        }
+        
+        return
+            $"{classTypeName}({string.Join(", ", testDetails.TestClassArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
+    }
+    
+    public static string GetTestDisplayName(this TestContext testContext)
+    {
+        var testDetails = testContext.TestDetails;
 
-    internal static IEnumerable<ITestStartEvent> GetTestStartEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<ITestStartEvent>();
+        if (!string.IsNullOrWhiteSpace(testDetails.DisplayName))
+        {
+            return testDetails.DisplayName;
+        }
+        
+        if (testDetails.TestMethodArguments.Length == 0)
+        {
+            return testDetails.TestName;
+        }
+        
+        return
+            $"{testDetails.TestName}({string.Join(", ", testDetails.TestMethodArguments.Select(x => ArgumentFormatter.GetConstantValue(testContext, x)))})";
+    }
     
-    internal static IEnumerable<ITestEndEvent> GetTestEndEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<ITestEndEvent>();
+    internal static IEnumerable<ITestRegisteredEventReceiver> GetTestRegisteredEventsObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestRegisteredEventReceiver>();
+
+    internal static IEnumerable<ITestStartEventReceiver> GetTestStartEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestStartEventReceiver>();
     
-    internal static IEnumerable<ILastTestInClassEvent> GetLastTestInClassEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<ILastTestInClassEvent>();
+    internal static IEnumerable<ITestEndEventReceiver> GetTestEndEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestEndEventReceiver>();
     
-    internal static IEnumerable<ILastTestInAssemblyEvent> GetLastTestInAssemblyEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<ILastTestInAssemblyEvent>();
+    internal static IEnumerable<ILastTestInClassEventReceiver> GetLastTestInClassEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ILastTestInClassEventReceiver>();
     
-    internal static IEnumerable<ILastTestInTestSessionEvent> GetLastTestInTestSessionEventObjects(this TestContext context) =>
-        GetPossibleEventObjects(context).OfType<ILastTestInTestSessionEvent>();
+    internal static IEnumerable<ILastTestInAssemblyEventReceiver> GetLastTestInAssemblyEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ILastTestInAssemblyEventReceiver>();
+    
+    internal static IEnumerable<ILastTestInTestSessionEventReceiver> GetLastTestInTestSessionEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ILastTestInTestSessionEventReceiver>();
 
     private static IEnumerable<object?> GetPossibleEventObjects(this TestContext context)
     {
-        return
+        IEnumerable<object?> rawObjects =
         [
             ..context.TestDetails.DataAttributes,
             ..context.TestDetails.Attributes,
@@ -55,5 +92,7 @@ public static class TestContextExtensions
             ..context.TestDetails.TestMethodArguments,
             ..context.TestDetails.TestClassInjectedPropertyArguments
         ];
+
+        return rawObjects.OfType<IEventReceiver>().OrderBy(x => x.Order);
     }
 }

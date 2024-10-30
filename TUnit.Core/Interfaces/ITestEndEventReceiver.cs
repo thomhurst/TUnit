@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core.Interfaces;
 
-public interface ITestEndEvent
+public interface ITestEndEventReceiver : IEventReceiver
 {
     ValueTask OnTestEnd(TestContext testContext);
 }
