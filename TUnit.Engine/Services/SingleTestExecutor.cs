@@ -369,14 +369,14 @@ internal class SingleTestExecutor(
     {
         try
         {
-            var retryAttribute = context.TestDetails.RetryAttribute;
+            var retryLogic = context.TestDetails.RetryLogic;
 
-            if (retryAttribute == null)
+            if (retryLogic == null)
             {
                 return false;
             }
 
-            return await retryAttribute.ShouldRetry(context, e, currentRetryCount);
+            return await retryLogic(context, e, currentRetryCount);
         }
         catch (Exception exception)
         {

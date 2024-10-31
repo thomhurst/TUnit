@@ -26,4 +26,21 @@ public class DiscoveredTestContext
     {
         TestContext.ArgumentDisplayFormatters.Add(formatter);
     }
+
+    public void SetNotInParallelConstraints(string[] constraintKeys, int order)
+    {
+        TestContext.TestDetails.NotInParallelConstraintKeys = constraintKeys;
+        TestContext.TestDetails.Order = order;
+    }
+    
+    public void SetRetryCount(int times)
+    {
+        SetRetryCount(times, (_, _, _) => Task.FromResult(true));
+    }
+    
+    public void SetRetryCount(int times, Func<TestContext, Exception, int, Task<bool>> shouldRetry)
+    {
+        TestContext.TestDetails.RetryLimit = times;
+        TestContext.TestDetails.RetryLogic = shouldRetry;
+    }
 }

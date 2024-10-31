@@ -7,8 +7,6 @@ namespace TUnit.Core;
 
 public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType> : TestMetadata where TClassType : class
 {
-	private const int DefaultOrder = int.MaxValue / 2;
-
     public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
     public required Func<TClassType, CancellationToken, Task> TestMethodFactory { get; init; }
     
@@ -28,10 +26,8 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 		var testDetails = new TestDetails<TClassType>
 		{
 			TestId = testId,
-			Categories = attributes.OfType<CategoryAttribute>().Select(x => x.Category).ToArray(),
 			LazyClassInstance = ResettableClassFactory!,
 			ClassType = classType,
-			Timeout = AttributeHelper.GetAttribute<TimeoutAttribute>(attributes)?.Timeout,
 			AssemblyAttributes = assemblyAttributes,
 			ClassAttributes = typeAttributes,
 			TestAttributes = methodAttributes,
@@ -42,22 +38,14 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 			TestClassInjectedPropertyArguments = TestClassProperties,
 			TestClassParameterTypes = classType.GetConstructors().FirstOrDefault()?.GetParameters().Select(x => x.ParameterType).ToArray() ?? [],
 			TestMethodParameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray(),
-			NotInParallelConstraintKeys = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.ConstraintKeys,
 			CurrentRepeatAttempt = CurrentRepeatAttempt,
 			RepeatLimit = RepeatLimit,
-			RetryLimit = AttributeHelper.GetAttribute<RetryAttribute>(attributes)?.Times ?? 0,
 			MethodInfo = methodInfo,
 			TestName = methodInfo.Name,
 			ReturnType = methodInfo.ReturnType,
-			Order = AttributeHelper.GetAttribute<NotInParallelAttribute>(attributes)?.Order ?? DefaultOrder,
 			TestFilePath = TestFilePath,
 			TestLineNumber = TestLineNumber,
 		};
-
-		foreach (var propertyAttribute in attributes.OfType<PropertyAttribute>())
-		{
-			testDetails.InternalCustomProperties.Add(propertyAttribute.Name, propertyAttribute.Value);
-		}
 
 		return testDetails;
     }

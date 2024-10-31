@@ -1,7 +1,9 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core.Interfaces;
+
+namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class RetryAttribute : TUnitAttribute
+public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
 {
     public int Times { get; }
 
@@ -18,5 +20,10 @@ public class RetryAttribute : TUnitAttribute
     public virtual Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)
     {
         return Task.FromResult(true);
+    }
+
+    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    {
+        discoveredTestContext.SetRetryCount(Times, ShouldRetry);
     }
 }
