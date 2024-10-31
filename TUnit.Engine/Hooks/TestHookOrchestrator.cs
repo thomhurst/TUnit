@@ -11,16 +11,7 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
 {
     internal async Task ExecuteBeforeHooks(object classInstance, DiscoveredTest discoveredTest)
     {
-        // Run Global Hooks First
-
-        foreach (var beforeEvery in hooksCollector.BeforeEveryTestHooks)
-        {
-            await beforeEvery.HookExecutor.ExecuteBeforeTestHook(
-                hookMethodInfo: beforeEvery.MethodInfo,
-                context: discoveredTest.TestContext,
-                action: () => beforeEvery.Body(discoveredTest.TestContext, default)
-            );
-        }
+        // Run instance ones first as they might initialize some variables etc.
         
         var testClassType = classInstance.GetType();
         
@@ -41,6 +32,15 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
                     )
                 );
             }
+        }
+        
+        foreach (var beforeEvery in hooksCollector.BeforeEveryTestHooks)
+        {
+            await beforeEvery.HookExecutor.ExecuteBeforeTestHook(
+                hookMethodInfo: beforeEvery.MethodInfo,
+                context: discoveredTest.TestContext,
+                action: () => beforeEvery.Body(discoveredTest.TestContext, default)
+            );
         }
     }
     
