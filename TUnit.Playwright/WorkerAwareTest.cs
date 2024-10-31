@@ -7,16 +7,16 @@ namespace TUnit.Playwright;
 
 public class WorkerAwareTest : ITestRegisteredEventReceiver
 {
-    internal class Worker
+    private class Worker
     {
         private static int _lastWorkedIndex = 0;
-        public int WorkerIndex = Interlocked.Increment(ref _lastWorkedIndex);
-        public Dictionary<string, IWorkerService> Services = new();
+        public readonly int WorkerIndex = Interlocked.Increment(ref _lastWorkedIndex);
+        public readonly Dictionary<string, IWorkerService> Services = [];
     }
     
     public virtual bool UseDefaultParallelLimiter => true;
 
-    private static readonly ConcurrentStack<Worker> AllWorkers = new();
+    private static readonly ConcurrentStack<Worker> AllWorkers = [];
     private Worker _currentWorker = null!;
 
     public int WorkerIndex { get; internal set; }
@@ -38,18 +38,20 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         {
             _currentWorker = new();
         }
+        
         WorkerIndex = _currentWorker.WorkerIndex;
     }
 
     [After(HookType.Test)]
-    public async Task WorkerTeardown()
+    public async Task WorkerTeardown(TestContext testContext)
     {
-        if (TestOk())
+        if (TestOk(testContext))
         {
             foreach (var kv in _currentWorker.Services)
             {
                 await kv.Value.ResetAsync().ConfigureAwait(false);
             }
+            
             AllWorkers.Push(_currentWorker);
         }
         else
@@ -58,13 +60,14 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
             {
                 await kv.Value.DisposeAsync().ConfigureAwait(false);
             }
+            
             _currentWorker.Services.Clear();
         }
     }
 
-    public bool TestOk()
+    protected bool TestOk(TestContext testContext)
     {
-        return TestContext.Current?.Result?.Status is Status.Passed or Status.Skipped;
+        return testContext.Result?.Status is Status.Passed or Status.Skipped;
     }
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)

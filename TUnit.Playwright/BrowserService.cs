@@ -14,7 +14,6 @@ internal class BrowserService : IWorkerService
 
     public static Task<BrowserService> Register(
         WorkerAwareTest test, 
-        IPlaywright playwright, 
         IBrowserType browserType,
         BrowserTypeLaunchOptions options)
     {

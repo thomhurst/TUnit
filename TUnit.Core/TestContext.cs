@@ -54,7 +54,9 @@ public partial class TestContext : Context, IDisposable
     }
     
     public EventHandler? OnDispose { get; set; }
-    
+
+    internal string? SkipReason { get; set; }
+
     public void Dispose()
     {
         OnDispose?.Invoke(this, EventArgs.Empty);
