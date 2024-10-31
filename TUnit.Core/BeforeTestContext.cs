@@ -12,6 +12,11 @@ public class TestRegisteredContext : BeforeTestContext
     {
         DiscoveredTest.TestDetails.ParallelLimit = parallelLimit;
     }
+
+    public void SkipTest(string reason)
+    {
+        DiscoveredTest.TestContext.SkipReason = reason;
+    }
 }
 
 public class BeforeTestContext
