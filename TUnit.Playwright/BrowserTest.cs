@@ -16,7 +16,7 @@ public class BrowserTest : PlaywrightTest
 
     public IBrowser Browser { get; internal set; } = null!;
 
-    private readonly List<IBrowserContext> _contexts = new();
+    private readonly List<IBrowserContext> _contexts = [];
     private readonly BrowserTypeLaunchOptions _options;
 
     public async Task<IBrowserContext> NewContext(BrowserNewContextOptions options)
@@ -29,14 +29,14 @@ public class BrowserTest : PlaywrightTest
     [Before(HookType.Test)]
     public async Task BrowserSetup()
     {
-        var service = await BrowserService.Register(this, Playwright, BrowserType, _options).ConfigureAwait(false);
+        var service = await BrowserService.Register(this, BrowserType, _options).ConfigureAwait(false);
         Browser = service.Browser;
     }
 
     [After(HookType.Test)]
-    public async Task BrowserTearDown()
+    public async Task BrowserTearDown(TestContext testContext)
     {
-        if (TestOk())
+        if (TestOk(testContext))
         {
             foreach (var context in _contexts)
             {
