@@ -27,18 +27,19 @@ public abstract record TestDetails(Type ClassType)
     public required Type[] TestClassParameterTypes { get; init; }
     public required object?[] TestClassArguments { get; init; }
     public required object?[] TestClassInjectedPropertyArguments { get; init; }
-    
-    public required IReadOnlyList<string> Categories { get; init; }
+
+    internal readonly List<string> MutableCategories = [];
+    public IReadOnlyList<string> Categories => MutableCategories;
     
     public required MethodInfo MethodInfo { get; init; }
     public abstract object? ClassInstance { get; }
     public required int CurrentRepeatAttempt { get; init; }
     public required int RepeatLimit { get; init; }
-    public required int RetryLimit { get; init; }
+    public int RetryLimit { get; internal set; }
 
-    public required TimeSpan? Timeout { get; init; }
+    public TimeSpan? Timeout { get; internal set; }
     
-    public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
+    public IReadOnlyList<string>? NotInParallelConstraintKeys { get; internal set; }
     public IReadOnlyDictionary<string, string> CustomProperties => InternalCustomProperties;
     internal Dictionary<string, string> InternalCustomProperties { get; } = [];
 
@@ -58,11 +59,11 @@ public abstract record TestDetails(Type ClassType)
     public required Attribute[] Attributes { get; init; }
 
     [JsonIgnore]
-    internal RetryAttribute? RetryAttribute => Attributes.OfType<RetryAttribute>().FirstOrDefault();
+    internal Func<TestContext, Exception, int, Task<bool>>? RetryLogic { get; set; }
     
     public required Type ReturnType { get; init; }
     
-    public required int Order { get; init; }
+    public int Order { get; internal set; }
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
     internal string? DisplayName { get; set; }

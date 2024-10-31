@@ -1,16 +1,18 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core.Interfaces;
+
+namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class NotInParallelAttribute : SingleTUnitAttribute
+public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver
 {
     public string[] ConstraintKeys { get; } = [];
 
     public int Order { get; init; }
-    
+
     public NotInParallelAttribute()
     {
     }
-    
+
     public NotInParallelAttribute(string constraintKey) : this([constraintKey])
     {
         if (constraintKey is null or { Length: < 1 })
@@ -18,7 +20,7 @@ public class NotInParallelAttribute : SingleTUnitAttribute
             throw new ArgumentException("No constraint key was provided");
         }
     }
-    
+
     public NotInParallelAttribute(string[] constraintKeys)
     {
         if (constraintKeys.Length != constraintKeys.Distinct().Count())
@@ -27,5 +29,10 @@ public class NotInParallelAttribute : SingleTUnitAttribute
         }
         
         ConstraintKeys = constraintKeys;
+    }
+
+    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    {
+        discoveredTestContext.SetNotInParallelConstraints(ConstraintKeys, Order);
     }
 }
