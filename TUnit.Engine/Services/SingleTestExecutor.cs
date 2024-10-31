@@ -87,9 +87,12 @@ internal class SingleTestExecutor(
                 {
                     throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
                 }
-                
-                await ExecuteOnTestStartEvents(testContext);
 
+                if (testContext.SkipReason != null)
+                {
+                    throw new SkipTestException(testContext.SkipReason);
+                }
+                
                 start = DateTimeOffset.Now;
                 
                 await ExecuteTest(test, context, testContext, cleanUpExceptions);
@@ -174,6 +177,8 @@ internal class SingleTestExecutor(
             await ExecuteBeforeHooks(test, context, testContext);
 
             TestContext.Current = testContext;
+            
+            await ExecuteOnTestStartEvents(testContext);
 
             await ExecuteWithRetries(test);
 
@@ -200,8 +205,8 @@ internal class SingleTestExecutor(
                 Start = timingProperty.GlobalTiming.StartTime,
                 End = timingProperty.GlobalTiming.EndTime,
                 ComputerName = Environment.MachineName,
-                Exception = e,
-                Status = Status.Failed,
+                Exception = e is SkipTestException ? null : e,
+                Status = e is SkipTestException ? Status.Skipped : Status.Failed,
                 Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}"
             };
 
@@ -209,9 +214,7 @@ internal class SingleTestExecutor(
         }
         finally
         {
-            // TestStart is null if the test was skipped
-            // If skipped, we didn't perform set ups, so also don't perform tear downs
-            if (testContext.TestStart != null)
+            if (testContext.Result?.Status != Status.Skipped)
             {
                 foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
                 {
