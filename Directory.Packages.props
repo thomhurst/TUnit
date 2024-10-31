@@ -32,7 +32,7 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.4.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.4.2" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="1.4.2" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.1" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.2" />
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.42.87" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.42.87" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.42.87" />
