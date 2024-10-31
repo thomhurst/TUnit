@@ -7,8 +7,6 @@ namespace TUnit.Core;
 
 public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClassType> : TestMetadata where TClassType : class
 {
-	private const int DefaultOrder = int.MaxValue / 2;
-
     public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
     public required Func<TClassType, CancellationToken, Task> TestMethodFactory { get; init; }
     

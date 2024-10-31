@@ -62,8 +62,8 @@ public abstract record TestDetails(Type ClassType)
     internal Func<TestContext, Exception, int, Task<bool>>? RetryLogic { get; set; }
     
     public required Type ReturnType { get; init; }
-    
-    public int Order { get; internal set; }
+
+    public int Order { get; internal set; } = int.MaxValue / 2;
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
     internal string? DisplayName { get; set; }
