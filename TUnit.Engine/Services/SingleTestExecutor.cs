@@ -6,7 +6,6 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
@@ -20,7 +19,6 @@ namespace TUnit.Engine.Services;
 
 internal class SingleTestExecutor(
     IExtension extension,
-    Disposer disposer,
     CancellationTokenSource cancellationTokenSource,
     InstanceTracker instanceTracker, 
     TestInvoker testInvoker,
