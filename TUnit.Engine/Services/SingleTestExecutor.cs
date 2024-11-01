@@ -276,8 +276,6 @@ internal class SingleTestExecutor(
                     cleanUpExceptions);
             }
         }
-            
-        ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
     }
 
     private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
