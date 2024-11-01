@@ -6,7 +6,6 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
@@ -20,7 +19,6 @@ namespace TUnit.Engine.Services;
 
 internal class SingleTestExecutor(
     IExtension extension,
-    Disposer disposer,
     CancellationTokenSource cancellationTokenSource,
     InstanceTracker instanceTracker, 
     TestInvoker testInvoker,
@@ -28,7 +26,6 @@ internal class SingleTestExecutor(
     ParallelLimitLockProvider parallelLimitLockProvider,
     AssemblyHookOrchestrator assemblyHookOrchestrator,
     ClassHookOrchestrator classHookOrchestrator,
-    TestHookOrchestrator testHookOrchestrator,
     ITestFinder testFinder,
     ITUnitMessageBus messageBus,
     TUnitFrameworkLogger logger,
@@ -174,13 +171,13 @@ internal class SingleTestExecutor(
 
         try
         {
-            await ExecuteBeforeHooks(test, context, testContext);
+            await ExecuteStaticBeforeHooks(test, context, testContext);
 
             TestContext.Current = testContext;
             
             await ExecuteOnTestStartEvents(testContext);
 
-            await ExecuteWithRetries(test);
+            await ExecuteWithRetries(test, cleanUpExceptions);
 
             var timingProperty = GetTimingProperty(testContext, start);
 
@@ -222,11 +219,9 @@ internal class SingleTestExecutor(
                         cleanUpExceptions);
                 }
 
-                await DisposeTest(testContext, cleanUpExceptions);
-
                 TestContext.Current = null;
 
-                await ExecuteAfterHooks(test, context, testContext, cleanUpExceptions);
+                await ExecuteStaticAfterHooks(test, context, testContext, cleanUpExceptions);
 
                 foreach (var artifact in testContext.Artifacts)
                 {
@@ -244,7 +239,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteBeforeHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext)
+    private async Task ExecuteStaticBeforeHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext)
     {
         try
         {
@@ -258,7 +253,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteAfterHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
+    private async Task ExecuteStaticAfterHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
         await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
@@ -275,24 +270,6 @@ internal class SingleTestExecutor(
                     () => testEndEventsObject.IfLastTestInTestSession(TestSessionContext.Current!, testContext),
                     cleanUpExceptions);
             }
-        }
-    }
-
-    private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
-    {
-        await testHookOrchestrator.ExecuteAfterHooks(testContext.TestDetails.ClassInstance!, testContext.InternalDiscoveredTest, cleanUpExceptions);
-            
-        await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
-        
-        await _consoleStandardOutLock.WaitAsync();
-
-        try
-        {
-            await Dispose(testContext);
-        }
-        finally
-        {
-            _consoleStandardOutLock.Release();
         }
     }
 
@@ -319,19 +296,12 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async ValueTask Dispose(TestContext testContext)
+    private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
-        await disposer.DisposeAsync(testContext);
+        return testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions);
     }
-
-    private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
-    {
-        return testInvoker.Invoke(discoveredTest, cancellationToken);
-    }
-
-    private readonly SemaphoreSlim _consoleStandardOutLock = new(1, 1);
-
-    private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest)
+    
+    private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest, List<Exception> cleanupExceptions)
     {
         var testInformation = discoveredTest.TestContext.TestDetails;
         var retryCount = testInformation.RetryLimit;
@@ -343,7 +313,7 @@ internal class SingleTestExecutor(
         {
             try
             {
-                await ExecuteCore(discoveredTest);
+                await ExecuteCore(discoveredTest, cleanupExceptions);
                 break;
             }
             catch (Exception e)
@@ -353,6 +323,8 @@ internal class SingleTestExecutor(
                 {
                     throw;
                 }
+                
+                cleanupExceptions.Clear();
 
                 await logger.LogWarningAsync($"""
                                               {discoveredTest.TestContext.GetClassTypeName()}.{discoveredTest.TestContext.GetTestDisplayName()} attempt {i + 1} failed, retrying...");
@@ -360,6 +332,11 @@ internal class SingleTestExecutor(
                                              """);
 
                 await discoveredTest.ResetTestInstance();
+                
+                foreach (var testRetryEventReceiver in discoveredTest.TestContext.GetTestRetryEventObjects())
+                {
+                    await testRetryEventReceiver.OnTestRetry(discoveredTest.TestContext, i + 1);
+                }
                 
                 discoveredTest.TestContext.CurrentRetryAttempt++;
             }
@@ -386,7 +363,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async ValueTask ExecuteCore(DiscoveredTest discoveredTest)
+    private async ValueTask ExecuteCore(DiscoveredTest discoveredTest, List<Exception> cleanupExceptions)
     {
         if (engineCancellationToken.Token.IsCancellationRequested)
         {
@@ -399,8 +376,8 @@ internal class SingleTestExecutor(
         }
 
         using var linkedTokenSource = CreateLinkedToken(discoveredTest.TestContext, engineCancellationToken.CancellationTokenSource);
-
-        await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token);
+        
+        await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token, cleanupExceptions);
     }
 
     private static CancellationTokenSource CreateLinkedToken(TestContext testContext,
@@ -483,17 +460,17 @@ internal class SingleTestExecutor(
         return testsForClass.ToArray();
     }
 
-    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken)
+    private async Task ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
         var testDetails = discoveredTest.TestDetails;
         
         if (testDetails.Timeout == null || testDetails.Timeout.Value == default)
         {
-            await RunTest(discoveredTest, cancellationToken);
+            await RunTest(discoveredTest, cancellationToken, cleanupExceptions);
             return;
         }
 
-        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token), testDetails.Timeout, cancellationToken);
+        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token, cleanupExceptions), testDetails.Timeout, cancellationToken);
     }
 
 

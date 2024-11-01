@@ -96,13 +96,15 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         Disposer = Register(new Disposer(Logger));
         
         var cancellationTokenSource = Register(EngineCancellationToken.CancellationTokenSource);
-        var testInvoker = Register(new TestInvoker(testHookOrchestrator));
+        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Disposer));
         var explicitFilterService = Register(new ExplicitFilterService());
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
-        var hookMessagePublisher = Register(new HookMessagePublisher(extension, messageBus));
         
-        var singleTestExecutor = Register(new SingleTestExecutor(extension, Disposer, cancellationTokenSource, instanceTracker, testInvoker,
-            explicitFilterService, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, testHookOrchestrator, TestFinder, TUnitMessageBus, Logger, EngineCancellationToken));
+        // TODO
+        Register(new HookMessagePublisher(extension, messageBus));
+        
+        var singleTestExecutor = Register(new SingleTestExecutor(extension, cancellationTokenSource, instanceTracker, testInvoker,
+            explicitFilterService, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TestFinder, TUnitMessageBus, Logger, EngineCancellationToken));
         
         TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken));
         
