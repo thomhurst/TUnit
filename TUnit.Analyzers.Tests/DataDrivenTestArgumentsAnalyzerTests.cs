@@ -152,7 +152,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
     }
     
     [Test]
-    public async Task Argument_Not_Flagged_When_Matching_ExternalType_Enum()
+    public async Task Argument_Not_Flagged_When_Matching_ExternalType_Package_Enum()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -166,6 +166,29 @@ public class DataDrivenTestArgumentsAnalyzerTests
                     [Test]
                     [Arguments(CircuitState.Closed)]
                     public void MyTest(CircuitState value)
+                    {
+                    }
+
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Argument_Not_Flagged_When_Matching_ExternalType_Project_Enum()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using TUnit.TestProject.Library;
+
+                public class MyClass
+                {
+                            
+                    [Test]
+                    [Arguments(ProjectReferenceEnum.Value1)]
+                    public void MyTest(ProjectReferenceEnum value)
                     {
                     }
 
