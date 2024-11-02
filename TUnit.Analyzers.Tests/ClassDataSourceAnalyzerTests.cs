@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.ClassDataSourceAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.TestDataAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
@@ -57,15 +57,17 @@ public class ClassDataSourceAnalyzerTests
     [Test]
     public async Task Class_Missing_Parameter_Error()
     {
-        var expected = Verifier.Diagnostic(Rules.NoMatchingParameterClassDataSource).WithLocation(0);
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+            .WithLocation(0)
+            .WithArguments("int", "");
 
         await Verifier
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
 
-                [ClassDataSource<int>]
-                public class {|#0:MyClass|}
+                [{|#0:ClassDataSource<int>|}]
+                public class MyClass
                 {
                     public MyClass()
                     {
@@ -84,7 +86,9 @@ public class ClassDataSourceAnalyzerTests
     [Test]
     public async Task Class_Wrong_Parameter_Type_Error()
     {
-        var expected = Verifier.Diagnostic(Rules.NoMatchingParameterClassDataSource).WithLocation(0);
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+            .WithLocation(0)
+            .WithArguments("int", "string");
 
         await Verifier
             .VerifyAnalyzerAsync(
@@ -209,16 +213,17 @@ public class ClassDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [ClassDataSource<int>]
+                    [{|#0:ClassDataSource<int>|}]
                     [Test]
-                    public void {|#0:MyTest|}()
+                    public void MyTest()
                     {
                     }
                 }
                 """,
                 
-                Verifier.Diagnostic(Rules.NoMatchingParameterClassDataSource)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
+                    .WithArguments("int", "")
             );
     }
 
@@ -240,8 +245,9 @@ public class ClassDataSourceAnalyzerTests
                 }
                 """,
                 
-                Verifier.Diagnostic(Rules.NoMatchingParameterClassDataSource)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
+                    .WithArguments("int", "string")
             );
     }
 }

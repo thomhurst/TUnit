@@ -113,7 +113,7 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithArguments("int", "string")
                     .WithLocation(0)
             );
@@ -148,7 +148,7 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithArguments("int", "string")
                     .WithLocation(0)
             );

@@ -17,13 +17,15 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.WrongArgumentTypeTestData, 
             Rules.NoTestDataProvided, 
             Rules.MethodParameterBadNullability,
-            Rules.WrongArgumentTypeTestDataSource,
+            Rules.WrongArgumentTypeTestData,
             Rules.MethodMustBeParameterless,
             Rules.MethodMustBeStatic,
             Rules.MethodMustBePublic,
             Rules.NoMethodFound,
             Rules.MethodMustReturnData,
-            Rules.TooManyArgumentsInTestMethod);
+            Rules.TooManyArgumentsInTestMethod,
+            Rules.PropertyRequiredNotSet,
+            Rules.MustHavePropertySetter);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -40,6 +42,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         if (methodSymbol.IsAbstract)
+        {
+            return;
+        }
+
+        if (!methodSymbol.IsTestMethod(context.Compilation))
         {
             return;
         }
@@ -80,6 +87,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        if (!namedTypeSymbol.IsTestClass(context.Compilation))
+        {
+            return;
+        }
+
         var attributes = namedTypeSymbol.GetAttributes();
 
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ??
@@ -95,8 +107,22 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         INamedTypeSymbol testClassType)
     {
         var types = GetTypes(parameters, propertySymbol);
+
+        var dataAttributes = attributes.Where(x =>
+                x.AttributeClass?.AllInterfaces.Contains(
+                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataAttribute
+                        .WithoutGlobalPrefix), SymbolEqualityComparer.Default
+                ) == true)
+            .ToImmutableArray();
+
+        if (dataAttributes.IsDefaultOrEmpty)
+        {
+            return;
+        }
+
+        CheckPropertyAccessor(context, propertySymbol);
         
-        foreach (var attribute in attributes)
+        foreach (var attribute in dataAttributes)
         {
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Arguments.WithoutGlobalPrefix)))
@@ -117,6 +143,24 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         CheckMatrix(context, parameters);
+    }
+
+    private void CheckPropertyAccessor(SymbolAnalysisContext context, IPropertySymbol? propertySymbol)
+    {
+        if (propertySymbol is null)
+        {
+            return;
+        }
+        
+        if (propertySymbol is { IsStatic: false, IsRequired: false })
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.PropertyRequiredNotSet, propertySymbol.Locations.FirstOrDefault()));
+        }
+            
+        if (propertySymbol is { IsStatic: true, SetMethod: null })
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rules.MustHavePropertySetter, propertySymbol.Locations.FirstOrDefault()));
+        }
     }
 
     private ImmutableArray<ITypeSymbol> GetTypes(ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? propertySymbol)
@@ -311,7 +355,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
-                        Rules.WrongArgumentTypeTestDataSource,
+                        Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
                         string.Join<ITypeSymbol>(", ", argumentTypes),
                         string.Join<ITypeSymbol>(", ", parameterTypes),
@@ -342,7 +386,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 if (returnTupleTypes.Length != testDataParameterTypes.Length)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                        Rules.WrongArgumentTypeTestDataSource,
+                        Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
                         string.Join(", ", returnTupleTypes),
                         string.Join(", ", testDataParameterTypes))
@@ -364,7 +408,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         context.ReportDiagnostic(
                             Diagnostic.Create(
-                                Rules.WrongArgumentTypeTestDataSource,
+                                Rules.WrongArgumentTypeTestData,
                                 attribute.GetLocation(),
                                 argumentType,
                                 parameterType)
@@ -388,7 +432,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         
             context.ReportDiagnostic(
                 Diagnostic.Create(
-                    Rules.WrongArgumentTypeTestDataSource,
+                    Rules.WrongArgumentTypeTestData,
                     attribute.GetLocation(),
                     testDataMethodNonEnumerableReturnType,
                     string.Join(", ", testDataParameterTypes))
@@ -420,7 +464,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
+        context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                 attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
                 string.Join(", ", baseGeneratorAttribute.TypeArguments), string.Join(", ", testDataTypes)));
     }

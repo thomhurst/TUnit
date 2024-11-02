@@ -16,6 +16,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
+                    [Test]
                     public void MyTest(string value)
                     {
                     }
@@ -27,7 +28,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("int", "string")
             );
@@ -44,6 +45,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }
@@ -69,6 +71,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }
@@ -95,6 +98,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }
@@ -127,6 +131,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [MethodDataSource(typeof(MyData), nameof(MyData.One))]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }
@@ -156,6 +161,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 {
                     [Timeout(30_000)]
                     [MethodDataSource(typeof(MyData), nameof(MyData.One))]
+                    [Test]
                     public void MyTest(int value, CancellationToken token)
                     {
                     }
@@ -183,6 +189,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                   
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
                 [MethodDataSource(nameof(Tuple))]
+                [Test]
                 public void MyTest(int value, string value2, bool value3{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
                 {
                 }
@@ -210,13 +217,14 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                          
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
                 [{|#0:MethodDataSource(nameof(Tuple))|}]
+                [Test]
                 public void MyTest(int value, string value2{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
                 {
                 }
             }
             """,
         
-            Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
             .WithLocation(0)
                 .WithArguments("int, string, bool", "int, string")
         );
@@ -241,13 +249,14 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                 
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
                 [{|#0:MethodDataSource(nameof(Tuple))|}]
+                [Test]
                 public void MyTest(int value, string value2, string value3{{GetTimeoutCancellationTokenParameter(includeTimeoutToken)}})
                 {
                 }
             }
             """,
         
-            Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
             .WithLocation(0)
                 .WithArguments("bool", "string")
         );
@@ -278,7 +287,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("int", "string")
             );
@@ -337,7 +346,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("System.Collections.Generic.IEnumerable<int>", "int")
             );
@@ -368,7 +377,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("string, int", "(string, string)")
             );
@@ -384,7 +393,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
                 public class MyClass
                 {
-                [MethodDataSource(nameof(Data))]
+                    [MethodDataSource(nameof(Data))]
                     public required (string, int) MyProperty { get; init; }
                                 
                     [Test]
@@ -412,6 +421,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data), Arguments = [ "Hi" ])|}]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }
@@ -423,8 +433,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
-            .WithLocation(0)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
                     .WithArguments("string", "bool")
             );
     }
@@ -440,6 +450,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data), Arguments = [ true ])|}]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }
@@ -465,6 +476,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data), Arguments = [ new[] { 1, 2 } ])]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }
@@ -488,7 +500,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
             public class MyClass
             {
-            [MethodDataSource(nameof(Data), Arguments = [ new[] { 1, 2 } ])]
+            
+                [MethodDataSource(nameof(Data), Arguments = [ new[] { 1, 2 } ])]
+                [Test]
                 public void MyTest(int value)
                 {
                 }
@@ -516,6 +530,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data), Arguments = [ {{argument}} ])]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }
@@ -543,6 +558,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data), Arguments = [ {{argument}} ])]
+                    [Test]
                     public void MyTest(int value)
                     {
                     }

@@ -12,17 +12,11 @@ public static class Rules
     public static readonly DiagnosticDescriptor NoTestDataProvided =
         CreateDescriptor("TUnit0002", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor NoTestDataSourceProvided =
-        CreateDescriptor("TUnit0003", UsageCategory, DiagnosticSeverity.Error);
-
     public static readonly DiagnosticDescriptor NoMethodFound =
         CreateDescriptor("TUnit0004", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MethodParameterBadNullability =
         CreateDescriptor("TUnit0005", UsageCategory, DiagnosticSeverity.Warning);
-
-    public static readonly DiagnosticDescriptor WrongArgumentTypeTestDataSource =
-        CreateDescriptor("TUnit0006", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor MethodMustBeStatic =
         CreateDescriptor("TUnit0007", UsageCategory, DiagnosticSeverity.Error);
@@ -38,9 +32,6 @@ public static class Rules
     
     public static readonly DiagnosticDescriptor MethodMustReturnData =
         CreateDescriptor("TUnit0011", UsageCategory, DiagnosticSeverity.Error);
-    
-    public static readonly DiagnosticDescriptor NoArgumentInTestMethod =
-        CreateDescriptor("TUnit0012", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor TooManyArgumentsInTestMethod =
         CreateDescriptor("TUnit0013", UsageCategory, DiagnosticSeverity.Error);
@@ -62,27 +53,9 @@ public static class Rules
     
     public static readonly DiagnosticDescriptor MissingTestAttribute =
         CreateDescriptor("TUnit0019", UsageCategory, DiagnosticSeverity.Error);
-    
-    public static readonly DiagnosticDescriptor RequiredPair_Attributes_DataDrivenTest_Arguments =
-        CreateDescriptor("TUnit0020", UsageCategory, DiagnosticSeverity.Error);
-    
-    public static readonly DiagnosticDescriptor RequiredCombinations_Attributes_DataSourceDrivenTest_MethodData_EnumerableMethodData_ClassData =
-        CreateDescriptor("TUnit0021", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor RequiredPair_Attributes_MatrixTest_Matrix =
-        CreateDescriptor("TUnit0022", UsageCategory, DiagnosticSeverity.Error);
-    
     public static readonly DiagnosticDescriptor Dispose_Member_In_Cleanup =
         CreateDescriptor("TUnit0023", UsageCategory, DiagnosticSeverity.Warning);
-    
-    public static readonly DiagnosticDescriptor Wrong_Category_Attribute =
-        CreateDescriptor("TUnit0024", UsageCategory, DiagnosticSeverity.Error);
-        
-    public static readonly DiagnosticDescriptor Argument_Count_Not_Matching_Parameter_Count =
-        CreateDescriptor("TUnit0025", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor NotIEnumerable =
-        CreateDescriptor("TUnit0026", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor UnknownParameters =
         CreateDescriptor("TUnit0027", UsageCategory, DiagnosticSeverity.Error);
@@ -107,15 +80,6 @@ public static class Rules
         
     public static readonly DiagnosticDescriptor NoMainMethod =
         CreateDescriptor("TUnit0034", UsageCategory, DiagnosticSeverity.Error);
-    
-    public static readonly DiagnosticDescriptor NoMatchingParameterClassDataSource =
-        CreateDescriptor("TUnit0035", UsageCategory, DiagnosticSeverity.Error);
-    
-    public static readonly DiagnosticDescriptor TypeMustBePublic =
-        CreateDescriptor("TUnit0036", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor ConstructorMustBeParameterless =
-        CreateDescriptor("TUnit0037", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor NoDataSourceProvided =
         CreateDescriptor("TUnit0038", UsageCategory, DiagnosticSeverity.Error);

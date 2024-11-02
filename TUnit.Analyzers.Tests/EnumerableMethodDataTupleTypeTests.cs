@@ -32,7 +32,7 @@ public class EnumerableMethodDataTupleTypeTests
                 """,
 
                 Verifier
-                    .Diagnostic(Rules.WrongArgumentTypeTestDataSource)
+                    .Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithArguments("int, string, bool", "int, string, bool, int")
                     .WithLocation(0)
             );

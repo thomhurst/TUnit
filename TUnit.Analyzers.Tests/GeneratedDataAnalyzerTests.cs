@@ -10,9 +10,9 @@ public class GeneratedDataAnalyzerTests
     [Test]
     public async Task Method_Flags_Error()
     {
-        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
             .WithLocation(0)
-            .WithMessage("The data source type `int` doesn't match the parameter type `string`");
+            .WithArguments("int", "string");
 
         await Verifier
             .VerifyAnalyzerAsync(
@@ -46,9 +46,9 @@ public class GeneratedDataAnalyzerTests
     [Test]
     public async Task Method_Flags_Error2()
     {
-        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
             .WithLocation(0)
-            .WithMessage("The data source type `int, string` doesn't match the parameter type `string, int`");
+            .WithArguments("int, string", "string, int");
 
         await Verifier
             .VerifyAnalyzerAsync(
@@ -82,9 +82,9 @@ public class GeneratedDataAnalyzerTests
     [Test]
     public async Task Method_Flags_Error3()
     {
-        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
+        var expected = Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
             .WithLocation(0)
-            .WithMessage("The data source type `int, string` doesn't match the parameter type `string, int`");
+            .WithArguments("int, string", "string, int");
 
         await Verifier
             .VerifyAnalyzerAsync(
@@ -179,7 +179,7 @@ public class GeneratedDataAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("int", "string")
             );
@@ -214,7 +214,7 @@ public class GeneratedDataAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("int, string", "string, int")
             );
@@ -249,7 +249,7 @@ public class GeneratedDataAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource.Id)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("int, string", "string, int")
             );
@@ -320,9 +320,9 @@ public class GeneratedDataAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestDataSource)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithMessage("The data source type `int` doesn't match the parameter type `string`")
+                    .WithArguments("int", "string")
             );
     }
 
