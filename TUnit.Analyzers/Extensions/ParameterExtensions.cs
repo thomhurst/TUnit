@@ -6,7 +6,7 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class ParameterExtensions
 {
-    public static IEnumerable<IParameterSymbol> WithoutTimeoutParameter(this ImmutableArray<IParameterSymbol> parameterSymbols)
+    public static IEnumerable<IParameterSymbol> WithoutCancellationTokenParameter(this ImmutableArray<IParameterSymbol> parameterSymbols)
     {
         if (parameterSymbols.IsDefaultOrEmpty)
         {
@@ -22,7 +22,7 @@ public static class ParameterExtensions
         return parameterSymbols;
     }
     
-    public static IEnumerable<ITypeSymbol> WithoutTimeoutParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
+    public static IEnumerable<ITypeSymbol> WithoutCancellationTokenParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
     {
         if (typeSymbols.IsDefaultOrEmpty)
         {

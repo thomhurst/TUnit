@@ -31,7 +31,7 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var parameters = methodSymbol.Parameters.WithoutTimeoutParameter().ToArray();
+        var parameters = methodSymbol.Parameters.WithoutCancellationTokenParameter().ToArray();
         
         if (parameters.Length == 0)
         {

@@ -44,7 +44,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
         
-        Analyze(context, attributes, methodSymbol.Parameters, null, methodSymbol.ContainingType);
+        Analyze(context, attributes, methodSymbol.Parameters.WithoutCancellationTokenParameter().ToImmutableArray(), null, methodSymbol.ContainingType);
     }
 
     private void AnalyzeProperty(SymbolAnalysisContext context)
