@@ -100,4 +100,77 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 """
 			);
     }
+    
+    [Test]
+    public async Task Argument_Not_Flagged_When_Matching_Type()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                            
+                    [Test]
+                    [Arguments("Hello")]
+                    public void MyTest(string value)
+                    {
+                    }
+
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Argument_Not_Flagged_When_Matching_Type_Enum()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                            
+                    [Test]
+                    [Arguments(MyEnum.Value1)]
+                    public void MyTest(MyEnum value)
+                    {
+                    }
+
+                }
+                
+                public enum MyEnum
+                {
+                    Value1,
+                    Value2
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Argument_Not_Flagged_When_Matching_ExternalType_Enum()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using Polly.CircuitBreaker;
+
+                public class MyClass
+                {
+                            
+                    [Test]
+                    [Arguments(CircuitState.Closed)]
+                    public void MyTest(CircuitState value)
+                    {
+                    }
+
+                }
+                """
+            );
+    }
 }

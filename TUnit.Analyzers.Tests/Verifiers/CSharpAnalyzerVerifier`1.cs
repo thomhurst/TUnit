@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using System.Diagnostics.CodeAnalysis;
+using Polly.CircuitBreaker;
 using TUnit.Core;
 
 namespace TUnit.Analyzers.Tests.Verifiers;
@@ -34,6 +35,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                 AdditionalReferences =
                 {
                     typeof(TUnitAttribute).Assembly.Location,
+                    typeof(CircuitState).Assembly.Location
                 },
             },
         };
