@@ -29,55 +29,5 @@ public class GeneratedDataAnalyzer : ConcurrentDiagnosticAnalyzer
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Property);
     }
 
-    private void AnalyzeSymbol(SymbolAnalysisContext context)
-    {
-        List<ITypeSymbol> parameterOrPropertyTypes = [];
-
-        List<AttributeData> attributes = [];
-        if (context.Symbol is IMethodSymbol methodSymbol)
-        {
-            parameterOrPropertyTypes.AddRange(methodSymbol.Parameters.Select(x => x.Type));
-            attributes.AddRange(methodSymbol.GetAttributes());
-        }
-
-        if (context.Symbol is INamedTypeSymbol namedTypeSymbol)
-        {
-            parameterOrPropertyTypes.AddRange(namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters
-                .Select(x => x.Type) ?? []);
-            attributes.AddRange(namedTypeSymbol.GetAttributes());
-        }
-
-        if (context.Symbol is IPropertySymbol propertySymbol)
-        {
-            parameterOrPropertyTypes.Add(propertySymbol.Type);
-            attributes.AddRange(propertySymbol.GetAttributes());
-        }
-
-        foreach (var attributeData in attributes)
-        {
-            var selfAndBaseTypes = attributeData.AttributeClass?.GetSelfAndBaseTypes() ?? [];
-            
-            var baseGeneratorAttribute = selfAndBaseTypes
-                .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithGlobalPrefix));
-
-            if (baseGeneratorAttribute is null)
-            {
-                continue;
-            }
-
-            if (parameterOrPropertyTypes.Any(x => x.IsGenericDefinition()))
-            {
-                continue;
-            }
-
-            if (parameterOrPropertyTypes.SequenceEqual(baseGeneratorAttribute.TypeArguments, new SelfOrBaseEqualityComparer(context.Compilation)))
-            {
-                continue;
-            }
-
-            context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestDataSource,
-                attributeData.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
-                string.Join(", ", baseGeneratorAttribute.TypeArguments), string.Join(", ", parameterOrPropertyTypes)));
-        }
-    }
+    
 }
