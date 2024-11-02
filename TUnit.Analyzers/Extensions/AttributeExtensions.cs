@@ -44,6 +44,13 @@ public static class AttributeExtensions
                    compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute
                        .WithoutGlobalPrefix));
     }
+    
+    public static bool IsMatrixAttribute(this AttributeData attributeData, Compilation compilation)
+    {
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Matrix
+                       .WithoutGlobalPrefix));
+    }
 
     public static string GetHookType(this AttributeData attributeData)
     {

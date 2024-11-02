@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.DataDrivenTestArgumentsAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.TestDataAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
@@ -99,5 +99,101 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 }
                 """
 			);
+    }
+    
+    [Test]
+    public async Task Argument_Not_Flagged_When_Matching_Type()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                            
+                    [Test]
+                    [Arguments("Hello")]
+                    public void MyTest(string value)
+                    {
+                    }
+
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Argument_Not_Flagged_When_Matching_Type_Enum()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                            
+                    [Test]
+                    [Arguments(MyEnum.Value1)]
+                    public void MyTest(MyEnum value)
+                    {
+                    }
+
+                }
+                
+                public enum MyEnum
+                {
+                    Value1,
+                    Value2
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Argument_Not_Flagged_When_Matching_ExternalType_Package_Enum()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using Polly.CircuitBreaker;
+
+                public class MyClass
+                {
+                            
+                    [Test]
+                    [Arguments(CircuitState.Closed)]
+                    public void MyTest(CircuitState value)
+                    {
+                    }
+
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Argument_Not_Flagged_When_Matching_ExternalType_Project_Enum()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using TUnit.TestProject.Library;
+
+                public class MyClass
+                {
+                            
+                    [Test]
+                    [Arguments(ProjectReferenceEnum.Value1)]
+                    public void MyTest(ProjectReferenceEnum value)
+                    {
+                    }
+
+                }
+                """
+            );
     }
 }

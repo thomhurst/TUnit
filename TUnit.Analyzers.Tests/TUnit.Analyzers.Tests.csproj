@@ -15,9 +15,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="Polly" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" />
+    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
   </ItemGroup>
 </Project>
