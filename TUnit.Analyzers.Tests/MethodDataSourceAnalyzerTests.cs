@@ -141,6 +141,64 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Data_Within_Another_Class_GenericAttribute()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyData
+                {
+                    public static int One()
+                    {
+                        return 1;
+                    }
+                }
+
+                public class MyClass
+                {
+                    [MethodDataSource<MyData>(nameof(MyData.One))]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Method_Data_Source_Is_Flagged_When_MethodNotFound_GenericAttribute()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyData
+                {
+                    public static int One()
+                    {
+                        return 1;
+                    }
+                }
+
+                public class MyClass
+                {
+                    [{|#0:MethodDataSource<MyData>("Two")|}]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.NoMethodFound)
+                    .WithLocation(0)
+            );
+    }
+    
+    [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Timeout_CancellationToken()
     {
         await Verifier

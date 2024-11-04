@@ -17,6 +17,7 @@ public static class WellKnown
         public static readonly FullyQualifiedTypeName Test = GetTypeName("TestAttribute");
         public static readonly FullyQualifiedTypeName Arguments = GetTypeName("ArgumentsAttribute");
         public static readonly FullyQualifiedTypeName MethodDataSource = GetTypeName("MethodDataSourceAttribute");
+        public static readonly FullyQualifiedTypeName GenericMethodDataSource = GetTypeName("MethodDataSourceAttribute`1");
         public static readonly FullyQualifiedTypeName ClassDataSource = GetTypeName("ClassDataSourceAttribute");
         public static readonly FullyQualifiedTypeName ClassConstructor = GetTypeName("ClassConstructorAttribute");
 

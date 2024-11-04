@@ -136,6 +136,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 CheckMethodDataSource(context, attribute, testClassType, types);
             }
             
+            if (attribute.AttributeClass?.IsGenericType is true 
+                && SymbolEqualityComparer.Default.Equals(attribute.AttributeClass.OriginalDefinition,
+                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.GenericMethodDataSource.WithoutGlobalPrefix)))
+            {
+                CheckMethodDataSource(context, attribute, testClassType, types);
+            }
+            
             if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithoutGlobalPrefix))) == true)
             {
                 CheckDataGenerator(context, attribute, types);
@@ -272,9 +279,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         AttributeData attribute,
         INamedTypeSymbol testClassType,
         ImmutableArray<ITypeSymbol> testDataParameterTypes)
-    { 
+    {
         {
-            var type = attribute.ConstructorArguments[0].Value as INamedTypeSymbol ?? testClassType;
+            var type = attribute.AttributeClass?.IsGenericType == true
+                ? attribute.AttributeClass.TypeArguments.First()
+                : attribute.ConstructorArguments[0].Value as INamedTypeSymbol ?? testClassType;
+            
             var methodName = attribute.ConstructorArguments[0].Value as string
                          ?? attribute.ConstructorArguments[1].Value as string;
 
@@ -291,10 +301,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         .ToArray()
                     : [];
 
-            var methodSymbols = type.GetSelfAndBaseTypes()
+            var methodSymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
                 .SelectMany(x => x.GetMembers())
                 .OfType<IMethodSymbol>()
-                .ToArray();
+                .ToArray() ?? [];
 
             var methodContainingTestData = methodSymbols
                                                .FirstOrDefault(x =>

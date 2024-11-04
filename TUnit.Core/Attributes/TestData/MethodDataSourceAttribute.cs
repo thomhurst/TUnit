@@ -1,6 +1,10 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
+public class MethodDataSourceAttribute<T>(string methodNameProvidingDataSource)
+    : MethodDataSourceAttribute(typeof(T), methodNameProvidingDataSource);
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 public class MethodDataSourceAttribute : TestDataAttribute
 {
     public Type? ClassProvidingDataSource { get; }

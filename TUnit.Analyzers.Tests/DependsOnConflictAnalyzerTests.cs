@@ -89,6 +89,93 @@ public class DependsOnConflictAnalyzerTests
     }
     
     [Test]
+    public async Task Direct_Conflict_Other_Class_Raises_Error_GenericAttribute()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            [DependsOn<MyClass2>]
+            public class MyClass1
+            {
+                [Test]
+                public void {|#0:Test|}()
+                {
+                }
+            
+                [Test]
+                public void {|#1:Test2|}()
+                {
+                }
+            }
+                            
+            [DependsOn<MyClass1>]
+            public class MyClass2
+            {
+                [Test]
+                public void {|#2:Test|}()
+                {
+                }
+                                                                
+                [Test]
+                public void {|#3:Test2|}()
+                {
+                }
+            }
+            """,
+
+            Verifier
+                .Diagnostic(Rules.DependsOnConflicts)
+                .WithMessage("DependsOn Conflicts: MyClass1.Test > MyClass2.Test > MyClass1.Test")
+                .WithLocation(0),
+
+            Verifier
+                .Diagnostic(Rules.DependsOnConflicts)
+                .WithMessage("DependsOn Conflicts: MyClass2.Test > MyClass1.Test > MyClass2.Test")
+                .WithLocation(2)
+        );
+    }
+    
+    [Test]
+    public async Task No_Conflict_Raises_Nothing_GenericAttribute()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class MyClass1
+            {
+                [Test]
+                public void {|#0:Test|}()
+                {
+                }
+            
+                [Test]
+                public void {|#1:Test2|}()
+                {
+                }
+            }
+                            
+            [DependsOn<MyClass1>]
+            public class MyClass2
+            {
+                [Test]
+                public void {|#2:Test|}()
+                {
+                }
+                                                                
+                [Test]
+                public void {|#3:Test2|}()
+                {
+                }
+            }
+            """
+        );
+    }
+    
+    [Test]
     public async Task Direct_Conflict_Other_Class_Raises_Error2()
     {
         await Verifier

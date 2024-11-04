@@ -1,6 +1,22 @@
 ﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+public class DependsOnAttribute<T> : DependsOnAttribute
+{
+    public DependsOnAttribute() : base(typeof(T))
+    {
+    }
+
+    public DependsOnAttribute(string testName) : base(typeof(T), testName)
+    {
+    }
+    
+    public DependsOnAttribute(string testName, Type[] parameterTypes) : base(typeof(T), testName, parameterTypes)
+    {
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class DependsOnAttribute : TUnitAttribute
 {
     public DependsOnAttribute(string testName) : this(testName, null!)

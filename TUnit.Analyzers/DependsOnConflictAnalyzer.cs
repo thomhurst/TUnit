@@ -82,10 +82,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         
         foreach (var dependsOnAttribute in dependsOnAttributes)
         {
-            var dependencyType = dependsOnAttribute.ConstructorArguments
-                                     .FirstOrNull(x => x.Kind == TypedConstantKind.Type)?.Value as INamedTypeSymbol
-                                 ?? methodToGetDependenciesFor.ReceiverType
-                                 ?? methodToGetDependenciesFor.ContainingType;
+            var dependencyType = GetTypeContainingMethod(methodToGetDependenciesFor, dependsOnAttribute);
 
             var dependencyMethodName = dependsOnAttribute.ConstructorArguments
                 .FirstOrNull(x => x.Kind == TypedConstantKind.Primitive)?.Value as string;
@@ -142,6 +139,19 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         return chain;
+    }
+
+    private static ITypeSymbol GetTypeContainingMethod(IMethodSymbol methodToGetDependenciesFor, AttributeData dependsOnAttribute)
+    {
+        if (dependsOnAttribute.AttributeClass?.IsGenericType == true)
+        {
+            return dependsOnAttribute.AttributeClass!.TypeArguments.First();
+        }
+        
+        return dependsOnAttribute.ConstructorArguments
+                   .FirstOrNull(x => x.Kind == TypedConstantKind.Type)?.Value as INamedTypeSymbol
+               ?? methodToGetDependenciesFor.ReceiverType
+               ?? methodToGetDependenciesFor.ContainingType;
     }
 
     private static IMethodSymbol[] FilterMethods(string? dependencyMethodName, IMethodSymbol[] methods,
