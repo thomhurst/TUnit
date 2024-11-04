@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,6 +11,7 @@ using TUnit.Analyzers.Helpers;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
+[SuppressMessage("ReSharper", "UnusedMember.Local")]
 public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -17,8 +19,9 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSyntaxNodeAction(AnalyzeProperty, SyntaxKind.PropertyDeclaration);
-        context.RegisterSyntaxNodeAction(AnalyzeField, SyntaxKind.FieldDeclaration);
+        // TODO: Rework
+        // context.RegisterSyntaxNodeAction(AnalyzeProperty, SyntaxKind.PropertyDeclaration);
+        // context.RegisterSyntaxNodeAction(AnalyzeField, SyntaxKind.FieldDeclaration);
     }
 
     private void AnalyzeField(SyntaxNodeAnalysisContext context)
@@ -152,7 +155,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private bool IsInjectedProperty(IPropertySymbol property)
     {
-        return property.TryGetClassDataAttribute(out var classAttributeData);
+        return property.TryGetClassDataAttribute(out _);
     }
 
     private static bool IsExpectedMethod(IMethodSymbol method, string expectedHookType)
