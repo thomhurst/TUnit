@@ -52,7 +52,7 @@ public static class TestContextExtensions
             AllValidTests = [newTest],
             Parallel = [newTest],
             NotInParallel = new PriorityQueue<DiscoveredTest, int>(),
-            KeyedNotInParallel = [],
+            KeyedNotInParallel = new Dictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>(),
             ParallelGroups = new Dictionary<string, List<DiscoveredTest>>()
         }, null, testContext.GetService<ExecuteRequestContext>());
     }

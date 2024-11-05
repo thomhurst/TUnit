@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Core;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
@@ -10,7 +9,7 @@ internal class TestGrouper
     public GroupedTests OrganiseTests(DiscoveredTest[] testCases)
     {
         var notInParallel = new PriorityQueue<DiscoveredTest, int>();
-        var keyedNotInParallel = new List<NotInParallelTestCase>();
+        var keyedNotInParallel = new ConcurrentDictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>();
         var parallel = new List<DiscoveredTest>();
         var parallelGroups = new ConcurrentDictionary<string, List<DiscoveredTest>>();
         
@@ -28,11 +27,10 @@ internal class TestGrouper
                 }
                 else
                 {
-                    keyedNotInParallel.Add(new NotInParallelTestCase
-                    {
-                        Test = discoveredTest,
-                        ConstraintKeys = new ConstraintKeysCollection(notInParallelConstraint.NotInParallelConstraintKeys)
-                    });
+                    keyedNotInParallel.GetOrAdd(
+                        new ConstraintKeysCollection(notInParallelConstraint.NotInParallelConstraintKeys),
+                        _ => new PriorityQueue<DiscoveredTest, int>()
+                    ).Enqueue(discoveredTest, notInParallelConstraint.Order);
                 }
             }
             else if (discoveredTest.TestDetails.ParallelConstraint is ParallelGroupConstraint parallelGroupConstraint)
