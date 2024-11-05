@@ -52,7 +52,8 @@ public static class TestContextExtensions
             AllValidTests = [newTest],
             Parallel = new Queue<DiscoveredTest>([newTest]),
             NotInParallel = new Queue<DiscoveredTest>(),
-            KeyedNotInParallel = []
+            KeyedNotInParallel = [],
+            ParallelGroups = new Dictionary<string, List<DiscoveredTest>>()
         }, null, testContext.GetService<ExecuteRequestContext>());
     }
 

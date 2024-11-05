@@ -33,6 +33,9 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
 
     public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
     {
-        discoveredTestContext.SetNotInParallelConstraints(ConstraintKeys, Order);
+        discoveredTestContext.SetParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
+        {
+            Order = Order
+        });
     }
 }

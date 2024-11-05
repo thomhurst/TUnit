@@ -39,7 +39,7 @@ public abstract record TestDetails(Type ClassType)
 
     public TimeSpan? Timeout { get; internal set; }
     
-    public IReadOnlyList<string>? NotInParallelConstraintKeys { get; internal set; }
+    public IParallelConstraint? ParallelConstraint { get; internal set; }
     public IReadOnlyDictionary<string, string> CustomProperties => InternalCustomProperties;
     internal Dictionary<string, string> InternalCustomProperties { get; } = [];
 
@@ -63,7 +63,6 @@ public abstract record TestDetails(Type ClassType)
     
     public required Type ReturnType { get; init; }
 
-    public int Order { get; internal set; } = int.MaxValue / 2;
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
     internal string? DisplayName { get; set; }
