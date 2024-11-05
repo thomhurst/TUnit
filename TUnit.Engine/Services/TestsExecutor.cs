@@ -78,9 +78,9 @@ internal class TestsExecutor
     
     public Task WaitForFinishAsync() => _onFinished.Task;
 
-    private async Task ProcessNotInParallelTests(Queue<DiscoveredTest> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)
+    private async Task ProcessNotInParallelTests(PriorityQueue<DiscoveredTest, int> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
-        foreach (var testInformation in testsNotInParallel)
+        while (testsNotInParallel.TryDequeue(out var testInformation, out _))
         {
             await ProcessTest(testInformation, filter, context, context.CancellationToken);
         }
@@ -136,13 +136,13 @@ internal class TestsExecutor
         }
     }
 
-    private async Task ProcessParallelTests(Queue<DiscoveredTest> queue, ITestExecutionFilter? filter,
+    private async Task ProcessParallelTests(IEnumerable<DiscoveredTest> queue, ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
-        await ProcessQueue(queue, filter, context);
+        await ProcessCollection(queue, filter, context);
     }
 
-    private async Task ProcessQueue(Queue<DiscoveredTest> queue,
+    private async Task ProcessCollection(IEnumerable<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {

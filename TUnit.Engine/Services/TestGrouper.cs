@@ -9,12 +9,12 @@ internal class TestGrouper
 {
     public GroupedTests OrganiseTests(DiscoveredTest[] testCases)
     {
-        var notInParallel = new SortedList<int, DiscoveredTest>();
-        var keyedNotInParallel = new SortedList<int, NotInParallelTestCase>();
+        var notInParallel = new PriorityQueue<DiscoveredTest, int>();
+        var keyedNotInParallel = new List<NotInParallelTestCase>();
         var parallel = new List<DiscoveredTest>();
         var parallelGroups = new ConcurrentDictionary<string, List<DiscoveredTest>>();
         
-        foreach (var discoveredTest in testCases.GroupBy(x => x.TestDetails.ClassType).SelectMany(x => x))
+        foreach (var discoveredTest in testCases)
         {
             if (discoveredTest.TestDetails.ParallelConstraint == null)
             {
@@ -24,11 +24,11 @@ internal class TestGrouper
             {
                 if (notInParallelConstraint.NotInParallelConstraintKeys.Count == 0)
                 {
-                    notInParallel.Add(notInParallelConstraint.Order, discoveredTest);
+                    notInParallel.Enqueue(discoveredTest, notInParallelConstraint.Order);
                 }
                 else
                 {
-                    keyedNotInParallel.Add(notInParallelConstraint.Order, new NotInParallelTestCase
+                    keyedNotInParallel.Add(new NotInParallelTestCase
                     {
                         Test = discoveredTest,
                         ConstraintKeys = new ConstraintKeysCollection(notInParallelConstraint.NotInParallelConstraintKeys)
@@ -49,11 +49,11 @@ internal class TestGrouper
         {
             AllValidTests = testCases,
             
-            Parallel = parallel.ToQueue(),
+            Parallel = parallel,
             
-            KeyedNotInParallel = keyedNotInParallel.Values,
+            KeyedNotInParallel = keyedNotInParallel,
             
-            NotInParallel = notInParallel.Values.ToQueue(),
+            NotInParallel = notInParallel,
             
             ParallelGroups = parallelGroups
         };
