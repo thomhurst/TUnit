@@ -1,12 +1,10 @@
-﻿using System.Collections.Concurrent;
-using EnumerableAsyncProcessor.Extensions;
+﻿using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 
@@ -20,17 +18,10 @@ internal class TestsExecutor
     private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly EngineCancellationToken _engineCancellationToken;
-    
+
     private readonly Counter _executionCounter = new();
     private readonly TaskCompletionSource _onFinished = new();
 
-    private readonly ConcurrentDictionary<string, Semaphore> _notInParallelKeyedLocks = new();
-#if NET9_0_OR_GREATER
-    private readonly Lock _notInParallelDictionaryLock = new();
-#else
-    private readonly object _notInParallelDictionaryLock = new();
-#endif
-    
     private readonly int _maximumParallelTests;
 
     public TestsExecutor(SingleTestExecutor singleTestExecutor,
@@ -54,14 +45,14 @@ internal class TestsExecutor
         };
     }
 
-    public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter,  ExecuteRequestContext context)
+    public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
         await using var _ = _engineCancellationToken.Token.Register(() => _onFinished.TrySetCanceled());
 
         try
         {
             _executionCounter.Increment();
-            
+
             await ProcessParallelTests(tests.Parallel, filter, context);
 
             await ProcessParallelGroups(tests.ParallelGroups, filter, context);
@@ -75,23 +66,19 @@ internal class TestsExecutor
             _executionCounter.Decrement();
         }
     }
-    
+
     public Task WaitForFinishAsync() => _onFinished.Task;
 
     private async Task ProcessNotInParallelTests(PriorityQueue<DiscoveredTest, int> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
-        while (testsNotInParallel.TryDequeue(out var testInformation, out _))
-        {
-            await ProcessTest(testInformation, filter, context, context.CancellationToken);
-        }
+        await ProcessQueue(filter, context, testsNotInParallel);
     }
-    
-    private async Task ProcessKeyedNotInParallelTests(IList<NotInParallelTestCase> testsToProcess,
+
+    private async Task ProcessKeyedNotInParallelTests(IDictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>> testsToProcess,
         ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
-        await testsToProcess
-            .GroupBy(x => x.ConstraintKeys)
-            .ForEachAsync(async group => await Task.Run(() => ProcessGroup(filter, context, group)))
+        await testsToProcess.Values
+            .ForEachAsync(async group => await Task.Run(() => ProcessQueue(filter, context, group)))
             .ProcessInParallel(_maximumParallelTests);
     }
 
@@ -104,35 +91,12 @@ internal class TestsExecutor
         }
     }
 
-    private async Task ProcessGroup(ITestExecutionFilter? filter, ExecuteRequestContext context,
-        IEnumerable<NotInParallelTestCase> tests)
+    private async Task ProcessQueue(ITestExecutionFilter? filter, ExecuteRequestContext context,
+        PriorityQueue<DiscoveredTest, int> tests)
     {
-        foreach (var test in tests)
+        while (tests.TryDequeue(out var testInformation, out _))
         {
-            var keys = test.ConstraintKeys;
-
-            var locks = keys.Select(GetLockForKey).ToArray();
-
-            while (!WaitHandle.WaitAll(locks, TimeSpan.FromMilliseconds(100), false))
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(500));
-            }
-
-            try
-            {
-                await ProcessTest(test.Test, filter, context, context.CancellationToken);
-            }
-            catch (Exception e)
-            {
-                await _logger.LogErrorAsync(e);
-            }
-            finally
-            {
-                foreach (var semaphore in locks)
-                {
-                    semaphore.Release();
-                }
-            }
+            await ProcessTest(testInformation, filter, context, context.CancellationToken);
         }
     }
 
@@ -165,7 +129,7 @@ internal class TestsExecutor
         catch (Exception exception)
         {
             await _logger.LogErrorAsync(exception);
-            
+
             if (_commandLineOptions.IsOptionSet(FailFastCommandProvider.FailFast))
             {
                 await _engineCancellationToken.CancellationTokenSource.CancelAsync();
@@ -174,14 +138,6 @@ internal class TestsExecutor
         finally
         {
             NotifyTestEnd();
-        }
-    }
-    
-    private Semaphore GetLockForKey(string key)
-    {
-        lock (_notInParallelDictionaryLock)
-        {
-            return _notInParallelKeyedLocks.GetOrAdd(key, _ => new Semaphore(1, 1));
         }
     }
 
