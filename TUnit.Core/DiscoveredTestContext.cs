@@ -1,4 +1,6 @@
-﻿#pragma warning disable CS9113 // Parameter is unread.
+﻿using TUnit.Core.Interfaces;
+
+#pragma warning disable CS9113 // Parameter is unread.
 
 namespace TUnit.Core;
 
@@ -27,10 +29,9 @@ public class DiscoveredTestContext
         TestContext.ArgumentDisplayFormatters.Add(formatter);
     }
 
-    public void SetNotInParallelConstraints(string[] constraintKeys, int order)
+    public void SetParallelConstraint(IParallelConstraint parallelConstraint)
     {
-        TestContext.TestDetails.NotInParallelConstraintKeys = constraintKeys;
-        TestContext.TestDetails.Order = order;
+        TestContext.TestDetails.ParallelConstraint = parallelConstraint;
     }
     
     public void SetRetryCount(int times)

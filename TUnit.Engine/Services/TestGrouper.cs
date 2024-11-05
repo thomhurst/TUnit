@@ -1,4 +1,6 @@
-﻿using TUnit.Core;
+﻿using System.Collections.Concurrent;
+using TUnit.Core;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
@@ -7,47 +9,53 @@ internal class TestGrouper
 {
     public GroupedTests OrganiseTests(DiscoveredTest[] testCases)
     {
-        var allTestsOrderedByClass = testCases
-            .OrderBy(x => x.TestDetails.Order)
-            .GroupBy(x => x.TestDetails.ClassType)
-            .SelectMany(x => x)
-            .ToList();
-
-        var notInParallel = new Queue<DiscoveredTest>();
+        var notInParallel = new PriorityQueue<DiscoveredTest, int>();
         var keyedNotInParallel = new List<NotInParallelTestCase>();
-        var parallel = new Queue<DiscoveredTest>();
-
-        foreach (var test in allTestsOrderedByClass)
+        var parallel = new List<DiscoveredTest>();
+        var parallelGroups = new ConcurrentDictionary<string, List<DiscoveredTest>>();
+        
+        foreach (var discoveredTest in testCases)
         {
-            var notInParallelConstraintKey = test.TestDetails.NotInParallelConstraintKeys;
-            
-            if (notInParallelConstraintKey == null)
+            if (discoveredTest.TestDetails.ParallelConstraint == null)
             {
-                parallel.Enqueue(test);
+                parallel.Add(discoveredTest);
             }
-            else if (notInParallelConstraintKey.Count == 0)
+            else if (discoveredTest.TestDetails.ParallelConstraint is NotInParallelConstraint notInParallelConstraint)
             {
-                notInParallel.Enqueue(test);
+                if (notInParallelConstraint.NotInParallelConstraintKeys.Count == 0)
+                {
+                    notInParallel.Enqueue(discoveredTest, notInParallelConstraint.Order);
+                }
+                else
+                {
+                    keyedNotInParallel.Add(new NotInParallelTestCase
+                    {
+                        Test = discoveredTest,
+                        ConstraintKeys = new ConstraintKeysCollection(notInParallelConstraint.NotInParallelConstraintKeys)
+                    });
+                }
+            }
+            else if (discoveredTest.TestDetails.ParallelConstraint is ParallelGroupConstraint parallelGroupConstraint)
+            {
+                parallelGroups.GetOrAdd(parallelGroupConstraint.Group, _ => []).Add(discoveredTest);
             }
             else
             {
-                keyedNotInParallel.Add(new NotInParallelTestCase
-                {
-                    Test = test,
-                    ConstraintKeys = new ConstraintKeysCollection(notInParallelConstraintKey)
-                });
+                throw new ArgumentOutOfRangeException();
             }
         }
 
         return new GroupedTests
         {
-            AllValidTests = allTestsOrderedByClass,
+            AllValidTests = testCases,
             
             Parallel = parallel,
             
             KeyedNotInParallel = keyedNotInParallel,
             
             NotInParallel = notInParallel,
+            
+            ParallelGroups = parallelGroups
         };
     }
 }

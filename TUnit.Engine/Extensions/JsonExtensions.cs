@@ -37,7 +37,6 @@ public static class JsonExtensions
         return new TestJson
         {
             Categories = context.TestDetails.Categories,
-            Order = context.TestDetails.Order,
             ClassType = context.TestDetails.ClassType.FullName,
             Result = context.Result?.ToJsonModel(),
             Timeout = context.TestDetails.Timeout,
@@ -54,7 +53,6 @@ public static class JsonExtensions
             TestMethodArguments = context.TestDetails.TestMethodArguments,
             TestClassParameterTypes = context.TestDetails.TestClassParameterTypes.Select(x => x.FullName).ToArray(),
             TestMethodParameterTypes = context.TestDetails.TestMethodParameterTypes.Select(x => x.FullName).ToArray(),
-            NotInParallelConstraintKeys = context.TestDetails.NotInParallelConstraintKeys
         };
     }
     

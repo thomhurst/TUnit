@@ -50,9 +50,10 @@ public static class TestContextExtensions
         _ = testContext.GetService<TestsExecutor>().ExecuteAsync(new GroupedTests
         {
             AllValidTests = [newTest],
-            Parallel = new Queue<DiscoveredTest>([newTest]),
-            NotInParallel = new Queue<DiscoveredTest>(),
-            KeyedNotInParallel = []
+            Parallel = [newTest],
+            NotInParallel = new PriorityQueue<DiscoveredTest, int>(),
+            KeyedNotInParallel = [],
+            ParallelGroups = new Dictionary<string, List<DiscoveredTest>>()
         }, null, testContext.GetService<ExecuteRequestContext>());
     }
 

@@ -21,13 +21,9 @@ public record TestJson
 
     public required TimeSpan? Timeout { get; init; }
     
-    public required IReadOnlyList<string>? NotInParallelConstraintKeys { get; init; }
-    
     public required IReadOnlyDictionary<string, string> CustomProperties { get; init; }
     
     public required string? ReturnType { get; init; }
-    
-    public required int Order { get; init; }
     
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }

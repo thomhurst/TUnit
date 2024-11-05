@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 
@@ -63,6 +64,8 @@ internal class TestsExecutor
             
             await ProcessParallelTests(tests.Parallel, filter, context);
 
+            await ProcessParallelGroups(tests.ParallelGroups, filter, context);
+
             await ProcessKeyedNotInParallelTests(tests.KeyedNotInParallel, filter, context);
 
             await ProcessNotInParallelTests(tests.NotInParallel, filter, context);
@@ -75,21 +78,30 @@ internal class TestsExecutor
     
     public Task WaitForFinishAsync() => _onFinished.Task;
 
-    private async Task ProcessNotInParallelTests(Queue<DiscoveredTest> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)
+    private async Task ProcessNotInParallelTests(PriorityQueue<DiscoveredTest, int> testsNotInParallel, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
-        foreach (var testInformation in testsNotInParallel)
+        while (testsNotInParallel.TryDequeue(out var testInformation, out _))
         {
             await ProcessTest(testInformation, filter, context, context.CancellationToken);
         }
     }
-
-    private async Task ProcessKeyedNotInParallelTests(List<NotInParallelTestCase> testsToProcess,
+    
+    private async Task ProcessKeyedNotInParallelTests(IList<NotInParallelTestCase> testsToProcess,
         ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
         await testsToProcess
             .GroupBy(x => x.ConstraintKeys)
             .ForEachAsync(async group => await Task.Run(() => ProcessGroup(filter, context, group)))
             .ProcessInParallel(_maximumParallelTests);
+    }
+
+    private async Task ProcessParallelGroups(IDictionary<string, List<DiscoveredTest>> groups,
+        ITestExecutionFilter? filter, ExecuteRequestContext context)
+    {
+        foreach (var (_, value) in groups)
+        {
+            await ProcessParallelTests(value.ToQueue(), filter, context);
+        }
     }
 
     private async Task ProcessGroup(ITestExecutionFilter? filter, ExecuteRequestContext context,
@@ -124,13 +136,13 @@ internal class TestsExecutor
         }
     }
 
-    private async Task ProcessParallelTests(Queue<DiscoveredTest> queue, ITestExecutionFilter? filter,
+    private async Task ProcessParallelTests(IEnumerable<DiscoveredTest> queue, ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
-        await ProcessQueue(queue, filter, context);
+        await ProcessCollection(queue, filter, context);
     }
 
-    private async Task ProcessQueue(Queue<DiscoveredTest> queue,
+    private async Task ProcessCollection(IEnumerable<DiscoveredTest> queue,
         ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
