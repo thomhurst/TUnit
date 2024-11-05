@@ -100,7 +100,7 @@ internal class TestsExecutor
     {
         foreach (var (_, value) in groups)
         {
-            await ProcessParallelTests(value.ToQueue(), filter, context);
+            await ProcessParallelTests(value, filter, context);
         }
     }
 
