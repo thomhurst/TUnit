@@ -2,6 +2,7 @@
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace TUnit.Core;
 
