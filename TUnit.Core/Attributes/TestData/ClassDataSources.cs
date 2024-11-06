@@ -45,10 +45,10 @@ internal class ClassDataSources
         return sharedType switch
         {
             SharedType.None => new T(),
-            SharedType.Globally => TestDataContainer.GetGlobalInstance(() => new T()),
-            SharedType.ForClass => TestDataContainer.GetInstanceForType(testClassType, () => new T()),
+            SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(() => new T()),
+            SharedType.PerClass => TestDataContainer.GetInstanceForType(testClassType, () => new T()),
             SharedType.Keyed => TestDataContainer.GetInstanceForKey(key, () => new T()),
-            SharedType.ForAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, () => new T()),
+            SharedType.PerAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, () => new T()),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

@@ -51,6 +51,19 @@ public static class AttributeExtensions
                    compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Matrix
                        .WithoutGlobalPrefix));
     }
+    
+    public static bool IsDataSourceAttribute(this AttributeData? attributeData, Compilation compilation)
+    {
+        if (attributeData?.AttributeClass is null)
+        {
+            return false;
+        }
+        
+        var dataAttributeInterface = compilation
+            .GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataAttribute.WithoutGlobalPrefix);
+
+        return attributeData.AttributeClass.AllInterfaces.Contains(dataAttributeInterface, SymbolEqualityComparer.Default);
+    }
 
     public static string GetHookType(this AttributeData attributeData)
     {

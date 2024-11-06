@@ -10,11 +10,11 @@ To do this, we add a `[ParallelLimiter<>]` attribute.
 
 You'll notice this has a generic type argument - You must give it a type that implements `IParallelLimit` and has a public empty constructor. That interface requires you to define what the limit is for those tests.
 
-If a class doesn't have a parallel limit defined, it'll try and eagerly run when the .NET thread pool allows it to do so.
+If a class doesn't have a parallel limit defined, it'll try and eagerly run when the .NET thread pool allows it to do so, so the upper limit is unknown.
 
 If it does have a parallel limit defined, be aware that that parallel limit is shared for any tests with that same `Type` of parallel limit. 
 
-In the example below, `MyParallelLimit` has a limit of `2`. Now any test, anywhere in your test suite, that has this parallel limit attribute applied to it, will only be processed 2 at a time. 
+In the example below, `MyParallelLimit` has a limit of `2`. Now any test, anywhere in your test suite, that has this parallel limit attribute applied to it, will shared this limit, and so only 2 can be processed at a time. 
 
 Other tests without this attribute may run alongside them still. 
 
