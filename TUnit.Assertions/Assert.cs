@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
 
@@ -68,26 +69,6 @@ public static class Assert
         [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
         => ThrowsAsync(async () => await @delegate, doNotPopulateThisValue);
     
-    public static async Task<TException> ThrowsAsync<TException>(Func<Task> @delegate, [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null) where TException : Exception
-    {
-        try
-        {
-            await @delegate();
-        }
-        catch (TException e)
-        {
-            return e;
-        }
-        catch (Exception e)
-        {
-            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
-        }
-
-        Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
-        
-        return null!;
-    }
-
     public static Task<TException> ThrowsAsync<TException>(Task @delegate,
         [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null) where TException : Exception
         => ThrowsAsync<TException>(async () => await @delegate, doNotPopulateThisValue);
@@ -95,31 +76,69 @@ public static class Assert
     public static Task<TException> ThrowsAsync<TException>(ValueTask @delegate,
         [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null) where TException : Exception
         => ThrowsAsync<TException>(async () => await @delegate, doNotPopulateThisValue);
-
-    public static Exception Throws(Action @delegate,
-        [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
-        => Throws<Exception>(@delegate, doNotPopulateThisValue);
     
-    public static TException Throws<TException>(Action @delegate, [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null) where TException : Exception
+    public static async Task<TException> ThrowsAsync<TException>(Func<Task> @delegate, [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null) where TException : Exception
+    {
+        return (TException) await ThrowsAsync(typeof(TException), @delegate, doNotPopulateThisValue);
+    }
+    
+    public static Task<Exception> ThrowsAsync(Type type, Task @delegate,
+        [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
+        => ThrowsAsync(type, async () => await @delegate, doNotPopulateThisValue);
+    
+    public static Task<Exception> ThrowsAsync(Type type, ValueTask @delegate,
+        [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
+        => ThrowsAsync(type, async () => await @delegate, doNotPopulateThisValue);
+    
+    public static async Task<Exception> ThrowsAsync(Type type, Func<Task> @delegate, [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
     {
         try
         {
-            @delegate();
+            await @delegate();
         }
-        catch (TException e)
+        catch (Exception e) when (e.GetType().IsAssignableTo(type))
         {
             return e;
         }
         catch (Exception e)
         {
-            Fail($"Exception is of type {e.GetType().Name} instead of {typeof(TException).Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+            Fail($"Exception is of type {e.GetType().Name} instead of {type.Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
+        }
+
+        Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
+        
+        return null;
+    }
+
+    public static Exception Throws(Action @delegate,
+        [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
+        => Throws<Exception>(@delegate, doNotPopulateThisValue);
+    
+    public static Exception Throws(Type type, Action @delegate, [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
+    {
+        try
+        {
+            @delegate();
+        }
+        catch (Exception e) when (e.GetType().IsAssignableTo(type))
+        {
+            return e;
+        }
+        catch (Exception e)
+        {
+            Fail($"Exception is of type {e.GetType().Name} instead of {type.Name} for {doNotPopulateThisValue.GetStringOr("the delegate")}");
         }
         
         Fail($"No exception was thrown by {doNotPopulateThisValue.GetStringOr("the delegate")}");
 
-
-        return null!;
+        return null;
+    }
+    
+    public static TException Throws<TException>(Action @delegate, [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null) where TException : Exception
+    {
+        return (TException) Throws(typeof(TException), @delegate, doNotPopulateThisValue);
     }
 
+    [DoesNotReturn]
     public static void Fail(string reason) => TUnit.Assertions.Fail.Test(reason);
 }

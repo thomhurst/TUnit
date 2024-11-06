@@ -3,7 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T1, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T2, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T3> : DataSourceGeneratorAttribute<T1, T2, T3>, ITestRegisteredEventReceiver, ITestStartEventReceiver, ITestEndEventReceiver, ILastTestInClassEventReceiver, ILastTestInAssemblyEventReceiver 
     where T1 : new()
     where T2 : new()
@@ -46,21 +46,21 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
         await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,
-            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+            false,
             _itemsWithMetadata.Item1.SharedType,
             _itemsWithMetadata.Item1.Key,
             _itemsWithMetadata.Item1.T);
         
         await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,
-            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+            false,
             _itemsWithMetadata.Item2.SharedType,
             _itemsWithMetadata.Item2.Key,
             _itemsWithMetadata.Item2.T);
         
         await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
             testContext,
-            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+            false,
             _itemsWithMetadata.Item3.SharedType,
             _itemsWithMetadata.Item3.Key,
             _itemsWithMetadata.Item3.T);
@@ -70,24 +70,24 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     {
         await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
             beforeTestContext,
-            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+            false,
             _itemsWithMetadata.Item1.SharedType,
             _itemsWithMetadata.Item1.Key,
-            _itemsWithMetadata.Item1.Key);
+            _itemsWithMetadata.Item1.T);
         
         await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
             beforeTestContext,
-            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+            false,
             _itemsWithMetadata.Item2.SharedType,
             _itemsWithMetadata.Item2.Key,
-            _itemsWithMetadata.Item2.Key);
+            _itemsWithMetadata.Item2.T);
         
         await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
             beforeTestContext,
-            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+            false,
             _itemsWithMetadata.Item3.SharedType,
             _itemsWithMetadata.Item3.Key,
-            _itemsWithMetadata.Item3.Key);
+            _itemsWithMetadata.Item3.T);
     }
 
     public async ValueTask OnTestEnd(TestContext testContext)

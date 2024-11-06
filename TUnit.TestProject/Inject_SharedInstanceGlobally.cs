@@ -8,7 +8,7 @@ public static class SharedInjectedGloballyContainer
     public static readonly List<DummyReferenceTypeClass> Instances = [];
 }
 
-[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerTestSession), NotInParallel]
 public class InjectSharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
     [Test, Repeat(5)]
@@ -48,7 +48,7 @@ public class InjectSharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeCla
     }
 }
 
-[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerTestSession), NotInParallel]
 public class InjectSharedGlobally2(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
     [Test, Repeat(5)]
@@ -88,7 +88,7 @@ public class InjectSharedGlobally2(DummyReferenceTypeClass dummyReferenceTypeCla
     }
 }
 
-[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.Globally), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerTestSession), NotInParallel]
 public class InjectSharedGlobally3(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
     [Test, Repeat(5)]

@@ -16,10 +16,10 @@ public class PropertySetterTests
     [ClassDataSource<InnerModel>]
     public required InnerModel Property3 { get; init; }
     
-    [ClassDataSource<InnerModel>(Shared = SharedType.Globally)]
+    [ClassDataSource<InnerModel>(Shared = SharedType.PerTestSession)]
     public required InnerModel Property4 { get; init; }
     
-    [ClassDataSource<InnerModel>(Shared = SharedType.ForClass)]
+    [ClassDataSource<InnerModel>(Shared = SharedType.PerClass)]
     public required InnerModel Property5 { get; init; }
     
     [ClassDataSource<InnerModel>(Shared = SharedType.Keyed, Key = "Key")]
@@ -28,7 +28,7 @@ public class PropertySetterTests
     [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
     public required string Property7 { get; init; }
 
-    [ClassDataSource<StaticInnerModel>(Shared = SharedType.Globally)]
+    [ClassDataSource<StaticInnerModel>(Shared = SharedType.PerTestSession)]
     public static StaticInnerModel StaticProperty { get; set; } = null!;
     
     [Before(TestSession)]
