@@ -2,7 +2,7 @@
 
 public class TestBase
 {
-    [ClassDataSource<MyFactory>(Shared = SharedType.Globally)]
+    [ClassDataSource<MyFactory>(Shared = SharedType.PerTestSession)]
     public static MyFactory Factory { get; set; } = null!;
     
     protected HttpClient Client { get; private set; } = null!;

@@ -9,7 +9,7 @@ public static class SharedInjectedKeyedContainer
     public static readonly ConcurrentDictionary<string, List<DummyReferenceTypeClass>> InstancesPerKey = new();
 }
 
-[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerClass), NotInParallel]
 public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
     [Test, Repeat(5)]
@@ -73,7 +73,7 @@ public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass
     }
 }
 
-[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerClass), NotInParallel]
 public class InjectSharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
     [Test, Repeat(5)]
@@ -137,7 +137,7 @@ public class InjectSharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass
     }
 }
 
-[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.ForClass), NotInParallel]
+[ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerClass), NotInParallel]
 public class InjectSharedPerKey3(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
     [Test, Repeat(5)]
