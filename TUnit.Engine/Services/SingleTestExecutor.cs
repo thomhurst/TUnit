@@ -35,17 +35,10 @@ internal class SingleTestExecutor(
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
         bool isStartedAsDependencyForAnotherTest)
     {
-        lock (test)
+        lock (test.TestContext.Lock)
         {
-            if (test.IsStarted)
-            {
-                return test.TestContext.TestTask;
-            }
-
-            test.IsStarted = true;
+            return test.TestContext.TestTask ??= ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest);
         }
-        
-        return ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest);
     }
 
     private async Task ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context, bool isStartedAsDependencyForAnotherTest)
@@ -66,8 +59,7 @@ internal class SingleTestExecutor(
             {
                 await messageBus.Cancelled(testContext);
                 
-                testContext.TaskCompletionSource.SetCanceled();
-                return;
+                cancellationTokenSource.Token.ThrowIfCancellationRequested();
             }
 
             await messageBus.InProgress(testContext);
@@ -111,13 +103,9 @@ internal class SingleTestExecutor(
                     Status = Status.Passed,
                     Output = testContext.GetStandardOutput()
                 };
-
-                testContext.TaskCompletionSource.SetResult(null);
             }
             catch (SkipTestException skipTestException)
             {
-                testContext.TaskCompletionSource.SetException(skipTestException);
-
                 await logger.LogInformationAsync($"Skipping {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}...");
 
                 await messageBus.Skipped(testContext, skipTestException.Reason);
@@ -133,11 +121,11 @@ internal class SingleTestExecutor(
                     Exception = null,
                     Status = Status.Skipped,
                 };
+
+                throw;
             }
             catch (Exception e)
             {
-                testContext.TaskCompletionSource.SetException(e);
-
                 var timingProperty = GetTimingProperty(testContext, start);
 
                 await messageBus.Failed(testContext, e, start);
@@ -152,11 +140,9 @@ internal class SingleTestExecutor(
                     Status = Status.Failed,
                     Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}"
                 };
-            }
 
-            // Will only set if not already set - Last resort incase something weird happened
-            testContext.TaskCompletionSource.TrySetException(
-                new Exception("Unknown error setting TaskCompletionSource"));
+                throw;
+            }
         }
         finally
         {

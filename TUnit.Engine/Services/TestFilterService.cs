@@ -21,7 +21,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             return testNodes;
         }
         
-        _logger.LogTrace($"Test filter is: {testExecutionFilter?.GetType().Name ?? "null"}");
+        _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
         return testNodes.Where(x => MatchesTest(testExecutionFilter, x));
     }
@@ -37,11 +37,6 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(discoveredTest.TestDetails), BuildPropertyBag(discoveredTest.TestDetails)),
             _ => UnhandledFilter(testExecutionFilter)
         };
-
-        if (!shouldRunTest)
-        {
-            discoveredTest.TestContext.TaskCompletionSource.SetException(new TestNotExecutedException(discoveredTest.TestDetails));
-        }
 
         return shouldRunTest;
 #pragma warning restore TPEXP
