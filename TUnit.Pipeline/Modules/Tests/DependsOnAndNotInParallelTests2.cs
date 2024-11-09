@@ -11,7 +11,7 @@ public class NotInParallelWithDependsOnTests : TestModule
         return await RunTestsWithFilter(context, 
             "/*/*/NotInParallelWithDependsOnTests/*",
             [
-                result => result.Successful.Should().BeTrue(),
+                result => result.Successful.Should().BeFalse(),
                 result => result.Total.Should().Be(3),
                 result => result.Passed.Should().Be(0),
                 result => result.Failed.Should().Be(3),
