@@ -18,7 +18,7 @@ public static class TestContextExtensions
             classType: context.TestDetails.ClassType, 
             classParameterTypes: context.TestDetails.TestClassParameterTypes);
 
-        if (tests.Any(x => !x.TestTask.IsCompleted))
+        if (tests.Any(x => x.TestTask?.IsCompleted is not true))
         {
             throw new Exception("Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?");
         }

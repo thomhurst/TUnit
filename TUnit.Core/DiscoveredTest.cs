@@ -40,6 +40,4 @@ internal abstract class DiscoveredTest
     public abstract IClassConstructor? ClassConstructor { get; }
     
     public IHookExecutor? HookExecutor { get; internal set; }
-    
-    public bool IsStarted { get; set; }
 }

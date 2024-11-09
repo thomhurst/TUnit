@@ -6,7 +6,6 @@ public partial class TestContext : Context, IDisposable
 
     internal T GetService<T>() => (T) _serviceProvider.GetService(typeof(T))!;
     
-    internal readonly TaskCompletionSource<object?> TaskCompletionSource = new();
     internal readonly List<Artifact> Artifacts = [];
     internal readonly List<CancellationToken> LinkedCancellationTokens = [];
     internal readonly TestMetadata OriginalMetadata;
@@ -29,7 +28,7 @@ public partial class TestContext : Context, IDisposable
     
     public DateTimeOffset? TestStart { get; internal set; }
     
-    internal Task TestTask => TaskCompletionSource.Task;
+    internal Task? TestTask { get; set; }
 
     public TestDetails TestDetails { get; }
 
