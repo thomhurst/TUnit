@@ -121,8 +121,6 @@ internal class SingleTestExecutor(
                     Exception = null,
                     Status = Status.Skipped,
                 };
-
-                throw;
             }
             catch (Exception e)
             {
