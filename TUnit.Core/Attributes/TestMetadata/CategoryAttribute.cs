@@ -9,6 +9,6 @@ public class CategoryAttribute(string category) : TUnitAttribute, ITestDiscovery
     
     public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
     {
-        discoveredTestContext.TestDetails.MutableCategories.Add(Category);
+        discoveredTestContext.AddCategory(Category);
     }
 }

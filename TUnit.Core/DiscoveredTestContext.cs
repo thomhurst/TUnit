@@ -19,6 +19,11 @@ public class DiscoveredTestContext
         TestContext.TestDetails.InternalCustomProperties.Add(key, value);
     }
     
+    public void AddCategory(string category)
+    {
+        TestContext.TestDetails.MutableCategories.Add(category);
+    }
+    
     public void SetDisplayName(string displayName)
     {
         TestContext.TestDetails.DisplayName = displayName;
