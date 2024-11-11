@@ -17,7 +17,7 @@ public class TestDiscoveryBeforeHookTests : TestModule
                 result => result.Passed.Should().Be(1),
                 result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0),
-                _ => context.Git().RootDirectory.FindFile(x => x.Name.StartsWith("TestDiscoveryBeforeTests") && x.Extension == ".txt").AssertExists().Delete()
+                _ => context.Git().RootDirectory.FindFile(x => x.Name.StartsWith("TestDiscoveryBeforeTests") && x.Extension == ".txt").AssertExists()
             ], cancellationToken);
     }
 }

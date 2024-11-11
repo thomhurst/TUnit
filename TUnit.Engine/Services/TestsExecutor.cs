@@ -126,10 +126,8 @@ internal class TestsExecutor
         {
             await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context, false), cancellationToken);
         }
-        catch (Exception exception)
+        catch
         {
-            await _logger.LogErrorAsync(exception);
-
             if (_commandLineOptions.IsOptionSet(FailFastCommandProvider.FailFast))
             {
                 await _engineCancellationToken.CancellationTokenSource.CancelAsync();

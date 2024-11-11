@@ -32,7 +32,7 @@ public class InheritedPropertySetterTests : TestModule
                     Disposing Property
                     """
                     ),
-                _ => context.Git().RootDirectory.FindFile(x => x.Name == "StaticProperty_IAsyncDisposable.txt").AssertExists().Delete()
+                _ => context.Git().RootDirectory.FindFile(x => x.Name == "StaticProperty_IAsyncDisposable.txt").AssertExists()
             ], cancellationToken);
     }
 }
