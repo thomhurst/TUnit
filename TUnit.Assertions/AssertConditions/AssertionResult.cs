@@ -10,7 +10,7 @@ public class AssertionResult
             return _message.Value;
         }
     }
-    private Lazy<string> _message;
+    private readonly Lazy<string> _message;
 
     private AssertionResult(bool isPassed, Func<string> messageGenerator)
     {
@@ -87,7 +87,7 @@ public class AssertionResult
     public static AssertionResult Fail(Func<string> message)
         => new(false, message);
 
-    public static AssertionResult Passed { get; } = new(true, () => "");
+    public static AssertionResult Passed { get; } = new(true, () => string.Empty);
     
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
 }
