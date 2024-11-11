@@ -32,8 +32,8 @@ internal static class TestExtensions
                     ),
                 
                 // Custom TUnit Properties
-                ..testDetails.Categories.Select(x => new KeyValuePairStringProperty("Category", x)),
-                ..testDetails.CustomProperties.Select(x => new KeyValuePairStringProperty(x.Key, x.Value)),
+                ..testDetails.Categories.Select(category => new TestMetadataProperty(category, string.Empty)),
+                ..testDetails.CustomProperties.Select(x => new TestMetadataProperty(x.Key, x.Value)),
                 
                 // TRX Report Properties
                 new TrxFullyQualifiedTypeNameProperty(testDetails.ClassType.FullName!),
