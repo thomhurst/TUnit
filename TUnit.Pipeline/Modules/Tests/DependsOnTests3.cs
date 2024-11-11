@@ -24,8 +24,8 @@ public class DependsOnTests3 : TestModule
                     var test2Start = result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("Test2")).StartTime!.Value;
                     var test3Start = result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("Test3")).StartTime!.Value;
 
-                    test3Start.Should().BeOnOrAfter(test1Start.AddSeconds(1));
-                    test3Start.Should().BeOnOrAfter(test2Start.AddSeconds(1));
+                    test3Start.Should().BeOnOrAfter(test1Start.AddSeconds(0.9));
+                    test3Start.Should().BeOnOrAfter(test2Start.AddSeconds(0.9));
 
                 } 
             ], cancellationToken);

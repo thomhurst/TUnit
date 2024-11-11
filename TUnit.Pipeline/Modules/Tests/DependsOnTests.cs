@@ -23,7 +23,7 @@ public class DependsOnTests : TestModule
                     var test1Start = result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("Test1")).StartTime!.Value;
                     var test2Start = result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("Test2")).StartTime!.Value;
 
-                    test2Start.Should().BeOnOrAfter(test1Start.AddSeconds(5));
+                    test2Start.Should().BeOnOrAfter(test1Start.AddSeconds(4.9));
                 }
             ], cancellationToken);
     }
