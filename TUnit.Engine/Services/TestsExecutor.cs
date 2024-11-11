@@ -12,8 +12,6 @@ namespace TUnit.Engine.Services;
 
 internal class TestsExecutor
 {
-    private int _currentlyExecutingTests;
-
     private readonly SingleTestExecutor _singleTestExecutor;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ICommandLineOptions _commandLineOptions;
@@ -120,8 +118,6 @@ internal class TestsExecutor
     private async ValueTask ProcessTest(DiscoveredTest test,
         ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
     {
-        NotifyTestStart();
-
         try
         {
             await Task.Run(() => _singleTestExecutor.ExecuteTestAsync(test, filter, context, false), cancellationToken);
@@ -133,20 +129,6 @@ internal class TestsExecutor
                 await _engineCancellationToken.CancellationTokenSource.CancelAsync();
             }
         }
-        finally
-        {
-            NotifyTestEnd();
-        }
-    }
-
-    private void NotifyTestEnd()
-    {
-        Interlocked.Decrement(ref _currentlyExecutingTests);
-    }
-
-    private void NotifyTestStart()
-    {
-        Interlocked.Increment(ref _currentlyExecutingTests);
     }
 
     private int GetParallelTestsLimit()

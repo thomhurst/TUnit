@@ -15,7 +15,7 @@ public partial class TestContext : Context, IDisposable
 #else
     public readonly object Lock = new();
 #endif
-
+    
     internal bool ReportResult = true;
     
     internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestMetadata originalMetadata)
