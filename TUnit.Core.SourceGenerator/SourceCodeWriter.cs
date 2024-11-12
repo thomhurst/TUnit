@@ -21,10 +21,20 @@ public class SourceCodeWriter : IDisposable
         }
     }
     
-    public void WriteLine([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string value)
+    public void WriteLine([StringSyntax("c#")] string value)
     {
         if (string.IsNullOrEmpty(value))
         {
+            return;
+        }
+
+        if (value.Contains('\n'))
+        {
+            foreach (var splitValue in value.Split('\n'))
+            {
+                WriteLine(splitValue.Trim());
+            }
+            
             return;
         }
         

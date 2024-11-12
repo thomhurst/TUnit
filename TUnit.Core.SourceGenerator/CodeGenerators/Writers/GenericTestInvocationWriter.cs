@@ -22,13 +22,17 @@ public static class GenericTestInvocationWriter
         sourceBuilder.WriteLine();
         
         sourceBuilder.WriteLine("var objectBag = new global::System.Collections.Generic.Dictionary<string, object>();");
-
-        var classVariablesIndex = 0;
+        
         var methodVariablesIndex = 0;
+        var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
         
-        testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
+        testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
+        testSourceDataModel.ClassArguments.OpenScope(sourceBuilder, ref classVariablesIndex);
+        testSourceDataModel.PropertyArguments.OpenScope(sourceBuilder, ref propertiesVariablesIndex);
         
+        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
+        testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
         testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
 
         foreach (var (propertySymbol, argumentsContainer) in testSourceDataModel.PropertyArguments.InnerContainers)
@@ -57,8 +61,6 @@ public static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine();
         
-        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
-
         sourceBuilder.WriteLine($"nodes.Add(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
@@ -79,8 +81,9 @@ public static class GenericTestInvocationWriter
         
         sourceBuilder.WriteLine(
             "resettableClassFactory = resettableClassFactoryDelegate();");
+        sourceBuilder.WriteLine("objectBag = new();");
         
-        testSourceDataModel.ClassArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
-        testSourceDataModel.MethodArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
+        testSourceDataModel.ClassArguments.CloseScope(sourceBuilder);
+        testSourceDataModel.MethodArguments.CloseScope(sourceBuilder);
     }
 }

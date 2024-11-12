@@ -7,12 +7,16 @@ public record ClassConstructorAttributeContainer(ArgumentsType ArgumentsType) : 
     public required string ClassConstructorType { get; init; }
 
     public string Invocation => $"new {ClassConstructorType}()";
-    
+
+    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+    }
+
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         // Nothing
     }

@@ -87,7 +87,10 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
                 $"There was an error with the generator compilation.{Environment.NewLine}{Environment.NewLine}{error}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, generatedFiles)}");
         }
 
-        await assertions(generatedFiles);
+        using (Assert.Multiple())
+        {
+            await assertions(generatedFiles);
+        }
     }
 
     private static bool IsError(Diagnostic x)

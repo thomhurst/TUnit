@@ -25,11 +25,50 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
             await Assert.That(generatedFiles.Length).IsEqualTo(7);
 
             await AssertFileContains(generatedFiles[0], "var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>>(true).ElementAt(0);");
-            await AssertFileContains(generatedFiles[0], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,\n   TestClassType = testClassType,\n   ParameterInfos = methodInfo.GetParameters(),\n   PropertyInfo = null,\n   TestObjectBag = objectBag,\n   TestSessionId = sessionId,\n});");
+            await AssertFileContains(generatedFiles[0], """
+                                                        for (var methodArgGeneratedDataIndex = 0; methodArgGeneratedDataIndex < methodDataAttribute.GenerateDataSources(new DataGeneratorMetadata
+                                                        {
+                                                        	Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+                                                        	TestClassType = testClassType,
+                                                        	ParameterInfos = methodInfo.GetParameters(),
+                                                        	PropertyInfo = null,
+                                                        	TestObjectBag = objectBag,
+                                                        	TestSessionId = sessionId,
+                                                        }).Count(); methodArgGeneratedDataIndex++)
+                                                        {
+                                                        	var methodArgGeneratedData = methodDataAttribute.GenerateDataSources(new DataGeneratorMetadata
+                                                        	{
+                                                        		Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+                                                        		TestClassType = testClassType,
+                                                        		ParameterInfos = methodInfo.GetParameters(),
+                                                        		PropertyInfo = null,
+                                                        		TestObjectBag = objectBag,
+                                                        		TestSessionId = sessionId,
+                                                        	}).ElementAt(methodArgGeneratedDataIndex);
+                                                        """);
             await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArgGeneratedData)");
 
             await AssertFileContains(generatedFiles[1], "var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>>(true).ElementAt(0);");
-            await AssertFileContains(generatedFiles[1], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(new DataGeneratorMetadata\n{\n   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,\n   TestClassType = testClassType,\n   ParameterInfos = methodInfo.GetParameters(),\n   PropertyInfo = null,\n   TestObjectBag = objectBag,\n   TestSessionId = sessionId,\n});");
-            await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArgGeneratedData)");
+            await AssertFileContains(generatedFiles[1], """
+                                                        for (var methodArgGeneratedDataIndex = 0; methodArgGeneratedDataIndex < methodDataAttribute.GenerateDataSources(new DataGeneratorMetadata
+                                                        {
+                                                        	Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+                                                        	TestClassType = testClassType,
+                                                        	ParameterInfos = methodInfo.GetParameters(),
+                                                        	PropertyInfo = null,
+                                                        	TestObjectBag = objectBag,
+                                                        	TestSessionId = sessionId,
+                                                        }).Count(); methodArgGeneratedDataIndex++)
+                                                        {
+                                                        	var methodArgGeneratedData = methodDataAttribute.GenerateDataSources(new DataGeneratorMetadata
+                                                        	{
+                                                        		Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+                                                        		TestClassType = testClassType,
+                                                        		ParameterInfos = methodInfo.GetParameters(),
+                                                        		PropertyInfo = null,
+                                                        		TestObjectBag = objectBag,
+                                                        		TestSessionId = sessionId,
+                                                        	}).ElementAt(methodArgGeneratedDataIndex);
+                                                        """);            await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArgGeneratedData)");
         });
 }

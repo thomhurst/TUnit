@@ -14,6 +14,38 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
     
     public required string? PropertyName { get; init; }
 
+    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+        if (ArgumentsType is ArgumentsType.Property)
+        {
+            return;
+        }
+        
+        var objectToGetAttributesFrom = ArgumentsType switch
+        {
+            ArgumentsType.Method => "methodInfo",
+            _ => $"typeof({TestClassTypeName})"
+        };
+        
+        var type = "Parameters";
+        
+        var parameterInfos = ArgumentsType switch
+        {
+            ArgumentsType.ClassConstructor => $"{objectToGetAttributesFrom}.GetConstructors().First().GetParameters()",
+            _ => $"{objectToGetAttributesFrom}.GetParameters()"
+        };
+        
+        var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
+
+        var dataAttr = GenerateDataAttributeVariable("var", $"{objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt({AttributeIndex})", ref variableIndex);
+            
+        sourceCodeWriter.WriteLine(dataAttr.ToString());
+        
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine($"for (var {generatedDataVariableName}Index = 0; {generatedDataVariableName}Index < {dataAttr.Name}.GenerateDataSources({DataGeneratorMetadata(type, parameterInfos, "null")}).Count(); {generatedDataVariableName}Index++)");
+        sourceCodeWriter.WriteLine("{");
+    }
+
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         var objectToGetAttributesFrom = ArgumentsType switch
@@ -24,6 +56,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         };
         
         var propertyName = "null";
+        
         if (ArgumentsType == ArgumentsType.Property)
         {
             propertyName = $"propertyInfo{variableIndex}";
@@ -40,18 +73,10 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
             _ => $"{objectToGetAttributesFrom}.GetParameters()"
         };
         
-        var dataGeneratorMetadata = $$"""
-                                     new DataGeneratorMetadata
-                                     {
-                                        Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
-                                        TestClassType = testClassType,
-                                        ParameterInfos = {{parameterInfos}},
-                                        PropertyInfo = {{propertyName}},
-                                        TestObjectBag = objectBag,
-                                        TestSessionId = sessionId,
-                                     }
-                                     """;
-        
+        var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
+
+        var dataGeneratorMetadata = DataGeneratorMetadata(type, parameterInfos, propertyName);
+
         if (ArgumentsType == ArgumentsType.Property)
         {
             var attr = GenerateDataAttributeVariable("var",
@@ -65,21 +90,9 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
             return;
         }
         
-        var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
-        var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
-
-        var dataAttr = GenerateDataAttributeVariable("var",
-            $"{objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt({AttributeIndex})",
-            ref variableIndex);
-            
-        sourceCodeWriter.WriteLine(dataAttr.ToString());
+        var dataAttr = DataAttributesVariables.ElementAt(0);
         
-        sourceCodeWriter.WriteLine();
-        
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata});");
-        sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
-        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.WriteLine($"var {generatedDataVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata}).ElementAt({generatedDataVariableName}Index);");
 
         if (ArgumentsType == ArgumentsType.ClassConstructor)
         {
@@ -112,19 +125,39 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         }
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
+        if (ArgumentsType is ArgumentsType.Property)
+        {
+            return;
+        }
+        
         sourceCodeWriter.WriteLine("}");
     }
-    
+
     public override string[] GetArgumentTypes()
     {
         return GenericArguments;
     }
-    
+
     public string TestClassTypeName { get; }
 
     public string[] GenericArguments { get; }
 
     public string AttributeDataGeneratorType { get; }
+
+    private static string DataGeneratorMetadata(string type, string parameterInfos, string propertyName)
+    {
+        return $$"""
+                 new DataGeneratorMetadata
+                 {
+                    Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
+                    TestClassType = testClassType,
+                    ParameterInfos = {{parameterInfos}},
+                    PropertyInfo = {{propertyName}},
+                    TestObjectBag = objectBag,
+                    TestSessionId = sessionId,
+                 }
+                 """;
+    }
 }

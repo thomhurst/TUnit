@@ -332,7 +332,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            var canBeInstanceMethod = context.Symbol is IPropertySymbol;
+            var canBeInstanceMethod = context.Symbol is IPropertySymbol or IMethodSymbol
+                                      && testClassType.InstanceConstructors.First().Parameters.IsDefaultOrEmpty;
+            
             if (!canBeInstanceMethod && !methodContainingTestData.IsStatic && attribute.ConstructorArguments.Length != 1) 
             {
                 context.ReportDiagnostic(
@@ -342,7 +344,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 );
                 return;
             }
-        
+            
             if (methodContainingTestData.DeclaredAccessibility != Accessibility.Public)
             {
                 context.ReportDiagnostic(

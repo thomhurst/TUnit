@@ -14,26 +14,33 @@ public record MethodDataSourceAttributeContainer(
     string ArgumentsExpression)
     : ArgumentsContainer(ArgumentsType)
 {
+    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+        if (!IsEnumerableData)
+        {
+            return;
+        }
+        
+        var dataName = ArgumentsType == ArgumentsType.ClassConstructor
+            ? CodeGenerators.VariableNames.ClassData
+            : CodeGenerators.VariableNames.MethodData;
+            
+        sourceCodeWriter.WriteLine($"for (var {dataName}CurrentIndex = 0; {dataName}CurrentIndex < {GetMethodInvocation()}.Count(); {dataName}CurrentIndex++)");
+        sourceCodeWriter.WriteLine("{");
+    }
+
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
+        var dataName = ArgumentsType == ArgumentsType.ClassConstructor
+            ? CodeGenerators.VariableNames.ClassData
+            : CodeGenerators.VariableNames.MethodData;
+        
         if (IsEnumerableData)
         {
             if (ArgumentsType == ArgumentsType.Property)
             {
                 throw new Exception("Property Injection is not supported with Enumerable data");
             }
-            
-            var enumerableIndexName = ArgumentsType == ArgumentsType.ClassConstructor
-                ? CodeGenerators.VariableNames.ClassDataIndex
-                : CodeGenerators.VariableNames.TestMethodDataIndex;
-            
-            var dataName = ArgumentsType == ArgumentsType.ClassConstructor
-                ? CodeGenerators.VariableNames.ClassData
-                : CodeGenerators.VariableNames.MethodData;
-            
-            sourceCodeWriter.WriteLine($"foreach (var {dataName} in {GetMethodInvocation()})");
-            sourceCodeWriter.WriteLine("{");
-            sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
             
             if (TupleTypes.Any())
             {
@@ -43,7 +50,7 @@ public record MethodDataSourceAttributeContainer(
                     tupleVariableName += Guid.NewGuid().ToString("N");
                 }
                 
-                sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({dataName});");
+                sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({GetMethodInvocation()}.ElementAt({dataName}CurrentIndex));");
 
                 for (var index = 0; index < TupleTypes.Length; index++)
                 {
@@ -56,11 +63,13 @@ public record MethodDataSourceAttributeContainer(
             }
             else
             {
+                sourceCodeWriter.WriteLine($"var {dataName} = {GetMethodInvocation()}.ElementAt({dataName}CurrentIndex);");
+
                 AddVariable(new Variable
                 {
                     Type = "var", 
                     Name = dataName, 
-                    Value = GetMethodInvocation()   
+                    Value = GetMethodInvocation() + $".ElementAt({dataName}CurrentIndex)"   
                 });
             }
         }
@@ -98,13 +107,19 @@ public record MethodDataSourceAttributeContainer(
             return $"{TypeName}.{MethodName}({ArgumentsExpression})";
         }
         
-        return $"resettableClassFactory.Value.{MethodName}({ArgumentsExpression})";
+        return $"new {TestClassTypeName}().{MethodName}({ArgumentsExpression})";
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         if (IsEnumerableData)
         { 
+            var enumerableIndexName = ArgumentsType == ArgumentsType.ClassConstructor
+                ? CodeGenerators.VariableNames.ClassDataIndex
+                : CodeGenerators.VariableNames.TestMethodDataIndex;
+            
+            sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
+
             sourceCodeWriter.WriteLine("}");
         }
     }
