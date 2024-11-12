@@ -36,8 +36,8 @@
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.42.87" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.42.87" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.42.87" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.6.2" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.6.2" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.6.3" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.6.3" />
     <PackageVersion Include="NUnit" Version="4.2.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.3.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
