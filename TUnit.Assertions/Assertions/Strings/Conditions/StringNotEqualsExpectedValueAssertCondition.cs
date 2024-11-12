@@ -17,12 +17,12 @@ public class StringNotEqualsExpectedValueAssertCondition(string expected, String
             return AssertionResult
                 .FailIf(
                     () => expectedValue is null,
-                    "it was null");
+                    () => "it was null");
         }
 
         return AssertionResult
             .FailIf(
                 () => string.Equals(actualValue, expectedValue, stringComparison),
-                "it was");
+                () => "it was");
     }
 }

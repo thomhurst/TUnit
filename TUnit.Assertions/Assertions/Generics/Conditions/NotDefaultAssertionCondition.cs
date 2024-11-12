@@ -13,5 +13,5 @@ public class NotDefaultExpectedValueAssertCondition<TActual>() : ExpectedValueAs
             => AssertionResult
                 .FailIf(
                     () => actualValue is null || actualValue.Equals(_defaultValue),
-                    "it was");
+                    () => "it was");
 }
