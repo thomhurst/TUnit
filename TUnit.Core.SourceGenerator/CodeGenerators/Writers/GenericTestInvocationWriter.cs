@@ -23,9 +23,11 @@ public static class GenericTestInvocationWriter
         
         sourceBuilder.WriteLine("var objectBag = new global::System.Collections.Generic.Dictionary<string, object>();");
 
-        var classVariablesIndex = 0;
         var methodVariablesIndex = 0;
+        var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
+        
+        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
         
         testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
         
@@ -57,8 +59,6 @@ public static class GenericTestInvocationWriter
 
         sourceBuilder.WriteLine();
         
-        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
-
         sourceBuilder.WriteLine($"nodes.Add(new TestMetadata<{fullyQualifiedClassType}>");
         sourceBuilder.WriteLine("{"); 
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");

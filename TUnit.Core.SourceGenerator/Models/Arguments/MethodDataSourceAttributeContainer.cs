@@ -98,7 +98,7 @@ public record MethodDataSourceAttributeContainer(
             return $"{TypeName}.{MethodName}({ArgumentsExpression})";
         }
         
-        return $"resettableClassFactory.Value.{MethodName}({ArgumentsExpression})";
+        return $"new {TypeName}().{MethodName}({ArgumentsExpression})";
     }
 
     public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
