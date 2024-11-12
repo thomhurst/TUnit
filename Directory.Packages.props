@@ -41,7 +41,7 @@
     <PackageVersion Include="NUnit" Version="4.2.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.3.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
-    <PackageVersion Include="Polly" Version="8.4.2" />
+    <PackageVersion Include="Polly" Version="8.5.0" />
     <PackageVersion Include="PolySharp" Version="1.14.1" />
     <PackageVersion Include="StreamJsonRpc" Version="2.19.27" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
