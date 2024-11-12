@@ -1,4 +1,6 @@
-﻿using TUnit.Assertions;
+﻿#pragma warning disable
+
+using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 
