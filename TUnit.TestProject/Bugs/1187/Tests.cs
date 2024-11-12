@@ -57,7 +57,7 @@ public class Tests(Context ctx)
     
     [Test]
     [MethodDataSource(nameof(Contexts))]
-    public async Task Test2(Context ctx2)
+    public async Task Test3(Context ctx2)
     {
         await AssertUniqueContext(ctx.Id);
         await AssertUniqueContext(ctx2.Id);
