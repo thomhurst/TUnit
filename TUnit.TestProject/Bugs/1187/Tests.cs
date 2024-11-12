@@ -11,8 +11,6 @@ public record TestRecord(Guid AppId, int X, int Y);
 public static class TestData
 {
     public static Guid AppId1 { get; } = Guid.NewGuid();
-    public static Guid AppId2 { get; } = Guid.NewGuid();
-    public static Guid AppId3 { get; } = Guid.NewGuid();
 
     public static IEnumerable<TestRecord> App1Data()
     {
@@ -20,32 +18,6 @@ public static class TestData
         yield return new TestRecord(AppId1, 2, 1);
         yield return new TestRecord(AppId1, 1, 0);
         yield return new TestRecord(Guid.NewGuid(), 0, 1);
-    }
-
-    public static IEnumerable<TestRecord> App2Data()
-    {
-        yield return new TestRecord(AppId2, 7, 2);
-        yield return new TestRecord(AppId2, 2, 1);
-        yield return new TestRecord(AppId2, 1, 0);
-        yield return new TestRecord(Guid.NewGuid(), 0, 1);
-    }
-
-    public static IEnumerable<TestRecord> App3Data()
-    {
-        yield return new TestRecord(AppId3, 7, 2);
-        yield return new TestRecord(AppId3, 2, 1);
-        yield return new TestRecord(AppId3, 1, 0);
-        yield return new TestRecord(Guid.NewGuid(), 0, 1);
-    }
-}
-
-public class Fixture : IAsyncInitializer
-{
-    public async Task InitializeAsync()
-    {
-        Console.WriteLine(@"in fixture init async");
-        await Task.Delay(2);
-        Console.WriteLine(@"fixture init async done");
     }
 }
 
@@ -61,8 +33,9 @@ public class Context : IAsyncInitializer
     }
 }
 
-[ClassDataSource<Fixture, Context>(Shared = [SharedType.PerTestSession, SharedType.None])]
-public class Tests(Fixture fixture, Context ctx)
+[ClassDataSource<Context>(Shared = SharedType.None)]
+[MethodDataSource(nameof(Contexts))]
+public class Tests(Context ctx)
 {
     private static List<Guid> Ids { get; } = [];
     private static readonly SemaphoreSlim Lock = new(1, 1);
@@ -82,6 +55,14 @@ public class Tests(Fixture fixture, Context ctx)
         await AssertUniqueContext(ctx.Id);
     }
     
+    [Test]
+    [MethodDataSource(nameof(Contexts))]
+    public async Task Test2(Context ctx2)
+    {
+        await AssertUniqueContext(ctx.Id);
+        await AssertUniqueContext(ctx2.Id);
+    }
+    
     private async Task AssertUniqueContext(Guid guid)
     {
         await Lock.WaitAsync();
@@ -95,5 +76,11 @@ public class Tests(Fixture fixture, Context ctx)
         {
             Lock.Release();
         }
+    }
+
+    public static IEnumerable<Context> Contexts()
+    {
+        yield return new Context();
+        yield return new Context();
     }
 }

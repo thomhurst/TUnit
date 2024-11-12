@@ -11,8 +11,8 @@ public class Bug1187 : TestModule
             "/*/TUnit.TestProject.Bugs._1187/*/*",
             [
                 result => result.Successful.Should().BeTrue(),
-                result => result.Total.Should().Be(6),
-                result => result.Passed.Should().Be(6),
+                result => result.Total.Should().Be(24),
+                result => result.Passed.Should().Be(24),
                 result => result.Failed.Should().Be(0),
                 result => result.Skipped.Should().Be(0)
             ], cancellationToken);
