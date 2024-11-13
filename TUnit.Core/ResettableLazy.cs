@@ -11,7 +11,7 @@ public class ResettableLazy<
     where TClassConstructor : IClassConstructor, new()
     where T : class
 {
-    public ResettableLazy(string sessionId) : base(new TClassConstructor(), sessionId)
+    public ResettableLazy(string sessionId, TestBuilderContext testBuilderContext) : base(new TClassConstructor(), sessionId, testBuilderContext)
     {
     }
     
@@ -21,7 +21,8 @@ public class ResettableLazy<
         ClassConstructor = new TClassConstructor();
         _factory = () => ClassConstructor.Create<T>(new ClassConstructorMetadata
         {
-            TestSessionId = SessionId
+            TestSessionId = SessionId,
+            TestBuilderContext = TestBuilderContext
         });
         await base.ResetLazy();
     }
@@ -30,25 +31,30 @@ public class ResettableLazy<
 public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : IAsyncDisposable where T : class
 {
     public IClassConstructor? ClassConstructor { get; protected set; }
-    
+    public TestBuilderContext TestBuilderContext { get; }
+
     private Lazy<T> _lazy;
     protected Func<T> _factory;
     
     protected readonly string SessionId;
 
-    protected ResettableLazy(IClassConstructor classConstructor, string sessionId)
+    protected ResettableLazy(IClassConstructor classConstructor, string sessionId,
+        TestBuilderContext testBuilderContext)
     {
         SessionId = sessionId;
         ClassConstructor = classConstructor;
+        TestBuilderContext = testBuilderContext;
         _factory = () => classConstructor.Create<T>(new ClassConstructorMetadata
         {
-            TestSessionId = sessionId
+            TestSessionId = sessionId,
+            TestBuilderContext = testBuilderContext
         });
         _lazy = new Lazy<T>(_factory);
     }
 
-    public ResettableLazy(Func<T> factory, string sessionId)
+    public ResettableLazy(Func<T> factory, string sessionId, TestBuilderContext testBuilderContext)
     {
+        TestBuilderContext = testBuilderContext;
         _factory = factory;
         SessionId = sessionId;
         _lazy = new Lazy<T>(factory);
@@ -85,6 +91,6 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
 
     public ResettableLazy<T> Clone()
     {
-        return new ResettableLazy<T>(_factory, SessionId);
+        return new ResettableLazy<T>(_factory, SessionId, TestBuilderContext);
     }
 }

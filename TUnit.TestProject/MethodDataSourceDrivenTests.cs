@@ -14,7 +14,7 @@ public class MethodDataSourceDrivenTests
     }
     
     [Test]
-    [MethodDataSource(nameof(SomeMethod), DisposeAfterTest = false)]
+    [MethodDataSource(nameof(SomeMethod))]
     public void DataSource_Method2(int value)
     {
         // Dummy method
@@ -28,8 +28,8 @@ public class MethodDataSourceDrivenTests
     }
     
     [Test]
-    [MethodDataSource(nameof(SomeMethod), Arguments = [5], DisposeAfterTest = false)]
-    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { 5 }, DisposeAfterTest = false)]
+    [MethodDataSource(nameof(SomeMethod), Arguments = [5])]
+    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { 5 })]
     public void DataSource_Method3(int value)
     {
         Console.WriteLine(value);
@@ -37,10 +37,10 @@ public class MethodDataSourceDrivenTests
     }
     
     [Test]
-    [MethodDataSource(nameof(SomeMethod), Arguments = ["Hello World!", 5, true], DisposeAfterTest = false)]
-    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { "Hello World!", 5, true }, DisposeAfterTest = false)]
-    [MethodDataSource(nameof(SomeMethod), Arguments = [MyString, 5, true], DisposeAfterTest = false)]
-    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { MyString, 5, true }, DisposeAfterTest = false)]
+    [MethodDataSource(nameof(SomeMethod), Arguments = ["Hello World!", 5, true])]
+    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { "Hello World!", 5, true })]
+    [MethodDataSource(nameof(SomeMethod), Arguments = [MyString, 5, true])]
+    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { MyString, 5, true })]
     public void DataSource_Method4(int value)
     {
         Console.WriteLine(value);

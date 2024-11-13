@@ -89,7 +89,7 @@ public abstract record TestMetadata
     
     public required Attribute[] DataAttributes { get; init; }
     
-    public required Dictionary<string, object?> ObjectBag { get; init; }
+    public required TestBuilderContext TestBuilderContext { get; init; }
     
     public abstract TestDetails BuildTestDetails();
     internal abstract DiscoveredTest BuildDiscoveredTest(TestContext testContext);

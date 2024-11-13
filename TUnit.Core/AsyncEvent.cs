@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using System.Runtime.ExceptionServices;
+
+namespace TUnit.Core;
 
 public class AsyncEvent<TEventArgs>
 {
@@ -60,7 +62,7 @@ public class AsyncEvent<TEventArgs>
         return e;
     }
 
-    public async Task InvokeAsync(object sender, TEventArgs eventArgs)
+    public async ValueTask InvokeAsync(object sender, TEventArgs eventArgs)
     {
         List<Func<object, TEventArgs, Task>> tmpInvocationList;
         
@@ -69,10 +71,28 @@ public class AsyncEvent<TEventArgs>
             tmpInvocationList = [.._invocationList];
         }
 
+        var exceptions = new List<Exception>();
+        
         foreach (var callback in tmpInvocationList)
         {
-            //Assuming we want a serial invocation, for a parallel invocation we can use Task.WhenAll instead
-            await callback(sender, eventArgs);
+            try
+            {
+                await callback(sender, eventArgs);
+            }
+            catch (Exception e)
+            {
+                exceptions.Add(e);
+            }
+        }
+
+        if (exceptions.Count == 1)
+        {
+            ExceptionDispatchInfo.Capture(exceptions[0]).Throw();
+        }
+
+        if (exceptions.Count > 1)
+        {
+            throw new AggregateException(exceptions);
         }
     }
 }

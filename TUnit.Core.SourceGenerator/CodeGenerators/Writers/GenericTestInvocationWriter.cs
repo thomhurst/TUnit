@@ -21,7 +21,8 @@ public static class GenericTestInvocationWriter
         
         sourceBuilder.WriteLine();
         
-        sourceBuilder.WriteLine("var objectBag = new global::System.Collections.Generic.Dictionary<string, object>();");
+        sourceBuilder.WriteLine("var testBuilderContext = new global::TUnit.Core.TestBuilderContext();");
+        sourceBuilder.WriteLine("var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);");
 
         var methodVariablesIndex = 0;
         var classVariablesIndex = 0;
@@ -76,11 +77,12 @@ public static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.WriteLine($"AttributeTypes = [ {testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})").ToCommaSeparatedString()} ],");
         sourceBuilder.WriteLine($"DataAttributes = [ {dataContainers.SelectMany(x => x.DataAttributesVariables).Select(x => x.Name).ToCommaSeparatedString()} ],");
-        sourceBuilder.WriteLine("ObjectBag = objectBag,");
+        sourceBuilder.WriteLine("TestBuilderContext = testBuilderContext,");
         sourceBuilder.WriteLine("});");
         
-        sourceBuilder.WriteLine(
-            "resettableClassFactory = resettableClassFactoryDelegate();");
+        sourceBuilder.WriteLine("resettableClassFactory = resettableClassFactoryDelegate();");
+        sourceBuilder.WriteLine("testBuilderContext = new();");
+        sourceBuilder.WriteLine("testBuilderContextAccessor.Current = testBuilderContext;");
         
         testSourceDataModel.ClassArguments.CloseScope(sourceBuilder);
         testSourceDataModel.MethodArguments.CloseScope(sourceBuilder);

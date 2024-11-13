@@ -4,7 +4,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : DataSourceGeneratorAttribute<T>, ITestRegisteredEventReceiver, ITestStartEventReceiver, ITestEndEventReceiver, ILastTestInClassEventReceiver, ILastTestInAssemblyEventReceiver where T : new()
+public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T> : DataSourceGeneratorAttribute<T> where T : new()
 {
     private T? _item;
     private DataGeneratorMetadata? _dataGeneratorMetadata;
@@ -17,41 +17,41 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         
         _item = ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key);
 
+        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (_, context) =>
+        {
+            await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
+                context.TestContext,
+                _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+                Shared,
+                Key,
+                _item);
+        };
+        
+        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (_, context) =>
+        {
+            await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
+                context,
+                _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
+                Shared,
+                Key,
+                _item);
+        };
+        
+        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, context) =>
+        {
+            await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, _item);
+        };
+        
+        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnLastTestInClass += async (_, context) =>
+        {
+            await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInClass<T>(Shared);
+        };
+        
+        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnLastTestInAssembly += async (_, context) =>
+        {
+            await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInAssembly<T>(Shared);
+        };
+
         yield return _item;
-    }
-
-    public async ValueTask OnTestRegistered(TestRegisteredContext testRegisteredContext)
-    {
-        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestRegistered(
-            testRegisteredContext.TestContext,
-            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
-            Shared,
-            Key,
-            _item);
-    }
-
-    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
-    {
-        return ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestStart(
-            beforeTestContext,
-            _dataGeneratorMetadata?.PropertyInfo?.GetAccessors()[0].IsStatic == true,
-            Shared,
-            Key,
-            _item);
-    }
-
-    public async ValueTask OnTestEnd(TestContext testContext)
-    {
-        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, _item);
-    }
-
-    public async ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext)
-    {
-        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInClass<T>(Shared);
-    }
-
-    public async ValueTask IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
-    {
-        await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).IfLastTestInAssembly<T>(Shared);
     }
 }

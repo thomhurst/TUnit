@@ -38,18 +38,20 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
             ArgumentsType.ClassConstructor => $"{objectToGetAttributesFrom}.GetConstructors().First().GetParameters()",
             _ => $"{objectToGetAttributesFrom}.GetParameters()"
         };
+
+        var dataGeneratorMetadataVariableName = $"{VariableNamePrefix}DataGeneratorMetadata";
         
-        var dataGeneratorMetadata = $$"""
-                                     new DataGeneratorMetadata
+        sourceCodeWriter.WriteLine($$"""
+                                     var {{dataGeneratorMetadataVariableName}} = new DataGeneratorMetadata
                                      {
                                         Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
                                         TestClassType = testClassType,
                                         ParameterInfos = {{parameterInfos}},
                                         PropertyInfo = {{propertyName}},
-                                        TestObjectBag = objectBag,
+                                        TestBuilderContext = testBuilderContextAccessor,
                                         TestSessionId = sessionId,
-                                     }
-                                     """;
+                                     };
+                                     """);
         
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
@@ -62,7 +64,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         
         sourceCodeWriter.WriteLine();
         
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata}).ToUniqueElementsEnumerable();");
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName}).ToUniqueElementsEnumerable();");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");
@@ -119,7 +121,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
                                                                     TestClassType = testClassType,
                                                                     ParameterInfos = {{parameterInfos}},
                                                                     PropertyInfo = {{propertyName}},
-                                                                    TestObjectBag = objectBag,
+                                                                    TestBuilderContext = testBuilderContextAccessor,
                                                                     TestSessionId = sessionId,
                                                                  }).ElementAtOrDefault(0)
                                                                  """, ref variableIndex).ToString());

@@ -18,6 +18,13 @@ public static class TestContextExtensions
     {
         var testMetadata = testContext.OriginalMetadata;
 
+        var testBuilderContext = new TestBuilderContext();
+        
+        foreach (var (key, value) in objectBag ?? [])
+        {
+            testBuilderContext.ObjectBag.Add(key, value);
+        }
+        
         var newTestMetaData = testMetadata.CloneWithNewMethodFactory(async (@class, token) =>
                 {
                     var hasTimeout = testContext.TestDetails.Timeout != null;
@@ -37,7 +44,7 @@ public static class TestContextExtensions
             {
                 TestId = Guid.NewGuid().ToString(),
                 TestMethodArguments = methodArguments ?? [],
-                ObjectBag = objectBag ?? [],
+                TestBuilderContext = testBuilderContext
             };
         
         var newTest = testContext.GetService<TestsConstructor>().ConstructTest(newTestMetaData);
