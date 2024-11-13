@@ -13,5 +13,5 @@ public class DefaultExpectedValueAssertCondition<TActual> : BaseAssertCondition<
         => AssertionResult
             .FailIf(
                 () => actualValue is not null && !actualValue.Equals(_defaultValue),
-                $"found {actualValue}");
+                () => $"found {actualValue}");
 }

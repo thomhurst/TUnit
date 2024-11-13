@@ -23,7 +23,7 @@ public class NotBetweenAssertCondition<TActual>(TActual minimum, TActual maximum
         return AssertionResult
             .FailIf(
                 () => !isInRange,
-                $"received {actualValue}");
+                () => $"received {actualValue}");
 
     }
 
