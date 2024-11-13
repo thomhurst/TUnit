@@ -1,4 +1,6 @@
-﻿namespace TUnit.TestProject;
+﻿using FluentAssertions;
+
+namespace TUnit.TestProject;
 
 public class UniqueBuilderContextsOnEnumerableDataGeneratorTests
 {
@@ -12,15 +14,22 @@ public class UniqueBuilderContextsOnEnumerableDataGeneratorTestsGenerator : Data
 {
     public override IEnumerable<int> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        Console.WriteLine(dataGeneratorMetadata.TestBuilderContext.Current.Id);
-        Console.WriteLine(dataGeneratorMetadata.TestBuilderContext.Current.Id);
-
+        var id1 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
+        var id2 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
+        
         yield return 1;
         
-        Console.WriteLine(dataGeneratorMetadata.TestBuilderContext.Current.Id);
+        var id3 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
         
         yield return 2;
         
-        Console.WriteLine(dataGeneratorMetadata.TestBuilderContext.Current.Id);
+        var id4 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
+
+        id1.Should().Be(id2);
+        
+        id3.Should().NotBe(id1);
+        
+        id4.Should().NotBe(id1);
+        id4.Should().NotBe(id3);
     }
 }
