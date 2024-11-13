@@ -6,7 +6,7 @@ public record EmptyArgumentsContainer : BaseContainer
     {
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
     }
 

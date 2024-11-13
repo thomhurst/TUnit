@@ -80,7 +80,7 @@ public static class GenericTestInvocationWriter
         sourceBuilder.WriteLine(
             "resettableClassFactory = resettableClassFactoryDelegate();");
         
-        testSourceDataModel.ClassArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
-        testSourceDataModel.MethodArguments.CloseInvocationStatementsParenthesis(sourceBuilder);
+        testSourceDataModel.ClassArguments.CloseScope(sourceBuilder);
+        testSourceDataModel.MethodArguments.CloseScope(sourceBuilder);
     }
 }

@@ -31,7 +31,7 @@ public record MethodDataSourceAttributeContainer(
                 ? CodeGenerators.VariableNames.ClassData
                 : CodeGenerators.VariableNames.MethodData;
             
-            sourceCodeWriter.WriteLine($"foreach (var {dataName} in {GetMethodInvocation()})");
+            sourceCodeWriter.WriteLine($"foreach (var {dataName} in {GetMethodInvocation()}.ToUniqueElementsEnumerable())");
             sourceCodeWriter.WriteLine("{");
             sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
             
@@ -43,7 +43,7 @@ public record MethodDataSourceAttributeContainer(
                     tupleVariableName += Guid.NewGuid().ToString("N");
                 }
                 
-                sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({dataName});");
+                sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({dataName}.Get());");
 
                 for (var index = 0; index < TupleTypes.Length; index++)
                 {
@@ -59,7 +59,7 @@ public record MethodDataSourceAttributeContainer(
                 AddVariable(new Variable
                 {
                     Type = "var", 
-                    Name = dataName, 
+                    Name = $"{dataName}.Get()", 
                     Value = GetMethodInvocation()   
                 });
             }
@@ -101,7 +101,7 @@ public record MethodDataSourceAttributeContainer(
         return $"new {TypeName}().{MethodName}({ArgumentsExpression})";
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         if (IsEnumerableData)
         { 

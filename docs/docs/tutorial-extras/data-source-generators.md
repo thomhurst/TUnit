@@ -41,4 +41,15 @@ public class MyTestClass(SomeClass1 someClass1, SomeClass2 someClass2, SomeClass
         // ...
     }
 }
+
+
 ```
+
+Notes:
+`GenerateDataSources()` could be called multiple times if you have nested loops to generate data within your tests. 
+
+An example could be using a DataSourceGenerator on both the class and the test method, resulting with a loop within a loop.
+
+Because this could be called multiple times, if you're subscribing to test events and storing state within the attribute, be aware of this and how this could affect disposal etc.
+
+You can always make the objects you're creating subscribe to events also to ensure clean lifecycle management.

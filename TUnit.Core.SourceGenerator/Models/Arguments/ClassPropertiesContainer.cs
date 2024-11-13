@@ -25,7 +25,7 @@ public record ClassPropertiesContainer(
         sourceCodeWriter.WriteLine();
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
     }
 

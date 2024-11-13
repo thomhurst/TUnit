@@ -12,7 +12,7 @@ public record ClassConstructorAttributeContainer(ArgumentsType ArgumentsType) : 
     {
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         // Nothing
     }

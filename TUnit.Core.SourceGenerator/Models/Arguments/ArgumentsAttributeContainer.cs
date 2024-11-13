@@ -15,7 +15,7 @@ public record ArgumentsAttributeContainer(ArgumentsType ArgumentsType, Argument[
         sourceCodeWriter.WriteLine();
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         // Nothing
     }

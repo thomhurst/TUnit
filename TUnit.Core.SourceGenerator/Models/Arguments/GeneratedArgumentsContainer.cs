@@ -76,9 +76,9 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         
         sourceCodeWriter.WriteLine();
         
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata});");
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata}).ToUniqueElementsEnumerable();");
         sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
+        sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");
 
         if (ArgumentsType == ArgumentsType.ClassConstructor)
@@ -106,13 +106,13 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
             DataVariables.Add(new Variable
             {
                 Type = "var",
-                Name = generatedDataVariableName,
+                Name = $"{generatedDataVariableName}.Get()",
                 Value = String.Empty
             });
         }
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         sourceCodeWriter.WriteLine("}");
     }
@@ -121,7 +121,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
     {
         return GenericArguments;
     }
-    
+
     public string TestClassTypeName { get; }
 
     public string[] GenericArguments { get; }
