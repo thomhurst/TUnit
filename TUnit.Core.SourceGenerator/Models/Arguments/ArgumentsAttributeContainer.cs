@@ -5,6 +5,10 @@ namespace TUnit.Core.SourceGenerator.Models.Arguments;
 public record ArgumentsAttributeContainer(ArgumentsType ArgumentsType, Argument[] Arguments)
     : ArgumentsContainer(ArgumentsType)
 {
+    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+    }
+
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         foreach (var argument in Arguments)
@@ -15,7 +19,7 @@ public record ArgumentsAttributeContainer(ArgumentsType ArgumentsType, Argument[
         sourceCodeWriter.WriteLine();
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         // Nothing
     }

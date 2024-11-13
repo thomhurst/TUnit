@@ -14,6 +14,72 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
     
     public required string? PropertyName { get; init; }
 
+    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+        if (ArgumentsType is ArgumentsType.Property)
+        {
+            // No scope as we don't allow enumerables for properties
+            return;
+        }
+        
+        var objectToGetAttributesFrom = ArgumentsType switch
+        {
+            ArgumentsType.Method => "methodInfo",
+            ArgumentsType.Property => $"testClassType.GetProperty(\"{PropertyName}\", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)",
+            _ => $"typeof({TestClassTypeName})"
+        };
+        
+        var propertyName = "null";
+        
+        var type = "Parameters";
+        
+        var parameterInfos = ArgumentsType switch
+        {
+            ArgumentsType.ClassConstructor => $"{objectToGetAttributesFrom}.GetConstructors().First().GetParameters()",
+            _ => $"{objectToGetAttributesFrom}.GetParameters()"
+        };
+
+        var dataGeneratorMetadataVariableName = $"{VariableNamePrefix}DataGeneratorMetadata";
+        
+        sourceCodeWriter.WriteLine($$"""
+                                     var {{dataGeneratorMetadataVariableName}} = new DataGeneratorMetadata
+                                     {
+                                        Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
+                                        TestClassType = testClassType,
+                                        ParameterInfos = {{parameterInfos}},
+                                        PropertyInfo = {{propertyName}},
+                                        TestBuilderContext = testBuilderContextAccessor,
+                                        TestSessionId = sessionId,
+                                     };
+                                     """);
+        
+        var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
+        var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
+
+        var dataAttr = GenerateDataAttributeVariable("var",
+            $"{objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt({AttributeIndex})",
+            ref variableIndex);
+            
+        sourceCodeWriter.WriteLine(dataAttr.ToString());
+        
+        sourceCodeWriter.WriteLine();
+        
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName}).ToUniqueElementsEnumerable();");
+        sourceCodeWriter.WriteLine();
+        sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
+        sourceCodeWriter.WriteLine("{");
+
+        if (ArgumentsType == ArgumentsType.ClassConstructor)
+        {
+            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
+        }
+        
+        if (ArgumentsType == ArgumentsType.Method)
+        {
+            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
+        }
+    }
+
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         var objectToGetAttributesFrom = ArgumentsType switch
@@ -40,18 +106,6 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
             _ => $"{objectToGetAttributesFrom}.GetParameters()"
         };
         
-        var dataGeneratorMetadata = $$"""
-                                     new DataGeneratorMetadata
-                                     {
-                                        Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
-                                        TestClassType = testClassType,
-                                        ParameterInfos = {{parameterInfos}},
-                                        PropertyInfo = {{propertyName}},
-                                        TestObjectBag = objectBag,
-                                        TestSessionId = sessionId,
-                                     }
-                                     """;
-        
         if (ArgumentsType == ArgumentsType.Property)
         {
             var attr = GenerateDataAttributeVariable("var",
@@ -60,36 +114,24 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
             
             sourceCodeWriter.WriteLine(attr.ToString());
             
-            sourceCodeWriter.WriteLine(GenerateVariable("var", $"{attr.Name}.GenerateDataSources({dataGeneratorMetadata}).ElementAtOrDefault(0)", ref variableIndex).ToString());
+            sourceCodeWriter.WriteLine(GenerateVariable("var", $$"""
+                                                                 {{attr.Name}}.GenerateDataSources(new DataGeneratorMetadata
+                                                                 {
+                                                                    Type = TUnit.Core.Enums.DataGeneratorType.{{type}},
+                                                                    TestClassType = testClassType,
+                                                                    ParameterInfos = {{parameterInfos}},
+                                                                    PropertyInfo = {{propertyName}},
+                                                                    TestBuilderContext = testBuilderContextAccessor,
+                                                                    TestSessionId = sessionId,
+                                                                 }).ElementAtOrDefault(0)
+                                                                 """, ref variableIndex).ToString());
             sourceCodeWriter.WriteLine();
             return;
         }
         
-        var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
-
-        var dataAttr = GenerateDataAttributeVariable("var",
-            $"{objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt({AttributeIndex})",
-            ref variableIndex);
-            
-        sourceCodeWriter.WriteLine(dataAttr.ToString());
         
-        sourceCodeWriter.WriteLine();
-        
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadata});");
-        sourceCodeWriter.WriteLine();
-        sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName} in {arrayVariableName})");
-        sourceCodeWriter.WriteLine("{");
-
-        if (ArgumentsType == ArgumentsType.ClassConstructor)
-        {
-            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
-        }
-        
-        if (ArgumentsType == ArgumentsType.Method)
-        {
-            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
-        }
+        sourceCodeWriter.WriteLine($"var {generatedDataVariableName} = {generatedDataVariableName}Accessor.Get();");
         
         if (GenericArguments.Length > 1)
         {
@@ -106,14 +148,19 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
             DataVariables.Add(new Variable
             {
                 Type = "var",
-                Name = generatedDataVariableName,
-                Value = String.Empty
+                Name = $"{generatedDataVariableName}",
+                Value = string.Empty
             });
         }
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
+        if (ArgumentsType is ArgumentsType.Property)
+        {
+            return;
+        }
+        
         sourceCodeWriter.WriteLine("}");
     }
     
@@ -121,7 +168,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
     {
         return GenericArguments;
     }
-    
+
     public string TestClassTypeName { get; }
 
     public string[] GenericArguments { get; }

@@ -14,6 +14,26 @@ public record MethodDataSourceAttributeContainer(
     string ArgumentsExpression)
     : ArgumentsContainer(ArgumentsType)
 {
+    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+        if (!IsEnumerableData)
+        {
+            return;
+        }
+        
+        var enumerableIndexName = ArgumentsType == ArgumentsType.ClassConstructor
+            ? CodeGenerators.VariableNames.ClassDataIndex
+            : CodeGenerators.VariableNames.TestMethodDataIndex;
+        
+        var dataName = ArgumentsType == ArgumentsType.ClassConstructor
+            ? CodeGenerators.VariableNames.ClassData
+            : CodeGenerators.VariableNames.MethodData;
+            
+        sourceCodeWriter.WriteLine($"foreach (var {dataName}Accessor in {GetMethodInvocation()}.ToUniqueElementsEnumerable())");
+        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
+    }
+
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         if (IsEnumerableData)
@@ -23,17 +43,11 @@ public record MethodDataSourceAttributeContainer(
                 throw new Exception("Property Injection is not supported with Enumerable data");
             }
             
-            var enumerableIndexName = ArgumentsType == ArgumentsType.ClassConstructor
-                ? CodeGenerators.VariableNames.ClassDataIndex
-                : CodeGenerators.VariableNames.TestMethodDataIndex;
-            
             var dataName = ArgumentsType == ArgumentsType.ClassConstructor
                 ? CodeGenerators.VariableNames.ClassData
                 : CodeGenerators.VariableNames.MethodData;
             
-            sourceCodeWriter.WriteLine($"foreach (var {dataName} in {GetMethodInvocation()})");
-            sourceCodeWriter.WriteLine("{");
-            sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
+            sourceCodeWriter.WriteLine($"var {dataName} = {dataName}Accessor.Get();");
             
             if (TupleTypes.Any())
             {
@@ -59,7 +73,7 @@ public record MethodDataSourceAttributeContainer(
                 AddVariable(new Variable
                 {
                     Type = "var", 
-                    Name = dataName, 
+                    Name = $"{dataName}", 
                     Value = GetMethodInvocation()   
                 });
             }
@@ -87,8 +101,6 @@ public record MethodDataSourceAttributeContainer(
         {
             sourceCodeWriter.WriteLine(GenerateVariable(MethodReturnType, GetMethodInvocation(), ref variableIndex).ToString());
         }
-        
-        sourceCodeWriter.WriteLine();
     }
 
     private string GetMethodInvocation()
@@ -101,7 +113,7 @@ public record MethodDataSourceAttributeContainer(
         return $"new {TypeName}().{MethodName}({ArgumentsExpression})";
     }
 
-    public override void CloseInvocationStatementsParenthesis(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
         if (IsEnumerableData)
         { 

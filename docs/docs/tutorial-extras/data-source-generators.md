@@ -23,7 +23,7 @@ namespace MyTestProject;
 
 public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
 {
-    public override IEnumerable<(T1, T2, T3)> GenerateDataSources()
+    public override IEnumerable<(T1, T2, T3)> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var fixture = new Fixture();
         
@@ -41,4 +41,37 @@ public class MyTestClass(SomeClass1 someClass1, SomeClass2 someClass2, SomeClass
         // ...
     }
 }
+
+
+```
+
+Notes:
+`GenerateDataSources()` could be called multiple times if you have nested loops to generate data within your tests. 
+
+An example could be using a DataSourceGenerator on both the class and the test method, resulting with a loop within a loop.
+
+Because this could be called multiple times, if you're subscribing to test events and storing state within the attribute, be aware of this and how this could affect disposal etc.
+
+Instead, you can use the `yield return` pattern, and use the `TestBuilderContext` from the `DataGeneratorMetadata` object passed to you.
+After each `yield`, the execution is passed back to TUnit, and TUnit will set a new `TestBuilderContext` for you - So as long as you yield each result, you'll get a unique context object for each test case.
+The `TestBuilderContext` object exposes `Events` - And you can register a delegate to be invoked on them at the point in the test lifecycle that you wish.
+
+As well as this, each `yield return` should return a `new T()`. Don't return a variable as that'll end up caching the value as it's a pointer - We want a new object each time.
+
+```csharp
+
+    public override IEnumerable<int> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        dataGeneratorMetadata.TestBuilderContext.Current; // <-- Initial Context for first test
+        
+        yield return 1;
+        
+        dataGeneratorMetadata.TestBuilderContext.Current; // <-- This is now a different context object, as we yielded
+        dataGeneratorMetadata.TestBuilderContext.Current; // <-- This is still the same as above because it'll only change on a yield
+        
+        yield return 2;
+        
+        dataGeneratorMetadata.TestBuilderContext.Current; // <-- A new object again
+    }
+
 ```

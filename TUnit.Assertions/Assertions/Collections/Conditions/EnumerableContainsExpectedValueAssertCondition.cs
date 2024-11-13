@@ -12,8 +12,8 @@ public class EnumerableContainsExpectedValueAssertCondition<TActual, TInner>(
         => AssertionResult
             .FailIf(
                 () => actualValue is null,
-                $"{ActualExpression ?? typeof(TActual).Name} is null")
+                () => $"{ActualExpression ?? typeof(TActual).Name} is null")
             .OrFailIf(
                 () => !actualValue!.Contains(inner, equalityComparer),
-                "it was not found in the collection");
+                () => "it was not found in the collection");
 }
