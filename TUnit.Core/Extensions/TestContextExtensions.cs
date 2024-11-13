@@ -87,6 +87,7 @@ public static class TestContextExtensions
     {
         IEnumerable<object?> rawObjects =
         [
+            context,
             ..context.TestDetails.DataAttributes,
             ..context.TestDetails.Attributes,
             context.TestDetails.ClassInstance,

@@ -27,11 +27,13 @@ public static class GenericTestInvocationWriter
         var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
         
-        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
-        
+        testSourceDataModel.ClassArguments.OpenScope(sourceBuilder, ref classVariablesIndex);
+        testSourceDataModel.PropertyArguments.OpenScope(sourceBuilder, ref propertiesVariablesIndex);
+        testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
+
         testSourceDataModel.ClassArguments.WriteVariableAssignments(sourceBuilder, ref classVariablesIndex);
-        
         testSourceDataModel.PropertyArguments.WriteVariableAssignments(sourceBuilder, ref propertiesVariablesIndex);
+        testSourceDataModel.MethodArguments.WriteVariableAssignments(sourceBuilder, ref methodVariablesIndex);
 
         foreach (var (propertySymbol, argumentsContainer) in testSourceDataModel.PropertyArguments.InnerContainers)
         {

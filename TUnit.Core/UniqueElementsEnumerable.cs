@@ -31,18 +31,18 @@ public class UniqueElementsEnumerable<T> : IReadOnlyList<UniqueElementsEnumerabl
 
     public UniqueElementAccessor this[int index] => new(index, this);
 
-    public class UniqueElementAccessor
+    public readonly struct UniqueElementAccessor
     {
         private readonly int _index;
-        private readonly UniqueElementsEnumerable<T> _enumerable1;
+        private readonly UniqueElementsEnumerable<T> _elementsEnumerable;
 
         internal UniqueElementAccessor(int index, UniqueElementsEnumerable<T> elementsEnumerable)
         {
             _index = index;
-            _enumerable1 = elementsEnumerable;
+            _elementsEnumerable = elementsEnumerable;
         }
 
-        public T Get() => _enumerable1.Get(_index);
+        public T Get() => _elementsEnumerable.Get(_index);
     }
     
     private T Get(int index)

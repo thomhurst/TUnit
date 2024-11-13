@@ -7,6 +7,10 @@ public record ClassPropertiesContainer(
     IReadOnlyCollection<(IPropertySymbol PropertySymbol, ArgumentsContainer ArgumentsContainer)> InnerContainers)
     : ArgumentsContainer(ArgumentsType.Property)
 {
+    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    {
+    }
+
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
         foreach (var (_, argumentsContainer) in InnerContainers)
