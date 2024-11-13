@@ -25,7 +25,7 @@ internal class ClassDataSourceDrivenTests2 : TestsBase<TestsGenerator>
                                                            TestSessionId = sessionId,
                                                         };
                                                         """);
-            await AssertFileContains(generatedFiles[0], "var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata).ToUniqueElementsEnumerable();");
+            await AssertFileContains(generatedFiles[0], "var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);");
             await AssertFileContains(generatedFiles[0],
                 "var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(() => new global::TUnit.TestProject.ClassDataSourceDrivenTests2(classArgGeneratedData), sessionId, testBuilderContext);");
         });

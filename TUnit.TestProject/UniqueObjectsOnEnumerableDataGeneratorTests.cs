@@ -15,10 +15,10 @@ public class UniqueObjectsOnEnumerableDataGeneratorTests(object classValue)
 
 public class UniqueObjectsOnEnumerableDataGeneratorTestsGenerator : DataSourceGeneratorAttribute<object>
 {
-    public override IEnumerable<object> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    public override IEnumerable<Func<object>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return new object();
-        yield return new object();
-        yield return new object();
+        yield return () => new object();
+        yield return () => new object();
+        yield return () => new object();
     }
 }

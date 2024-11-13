@@ -21,9 +21,9 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     
-    public override IEnumerable<int> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return Random.Shared.Next();
+        yield return () => Random.Shared.Next();
     }
 
     public ValueTask OnTestStart(BeforeTestContext beforeTestContext)

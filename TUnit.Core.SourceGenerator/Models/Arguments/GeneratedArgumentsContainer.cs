@@ -64,7 +64,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         
         sourceCodeWriter.WriteLine();
         
-        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName}).ToUniqueElementsEnumerable();");
+        sourceCodeWriter.WriteLine($"var {arrayVariableName} = {dataAttr.Name}.GenerateDataSources({dataGeneratorMetadataVariableName});");
         sourceCodeWriter.WriteLine();
         sourceCodeWriter.WriteLine($"foreach (var {generatedDataVariableName}Accessor in {arrayVariableName})");
         sourceCodeWriter.WriteLine("{");
@@ -123,7 +123,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
                                                                     PropertyInfo = {{propertyName}},
                                                                     TestBuilderContext = testBuilderContextAccessor,
                                                                     TestSessionId = sessionId,
-                                                                 }).ElementAtOrDefault(0)
+                                                                 }).ElementAtOrDefault(0)()
                                                                  """, ref variableIndex).ToString());
             sourceCodeWriter.WriteLine();
             return;
@@ -131,7 +131,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
         
-        sourceCodeWriter.WriteLine($"var {generatedDataVariableName} = {generatedDataVariableName}Accessor.Get();");
+        sourceCodeWriter.WriteLine($"var {generatedDataVariableName} = {generatedDataVariableName}Accessor();");
         
         if (GenericArguments.Length > 1)
         {

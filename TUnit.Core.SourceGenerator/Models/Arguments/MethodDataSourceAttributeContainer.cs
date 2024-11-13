@@ -29,7 +29,7 @@ public record MethodDataSourceAttributeContainer(
             ? CodeGenerators.VariableNames.ClassData
             : CodeGenerators.VariableNames.MethodData;
             
-        sourceCodeWriter.WriteLine($"foreach (var {dataName}Accessor in {GetMethodInvocation()}.ToUniqueElementsEnumerable())");
+        sourceCodeWriter.WriteLine($"foreach (var {dataName} in {GetMethodInvocation()})");
         sourceCodeWriter.WriteLine("{");
         sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
     }
@@ -46,8 +46,6 @@ public record MethodDataSourceAttributeContainer(
             var dataName = ArgumentsType == ArgumentsType.ClassConstructor
                 ? CodeGenerators.VariableNames.ClassData
                 : CodeGenerators.VariableNames.MethodData;
-            
-            sourceCodeWriter.WriteLine($"var {dataName} = {dataName}Accessor.Get();");
             
             if (TupleTypes.Any())
             {

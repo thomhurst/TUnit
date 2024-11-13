@@ -32,25 +32,25 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     
     public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
     {
-        public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata metadata)
+        public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata metadata)
         {
-            return [default!];
+            return [() => default!];
         }
     }
     
     public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
     {
-        public override IEnumerable<(T1, T2, T3)> GenerateDataSources(DataGeneratorMetadata metadata)
+        public override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata metadata)
         {
-            return [default];
+            return [() => default];
         }
     }
     
     public class AutoFixtureGeneratorAttribute : DataSourceGeneratorAttribute<int, string, bool>
     {
-        public override IEnumerable<(int, string, bool)> GenerateDataSources(DataGeneratorMetadata metadata)
+        public override IEnumerable<Func<(int, string, bool)>> GenerateDataSources(DataGeneratorMetadata metadata)
         {
-            return [default];
+            return [() => default];
         }
     }
 }

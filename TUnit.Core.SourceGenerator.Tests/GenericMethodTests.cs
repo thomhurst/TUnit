@@ -13,7 +13,7 @@ internal class GenericMethodTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(1);
             
-            await AssertFileContains(generatedFiles[0], "var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData().ToUniqueElementsEnumerable()");
+            await AssertFileContains(generatedFiles[0], "var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData()");
             
             await AssertFileContains(generatedFiles[0], "var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Collections.Generic.IEnumerable<global::System.Int32>, global::System.Func<global::System.Int32, global::System.Int32>, global::System.Func<global::System.Int32, global::System.Int32>, global::System.Func<global::System.Int32, global::System.Int32, global::System.Int32>, global::System.Collections.Generic.IEqualityComparer<global::System.Int32>, global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.Int32, global::System.Int32>>>(methodData);");
             await AssertFileContains(generatedFiles[0], "global::System.Collections.Generic.IEnumerable<global::System.Int32> methodArg = methodArgTuples.Item1;");
@@ -23,7 +23,7 @@ internal class GenericMethodTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[0], "global::System.Collections.Generic.IEqualityComparer<global::System.Int32> methodArg4 = methodArgTuples.Item5;");
             await AssertFileContains(generatedFiles[0], "global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.Int32, global::System.Int32>> methodArg5 = methodArgTuples.Item6;");
             
-            await AssertFileContains(generatedFiles[0], "var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData().ToUniqueElementsEnumerable()");
+            await AssertFileContains(generatedFiles[0], "var methodDataAccessor in global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData()");
 
             await AssertFileContains(generatedFiles[0], "var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Collections.Generic.IEnumerable<global::System.String>, global::System.Func<global::System.String, global::System.String>, global::System.Func<global::System.String, global::System.String>, global::System.Func<global::System.String, global::System.String, global::System.String>, global::System.Collections.Generic.IEqualityComparer<global::System.String>, global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.String, global::System.String>>>(methodData);");
             await AssertFileContains(generatedFiles[0], "global::System.Collections.Generic.IEnumerable<global::System.String> methodArg = methodArgTuples.Item1;");

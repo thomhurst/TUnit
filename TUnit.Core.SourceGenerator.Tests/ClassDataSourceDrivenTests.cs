@@ -36,7 +36,7 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
                                                            TestSessionId = sessionId,
                                                         };
                                                         """);
-            await AssertFileContains(generatedFiles[0], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata).ToUniqueElementsEnumerable();");
+            await AssertFileContains(generatedFiles[0], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);");
             await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Class(methodArgGeneratedData)");
 
             await AssertFileContains(generatedFiles[1], "var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>>(true).ElementAt(0);");
@@ -51,7 +51,7 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
                                                            TestSessionId = sessionId,
                                                         };
                                                         """);
-            await AssertFileContains(generatedFiles[1], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata).ToUniqueElementsEnumerable();");
+            await AssertFileContains(generatedFiles[1], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);");
             await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Class_Generic(methodArgGeneratedData)");
         });
 }

@@ -26,7 +26,7 @@ internal class DataSourceGeneratorTests : TestsBase<TestsGenerator>
                                                            TestSessionId = sessionId,
                                                         };
                                                         """);
-            await AssertFileContains(generatedFiles[0], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata).ToUniqueElementsEnumerable();");
+            await AssertFileContains(generatedFiles[0], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);");
             await AssertFileContains(generatedFiles[0], "foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)");
             await AssertFileContains(generatedFiles[0], "classInstance.GeneratedData_Method(methodArgGeneratedData))");
 
@@ -43,7 +43,7 @@ internal class DataSourceGeneratorTests : TestsBase<TestsGenerator>
                                                            TestSessionId = sessionId,
                                                         };
                                                         """);
-            await AssertFileContains(generatedFiles[1], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata).ToUniqueElementsEnumerable();");            
+            await AssertFileContains(generatedFiles[1], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);");            
             await AssertFileContains(generatedFiles[1], "foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)");
             await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = methodArgGeneratedData.Item1;");
             await AssertFileContains(generatedFiles[1], "global::System.String methodArg1 = methodArgGeneratedData.Item2;");
@@ -63,7 +63,7 @@ internal class DataSourceGeneratorTests : TestsBase<TestsGenerator>
                                                            TestSessionId = sessionId,
                                                         };
                                                         """);
-            await AssertFileContains(generatedFiles[2], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata).ToUniqueElementsEnumerable();");            
+            await AssertFileContains(generatedFiles[2], "var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);");            
             await AssertFileContains(generatedFiles[2], "foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)");
             await AssertFileContains(generatedFiles[2], "global::System.Int32 methodArg = methodArgGeneratedData.Item1;");
             await AssertFileContains(generatedFiles[2], "global::System.String methodArg1 = methodArgGeneratedData.Item2;");
