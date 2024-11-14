@@ -23,11 +23,11 @@ namespace MyTestProject;
 
 public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
 {
-    public override IEnumerable<(T1, T2, T3)> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    public override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var fixture = new Fixture();
         
-        yield return (fixture.Create<T1>(), fixture.Create<T2>(), fixture.Create<T3>());
+        yield return () => (fixture.Create<T1>(), fixture.Create<T2>(), fixture.Create<T3>());
     }
 }
 
@@ -46,7 +46,7 @@ public class MyTestClass(SomeClass1 someClass1, SomeClass2 someClass2, SomeClass
 ```
 
 Notes:
-`GenerateDataSources()` could be called multiple times if you have nested loops to generate data within your tests. 
+`GenerateDataSources()` could be called multiple times if you have nested loops to generate data within your tests. Because of this, you are required to return a `Func` - This means that tests can create a new object each time for a test case. Otherwise, we'd be pointing to the same object if we were in a nested loop and that could lead to unintended side-effects.
 
 An example could be using a DataSourceGenerator on both the class and the test method, resulting with a loop within a loop.
 
@@ -56,20 +56,18 @@ Instead, you can use the `yield return` pattern, and use the `TestBuilderContext
 After each `yield`, the execution is passed back to TUnit, and TUnit will set a new `TestBuilderContext` for you - So as long as you yield each result, you'll get a unique context object for each test case.
 The `TestBuilderContext` object exposes `Events` - And you can register a delegate to be invoked on them at the point in the test lifecycle that you wish.
 
-As well as this, each `yield return` should return a `new T()`. Don't return a variable as that'll end up caching the value as it's a pointer - We want a new object each time.
-
 ```csharp
 
-    public override IEnumerable<int> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         dataGeneratorMetadata.TestBuilderContext.Current; // <-- Initial Context for first test
         
-        yield return 1;
+        yield return () => 1;
         
         dataGeneratorMetadata.TestBuilderContext.Current; // <-- This is now a different context object, as we yielded
         dataGeneratorMetadata.TestBuilderContext.Current; // <-- This is still the same as above because it'll only change on a yield
         
-        yield return 2;
+        yield return () => 2;
         
         dataGeneratorMetadata.TestBuilderContext.Current; // <-- A new object again
     }

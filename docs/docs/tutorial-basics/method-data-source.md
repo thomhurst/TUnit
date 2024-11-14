@@ -12,6 +12,8 @@ If we want test data represented in the form of objects, or just to use somethin
 - If you pass in one argument, this is the method name containing your data. TUnit will assume this is in the current test class.
 - If you pass in two arguments, the first should be the `Type` of the class containing your test source data method, and the second should be the name of the method.
 
+If methods are returning reference types, they should return a `Func<T>` rather than just a `T` - This ensures each test has its own instance of that object and tests aren't sharing objects which could lead to unintended side effects.
+
 Here's an example returning a simple object:
 
 ```csharp
@@ -25,9 +27,9 @@ public record AdditionTestData(int Value1, int Value2, int ExpectedResult);
 
 public static class MyTestDataSources
 {
-    public static AdditionTestData AdditionTestData()
+    public static Func<AdditionTestData> AdditionTestData()
     {
-        return new AdditionTestData(1, 2, 3);
+        return () => new AdditionTestData(1, 2, 3);
     }
 }
 
@@ -60,9 +62,9 @@ namespace MyTestProject;
 
 public static class MyTestDataSources
 {
-    public static (int, int, int) AdditionTestData()
+    public static Func<(int, int, int)> AdditionTestData()
     {
-        return (1, 2, 3);
+        return () => (1, 2, 3);
     }
 }
 
@@ -99,11 +101,11 @@ public record AdditionTestData(int Value1, int Value2, int ExpectedResult);
 
 public static class MyTestDataSources
 {
-    public static IEnumerable<AdditionTestData> AdditionTestData()
+    public static IEnumerable<Func<AdditionTestData>> AdditionTestData()
     {
-        yield return new AdditionTestData(1, 2, 3);
-        yield return new AdditionTestData(2, 2, 4);
-        yield return new AdditionTestData(5, 5, 10);
+        yield return () => new AdditionTestData(1, 2, 3);
+        yield return () => new AdditionTestData(2, 2, 4);
+        yield return () => new AdditionTestData(5, 5, 10);
     }
 }
 
@@ -136,11 +138,11 @@ namespace MyTestProject;
 
 public static class MyTestDataSources
 {
-    public static IEnumerable<(int, int, int)> AdditionTestData()
+    public static IEnumerable<Func<(int, int, int)>> AdditionTestData()
     {
-        yield return (1, 2, 3);
-        yield return (2, 2, 4);
-        yield return (5, 5, 10);
+        yield return () => (1, 2, 3);
+        yield return () => (2, 2, 4);
+        yield return () => (5, 5, 10);
     }
 }
 
