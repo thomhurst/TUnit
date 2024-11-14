@@ -6,6 +6,11 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class TypeExtensions
 {
+    public static string GetMetadataName(this Type type)
+    {
+        return $"{type.Namespace}.{type.Name}";
+    }
+    
     public static string GetFullNameWithoutGenericArity(this Type type)
     {
         var name = type.FullName!;

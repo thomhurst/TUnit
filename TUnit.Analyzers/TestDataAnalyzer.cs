@@ -25,7 +25,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MethodMustReturnData,
             Rules.TooManyArgumentsInTestMethod,
             Rules.PropertyRequiredNotSet,
-            Rules.MustHavePropertySetter);
+            Rules.MustHavePropertySetter,
+            Rules.ReturnFunc);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -359,6 +360,15 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 || !methodContainingTestData.ReturnType.IsEnumerable(context, out var testDataMethodNonEnumerableReturnType))
             {
                 testDataMethodNonEnumerableReturnType = methodContainingTestData.ReturnType;
+            }
+
+            if (!methodContainingTestData.ReturnType.OriginalDefinition.IsGenericDefinition()
+                || !SymbolEqualityComparer.Default.Equals(
+                    context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
+                    methodContainingTestData.ReturnType.OriginalDefinition))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.ReturnFunc,
+                    methodContainingTestData.Locations.FirstOrDefault()));
             }
 
             var parameterTypes = methodContainingTestData.Parameters.Select(x => x.Type).ToArray();

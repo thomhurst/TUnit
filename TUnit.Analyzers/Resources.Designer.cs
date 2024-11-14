@@ -1273,5 +1273,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0045Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` than than a `&lt;T&gt;`..
+        /// </summary>
+        internal static string TUnit0046Description {
+            get {
+                return ResourceManager.GetString("TUnit0046Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` than than a `&lt;T&gt;`..
+        /// </summary>
+        internal static string TUnit0046MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0046MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` than than a `&lt;T&gt;`.
+        /// </summary>
+        internal static string TUnit0046Title {
+            get {
+                return ResourceManager.GetString("TUnit0046Title", resourceCulture);
+            }
+        }
     }
 }
