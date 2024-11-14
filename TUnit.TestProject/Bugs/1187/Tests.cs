@@ -78,9 +78,9 @@ public class Tests(Context ctx)
         }
     }
 
-    public static IEnumerable<Context> Contexts()
+    public static IEnumerable<Func<Context>> Contexts()
     {
-        yield return new Context();
-        yield return new Context();
+        yield return () => new Context();
+        yield return () => new Context();
     }
 }

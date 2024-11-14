@@ -6,6 +6,11 @@ namespace TUnit.Core.SourceGenerator.Extensions;
 
 public static class TypeExtensions
 {
+    public static string GetMetadataName(this Type type)
+    {
+        return $"{type.Namespace}.{type.Name}";
+    }
+    
     public static IEnumerable<ISymbol> GetMembersIncludingBase(this ITypeSymbol namedTypeSymbol, bool reverse = true)
     {
         var list = new List<ISymbol>();

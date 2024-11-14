@@ -1,22 +1,28 @@
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Enums;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
 public record MethodDataSourceAttributeContainer(
+    Compilation Compilation,
     ArgumentsType ArgumentsType,
+    ImmutableArray<ITypeSymbol> TypesToInject,
+    bool IsExpandableFunc,
+    bool IsExpandableEnumerable,
+    bool IsExpandableTuples,
     string TestClassTypeName,
     string TypeName,
     string MethodName,
     bool IsStatic,
-    bool IsEnumerableData,
-    string[] TupleTypes,
-    string MethodReturnType,
+    ITypeSymbol MethodReturnType,
     string ArgumentsExpression)
     : ArgumentsContainer(ArgumentsType)
 {
     public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
-        if (!IsEnumerableData)
+        if (!IsExpandableEnumerable)
         {
             return;
         }
@@ -29,75 +35,88 @@ public record MethodDataSourceAttributeContainer(
             ? CodeGenerators.VariableNames.ClassData
             : CodeGenerators.VariableNames.MethodData;
             
-        sourceCodeWriter.WriteLine($"foreach (var {dataName} in {GetMethodInvocation()})");
+        sourceCodeWriter.WriteLine($"foreach (var {dataName}Accessor in {GetMethodInvocation()})");
         sourceCodeWriter.WriteLine("{");
         sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
     }
 
     public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
-        if (IsEnumerableData)
+        if (IsExpandableEnumerable)
         {
-            if (ArgumentsType == ArgumentsType.Property)
-            {
-                throw new Exception("Property Injection is not supported with Enumerable data");
-            }
-            
-            var dataName = ArgumentsType == ArgumentsType.ClassConstructor
-                ? CodeGenerators.VariableNames.ClassData
-                : CodeGenerators.VariableNames.MethodData;
-            
-            if (TupleTypes.Any())
-            {
-                var tupleVariableName = $"{VariableNamePrefix}Tuples";
-                if (ArgumentsType == ArgumentsType.Property)
-                {
-                    tupleVariableName += Guid.NewGuid().ToString("N");
-                }
-                
-                sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({dataName});");
-
-                for (var index = 0; index < TupleTypes.Length; index++)
-                {
-                    var tupleType = TupleTypes[index];
-
-                    var refIndex = index;
-                    
-                    sourceCodeWriter.WriteLine(GenerateVariable(tupleType, $"{tupleVariableName}.Item{index+1}", ref refIndex).ToString());
-                }
-            }
-            else
-            {
-                AddVariable(new Variable
-                {
-                    Type = "var", 
-                    Name = $"{dataName}", 
-                    Value = GetMethodInvocation()   
-                });
-            }
+            WriteEnumerable(sourceCodeWriter);
         }
-        else if (TupleTypes.Any())
+        else if (IsExpandableTuples)
+        {
+            WriteTuples(sourceCodeWriter);
+        }
+        else
+        {
+            sourceCodeWriter.WriteLine(GenerateVariable("var", $"{GetMethodInvocation()}{GetUnfoldFunc()}", ref variableIndex).ToString());
+        }
+    }
+
+    private void WriteTuples(SourceCodeWriter sourceCodeWriter)
+    {
+        var tupleVariableName = $"{VariableNamePrefix}Tuples";
+        
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            tupleVariableName += Guid.NewGuid().ToString("N");
+        }
+
+        sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject)}>({GetMethodInvocation()}{GetUnfoldFunc()});");
+            
+        for (var index = 0; index < TypesToInject.Length; index++)
+        {
+            var tupleType = TypesToInject[index];
+
+            var refIndex = index;
+                
+            sourceCodeWriter.WriteLine(GenerateVariable(tupleType.GloballyQualified(), $"{tupleVariableName}.Item{index+1}", ref refIndex).ToString());
+        }
+    }
+
+    private void WriteEnumerable(SourceCodeWriter sourceCodeWriter)
+    {
+        if (ArgumentsType == ArgumentsType.Property)
+        {
+            throw new Exception("Property Injection is not supported with Enumerable data");
+        }
+            
+        var dataName = ArgumentsType == ArgumentsType.ClassConstructor
+            ? CodeGenerators.VariableNames.ClassData
+            : CodeGenerators.VariableNames.MethodData;
+            
+        sourceCodeWriter.WriteLine($"var {dataName} = {dataName}Accessor{GetUnfoldFunc()};");
+            
+        if (IsExpandableTuples)
         {
             var tupleVariableName = $"{VariableNamePrefix}Tuples";
             if (ArgumentsType == ArgumentsType.Property)
             {
                 tupleVariableName += Guid.NewGuid().ToString("N");
             }
+                
+            sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject)}>({dataName});");
 
-            sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TupleTypes)}>({GetMethodInvocation()});");
-            
-            for (var index = 0; index < TupleTypes.Length; index++)
+            for (var index = 0; index < TypesToInject.Length; index++)
             {
-                var tupleType = TupleTypes[index];
+                var tupleType = TypesToInject[index];
 
                 var refIndex = index;
-                
-                sourceCodeWriter.WriteLine(GenerateVariable(tupleType, $"{tupleVariableName}.Item{index+1}", ref refIndex).ToString());
+                    
+                sourceCodeWriter.WriteLine(GenerateVariable(tupleType.GloballyQualified(), $"{tupleVariableName}.Item{index+1}", ref refIndex).ToString());
             }
         }
         else
         {
-            sourceCodeWriter.WriteLine(GenerateVariable(MethodReturnType, GetMethodInvocation(), ref variableIndex).ToString());
+            AddVariable(new Variable
+            {
+                Type = "var", 
+                Name = $"{dataName}", 
+                Value = $"{GetMethodInvocation()}"
+            });
         }
     }
 
@@ -113,7 +132,7 @@ public record MethodDataSourceAttributeContainer(
 
     public override void CloseScope(SourceCodeWriter sourceCodeWriter)
     {
-        if (IsEnumerableData)
+        if (IsExpandableEnumerable)
         { 
             sourceCodeWriter.WriteLine("}");
         }
@@ -121,11 +140,23 @@ public record MethodDataSourceAttributeContainer(
 
     public override string[] GetArgumentTypes()
     {
-        if (TupleTypes.Any())
+        if (IsExpandableTuples)
         {
-            return TupleTypes;
+            return TypesToInject.Select(x => x.GloballyQualified()).ToArray();
+        }
+
+        if (MethodReturnType.OriginalDefinition.IsGenericDefinition()
+            && SymbolEqualityComparer.Default.Equals(MethodReturnType.OriginalDefinition,
+                Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
+        {
+            return [((INamedTypeSymbol)MethodReturnType).TypeArguments[0].GloballyQualified()];
         }
         
-        return [MethodReturnType];
+        return [MethodReturnType.GloballyQualified()];
+    }
+
+    private string GetUnfoldFunc()
+    {
+        return IsExpandableFunc ? "()" : string.Empty;
     }
 }

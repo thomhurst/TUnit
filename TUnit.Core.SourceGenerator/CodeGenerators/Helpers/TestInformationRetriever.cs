@@ -28,7 +28,7 @@ public static class TestInformationRetriever
 
         if (testGenerationContext.ClassArguments is MethodDataSourceAttributeContainer classLevelMethodDataSourceAttributeContainer)
         {
-            stringBuilder.Append(classLevelMethodDataSourceAttributeContainer.IsEnumerableData
+            stringBuilder.Append(classLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
                 ? $"CL-EMDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.ClassDataIndex}}}:"
                 : $"CL-MDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:");
         }
@@ -55,7 +55,7 @@ public static class TestInformationRetriever
 
         if (testGenerationContext.TestArguments is MethodDataSourceAttributeContainer testLevelMethodDataSourceAttributeContainer)
         {
-            stringBuilder.Append(testLevelMethodDataSourceAttributeContainer.IsEnumerableData
+            stringBuilder.Append(testLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
                 ? $"TL-EMDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.TestMethodDataIndex}}}:"
                 : $"TL-MDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:");
         }
