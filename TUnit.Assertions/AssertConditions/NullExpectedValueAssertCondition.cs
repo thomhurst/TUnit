@@ -9,5 +9,5 @@ public class NullExpectedValueAssertCondition<TActual> : BaseAssertCondition<TAc
         => AssertionResult
             .FailIf(
                 () => actualValue is not null,
-                $"found {actualValue}");
+                () => $"found {actualValue}");
 }

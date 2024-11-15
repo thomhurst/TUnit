@@ -16,12 +16,12 @@ public class StringNotContainsExpectedValueAssertCondition(string expected, Stri
             return AssertionResult
                 .FailIf(
                     () => expectedValue is null,
-                    "it was null");
+                    () => "it was null");
         }
 
         return AssertionResult
             .FailIf(
                 () => actualValue.Contains(expectedValue!, stringComparison),
-                $"it was found in {Formatter.Format(ActualValue).TruncateWithEllipsis(100)}");
+                () => $"it was found in {Formatter.Format(ActualValue).TruncateWithEllipsis(100)}");
     }
 }
