@@ -18,6 +18,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
                             
                 namespace TUnit.TestProject;
@@ -32,7 +33,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
                     {
-                        public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -54,6 +55,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
 
                 namespace TUnit.TestProject;
@@ -68,7 +70,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute<T1, T2> : DataSourceGeneratorAttribute<T1, T2>
                     {
-                        public override IEnumerable<(T1, T2)> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<(T1, T2)>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -90,6 +92,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
 
                 namespace TUnit.TestProject;
@@ -104,7 +107,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute : DataSourceGeneratorAttribute<int, string>
                     {
-                        public override IEnumerable<(int, string)> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<(int, string)>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -122,6 +125,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
 
                 namespace TUnit.TestProject;
@@ -136,7 +140,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute : DataSourceGeneratorAttribute<string, int>
                     {
-                        public override IEnumerable<(string, int)> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<(string, int)>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -157,6 +161,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
                             
                 namespace TUnit.TestProject;
@@ -171,7 +176,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
                     {
-                        public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -192,6 +197,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
 
                 namespace TUnit.TestProject;
@@ -206,7 +212,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute<T1, T2> : DataSourceGeneratorAttribute<T1, T2>
                     {
-                        public override IEnumerable<(T1, T2)> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<(T1, T2)>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -227,6 +233,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
 
                 namespace TUnit.TestProject;
@@ -241,7 +248,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute : DataSourceGeneratorAttribute<int, string>
                     {
-                        public override IEnumerable<(int, string)> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<(int, string)>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -262,6 +269,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
 
                 namespace TUnit.TestProject;
@@ -276,7 +284,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute : DataSourceGeneratorAttribute<string, int>
                     {
-                        public override IEnumerable<(string, int)> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<(string, int)>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -297,6 +305,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
                             
                 namespace TUnit.TestProject;
@@ -313,7 +322,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
                     {
-                        public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }
@@ -333,6 +342,7 @@ public class GeneratedDataAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
                             
                 namespace TUnit.TestProject;
@@ -349,7 +359,7 @@ public class GeneratedDataAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
                     {
-                        public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata metadata)
+                        public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata metadata)
                         {
                             return [];
                         }

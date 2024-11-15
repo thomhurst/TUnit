@@ -106,7 +106,7 @@ public static class Rules
         CreateDescriptor("TUnit0045", UsageCategory, DiagnosticSeverity.Error);
     
     public static readonly DiagnosticDescriptor ReturnFunc =
-        CreateDescriptor("TUnit0045", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor("TUnit0046", UsageCategory, DiagnosticSeverity.Warning);
     
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

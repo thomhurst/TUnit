@@ -12,6 +12,7 @@ public class EnumerableMethodDataTupleTypeTests
             .VerifyAnalyzerAsync(
                 """
                 using System.Collections.Generic;
+                using System;
                 using TUnit.Core;
                             
                 public class EnumerableTupleDataSourceDrivenTests
@@ -22,11 +23,11 @@ public class EnumerableMethodDataTupleTypeTests
                     {
                     }
                                 
-                    public static IEnumerable<(int, string, bool)> TupleMethod()
+                    public static IEnumerable<Func<(int, string, bool)>> TupleMethod()
                     {
-                        yield return (1, "String", true);
-                        yield return (2, "String2", false);
-                        yield return (3, "String3", true);
+                        yield return () => (1, "String", true);
+                        yield return () => (2, "String2", false);
+                        yield return () => (3, "String3", true);
                     }
                 }
                 """,
@@ -45,6 +46,7 @@ public class EnumerableMethodDataTupleTypeTests
             .VerifyAnalyzerAsync(
                 """
                 using System.Collections.Generic;
+                using System;
                 using TUnit.Core;
 
                 public class EnumerableTupleDataSourceDrivenTests
@@ -55,11 +57,11 @@ public class EnumerableMethodDataTupleTypeTests
                     {
                     }
                                 
-                    public static IEnumerable<(int, string, bool)> TupleMethod()
+                    public static IEnumerable<Func<(int, string, bool)>> TupleMethod()
                     {
-                        yield return (1, "String", true);
-                        yield return (2, "String2", false);
-                        yield return (3, "String3", true);
+                        yield return () => (1, "String", true);
+                        yield return () => (2, "String2", false);
+                        yield return () => (3, "String3", true);
                     }
                 }
                 """

@@ -12,6 +12,7 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
 
                 [MethodDataSource(nameof(MyMethod))]
                 public class MyClass
@@ -25,7 +26,7 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
                     {
                     }
 
-                    public static int MyMethod() => 1;
+                    public static Func<int> MyMethod() => () => 1;
                 }
                 """
             );
@@ -38,6 +39,7 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using System.Collections.Generic;
+                using System;
                 using TUnit.Core;
 
                 [MethodDataSource(nameof(MyMethod))]
@@ -52,10 +54,10 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
                     {
                     }
                             
-                    public static IEnumerable<int> MyMethod()
+                    public static IEnumerable<Func<int>> MyMethod()
                     {
-                        yield return 1;
-                        yield return 2;
+                        yield return () => 1;
+                        yield return () => 2;
                     }
                 }
                 """
@@ -96,6 +98,7 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
 
                 [{|#0:MethodDataSource(nameof(MyMethod))|}]
                 public class MyClass
@@ -109,7 +112,7 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
                     {
                     }
                                 
-                    public static int MyMethod() => 1;
+                    public static Func<int> MyMethod() => () => 1;
                 }
                 """,
 
@@ -126,6 +129,7 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using System.Collections.Generic;
+                using System;
                 using TUnit.Core;
 
                 [{|#0:MethodDataSource(nameof(MyMethod))|}]
@@ -140,10 +144,10 @@ public class MethodDataSourceMatchesConstructorAnalyzerTests
                     {
                     }
                                 
-                    public static IEnumerable<int> MyMethod()
+                    public static IEnumerable<Func<int>> MyMethod()
                     {
-                        yield return 1;
-                        yield return 2;
+                        yield return () => 1;
+                        yield return () => 2;
                     }
                 }
                 """,
