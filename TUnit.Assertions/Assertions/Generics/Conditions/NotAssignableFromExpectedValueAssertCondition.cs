@@ -11,8 +11,8 @@ public class NotAssignableFromExpectedValueAssertCondition<TActual>(Type expecte
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult
             .FailIf(() => actualValue is null,
-                "actual is null")
+                () => "actual is null")
             .OrFailIf(
                 () => actualValue!.GetType().IsAssignableFrom(expectedType),
-                $"it is {ActualValue?.GetType().Name ?? "null"}");
+                () => $"it is {ActualValue?.GetType().Name ?? "null"}");
 }

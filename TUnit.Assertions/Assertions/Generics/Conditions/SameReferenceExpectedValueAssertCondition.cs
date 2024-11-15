@@ -11,5 +11,5 @@ public class SameReferenceExpectedValueAssertCondition<TActual, TExpected>(TExpe
     protected override AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue) => AssertionResult
         .FailIf(
             () => !ReferenceEquals(actualValue, expectedValue),
-            "they did not");
+            () => "they did not");
 }
