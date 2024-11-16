@@ -71,7 +71,7 @@ public partial class Throws
 
             var result = await Assert.That(action).ThrowsExactly<CustomException>();
 
-            await Assert.That<object?>(result).IsSameReference(exception);
+            await Assert.That<object?>(result).IsSameReferenceAs(exception);
         }
 
         [Test]

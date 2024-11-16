@@ -19,7 +19,7 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();");
             await AssertFileContains(generatedFiles[1], "classInstance.DataSource_Method2(methodArg)");
 
-            await AssertFileContains(generatedFiles[2], "global::System.Action methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction();");
+            await AssertFileContains(generatedFiles[2], "global::System.Action methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction()();");
             await AssertFileContains(generatedFiles[2], "classInstance.DataSource_Method_WithAction(methodArg)");
             
             await AssertFileContains(generatedFiles[3], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(5)");

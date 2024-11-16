@@ -12,7 +12,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
@@ -21,9 +22,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
 
-                    public static int Data()
+                    public static Func<int> Data()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
                 """,
@@ -41,7 +42,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
@@ -50,9 +52,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                                 
-                    public static int Data()
+                    public static Func<int> Data()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
                 """
@@ -66,6 +68,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
 
                 public class MyClass
@@ -76,11 +79,11 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                                 
-                    public static IEnumerable<int> Data()
+                    public static IEnumerable<Func<int>> Data()
                     {
-                        yield return 1;
-                        yield return 2;
-                        yield return 3;
+                        yield return () => 1;
+                        yield return () => 2;
+                        yield return () => 3;
                     }
                 }
                 """
@@ -94,7 +97,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
@@ -103,9 +107,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                                 
-                    public static int Data()
+                    public static Func<int> Data()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
                 """
@@ -119,12 +123,13 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public static class MyData
                 {
-                    public static int One()
+                    public static Func<int> One()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
 
@@ -147,12 +152,13 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyData
                 {
-                    public static int One()
+                    public static Func<int> One()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
 
@@ -175,12 +181,13 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyData
                 {
-                    public static int One()
+                    public static Func<int> One()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
 
@@ -206,12 +213,13 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using System.Threading;
                 using TUnit.Core;
-
+                using System;
+                
                 public static class MyData
                 {
-                    public static int One()
+                    public static Func<int> One()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
 
@@ -236,13 +244,14 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         await Verifier.VerifyAnalyzerAsync(
             $$"""
             using System.Threading;
+            using System;
             using TUnit.Core;
 
             public class MyClass
             {
-                public static (int, string, bool) Tuple()
+                public static Func<(int, string, bool)> Tuple()
                 {
-                    return (1, "Hello", true);
+                    return () => (1, "Hello", true);
                 }
                                   
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
@@ -264,13 +273,14 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         await Verifier.VerifyAnalyzerAsync(
             $$"""
             using System.Threading;
+            using System;
             using TUnit.Core;
 
             public class MyClass
             {
-                public static (int, string, bool) Tuple()
+                public static Func<(int, string, bool)> Tuple()
                 {
-                    return (1, "Hello", true);
+                    return () => (1, "Hello", true);
                 }
                          
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
@@ -296,13 +306,14 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         await Verifier.VerifyAnalyzerAsync(
             $$"""
             using System.Threading;
+            using System;
             using TUnit.Core;
 
             public class MyClass
             {
-                public static (int, string, bool) Tuple()
+                public static Func<(int, string, bool)> Tuple()
                 {
-                    return (1, "Hello", true);
+                    return () => (1, "Hello", true);
                 }
                                 
                 {{GetTimeoutAttribute(includeTimeoutToken)}}
@@ -316,7 +327,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
             .WithLocation(0)
-                .WithArguments("bool", "string")
+                .WithArguments("int, string, bool", "int, string, string")
         );
     }
     
@@ -327,7 +338,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
@@ -338,9 +350,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                             
-                    public static int Data()
+                    public static Func<int> Data()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
                 """,
@@ -358,7 +370,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
@@ -369,9 +382,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                             
-                    public static int Data()
+                    public static Func<int> Data()
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
                 """
@@ -385,6 +398,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
+                using System;
                 using System.Collections.Generic;
 
                 public class MyClass
@@ -397,16 +411,19 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                             
-                    public static IEnumerable<int> Data()
+                    public static IEnumerable<Func<int>> {|#1:Data|}()
                     {
-                        return [1];
+                        return [() => 1];
                     }
                 }
                 """,
 
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("System.Collections.Generic.IEnumerable<int>", "int")
+                    .WithArguments("System.Collections.Generic.IEnumerable<System.Func<int>>", "int"),
+                
+                Verifier.Diagnostic(Rules.ReturnFunc)
+                    .WithLocation(1)
             );
     }
     
@@ -417,7 +434,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data))|}]
@@ -428,16 +446,16 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                             
-                    public static (string, int) Data()
+                    public static Func<(string, int)> Data()
                     {
-                        return ("Hello", 1);
+                        return () => ("Hello", 1);
                     }
                 }
                 """,
 
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("string, int", "(string, string)")
+                    .WithArguments("(string, int)", "(string, string)")
             );
     }
     
@@ -448,7 +466,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data))]
@@ -459,9 +478,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                             
-                    public static (string, int) Data()
+                    public static Func<(string, int)> Data()
                     {
-                        return ("Hello", 1);
+                        return () => ("Hello", 1);
                     }
                 }
                 """
@@ -475,7 +494,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data), Arguments = [ "Hi" ])|}]
@@ -484,9 +504,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                             
-                    public static int Data(bool flag)
+                    public static Func<int> Data(bool flag)
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
                 """,
@@ -504,7 +524,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [{|#0:MethodDataSource(nameof(Data), Arguments = [ true ])|}]
@@ -513,9 +534,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                             
-                    public static int Data(bool flag)
+                    public static Func<int> Data(bool flag)
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
                 """
@@ -530,7 +551,8 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
                 using System.Collections.Generic;
                 using TUnit.Core;
-
+                using System;
+                
                 public class MyClass
                 {
                     [MethodDataSource(nameof(Data), Arguments = [ new[] { 1, 2 } ])]
@@ -539,9 +561,9 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     {
                     }
                             
-                    public static int Data(IEnumerable<int> values)
+                    public static Func<int> Data(IEnumerable<int> values)
                     {
-                        return 1;
+                        return () => 1;
                     }
                 }
                 """
@@ -554,6 +576,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         await Verifier.VerifyAnalyzerAsync(
             """
             using System.Collections.Generic;
+            using System;
             using TUnit.Core;
 
             public class MyClass
@@ -565,68 +588,12 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 {
                 }
                             
-                public static int Data<T>(IEnumerable<T> values)
+                public static Func<int> Data<T>(IEnumerable<T> values)
                 {
-                    return 1;
+                    return () => 1;
                 }
             }
             """
         );
-    }
-
-    [Test]
-    [TestCase("new int[0]")]
-    [TestCase("\"hello\"")]
-    public async Task Method_Data_Source_Is_Not_Flagged_When_Matches_Parameter_Type_Generic(string argument)
-    {
-        await Verifier
-            .VerifyAnalyzerAsync(
-                $$"""
-                using System.Collections.Generic;
-                using TUnit.Core;
-
-                public class MyClass
-                {
-                    [MethodDataSource(nameof(Data), Arguments = [ {{argument}} ])]
-                    [Test]
-                    public void MyTest(int value)
-                    {
-                    }
-                      
-                    public static T Data<T>(T[] values)
-                    {
-                        return values[0];
-                    }
-                }
-                """
-            );
-    }
-
-    [Test]
-    [TestCase("new int[0]")]
-    [TestCase("\"hello\"")]
-    public async Task Method_Data_Source_Is_Not_Flagged_When_Enumerable_Inner_Type_Matches_Parameter_Type_Generic(string argument)
-    {
-        await Verifier
-            .VerifyAnalyzerAsync(
-                $$"""
-                using System.Collections.Generic;
-                using TUnit.Core;
-                      
-                public class MyClass
-                {
-                    [MethodDataSource(nameof(Data), Arguments = [ {{argument}} ])]
-                    [Test]
-                    public void MyTest(int value)
-                    {
-                    }
-                      
-                    public static IEnumerable<T> Data<T>(T[] values)
-                    {
-                        return values;
-                    }
-                }
-                """
-            );
     }
 }

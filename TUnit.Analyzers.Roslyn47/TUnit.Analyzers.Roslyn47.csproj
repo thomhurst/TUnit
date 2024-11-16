@@ -18,4 +18,10 @@
         <EmbeddedResource Include="..\TUnit.Analyzers\**\*.resx" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="..\TUnit.Analyzers\EqualityComparers\">
+        <Link>EqualityComparers</Link>
+      </Folder>
+    </ItemGroup>
+
 </Project>

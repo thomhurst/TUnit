@@ -41,9 +41,9 @@ public class CustomDisplayNameTests
     
     public class MyGenerator : DataSourceGeneratorAttribute<string>, ITestDiscoveryEventReceiver
     {
-        public override IEnumerable<string> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        public override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            yield return "Super Secret Password";
+            yield return () => "Super Secret Password";
         }
 
         public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)

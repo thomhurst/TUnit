@@ -19,14 +19,14 @@ public class GenericMethodTests
         Console.WriteLine(string.Join(", ", enumerable.Select(x => seedSelector(keySelector(x)))));
     }
 
-    public static IEnumerable<(IEnumerable<int> source,
+    public static IEnumerable<Func<(IEnumerable<int> source,
         Func<int, int> keySelector,
         Func<int, int> seedSelector,
         Func<int, int, int> func,
         IEqualityComparer<int>? comparer,
-        IEnumerable<KeyValuePair<int, int>> expected)> AggregateBy_Numeric_TestData()
+        IEnumerable<KeyValuePair<int, int>> expected)>> AggregateBy_Numeric_TestData()
     {
-        yield return (
+        yield return () => (
             source: Enumerable.Range(0, 10),
             keySelector: x => x,
             seedSelector: x => 0,
@@ -36,14 +36,14 @@ public class GenericMethodTests
         );
     }
     
-    public static IEnumerable<(IEnumerable<string> source,
+    public static IEnumerable<Func<(IEnumerable<string> source,
         Func<string, string> keySelector,
         Func<string, string> seedSelector,
         Func<string, string, string> func,
         IEqualityComparer<string>? comparer,
-        IEnumerable<KeyValuePair<string, string>> expected)> AggregateBy_String_TestData()
+        IEnumerable<KeyValuePair<string, string>> expected)>> AggregateBy_String_TestData()
     {
-        yield return (
+        yield return () => (
             source: ["Bob", "bob", "tim", "Bob", "Tim"],
             keySelector: x => x,
             seedSelector: x => "",

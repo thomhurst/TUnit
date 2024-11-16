@@ -42,4 +42,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="compiler-diagnostics.sarif" />
+  </ItemGroup>
 </Project>

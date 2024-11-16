@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Assertions.Strings.Conditions;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
@@ -21,9 +22,10 @@ public class StringContainsAssertionBuilderWrapper : InvokableValueAssertionBuil
     
     public StringContainsAssertionBuilderWrapper IgnoringWhitespace()
     {
-        var assertion = (ExpectedValueAssertCondition<string, string>) Assertions.Peek();
+        var assertion = (StringContainsExpectedValueAssertCondition) Assertions.Peek();
 
         assertion.WithTransform(StringUtils.StripWhitespace, StringUtils.StripWhitespace);
+        assertion.IgnoreWhitespace = true;
         
         AppendCallerMethod([]);
         

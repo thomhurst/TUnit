@@ -29,7 +29,7 @@ public class ClassTupleDataSourceDrivenTests
         // Dummy method
     }
     
-    public static (int, string, bool) TupleMethod() => (1, "String", true);
-    public static (int Number, string Word, bool Flag) NamedTupleMethod() => (1, "String", true);
+    public static Func<(int, string, bool)> TupleMethod() => () => (1, "String", true);
+    public static Func<(int Number, string Word, bool Flag)> NamedTupleMethod() => () => (1, "String", true);
 
 }

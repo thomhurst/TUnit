@@ -23,9 +23,12 @@ public partial class TestContext : Context, IDisposable
         _serviceProvider = serviceProvider;
         OriginalMetadata = originalMetadata;
         TestDetails = testDetails;
-        ObjectBag = originalMetadata.ObjectBag;
+        ObjectBag = originalMetadata.TestBuilderContext.ObjectBag;
+        Events = originalMetadata.TestBuilderContext.Events;
     }
-    
+
+    public TestContextEvents Events { get; }
+
     public DateTimeOffset? TestStart { get; internal set; }
     
     internal Task? TestTask { get; set; }
@@ -52,12 +55,10 @@ public partial class TestContext : Context, IDisposable
         Artifacts.Add(artifact);
     }
     
-    public EventHandler? OnDispose { get; set; }
-
     internal string? SkipReason { get; set; }
 
     public void Dispose()
     {
-        OnDispose?.Invoke(this, EventArgs.Empty);
+        Events.Dispose();
     }
 }

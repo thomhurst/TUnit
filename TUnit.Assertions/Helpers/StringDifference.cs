@@ -8,7 +8,11 @@ internal class StringDifference(string? actualValue, string? expectedValue, IEqu
     private const char ArrowUp = '\u2191';
 
     private readonly IEqualityComparer<string> _comparer = comparer ?? StringComparer.Ordinal;
-
+    
+    public int? OverriddenIndex { get; set; }
+    public int IgnoreWhiteSpace { get; set; }
+    
+    
     /// <summary>
     /// Returns the first index at which the two values do not match.
     /// </summary>
@@ -78,7 +82,7 @@ internal class StringDifference(string? actualValue, string? expectedValue, IEqu
         var spacesBeforeArrow = IndexOfFirstMismatch(actualLine, expectedLine, _comparer) + 1;
 
         return $"""
-                {prefix} {initialIndexOfDifference}:
+                {prefix} {OverriddenIndex ?? initialIndexOfDifference}:
                    {new string(' ', spacesBeforeArrow)}{ArrowDown}
                    "{actualLine}"
                    "{expectedLine}"

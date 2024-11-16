@@ -1,11 +1,17 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
 public static class TypeExtensions
 {
+    public static string GetMetadataName(this Type type)
+    {
+        return $"{type.Namespace}.{type.Name}";
+    }
+    
     public static IEnumerable<ISymbol> GetMembersIncludingBase(this ITypeSymbol namedTypeSymbol, bool reverse = true)
     {
         var list = new List<ISymbol>();
@@ -105,7 +111,7 @@ public static class TypeExtensions
 
         var firstParameterType = parameterTypes.FirstOrDefault();
         
-        if (context.SemanticModel.Compilation.HasImplicitConversion(enumerableInnerType, firstParameterType))
+        if (context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(enumerableInnerType, firstParameterType))
         {
             return true;
         }
@@ -129,7 +135,7 @@ public static class TypeExtensions
                     continue;
                 }
                 
-                if (!context.SemanticModel.Compilation.HasImplicitConversion(tupleType, parameterType))
+                if (!context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(tupleType, parameterType))
                 {
                     return false;
                 }

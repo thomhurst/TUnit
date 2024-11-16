@@ -93,17 +93,17 @@ public class TestMethodParametersAnalyzerTests
                                 
                     public class AutoFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<T>
                     {
-                        public override IEnumerable<T> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                        public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                         {
-                            return [default];
+                            return [() => default];
                         }
                     }
                                 
                     public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
                     {
-                        public override IEnumerable<(T1, T2, T3)> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+                        public override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
                         {
-                            return [default];
+                            return [() => default];
                         }
                     }
                 }

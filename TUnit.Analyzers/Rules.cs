@@ -105,6 +105,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor TooManyDataAttributes =
         CreateDescriptor("TUnit0045", UsageCategory, DiagnosticSeverity.Error);
     
+    public static readonly DiagnosticDescriptor ReturnFunc =
+        CreateDescriptor("TUnit0046", UsageCategory, DiagnosticSeverity.Warning);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

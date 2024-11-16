@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
@@ -45,55 +46,28 @@ public static class MethodDataSourceRetriever
             methodDataAttribute.NamedArguments.FirstOrDefault(x => x.Key == "DisposeAfterTest").Value.Value as bool? ??
             true;
 
-        var isEnumerable = dataSourceMethod.ReturnType.EnumerableGenericTypeIs(context, parameterOrPropertyTypes, out var innerType);
+        var types = GetInjectableTypes(context, 
+            parameterOrPropertyTypes, 
+            dataSourceMethod, 
+            out var isExpandableEnumerable, 
+            out var isExpandableFunc, 
+            out var isExpandableTuples);
         
-        if (!isEnumerable)
-        {
-            innerType = dataSourceMethod.ReturnType!;
-        }
-
         var argumentsExpression = GetArgumentsExpression(context, methodDataAttribute);
         
-        if (parameterOrPropertyTypes.Length > 1 && innerType!.IsTupleType && innerType is INamedTypeSymbol typeSymbol)
-        {
-            var tupleTypes = typeSymbol.TupleUnderlyingType?.TypeArguments ??
-                             typeSymbol.TypeArguments;
-
-            if (CheckTupleTypes(parameterOrPropertyTypes, tupleTypes) is {} result)
-            {
-                return new MethodDataSourceAttributeContainer
-                (
-                    TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats
-                        .FullyQualifiedGenericWithGlobalPrefix),
-                    ArgumentsType: argumentsType,
-                    IsEnumerableData: isEnumerable,
-                    IsStatic: isStatic,
-                    MethodName: methodName,
-                    TypeName: typeName,
-                    MethodReturnType: dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats
-                        .FullyQualifiedGenericWithGlobalPrefix),
-                    TupleTypes: result.ToArray(),
-                    ArgumentsExpression: argumentsExpression
-                )
-                {
-                    Attribute = methodDataAttribute,
-                    AttributeIndex = index,
-                    DisposeAfterTest = disposeAfterTest,
-                };
-            }
-        }
-
         return new MethodDataSourceAttributeContainer
         (
+            context.SemanticModel.Compilation,
             TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             ArgumentsType: argumentsType,
-            IsEnumerableData: isEnumerable,
+            TypesToInject: types,
+            IsExpandableEnumerable: isExpandableEnumerable,
+            IsExpandableFunc: isExpandableFunc,
+            IsExpandableTuples: isExpandableTuples,
             IsStatic: isStatic,
             MethodName: methodName,
             TypeName: typeName,
-            MethodReturnType: dataSourceMethod.ReturnType.ToDisplayString(DisplayFormats
-                .FullyQualifiedGenericWithGlobalPrefix),
-            TupleTypes: [],
+            MethodReturnType: dataSourceMethod.ReturnType,
             ArgumentsExpression: argumentsExpression
         )
         {
@@ -101,6 +75,134 @@ public static class MethodDataSourceRetriever
             AttributeIndex = index,
             DisposeAfterTest = disposeAfterTest,
         };
+    }
+
+    private static ImmutableArray<ITypeSymbol> GetInjectableTypes(GeneratorAttributeSyntaxContext context, 
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, 
+        IMethodSymbol dataSourceMethod,
+        out bool isExpandableEnumerable, 
+        out bool isExpandableFunc,
+        out bool isExpandableTuples)
+    {
+        isExpandableEnumerable = false;
+        isExpandableFunc = false;
+        isExpandableTuples = false;
+        
+        if (parameterOrPropertyTypes.Length == 1
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(dataSourceMethod.ReturnType,
+                parameterOrPropertyTypes[0]))
+        {
+            return ImmutableArray.Create(dataSourceMethod.ReturnType);
+        }
+        
+        if (dataSourceMethod.ReturnType is not INamedTypeSymbol type)
+        {
+            return ImmutableArray.Create(dataSourceMethod.ReturnType);
+        }
+
+        if (type.IsGenericType && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition,
+                context.SemanticModel.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
+        {
+            isExpandableEnumerable = true;
+            type = (INamedTypeSymbol)type.TypeArguments[0];
+        }
+
+        if (parameterOrPropertyTypes.Length == 1
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, parameterOrPropertyTypes[0]))
+        {
+            return ImmutableArray.Create<ITypeSymbol>(type);
+        }
+        
+        var genericFunc = context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName());
+
+        if (type.IsGenericType
+            && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, genericFunc)
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, genericFunc.Construct(GetTypeOrTuplesType(context.SemanticModel.Compilation, parameterOrPropertyTypes))))
+        {
+            isExpandableFunc = true;
+            type = (INamedTypeSymbol)type.TypeArguments[0];
+        }
+        
+        if (parameterOrPropertyTypes.Length == 1
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, parameterOrPropertyTypes[0]))
+        {
+            return ImmutableArray.Create<ITypeSymbol>(type);
+        }
+
+        if (type.IsTupleType)
+        {
+            isExpandableTuples = true;
+            return type.TupleUnderlyingType?.TypeArguments ?? type.TypeArguments;
+        }
+        
+        return ImmutableArray.Create<ITypeSymbol>(type);
+    }
+
+    private static ITypeSymbol GetTypeOrTuplesType(Compilation compilation, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes)
+    {
+        if (parameterOrPropertyTypes.Length == 1)
+        {
+            return parameterOrPropertyTypes[0];
+        }
+
+        return compilation.CreateTupleTypeSymbol(parameterOrPropertyTypes);
+    }
+
+    private static bool TryGetTupleTypes(GeneratorAttributeSyntaxContext context, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, IMethodSymbol dataSourceMethod, out ImmutableArray<ITypeSymbol> tupleTypes)
+    {
+        if (parameterOrPropertyTypes.Length <= 1)
+        {
+            tupleTypes = ImmutableArray<ITypeSymbol>.Empty;
+            return false;
+        }
+
+        var returnType = dataSourceMethod.ReturnType;
+        
+        if (returnType is INamedTypeSymbol { IsGenericType: true } enumerableSymbol && 
+            SymbolEqualityComparer.Default.Equals(dataSourceMethod.ReturnType.OriginalDefinition,
+                context.SemanticModel.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
+        {
+            returnType = enumerableSymbol.TypeArguments[0];
+        }
+
+        if (returnType is INamedTypeSymbol { IsGenericType: true } funcSymbol &&
+            SymbolEqualityComparer.Default.Equals(dataSourceMethod.ReturnType.OriginalDefinition,
+                context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName())))
+        {
+            returnType = funcSymbol.TypeArguments[0];
+        }
+
+        if (returnType.IsTupleType)
+        {
+            var tupleType = (INamedTypeSymbol) returnType;
+            tupleTypes = tupleType.TupleUnderlyingType?.TypeArguments ?? tupleType.TypeArguments;
+            return true;
+        }
+
+        tupleTypes = ImmutableArray<ITypeSymbol>.Empty;
+        return false;
+    }
+
+    private static bool ShouldUnfoldFunc(GeneratorAttributeSyntaxContext context, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, IMethodSymbol dataSourceMethod)
+    {
+        if (parameterOrPropertyTypes.Length != 1)
+        {
+            return false;
+        }
+        
+        var parameterType = parameterOrPropertyTypes[0];
+
+        var returnType = dataSourceMethod.ReturnType;
+        
+        if (returnType.OriginalDefinition.IsGenericDefinition() && SymbolEqualityComparer.Default.Equals(returnType.OriginalDefinition,
+                context.SemanticModel.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
+        {
+            returnType = ((INamedTypeSymbol)returnType).TypeArguments[0];
+        }
+        
+        return SymbolEqualityComparer.Default
+                   .Equals(context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName())?.Construct(parameterType),
+                       returnType);
     }
 
     private static string GetArgumentsExpression(GeneratorAttributeSyntaxContext context, AttributeData methodDataAttribute)
@@ -120,15 +222,14 @@ public static class MethodDataSourceRetriever
         return argumentsSyntax.Accept(new CollectionToArgumentsListRewriter(context.SemanticModel))?.ToFullString() ?? string.Empty;
     }
 
-    private static IEnumerable<string> CheckTupleTypes(ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, ImmutableArray<ITypeSymbol> tupleTypes)
+    private static IEnumerable<ITypeSymbol> CheckTupleTypes(ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, ImmutableArray<ITypeSymbol> tupleTypes)
     {
         for (var index = 0; index < tupleTypes.Length; index++)
         {
             var tupleType = tupleTypes.ElementAtOrDefault(index);
             var parameterType = parameterOrPropertyTypes.ElementAtOrDefault(index);
 
-            yield return tupleType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)
-                ?? parameterType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)!;
+            yield return tupleType ?? parameterType!;
         }
     }
 }
