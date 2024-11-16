@@ -90,6 +90,6 @@ internal static class StringUtils
         
         var startIndex = Math.Max(differIndexOnActual-25, 0);
         
-        return text.Substring(startIndex, 50);
+        return text?.Substring(startIndex, Math.Min(text.Length - startIndex, 50));
     }
 }
