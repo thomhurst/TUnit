@@ -65,10 +65,12 @@ internal class SingleTestExecutor(
 
             var cleanUpExceptions = new List<Exception>();
 
-            DateTimeOffset start = DateTimeOffset.Now;
+            var start = DateTimeOffset.Now;
 
             try
             {
+                CheckCancelled();
+                
                 await WaitForDependsOnTests(test, filter, context);
 
                 if (!explicitFilterService.CanRun(test.TestDetails, filter))
@@ -80,6 +82,8 @@ internal class SingleTestExecutor(
                 {
                     throw new SkipTestException(testContext.SkipReason);
                 }
+                
+                CheckCancelled();
                 
                 start = DateTimeOffset.Now;
                 
@@ -144,6 +148,19 @@ internal class SingleTestExecutor(
         finally
         {
             semaphore?.Release();
+        }
+    }
+
+    private void CheckCancelled()
+    {
+        if (engineCancellationToken.Token.IsCancellationRequested)
+        {
+            throw new SkipTestException("The test session has been cancelled...");
+        }
+        
+        if (cancellationTokenSource.IsCancellationRequested)
+        {
+            throw new SkipTestException("The test has been cancelled...");
         }
     }
 
@@ -348,16 +365,6 @@ internal class SingleTestExecutor(
 
     private async ValueTask ExecuteCore(DiscoveredTest discoveredTest, List<Exception> cleanupExceptions)
     {
-        if (engineCancellationToken.Token.IsCancellationRequested)
-        {
-            throw new SkipTestException("The test session has been cancelled...");
-        }
-        
-        if (cancellationTokenSource.IsCancellationRequested)
-        {
-            throw new SkipTestException("The test has been cancelled...");
-        }
-
         using var linkedTokenSource = CreateLinkedToken(discoveredTest.TestContext, engineCancellationToken.CancellationTokenSource);
         
         await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token, cleanupExceptions);
