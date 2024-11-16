@@ -124,9 +124,9 @@ public static class Compare
         }
         
         foreach (var propertyName in actual.GetType().GetProperties().Concat(expected.GetType().GetProperties())
-                     .Distinct()
                      .Where(p => p.GetIndexParameters().Length == 0)
-                     .Select(x => x.Name))
+                     .Select(x => x.Name)
+                     .Distinct())
         {
             string?[] readOnlySpan = [..memberNames, propertyName];
             
