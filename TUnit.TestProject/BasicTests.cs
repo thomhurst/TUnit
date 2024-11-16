@@ -13,4 +13,10 @@ public class BasicTests
     {
         await Task.CompletedTask;
     }
+    
+    [Test]
+    public async ValueTask ValueTaskAsynchronousTest()
+    {
+        await ValueTask.CompletedTask;
+    }
 }
