@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using ModularPipelines.Context;
-using Polly.Retry;
 
 namespace TUnit.Pipeline.Modules.Tests;
 

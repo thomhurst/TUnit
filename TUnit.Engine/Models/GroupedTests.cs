@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using TUnit.Core;
+﻿using TUnit.Core;
 
 namespace TUnit.Engine.Models;
 

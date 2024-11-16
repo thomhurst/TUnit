@@ -1,7 +1,6 @@
 using AutoFixture;
 using TUnit.Core;
 using TUnit.Core.Extensions;
-using TUnit.Engine.Extensions;
 using TestContext = TUnit.Core.TestContext;
 
 namespace TUnit.UnitTests;
