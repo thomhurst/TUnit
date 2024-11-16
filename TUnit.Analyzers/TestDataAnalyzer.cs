@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.EqualityComparers;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
@@ -380,7 +379,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            var conversions = unwrappedTypes.Zip(testParameterTypes,
+            var conversions = unwrappedTypes.ZipAll(testParameterTypes,
                 (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter));
             
             if (!conversions.All(x => x))
@@ -395,8 +394,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            var argumentsToParamsConversions = argumentForMethodCallTypes.Zip(dataSourceMethodParameterTypes,
-                (argument, parameterType) => context.Compilation.HasImplicitConversion(argument, parameterType));
+            var argumentsToParamsConversions = argumentForMethodCallTypes.ZipAll(dataSourceMethodParameterTypes,
+                (argument, parameterType) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameterType));
             
             if (!argumentsToParamsConversions.All(x => x))
             {
@@ -413,7 +412,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (testParameterTypes.Length == 1
                 && unwrappedTypes.Length == 1
-                && context.Compilation.HasImplicitConversion(unwrappedTypes[0],
+                && context.Compilation.HasImplicitConversionOrGenericParameter(unwrappedTypes[0],
                     testParameterTypes[0]))
             {
                 return;
@@ -447,7 +446,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         continue;
                     }
                 
-                    if (!context.Compilation.HasImplicitConversion(argumentType, parameterType))
+                    if (!context.Compilation.HasImplicitConversionOrGenericParameter(argumentType, parameterType))
                     {
                         context.ReportDiagnostic(
                             Diagnostic.Create(
@@ -475,8 +474,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static bool MatchesParameters(SymbolAnalysisContext context, ITypeSymbol[] argumentForMethodCallTypes, IMethodSymbol methodSymbol)
     {
-        return argumentForMethodCallTypes.Zip(methodSymbol.Parameters.Select(p => p.Type), 
-                (argument, parameter) => context.Compilation.HasImplicitConversion(argument, parameter))
+        return argumentForMethodCallTypes.ZipAll(methodSymbol.Parameters.Select(p => p.Type), 
+                (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter))
             .All(x => x);
     }
 
@@ -494,7 +493,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         var type = methodContainingTestData.ReturnType;
 
         if (testParameterTypes.Length == 1
-            && context.Compilation.HasImplicitConversion(type, testParameterTypes[0]))
+            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
             return ImmutableArray.Create(type);
         }
@@ -528,7 +527,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         if (testParameterTypes.Length == 1
-            && context.Compilation.HasImplicitConversion(type, testParameterTypes[0]))
+            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
             return ImmutableArray.Create(type);
         }
@@ -543,7 +542,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         if (testParameterTypes.Length == 1
-            && context.Compilation.HasImplicitConversion(type, testParameterTypes[0]))
+            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
             return ImmutableArray.Create(type);
         }
@@ -576,8 +575,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var conversions = baseGeneratorAttribute.TypeArguments.Zip(testDataTypes,
-            (returnType, parameterType) => context.Compilation.HasImplicitConversion(returnType, parameterType));
+        var conversions = baseGeneratorAttribute.TypeArguments.ZipAll(testDataTypes,
+            (returnType, parameterType) => context.Compilation.HasImplicitConversionOrGenericParameter(returnType, parameterType));
         
         if (conversions.All(x => x))
         {
@@ -600,7 +599,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
         
-        return context.Compilation.HasImplicitConversion(argument.Type, methodParameterType);
+        return context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, methodParameterType);
     }
 
     private bool IsEnumAndInteger(ITypeSymbol? type1, ITypeSymbol? type2)
