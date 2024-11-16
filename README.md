@@ -42,11 +42,7 @@ TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the
 
 ### Visual Studio
 
-Visual Studio is supported on the Preview version currently. 
-
-- Install the [latest preview version](https://visualstudio.microsoft.com/vs/preview/)
-- Open Visual Studio and go to Tools > Manage Preview Features
-- Enable "Use testing platform server mode"
+Visual Studio is supported. The "Use testing platform server mode" option must be selected in Tools > Manage Preview Features.
 
 <img src="/docs/static/img/visual-studio.png" height="300px">
 
