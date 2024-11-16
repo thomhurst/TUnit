@@ -220,13 +220,13 @@ internal class SingleTestExecutor(
                 }
 
                 TestContext.Current = null;
+            }
+            
+            await ExecuteStaticAfterHooks(test, testContext, cleanUpExceptions);
 
-                await ExecuteStaticAfterHooks(test, context, testContext, cleanUpExceptions);
-
-                foreach (var artifact in testContext.Artifacts)
-                {
-                    await messageBus.TestArtifact(testContext, artifact);
-                }
+            foreach (var artifact in testContext.Artifacts)
+            {
+                await messageBus.TestArtifact(testContext, artifact);
             }
         }
     }
@@ -253,7 +253,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteStaticAfterHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
+    private async Task ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
         await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
