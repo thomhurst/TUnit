@@ -26,12 +26,12 @@ public static class GenericIsExtensions
             .RegisterAssertion(new EqualsExpectedValueAssertCondition<TActual>(expected), [doNotPopulateThisValue1]);
     }
     
-    public static EquivalentToAssertionBuilderWrapper<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "")
+    public static EquivalentToAssertionBuilderWrapper<TActual, TExpected> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "")
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new EquivalentToExpectedValueAssertCondition<TActual>(expected, doNotPopulateThisValue1)
+        var assertionBuilder = valueSource.RegisterAssertion(new EquivalentToExpectedValueAssertCondition<TActual, TExpected>(expected, doNotPopulateThisValue1)
             , [doNotPopulateThisValue1]);
         
-        return new EquivalentToAssertionBuilderWrapper<TActual>(assertionBuilder);
+        return new EquivalentToAssertionBuilderWrapper<TActual, TExpected>(assertionBuilder);
     }
     
     public static InvokableValueAssertionBuilder<object> IsSameReferenceAs(this IValueSource<object> valueSource, object expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "")
