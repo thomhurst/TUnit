@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;

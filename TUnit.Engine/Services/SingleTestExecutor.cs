@@ -8,7 +8,6 @@ using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;

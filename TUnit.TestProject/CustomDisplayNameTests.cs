@@ -2,7 +2,6 @@
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.TestProject;
 

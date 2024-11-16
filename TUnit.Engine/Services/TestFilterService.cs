@@ -2,7 +2,6 @@
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
-using TUnit.Core.Exceptions;
 
 namespace TUnit.Engine.Services;
 
