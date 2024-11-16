@@ -107,7 +107,7 @@ public static class MethodDataSourceRetriever
         }
 
         if (parameterOrPropertyTypes.Length == 1
-            && SymbolEqualityComparer.Default.Equals(type, parameterOrPropertyTypes[0]))
+            && context.SemanticModel.Compilation.HasImplicitConversion(type, parameterOrPropertyTypes[0]))
         {
             return ImmutableArray.Create<ITypeSymbol>(type);
         }
@@ -116,10 +116,16 @@ public static class MethodDataSourceRetriever
 
         if (type.IsGenericType
             && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, genericFunc)
-            && SymbolEqualityComparer.Default.Equals(type, genericFunc.Construct(parameterOrPropertyTypes[0])))
+            && context.SemanticModel.Compilation.HasImplicitConversion(type, genericFunc.Construct(GetTypeOrTuplesType(context.SemanticModel.Compilation, parameterOrPropertyTypes))))
         {
             isExpandableFunc = true;
             type = (INamedTypeSymbol)type.TypeArguments[0];
+        }
+        
+        if (parameterOrPropertyTypes.Length == 1
+            && context.SemanticModel.Compilation.HasImplicitConversion(type, parameterOrPropertyTypes[0]))
+        {
+            return ImmutableArray.Create<ITypeSymbol>(type);
         }
 
         if (type.IsTupleType)
@@ -129,6 +135,16 @@ public static class MethodDataSourceRetriever
         }
         
         return ImmutableArray.Create<ITypeSymbol>(type);
+    }
+
+    private static ITypeSymbol GetTypeOrTuplesType(Compilation compilation, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes)
+    {
+        if (parameterOrPropertyTypes.Length == 1)
+        {
+            return parameterOrPropertyTypes[0];
+        }
+
+        return compilation.CreateTupleTypeSymbol(parameterOrPropertyTypes);
     }
 
     private static bool TryGetTupleTypes(GeneratorAttributeSyntaxContext context, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, IMethodSymbol dataSourceMethod, out ImmutableArray<ITypeSymbol> tupleTypes)

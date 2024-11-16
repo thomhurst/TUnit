@@ -52,7 +52,7 @@ public record MethodDataSourceAttributeContainer(
         }
         else
         {
-            sourceCodeWriter.WriteLine(GenerateVariable("var", $"{GetMethodInvocation()}{GetUnfoldFunc()}", ref variableIndex).ToString());
+            sourceCodeWriter.WriteLine(GenerateVariable("var", $"{GetMethodInvocation()}{FuncParenthesis()}", ref variableIndex).ToString());
         }
     }
 
@@ -65,7 +65,7 @@ public record MethodDataSourceAttributeContainer(
             tupleVariableName += Guid.NewGuid().ToString("N");
         }
 
-        sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject)}>({GetMethodInvocation()}{GetUnfoldFunc()});");
+        sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject)}>({GetMethodInvocation()}{FuncParenthesis()});");
             
         for (var index = 0; index < TypesToInject.Length; index++)
         {
@@ -88,7 +88,7 @@ public record MethodDataSourceAttributeContainer(
             ? CodeGenerators.VariableNames.ClassData
             : CodeGenerators.VariableNames.MethodData;
             
-        sourceCodeWriter.WriteLine($"var {dataName} = {dataName}Accessor{GetUnfoldFunc()};");
+        sourceCodeWriter.WriteLine($"var {dataName} = {dataName}Accessor{FuncParenthesis()};");
             
         if (IsExpandableTuples)
         {
@@ -155,7 +155,7 @@ public record MethodDataSourceAttributeContainer(
         return [MethodReturnType.GloballyQualified()];
     }
 
-    private string GetUnfoldFunc()
+    private string FuncParenthesis()
     {
         return IsExpandableFunc ? "()" : string.Empty;
     }

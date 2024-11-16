@@ -49,7 +49,7 @@ public class MethodDataSourceDrivenTests
 
     public static int SomeMethod() => 1;
 
-    public static Action SomeAction() => () => { };
+    public static Func<Action> SomeAction() => () => () => { };
     
     public static int SomeMethod(int input) => input * 2;
     public static int SomeMethod(string input1, int input2, bool input3) => input2 * 2;

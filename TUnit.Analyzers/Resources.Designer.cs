@@ -1275,7 +1275,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` than than a `&lt;T&gt;`..
+        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`..
         /// </summary>
         internal static string TUnit0046Description {
             get {
@@ -1284,7 +1284,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` than than a `&lt;T&gt;`..
+        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`..
         /// </summary>
         internal static string TUnit0046MessageFormat {
             get {
@@ -1293,7 +1293,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` than than a `&lt;T&gt;`.
+        ///   Looks up a localized string similar to Return a `Func&lt;T&gt;` rather than a `&lt;T&gt;`.
         /// </summary>
         internal static string TUnit0046Title {
             get {

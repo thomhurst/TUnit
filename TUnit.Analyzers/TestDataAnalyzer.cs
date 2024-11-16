@@ -17,7 +17,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.WrongArgumentTypeTestData, 
             Rules.NoTestDataProvided, 
             Rules.MethodParameterBadNullability,
-            Rules.WrongArgumentTypeTestData,
             Rules.MethodMustBeParameterless,
             Rules.MethodMustBeStatic,
             Rules.MethodMustBePublic,
@@ -308,9 +307,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 .ToArray() ?? [];
 
             var dataSourceMethod = methodSymbols
-                                               .FirstOrDefault(x =>
-                                                   x.Name == methodName && x.Parameters.Select(p => p.Type)
-                                                       .SequenceEqual(argumentForMethodCallTypes, new SelfOrBaseEqualityComparer(context.Compilation)))
+                                               .FirstOrDefault(methodSymbol =>
+                                                   methodSymbol.Name == methodName &&
+                                                   MatchesParameters(context, argumentForMethodCallTypes, methodSymbol))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
             
             if (dataSourceMethod is null)
@@ -358,11 +357,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var unwrappedTypes = UnwrapTypes(context,
                 dataSourceMethod,
+                testParameterTypes,
                 out var isEnumerable,
                 out var isFunc,
                 out var isTuples);
 
-            if (!isFunc)
+            if (!isFunc && unwrappedTypes.Any(x => x.IsReferenceType || x.SpecialType == SpecialType.System_String))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ReturnFunc,
                     dataSourceMethod.Locations.FirstOrDefault()));
@@ -379,8 +379,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 );
                 return;
             }
+
+            var conversions = unwrappedTypes.Zip(testParameterTypes,
+                (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter));
             
-            if (!testParameterTypes.SequenceEqual(unwrappedTypes, new SelfOrBaseEqualityComparer(context.Compilation)))
+            if (!conversions.All(x => x))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
@@ -391,8 +394,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 );
                 return;
             }
+
+            var argumentsToParamsConversions = argumentForMethodCallTypes.Zip(dataSourceMethodParameterTypes,
+                (argument, parameterType) => context.Compilation.HasImplicitConversion(argument, parameterType));
             
-            if (!dataSourceMethodParameterTypes.SequenceEqual(argumentForMethodCallTypes, new SelfOrBaseEqualityComparer(context.Compilation)))
+            if (!argumentsToParamsConversions.All(x => x))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
@@ -467,8 +473,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context, 
+    private static bool MatchesParameters(SymbolAnalysisContext context, ITypeSymbol[] argumentForMethodCallTypes, IMethodSymbol methodSymbol)
+    {
+        return argumentForMethodCallTypes.Zip(methodSymbol.Parameters.Select(p => p.Type), 
+                (argument, parameter) => context.Compilation.HasImplicitConversion(argument, parameter))
+            .All(x => x);
+    }
+
+    private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context,
         IMethodSymbol methodContainingTestData,
+        ImmutableArray<ITypeSymbol> testParameterTypes,
         out bool isEnumerable,
         out bool isFunc,
         out bool isTuples)
@@ -478,6 +492,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         isTuples = false;
 
         var type = methodContainingTestData.ReturnType;
+
+        if (testParameterTypes.Length == 1
+            && context.Compilation.HasImplicitConversion(type, testParameterTypes[0]))
+        {
+            return ImmutableArray.Create(type);
+        }
         
         if (context.Symbol is IPropertySymbol)
         {
@@ -506,6 +526,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             isEnumerable = true;
             type = namedTypeSymbol.TypeArguments[0];
         }
+        
+        if (testParameterTypes.Length == 1
+            && context.Compilation.HasImplicitConversion(type, testParameterTypes[0]))
+        {
+            return ImmutableArray.Create(type);
+        }
 
         if (type is INamedTypeSymbol { IsGenericType: true } genericType
             && SymbolEqualityComparer.Default.Equals(
@@ -514,6 +540,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             isFunc = true;
             type = genericType.TypeArguments[0];
+        }
+        
+        if (testParameterTypes.Length == 1
+            && context.Compilation.HasImplicitConversion(type, testParameterTypes[0]))
+        {
+            return ImmutableArray.Create(type);
         }
 
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
@@ -544,7 +576,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (testDataTypes.SequenceEqual(baseGeneratorAttribute.TypeArguments, new SelfOrBaseEqualityComparer(context.Compilation)))
+        var conversions = baseGeneratorAttribute.TypeArguments.Zip(testDataTypes,
+            (returnType, parameterType) => context.Compilation.HasImplicitConversion(returnType, parameterType));
+        
+        if (conversions.All(x => x))
         {
             return;
         }
