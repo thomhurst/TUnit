@@ -59,9 +59,14 @@ internal static class StringUtils
 
             for (var i = 0; i < expectedDictionary.Count; i++)
             {
-                var actualKey = actualKeys[actualCharIndex + i];
+                int? actualKey = actualKeys.Count > actualCharIndex + i ? actualKeys[actualCharIndex + i] : null;
+
+                if (actualKey == null)
+                {
+                    break;
+                }
                 
-                var actualChar = actualDictionary[actualKey];
+                var actualChar = actualDictionary[actualKey.Value];
                 
                 var expectedChar = expectedDictionary.Values.ElementAt(i);
                 
