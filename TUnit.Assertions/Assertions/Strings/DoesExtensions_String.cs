@@ -4,9 +4,9 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.String;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.AssertionBuilders.Wrappers;
+using TUnit.Assertions.Assertions.Strings.Conditions;
 
 namespace TUnit.Assertions.Extensions;
 
