@@ -5,7 +5,7 @@ using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
-public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual>(TActual expected, string expectedExpression) : ExpectedValueAssertCondition<TActual, TActual>(expected)
+public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TExpected>(TExpected expected, string expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
     private readonly List<string> _ignoredMembers = [];
 
@@ -13,7 +13,7 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         => $"to be equivalent to {expectedExpression}";
 
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
-    protected override AssertionResult GetResult(TActual? actualValue, TActual? expectedValue)
+    protected override AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue)
     {
         if (actualValue is null && ExpectedValue is null)
         {
@@ -32,17 +32,10 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         }
 
         bool? isEqual = null;
-        if (actualValue is IEqualityComparer<TActual> typedEqualityComparer)
-        {
-            isEqual = typedEqualityComparer.Equals(actualValue, ExpectedValue);
-        }
-        else if (actualValue is IEqualityComparer basicEqualityComparer)
+        
+        if (actualValue is IEqualityComparer basicEqualityComparer)
         {
             isEqual = basicEqualityComparer.Equals(actualValue, ExpectedValue);
-        }
-        else if (ExpectedValue is IEqualityComparer<TActual> expectedTypeEqualityComparer)
-        {
-            isEqual = expectedTypeEqualityComparer.Equals(actualValue, ExpectedValue);
         }
         else if (ExpectedValue is IEqualityComparer expectedBasicEqualityComparer)
         {

@@ -3,15 +3,15 @@ using TUnit.Assertions.Assertions.Generics.Conditions;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class EquivalentToAssertionBuilderWrapper<TActual> : InvokableValueAssertionBuilder<TActual>
+public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : InvokableValueAssertionBuilder<TActual>
 {
     internal EquivalentToAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
     
-    public EquivalentToAssertionBuilderWrapper<TActual> IgnoringMember(string propertyName, [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
+    public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual>) Assertions.Peek();
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
 
         assertion.IgnoringMember(propertyName);
         

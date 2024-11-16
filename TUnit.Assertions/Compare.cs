@@ -1,18 +1,26 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Assertions;
 
 public static class Compare
 {
+    private static readonly BindingFlags BindingFlags = 
+        BindingFlags.Instance 
+        | BindingFlags.Static 
+        | BindingFlags.Public 
+        | BindingFlags.NonPublic
+        | BindingFlags.FlattenHierarchy;
+    
     [RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
-    public static IEnumerable<ComparisonFailure> CheckEquivalent<T>(T actual, T expected, CompareOptions options)
+    public static IEnumerable<ComparisonFailure> CheckEquivalent<TActual, TExpected>(TActual actual, TExpected expected, CompareOptions options)
     {
         return CheckEquivalent(actual, expected, options, [], MemberType.Value);
     }
     
     [RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
-    public static IEnumerable<ComparisonFailure> CheckEquivalent<T>(T actual, T expected, CompareOptions options, string[] memberNames, MemberType memberType)
+    public static IEnumerable<ComparisonFailure> CheckEquivalent<TActual, TExpected>(TActual actual, TExpected expected, CompareOptions options, string[] memberNames, MemberType memberType)
     {
         if (actual is null && expected is null)
         {
@@ -31,7 +39,26 @@ public static class Compare
             
             yield break;
         }
-
+        
+        if (actual.GetType().IsPrimitive 
+            || actual.GetType().IsEnum 
+            || actual.GetType().IsValueType 
+            || actual is string)
+        {
+            if (!actual.Equals(expected))
+            {
+                yield return new ComparisonFailure
+                {
+                    Type = memberType,
+                    Actual = actual,
+                    Expected = expected,
+                    NestedMemberNames = memberNames
+                };
+            }
+            
+            yield break;
+        }
+        
         if (actual is IEnumerable actualEnumerable && expected is IEnumerable expectedEnumerable)
         {
             var actualObjects = actualEnumerable.Cast<object>().ToArray();
@@ -55,37 +82,21 @@ public static class Compare
                 }
             }
         }
-        
-        if (actual.GetType().IsPrimitive 
-            || actual.GetType().IsEnum 
-            || actual.GetType().IsValueType 
-            || actual is string)
-        {
-            if (!actual.Equals(expected))
-            {
-                yield return new ComparisonFailure
-                {
-                    Type = MemberType.Value,
-                    Actual = actual,
-                    Expected = expected,
-                    NestedMemberNames = memberNames
-                };
-            }
-            
-            yield break;
-        }
 
-        foreach (var fieldInfo in actual.GetType().GetFields().Concat(expected.GetType().GetFields()).Distinct())
+        foreach (var fieldName in actual.GetType().GetFields().Concat(expected.GetType().GetFields())
+                     .Where(x => !x.Name.StartsWith('<'))
+                     .Select(x => x.Name)
+                     .Distinct())
         {
-            string?[] readOnlySpan = [..memberNames, fieldInfo.Name];
+            string?[] readOnlySpan = [..memberNames, fieldName];
             
             if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
             {
                 continue;
             }
             
-            var actualFieldValue = fieldInfo.GetValue(actual);
-            var expectedFieldValue = fieldInfo.GetValue(expected);
+            var actualFieldValue = actual.GetType().GetField(fieldName, BindingFlags)?.GetValue(actual);
+            var expectedFieldValue = expected.GetType().GetField(fieldName, BindingFlags)?.GetValue(expected);
 
             if (actualFieldValue?.Equals(actual) == true && expectedFieldValue?.Equals(expected) == true)
             {
@@ -106,25 +117,26 @@ public static class Compare
                 yield break;
             }
 
-            foreach (var comparisonFailure in CheckEquivalent(actualFieldValue, expectedFieldValue, options, [..memberNames, fieldInfo.Name], MemberType.Field))
+            foreach (var comparisonFailure in CheckEquivalent(actualFieldValue, expectedFieldValue, options, [..memberNames, fieldName], MemberType.Field))
             {
                 yield return comparisonFailure;
             }
         }
         
-        foreach (var propertyInfo in actual.GetType().GetProperties().Concat(expected!.GetType().GetProperties())
+        foreach (var propertyName in actual.GetType().GetProperties().Concat(expected.GetType().GetProperties())
                      .Distinct()
-                     .Where(p => p.GetIndexParameters().Length == 0))
+                     .Where(p => p.GetIndexParameters().Length == 0)
+                     .Select(x => x.Name))
         {
-            string?[] readOnlySpan = [..memberNames, propertyInfo.Name];
+            string?[] readOnlySpan = [..memberNames, propertyName];
             
             if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
             {
                 continue;
             }
 
-            var actualPropertyValue = propertyInfo.GetValue(actual);
-            var expectedPropertyValue = propertyInfo.GetValue(expected);
+            var actualPropertyValue = actual.GetType().GetProperty(propertyName, BindingFlags)?.GetValue(actual);
+            var expectedPropertyValue = expected.GetType().GetProperty(propertyName, BindingFlags)?.GetValue(expected);
 
             if (actualPropertyValue?.Equals(actual) == true && expectedPropertyValue?.Equals(expected) == true)
             {
@@ -145,7 +157,7 @@ public static class Compare
                 yield break;
             }
             
-            foreach (var comparisonFailure in CheckEquivalent(actualPropertyValue, expectedPropertyValue, options, [..memberNames, propertyInfo.Name], MemberType.Property))
+            foreach (var comparisonFailure in CheckEquivalent(actualPropertyValue, expectedPropertyValue, options, [..memberNames, propertyName], MemberType.Property))
             {
                 yield return comparisonFailure;
             }

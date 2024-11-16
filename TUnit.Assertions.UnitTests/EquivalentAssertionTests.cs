@@ -18,6 +18,44 @@ public class EquivalentAssertionTests
 
         await TUnitAssert.That(object1).IsEquivalentTo(object2);
     }
+
+    [Test]
+    public async Task Different_Objects_Still_Are_Equivalent()
+    {
+        var result1 = new MyClass
+        {
+            Value = "Foo"
+        };
+        
+        var result2 = new { Value = "Foo" };
+
+        await TUnitAssert.That(result1).IsEquivalentTo(result2);
+    }
+    
+    [Test]
+    public void Different_Mismatched_Objects_Still_Are_Not_Equivalent()
+    {
+        var result1 = new MyClass
+        {
+            Value = "Foo"
+        };
+        
+        var result2 = new { Value = "Foo1" };
+
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(result1).IsEquivalentTo(result2));
+        
+        NUnitAssert.That(exception!.Message, Is.EqualTo(
+            """
+            Expected result1 to be equivalent to result2
+            
+            but Property Value did not match
+            Expected: "Foo1"
+            Received: "Foo"
+            
+            at Assert.That(result1).IsEquivalentTo(result2)
+            """
+        ));
+    }
     
     [Test]
     public void Mismatched_Objects_Are_Not_Equivalent()
