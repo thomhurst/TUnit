@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
@@ -110,7 +111,7 @@ public static class TypeExtensions
 
         var firstParameterType = parameterTypes.FirstOrDefault();
         
-        if (context.SemanticModel.Compilation.HasImplicitConversion(enumerableInnerType, firstParameterType))
+        if (context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(enumerableInnerType, firstParameterType))
         {
             return true;
         }
@@ -134,7 +135,7 @@ public static class TypeExtensions
                     continue;
                 }
                 
-                if (!context.SemanticModel.Compilation.HasImplicitConversion(tupleType, parameterType))
+                if (!context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(tupleType, parameterType))
                 {
                     return false;
                 }

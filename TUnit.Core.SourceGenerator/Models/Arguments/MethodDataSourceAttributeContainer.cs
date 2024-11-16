@@ -140,19 +140,7 @@ public record MethodDataSourceAttributeContainer(
 
     public override string[] GetArgumentTypes()
     {
-        if (IsExpandableTuples)
-        {
-            return TypesToInject.Select(x => x.GloballyQualified()).ToArray();
-        }
-
-        if (MethodReturnType.OriginalDefinition.IsGenericDefinition()
-            && SymbolEqualityComparer.Default.Equals(MethodReturnType.OriginalDefinition,
-                Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
-        {
-            return [((INamedTypeSymbol)MethodReturnType).TypeArguments[0].GloballyQualified()];
-        }
-        
-        return [MethodReturnType.GloballyQualified()];
+        return TypesToInject.Select(x => x.GloballyQualified()).ToArray();
     }
 
     private string FuncParenthesis()

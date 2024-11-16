@@ -165,6 +165,18 @@ public static class TestSourceDataModelRetriever
     private static IEnumerable<string> GetNonGenericTypes(ImmutableArray<IParameterSymbol> methodSymbolParameters,
         string[] argumentTypes)
     {
+        try
+        {
+            return Enumerable(methodSymbolParameters, argumentTypes);
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+    }
+
+    private static IEnumerable<string> Enumerable(ImmutableArray<IParameterSymbol> methodSymbolParameters, string[] argumentTypes)
+    {
         for (var i = 0; i < methodSymbolParameters.Length; i++)
         {
             var parameter = methodSymbolParameters[i];

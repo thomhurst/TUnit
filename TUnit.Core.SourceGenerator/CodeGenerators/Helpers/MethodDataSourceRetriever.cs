@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
@@ -88,7 +89,7 @@ public static class MethodDataSourceRetriever
         isExpandableTuples = false;
         
         if (parameterOrPropertyTypes.Length == 1
-            && context.SemanticModel.Compilation.HasImplicitConversion(dataSourceMethod.ReturnType,
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(dataSourceMethod.ReturnType,
                 parameterOrPropertyTypes[0]))
         {
             return ImmutableArray.Create(dataSourceMethod.ReturnType);
@@ -107,7 +108,7 @@ public static class MethodDataSourceRetriever
         }
 
         if (parameterOrPropertyTypes.Length == 1
-            && context.SemanticModel.Compilation.HasImplicitConversion(type, parameterOrPropertyTypes[0]))
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, parameterOrPropertyTypes[0]))
         {
             return ImmutableArray.Create<ITypeSymbol>(type);
         }
@@ -116,14 +117,14 @@ public static class MethodDataSourceRetriever
 
         if (type.IsGenericType
             && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, genericFunc)
-            && context.SemanticModel.Compilation.HasImplicitConversion(type, genericFunc.Construct(GetTypeOrTuplesType(context.SemanticModel.Compilation, parameterOrPropertyTypes))))
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, genericFunc.Construct(GetTypeOrTuplesType(context.SemanticModel.Compilation, parameterOrPropertyTypes))))
         {
             isExpandableFunc = true;
             type = (INamedTypeSymbol)type.TypeArguments[0];
         }
         
         if (parameterOrPropertyTypes.Length == 1
-            && context.SemanticModel.Compilation.HasImplicitConversion(type, parameterOrPropertyTypes[0]))
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, parameterOrPropertyTypes[0]))
         {
             return ImmutableArray.Create<ITypeSymbol>(type);
         }
