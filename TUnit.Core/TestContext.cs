@@ -1,6 +1,4 @@
-﻿using Backport.System.Threading;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public partial class TestContext : Context, IDisposable
 {
