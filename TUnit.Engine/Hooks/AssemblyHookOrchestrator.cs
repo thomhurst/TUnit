@@ -18,8 +18,12 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
     private readonly GetOnlyDictionary<Assembly, Task> _before = new();
     private readonly GetOnlyDictionary<Assembly, Task> _after = new();
 
+    private readonly ConcurrentDictionary<Assembly, bool> _beforeHooksReached = new();
+
     public async Task ExecuteBeforeHooks(Assembly assembly)
     {
+        _beforeHooksReached.GetOrAdd(assembly, true);
+        
         await _before.GetOrAdd(assembly, async _ =>
             {
                 var context = GetContext(assembly);
@@ -54,15 +58,15 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
            return;
         }
         
+        if (!_beforeHooksReached.TryGetValue(assembly, out _))
+        {
+            // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
+            return;
+        }
+        
         await _after.GetOrAdd(assembly, async _ =>
         {
             var context = GetContext(assembly);
-            
-            if (context.AllTests.All(x => x.Result?.Status is Status.Skipped))
-            {
-                // We didn't actually execute these tests so nothing to clean up.
-                return;
-            }
             
             AssemblyHookContext.Current = context;
             

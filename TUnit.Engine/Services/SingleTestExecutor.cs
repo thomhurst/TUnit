@@ -73,7 +73,7 @@ internal class SingleTestExecutor(
                 
                 start = DateTimeOffset.Now;
                 
-                await ExecuteTest(test, context, testContext, filter, cleanUpExceptions);
+                await ExecuteTest(test, testContext, filter, cleanUpExceptions);
 
                 ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
 
@@ -150,7 +150,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteTest(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
+    private async Task ExecuteTest(DiscoveredTest test, TestContext testContext,
         ITestExecutionFilter? filter,
         List<Exception> cleanUpExceptions)
     {
