@@ -10,7 +10,7 @@ public partial class TestContext : Context, IDisposable
     internal readonly List<CancellationToken> LinkedCancellationTokens = [];
     internal readonly TestMetadata OriginalMetadata;
     
-    public readonly Lock Lock = new();
+    internal readonly Lock Lock = new();
     
     internal bool ReportResult = true;
     
