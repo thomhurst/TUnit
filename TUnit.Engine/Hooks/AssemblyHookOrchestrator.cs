@@ -58,7 +58,7 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
            return;
         }
         
-        if (!_beforeHooksReached.TryGetValue(assembly, out var _))
+        if (!_beforeHooksReached.TryGetValue(assembly, out _))
         {
             // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
             return;

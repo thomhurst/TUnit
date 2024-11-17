@@ -63,7 +63,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
            return;
         }
         
-        if (!_beforeHooksReached.TryGetValue(testClassType, out var _))
+        if (!_beforeHooksReached.TryGetValue(testClassType, out _))
         {
             // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
             return;
