@@ -9,10 +9,6 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Backport.System.Threading.Lock">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>analyzers</IncludeAssets>
-	</PackageReference>
     <PackageReference Include="EnumerableAsyncProcessor" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Platform" />
