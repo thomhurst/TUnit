@@ -44,13 +44,10 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="Polly" Version="8.5.0" />
     <PackageVersion Include="PolySharp" Version="1.14.1" />
-    <PackageVersion Include="Sourcy.DotNet" Version="0.0.20" />
-    <PackageVersion Include="Sourcy.Git" Version="0.0.20" />
     <PackageVersion Include="StreamJsonRpc" Version="2.20.17" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.0.0" />
-    <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="TUnit" Version="0.3.20" />
     <PackageVersion Include="TUnit.Core" Version="0.3.20" />
     <PackageVersion Include="TUnit.Assertions" Version="0.3.20" />
