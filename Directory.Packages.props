@@ -47,9 +47,9 @@
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.0.0" />
-    <PackageVersion Include="TUnit" Version="0.3.12" />
-    <PackageVersion Include="TUnit.Core" Version="0.3.12" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.3.12" />
+    <PackageVersion Include="TUnit" Version="0.3.14" />
+    <PackageVersion Include="TUnit.Core" Version="0.3.14" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.3.14" />
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>

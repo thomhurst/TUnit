@@ -74,6 +74,9 @@ public static class TestContextExtensions
     internal static IEnumerable<ITestEndEventReceiver> GetTestEndEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ITestEndEventReceiver>();
     
+    internal static IEnumerable<ITestSkippedEventReceiver> GetTestSkippedEventObjects(this TestContext context) =>
+        GetPossibleEventObjects(context).OfType<ITestSkippedEventReceiver>();
+    
     internal static IEnumerable<ILastTestInClassEventReceiver> GetLastTestInClassEventObjects(this TestContext context) =>
         GetPossibleEventObjects(context).OfType<ILastTestInClassEventReceiver>();
     
