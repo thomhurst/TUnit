@@ -91,4 +91,6 @@ public class AsyncEvent<TEventArgs>
             throw new AggregateException(exceptions);
         }
     }
+    
+    public void Unregister() => _invocationList.Clear();
 }

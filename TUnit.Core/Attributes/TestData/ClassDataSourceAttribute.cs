@@ -38,6 +38,11 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
                     item);
             };
 
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, context) =>
+            {
+                await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, item);
+            };
+            
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, context) =>
             {
                 await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, item);
