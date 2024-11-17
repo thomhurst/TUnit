@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup>
-      <LangVersion>preview</LangVersion>
+      <LangVersion>latest</LangVersion>
     </PropertyGroup>
     
     <ItemGroup>
@@ -15,6 +15,10 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
+		<PackageReference Include="Backport.System.Threading.Lock">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>analyzers</IncludeAssets>
+		</PackageReference>		
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
 

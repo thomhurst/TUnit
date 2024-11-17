@@ -9,11 +9,7 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
 {
     private ConcurrentDictionary<TKey, TValue> InnerDictionary { get; } = new();
 
-#if NET9_0_OR_GREATER
     private static readonly Lock Lock = new();
-#else
-    private static readonly object Lock = new();
-#endif
     
     public ICollection<TKey> Keys => InnerDictionary.Keys;
     public ICollection<TValue> Values => InnerDictionary.Values;

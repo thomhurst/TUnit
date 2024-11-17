@@ -5,11 +5,7 @@ namespace TUnit.Engine.Services;
 [DebuggerDisplay("Count = {CurrentCount}")]
 public class Counter
 {
-#if NET9_0_OR_GREATER
     private readonly Lock _locker = new();
-#else
-    private readonly object _locker = new();
-#endif
     
     private int _count;
 

@@ -2,13 +2,17 @@
   <PropertyGroup>
     <IsTestProject>false</IsTestProject>
     <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
-    <LangVersion>preview</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(LaunchDebugger)' != ''">
     <DefineConstants>LAUNCH_DEBUGGER</DefineConstants>
   </PropertyGroup>
   
   <ItemGroup>
+    <PackageReference Include="Backport.System.Threading.Lock">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>analyzers</IncludeAssets>
+	</PackageReference>
     <PackageReference Include="EnumerableAsyncProcessor" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Platform" />

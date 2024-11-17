@@ -5,11 +5,7 @@ namespace TUnit.Core;
 public class AsyncEvent<TEventArgs>
 {
     private readonly List<Func<object, TEventArgs, Task>> _invocationList;
-    #if NET9_0_OR_GREATER
     private readonly Lock _locker;
-    #else
-    private readonly object _locker;
-    #endif
 
     private AsyncEvent()
     {
