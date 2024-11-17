@@ -69,25 +69,11 @@ internal class SingleTestExecutor(
 
             try
             {
-                CheckCancelled();
-                
                 await WaitForDependsOnTests(test, filter, context);
-
-                if (!explicitFilterService.CanRun(test.TestDetails, filter))
-                {
-                    throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
-                }
-
-                if (testContext.SkipReason != null)
-                {
-                    throw new SkipTestException(testContext.SkipReason);
-                }
-                
-                CheckCancelled();
                 
                 start = DateTimeOffset.Now;
                 
-                await ExecuteTest(test, context, testContext, cleanUpExceptions);
+                await ExecuteTest(test, context, testContext, filter, cleanUpExceptions);
 
                 ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
 
@@ -165,13 +151,28 @@ internal class SingleTestExecutor(
     }
 
     private async Task ExecuteTest(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
+        ITestExecutionFilter? filter,
         List<Exception> cleanUpExceptions)
     {
-        var start = DateTimeOffset.Now;
+        DateTimeOffset? start = null;
 
         try
         {
-            await ExecuteStaticBeforeHooks(test, context, testContext);
+            if (!explicitFilterService.CanRun(test.TestDetails, filter))
+            {
+                throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
+            }
+
+            if (testContext.SkipReason != null)
+            {
+                throw new SkipTestException(testContext.SkipReason);
+            }
+                
+            CheckCancelled();
+
+            start = DateTimeOffset.Now;
+            
+            await ExecuteStaticBeforeHooks(test);
 
             TestContext.Current = testContext;
             
@@ -179,7 +180,7 @@ internal class SingleTestExecutor(
 
             await ExecuteWithRetries(test, cleanUpExceptions);
 
-            var timingProperty = GetTimingProperty(testContext, start);
+            var timingProperty = GetTimingProperty(testContext, start.Value);
 
             testContext.Result = new TestResult
             {
@@ -218,9 +219,17 @@ internal class SingleTestExecutor(
                     await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
                         cleanUpExceptions);
                 }
-
-                TestContext.Current = null;
             }
+            else
+            {
+                foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
+                {
+                    await RunHelpers.RunValueTaskSafelyAsync(() => testSkippedEventReceiver.OnTestSkipped(testContext),
+                        cleanUpExceptions);
+                }
+            }
+            
+            TestContext.Current = null;
             
             await ExecuteStaticAfterHooks(test, testContext, cleanUpExceptions);
 
@@ -239,18 +248,11 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteStaticBeforeHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext)
+    private async Task ExecuteStaticBeforeHooks(DiscoveredTest test)
     {
-        try
-        {
-            await assemblyHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly);
+        await assemblyHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly);
 
-            await classHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType);
-        }
-        catch (Exception e)
-        {
-            throw new SkipTestException($"Skipped due to failing Before Hook {e.GetType().Name}: {e.Message}");
-        }
+        await classHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType);
     }
 
     private async Task ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
@@ -283,16 +285,17 @@ internal class SingleTestExecutor(
         return null;
     }
 
-    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
+    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset? overallStart)
     {
         var end = DateTimeOffset.Now;
+        overallStart ??= end;
 
         lock (testContext.Lock)
         {
             var stepTimings = testContext.Timings.Select(x =>
                 new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
 
-            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [..stepTimings]);
+            return new TimingProperty(new TimingInfo(overallStart.Value, end, end - overallStart.Value), [..stepTimings]);
         }
     }
 
