@@ -70,15 +70,15 @@ internal class ClassDataSources
         {
             case SharedType.None:
                 break;
-            case SharedType.ForClass:
+            case SharedType.PerClass:
                 break;
-            case SharedType.Globally:
+            case SharedType.PerTestSession:
                 TestDataContainer.IncrementGlobalUsage(typeof(T));
                 break;
             case SharedType.Keyed:
                 TestDataContainer.IncrementKeyUsage(key, typeof(T));
                 break;
-            case SharedType.ForAssembly:
+            case SharedType.PerAssembly:
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -103,7 +103,7 @@ internal class ClassDataSources
 
     public Task Initialize<T>(TestContext testContext, SharedType shared, string key, T? item)
     {
-        if (shared == SharedType.Globally)
+        if (shared == SharedType.PerTestSession)
         {
             return GlobalInitializers.GetOrAdd(typeof(T), _ => InitializeObject(item));
         }
@@ -113,7 +113,7 @@ internal class ClassDataSources
             return InitializeObject(item);
         }
 
-        if (shared == SharedType.ForClass)
+        if (shared == SharedType.PerClass)
         {
             var innerDictionary = TestClassTypeInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<Type, Task>());
@@ -122,7 +122,7 @@ internal class ClassDataSources
                 _ => InitializeObject(item));
         }
 
-        if (shared == SharedType.ForAssembly)
+        if (shared == SharedType.PerAssembly)
         {
             var innerDictionary = AssemblyInitializers.GetOrAdd(typeof(T),
                 _ => new GetOnlyDictionary<Assembly, Task>());
@@ -154,7 +154,7 @@ internal class ClassDataSources
             await TestDataContainer.ConsumeKey(key, typeof(T));
         }
 
-        if (shared == SharedType.Globally)
+        if (shared == SharedType.PerTestSession)
         {
             await TestDataContainer.ConsumeGlobalCount(typeof(T));
         }
@@ -162,7 +162,7 @@ internal class ClassDataSources
 
     public async ValueTask IfLastTestInClass<T>(SharedType shared)
     {
-        if (shared == SharedType.ForClass)
+        if (shared == SharedType.PerClass)
         {
             await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(TestDataContainer.GetInstanceForType(typeof(T), () => default(T)!));
         }
@@ -170,7 +170,7 @@ internal class ClassDataSources
 
     public async ValueTask IfLastTestInAssembly<T>(SharedType shared)
     {
-        if (shared == SharedType.ForAssembly)
+        if (shared == SharedType.PerAssembly)
         {
             await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(TestDataContainer.GetInstanceForType(typeof(T), () => default(T)!));
         }
