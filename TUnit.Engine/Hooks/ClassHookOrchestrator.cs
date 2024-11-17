@@ -16,9 +16,13 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
 
     private readonly GetOnlyDictionary<Type, Task> _before = new();
     private readonly GetOnlyDictionary<Type, Task> _after = new();
+    
+    private readonly ConcurrentDictionary<Type, bool> _beforeHooksReached = new();
 
     public async Task ExecuteBeforeHooks(Type testClassType)
     {
+        _beforeHooksReached.GetOrAdd(testClassType, true);
+
         await _before.GetOrAdd(testClassType, async _ =>
             {
                 var context = GetContext(testClassType);
@@ -63,9 +67,9 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
         {
             var context = GetContext(testClassType);
 
-            if (context.Tests.All(x => x.Result?.Status is Status.Skipped))
+            if (!_beforeHooksReached.TryGetValue(testClassType, out var _))
             {
-                // We didn't actually execute these tests so nothing to clean up.
+                // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
                 return;
             }
             

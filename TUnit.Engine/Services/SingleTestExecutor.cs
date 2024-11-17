@@ -87,7 +87,7 @@ internal class SingleTestExecutor(
                 
                 start = DateTimeOffset.Now;
                 
-                await ExecuteTest(test, context, testContext, cleanUpExceptions);
+                await ExecuteTest(test, testContext, cleanUpExceptions);
 
                 ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
 
@@ -164,14 +164,14 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteTest(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext,
+    private async Task ExecuteTest(DiscoveredTest test, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
         var start = DateTimeOffset.Now;
 
         try
         {
-            await ExecuteStaticBeforeHooks(test, context, testContext);
+            await ExecuteStaticBeforeHooks(test);
 
             TestContext.Current = testContext;
             
@@ -239,7 +239,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteStaticBeforeHooks(DiscoveredTest test, ExecuteRequestContext context, TestContext testContext)
+    private async Task ExecuteStaticBeforeHooks(DiscoveredTest test)
     {
         try
         {
