@@ -15,11 +15,7 @@ public static class TestDataContainer
     private static readonly GetOnlyDictionary<Assembly, GetOnlyDictionary<Type, object>> InjectedSharedPerAssembly = new();
     private static readonly GetOnlyDictionary<Type, GetOnlyDictionary<string, object>> InjectedSharedPerKey = new();
 
-#if NET9_0_OR_GREATER
     private static readonly Lock Lock = new();
-#else
-    private static readonly object Lock = new();
-#endif
     private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> CountsPerKey = new();
     private static readonly ConcurrentDictionary<Type, int> CountsPerGlobalType = new();
 
