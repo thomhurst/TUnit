@@ -21,6 +21,24 @@ public class CategoryTests
         await Assert.That(GetDictionary()).Contains("MethodCategory2");
     }
 
+    [Test]
+    [Category("A")]
+    public void A()
+    {
+    }
+    
+    [Test]
+    [Category("B")]
+    public void B()
+    {
+    }
+    
+    [Test]
+    [Category("A"), Category("B")]
+    public void C()
+    {
+    }
+
     private static IEnumerable<string> GetDictionary()
     {
         return TestContext.Current?.TestDetails.Categories ?? [];
