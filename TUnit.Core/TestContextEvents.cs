@@ -7,6 +7,7 @@ public record TestContextEvents :
     ITestRegisteredEventReceiver,
     ITestStartEventReceiver,
     ITestEndEventReceiver,
+    ITestSkippedEventReceiver,
     ILastTestInClassEventReceiver,
     ILastTestInAssemblyEventReceiver,
     ILastTestInTestSessionEventReceiver,
@@ -16,10 +17,11 @@ public record TestContextEvents :
     public AsyncEvent<TestRegisteredContext>? OnTestRegistered { get; set; }
     public AsyncEvent<BeforeTestContext>? OnTestStart { get; set; }
     public AsyncEvent<TestContext>? OnTestEnd { get; set; }
+    public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
     public AsyncEvent<(ClassHookContext, TestContext)>? OnLastTestInClass { get; set; }
     public AsyncEvent<(AssemblyHookContext, TestContext)>? OnLastTestInAssembly { get; set; }
     public AsyncEvent<(TestSessionContext, TestContext)>? OnLastTestInTestSession { get; set; }
-    public AsyncEvent<(TestContext, int RetryAttempt)>? OnRetry { get; set; }
+    public AsyncEvent<(TestContext, int RetryAttempt)>? OnTestRetry { get; set; }
 
     ValueTask ITestRegisteredEventReceiver.OnTestRegistered(TestRegisteredContext context)
     {
@@ -34,6 +36,11 @@ public record TestContextEvents :
     ValueTask ITestEndEventReceiver.OnTestEnd(TestContext testContext)
     {
         return OnTestEnd?.InvokeAsync(this, testContext) ?? ValueTask.CompletedTask;
+    }
+    
+    ValueTask ITestSkippedEventReceiver.OnTestSkipped(TestContext testContext)
+    {
+        return OnTestSkipped?.InvokeAsync(this, testContext) ?? ValueTask.CompletedTask;
     }
 
     public ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext)
@@ -51,13 +58,27 @@ public record TestContextEvents :
         return OnLastTestInTestSession?.InvokeAsync(this, (context, testContext)) ?? ValueTask.CompletedTask;
     }
 
-    public ValueTask OnTestRetry(TestContext testContext, int retryAttempt)
+    ValueTask ITestRetryEventReceiver.OnTestRetry(TestContext testContext, int retryAttempt)
     {
-        return OnRetry?.InvokeAsync(this, (testContext, retryAttempt)) ?? ValueTask.CompletedTask;
+        return OnTestRetry?.InvokeAsync(this, (testContext, retryAttempt)) ?? ValueTask.CompletedTask;
     }
     
     public void Dispose()
     {
-        OnDispose?.Invoke(this, EventArgs.Empty);
+        try
+        {
+            OnDispose?.Invoke(this, EventArgs.Empty);
+        }
+        finally
+        {
+            OnTestRegistered?.Unregister(); 
+            OnTestStart?.Unregister(); 
+            OnTestEnd?.Unregister(); 
+            OnTestSkipped?.Unregister(); 
+            OnTestRetry?.Unregister(); 
+            OnLastTestInClass?.Unregister(); 
+            OnLastTestInAssembly?.Unregister(); 
+            OnLastTestInTestSession?.Unregister();
+        }
     }
 }

@@ -218,9 +218,17 @@ internal class SingleTestExecutor(
                     await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
                         cleanUpExceptions);
                 }
-
-                TestContext.Current = null;
             }
+            else
+            {
+                foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
+                {
+                    await RunHelpers.RunValueTaskSafelyAsync(() => testSkippedEventReceiver.OnTestSkipped(testContext),
+                        cleanUpExceptions);
+                }
+            }
+            
+            TestContext.Current = null;
             
             await ExecuteStaticAfterHooks(test, testContext, cleanUpExceptions);
 
