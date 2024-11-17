@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Services;
 
@@ -61,6 +62,12 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
         await _after.GetOrAdd(testClassType, async _ =>
         {
             var context = GetContext(testClassType);
+
+            if (context.Tests.All(x => x.Result?.Status is Status.Skipped))
+            {
+                // We didn't actually execute these tests so nothing to clean up.
+                return;
+            }
             
             ClassHookContext.Current = context;
 
