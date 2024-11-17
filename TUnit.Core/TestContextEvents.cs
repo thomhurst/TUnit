@@ -65,20 +65,6 @@ public record TestContextEvents :
     
     public void Dispose()
     {
-        try
-        {
-            OnDispose?.Invoke(this, EventArgs.Empty);
-        }
-        finally
-        {
-            OnTestRegistered?.Unregister(); 
-            OnTestStart?.Unregister(); 
-            OnTestEnd?.Unregister(); 
-            OnTestSkipped?.Unregister(); 
-            OnTestRetry?.Unregister(); 
-            OnLastTestInClass?.Unregister(); 
-            OnLastTestInAssembly?.Unregister(); 
-            OnLastTestInTestSession?.Unregister();
-        }
+        OnDispose?.Invoke(this, EventArgs.Empty);
     }
 }
