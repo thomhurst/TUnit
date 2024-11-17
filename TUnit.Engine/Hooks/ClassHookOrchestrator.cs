@@ -63,15 +63,15 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
            return;
         }
         
+        if (!_beforeHooksReached.TryGetValue(testClassType, out var _))
+        {
+            // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
+            return;
+        }
+        
         await _after.GetOrAdd(testClassType, async _ =>
         {
             var context = GetContext(testClassType);
-
-            if (!_beforeHooksReached.TryGetValue(testClassType, out var _))
-            {
-                // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
-                return;
-            }
             
             ClassHookContext.Current = context;
 

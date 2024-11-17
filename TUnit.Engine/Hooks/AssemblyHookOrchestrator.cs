@@ -58,15 +58,15 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
            return;
         }
         
+        if (!_beforeHooksReached.TryGetValue(assembly, out var _))
+        {
+            // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
+            return;
+        }
+        
         await _after.GetOrAdd(assembly, async _ =>
         {
             var context = GetContext(assembly);
-            
-            if (!_beforeHooksReached.TryGetValue(assembly, out var _))
-            {
-                // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
-                return;
-            }
             
             AssemblyHookContext.Current = context;
             
