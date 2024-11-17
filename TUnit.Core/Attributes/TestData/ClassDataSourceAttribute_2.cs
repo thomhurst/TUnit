@@ -66,6 +66,19 @@ public sealed class ClassDataSourceAttribute<
                     itemsWithMetadata.Item2.Key,
                     itemsWithMetadata.Item2.T);
             };
+            
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (_, _) =>
+            {
+                await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(
+                    itemsWithMetadata.Item1.SharedType,
+                    itemsWithMetadata.Item1.Key,
+                    itemsWithMetadata.Item1.T);
+
+                await ClassDataSources.Get(_dataGeneratorMetadata!.TestSessionId).OnTestEnd(
+                    itemsWithMetadata.Item2.SharedType,
+                    itemsWithMetadata.Item2.Key,
+                    itemsWithMetadata.Item2.T);
+            };
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, _) =>
             {
