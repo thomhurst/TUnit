@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using Backport.System.Threading;
+
+namespace TUnit.Core;
 
 public partial class TestContext : Context, IDisposable
 {
@@ -9,9 +11,13 @@ public partial class TestContext : Context, IDisposable
     internal readonly List<Artifact> Artifacts = [];
     internal readonly List<CancellationToken> LinkedCancellationTokens = [];
     internal readonly TestMetadata OriginalMetadata;
-    
-    internal readonly Lock Lock = new();
-    
+
+#if NET9_0_OR_GREATER
+    public readonly Lock Lock = new();
+#else
+    public readonly object Lock = new();
+#endif
+
     internal bool ReportResult = true;
     
     internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestMetadata originalMetadata)
