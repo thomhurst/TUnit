@@ -517,13 +517,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray.Create(methodContainingTestData.ReturnType);
         }
         
-        if (namedTypeSymbol.IsGenericType
-            && SymbolEqualityComparer.Default.Equals(
-                context.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T),
-                namedTypeSymbol.OriginalDefinition))
+        if (namedTypeSymbol.IsIEnumerable(context.Compilation, out var enumerableInnerType))
         {
             isEnumerable = true;
-            type = namedTypeSymbol.TypeArguments[0];
+            type = enumerableInnerType;
         }
         
         if (testParameterTypes.Length == 1

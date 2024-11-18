@@ -91,4 +91,22 @@ public static class TypeExtensions
 
         return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
     }
+    
+    public static bool IsIEnumerable(this ITypeSymbol namedTypeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
+    {
+        var interfaces = namedTypeSymbol.TypeKind == TypeKind.Interface
+            ? [(INamedTypeSymbol)namedTypeSymbol, ..namedTypeSymbol.AllInterfaces]
+            : namedTypeSymbol.AllInterfaces.AsEnumerable();
+        
+        foreach (var enumerable in interfaces
+                     .Where(x => x.IsGenericType)
+                     .Where(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T))))
+        {
+            innerType = enumerable.TypeArguments[0];
+            return true;
+        }
+        
+        innerType = null;
+        return false;
+    }
 }
