@@ -1,4 +1,5 @@
-﻿using Microsoft.Testing.Platform.Extensions;
+﻿using System.Diagnostics;
+using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
@@ -261,6 +262,7 @@ internal class SingleTestExecutor(
             catch (Exception e)
             {
                 if (i == retryCount
+                    || Debugger.IsAttached
                     || !await ShouldRetry(discoveredTest.TestContext, e, i + 1))
                 {
                     throw;
