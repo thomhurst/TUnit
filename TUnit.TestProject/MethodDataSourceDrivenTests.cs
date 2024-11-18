@@ -46,6 +46,12 @@ public class MethodDataSourceDrivenTests
         Console.WriteLine(value);
         // Dummy method
     }
+    
+    [Test]
+    [MethodDataSource(nameof(MethodWithBaseReturn))]
+    public void DataSource_WithBaseReturn(BaseValue value)
+    {
+    }
 
     public static int SomeMethod() => 1;
 
@@ -53,4 +59,10 @@ public class MethodDataSourceDrivenTests
     
     public static int SomeMethod(int input) => input * 2;
     public static int SomeMethod(string input1, int input2, bool input3) => input2 * 2;
+
+    public static Func<BaseValue> MethodWithBaseReturn() => () => new ConcreteValue();
+    
+    public abstract class BaseValue;
+
+    public class ConcreteValue : BaseValue;
 }

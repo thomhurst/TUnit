@@ -100,11 +100,10 @@ public static class MethodDataSourceRetriever
             return ImmutableArray.Create(dataSourceMethod.ReturnType);
         }
 
-        if (type.IsGenericType && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition,
-                context.SemanticModel.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
+        if (type.IsIEnumerable(context.SemanticModel.Compilation, out var enumerableInnerType))
         {
             isExpandableEnumerable = true;
-            type = (INamedTypeSymbol)type.TypeArguments[0];
+            type = (INamedTypeSymbol)enumerableInnerType;
         }
 
         if (parameterOrPropertyTypes.Length == 1

@@ -91,6 +91,35 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
     
     [Test]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_List_Inner_Type_Matches_Parameter_Type()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(Data))]
+                    [Test]
+                    public void MyTest(int value)
+                    {
+                    }
+                                
+                    public static List<Func<int>> Data() =>
+                    [
+                        () => 1,
+                        () => 2,
+                        () => 3,
+                    ];
+                }
+                """
+            );
+    }
+    
+    [Test]
     public async Task Method_Data_Source_Is_Flagged_When_Argument_Missing()
     {
         await Verifier
