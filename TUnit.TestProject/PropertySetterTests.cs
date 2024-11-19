@@ -43,7 +43,9 @@ public class PropertySetterTests
     }
     
     [Before(Assembly)]
+#pragma warning disable TUnit0042
     public static async Task BeforeAssembly()
+#pragma warning restore TUnit0042
     {
         if (IsMatchingTestFilter())
         {

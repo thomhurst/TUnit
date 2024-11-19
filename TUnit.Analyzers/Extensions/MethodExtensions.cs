@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers.Extensions;
@@ -11,28 +12,41 @@ public static class MethodExtensions
         return methodSymbol.GetAttributes().Any(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, testAttribute));
     }
 
-    public static bool IsHookMethod(this IMethodSymbol methodSymbol, Compilation compilation)
+    public static bool IsHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
     {
-        return IsNonGlobalHookMethod(methodSymbol, compilation) || IsGlobalHookMethod(methodSymbol, compilation);
+        return IsStandardHookMethod(methodSymbol, compilation, out type, out hookLevel) || IsEveryHookMethod(methodSymbol, compilation, out type, out hookLevel);
     }
     
-    public static bool IsNonGlobalHookMethod(this IMethodSymbol methodSymbol, Compilation compilation)
+    public static bool IsStandardHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
     {
-        return methodSymbol.GetAttributes().Any(x => x.IsNonGlobalHook(compilation));
+        foreach (var attributeData in methodSymbol.GetAttributes())
+        {
+            if (attributeData.IsStandardHook(compilation, out type, out hookLevel))
+            {
+                return true;
+            }
+        }
+
+        type = null;
+        hookLevel = null;
+        return false;
     }
     
-    public static bool IsGlobalHookMethod(this IMethodSymbol methodSymbol, Compilation compilation)
+    public static bool IsEveryHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
     {
-        return methodSymbol.GetAttributes().Any(x => x.IsGlobalHook(compilation));
+        foreach (var attributeData in methodSymbol.GetAttributes())
+        {
+            if (attributeData.IsEveryHook(compilation, out type, out hookLevel))
+            {
+                return true;
+            }
+        }
+
+        type = null;
+        hookLevel = null;
+        return false;
     }
-    
-    public static bool HasTimeoutAttribute(this IMethodSymbol methodSymbol, out AttributeData? timeoutAttribute)
-    {
-        timeoutAttribute = GetTimeoutAttribute(methodSymbol);
-        
-        return timeoutAttribute != null;
-    }
-    
+
     public static AttributeData? GetTimeoutAttribute(this IMethodSymbol methodSymbol)
     {
         return methodSymbol.GetAttribute(WellKnown.AttributeFullyQualifiedClasses.TimeoutAttribute.WithGlobalPrefix, true);

@@ -34,12 +34,12 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
 
                 foreach (var type in typesIncludingBase)
                 {
-                    foreach (var beforeEveryClass in hooksCollector.BeforeEveryClassHooks)
+                    foreach (var beforeEveryClass in hooksCollector.BeforeEveryClassHooks.OrderBy(x => x.Order))
                     {
                         await beforeEveryClass.Body(context, default);
                     }
 
-                    var list = hooksCollector.BeforeClassHooks.GetOrAdd(type, _ => []);
+                    var list = hooksCollector.BeforeClassHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
 
                     foreach (var staticHookMethod in list)
                     {
@@ -86,14 +86,14 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
                         cleanUpExceptions);
                 }
                 
-                var list = hooksCollector.AfterClassHooks.GetOrAdd(type, _ => []);
+                var list = hooksCollector.AfterClassHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
 
                 foreach (var staticHookMethod in list)
                 {
                     await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
                 }
                 
-                foreach (var afterEveryClass in hooksCollector.AfterEveryClassHooks)
+                foreach (var afterEveryClass in hooksCollector.AfterEveryClassHooks.OrderBy(x => x.Order))
                 {
                     await RunHelpers.RunSafelyAsync(() => afterEveryClass.Body(context, default), cleanUpExceptions);
                 }

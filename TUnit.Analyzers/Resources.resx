@@ -220,7 +220,7 @@
         <value>Member should be disposed within a clean up method</value>
     </data>
     <data name="TUnit0023MessageFormat" xml:space="preserve">
-        <value>Member should be disposed within a clean up method</value>
+        <value>{0} should be disposed within a clean up method</value>
     </data>
     <data name="TUnit0023Title" xml:space="preserve">
         <value>Member should be disposed within a clean up method</value>

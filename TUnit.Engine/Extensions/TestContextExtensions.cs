@@ -3,8 +3,12 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
+using TUnit.Core.Enums;
+using TUnit.Core.Exceptions;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
+using AggregateException = System.AggregateException;
 
 namespace TUnit.Engine.Extensions;
 
@@ -62,6 +66,36 @@ public static class TestContextExtensions
             KeyedNotInParallel = new Dictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>(),
             ParallelGroups = new Dictionary<string, List<DiscoveredTest>>()
         }, null, testContext.GetService<ExecuteRequestContext>());
+    }
+    
+    internal static void SetResult(this TestContext testContext, Exception? exception)
+    {
+        var status = exception switch
+        {
+            null => Status.Passed,
+            SkipTestException => Status.Skipped,
+            _ => Status.Failed,
+        };
+
+        if (testContext.Result?.Exception is not null && exception is not null)
+        {
+            exception = new AggregateException(testContext.Result.Exception, exception);
+        }
+
+        var start = testContext.Timings.MinBy(x => x.Start)?.Start;
+        var end = testContext.Timings.MaxBy(x => x.End)?.End;
+        
+        testContext.Result = new TestResult
+        {
+            TestContext = testContext,
+            Duration = end - start,
+            Start = start,
+            End = end,
+            ComputerName = Environment.MachineName,
+            Exception = exception,
+            Status = status,
+            Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}".Trim()
+        };
     }
 
     private static object?[]? GetArgs(object?[]? methodArguments, bool hasTimeout, CancellationToken token)

@@ -19,169 +19,200 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        // TODO: Rework
-        // context.RegisterSyntaxNodeAction(AnalyzeProperty, SyntaxKind.PropertyDeclaration);
-        // context.RegisterSyntaxNodeAction(AnalyzeField, SyntaxKind.FieldDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeClass, SyntaxKind.ClassDeclaration);
     }
 
-    private void AnalyzeField(SyntaxNodeAnalysisContext context)
+    private void AnalyzeClass(SyntaxNodeAnalysisContext context)
     {
-        var fieldDeclaration = (FieldDeclarationSyntax)context.Node;
-        
-        var field = (IFieldSymbol) context.SemanticModel.GetDeclaredSymbol(fieldDeclaration.Declaration.Variables[0])!;
-
-        if (!field.ContainingType.IsTestClass(context.Compilation))
+        if (context.Node is not ClassDeclarationSyntax classDeclarationSyntax)
         {
             return;
         }
 
-        var isAsyncDisposable = IsAsyncDisposable(field.Type); 
-        
-        var isDisposable = IsDisposable(field.Type);
+        var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
 
-        if (!isAsyncDisposable && !isDisposable)
+        if (namedTypeSymbol == null)
         {
             return;
         }
 
-        if (!field.IsStatic && field.ContainingType.GetMembers().OfType<IMethodSymbol>()
-                .Where(x => x.MethodKind == MethodKind.Constructor)
-                .SelectMany(x => x.DeclaringSyntaxReferences)
-                .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf())
-                .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression))
-                .Select(x => context.SemanticModel.GetOperation(x))
-                .OfType<IAssignmentOperation>()
-                .Select(x => x.Target)
-                .OfType<IFieldReferenceOperation>()
-                .Any(x => x.Field.Name == field.Name))
+        var methods = namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(x => x.GetMembers()).OfType<IMethodSymbol>().ToArray();
+        
+        CheckMethods(context, methods, true);
+        CheckMethods(context, methods, false);
+    }
+
+    private static void CheckMethods(SyntaxNodeAnalysisContext context, IMethodSymbol[] methods, bool isStaticMethod)
+    {
+        var createdObjects = new Dictionary<ISymbol, HookLevel?>(SymbolEqualityComparer.Default);
+
+        var methodSymbols = methods.Where(x => x.IsStatic == isStaticMethod).ToArray();
+        
+        foreach (var methodSymbol in methodSymbols)
         {
-            return;
+            CheckSetUps(context, methodSymbol, createdObjects);
+        }
+
+        foreach (var methodSymbol in methodSymbols)
+        {
+            CheckTeardowns(context, methodSymbol, createdObjects);
         }
         
-        var expectedHookType = field.IsStatic
-            ? "TUnit.Core.HookType.Class"
-            : "TUnit.Core.HookType.Test";
+        foreach (var kvp in createdObjects)
+        {
+            var createdObject = kvp.Key;
             
-        var methodsRequiringDisposeCall = field.ContainingType.GetMembers()
-            .Where(x => x.IsStatic == field.IsStatic)
-            .OfType<IMethodSymbol>()
-            .Where(x => IsExpectedMethod(x, expectedHookType));
-
-        var syntaxesWithinMethods = methodsRequiringDisposeCall
-            .SelectMany(x => x.DeclaringSyntaxReferences)
-            .Select(x => x.GetSyntax());
-
-        if (!syntaxesWithinMethods
-                .Where(x => !x.DescendantTrivia().Any(dt => dt.IsKind(SyntaxKind.SingleLineCommentTrivia)))
-                .Where(x => !x.DescendantTrivia().Any(dt => dt.IsKind(SyntaxKind.MultiLineCommentTrivia)))
-                .Any(x =>
-                x.ToFullString()
-                    .Replace("?", "")
-                    .Replace("!", "")
-                    .Contains(isAsyncDisposable
-                    ? $"await {field.Name}.DisposeAsync()"
-                    : $"{field.Name}.Dispose()")))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.Dispose_Member_In_Cleanup, context.Node.GetLocation()));
+            context.ReportDiagnostic(Diagnostic.Create(Rules.Dispose_Member_In_Cleanup,
+                createdObject.Locations.FirstOrDefault(), createdObject.Name));
         }
     }
 
-    private void AnalyzeProperty(SyntaxNodeAnalysisContext context)
+    private static void CheckSetUps(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, Dictionary<ISymbol, HookLevel?> createdObjects)
     {
-        var propertyDeclaration = (PropertyDeclarationSyntax) context.Node;
-        
-        var property = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration)!;
+        var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
+            .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
 
-        if (!property.ContainingType.IsTestClass(context.Compilation))
+        methodSymbol.IsHookMethod(context.Compilation, out _, out var level);
+        
+        foreach (var assignment in syntaxNodes
+                     .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression)))
         {
-            return;
-        }
-        
-        var isAsyncDisposable = IsAsyncDisposable(property.Type); 
-        
-        var isDisposable = IsDisposable(property.Type);
+            var assignmentOperation = assignment.GetOperation(context.SemanticModel) as IAssignmentOperation;
 
-        if (!isAsyncDisposable && !isDisposable)
-        {
-            return;
-        }
-        
-        if (!property.IsStatic && property.ContainingType.GetMembers().OfType<IMethodSymbol>()
-                .Where(x => x.MethodKind == MethodKind.Constructor)
-                .SelectMany(x => x.DeclaringSyntaxReferences)
-                .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf())
-                .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression))
-                .Select(x => context.SemanticModel.GetOperation(x))
-                .OfType<IAssignmentOperation>()
-                .Select(x => x.Target)
-                .OfType<IPropertyReferenceOperation>()
-                .Any(x => x.Property.Name == property.Name))
-        {
-            return;
-        }
-
-        if (IsInjectedProperty(property))
-        {
-            return;
-        }
-        
-        var expectedHookType = property.IsStatic
-                ? "Class"
-                : "Test";
+            if (assignmentOperation?.Target is not IFieldReferenceOperation and not IPropertyReferenceOperation)
+            {
+                continue;
+            }
             
-        var methodsRequiringDisposeCall = property.ContainingType.GetMembers()
-            .Where(x => x.IsStatic == property.IsStatic)
-            .OfType<IMethodSymbol>()
-            .Where(x => IsExpectedMethod(x, expectedHookType));
+            if(assignmentOperation
+               .Descendants()
+               .OfType<IObjectCreationOperation>()
+               .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true))
+            {
+                if(assignmentOperation.Target is IFieldReferenceOperation fieldReferenceOperation)
+                {
+                    createdObjects.Add(fieldReferenceOperation.Field, level);
+                }
 
-        var syntaxesWithinMethods = methodsRequiringDisposeCall
-            .SelectMany(x => x.DeclaringSyntaxReferences)
-            .Select(x => x.GetSyntax());
-
-        if (!syntaxesWithinMethods
-                .Where(x => !x.DescendantTrivia().Any(dt => dt.IsKind(SyntaxKind.SingleLineCommentTrivia)))
-                .Where(x => !x.DescendantTrivia().Any(dt => dt.IsKind(SyntaxKind.MultiLineCommentTrivia)))
-                .Any(x =>
-                x.ToFullString()
-                    .Replace("?", "")
-                    .Replace("!", "")
-                    .Contains(isAsyncDisposable
-                    ? $"await {property.Name}.DisposeAsync()"
-                    : $"{property.Name}.Dispose()")))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.Dispose_Member_In_Cleanup, context.Node.GetLocation()));
+                if(assignmentOperation.Target is IPropertyReferenceOperation propertyReferenceOperation)
+                {
+                    createdObjects.Add(propertyReferenceOperation.Property, level);
+                }
+            }
         }
     }
 
-    private bool IsInjectedProperty(IPropertySymbol property)
+    private static void CheckTeardowns(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, Dictionary<ISymbol, HookLevel?> createdObjects)
     {
-        return property.TryGetClassDataAttribute(out _);
+        var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
+            .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
+        
+        foreach (var assignment in syntaxNodes
+                     .Where(x => x.IsKind(SyntaxKind.InvocationExpression)))
+        {
+            if (assignment.GetOperation(context.SemanticModel) is not IInvocationOperation invocationOperation)
+            {
+                continue;
+            }
+            
+            if (!IsDisposeInvocation(context, invocationOperation) || !IsValidTearDownMethod(context, methodSymbol, out var level))
+            {
+                continue;
+            }
+
+            var fieldOrPropertyOperation = GetFieldOrPropertyOperation(invocationOperation);
+            
+            if (fieldOrPropertyOperation is IFieldReferenceOperation fieldReferenceOperation && createdObjects.TryGetValue(fieldReferenceOperation.Field, out var createdObjectLevel) && createdObjectLevel == level)
+            {
+                createdObjects.Remove(fieldReferenceOperation.Field);
+            }
+                
+            if (fieldOrPropertyOperation is IPropertyReferenceOperation propertyReferenceOperation && createdObjects.TryGetValue(propertyReferenceOperation.Property, out createdObjectLevel) && createdObjectLevel == level)
+            {
+                createdObjects.Remove(propertyReferenceOperation.Property);
+            }
+        }
     }
 
-    private static bool IsExpectedMethod(IMethodSymbol method, string expectedHookType)
+    private static bool IsValidTearDownMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, out HookLevel? hookLevel)
     {
-        if (method.Name == "DisposeAsync" && IsAsyncDisposable(method.ContainingType))
+        if (!methodSymbol.IsStatic)
+        {
+            hookLevel = HookLevel.Test;
+            return IsValidInstanceTearDownMethod(context, methodSymbol);
+        }
+
+        return IsValidStaticTearDownMethod(context, methodSymbol, out hookLevel);
+    }
+
+    private static bool IsValidStaticTearDownMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, out HookLevel? hookLevel)
+    {
+        return methodSymbol.IsHookMethod(context.Compilation, out var type, out hookLevel)
+               && type.Name.StartsWith("After")
+               && hookLevel is HookLevel.TestSession or HookLevel.Assembly or HookLevel.Class;
+    }
+
+    private static bool IsValidInstanceTearDownMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol)
+    {
+        if (methodSymbol is { Name: "Dispose", Parameters.IsDefaultOrEmpty: true }
+            && methodSymbol.ContainingType.Interfaces.Any(x => x.SpecialType == SpecialType.System_IDisposable))
         {
             return true;
         }
 
-        if (method.Name == "Dispose" && IsDisposable(method.ContainingType))
+        if (methodSymbol is { Name: "DisposeAsync", Parameters.IsDefaultOrEmpty: true })
+        {
+            var asyncDisposable = context.Compilation.GetTypeByMetadataName("System.IAsyncDisposable");
+            return methodSymbol.ContainingType.Interfaces.Any(x =>
+                SymbolEqualityComparer.Default.Equals(x, asyncDisposable));
+        }
+            
+        if (methodSymbol.IsHookMethod(context.Compilation, out var type, out var level)
+            && type.Name.StartsWith("After") && level == HookLevel.Test)
         {
             return true;
         }
-        
-        return method.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == WellKnown.AttributeFullyQualifiedClasses.AfterAttribute.WithGlobalPrefix && a.GetHookType() == expectedHookType);
+
+        return false;
     }
 
-    private static bool IsDisposable(ITypeSymbol type)
+    private static IOperation? GetFieldOrPropertyOperation(IInvocationOperation invocationOperation)
     {
-        return type.AllInterfaces
-            .Any(x => x.SpecialType == SpecialType.System_IDisposable);
+        var operation = invocationOperation.Instance;
+
+        while (operation is not null)
+        {
+            if (operation is IConditionalAccessOperation conditionalAccessOperation)
+            {
+                return conditionalAccessOperation.Operation;
+            }
+
+            if (operation is IFieldReferenceOperation or IPropertyReferenceOperation)
+            {
+                return operation;
+            }
+            
+            operation = operation.Parent;
+        }
+        
+        return null;
     }
-    
-    private static bool IsAsyncDisposable(ITypeSymbol type)
+
+    private static bool IsDisposeInvocation(SyntaxNodeAnalysisContext context, IInvocationOperation invocationOperation)
     {
-        return type.AllInterfaces
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == "global::System.IAsyncDisposable");
+        if (invocationOperation.TargetMethod is { Name: "Dispose", Parameters.IsDefaultOrEmpty: true })
+        {
+            return invocationOperation.Instance?.Type?.AllInterfaces.Any(x => x.SpecialType == SpecialType.System_IDisposable) ==
+                   true;
+        }
+
+        if (invocationOperation.TargetMethod is { Name: "DisposeAsync", Parameters.IsDefaultOrEmpty: true })
+        {
+            var asyncDisposable = context.Compilation.GetTypeByMetadataName("System.IAsyncDisposable");
+            return invocationOperation.Instance?.Type?.AllInterfaces.Any(x =>
+                SymbolEqualityComparer.Default.Equals(x, asyncDisposable)) == true;
+        }
+
+        return false;
     }
 }

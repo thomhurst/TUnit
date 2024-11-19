@@ -20,7 +20,7 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
 
         foreach (var type in typesIncludingBase)
         {
-            var list = hooksCollector.BeforeTestHooks.GetOrAdd(type, _ => []);
+            var list = hooksCollector.BeforeTestHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
             
             foreach (var instanceHookMethod in list)
             {
@@ -34,7 +34,7 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
             }
         }
         
-        foreach (var beforeEvery in hooksCollector.BeforeEveryTestHooks)
+        foreach (var beforeEvery in hooksCollector.BeforeEveryTestHooks.OrderBy(x => x.Order))
         {
             await beforeEvery.HookExecutor.ExecuteBeforeTestHook(
                 hookMethodInfo: beforeEvery.MethodInfo,
@@ -52,7 +52,7 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
 
         foreach (var type in typesIncludingBase)
         {
-            var list = hooksCollector.AfterTestHooks.GetOrAdd(type, _ => []);
+            var list = hooksCollector.AfterTestHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
             
             foreach (var instanceHookMethod in list)
             {
@@ -71,7 +71,7 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
         
         // Run Global Hooks Last
 
-        foreach (var afterEvery in hooksCollector.AfterEveryTestHooks)
+        foreach (var afterEvery in hooksCollector.AfterEveryTestHooks.OrderBy(x => x.Order))
         {
             await RunHelpers.RunSafelyAsync(() =>
                     afterEvery.HookExecutor.ExecuteBeforeTestHook(

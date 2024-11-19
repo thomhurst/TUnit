@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using System.Text;
+
+namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class DependsOnAttribute<T> : DependsOnAttribute
@@ -48,4 +50,19 @@ public class DependsOnAttribute : TUnitAttribute
     public Type[]? ParameterTypes { get; }
 
     public bool ProceedOnFailure { get; set; }
+
+    public override string ToString()
+    {
+        if (TestClass != null && TestName == null)
+        {
+            return TestClass.Name;
+        }
+
+        if (ParameterTypes is { Length: > 0 })
+        {
+            return $"{TestName}({string.Join(", ", ParameterTypes.SelectMany(x => x.Name))}";
+        }
+
+        return TestName!;
+    }
 }

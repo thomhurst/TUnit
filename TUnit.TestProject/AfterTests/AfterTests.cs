@@ -92,7 +92,7 @@ public class CleanupTests : Base3
     [After(Test), Timeout(30_000)]
     public async Task CleanupWithContext(TestContext testContext, CancellationToken cancellationToken)
     {
-        await Task.CompletedTask;
+        await Assertions.Extensions.GenericIsNotExtensions.IsNotNull(Assertions.Assert.That(testContext.Result));
     }
 
     [Test]

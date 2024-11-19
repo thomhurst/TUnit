@@ -30,12 +30,12 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
                 
                 AssemblyHookContext.Current = context;
 
-                foreach (var beforeEveryClass in hooksCollector.BeforeEveryAssemblyHooks)
+                foreach (var beforeEveryClass in hooksCollector.BeforeEveryAssemblyHooks.OrderBy(x => x.Order))
                 {
                     await beforeEveryClass.Body(context, default);
                 }
 
-                var list = hooksCollector.BeforeAssemblyHooks.GetOrAdd(assembly, _ => []);
+                var list = hooksCollector.BeforeAssemblyHooks.GetOrAdd(assembly, _ => []).OrderBy(x => x.Order);
 
                 foreach (var staticHookMethod in list)
                 {
@@ -77,14 +77,14 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
                     cleanUpExceptions);
             }
             
-            var list = hooksCollector.AfterAssemblyHooks.GetOrAdd(assembly, _ => []);
+            var list = hooksCollector.AfterAssemblyHooks.GetOrAdd(assembly, _ => []).OrderBy(x => x.Order);
 
             foreach (var staticHookMethod in list)
             {
                 await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
             }
                 
-            foreach (var afterEveryAssembly in hooksCollector.AfterEveryAssemblyHooks)
+            foreach (var afterEveryAssembly in hooksCollector.AfterEveryAssemblyHooks.OrderBy(x => x.Order))
             {
                 await RunHelpers.RunSafelyAsync(() => afterEveryAssembly.Body(context, default), cleanUpExceptions);
             }

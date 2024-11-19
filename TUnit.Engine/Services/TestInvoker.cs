@@ -1,6 +1,7 @@
 ﻿using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 
@@ -24,6 +25,13 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
 
             await Timings.Record("Main Test Body", discoveredTest.TestContext,
                 () => discoveredTest.ExecuteTest(cancellationToken));
+            
+            discoveredTest.TestContext.SetResult(null);
+        }
+        catch (Exception ex)
+        {
+            discoveredTest.TestContext.SetResult(ex);
+            throw;
         }
         finally
         {

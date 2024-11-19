@@ -12,9 +12,10 @@ public class GlobalTestHooks
     }
     
     [AfterEvery(Test)]
-    public static void CleanUp(TestContext testContext)
+    public static async Task CleanUp(TestContext testContext)
     {
         testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.TestDetails.TestName);
+        await Assert.That(testContext.Result).IsNotNull();
     }
     
     [BeforeEvery(Class)]

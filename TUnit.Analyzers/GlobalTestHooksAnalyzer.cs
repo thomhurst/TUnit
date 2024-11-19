@@ -36,7 +36,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var globalHooks = attributes
-            .Where(x => x.IsGlobalHook(context.Compilation))
+            .Where(x => x.IsEveryHook(context.Compilation, out _, out _))
             .ToList();
 
         if (!globalHooks.Any())
