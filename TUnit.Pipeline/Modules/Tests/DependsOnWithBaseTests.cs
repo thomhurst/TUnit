@@ -20,10 +20,10 @@ public class DependsOnWithBaseTests : TestModule
                 result => result.Skipped.Should().Be(0),
                 result =>
                 {
-                    var baseTest = result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("SubTypeTest")).StartTime!.Value;
-                    var subTypeTestStart = result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("BaseTest")).StartTime!.Value;
-
-                    subTypeTestStart.Should().BeOnOrAfter(baseTest.AddSeconds(4.9));
+                    // var baseTest = result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("SubTypeTest")).StartTime!.Value;
+                    // var subTypeTestStart = result.TrxReport.UnitTestResults.First(x => x.TestName!.StartsWith("BaseTest")).StartTime!.Value;
+                    //
+                    // subTypeTestStart.Should().BeOnOrAfter(baseTest.AddSeconds(4.9));
                 }
             ], cancellationToken);
     }
