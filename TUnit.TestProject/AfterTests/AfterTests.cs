@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.TestProject.AfterTests;
+﻿namespace TUnit.TestProject.AfterTests;
 
 public class Base1
 {
@@ -95,7 +92,7 @@ public class CleanupTests : Base3
     [After(Test), Timeout(30_000)]
     public async Task CleanupWithContext(TestContext testContext, CancellationToken cancellationToken)
     {
-        await Assert.That(testContext.Result).IsNotNull();
+        await Assertions.Extensions.GenericIsNotExtensions.IsNotNull(Assertions.Assert.That(testContext.Result));
     }
 
     [Test]
