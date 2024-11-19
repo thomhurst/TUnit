@@ -1,4 +1,5 @@
-﻿using TUnit.Core;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using TUnit.Core;
 
 namespace TUnit.Engine.Helpers;
 
@@ -22,4 +23,17 @@ internal static class Timings
             }
         }
     }  
+    
+    public static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
+    {
+        var end = DateTimeOffset.Now;
+
+        lock (testContext.Lock)
+        {
+            var stepTimings = testContext.Timings.Select(x =>
+                new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
+
+            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [.. stepTimings]);
+        }
+    }
 }

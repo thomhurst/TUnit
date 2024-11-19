@@ -6,15 +6,17 @@ namespace TUnit.TestProject;
 public class GlobalTestHooks
 {
     [BeforeEvery(Test)]
-    public static void SetUp(TestContext testContext)
+    public static async Task SetUp(TestContext testContext)
     {
         testContext.ObjectBag.TryAdd("SetUpCustomTestNameProperty", testContext.TestDetails.TestName);
+        await Assert.That(testContext.Result).IsNull();
     }
     
     [AfterEvery(Test)]
-    public static void CleanUp(TestContext testContext)
+    public static async Task CleanUp(TestContext testContext)
     {
         testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.TestDetails.TestName);
+        await Assert.That(testContext.Result).IsNotNull();
     }
     
     [BeforeEvery(Class)]

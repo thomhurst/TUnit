@@ -9,6 +9,7 @@ using TUnit.Core.Exceptions;
 using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
 using TUnit.Engine.Logging;
@@ -97,93 +98,81 @@ internal class SingleTestExecutor(
                 await ExecuteWithRetries(test, cleanUpExceptions);
 
                 ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
-
-                var timingProperty = GetTimingProperty(testContext, start);
-
-                await messageBus.Passed(testContext, start);
-
-                testContext.Result = new TestResult
-                {
-                    TestContext = testContext,
-                    Duration = timingProperty.GlobalTiming.Duration,
-                    Start = timingProperty.GlobalTiming.StartTime,
-                    End = timingProperty.GlobalTiming.EndTime,
-                    ComputerName = Environment.MachineName,
-                    Exception = null,
-                    Status = Status.Passed,
-                    Output = testContext.GetStandardOutput()
-                };
             }
             catch (SkipTestException skipTestException)
             {
-                var timingProperty = GetTimingProperty(testContext, start);
-
                 await logger.LogInformationAsync($"Skipping {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}...");
+                
+                testContext.SetResult(skipTestException);
 
                 await messageBus.Skipped(testContext, skipTestException.Reason);
-
-                testContext.Result = new TestResult
-                {
-                    Duration = timingProperty.GlobalTiming.Duration,
-                    Start = timingProperty.GlobalTiming.StartTime,
-                    End = timingProperty.GlobalTiming.EndTime,
-                    ComputerName = Environment.MachineName,
-                    Exception = null,
-                    Status = Status.Skipped,
-                    Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}"
-                };
             }
             catch (Exception e)
             {
-                var timingProperty = GetTimingProperty(testContext, start);
-
-                await messageBus.Failed(testContext, e, start);
-
-                testContext.Result = new TestResult
-                {
-                    Duration = timingProperty.GlobalTiming.Duration,
-                    Start = timingProperty.GlobalTiming.StartTime,
-                    End = timingProperty.GlobalTiming.EndTime,
-                    ComputerName = Environment.MachineName,
-                    Exception = e,
-                    Status = Status.Failed,
-                    Output = $"{testContext.GetErrorOutput()}{Environment.NewLine}{testContext.GetStandardOutput()}"
-                };
-
-                throw;
+                testContext.SetResult(e);
             }
             finally
             {
-                if (testContext.Result?.Status != Status.Skipped)
-                {
-                    foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
-                    {
-                        await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
-                            cleanUpExceptions);
-                    }
-                }
-                else
-                {
-                    foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
-                    {
-                        await RunHelpers.RunValueTaskSafelyAsync(() => testSkippedEventReceiver.OnTestSkipped(testContext),
-                            cleanUpExceptions);
-                    }
-                }
-
-                TestContext.Current = null;
-
-                await ExecuteStaticAfterHooks(test, testContext, cleanUpExceptions);
-
-                foreach (var artifact in testContext.Artifacts)
-                {
-                    await messageBus.TestArtifact(testContext, artifact);
-                }
+                await RunTeardowns(test, start, testContext, cleanUpExceptions);
             }
         }
         finally
         {
             semaphore?.Release();
+        }
+    }
+
+    private async Task RunTeardowns(DiscoveredTest test, DateTimeOffset start, TestContext testContext,
+        List<Exception> cleanUpExceptions)
+    {
+        try
+        {
+            if (testContext.Result?.Status != Status.Skipped)
+            {
+                foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
+                {
+                    await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
+                        cleanUpExceptions);
+                }
+            }
+            else
+            {
+                foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
+                {
+                    await RunHelpers.RunValueTaskSafelyAsync(() => testSkippedEventReceiver.OnTestSkipped(testContext),
+                        cleanUpExceptions);
+                }
+            }
+
+            TestContext.Current = null;
+
+            await ExecuteStaticAfterHooks(test, testContext, cleanUpExceptions);
+
+            foreach (var artifact in testContext.Artifacts)
+            {
+                await messageBus.TestArtifact(testContext, artifact);
+            }
+
+            IEnumerable<Exception?> exceptions = [testContext.Result?.Exception, ..cleanUpExceptions];
+            ExceptionsHelper.ThrowIfAny(exceptions.OfType<Exception>().Where(x => x is not SkipTestException).ToArray());
+        }
+        catch (Exception e)
+        {
+            testContext.SetResult(e);
+            throw;
+        }
+        finally
+        {
+            var result = testContext.Result!;
+            
+            var task = result.Status switch
+            {
+                Status.Passed => messageBus.Passed(testContext, start),
+                Status.Failed => messageBus.Failed(testContext, result.Exception!, start),
+                _ => ValueTask.CompletedTask,
+            };
+
+            await task;
         }
     }
 
@@ -230,19 +219,6 @@ internal class SingleTestExecutor(
         }
 
         return null;
-    }
-
-    private static TimingProperty GetTimingProperty(TestContext testContext, DateTimeOffset overallStart)
-    {
-        var end = DateTimeOffset.Now;
-
-        lock (testContext.Lock)
-        {
-            var stepTimings = testContext.Timings.Select(x =>
-                new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
-
-            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), [.. stepTimings]);
-        }
     }
 
     private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest, List<Exception> cleanupExceptions)
@@ -409,8 +385,15 @@ internal class SingleTestExecutor(
             testsForClass = testsForClass.Where(x =>
                 x.TestDetails.TestMethodParameterTypes.SequenceEqual(dependsOnAttribute.ParameterTypes));
         }
+        
+        var foundTests = testsForClass.ToArray();
 
-        return testsForClass.ToArray();
+        if (!foundTests.Any())
+        {
+            throw new TUnitException($"No tests found for DependsOn({dependsOnAttribute}) - If using Inheritance remember to use an [InheritsTest] attribute");
+        }
+
+        return foundTests;
     }
 
     public Task<bool> IsEnabledAsync()

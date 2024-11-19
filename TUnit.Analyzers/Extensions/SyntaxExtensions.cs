@@ -4,32 +4,13 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class SyntaxExtensions
 {
-    public static IEnumerable<TOutput> GetAllAncestorSyntaxesOfType<TOutput>(this SyntaxNode input) 
-        where TOutput : SyntaxNode
+    public static IOperation? GetOperation(this SyntaxNode syntaxNode, SemanticModel semanticModel)
     {
-        var parent = input.Parent;
-        
-        while (parent != null)
+        if (semanticModel.SyntaxTree != syntaxNode.SyntaxTree)
         {
-            if (parent is TOutput output)
-            {
-                yield return output;
-            }
-            
-            parent = parent.Parent;
+            semanticModel = semanticModel.Compilation.GetSemanticModel(syntaxNode.SyntaxTree);
         }
-    }
-    
-    public static TOutput? GetAncestorSyntaxOfType<TOutput>(this SyntaxNode input) 
-        where TOutput : SyntaxNode
-    {
-        var parent = input.Parent;
         
-        while (parent != null && parent is not TOutput)
-        {
-            parent = parent.Parent;
-        }
-
-        return parent as TOutput;
+        return semanticModel.GetOperation(syntaxNode);
     }
 }

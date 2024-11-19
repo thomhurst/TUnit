@@ -93,7 +93,14 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
                 .Select(x => (INamedTypeSymbol)x.Value!)
                 .ToArray();
 
-            var methods = dependencyType.GetMembers()
+            if (dependencyType is not INamedTypeSymbol namedTypeSymbol)
+            {
+                return chain;
+            }
+
+            var methods = namedTypeSymbol
+                .GetSelfAndBaseTypes()
+                .SelectMany(x => x.GetMembers())
                 .OfType<IMethodSymbol>()
                 .Where(x => x.MethodKind == MethodKind.Ordinary)
                 .ToArray();

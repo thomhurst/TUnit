@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Analyzers.Helpers;
@@ -24,24 +25,45 @@ public static class AttributeExtensions
         return attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
     
-    public static bool IsNonGlobalHook(this AttributeData attributeData, Compilation compilation)
+    public static bool IsStandardHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
     {
-        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute
-                       .WithoutGlobalPrefix)) ||
-               SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
-                       .WithoutGlobalPrefix));
+        if (
+            SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute
+                    .WithoutGlobalPrefix)) ||
+            SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
+                    .WithoutGlobalPrefix)))
+        {
+            type = attributeData.AttributeClass!;
+            hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last()); 
+            return true;
+        }
+
+        type = null;
+        hookLevel = null;
+        return false;
     }
     
-    public static bool IsGlobalHook(this AttributeData attributeData, Compilation compilation)
+    public static bool IsEveryHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
     {
-        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeEveryAttribute
-                       .WithoutGlobalPrefix)) ||
-               SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute
-                       .WithoutGlobalPrefix));
+        if (
+            SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeEveryAttribute
+                    .WithoutGlobalPrefix)) ||
+            SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute
+                    .WithoutGlobalPrefix)))
+        {
+            type = attributeData.AttributeClass!;
+            hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            
+            return true;
+        }
+
+        type = null;
+        hookLevel = null;
+        return false;
     }
     
     public static bool IsMatrixAttribute(this AttributeData attributeData, Compilation compilation)

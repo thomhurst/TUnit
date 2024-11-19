@@ -174,6 +174,72 @@ public class DependsOnConflictAnalyzerTests
             """
         );
     }
+        
+    [Test]
+    public async Task No_Conflict_Raises_Nothing()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class MyClass1
+            {
+                [Test]
+                public void {|#0:Test|}()
+                {
+                }
+            
+                [Test]
+                public void {|#1:Test2|}()
+                {
+                }
+            }
+                            
+            [DependsOn(typeof(MyClass1))]
+            public class MyClass2
+            {
+                [Test]
+                public void {|#2:Test|}()
+                {
+                }
+                                                                
+                [Test]
+                public void {|#3:Test2|}()
+                {
+                }
+            }
+            """
+        );
+    }
+    
+    [Test]
+    public async Task No_Conflict_Base_Class_Raises_Nothing()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class MyClass : BaseClass
+            {
+                [DependsOn(nameof(BaseTest))]
+                [Test]
+                public void SubTypeTest()
+                {
+                }
+            }
+                            
+            public class BaseClass
+            {
+                [Test]
+                public void BaseTest()
+                {
+                }
+            }
+            """
+        );
+    }
     
     [Test]
     public async Task Direct_Conflict_Other_Class_Raises_Error2()

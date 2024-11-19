@@ -18,7 +18,7 @@ internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, stri
         
         BeforeTestDiscoveryContext.Current = context;
 
-        foreach (var staticHookMethod in hooksCollector.BeforeTestDiscoveryHooks)
+        foreach (var staticHookMethod in hooksCollector.BeforeTestDiscoveryHooks.OrderBy(x => x.Order))
         {
             await staticHookMethod.Body(context, default);
         }
@@ -34,7 +34,7 @@ internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, stri
         
         TestDiscoveryContext.Current = context;
         
-        foreach (var staticHookMethod in hooksCollector.AfterTestDiscoveryHooks)
+        foreach (var staticHookMethod in hooksCollector.AfterTestDiscoveryHooks.OrderBy(x => x.Order))
         {
             await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
         }

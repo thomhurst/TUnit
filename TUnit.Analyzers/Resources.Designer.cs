@@ -663,7 +663,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Member should be disposed within a clean up method.
+        ///   Looks up a localized string similar to {0} should be disposed within a clean up method.
         /// </summary>
         internal static string TUnit0023MessageFormat {
             get {

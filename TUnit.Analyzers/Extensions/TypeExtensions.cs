@@ -109,4 +109,16 @@ public static class TypeExtensions
         innerType = null;
         return false;
     }
+    
+    public static bool IsDisposable(this ITypeSymbol type)
+    {
+        return type.AllInterfaces
+            .Any(x => x.SpecialType == SpecialType.System_IDisposable);
+    }
+    
+    public static bool IsAsyncDisposable(this ITypeSymbol type)
+    {
+        return type.AllInterfaces
+            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == "global::System.IAsyncDisposable");
+    }
 }
