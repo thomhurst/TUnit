@@ -31,6 +31,7 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
         catch (Exception ex)
         {
             discoveredTest.TestContext.SetResult(ex);
+            throw;
         }
         finally
         {

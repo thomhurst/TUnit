@@ -53,7 +53,6 @@ internal class SingleTestExecutor(
         try
         {
             var testContext = test.TestContext;
-            var timings = testContext.Timings;
 
             if (engineCancellationToken.Token.IsCancellationRequested)
             {
@@ -110,6 +109,7 @@ internal class SingleTestExecutor(
             catch (Exception e)
             {
                 testContext.SetResult(e);
+                throw;
             }
             finally
             {
