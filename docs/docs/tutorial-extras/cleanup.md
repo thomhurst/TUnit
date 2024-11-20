@@ -8,14 +8,42 @@ TUnit supports having your test class implement `IDisposable` or `IAsyncDisposab
 
 You can also declare a method with an `[After(...)]` or an `[AfterEvery(...)]` attribute.
 
-- `[After(Test)]` methods should NOT be static, and they will be executed repeatedly after each test in their class ends.
-- `[After(Class)]` methods SHOULD be static, and they will be executed only once, after all tests in their class end.
-- `[After(Assembly)]` methods SHOULD be static, and they will be executed only once, after all tests in their assembly end.
+## [After(HookType)]
 
-
-- All `[AfterEvery(...)]` methods SHOULD be static, and they will follow the same behaviour as above, but fire for every test/class/assembly that is being run in the test session.
-
+### [After(Test)]
+Must be an instance method. Will be executed after each test in the class it's defined in.
 Methods will be executed top-down, so the current class clean ups will execute first, then the base classes' last.
+
+### [After(Class)]
+Must be a static method. Will run once after the last test in the class it's defined it finishes.
+
+### [After(Assembly)]
+Must be a static method. Will run once after the last test in the assembly it's defined it finishes.
+
+### [After(TestSession)]
+Must be a static method. Will run once after the last test in the test session finishes.
+
+### [After(TestDiscovery)]
+Must be a static method. Will run once after tests are discovered.
+
+## [AfterEvery(HookType)]
+All [AfterEvery(...)] methods must be static - And should ideally be placed in their own file that's easy to find, as they can globally affect the test suite, so it should be easy for developers to locate this behaviour.
+e.g. `GlobalHooks.cs` at the root of the test project.
+
+### [AfterEvery(Test)]
+Will be executed after every test that will run in the test session.
+
+### [AfterEvery(Class)]
+Will be executed after the last test of every class that will run in the test session.
+
+### [AfterEvery(Assembly)]
+Will be executed after the last test of every assembly that will run in the test session.
+
+### [AfterEvery(TestSession)]
+The same as [After(TestSession)]
+
+### [AfterEvery(TestDiscovery)]
+The same as [After(TestDiscovery)]
 
 ```csharp
 using TUnit.Core;
