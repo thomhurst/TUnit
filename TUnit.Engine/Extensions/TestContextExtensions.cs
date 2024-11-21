@@ -70,6 +70,11 @@ public static class TestContextExtensions
     
     internal static void SetResult(this TestContext testContext, Exception? exception)
     {
+        if (ReferenceEquals(exception, testContext.Result?.Exception))
+        {
+            return;
+        }
+        
         var status = exception switch
         {
             null => Status.Passed,

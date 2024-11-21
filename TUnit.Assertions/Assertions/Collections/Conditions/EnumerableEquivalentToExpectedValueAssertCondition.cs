@@ -1,8 +1,11 @@
+using TUnit.Assertions.Enums;
+
 namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(
     IEnumerable<TInner> expected,
-    IEqualityComparer<TInner?>? equalityComparer)
+    IEqualityComparer<TInner?>? equalityComparer,
+    CollectionOrdering collectionOrdering)
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
@@ -15,16 +18,27 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
             return AssertionResult.Passed;
         }
 
+        IEnumerable<TInner>? orderedActual;
+        if (collectionOrdering == CollectionOrdering.Any)
+        {
+            orderedActual = actualValue?.Order();
+            expectedValue = expectedValue?.Order();
+        }
+        else
+        {
+            orderedActual = actualValue;
+        }
+
         return AssertionResult
             .FailIf(
-                () => actualValue is null,
+                () => orderedActual is null,
                 () => "it is null")
             .OrFailIf(
                 () => expectedValue is null,
                 () => "it is not null")
             .OrFailIf(
-                () => !actualValue!.SequenceEqual(expectedValue!, equalityComparer),
-                () => $"it is {string.Join(',', actualValue!)}"
+                () => !orderedActual!.SequenceEqual(expectedValue!, equalityComparer),
+                () => $"it is {string.Join(',', orderedActual!)}"
             );
     }
 }

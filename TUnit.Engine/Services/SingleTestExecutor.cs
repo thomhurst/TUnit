@@ -153,8 +153,7 @@ internal class SingleTestExecutor(
                 await messageBus.TestArtifact(testContext, artifact);
             }
 
-            IEnumerable<Exception?> exceptions = [testContext.Result?.Exception, ..cleanUpExceptions];
-            ExceptionsHelper.ThrowIfAny(exceptions.OfType<Exception>().Where(x => x is not SkipTestException).ToArray());
+            ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
         }
         catch (Exception e)
         {

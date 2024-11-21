@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿#pragma warning disable IL2072
+#pragma warning disable IL2075
+
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -6,21 +9,32 @@ namespace TUnit.Assertions;
 
 public static class Compare
 {
-    private static readonly BindingFlags BindingFlags = 
-        BindingFlags.Instance 
-        | BindingFlags.Static 
-        | BindingFlags.Public 
+    private static readonly BindingFlags BindingFlags =
+        BindingFlags.Instance
+        | BindingFlags.Static
+        | BindingFlags.Public
         | BindingFlags.NonPublic
         | BindingFlags.FlattenHierarchy;
-    
-    [RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
-    public static IEnumerable<ComparisonFailure> CheckEquivalent<TActual, TExpected>(TActual actual, TExpected expected, CompareOptions options)
+
+    //[RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
+    public static IEnumerable<ComparisonFailure> CheckEquivalent<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+        TActual,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+        TExpected>(
+        TActual actual,
+        TExpected expected, CompareOptions options)
     {
         return CheckEquivalent(actual, expected, options, [], MemberType.Value);
     }
-    
-    [RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
-    public static IEnumerable<ComparisonFailure> CheckEquivalent<TActual, TExpected>(TActual actual, TExpected expected, CompareOptions options, string[] memberNames, MemberType memberType)
+
+    //[RequiresUnreferencedCode("Uses reflection to iterate through nested objects")]
+    private static IEnumerable<ComparisonFailure> CheckEquivalent<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TExpected>(
+        TActual actual,
+        TExpected expected, CompareOptions options,
+        string[] memberNames, MemberType memberType)
     {
         if (actual is null && expected is null)
         {
@@ -36,13 +50,13 @@ public static class Compare
                 Expected = expected,
                 NestedMemberNames = memberNames
             };
-            
+
             yield break;
         }
-        
-        if (actual.GetType().IsPrimitive 
-            || actual.GetType().IsEnum 
-            || actual.GetType().IsValueType 
+
+        if (actual.GetType().IsPrimitive
+            || actual.GetType().IsEnum
+            || actual.GetType().IsValueType
             || actual is string)
         {
             if (!actual.Equals(expected))
@@ -55,28 +69,29 @@ public static class Compare
                     NestedMemberNames = memberNames
                 };
             }
-            
+
             yield break;
         }
-        
+
         if (actual is IEnumerable actualEnumerable && expected is IEnumerable expectedEnumerable)
         {
             var actualObjects = actualEnumerable.Cast<object>().ToArray();
             var expectedObjects = expectedEnumerable.Cast<object>().ToArray();
-            
+
             for (var i = 0; i < Math.Max(actualObjects.Length, expectedObjects.Length); i++)
             {
                 string?[] readOnlySpan = [..memberNames, $"[{i}]"];
-                
+
                 if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
                 {
                     continue;
                 }
-                
+
                 var actualObject = actualObjects.ElementAtOrDefault(i);
                 var expectedObject = expectedObjects.ElementAtOrDefault(i);
 
-                foreach (var comparisonFailure in CheckEquivalent(actualObject, expectedObject, options, [..memberNames, $"[{i}]"], MemberType.EnumerableItem))
+                foreach (var comparisonFailure in CheckEquivalent(actualObject, expectedObject, options,
+                             [..memberNames, $"[{i}]"], MemberType.EnumerableItem))
                 {
                     yield return comparisonFailure;
                 }
@@ -89,21 +104,21 @@ public static class Compare
                      .Distinct())
         {
             string?[] readOnlySpan = [..memberNames, fieldName];
-            
+
             if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
             {
                 continue;
             }
-            
+
             var actualFieldValue = actual.GetType().GetField(fieldName, BindingFlags)?.GetValue(actual);
             var expectedFieldValue = expected.GetType().GetField(fieldName, BindingFlags)?.GetValue(expected);
 
             if (actualFieldValue?.Equals(actual) == true && expectedFieldValue?.Equals(expected) == true)
             {
                 // To prevent cyclical references/stackoverflow
-               continue;
+                continue;
             }
-            
+
             if (actualFieldValue?.Equals(actual) == true || expectedFieldValue?.Equals(expected) == true)
             {
                 yield return new ComparisonFailure
@@ -113,23 +128,24 @@ public static class Compare
                     Expected = expected,
                     NestedMemberNames = memberNames
                 };
-                
+
                 yield break;
             }
 
-            foreach (var comparisonFailure in CheckEquivalent(actualFieldValue, expectedFieldValue, options, [..memberNames, fieldName], MemberType.Field))
+            foreach (var comparisonFailure in CheckEquivalent(actualFieldValue, expectedFieldValue, options,
+                         [..memberNames, fieldName], MemberType.Field))
             {
                 yield return comparisonFailure;
             }
         }
-        
+
         foreach (var propertyName in actual.GetType().GetProperties().Concat(expected.GetType().GetProperties())
                      .Where(p => p.GetIndexParameters().Length == 0)
                      .Select(x => x.Name)
                      .Distinct())
         {
             string?[] readOnlySpan = [..memberNames, propertyName];
-            
+
             if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
             {
                 continue;
@@ -143,7 +159,7 @@ public static class Compare
                 // To prevent cyclical references/stackoverflow
                 continue;
             }
-            
+
             if (actualPropertyValue?.Equals(actual) == true || actualPropertyValue?.Equals(expected) == true)
             {
                 yield return new ComparisonFailure
@@ -153,11 +169,12 @@ public static class Compare
                     Expected = expected,
                     NestedMemberNames = memberNames
                 };
-                
+
                 yield break;
             }
-            
-            foreach (var comparisonFailure in CheckEquivalent(actualPropertyValue, expectedPropertyValue, options, [..memberNames, propertyName], MemberType.Property))
+
+            foreach (var comparisonFailure in CheckEquivalent(actualPropertyValue, expectedPropertyValue, options,
+                         [..memberNames, propertyName], MemberType.Property))
             {
                 yield return comparisonFailure;
             }
