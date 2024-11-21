@@ -13,7 +13,7 @@ public class Tests : PageTest
             Environment.SetEnvironmentVariable("PWDEBUG", "1");
         }
         
-        Microsoft.Playwright.Program.Main(["install"]);
+        Microsoft.Playwright.Program.Main(["install --with-deps"]);
     }
     
     [Test]
