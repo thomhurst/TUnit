@@ -14,6 +14,7 @@ public class Tests : PageTest
         }
         
         Microsoft.Playwright.Program.Main(["install --with-deps"]);
+        Microsoft.Playwright.Program.Main(["install"]);
     }
     
     [Test]
