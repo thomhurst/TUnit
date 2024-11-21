@@ -74,7 +74,7 @@ public class EquivalentAssertionTests
     }
     
     [Test]
-    public async Task Different_Enumerables__Thrown_When_Non_Matching_Order()
+    public void Different_Enumerables__Thrown_When_Non_Matching_Order()
     {
         List<int> list = [1, 2, 3, 4, 5];
         
@@ -93,7 +93,7 @@ public class EquivalentAssertionTests
         ));    }
     
     [Test]
-    public async Task Different_Enumerables__Thrown_When_Non_Matching_Order2()
+    public void Different_Enumerables__Thrown_When_Non_Matching_Order2()
     {
         List<int> list = [1, 2, 3, 4, 5];
         
