@@ -50,6 +50,7 @@ internal class SingleTestExecutor(
             await semaphore.WaitAsync();
         }
 
+        DateTimeOffset? start = null;
         try
         {
             var testContext = test.TestContext;
@@ -65,7 +66,7 @@ internal class SingleTestExecutor(
 
             var cleanUpExceptions = new List<Exception>();
 
-            var start = DateTimeOffset.Now;
+            start = DateTimeOffset.Now;
 
             try
             {
@@ -113,11 +114,22 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                await RunTeardowns(test, start, testContext, cleanUpExceptions);
+                await RunTeardowns(test, start.GetValueOrDefault(), testContext, cleanUpExceptions);
             }
         }
         finally
         {
+            var result = test.TestContext.Result!;
+            
+            var task = result.Status switch
+            {
+                Status.Passed => messageBus.Passed(test.TestContext, start.GetValueOrDefault()),
+                Status.Failed => messageBus.Failed(test.TestContext, result.Exception!, start.GetValueOrDefault()),
+                _ => ValueTask.CompletedTask,
+            };
+
+            await task;
+            
             semaphore?.Release();
         }
     }
@@ -159,19 +171,6 @@ internal class SingleTestExecutor(
         {
             testContext.SetResult(e);
             throw;
-        }
-        finally
-        {
-            var result = testContext.Result!;
-            
-            var task = result.Status switch
-            {
-                Status.Passed => messageBus.Passed(testContext, start),
-                Status.Failed => messageBus.Failed(testContext, result.Exception!, start),
-                _ => ValueTask.CompletedTask,
-            };
-
-            await task;
         }
     }
 

@@ -70,7 +70,7 @@ public static class TestContextExtensions
     
     internal static void SetResult(this TestContext testContext, Exception? exception)
     {
-        if (ReferenceEquals(exception, testContext.Result?.Exception))
+        if (exception != null && ReferenceEquals(exception, testContext.Result?.Exception))
         {
             return;
         }
