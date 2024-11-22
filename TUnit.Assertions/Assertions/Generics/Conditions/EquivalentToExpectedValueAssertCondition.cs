@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Equality;
 using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Assertions.Generics.Conditions;
@@ -12,7 +13,6 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
     protected override string GetExpectation()
         => $"to be equivalent to {expectedExpression}";
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     protected override AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue)
     {
         if (actualValue is null && ExpectedValue is null)
@@ -29,6 +29,18 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
                 .OrFailIf(
                     () => expectedValue is null,
                     () => "it is not null");
+        }
+
+        if (actualValue is IEnumerable actualEnumerable && ExpectedValue is IEnumerable expectedEnumerable)
+        {
+            return AssertionResult
+                .FailIf(
+                    () => !actualEnumerable.Cast<object?>().SequenceEqual(expectedEnumerable.Cast<object?>(),
+                        new EquivalentToEqualityComparer<object?>(new CompareOptions()
+                        {
+                            MembersToIgnore = [.._ignoredMembers]
+                        })),
+                    () => $"it is {string.Join(',', actualEnumerable)}");
         }
 
         bool? isEqual = null;

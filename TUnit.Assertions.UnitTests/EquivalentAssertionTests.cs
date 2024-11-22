@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.Extensions;
+﻿using TUnit.Assertions.Enums;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 
@@ -30,6 +31,85 @@ public class EquivalentAssertionTests
         var result2 = new { Value = "Foo" };
 
         await TUnitAssert.That(result1).IsEquivalentTo(result2);
+    }
+    
+    [Test]
+    public async Task Different_Enumerables_Are_Equivalent()
+    {
+        List<int> list = [1, 2, 3, 4, 5];
+        
+        int[] array = [1, 2, 3, 4, 5];
+
+        await TUnitAssert.That(list).IsEquivalentTo(array);
+    }
+    
+    [Test]
+    public async Task Different_Enumerables_Are_Equivalent2()
+    {
+        List<int> list = [1, 2, 3, 4, 5];
+        
+        int[] array = [1, 2, 3, 4, 5];
+
+        await TUnitAssert.That(array).IsEquivalentTo(list);
+    }
+    
+    [Test]
+    public async Task Different_Enumerables_Are_Equivalent_Any_Order()
+    {
+        List<int> list = [1, 2, 3, 4, 5];
+        
+        int[] array = [1, 5, 2, 3, 4];
+
+        await TUnitAssert.That(list).IsEquivalentTo(array, CollectionOrdering.Any);
+    }
+    
+    [Test]
+    public async Task Different_Enumerables_Are_Equivalent_Any_Order2()
+    {
+        List<int> list = [1, 2, 3, 4, 5];
+        
+        int[] array = [1, 5, 2, 3, 4];
+
+        await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Any);
+    }
+    
+    [Test]
+    public void Different_Enumerables__Thrown_When_Non_Matching_Order()
+    {
+        List<int> list = [1, 2, 3, 4, 5];
+        
+        int[] array = [1, 5, 2, 3, 4];
+
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching));
+        
+        NUnitAssert.That(exception!.Message, Is.EqualTo(
+            """
+            Expected array to be equivalent to 1,2,3,4,5
+            
+            but it is 1,5,2,3,4
+            
+            at Assert.That(array).IsEquivalentTo(list)
+            """
+        ));    }
+    
+    [Test]
+    public void Different_Enumerables__Thrown_When_Non_Matching_Order2()
+    {
+        List<int> list = [1, 2, 3, 4, 5];
+        
+        int[] array = [1, 5, 2, 3, 4];
+
+        var exception = NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching));
+        
+        NUnitAssert.That(exception!.Message, Is.EqualTo(
+            """
+            Expected array to be equivalent to 1,2,3,4,5
+            
+            but it is 1,5,2,3,4
+            
+            at Assert.That(array).IsEquivalentTo(list)
+            """
+        ));
     }
     
     [Test]

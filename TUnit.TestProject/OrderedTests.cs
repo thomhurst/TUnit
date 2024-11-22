@@ -46,7 +46,7 @@ public class OrderedTests
     public async Task AssertOrder()
     {
         await Assert.That(RegisteredOrders)
-            .IsEquivalentCollectionTo(["First", "Second", "Third", "Fourth", "Fifth"]);
+            .IsEquivalentTo(["First", "Second", "Third", "Fourth", "Fifth"]);
     }
 
     private async Task Wait()
