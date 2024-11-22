@@ -6,12 +6,16 @@ sidebar_position: 3
 
 As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined with the fact that TUnit tests are source generated, running your tests is available in a variety of ways. 
 
+Please note that for the coverage and trx report, you need to install [additional extensions](../extensions/extensions.md)
+
 ## [dotnet run](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-run)
 
 For a simple execution of a project, `dotnet run` is the preferred method, allowing easier passing in of command line flags.
 
 ```powershell
 cd 'C:/Your/Test/Directory'
+dotnet run -c Release
+# or with flags
 dotnet run -c Release --report-trx --coverage
 ```
 
@@ -21,6 +25,8 @@ dotnet run -c Release --report-trx --coverage
 
 ```powershell
 cd 'C:/Your/Test/Directory'
+dotnet test -c Release
+# or with flags
 dotnet test -c Release -- --report-trx --coverage
 ```
 
@@ -30,6 +36,8 @@ If your test project has already been built, you can use `dotnet exec` or just `
 
 ```powershell
 cd 'C:/Your/Test/Directory/bin/Release/net8.0'
+dotnet exec YourTestProject.dll
+# or with flags
 dotnet exec YourTestProject.dll --report-trx --coverage
 ```
 
@@ -37,6 +45,8 @@ or
 
 ```powershell
 cd 'C:/Your/Test/Directory/bin/Release/net8.0'
+dotnet YourTestProject.dll
+# or with flags
 dotnet YourTestProject.dll --report-trx --coverage
 ```
 
@@ -49,6 +59,8 @@ This can be invoked directly and passed any flags.
 
 ```powershell
 cd 'C:/Your/Test/Directory/bin/Release/net8.0/win-x64/publish'
+./YourTestProject.exe
+# or with flags
 ./YourTestProject.exe --report-trx --coverage
 ```
 
