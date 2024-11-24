@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
@@ -45,11 +46,11 @@ internal class ClassDataSources
     {
         return sharedType switch
         {
-            SharedType.None => new T(),
-            SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(() => new T()),
-            SharedType.PerClass => TestDataContainer.GetInstanceForType(testClassType, () => new T()),
-            SharedType.Keyed => TestDataContainer.GetInstanceForKey(key, () => new T()),
-            SharedType.PerAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, () => new T()),
+            SharedType.None => Create<T>(),
+            SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(Create<T>),
+            SharedType.PerClass => TestDataContainer.GetInstanceForType(testClassType, Create<T>),
+            SharedType.Keyed => TestDataContainer.GetInstanceForKey(key, Create<T>),
+            SharedType.PerAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, Create<T>),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -173,6 +174,23 @@ internal class ClassDataSources
         if (shared == SharedType.PerAssembly)
         {
             await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(TestDataContainer.GetInstanceForType(typeof(T), () => default(T)!));
+        }
+    }
+
+    private static T Create<T>() where T : new()
+    {
+        try
+        {
+            return new T();
+        }
+        catch (TargetInvocationException targetInvocationException)
+        {
+            if (targetInvocationException.InnerException != null)
+            {
+                ExceptionDispatchInfo.Throw(targetInvocationException.InnerException);
+            }
+
+            throw;
         }
     }
 }
