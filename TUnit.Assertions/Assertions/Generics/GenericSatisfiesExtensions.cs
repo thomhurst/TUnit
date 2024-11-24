@@ -2,8 +2,9 @@
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Assertions.Generics;
 
 public static class GenericSatisfiesExtensions
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace TUnit.Core.SourceGenerator.Extensions;
+namespace TUnit.Core.SourceGenerator;
 
 public static class AttributeDataExtensions
 {

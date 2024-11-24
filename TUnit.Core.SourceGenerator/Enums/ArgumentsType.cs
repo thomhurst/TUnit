@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.SourceGenerator.Enums;
+﻿namespace TUnit.Core.SourceGenerator;
 
 public enum ArgumentsType
 {

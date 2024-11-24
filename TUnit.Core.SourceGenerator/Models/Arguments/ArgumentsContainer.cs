@@ -1,6 +1,4 @@
-﻿using TUnit.Core.SourceGenerator.Enums;
-
-namespace TUnit.Core.SourceGenerator.Models.Arguments;
+﻿namespace TUnit.Core.SourceGenerator.Arguments;
 
 public abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataAttributeContainer(ArgumentsType)
 {
@@ -12,9 +10,9 @@ public abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataAtt
         {
             return ArgumentsType switch
             {
-                ArgumentsType.ClassConstructor => CodeGenerators.VariableNames.ClassArg,
-                ArgumentsType.Property => CodeGenerators.VariableNames.PropertyArg,
-                _ => CodeGenerators.VariableNames.MethodArg
+                ArgumentsType.ClassConstructor => VariableNames.ClassArg,
+                ArgumentsType.Property => VariableNames.PropertyArg,
+                _ => VariableNames.MethodArg
             };
         }
     }
@@ -25,9 +23,9 @@ public abstract record ArgumentsContainer(ArgumentsType ArgumentsType) : DataAtt
         {
             return ArgumentsType switch
             {
-                ArgumentsType.ClassConstructor => CodeGenerators.VariableNames.ClassDataAttribute,
-                ArgumentsType.Property => CodeGenerators.VariableNames.PropertyDataAttribute,
-                _ => CodeGenerators.VariableNames.MethodDataAttribute
+                ArgumentsType.ClassConstructor => VariableNames.ClassDataAttribute,
+                ArgumentsType.Property => VariableNames.PropertyDataAttribute,
+                _ => VariableNames.MethodDataAttribute
             };
         }
     }

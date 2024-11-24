@@ -1,9 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Enums;
-using TUnit.Core.SourceGenerator.Extensions;
 
-namespace TUnit.Core.SourceGenerator.Models.Arguments;
+namespace TUnit.Core.SourceGenerator.Arguments;
 
 public record MethodDataSourceAttributeContainer(
     Compilation Compilation,
@@ -28,12 +26,12 @@ public record MethodDataSourceAttributeContainer(
         }
         
         var enumerableIndexName = ArgumentsType == ArgumentsType.ClassConstructor
-            ? CodeGenerators.VariableNames.ClassDataIndex
-            : CodeGenerators.VariableNames.TestMethodDataIndex;
+            ? VariableNames.ClassDataIndex
+            : VariableNames.TestMethodDataIndex;
         
         var dataName = ArgumentsType == ArgumentsType.ClassConstructor
-            ? CodeGenerators.VariableNames.ClassData
-            : CodeGenerators.VariableNames.MethodData;
+            ? VariableNames.ClassData
+            : VariableNames.MethodData;
             
         sourceCodeWriter.WriteLine($"foreach (var {dataName}Accessor in {GetMethodInvocation()})");
         sourceCodeWriter.WriteLine("{");
@@ -85,8 +83,8 @@ public record MethodDataSourceAttributeContainer(
         }
             
         var dataName = ArgumentsType == ArgumentsType.ClassConstructor
-            ? CodeGenerators.VariableNames.ClassData
-            : CodeGenerators.VariableNames.MethodData;
+            ? VariableNames.ClassData
+            : VariableNames.MethodData;
             
         sourceCodeWriter.WriteLine($"var {dataName} = {dataName}Accessor{FuncParenthesis()};");
             

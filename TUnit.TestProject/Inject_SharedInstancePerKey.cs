@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Collections;
+using TUnit.Assertions.Assertions.Generics;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;

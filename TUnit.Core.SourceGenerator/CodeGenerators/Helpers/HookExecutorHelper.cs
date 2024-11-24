@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+﻿namespace TUnit.Core.SourceGenerator.Helpers;
 
 public static class HookExecutorHelper
 {

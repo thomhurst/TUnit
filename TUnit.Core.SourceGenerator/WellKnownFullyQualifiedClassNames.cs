@@ -1,6 +1,4 @@
-﻿using TUnit.Core.SourceGenerator.Models;
-
-namespace TUnit.Core.SourceGenerator;
+﻿namespace TUnit.Core.SourceGenerator;
 
 public static class WellKnownFullyQualifiedClassNames
 {

@@ -1,4 +1,7 @@
-﻿namespace TUnit.Assertions.Tests.Assertions.Delegates;
+﻿using TUnit.Assertions.Assertions.Collections;
+using TUnit.Assertions.Assertions.Generics;
+
+namespace TUnit.Assertions.Tests.Assertions.Delegates;
 
 public partial class Throws
 {

@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace TUnit.Core.SourceGenerator.Extensions;
+namespace TUnit.Core.SourceGenerator;
 
 public static class StringExtensions
 {

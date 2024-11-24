@@ -1,4 +1,7 @@
 ﻿using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Generics;
+using TUnit.Assertions.Assertions.Primitives;
+using TUnit.Assertions.Assertions.Strings;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 

@@ -1,8 +1,6 @@
-﻿using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
-using TUnit.Core.SourceGenerator.Enums;
-using TUnit.Core.SourceGenerator.Models;
+﻿using TUnit.Core.SourceGenerator.Helpers;
 
-namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
+namespace TUnit.Core.SourceGenerator.Writers.Hooks;
 
 public static class ClassHooksWriter
 {

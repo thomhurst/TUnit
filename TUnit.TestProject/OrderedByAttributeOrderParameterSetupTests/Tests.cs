@@ -1,6 +1,7 @@
 ﻿#pragma warning disable
 
 using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Strings;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject.OrderedByAttributeOrderParameterSetupTests;

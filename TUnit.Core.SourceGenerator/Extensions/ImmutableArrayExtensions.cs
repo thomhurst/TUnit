@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace TUnit.Core.SourceGenerator.Extensions;
+namespace TUnit.Core.SourceGenerator;
 
 public static class ImmutableArrayExtensions
 {

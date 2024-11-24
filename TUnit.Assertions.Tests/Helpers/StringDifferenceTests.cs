@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.Tests.Helpers;
+﻿using TUnit.Assertions.Assertions.Strings;
+
+namespace TUnit.Assertions.Tests.Helpers;
 
 public class StringDifferenceTests
 {

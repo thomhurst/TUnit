@@ -1,4 +1,7 @@
 ﻿using TUnit.Assertions.AssertionBuilders.Groups;
+using TUnit.Assertions.Assertions.Collections;
+using TUnit.Assertions.Assertions.Generics;
+using TUnit.Assertions.Assertions.Strings;
 
 namespace TUnit.Assertions.Tests;
 

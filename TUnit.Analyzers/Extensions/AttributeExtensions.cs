@@ -2,9 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using TUnit.Analyzers.Helpers;
 
-namespace TUnit.Analyzers.Extensions;
+namespace TUnit.Analyzers;
 
 public static class AttributeExtensions
 {

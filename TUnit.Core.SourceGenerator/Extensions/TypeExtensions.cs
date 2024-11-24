@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using TUnit.Analyzers.Extensions;
 
-namespace TUnit.Core.SourceGenerator.Extensions;
+namespace TUnit.Core.SourceGenerator;
 
 public static class TypeExtensions
 {

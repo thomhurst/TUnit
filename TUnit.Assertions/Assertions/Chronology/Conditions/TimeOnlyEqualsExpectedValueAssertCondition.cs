@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.Chronology;
+﻿using TUnit.Assertions.AssertConditions;
+
+namespace TUnit.Assertions.Assertions.Chronology.Conditions;
 
 public class TimeOnlyEqualsExpectedValueAssertCondition(TimeOnly expected) : ExpectedValueAssertCondition<TimeOnly, TimeOnly>(expected) 
 {

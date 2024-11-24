@@ -1,4 +1,4 @@
-﻿namespace TUnit.Analyzers.Extensions;
+﻿namespace TUnit.Analyzers;
 
 public static class EnumerableExtensions
 {

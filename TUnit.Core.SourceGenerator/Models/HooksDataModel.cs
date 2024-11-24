@@ -1,6 +1,4 @@
-﻿using TUnit.Core.SourceGenerator.Enums;
-
-namespace TUnit.Core.SourceGenerator.Models;
+﻿namespace TUnit.Core.SourceGenerator;
 
 public record HooksDataModel
 {

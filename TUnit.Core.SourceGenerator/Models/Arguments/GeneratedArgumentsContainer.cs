@@ -1,6 +1,4 @@
-using TUnit.Core.SourceGenerator.Enums;
-
-namespace TUnit.Core.SourceGenerator.Models.Arguments;
+namespace TUnit.Core.SourceGenerator.Arguments;
 
 public record GeneratedArgumentsContainer : ArgumentsContainer
 {
@@ -71,12 +69,12 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
 
         if (ArgumentsType == ArgumentsType.ClassConstructor)
         {
-            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
+            sourceCodeWriter.WriteLine($"{VariableNames.ClassDataIndex}++;");
         }
         
         if (ArgumentsType == ArgumentsType.Method)
         {
-            sourceCodeWriter.WriteLine($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
+            sourceCodeWriter.WriteLine($"{VariableNames.TestMethodDataIndex}++;");
         }
     }
 

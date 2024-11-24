@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Assertions.Generics;
 
 namespace TUnit.Assertions.Tests.Assertions.Delegates;
 

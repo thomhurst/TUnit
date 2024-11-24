@@ -1,6 +1,7 @@
-﻿using TUnit.Assertions.Extensions;
+﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.AssertConditions.Throws;
+namespace TUnit.Assertions.Assertions.Throws;
 
 public class ThrowsNothingAssertCondition<TActual> : DelegateAssertCondition<TActual, Exception>
 {

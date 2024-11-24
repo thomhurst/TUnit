@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Collections;
+using TUnit.Assertions.Assertions.Primitives;
 using TUnit.Assertions.Extensions;
 using TUnit.TestProject.Dummy;
 

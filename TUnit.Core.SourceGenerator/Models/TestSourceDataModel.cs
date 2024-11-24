@@ -1,7 +1,6 @@
-﻿using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Models.Arguments;
+﻿using TUnit.Core.SourceGenerator.Arguments;
 
-namespace TUnit.Core.SourceGenerator.Models;
+namespace TUnit.Core.SourceGenerator;
 
 public record TestSourceDataModel
 {

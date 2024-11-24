@@ -1,9 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Enums;
-using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Models.Arguments;
+using TUnit.Core.SourceGenerator.Arguments;
 
-namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+namespace TUnit.Core.SourceGenerator.Helpers;
 
 public static class DataSourceGeneratorRetriever
 {

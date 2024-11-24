@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Assertions.Strings;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;

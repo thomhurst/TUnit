@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.Tests;
+﻿using TUnit.Assertions.Assertions.Generics;
+
+namespace TUnit.Assertions.Tests;
 
 public class SatisfiesTests
 {

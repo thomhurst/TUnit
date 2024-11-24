@@ -1,4 +1,6 @@
 ﻿using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Chronology;
+using TUnit.Assertions.Assertions.Collections;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Extensions;
 

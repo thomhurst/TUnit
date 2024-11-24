@@ -1,5 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Chronology;
+using TUnit.Assertions.Assertions.Chronology.Conditions;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 

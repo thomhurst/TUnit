@@ -1,6 +1,6 @@
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Assertions.Throws;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 

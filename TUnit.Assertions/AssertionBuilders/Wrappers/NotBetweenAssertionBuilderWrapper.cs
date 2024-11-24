@@ -1,4 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Comparable;
+﻿using TUnit.Assertions.Assertions.Comparables.Conditions;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 

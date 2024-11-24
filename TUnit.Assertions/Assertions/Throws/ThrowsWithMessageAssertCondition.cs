@@ -1,7 +1,8 @@
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Helpers;
 
-namespace TUnit.Assertions.AssertConditions.Throws;
+namespace TUnit.Assertions.Assertions.Throws;
 
 public class ThrowsWithMessageAssertCondition<TActual, TException>(
     string expectedMessage,

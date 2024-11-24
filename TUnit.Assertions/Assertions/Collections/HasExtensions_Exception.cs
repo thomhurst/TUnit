@@ -5,8 +5,9 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Exceptions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Assertions.Collections;
 
 public static partial class HasExtensions
 {

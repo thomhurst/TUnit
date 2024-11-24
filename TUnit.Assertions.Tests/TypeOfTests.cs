@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using TUnit.Assertions.Assertions.Generics;
 
 namespace TUnit.Assertions.Tests;
 

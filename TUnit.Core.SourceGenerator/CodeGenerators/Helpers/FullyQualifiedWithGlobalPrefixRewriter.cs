@@ -1,9 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TUnit.Core.SourceGenerator.Extensions;
 
-namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+namespace TUnit.Core.SourceGenerator.Helpers;
 
 public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanticModel) : CSharpSyntaxRewriter
 {

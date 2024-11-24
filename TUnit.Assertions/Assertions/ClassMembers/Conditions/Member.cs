@@ -4,7 +4,7 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.AssertConditions.ClassMember;
+namespace TUnit.Assertions.Assertions.ClassMembers.Conditions;
 
 public class Member<TActualRootType, TPropertyType>(IValueSource<TActualRootType> valueSource, Expression<Func<TActualRootType, TPropertyType>> selector)
 {

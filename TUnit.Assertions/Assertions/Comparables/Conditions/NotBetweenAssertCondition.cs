@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.Comparable;
+﻿using TUnit.Assertions.AssertConditions;
+
+namespace TUnit.Assertions.Assertions.Comparables.Conditions;
 
 public class NotBetweenAssertCondition<TActual>(TActual minimum, TActual maximum) : BaseAssertCondition<TActual> 
     where TActual : IComparable<TActual>

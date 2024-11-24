@@ -1,4 +1,7 @@
-﻿namespace TUnit.Assertions.Tests.AssertConditions;
+﻿using TUnit.Assertions.Assertions.Primitives;
+using TUnit.Assertions.Assertions.Strings;
+
+namespace TUnit.Assertions.Tests.AssertConditions;
 
 public class BecauseTests
 {

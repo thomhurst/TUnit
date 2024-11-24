@@ -1,4 +1,5 @@
 using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Primitives;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Dummy;

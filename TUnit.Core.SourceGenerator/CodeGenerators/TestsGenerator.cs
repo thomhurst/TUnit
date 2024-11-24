@@ -1,10 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
-using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
-using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Models;
+using TUnit.Core.SourceGenerator.Helpers;
+using TUnit.Core.SourceGenerator.Writers;
 
-namespace TUnit.Core.SourceGenerator.CodeGenerators;
+namespace TUnit.Core.SourceGenerator;
 
 [Generator]
 public class TestsGenerator : IIncrementalGenerator

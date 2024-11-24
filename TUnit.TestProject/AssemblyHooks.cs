@@ -1,4 +1,6 @@
 ﻿using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Generics;
+using TUnit.Assertions.Assertions.Numbers;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;

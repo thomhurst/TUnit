@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.SourceGenerator.Models;
+﻿namespace TUnit.Core.SourceGenerator;
 
 public record FullyQualifiedTypeName
 {

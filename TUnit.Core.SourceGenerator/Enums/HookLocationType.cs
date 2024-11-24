@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.SourceGenerator.Enums;
+﻿namespace TUnit.Core.SourceGenerator;
 
 [Flags]
 public enum HookLocationType

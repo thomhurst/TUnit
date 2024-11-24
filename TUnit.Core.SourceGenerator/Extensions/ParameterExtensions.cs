@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace TUnit.Core.SourceGenerator.Extensions;
+namespace TUnit.Core.SourceGenerator;
 
 public static class ParameterExtensions
 {

@@ -1,6 +1,7 @@
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Enums;
 
-namespace TUnit.Assertions.AssertConditions.Collections;
+namespace TUnit.Assertions.Assertions.Collections.Conditions;
 
 public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(
     IEnumerable<TInner> expected,

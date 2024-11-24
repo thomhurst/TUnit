@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace TUnit.Analyzers.Extensions;
+namespace TUnit.Analyzers;
 
 public static class SyntaxExtensions
 {

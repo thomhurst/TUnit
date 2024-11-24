@@ -1,4 +1,6 @@
 ﻿using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Collections;
+using TUnit.Assertions.Assertions.Generics;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Enums;
 

@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.Tests;
+﻿using TUnit.Assertions.Assertions.Strings;
+
+namespace TUnit.Assertions.Tests;
 
 public class FailTests
 {

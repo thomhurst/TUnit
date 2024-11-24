@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Models.Arguments;
+using TUnit.Core.SourceGenerator.Arguments;
 
-namespace TUnit.Core.SourceGenerator.Models;
+namespace TUnit.Core.SourceGenerator;
 
 public record TestGenerationContext
 {

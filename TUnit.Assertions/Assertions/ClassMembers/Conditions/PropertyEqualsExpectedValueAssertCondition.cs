@@ -1,7 +1,8 @@
 using System.Linq.Expressions;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Helpers;
 
-namespace TUnit.Assertions.AssertConditions.ClassMember;
+namespace TUnit.Assertions.Assertions.ClassMembers.Conditions;
 
 public class PropertyEqualsExpectedValueAssertCondition<TRootObjectType, TPropertyType>(Expression<Func<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual)
     : ExpectedValueAssertCondition<TRootObjectType, TPropertyType>(expected)

@@ -1,6 +1,7 @@
 using System.Collections;
+using TUnit.Assertions.AssertConditions;
 
-namespace TUnit.Assertions.AssertConditions.Collections;
+namespace TUnit.Assertions.Assertions.Collections.Conditions;
 
 public class EnumerableDistinctItemsExpectedValueAssertCondition<TActual, TInner>(IEqualityComparer<TInner?>? equalityComparer)
     : BaseAssertCondition<TActual>

@@ -3,8 +3,9 @@
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Assertions.Generics.Conditions;
+using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Assertions.Chronology;
 
 public static class TimeSpanIsNotExtensions
 {

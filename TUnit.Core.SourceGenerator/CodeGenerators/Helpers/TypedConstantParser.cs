@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+namespace TUnit.Core.SourceGenerator.Helpers;
 
 public static class TypedConstantParser
 {

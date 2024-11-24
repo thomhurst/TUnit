@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.Extensions;
+﻿using TUnit.Assertions.Assertions.Comparables;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 

@@ -1,4 +1,4 @@
-namespace TUnit.Core.SourceGenerator.Models.Arguments;
+namespace TUnit.Core.SourceGenerator.Arguments;
 
 public abstract record BaseContainer
 {

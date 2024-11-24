@@ -1,5 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions;
+using TUnit.Assertions.Assertions.Chronology;
+using TUnit.Assertions.Assertions.Generics;
+using TUnit.Assertions.Assertions.Primitives;
+using TUnit.Assertions.Assertions.Strings;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;

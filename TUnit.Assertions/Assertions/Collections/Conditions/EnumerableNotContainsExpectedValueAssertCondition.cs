@@ -1,4 +1,6 @@
-namespace TUnit.Assertions.AssertConditions.Collections;
+using TUnit.Assertions.AssertConditions;
+
+namespace TUnit.Assertions.Assertions.Collections.Conditions;
 
 public class EnumerableNotContainsExpectedValueAssertCondition<TActual, TInner>(
     TInner expected,

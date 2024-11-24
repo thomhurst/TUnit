@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Analyzers.Helpers;
 
-namespace TUnit.Analyzers.Extensions;
+namespace TUnit.Analyzers;
 
 public static class SymbolExtensions
 {

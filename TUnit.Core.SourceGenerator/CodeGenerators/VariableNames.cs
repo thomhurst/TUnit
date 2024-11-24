@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core.SourceGenerator.CodeGenerators;
+﻿namespace TUnit.Core.SourceGenerator;
 
 public static class VariableNames
 {

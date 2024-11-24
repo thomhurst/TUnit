@@ -1,6 +1,4 @@
-using TUnit.Core.SourceGenerator.Enums;
-
-namespace TUnit.Core.SourceGenerator.Models.Arguments;
+namespace TUnit.Core.SourceGenerator.Arguments;
 
 public record ClassConstructorAttributeContainer(ArgumentsType ArgumentsType) : ArgumentsContainer(ArgumentsType)
 {

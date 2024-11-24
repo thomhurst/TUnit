@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Analyzers;
 

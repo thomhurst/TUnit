@@ -5,8 +5,9 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Assertions.Collections;
 
 public static partial class DoesNotExtensions
 {

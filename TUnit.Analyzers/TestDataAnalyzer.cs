@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
-using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 

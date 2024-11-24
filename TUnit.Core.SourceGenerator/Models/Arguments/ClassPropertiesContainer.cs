@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Enums;
 
-namespace TUnit.Core.SourceGenerator.Models.Arguments;
+namespace TUnit.Core.SourceGenerator.Arguments;
 
 public record ClassPropertiesContainer(
     IReadOnlyCollection<(IPropertySymbol PropertySymbol, ArgumentsContainer ArgumentsContainer)> InnerContainers)

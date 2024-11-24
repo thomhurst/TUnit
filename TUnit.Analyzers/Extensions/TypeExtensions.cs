@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace TUnit.Analyzers.Extensions;
+namespace TUnit.Analyzers;
 
 public static class TypeExtensions
 {

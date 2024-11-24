@@ -16,4 +16,7 @@
     <PackageReference Include="ModularPipelines.GitHub" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Modules\Tests\" />
+  </ItemGroup>
 </Project>

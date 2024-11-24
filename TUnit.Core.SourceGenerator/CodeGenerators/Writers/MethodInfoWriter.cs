@@ -1,6 +1,4 @@
-﻿using TUnit.Core.SourceGenerator.Models;
-
-namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
+﻿namespace TUnit.Core.SourceGenerator.Writers;
 
 public static class MethodInfoWriter
 {

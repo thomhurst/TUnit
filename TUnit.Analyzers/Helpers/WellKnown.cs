@@ -1,4 +1,4 @@
-﻿namespace TUnit.Analyzers.Helpers;
+﻿namespace TUnit.Analyzers;
 
 public static class WellKnown
 {

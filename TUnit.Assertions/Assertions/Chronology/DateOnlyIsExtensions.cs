@@ -2,12 +2,13 @@
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.AssertionBuilders.Wrappers;
+using TUnit.Assertions.Assertions.Chronology.Conditions;
+using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Assertions.Chronology;
 
 public static class DateOnlyIsExtensions
 {

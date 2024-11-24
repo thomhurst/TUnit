@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.ClassMember;
 using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.Assertions.ClassMembers.Conditions;
 
-namespace TUnit.Assertions.Extensions;
+namespace TUnit.Assertions.Assertions.Collections;
 
 public static partial class HasExtensions
 {

@@ -1,4 +1,6 @@
-﻿using TUnit.Assertions.Enums;
+﻿using TUnit.Assertions.Assertions.Collections;
+using TUnit.Assertions.Assertions.Generics;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;

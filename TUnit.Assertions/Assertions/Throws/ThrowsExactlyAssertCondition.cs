@@ -1,6 +1,7 @@
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.AssertConditions.Throws;
+namespace TUnit.Assertions.Assertions.Throws;
 
 public class ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, TExpectedException>
     where TExpectedException : Exception

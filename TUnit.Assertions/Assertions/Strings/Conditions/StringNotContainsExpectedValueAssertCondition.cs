@@ -1,7 +1,8 @@
-﻿using TUnit.Assertions.Extensions;
+﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Helpers;
 
-namespace TUnit.Assertions.AssertConditions.String;
+namespace TUnit.Assertions.Assertions.Strings.Conditions;
 
 public class StringNotContainsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)

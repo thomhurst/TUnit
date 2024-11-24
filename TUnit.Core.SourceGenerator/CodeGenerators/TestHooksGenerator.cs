@@ -1,12 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
-using TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
-using TUnit.Core.SourceGenerator.Enums;
-using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Models;
+using TUnit.Core.SourceGenerator.Helpers;
+using TUnit.Core.SourceGenerator.Writers.Hooks;
 
-namespace TUnit.Core.SourceGenerator.CodeGenerators;
+namespace TUnit.Core.SourceGenerator;
 
 [Generator]
 public class TestHooksGenerator : IIncrementalGenerator
