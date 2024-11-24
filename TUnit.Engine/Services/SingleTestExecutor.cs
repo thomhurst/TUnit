@@ -89,43 +89,84 @@ internal class SingleTestExecutor(
                     throw new SkipTestException("The test session has been cancelled...");
                 }
 
-                var beforeAssemblyHooks = assemblyHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly);
-                var assemblyHookContext = assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType.Assembly);
+                var assemblyHooksTaskCompletionSource = assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
+                    _ => new TaskCompletionSource(), out var assemblyHooksTaskPreviouslyExisted);
+                
+                if (assemblyHooksTaskPreviouslyExisted)
+                {
+                    await assemblyHooksTaskCompletionSource.Task;
+                }
+                else
+                {
+                    try
+                    {
+                        var beforeAssemblyHooks =
+                            assemblyHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly);
+                        var assemblyHookContext =
+                            assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType.Assembly);
 
-                AssemblyHookContext.Current = assemblyHookContext;
-                
-                foreach (var beforeHook in beforeAssemblyHooks)
-                {
-                    if(beforeHook.IsSynchronous)
-                    {
-                        beforeHook.Execute(assemblyHookContext, CancellationToken.None);
+                        AssemblyHookContext.Current = assemblyHookContext;
+
+                        foreach (var beforeHook in beforeAssemblyHooks)
+                        {
+                            if (beforeHook.IsSynchronous)
+                            {
+                                beforeHook.Execute(assemblyHookContext, CancellationToken.None);
+                            }
+                            else
+                            {
+                                await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                            }
+                        }
+
+                        AssemblyHookContext.Current = null;
+                        assemblyHooksTaskCompletionSource.SetResult();
                     }
-                    else
+                    catch (Exception e)
                     {
-                        await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
-                    }
-                }
-                
-                AssemblyHookContext.Current = null;
-                
-                var beforeClassHooks = classHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.ClassType);
-                var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType);
-                
-                ClassHookContext.Current = classHookContext;
-                
-                foreach (var beforeHook in beforeClassHooks)
-                {
-                    if(beforeHook.IsSynchronous)
-                    {
-                        beforeHook.Execute(classHookContext, CancellationToken.None);
-                    }
-                    else
-                    {
-                        await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
+                        assemblyHooksTaskCompletionSource.SetException(e);
+                        throw;
                     }
                 }
+
+                var classHooksTaskCompletionSource = classHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType,
+                    _ => new TaskCompletionSource(), out var classHooksTaskPreviouslyExisted);
                 
-                ClassHookContext.Current = null;
+                if (classHooksTaskPreviouslyExisted)
+                {
+                    await classHooksTaskCompletionSource.Task;
+                }
+                else
+                {
+                    try
+                    {
+                        var beforeClassHooks =
+                            classHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.ClassType);
+                        var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType);
+
+                        ClassHookContext.Current = classHookContext;
+
+                        foreach (var beforeHook in beforeClassHooks)
+                        {
+                            if (beforeHook.IsSynchronous)
+                            {
+                                beforeHook.Execute(classHookContext, CancellationToken.None);
+                            }
+                            else
+                            {
+                                await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
+                            }
+                        }
+
+                        ClassHookContext.Current = null;
+                        classHooksTaskCompletionSource.SetResult();
+                    }
+                    catch (Exception e)
+                    {
+                        classHooksTaskCompletionSource.SetException(e);
+                        throw;
+                    }
+                }
 
                 TestContext.Current = testContext;
 

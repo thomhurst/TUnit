@@ -21,6 +21,21 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
             return InnerDictionary.GetOrAdd(key, func);
         }
     }
+    
+    public TValue GetOrAdd(TKey key, Func<TKey, TValue> func, out bool previouslyExisted)
+    {
+        lock (Lock)
+        {
+            if (InnerDictionary.TryGetValue(key, out var foundValue))
+            {
+                previouslyExisted = true;
+                return foundValue;
+            }
+            
+            previouslyExisted = false;
+            return InnerDictionary.GetOrAdd(key, func);
+        }
+    }
 
     public TValue? Remove(TKey key)
     {

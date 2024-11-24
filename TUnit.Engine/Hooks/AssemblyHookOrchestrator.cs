@@ -13,6 +13,8 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyHookContexts = new();
 
     private readonly ConcurrentDictionary<Assembly, bool> _beforeHooksReached = new();
+    
+    internal GetOnlyDictionary<Assembly, TaskCompletionSource> PreviouslyRunBeforeHooks { get; } = new();
 
     public IEnumerable<StaticHookMethod<AssemblyHookContext>> CollectBeforeHooks(Assembly assembly)
     {
