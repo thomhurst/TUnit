@@ -1,7 +1,4 @@
-﻿using TUnit.Core.Enums;
-using TUnit.Core.Exceptions;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 public partial class TestContext : Context, IDisposable
 {

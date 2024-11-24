@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 using TUnit.Analyzers.Extensions;
-using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 

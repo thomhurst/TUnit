@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class DependsOnAttribute<T> : DependsOnAttribute
