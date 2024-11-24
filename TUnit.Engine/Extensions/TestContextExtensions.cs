@@ -5,7 +5,6 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
 using AggregateException = System.AggregateException;
