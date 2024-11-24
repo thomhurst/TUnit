@@ -33,7 +33,10 @@ public class RetryTests
         throw new Exception();
     }
 
-    [Test, NotInParallel(nameof(RetryTests), Order = 2)]
+    [Test]
+    [DependsOn(nameof(One))]
+    [DependsOn(nameof(Two))]
+    [DependsOn(nameof(Three))]
     public async Task AssertCounts()
     {
         await Assert.That(RetryCount1).IsEqualTo(2);
