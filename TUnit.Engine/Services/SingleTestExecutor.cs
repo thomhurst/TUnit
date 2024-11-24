@@ -32,10 +32,12 @@ internal class SingleTestExecutor(
     EngineCancellationToken engineCancellationToken)
     : IDataProducer
 {
+    private static readonly Lock Lock = new();
+    
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
         bool isStartedAsDependencyForAnotherTest)
     {
-        lock (test.TestContext.Lock)
+        lock (Lock)
         {
             return test.TestContext.TestTask ??= ExecuteTestInternalAsync(test, filter, context, isStartedAsDependencyForAnotherTest);
         }
@@ -417,18 +419,18 @@ internal class SingleTestExecutor(
         return testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions);
     }
 
-    private async ValueTask WaitForDependsOnTests(DiscoveredTest testContext, ITestExecutionFilter? filter,
+    private async ValueTask WaitForDependsOnTests(DiscoveredTest test, ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
-        foreach (var dependency in GetDependencies(testContext.TestDetails))
+        foreach (var dependency in GetDependencies(test.TestDetails))
         {
             try
             {
                 await ExecuteTestAsync(dependency.Test, filter, context, true);
             }
-            catch when (dependency.ProceedOnFailure)
+            catch (Exception e) when (dependency.ProceedOnFailure)
             {
-                // Ignore
+                test.TestContext.OutputWriter.WriteLine($"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
             }
             catch (Exception e)
             {
