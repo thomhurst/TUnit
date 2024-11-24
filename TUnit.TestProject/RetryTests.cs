@@ -34,9 +34,9 @@ public class RetryTests
     }
 
     [Test]
-    [DependsOn(nameof(One))]
-    [DependsOn(nameof(Two))]
-    [DependsOn(nameof(Three))]
+    [DependsOn(nameof(One), ProceedOnFailure = true)]
+    [DependsOn(nameof(Two), ProceedOnFailure = true)]
+    [DependsOn(nameof(Three), ProceedOnFailure = true)]
     public async Task AssertCounts()
     {
         await Assert.That(RetryCount1).IsEqualTo(2);

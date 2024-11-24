@@ -344,7 +344,9 @@ internal class SingleTestExecutor(
                     throw;
                 }
 
+                // Clear context for a new run
                 cleanupExceptions.Clear();
+                discoveredTest.TestContext.Result = null;
 
                 await logger.LogWarningAsync($"""
                                               {discoveredTest.TestContext.GetClassTypeName()}.{discoveredTest.TestContext.GetTestDisplayName()} attempt {i + 1} failed, retrying...");
