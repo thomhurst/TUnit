@@ -15,10 +15,10 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[0], 
                 """
-                            new StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>
+                            new global::TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
-                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery()),
+                               Body = (context, cancellationToken) => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery(),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 5,
                                FilePath = @"", 
@@ -28,10 +28,10 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[1], 
                 """
-                            new StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>
+                            new global::TUnit.Core.Hooks.AfterTestDiscoveryHookMethod
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
-                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery()),
+                               Body = (context, cancellationToken) => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery(),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 0,
                                FilePath = @"", 

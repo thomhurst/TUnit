@@ -12,36 +12,38 @@ public static class MethodExtensions
         return methodSymbol.GetAttributes().Any(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, testAttribute));
     }
 
-    public static bool IsHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
+    public static bool IsHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
-        return IsStandardHookMethod(methodSymbol, compilation, out type, out hookLevel) || IsEveryHookMethod(methodSymbol, compilation, out type, out hookLevel);
+        return IsStandardHookMethod(methodSymbol, compilation, out type, out hookLevel, out hookType) || IsEveryHookMethod(methodSymbol, compilation, out type, out hookLevel, out hookType);
     }
     
-    public static bool IsStandardHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
+    public static bool IsStandardHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         foreach (var attributeData in methodSymbol.GetAttributes())
         {
-            if (attributeData.IsStandardHook(compilation, out type, out hookLevel))
+            if (attributeData.IsStandardHook(compilation, out type, out hookLevel, out hookType))
             {
                 return true;
             }
         }
 
+        hookType = null;
         type = null;
         hookLevel = null;
         return false;
     }
     
-    public static bool IsEveryHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
+    public static bool IsEveryHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         foreach (var attributeData in methodSymbol.GetAttributes())
         {
-            if (attributeData.IsEveryHook(compilation, out type, out hookLevel))
+            if (attributeData.IsEveryHook(compilation, out type, out hookLevel, out hookType))
             {
                 return true;
             }
         }
 
+        hookType = null;
         type = null;
         hookLevel = null;
         return false;

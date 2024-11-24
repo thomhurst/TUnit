@@ -25,42 +25,61 @@ public static class AttributeExtensions
         return attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
     
-    public static bool IsStandardHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
+    public static bool IsStandardHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         if (
             SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
                 compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeAttribute
-                    .WithoutGlobalPrefix)) ||
-            SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                    .WithoutGlobalPrefix)))
+        {
+            hookType = HookType.Before;
+            type = attributeData.AttributeClass!;
+            hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last()); 
+            return true;
+        }
+        
+        if (SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
                 compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
                     .WithoutGlobalPrefix)))
         {
+            hookType = HookType.After;
             type = attributeData.AttributeClass!;
             hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last()); 
             return true;
         }
 
+        hookType = null;
         type = null;
         hookLevel = null;
         return false;
     }
     
-    public static bool IsEveryHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel)
+    public static bool IsEveryHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         if (
             SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
                 compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.BeforeEveryAttribute
-                    .WithoutGlobalPrefix)) ||
-            SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute
                     .WithoutGlobalPrefix)))
         {
+            hookType = HookType.Before;
             type = attributeData.AttributeClass!;
             hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
             
             return true;
         }
 
+        if (SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+                compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterEveryAttribute
+                    .WithoutGlobalPrefix)))
+        {
+            hookType = HookType.After;
+            type = attributeData.AttributeClass!;
+            hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+            
+            return true;
+        }
+        
+        hookType = null;
         type = null;
         hookLevel = null;
         return false;

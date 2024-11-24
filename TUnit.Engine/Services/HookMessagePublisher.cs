@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Hooks;
 
 namespace TUnit.Engine.Services;
 

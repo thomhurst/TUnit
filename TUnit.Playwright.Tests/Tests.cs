@@ -1,21 +1,9 @@
-﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace TUnit.Playwright.Tests;
 
 public class Tests : PageTest
 {
-    [Before(TestSession)]
-    public static void InstallPlaywright()
-    {
-        if (Debugger.IsAttached)
-        {
-            Environment.SetEnvironmentVariable("PWDEBUG", "1");
-        }
-        
-        Microsoft.Playwright.Program.Main(["install"]);
-    }
-    
     [Test]
     public async Task Test()
     {

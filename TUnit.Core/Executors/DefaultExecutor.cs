@@ -12,4 +12,9 @@ public class DefaultExecutor : GenericAbstractExecutor
     {
         return action();
     }
+
+    protected override void ExecuteSync(Action action)
+    {
+        action();
+    }
 }

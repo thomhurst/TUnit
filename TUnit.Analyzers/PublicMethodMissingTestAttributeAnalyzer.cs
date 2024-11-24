@@ -40,7 +40,7 @@ public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnal
                      .Where(x => !x.IsOverride)
                      .Where(x => x.DeclaredAccessibility == Accessibility.Public)
                      .Where(x => !x.IsTestMethod(context.Compilation))
-                     .Where(x => !x.IsStandardHookMethod(context.Compilation, out _, out _))
+                     .Where(x => !x.IsStandardHookMethod(context.Compilation, out _, out _, out _))
                      .Where(x => !IsDisposableDispose(x))
                      .Where(x => !IsAsyncDisposableDispose(x)))
         {

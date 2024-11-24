@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core.Interfaces.SourceGenerator;
+﻿using TUnit.Core.Hooks;
+
+namespace TUnit.Core.Interfaces.SourceGenerator;
 
 public interface ITestDiscoveryHookSource
 {

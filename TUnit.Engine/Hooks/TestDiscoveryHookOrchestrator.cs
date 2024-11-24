@@ -1,50 +1,27 @@
 ﻿using TUnit.Core;
-using TUnit.Engine.Helpers;
+using TUnit.Core.Hooks;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-#if !DEBUG
-[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-#endif
 internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, string? stringFilter)
 {
     private BeforeTestDiscoveryContext? _beforeContext;
     private TestDiscoveryContext? _afterContext;
 
-    public async Task ExecuteBeforeHooks()
+    public IEnumerable<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeHooks()
     {
-        var context = GetBeforeContext();
-        
-        BeforeTestDiscoveryContext.Current = context;
-
-        foreach (var staticHookMethod in hooksCollector.BeforeTestDiscoveryHooks.OrderBy(x => x.Order))
-        {
-            await staticHookMethod.Body(context, default);
-        }
-        
-        BeforeTestDiscoveryContext.Current = null;
+        return hooksCollector.BeforeTestDiscoveryHooks
+            .OrderBy(x => x.Order);
     }
 
-    public async Task ExecuteAfterHooks(IEnumerable<DiscoveredTest> discoveredTests)
+    public IEnumerable<StaticHookMethod<TestDiscoveryContext>> CollectAfterHooks()
     {
-        List<Exception> cleanUpExceptions = [];
-
-        var context = GetAfterContext(discoveredTests);
-        
-        TestDiscoveryContext.Current = context;
-        
-        foreach (var staticHookMethod in hooksCollector.AfterTestDiscoveryHooks.OrderBy(x => x.Order))
-        {
-            await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
-        }
-        
-        TestDiscoveryContext.Current = null;
-        
-        ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
+        return hooksCollector.AfterTestDiscoveryHooks
+            .OrderBy(x => x.Order);
     }
     
-    private BeforeTestDiscoveryContext GetBeforeContext()
+    public BeforeTestDiscoveryContext GetBeforeContext()
     {
         return _beforeContext ??= new BeforeTestDiscoveryContext
         {
@@ -52,7 +29,7 @@ internal class TestDiscoveryHookOrchestrator(HooksCollector hooksCollector, stri
         };
     }
 
-    private TestDiscoveryContext GetAfterContext(IEnumerable<DiscoveredTest> discoveredTests)
+    public TestDiscoveryContext GetAfterContext(IEnumerable<DiscoveredTest> discoveredTests)
     {
         return _afterContext ??= new TestDiscoveryContext(discoveredTests)
         {

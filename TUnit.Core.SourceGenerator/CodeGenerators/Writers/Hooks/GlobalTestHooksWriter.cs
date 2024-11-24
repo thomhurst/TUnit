@@ -8,34 +8,50 @@ public static class GlobalTestHooksWriter
 {
     public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model)
     { 
-        sourceBuilder.WriteLine(
-                $$"""
-                   new StaticHookMethod<{{GetClassType(model.HookLevel, model.HookLocationType)}}>
-                           { 
-                              MethodInfo = typeof({{model.FullyQualifiedTypeName}}).GetMethod("{{model.MethodName}}", 0, [{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}]),
-                              Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{model.FullyQualifiedTypeName}}.{{model.MethodName}}({{GetArgs(model, model.HookLocationType)}})),
-                              HookExecutor = {{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}},
-                              Order = {{model.Order}},
-                              FilePath = @"{{model.FilePath}}",
-                              LineNumber = {{model.LineNumber}},
-                           },
-                   """);
+        sourceBuilder.WriteLine($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
+        sourceBuilder.WriteLine("{");
+        sourceBuilder.WriteLine($"""MethodInfo = typeof({model.FullyQualifiedTypeName}).GetMethod("{model.MethodName}", 0, [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]),""");
+
+        if (model.IsVoid)
+        {
+            sourceBuilder.WriteLine(
+                $"Body = (context, cancellationToken) => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)}),"); 
+        }
+        else
+        {
+            sourceBuilder.WriteLine(
+                $"AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)})),");
+        }
+
+        sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+        sourceBuilder.WriteLine($"Order = {model.Order},");
+        sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
+        sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
+        sourceBuilder.WriteLine("},");
     }
 
     private static string GetClassType(string hookType, HookLocationType hookLocationType)
     {
-        if (hookType == "TUnit.Core.HookType.TestDiscovery" && hookLocationType == HookLocationType.Before)
+        if (hookLocationType == HookLocationType.Before)
         {
-            return "global::TUnit.Core.BeforeTestDiscoveryContext";
+            return hookType switch
+            {
+                "TUnit.Core.HookType.Test" => "global::TUnit.Core.Hooks.BeforeTestHookMethod",
+                "TUnit.Core.HookType.Class" => "global::TUnit.Core.Hooks.BeforeClassHookMethod",
+                "TUnit.Core.HookType.Assembly" => "global::TUnit.Core.Hooks.BeforeAssemblyHookMethod",
+                "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.Hooks.BeforeTestSessionHookMethod",
+                "TUnit.Core.HookType.TestDiscovery" => "global::TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod",
+                _ => throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null)
+            };
         }
         
         return hookType switch
         {
-            "TUnit.Core.HookType.Test" => "global::TUnit.Core.TestContext",
-            "TUnit.Core.HookType.Class" => "global::TUnit.Core.ClassHookContext",
-            "TUnit.Core.HookType.Assembly" => "global::TUnit.Core.AssemblyHookContext",
-            "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.TestSessionContext",
-            "TUnit.Core.HookType.TestDiscovery" => "global::TUnit.Core.TestDiscoveryContext",
+            "TUnit.Core.HookType.Test" => "global::TUnit.Core.Hooks.AfterTestHookMethod",
+            "TUnit.Core.HookType.Class" => "global::TUnit.Core.Hooks.AfterClassHookMethod",
+            "TUnit.Core.HookType.Assembly" => "global::TUnit.Core.Hooks.AfterAssemblyHookMethod",
+            "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.Hooks.AfterTestSessionHookMethod",
+            "TUnit.Core.HookType.TestDiscovery" => "global::TUnit.Core.Hooks.AfterTestDiscoveryHookMethod",
             _ => throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null)
         };
     }

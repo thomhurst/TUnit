@@ -75,6 +75,7 @@ public class TestHooksGenerator : IIncrementalGenerator
                 Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
                 FilePath = contextAttribute.ConstructorArguments[1].Value?.ToString() ?? string.Empty,
                 LineNumber = contextAttribute.ConstructorArguments[2].Value as int? ?? 0,
+                IsVoid = methodSymbol.ReturnsVoid,
             };
         }
     }
@@ -93,6 +94,7 @@ public class TestHooksGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine("using global::System.Reflection;");
             sourceBuilder.WriteLine("using global::System.Runtime.CompilerServices;");
             sourceBuilder.WriteLine("using global::TUnit.Core;");
+            sourceBuilder.WriteLine("using global::TUnit.Core.Hooks;");
             sourceBuilder.WriteLine("using global::TUnit.Core.Interfaces;");
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");

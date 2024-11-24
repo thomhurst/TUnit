@@ -88,16 +88,40 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                             TestFilter = stringFilter
                         };
 
-                    await serviceProvider.TestSessionHookOrchestrator.ExecuteBeforeHooks();
+                    var beforeSessionHooks = serviceProvider.TestSessionHookOrchestrator.CollectBeforeHooks();
 
+                    foreach (var beforeSessionHook in beforeSessionHooks)
+                    {
+                        if(beforeSessionHook.IsSynchronous)
+                        {
+                            beforeSessionHook.Execute(testSessionContext, context.CancellationToken);
+                        }
+                        else
+                        {
+                            await beforeSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
+                        }
+                    }
+                    
                     await serviceProvider.TestsExecutor.ExecuteAsync(filteredTests, runTestExecutionRequest.Filter,
                         context);
 
                     // Tests could reschedule separate invocations - This allows us to wait for all invocations
                     await serviceProvider.TestsExecutor.WaitForFinishAsync();
 
-                    await serviceProvider.TestSessionHookOrchestrator.ExecuteAfterHooks();
+                    var afterSessionHooks = serviceProvider.TestSessionHookOrchestrator.CollectAfterHooks();
 
+                    foreach (var afterSessionHook in afterSessionHooks)
+                    {
+                        if(afterSessionHook.IsSynchronous)
+                        {
+                            afterSessionHook.Execute(testSessionContext, context.CancellationToken);
+                        }
+                        else
+                        {
+                            await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
+                        }
+                    }
+                    
                     foreach (var artifact in testSessionContext.Artifacts)
                     {
                         await serviceProvider.TUnitMessageBus.SessionArtifact(artifact);

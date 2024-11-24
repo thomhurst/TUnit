@@ -2,95 +2,76 @@
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Data;
-using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
+using TUnit.Core.Hooks;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-#if !DEBUG
-[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-#endif
 internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector)
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyHookContexts = new();
 
-    private readonly GetOnlyDictionary<Assembly, Task> _before = new();
-    private readonly GetOnlyDictionary<Assembly, Task> _after = new();
-
     private readonly ConcurrentDictionary<Assembly, bool> _beforeHooksReached = new();
+    
+    internal GetOnlyDictionary<Assembly, TaskCompletionSource> PreviouslyRunBeforeHooks { get; } = new();
 
-    public async Task ExecuteBeforeHooks(Assembly assembly)
+    public IEnumerable<StaticHookMethod<AssemblyHookContext>> CollectBeforeHooks(Assembly assembly)
     {
         _beforeHooksReached.GetOrAdd(assembly, true);
         
-        await _before.GetOrAdd(assembly, async _ =>
-            {
-                var context = GetContext(assembly);
+        var context = GetContext(assembly);
                 
-                AssemblyHookContext.Current = context;
+        AssemblyHookContext.Current = context;
 
-                foreach (var beforeEveryClass in hooksCollector.BeforeEveryAssemblyHooks.OrderBy(x => x.Order))
-                {
-                    await beforeEveryClass.Body(context, default);
-                }
+        foreach (var beforeEveryAssembly in hooksCollector.BeforeEveryAssemblyHooks
+                     .OrderBy(x => x.Order))
+        {
+            yield return beforeEveryAssembly;
+        }
 
-                var list = hooksCollector.BeforeAssemblyHooks.GetOrAdd(assembly, _ => []).OrderBy(x => x.Order);
+        var list = hooksCollector.BeforeAssemblyHooks
+            .GetOrAdd(assembly, _ => []).OrderBy(x => x.Order);
 
-                foreach (var staticHookMethod in list)
-                {
-                    await staticHookMethod.Body(context, default);
-                }
-                
-                AssemblyHookContext.Current = null;
-            });
+        foreach (var staticHookMethod in list)
+        {
+            yield return staticHookMethod;
+        }
     }
 
-    public async Task ExecuteCleanUpsIfLastInstance(
+    public IEnumerable<IExecutableHook<AssemblyHookContext>> CollectAfterHooks(
         TestContext testContext, 
-        Assembly assembly,
-        List<Exception> cleanUpExceptions
+        Assembly assembly
         )
     {
         if (!instanceTracker.IsLastTestForAssembly(assembly))
         {
             // Only run one time clean downs when no instances are left!
-           return;
+           yield break;
         }
         
         if (!_beforeHooksReached.TryGetValue(assembly, out _))
         {
             // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
-            return;
+            yield break;
         }
         
-        await _after.GetOrAdd(assembly, async _ =>
+        foreach (var testEndEventsObject in testContext.GetLastTestInAssemblyEventObjects())
         {
-            var context = GetContext(assembly);
+            yield return new LastTestInAssemblyAdapter(testEndEventsObject, testContext);
+        }
             
-            AssemblyHookContext.Current = context;
-            
-            foreach (var testEndEventsObject in testContext.GetLastTestInAssemblyEventObjects())
-            {
-                await RunHelpers.RunValueTaskSafelyAsync(
-                    () => testEndEventsObject.IfLastTestInAssembly(context, testContext),
-                    cleanUpExceptions);
-            }
-            
-            var list = hooksCollector.AfterAssemblyHooks.GetOrAdd(assembly, _ => []).OrderBy(x => x.Order);
+        var list = hooksCollector.AfterAssemblyHooks.GetOrAdd(assembly, _ => []).OrderBy(x => x.Order);
 
-            foreach (var staticHookMethod in list)
-            {
-                await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
-            }
-                
-            foreach (var afterEveryAssembly in hooksCollector.AfterEveryAssemblyHooks.OrderBy(x => x.Order))
-            {
-                await RunHelpers.RunSafelyAsync(() => afterEveryAssembly.Body(context, default), cleanUpExceptions);
-            }
-            
-            AssemblyHookContext.Current = null;
-        });
+        foreach (var staticHookMethod in list)
+        {
+            yield return staticHookMethod;
+        }
+
+        foreach (var afterEveryAssembly in hooksCollector.AfterEveryAssemblyHooks.OrderBy(x => x.Order))
+        {
+            yield return afterEveryAssembly;
+        }
     }
 
     public AssemblyHookContext GetContext(Assembly assembly)

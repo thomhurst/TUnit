@@ -18,6 +18,8 @@ public record HooksDataModel
     
     public required int Order { get; init; }
     public required bool IsEveryHook { get; init; }
+    
+    public required bool IsVoid { get; init; }
 
     public virtual bool Equals(HooksDataModel? other)
     {

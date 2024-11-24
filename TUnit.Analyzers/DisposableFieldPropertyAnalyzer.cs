@@ -72,7 +72,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
             .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
 
-        methodSymbol.IsHookMethod(context.Compilation, out _, out var level);
+        methodSymbol.IsHookMethod(context.Compilation, out _, out var level, out _);
         
         foreach (var assignment in syntaxNodes
                      .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression)))
@@ -147,7 +147,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static bool IsValidStaticTearDownMethod(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, out HookLevel? hookLevel)
     {
-        return methodSymbol.IsHookMethod(context.Compilation, out var type, out hookLevel)
+        return methodSymbol.IsHookMethod(context.Compilation, out var type, out hookLevel, out _)
                && type.Name.StartsWith("After")
                && hookLevel is HookLevel.TestSession or HookLevel.Assembly or HookLevel.Class;
     }
@@ -167,7 +167,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
                 SymbolEqualityComparer.Default.Equals(x, asyncDisposable));
         }
             
-        if (methodSymbol.IsHookMethod(context.Compilation, out var type, out var level)
+        if (methodSymbol.IsHookMethod(context.Compilation, out var type, out var level, out _)
             && type.Name.StartsWith("After") && level == HookLevel.Test)
         {
             return true;

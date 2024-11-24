@@ -3,7 +3,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 
-[Retry(3), NotInParallel(nameof(RetryTests), Order = 1)]
+[Retry(3)]
 public class RetryTests
 {
     public static int RetryCount1 { get; private set; }
@@ -33,7 +33,10 @@ public class RetryTests
         throw new Exception();
     }
 
-    [Test, NotInParallel(nameof(RetryTests), Order = 2)]
+    [Test]
+    [DependsOn(nameof(One), ProceedOnFailure = true)]
+    [DependsOn(nameof(Two), ProceedOnFailure = true)]
+    [DependsOn(nameof(Three), ProceedOnFailure = true)]
     public async Task AssertCounts()
     {
         await Assert.That(RetryCount1).IsEqualTo(2);

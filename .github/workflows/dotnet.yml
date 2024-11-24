@@ -29,14 +29,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-          
-      - name: Build .NET 8 
-        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:SDK_VERSION=net8
 
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4

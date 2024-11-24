@@ -16,10 +16,10 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
 
             await AssertFileContains(generatedFiles[0], 
                 """
-                new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
+                new AfterAssemblyHookMethod
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase1).GetMethod("AfterAll1", 0, []),
-                    Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyBase1.AfterAll1()),
+                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyBase1.AfterAll1()),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
                     FilePath = @"", 
@@ -29,10 +29,10 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[2], 
                 """
-                new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
+                new AfterAssemblyHookMethod
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase2).GetMethod("AfterAll2", 0, []),
-                    Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyBase2.AfterAll2()),
+                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyBase2.AfterAll2()),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
                     FilePath = @"", 
@@ -42,10 +42,10 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[4], 
                 """
-                new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
+                new AfterAssemblyHookMethod
                 { 
                     MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase3).GetMethod("AfterAll3", 0, []),
-                    Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyBase3.AfterAll3()),
+                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyBase3.AfterAll3()),
                     HookExecutor = DefaultExecutor.Instance,
                     Order = 0,
                     FilePath = @"", 
@@ -55,10 +55,10 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[6], 
                 """
-                            new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
+                            new AfterAssemblyHookMethod
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUp", 0, []),
-                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUp()),
+                               AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUp()),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 0,
                                FilePath = @"", 
@@ -68,10 +68,10 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[7], 
                 """
-                            new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
+                            new AfterAssemblyHookMethod
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext)]),
-                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContext(context)),
+                               AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContext(context)),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 0,
                                FilePath = @"", 
@@ -81,10 +81,10 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[8], 
                 """
-                            new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
+                            new AfterAssemblyHookMethod
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUp", 0, [typeof(global::System.Threading.CancellationToken)]),
-                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUp(cancellationToken)),
+                               AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUp(cancellationToken)),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 0,
                                FilePath = @"", 
@@ -94,10 +94,10 @@ internal class AssemblyAfterTests : TestsBase<TestHooksGenerator>
             
             await AssertFileContains(generatedFiles[9], 
                 """
-                            new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
+                            new AfterAssemblyHookMethod
                             { 
                                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken)]),
-                               Body = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContext(context, cancellationToken)),
+                               AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContext(context, cancellationToken)),
                                HookExecutor = DefaultExecutor.Instance,
                                Order = 0,
                                FilePath = @"", 

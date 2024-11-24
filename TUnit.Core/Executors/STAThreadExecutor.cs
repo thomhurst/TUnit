@@ -27,4 +27,13 @@ public class STAThreadExecutor : GenericAbstractExecutor
         
         await tcs.Task;
     }
+
+    protected override void ExecuteSync(Action action)
+    {
+        var thread = new Thread(() => action());
+        
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+    }
 }
