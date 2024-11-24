@@ -3,7 +3,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 
-[Retry(3), NotInParallel(nameof(RetryTests), Order = 1)]
+[Retry(3)]
 public class RetryTests
 {
     public static int RetryCount1 { get; private set; }
