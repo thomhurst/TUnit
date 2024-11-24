@@ -65,12 +65,37 @@ internal class TUnitTestDiscoverer(
     {
         hooksCollector.CollectDiscoveryHooks();
         
-        await testDiscoveryHookOrchestrator.ExecuteBeforeHooks();
+        var beforeDiscoveryHooks = testDiscoveryHookOrchestrator.CollectBeforeHooks();
+        var beforeContext = testDiscoveryHookOrchestrator.GetBeforeContext();
+        
+        foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
+        {
+            if(beforeDiscoveryHook.IsSynchronous)
+            {
+                beforeDiscoveryHook.Execute(beforeContext, CancellationToken.None);
+            }
+            else
+            {
+                await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
+            }
+        }
         
         var allDiscoveredTests = testsConstructor.GetTests().ToArray();
 
-        await testDiscoveryHookOrchestrator.ExecuteAfterHooks(allDiscoveredTests);
+        var afterDiscoveryHooks = testDiscoveryHookOrchestrator.CollectAfterHooks();
+        var afterContext = testDiscoveryHookOrchestrator.GetAfterContext(allDiscoveredTests);
         
+        foreach (var afterDiscoveryHook in afterDiscoveryHooks)
+        {
+            if(afterDiscoveryHook.IsSynchronous)
+            {
+                afterDiscoveryHook.Execute(afterContext, CancellationToken.None);
+            }
+            else
+            {
+                await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
+            }
+        }        
         hooksCollector.CollectHooks();
 
         return allDiscoveredTests;

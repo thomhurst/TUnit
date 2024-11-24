@@ -1,41 +1,26 @@
 ﻿using TUnit.Core;
-using TUnit.Engine.Helpers;
+using TUnit.Core.Hooks;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-#if !DEBUG
-[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-#endif
 internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, AssemblyHookOrchestrator assemblyHookOrchestrator, string? stringFilter)
 {
     private TestSessionContext? _context;
     
-    public async Task ExecuteBeforeHooks()
+    public IEnumerable<StaticHookMethod<TestSessionContext>> CollectBeforeHooks()
     {
-        var context = GetContext();
-
-        foreach (var staticHookMethod in hooksCollector.BeforeTestSessionHooks.OrderBy(x => x.Order))
-        {
-            await staticHookMethod.AsyncBody(context, default);
-        }
+        return hooksCollector.BeforeTestSessionHooks
+            .OrderBy(x => x.Order);
     }
 
-    public async Task ExecuteAfterHooks()
+    public IEnumerable<StaticHookMethod<TestSessionContext>> CollectAfterHooks()
     {
-        List<Exception> cleanUpExceptions = [];
-        
-        var context = GetContext();
-        
-        foreach (var staticHookMethod in hooksCollector.AfterTestSessionHooks.OrderBy(x => x.Order))
-        {
-            await RunHelpers.RunSafelyAsync(() => staticHookMethod.AsyncBody(context, default), cleanUpExceptions);
-        }
-        
-        ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
+        return hooksCollector.AfterTestSessionHooks
+            .OrderBy(x => x.Order);
     }
     
-    private TestSessionContext GetContext()
+    public TestSessionContext GetContext()
     {
         return _context ??= new TestSessionContext(assemblyHookOrchestrator.GetAllAssemblyHookContexts())
         {

@@ -1,106 +1,81 @@
 ﻿using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Data;
-using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
+using TUnit.Core.Hooks;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
 
-#if !DEBUG
-[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-#endif
 internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksCollector hooksCollector)
 {
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classHookContexts = new();
-
-    private readonly GetOnlyDictionary<Type, Task> _before = new();
-    private readonly GetOnlyDictionary<Type, Task> _after = new();
     
     private readonly ConcurrentDictionary<Type, bool> _beforeHooksReached = new();
 
-    public async Task ExecuteBeforeHooks(Type testClassType)
+    public IEnumerable<StaticHookMethod<ClassHookContext>> CollectBeforeHooks(Type testClassType)
     {
         _beforeHooksReached.GetOrAdd(testClassType, true);
 
-        await _before.GetOrAdd(testClassType, async _ =>
+        // Reverse so base types are first - We'll run those ones first
+        var typesIncludingBase = GetTypesIncludingBase(testClassType).Reverse();
+
+        foreach (var type in typesIncludingBase)
+        {
+            foreach (var beforeEveryClass in hooksCollector.BeforeEveryClassHooks
+                         .OrderBy(x => x.Order))
             {
-                var context = GetContext(testClassType);
-                
-                ClassHookContext.Current = context;
+                yield return beforeEveryClass;
+            }
 
-                // Reverse so base types are first - We'll run those ones first
-                var typesIncludingBase = GetTypesIncludingBase(testClassType).Reverse();
+            var list = hooksCollector.BeforeClassHooks
+                .GetOrAdd(type, _ => []).OrderBy(x => x.Order);
 
-                foreach (var type in typesIncludingBase)
-                {
-                    foreach (var beforeEveryClass in hooksCollector.BeforeEveryClassHooks.OrderBy(x => x.Order))
-                    {
-                        await beforeEveryClass.AsyncBody(context, default);
-                    }
-
-                    var list = hooksCollector.BeforeClassHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
-
-                    foreach (var staticHookMethod in list)
-                    {
-                        await staticHookMethod.AsyncBody(context, default);
-                    }
-                }
-                
-                ClassHookContext.Current = null;
-            });
+            foreach (var staticHookMethod in list)
+            {
+                yield return staticHookMethod;
+            }
+        }
     }
 
-    public async Task ExecuteCleanUpsIfLastInstance(
+    public IEnumerable<IExecutableHook<ClassHookContext>> CollectAfterHooks(
         TestContext testContext, 
-        Type testClassType,
-        List<Exception> cleanUpExceptions
-        )
+        Type testClassType)
     {
         if (!instanceTracker.IsLastTestForType(testClassType))
         {
             // Only run one time clean downs when no instances are left!
-           return;
+           yield break;
         }
         
         if (!_beforeHooksReached.TryGetValue(testClassType, out _))
         {
             // The before hooks were never hit, meaning no tests were executed, so nothing to clean up.
-            return;
+            yield break;
         }
         
-        await _after.GetOrAdd(testClassType, async _ =>
+        var typesIncludingBase = GetTypesIncludingBase(testClassType);
+
+        foreach (var type in typesIncludingBase)
         {
-            var context = GetContext(testClassType);
-            
-            ClassHookContext.Current = context;
-
-            var typesIncludingBase = GetTypesIncludingBase(testClassType);
-
-            foreach (var type in typesIncludingBase)
+            foreach (var testEndEventsObject in testContext.GetLastTestInClassEventObjects())
             {
-                foreach (var testEndEventsObject in testContext.GetLastTestInClassEventObjects())
-                {
-                    await RunHelpers.RunValueTaskSafelyAsync(
-                        () => testEndEventsObject.IfLastTestInClass(context, testContext),
-                        cleanUpExceptions);
-                }
-                
-                var list = hooksCollector.AfterClassHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
-
-                foreach (var staticHookMethod in list)
-                {
-                    await RunHelpers.RunSafelyAsync(() => staticHookMethod.AsyncBody(context, default), cleanUpExceptions);
-                }
-                
-                foreach (var afterEveryClass in hooksCollector.AfterEveryClassHooks.OrderBy(x => x.Order))
-                {
-                    await RunHelpers.RunSafelyAsync(() => afterEveryClass.AsyncBody(context, default), cleanUpExceptions);
-                }
-                
-                ClassHookContext.Current = null;
+                yield return new LastTestInClassAdapter(testEndEventsObject, testContext);
             }
-        });
+                
+            var list = hooksCollector.AfterClassHooks
+                .GetOrAdd(type, _ => []).OrderBy(x => x.Order);
+
+            foreach (var staticHookMethod in list)
+            {
+                yield return staticHookMethod;
+            }
+                
+            foreach (var afterEveryClass in hooksCollector.AfterEveryClassHooks.OrderBy(x => x.Order))
+            {
+                yield return afterEveryClass;
+            }
+        }
     }
 
     private static IEnumerable<Type> GetTypesIncludingBase(Type testClassType)

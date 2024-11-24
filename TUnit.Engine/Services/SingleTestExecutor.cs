@@ -89,7 +89,43 @@ internal class SingleTestExecutor(
                     throw new SkipTestException("The test session has been cancelled...");
                 }
 
-                await ExecuteStaticBeforeHooks(test);
+                var beforeAssemblyHooks = assemblyHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly);
+                var assemblyHookContext = assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType.Assembly);
+
+                AssemblyHookContext.Current = assemblyHookContext;
+                
+                foreach (var beforeHook in beforeAssemblyHooks)
+                {
+                    if(beforeHook.IsSynchronous)
+                    {
+                        beforeHook.Execute(assemblyHookContext, CancellationToken.None);
+                    }
+                    else
+                    {
+                        await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
+                    }
+                }
+                
+                AssemblyHookContext.Current = null;
+                
+                var beforeClassHooks = classHookOrchestrator.CollectBeforeHooks(test.TestContext.TestDetails.ClassType);
+                var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType);
+                
+                ClassHookContext.Current = classHookContext;
+                
+                foreach (var beforeHook in beforeClassHooks)
+                {
+                    if(beforeHook.IsSynchronous)
+                    {
+                        beforeHook.Execute(classHookContext, CancellationToken.None);
+                    }
+                    else
+                    {
+                        await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
+                    }
+                }
+                
+                ClassHookContext.Current = null;
 
                 TestContext.Current = testContext;
 
@@ -114,7 +150,7 @@ internal class SingleTestExecutor(
             }
             finally
             {
-                await RunTeardowns(test, start.GetValueOrDefault(), testContext, cleanUpExceptions);
+                await RunCleanUps(test, testContext, cleanUpExceptions);
             }
         }
         finally
@@ -134,7 +170,7 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task RunTeardowns(DiscoveredTest test, DateTimeOffset start, TestContext testContext,
+    private async Task RunCleanUps(DiscoveredTest test, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
         try
@@ -182,22 +218,47 @@ internal class SingleTestExecutor(
         }
     }
 
-    private async Task ExecuteStaticBeforeHooks(DiscoveredTest test)
-    {
-        await assemblyHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType.Assembly);
-
-        await classHookOrchestrator.ExecuteBeforeHooks(test.TestContext.TestDetails.ClassType);
-    }
-
     private async Task ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
         List<Exception> cleanUpExceptions)
     {
-        await classHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
-                test.TestContext.TestDetails.ClassType, cleanUpExceptions);
+        var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.ClassType);
+        var classHookContext = classHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType);
+                
+        ClassHookContext.Current = classHookContext;
+                
+        foreach (var afterHook in afterClassHooks)
+        {
+            if(afterHook.IsSynchronous)
+            {
+                RunHelpers.RunSafely(() => afterHook.Execute(classHookContext, CancellationToken.None), cleanUpExceptions);
+            }
+            else
+            {
+                await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
+            }
+        }
+                
+        ClassHookContext.Current = null;
+        
+        var afterAssemblyHooks = assemblyHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.ClassType.Assembly);
+        var assemblyHookContext = assemblyHookOrchestrator.GetContext(test.TestContext.TestDetails.ClassType.Assembly);
 
-        await assemblyHookOrchestrator.ExecuteCleanUpsIfLastInstance(testContext,
-            test.TestContext.TestDetails.ClassType.Assembly, cleanUpExceptions);
-
+        AssemblyHookContext.Current = assemblyHookContext;
+                
+        foreach (var afterHook in afterAssemblyHooks)
+        {
+            if(afterHook.IsSynchronous)
+            {
+                RunHelpers.RunSafely(() => afterHook.Execute(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
+            }
+            else
+            {
+                await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
+            }
+        }
+                
+        AssemblyHookContext.Current = null;
+        
         if (instanceTracker.IsLastTest())
         {
             foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
