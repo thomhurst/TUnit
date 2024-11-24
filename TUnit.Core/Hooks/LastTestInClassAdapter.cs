@@ -6,7 +6,7 @@ namespace TUnit.Core.Hooks;
 public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClassEventReceiver, TestContext testContext) : IExecutableHook<ClassHookContext>
 {
     public string Name => nameof(lastTestInClassEventReceiver.IfLastTestInClass);
-    public MethodInfo MethodInfo => lastTestInClassEventReceiver.GetType().GetMethod(Name)!;
+    public MethodInfo MethodInfo => typeof(ILastTestInClassEventReceiver).GetMethod(Name)!;
     public int Order => 0;
 
     public bool Execute(ClassHookContext context, CancellationToken cancellationToken)
