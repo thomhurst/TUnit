@@ -5,7 +5,7 @@ namespace TUnit.Playwright.Tests;
 
 public class Tests : PageTest
 {
-    [Before(TestSession)]
+    [Before(Assembly)]
     public static void InstallPlaywright()
     {
         if (Debugger.IsAttached)
