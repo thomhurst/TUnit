@@ -1,5 +1,5 @@
 ﻿using TUnit.Core;
-using TUnit.Engine.Helpers;
+using TUnit.Core.Hooks;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Hooks;
@@ -9,10 +9,8 @@ namespace TUnit.Engine.Hooks;
 #endif
 internal class TestHookOrchestrator(HooksCollector hooksCollector)
 {
-    internal async Task ExecuteBeforeHooks(object classInstance, DiscoveredTest discoveredTest)
+    internal IEnumerable<IExecutableHook<TestContext>> CollectBeforeHooks(object classInstance, DiscoveredTest discoveredTest)
     {
-        // Run instance ones first as they might initialize some variables etc.
-        
         var testClassType = classInstance.GetType();
         
         // Reverse so base types are first - We'll run those ones first
@@ -20,31 +18,23 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
 
         foreach (var type in typesIncludingBase)
         {
-            var list = hooksCollector.BeforeTestHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
-            
-            foreach (var instanceHookMethod in list)
+            foreach (var instanceHookMethod in hooksCollector.BeforeTestHooks.GetOrAdd(type, _ => [])
+                         .OrderBy(x => x.Order)
+                         .OfType<IExecutableHook<TestContext>>())
             {
-                await Timings.Record($"Test Hook Set Up: {instanceHookMethod.Name}", discoveredTest.TestContext, () =>
-                    instanceHookMethod.HookExecutor.ExecuteBeforeTestHook(
-                        hookMethodInfo: instanceHookMethod.MethodInfo,
-                        context: discoveredTest.TestContext,
-                        action: () => instanceHookMethod.ExecuteHook(discoveredTest.TestContext, default)
-                    )
-                );
+                yield return instanceHookMethod;
             }
         }
         
-        foreach (var beforeEvery in hooksCollector.BeforeEveryTestHooks.OrderBy(x => x.Order))
+        foreach (var beforeEvery in hooksCollector.BeforeEveryTestHooks
+                     .OrderBy(x => x.Order)
+                     .OfType<IExecutableHook<TestContext>>())
         {
-            await beforeEvery.HookExecutor.ExecuteBeforeTestHook(
-                hookMethodInfo: beforeEvery.MethodInfo,
-                context: discoveredTest.TestContext,
-                action: () => beforeEvery.Body(discoveredTest.TestContext, default)
-            );
+            yield return beforeEvery;
         }
     }
     
-    internal async Task ExecuteAfterHooks(object classInstance, DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
+    internal IEnumerable<IExecutableHook<TestContext>> CollectAfterHooks(object classInstance, DiscoveredTest discoveredTest, List<Exception> cleanUpExceptions)
     {
         var testClassType = classInstance.GetType();
         
@@ -52,35 +42,20 @@ internal class TestHookOrchestrator(HooksCollector hooksCollector)
 
         foreach (var type in typesIncludingBase)
         {
-            var list = hooksCollector.AfterTestHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
-            
-            foreach (var instanceHookMethod in list)
+            foreach (var instanceHookMethod in hooksCollector.AfterTestHooks.GetOrAdd(type, _ => [])
+                         .OrderBy(x => x.Order)
+                         .OfType<IExecutableHook<TestContext>>())
             {
-                await Timings.Record($"Test Hook Set Up: {instanceHookMethod.Name}", discoveredTest.TestContext, () =>
-                    RunHelpers.RunSafelyAsync(() =>
-                            instanceHookMethod.HookExecutor.ExecuteBeforeTestHook(
-                                hookMethodInfo: instanceHookMethod.MethodInfo,
-                                context: discoveredTest.TestContext,
-                                action: () => instanceHookMethod.ExecuteHook(discoveredTest.TestContext, default)
-                            ),
-                        cleanUpExceptions
-                    )
-                );
+                yield return instanceHookMethod;
             }
         }
         
         // Run Global Hooks Last
-
-        foreach (var afterEvery in hooksCollector.AfterEveryTestHooks.OrderBy(x => x.Order))
+        foreach (var afterEvery in hooksCollector.AfterEveryTestHooks
+                     .OrderBy(x => x.Order)
+                     .OfType<IExecutableHook<TestContext>>())
         {
-            await RunHelpers.RunSafelyAsync(() =>
-                    afterEvery.HookExecutor.ExecuteBeforeTestHook(
-                        hookMethodInfo: afterEvery.MethodInfo,
-                        context: discoveredTest.TestContext,
-                        action: () => afterEvery.Body(discoveredTest.TestContext, default)
-                    ),
-                cleanUpExceptions
-            );
+            yield return afterEvery;
         }
     }
 

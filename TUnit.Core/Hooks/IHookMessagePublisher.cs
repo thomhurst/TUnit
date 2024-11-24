@@ -1,4 +1,4 @@
-﻿namespace TUnit.Core;
+﻿namespace TUnit.Core.Hooks;
 
 public interface IHookMessagePublisher
 {

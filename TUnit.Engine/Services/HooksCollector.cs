@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Hooks;
 
 namespace TUnit.Engine.Services;
 

@@ -46,6 +46,20 @@ internal static class RunHelpers
     
     [StackTraceHidden]
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static void RunSafely(Action action, List<Exception> exceptions)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception exception)
+        {
+            exceptions.Add(exception);
+        }
+    }
+    
+    [StackTraceHidden]
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static async Task RunSafelyAsync(Func<Task> action, List<Exception> exceptions)
     {
         try

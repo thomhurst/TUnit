@@ -1,4 +1,5 @@
 ﻿using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
@@ -11,19 +12,33 @@ public static class AssemblyHooksWriter
         {
             return;
         }
+        
+        if(model.HookLocationType == HookLocationType.Before)
+        {
+            sourceBuilder.WriteLine("new BeforeAssemblyHookMethod");
+        }
+        else
+        {
+            sourceBuilder.WriteLine("new AfterAssemblyHookMethod");
+        }
 
-        sourceBuilder.WriteLine(
-            $$$"""
-               new StaticHookMethod<global::TUnit.Core.AssemblyHookContext>
-                       { 
-                          MethodInfo = typeof({{{model.FullyQualifiedTypeName}}}).GetMethod("{{{model.MethodName}}}", 0, [{{{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}}}]),
-                          Body = (context, cancellationToken) => AsyncConvert.Convert(() => {{{model.FullyQualifiedTypeName}}}.{{{model.MethodName}}}({{{GetArgs(model)}}})),
-                          HookExecutor = {{{HookExecutorHelper.GetHookExecutor(model.HookExecutor)}}},
-                          Order = {{{model.Order}}},
-                          FilePath = @"{{{model.FilePath}}}",
-                          LineNumber = {{{model.LineNumber}}},
-                       },
-               """);
+        sourceBuilder.WriteLine("{ ");
+        sourceBuilder.WriteLine($"""MethodInfo = typeof({model.FullyQualifiedTypeName}).GetMethod("{model.MethodName}", 0, [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]),""");
+        
+        if(model.IsVoid)
+        {
+            sourceBuilder.WriteLine($"Body = (context, cancellationToken) => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)}),");
+        }
+        else
+        {
+            sourceBuilder.WriteLine($"AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
+        }
+        
+        sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
+        sourceBuilder.WriteLine($"Order = {model.Order},");
+        sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
+        sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
+        sourceBuilder.WriteLine("},");
     }
     
     private static string GetArgs(HooksDataModel model)

@@ -36,14 +36,14 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
                 {
                     foreach (var beforeEveryClass in hooksCollector.BeforeEveryClassHooks.OrderBy(x => x.Order))
                     {
-                        await beforeEveryClass.Body(context, default);
+                        await beforeEveryClass.AsyncBody(context, default);
                     }
 
                     var list = hooksCollector.BeforeClassHooks.GetOrAdd(type, _ => []).OrderBy(x => x.Order);
 
                     foreach (var staticHookMethod in list)
                     {
-                        await staticHookMethod.Body(context, default);
+                        await staticHookMethod.AsyncBody(context, default);
                     }
                 }
                 
@@ -90,12 +90,12 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
 
                 foreach (var staticHookMethod in list)
                 {
-                    await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
+                    await RunHelpers.RunSafelyAsync(() => staticHookMethod.AsyncBody(context, default), cleanUpExceptions);
                 }
                 
                 foreach (var afterEveryClass in hooksCollector.AfterEveryClassHooks.OrderBy(x => x.Order))
                 {
-                    await RunHelpers.RunSafelyAsync(() => afterEveryClass.Body(context, default), cleanUpExceptions);
+                    await RunHelpers.RunSafelyAsync(() => afterEveryClass.AsyncBody(context, default), cleanUpExceptions);
                 }
                 
                 ClassHookContext.Current = null;

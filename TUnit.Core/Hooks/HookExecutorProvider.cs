@@ -1,6 +1,6 @@
 ﻿using TUnit.Core.Interfaces;
 
-namespace TUnit.Core;
+namespace TUnit.Core.Hooks;
 
 internal static class HookExecutorProvider
 {

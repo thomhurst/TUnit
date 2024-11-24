@@ -17,7 +17,7 @@ internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, Assemb
 
         foreach (var staticHookMethod in hooksCollector.BeforeTestSessionHooks.OrderBy(x => x.Order))
         {
-            await staticHookMethod.Body(context, default);
+            await staticHookMethod.AsyncBody(context, default);
         }
     }
 
@@ -29,7 +29,7 @@ internal class TestSessionHookOrchestrator(HooksCollector hooksCollector, Assemb
         
         foreach (var staticHookMethod in hooksCollector.AfterTestSessionHooks.OrderBy(x => x.Order))
         {
-            await RunHelpers.RunSafelyAsync(() => staticHookMethod.Body(context, default), cleanUpExceptions);
+            await RunHelpers.RunSafelyAsync(() => staticHookMethod.AsyncBody(context, default), cleanUpExceptions);
         }
         
         ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
