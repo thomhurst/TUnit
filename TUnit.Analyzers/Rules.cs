@@ -108,6 +108,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor ReturnFunc =
         CreateDescriptor("TUnit0046", UsageCategory, DiagnosticSeverity.Warning);
     
+    public static readonly DiagnosticDescriptor AsyncLocalVoidMethod =
+        CreateDescriptor("TUnit0047", UsageCategory, DiagnosticSeverity.Warning);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

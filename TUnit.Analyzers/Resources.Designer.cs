@@ -1300,5 +1300,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0046Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods..
+        /// </summary>
+        internal static string TUnit0047Description {
+            get {
+                return ResourceManager.GetString("TUnit0047Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods..
+        /// </summary>
+        internal static string TUnit0047MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0047MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods.
+        /// </summary>
+        internal static string TUnit0047Title {
+            get {
+                return ResourceManager.GetString("TUnit0047Title", resourceCulture);
+            }
+        }
     }
 }
