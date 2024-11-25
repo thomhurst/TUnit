@@ -12,7 +12,7 @@ public abstract class InvokableTestBase
         List<Action<TestRun>> assertions,
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
-        return RunTestsWithFilter(filter, assertions, new RunOptions(), "assertionExpression");
+        return RunTestsWithFilter(filter, assertions, new RunOptions(), assertionExpression);
     }
 
     protected async Task RunTestsWithFilter(string filter,
