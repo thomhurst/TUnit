@@ -51,7 +51,7 @@ public abstract class InvokableTestBase
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithWorkingDirectory(testProject.DirectoryName)
+            .WithWorkingDirectory(testProject.DirectoryName!)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
