@@ -36,7 +36,7 @@ public abstract class InvokableTestBase
                 [
                     "run",
                     "--no-build",
-                    "-f", "net8.0",
+                    "-f", "net9.0",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
                     // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
