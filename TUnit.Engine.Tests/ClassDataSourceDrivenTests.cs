@@ -10,7 +10,7 @@ public class ClassDataSourceDrivenTests : TestModule
         await RunTestsWithFilter(
             "/*/*/ClassDataSourceDrivenTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Passed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(7),
                 result => result.ResultSummary.Counters.Passed.Should().Be(7),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),

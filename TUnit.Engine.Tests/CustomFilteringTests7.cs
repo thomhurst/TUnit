@@ -10,7 +10,7 @@ public class CustomFilteringTests7 : TestModule
         await RunTestsWithFilter(
             "/*/*/CustomFilteringTests/*[*=yes]",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Passed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(1),
                 result => result.ResultSummary.Counters.Passed.Should().Be(1),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),

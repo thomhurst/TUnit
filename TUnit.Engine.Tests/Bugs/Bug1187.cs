@@ -10,7 +10,7 @@ public class Bug1187 : TestModule
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._1187/*/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Passed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(24),
                 result => result.ResultSummary.Counters.Passed.Should().Be(24),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),

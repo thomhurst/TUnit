@@ -10,7 +10,7 @@ public class OrderedTests : TestModule
         await RunTestsWithFilter(
             "/*/*/OrderedTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Passed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(6),
                 result => result.ResultSummary.Counters.Passed.Should().Be(6),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),

@@ -11,7 +11,7 @@ public class PropertySetterTests : TestModule
         await RunTestsWithFilter(
             "/*/*/PropertySetterTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Passed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(1),
                 result => result.ResultSummary.Counters.Passed.Should().Be(1),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),

@@ -10,7 +10,7 @@ public class MatrixTests2 : TestModule
         await RunTestsWithFilter(
             "/*/*/MatrixTests/MatrixTest_Two",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Passed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(48),
                 result => result.ResultSummary.Counters.Passed.Should().Be(48),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),

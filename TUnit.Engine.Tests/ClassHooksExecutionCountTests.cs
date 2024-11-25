@@ -10,7 +10,7 @@ public class ClassHooksExecutionCountTests : TestModule
         await RunTestsWithFilter(
             "/*/*/ClassHooksExecutionCountTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Passed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(5),
                 result => result.ResultSummary.Counters.Passed.Should().Be(5),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),

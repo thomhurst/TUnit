@@ -10,7 +10,7 @@ public class PriorityFilteringTests5 : TestModule
         await RunTestsWithFilter(
             "/*/*/PriorityFilteringTests/*[Priority=*]",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Passed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(6),
                 result => result.ResultSummary.Counters.Passed.Should().Be(6),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),
