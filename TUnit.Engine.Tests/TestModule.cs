@@ -35,12 +35,12 @@ public abstract class TestModule
     private static async Task RunWithoutAot(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
+        var testProject = FindFile(x => x.Name == "TUnit.TestProject.csproj")!;
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         var result = await Cli.Wrap("dotnet")
             .WithArguments(
                 [
                     "run",
-                    FindFile(x => x.Name == "TUnit.TestProject.csproj")!.FullName,
                     "--no-build",
                     "-f", "net8.0",
                     "--treenode-filter", filter,
@@ -50,6 +50,7 @@ public abstract class TestModule
                     ..runOptions.AdditionalArguments
                 ]
             )
+            .WithWorkingDirectory(testProject.DirectoryName)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
