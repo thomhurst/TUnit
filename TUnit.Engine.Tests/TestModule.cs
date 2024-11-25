@@ -36,12 +36,11 @@ public abstract class TestModule
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
-
         var result = await Cli.Wrap("dotnet")
             .WithArguments(
                 [
                     "run",
-                    Sourcy.DotNet.Projects.TUnit_TestProject.FullName,
+                    FindFile(x => x.Name == "TUnit.TestProject.csproj")!.FullName,
                     "--no-build",
                     "-f", "net8.0",
                     "--treenode-filter", filter,
@@ -54,15 +53,14 @@ public abstract class TestModule
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
+
         await AssertTrx(result, assertions, trxFilename, assertionExpression);
     }
     
     private static async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
         RunOptions runOptions, string assertionExpression)
     {
-        var files = Sourcy.Git.RootDirectory
-            .EnumerateDirectories("*", SearchOption.AllDirectories)
-            .First(x => x.Name == "TESTPROJECT_AOT")
+        var files = FindFolder(x => x.Name == "TESTPROJECT_AOT")!
             .EnumerateFiles("*", SearchOption.AllDirectories)
             .ToArray();
 
@@ -71,7 +69,7 @@ public abstract class TestModule
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
-        var result = await Cli.Wrap(aotApp)
+        var result = await Cli.Wrap(aotApp.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -90,9 +88,7 @@ public abstract class TestModule
     private static async Task RunWithSingleFile(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
-        var files = Sourcy.Git.RootDirectory
-            .EnumerateDirectories("*", SearchOption.AllDirectories)
-            .First(x => x.Name == "TESTPROJECT_SINGLEFILE")
+        var files = FindFolder(x => x.Name == "TESTPROJECT_SINGLEFILE")!
             .EnumerateFiles("*", SearchOption.AllDirectories)
             .ToArray();
         
@@ -101,7 +97,7 @@ public abstract class TestModule
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
-        var result = await Cli.Wrap(aotApp)
+        var result = await Cli.Wrap(aotApp.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -117,10 +113,29 @@ public abstract class TestModule
         await AssertTrx(result, assertions, trxFilename, assertionExpression);
     }
 
-    protected FileInfo? FindFile(Func<FileInfo, bool> predicate)
+    protected static FileInfo? FindFile(Func<FileInfo, bool> predicate)
     {
-        return Sourcy.Git.RootDirectory
+        var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+        while (!directory!.EnumerateDirectories().Any(x => x.Name == ".git"))
+        {
+            directory = directory.Parent;
+        }
+        
+        return directory
             .EnumerateFiles("*", SearchOption.AllDirectories)
+            .FirstOrDefault(predicate);
+    }
+    
+    protected static DirectoryInfo? FindFolder(Func<DirectoryInfo, bool> predicate)
+    {
+        var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+        while (!directory!.EnumerateDirectories().Any(x => x.Name == ".git"))
+        {
+            directory = directory.Parent;
+        }
+        
+        return directory
+            .EnumerateDirectories("*", SearchOption.AllDirectories)
             .FirstOrDefault(predicate);
     }
 
@@ -131,10 +146,8 @@ public abstract class TestModule
         try
         {
             var trxFileContents = await File.ReadAllTextAsync(
-                Sourcy.Git.RootDirectory
-                    .EnumerateFiles("*", SearchOption.AllDirectories)
-                    .First(x => x.Name == trxFilename)
-                    .FullName);
+                FindFile(x => x.Name == trxFilename)!.FullName
+            );
 
             var testRun = TrxControl.ReadTrx(new StringReader(trxFileContents));
             
