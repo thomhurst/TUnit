@@ -151,9 +151,9 @@ public abstract class InvokableTestBase
     {
         try
         {
-            var trxFileContents = await File.ReadAllTextAsync(
-                FindFile(x => x.Name == trxFilename)!.FullName
-            );
+            var trxFile = FindFile(x => x.Name == trxFilename)?.FullName ?? throw new FileNotFoundException($"Could not find trx file {trxFilename}");
+            
+            var trxFileContents = await File.ReadAllTextAsync(trxFile);
 
             var testRun = TrxControl.ReadTrx(new StringReader(trxFileContents));
             
@@ -164,9 +164,9 @@ public abstract class InvokableTestBase
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Command Input: {commandResult}");
-            Console.WriteLine($"Error: {commandResult.StandardError}");
-            Console.WriteLine($"Output: {commandResult.StandardOutput}");
+            Console.WriteLine(@$"Command Input: {commandResult}");
+            Console.WriteLine(@$"Error: {commandResult.StandardError}");
+            Console.WriteLine(@$"Output: {commandResult.StandardOutput}");
 
             throw new Exception($"""
                                  Error asserting results
