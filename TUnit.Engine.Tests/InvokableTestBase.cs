@@ -35,6 +35,7 @@ public abstract class InvokableTestBase
             .WithArguments(
                 [
                     "run",
+                    testProject.Name,
                     "--no-build",
                     "-f", "net9.0",
                     "--treenode-filter", filter,
