@@ -10,6 +10,8 @@ using ModularPipelines.Modules;
 namespace TUnit.Pipeline.Modules;
 
 [NotInParallel("DotNetTests")]
+[DependsOn<PublishSingleFileModule>]
+[DependsOn<PublishAOTModule>]
 public class RunEngineTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
