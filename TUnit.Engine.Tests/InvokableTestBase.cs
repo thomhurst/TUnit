@@ -70,7 +70,7 @@ public abstract class InvokableTestBase
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
-        var result = await Cli.Wrap(aotApp.Name)
+        var result = await Cli.Wrap(aotApp.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -80,7 +80,6 @@ public abstract class InvokableTestBase
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithWorkingDirectory(aotApp.DirectoryName!)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
@@ -104,7 +103,7 @@ public abstract class InvokableTestBase
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
-        var result = await Cli.Wrap(aotApp.Name)
+        var result = await Cli.Wrap(aotApp.FullName)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -114,7 +113,6 @@ public abstract class InvokableTestBase
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithWorkingDirectory(aotApp.DirectoryName!)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
