@@ -5,7 +5,7 @@ namespace TUnit.Engine.Tests;
 public class JsonOutputTests : InvokableTestBase
 {
     [Test]
-    [Ignore("TODO")]
+    [Skip("TODO")]
     public async Task Test()
     {
         var prefix = "myprefix_";

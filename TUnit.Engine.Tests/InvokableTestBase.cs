@@ -6,7 +6,6 @@ using TrxTools.TrxParser;
 
 namespace TUnit.Engine.Tests;
 
-[Parallelizable(ParallelScope.All)]
 public abstract class InvokableTestBase
 {
     protected Task RunTestsWithFilter(string filter,
