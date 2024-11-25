@@ -16,11 +16,13 @@ public class RunEngineTestsModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Engine.Tests.csproj").AssertExists();
         
-        return await context.DotNet().Test(new DotNetTestOptions(project)
+        return await context.DotNet().Run(new DotNetRunOptions
         {
+            Project = project.Name,
             NoBuild = true,
             Configuration = Configuration.Release,
-            Framework = "net8.0"
+            Framework = "net8.0",
+            WorkingDirectory = project.Folder!
         }, cancellationToken);
     }
 }

@@ -19,17 +19,11 @@ public abstract class InvokableTestBase
         List<Action<TestRun>> assertions, RunOptions runOptions,
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
-        {
-            await RunWithoutAot(filter, assertions, runOptions, assertionExpression);
-        }
+        await RunWithoutAot(filter, assertions, runOptions, assertionExpression);
 
-        {
-            await RunWithAot(filter, assertions, runOptions, assertionExpression);
-        }
+        await RunWithAot(filter, assertions, runOptions, assertionExpression);
 
-        {
-            await RunWithSingleFile(filter, assertions, runOptions, assertionExpression);
-        }
+        await RunWithSingleFile(filter, assertions, runOptions, assertionExpression);
     }
 
     private static async Task RunWithoutAot(string filter,
@@ -75,7 +69,7 @@ public abstract class InvokableTestBase
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
-        var result = await Cli.Wrap(aotApp.FullName)
+        var result = await Cli.Wrap(aotApp.Name)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -85,6 +79,7 @@ public abstract class InvokableTestBase
                     ..runOptions.AdditionalArguments
                 ]
             )
+            .WithWorkingDirectory(aotApp.DirectoryName!)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
@@ -108,7 +103,7 @@ public abstract class InvokableTestBase
         
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         
-        var result = await Cli.Wrap(aotApp.FullName)
+        var result = await Cli.Wrap(aotApp.Name)
             .WithArguments(
                 [
                     "--treenode-filter", filter,
@@ -118,6 +113,7 @@ public abstract class InvokableTestBase
                     ..runOptions.AdditionalArguments
                 ]
             )
+            .WithWorkingDirectory(aotApp.DirectoryName!)
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
 
