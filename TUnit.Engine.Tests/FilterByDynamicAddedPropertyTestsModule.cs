@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class FilterByDynamicAddedPropertyTestsModule : TestModule
+public class FilterByDynamicAddedPropertyTestsModule : InvokableTestBase
 {
     [Test]
     public async Task Test()

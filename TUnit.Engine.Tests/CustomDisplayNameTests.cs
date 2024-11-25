@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class CustomDisplayNameTests : TestModule
+public class CustomDisplayNameTests : InvokableTestBase
 {
     [Test]
     public async Task Test()

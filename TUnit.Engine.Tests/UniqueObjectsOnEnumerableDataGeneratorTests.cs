@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class UniqueObjectsOnEnumerableDataGeneratorTests : TestModule
+public class UniqueObjectsOnEnumerableDataGeneratorTests : InvokableTestBase
 {
     [Test]
     public async Task Test()

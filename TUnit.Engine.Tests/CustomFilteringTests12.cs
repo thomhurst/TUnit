@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class CaptureOutputTests : TestModule
+public class CaptureOutputTests : InvokableTestBase
 {
     [Test]
     public async Task Test()

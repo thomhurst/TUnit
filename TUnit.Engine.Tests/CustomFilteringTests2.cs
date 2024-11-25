@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class CustomFilteringTests2 : TestModule
+public class CustomFilteringTests2 : InvokableTestBase
 {
     [Test]
     public async Task Test()

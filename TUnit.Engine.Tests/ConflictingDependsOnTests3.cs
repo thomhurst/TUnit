@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class ConflictingDependsOnTests3 : TestModule
+public class ConflictingDependsOnTests3 : InvokableTestBase
 {
     [Test]
     public async Task Test()

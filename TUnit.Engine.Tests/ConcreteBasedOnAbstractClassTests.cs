@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class ConcreteBasedOnAbstractClassTests : TestModule
+public class ConcreteBasedOnAbstractClassTests : InvokableTestBase
 {
     [Test]
     public async Task Test()

@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class JsonOutputTests : TestModule
+public class JsonOutputTests : InvokableTestBase
 {
     [Test]
     [Ignore("TODO")]

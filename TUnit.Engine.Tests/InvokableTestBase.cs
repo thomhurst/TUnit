@@ -6,7 +6,8 @@ using TrxTools.TrxParser;
 
 namespace TUnit.Engine.Tests;
 
-public abstract class TestModule
+[Parallelizable(ParallelScope.All)]
+public abstract class InvokableTestBase
 {
     protected Task RunTestsWithFilter(string filter,
         List<Action<TestRun>> assertions,
@@ -61,6 +62,11 @@ public abstract class TestModule
     private static async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
         RunOptions runOptions, string assertionExpression)
     {
+        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
+        {
+            return;
+        }
+        
         var files = FindFolder(x => x.Name == "TESTPROJECT_AOT")!
             .EnumerateFiles("*", SearchOption.AllDirectories)
             .ToArray();
@@ -89,6 +95,11 @@ public abstract class TestModule
     private static async Task RunWithSingleFile(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
+        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
+        {
+            return;
+        }
+
         var files = FindFolder(x => x.Name == "TESTPROJECT_SINGLEFILE")!
             .EnumerateFiles("*", SearchOption.AllDirectories)
             .ToArray();

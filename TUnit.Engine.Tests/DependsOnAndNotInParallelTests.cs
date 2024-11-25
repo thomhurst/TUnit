@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class DependsOnAndNotInParallelTests : TestModule
+public class DependsOnAndNotInParallelTests : InvokableTestBase
 {
     [Test]
     public async Task Test()

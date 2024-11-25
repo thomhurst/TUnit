@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class MatrixTests1 : TestModule
+public class MatrixTests1 : InvokableTestBase
 {
     [Test]
     public async Task Test()

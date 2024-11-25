@@ -3,7 +3,7 @@ using TUnit.Engine.Tests.Extensions;
 
 namespace TUnit.Engine.Tests;
 
-public class TestSessionAfterHookTests : TestModule
+public class TestSessionAfterHookTests : InvokableTestBase
 {
     [Test]
     public async Task Test()

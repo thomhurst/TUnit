@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class SkipTests : TestModule
+public class SkipTests : InvokableTestBase
 {
     [Test]
     public async Task Test()

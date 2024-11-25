@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class TimeoutTests2 : TestModule
+public class TimeoutTests2 : InvokableTestBase
 {
     public async Task Test()
     {

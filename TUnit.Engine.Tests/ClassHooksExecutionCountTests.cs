@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class ClassHooksExecutionCountTests : TestModule
+public class ClassHooksExecutionCountTests : InvokableTestBase
 {
     [Test]
     public async Task Test()

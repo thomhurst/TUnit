@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class PriorityFilteringTests4 : TestModule
+public class PriorityFilteringTests4 : InvokableTestBase
 {
     [Test]
     public async Task Test()

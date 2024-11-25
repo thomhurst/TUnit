@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Tests;
 
-public class ParallelLimiterTests : TestModule
+public class ParallelLimiterTests : InvokableTestBase
 {
     public async Task Test()
     {
