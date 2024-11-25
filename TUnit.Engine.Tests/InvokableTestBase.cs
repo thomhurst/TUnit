@@ -35,9 +35,9 @@ public abstract class InvokableTestBase
             .WithArguments(
                 [
                     "run",
-                    testProject.Name,
                     "--no-build",
                     "-f", "net9.0",
+                    "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
                     // "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}", 
