@@ -7,7 +7,7 @@
     <IsRoslynComponent>true</IsRoslynComponent>
     <DevelopmentDependency>false</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <NoWarn>RS2003</NoWarn>
+    <NoWarn>RS2003;NU1507</NoWarn>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

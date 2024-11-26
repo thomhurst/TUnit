@@ -9,7 +9,7 @@
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <RootNamespace>TUnit.Assertions.Analyzers</RootNamespace>
     <AssemblyName>TUnit.Assertions.Analyzers</AssemblyName>
-    <NoWarn>RS2003</NoWarn>
+    <NoWarn>RS2003;NU1507</NoWarn>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
