@@ -31,9 +31,9 @@
     <PackageVersion Include="Microsoft.Playwright" Version="1.49.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.12.6" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.5.0-preview.24575.7" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.5.0-preview.24575.7" />
-    <PackageVersion Include="Microsoft.Testing.Platform" Version="1.5.0-preview.24575.7" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.5.0-preview.24577.6" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.5.0-preview.24577.6" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="1.5.0-preview.24577.6" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.5.0-preview.24575.7" />
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.42.115" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.42.115" />
