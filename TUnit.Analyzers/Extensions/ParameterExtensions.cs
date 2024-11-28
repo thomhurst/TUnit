@@ -6,7 +6,7 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class ParameterExtensions
 {
-    public static IEnumerable<IParameterSymbol> WithoutCancellationTokenParameter(this ImmutableArray<IParameterSymbol> parameterSymbols)
+    public static ImmutableArray<IParameterSymbol> WithoutCancellationTokenParameter(this ImmutableArray<IParameterSymbol> parameterSymbols)
     {
         if (parameterSymbols.IsDefaultOrEmpty)
         {
@@ -16,23 +16,23 @@ public static class ParameterExtensions
         if (parameterSymbols.Last().Type.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
             WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
         {
-            return parameterSymbols.Take(parameterSymbols.Length - 1);
+            return ImmutableArray.Create(parameterSymbols, 0, parameterSymbols.Length - 1);
         }
 
         return parameterSymbols;
     }
     
-    public static IEnumerable<ITypeSymbol> WithoutCancellationTokenParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
+    public static ImmutableArray<ITypeSymbol> WithoutCancellationTokenParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
     {
         if (typeSymbols.IsDefaultOrEmpty)
         {
             return typeSymbols;
         }
 
-        if (typeSymbols.Last().ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+        if (typeSymbols.Last().GloballyQualified() ==
             WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
         {
-            return typeSymbols.Take(typeSymbols.Length - 1);
+            return ImmutableArray.Create(typeSymbols, 0, typeSymbols.Length - 1);
         }
 
         return typeSymbols;

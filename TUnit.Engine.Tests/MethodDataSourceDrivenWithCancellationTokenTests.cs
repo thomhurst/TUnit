@@ -2,13 +2,13 @@
 
 namespace TUnit.Engine.Tests;
 
-public class CustomDisplayNameTests : InvokableTestBase
+public class MethodDataSourceDrivenWithCancellationTokenTests : InvokableTestBase
 {
     [Test]
     public async Task Test()
     {
         await RunTestsWithFilter(
-            "/*/*/CustomDisplayNameTests/*",
+            "/*/*/MethodDataSourceDrivenWithCancellationTokenTests/*",
             [
                 result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(6),
