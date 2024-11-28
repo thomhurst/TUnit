@@ -6,7 +6,7 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class ParameterExtensions
 {
-    public static IEnumerable<IParameterSymbol> WithoutCancellationTokenParameter(this ImmutableArray<IParameterSymbol> parameterSymbols)
+    public static ImmutableArray<IParameterSymbol> WithoutCancellationTokenParameter(this ImmutableArray<IParameterSymbol> parameterSymbols)
     {
         if (parameterSymbols.IsDefaultOrEmpty)
         {
@@ -16,7 +16,7 @@ public static class ParameterExtensions
         if (parameterSymbols.Last().Type.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
             WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
         {
-            return parameterSymbols.Take(parameterSymbols.Length - 1);
+            return ImmutableArray.Create(parameterSymbols, 0, parameterSymbols.Length - 1);
         }
 
         return parameterSymbols;

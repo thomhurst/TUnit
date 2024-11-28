@@ -22,7 +22,7 @@ public static class ArgumentsRetriever
             
             yield break;
         }
-
+        
         foreach (var argumentsContainer in MatrixRetriever.Parse(context, parameters, argumentsType))
         {
             yield return argumentsContainer;

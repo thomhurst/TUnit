@@ -32,6 +32,14 @@ public class CustomDisplayNameTests
     }
     
     [Test]
+    [MethodDataSource(nameof(Method))]
+    [DisplayName("Test using MethodDataSource")]
+    public async Task MethodDataSourceTest(string foo)
+    {
+        await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("Test using MethodDataSource");
+    }
+    
+    [Test]
     [MyGenerator]
     public async Task PasswordTest(string password)
     {
@@ -50,4 +58,6 @@ public class CustomDisplayNameTests
             discoveredTestContext.SetDisplayName($"{discoveredTestContext.TestDetails.TestName}(REDACTED)");
         }
     }
+
+    public static string Method() => "bar";
 }

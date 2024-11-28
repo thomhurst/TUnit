@@ -22,7 +22,8 @@ public static class TestSourceDataModelRetriever
 
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, constructorParameters, constructorParameters.Select(x => x.Type).ToImmutableArray(), GetClassAttributes(namedTypeSymbol).Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
-        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodSymbol.Parameters, methodSymbol.Parameters.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
+        var methodParametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
         var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol);
         
         var repeatCount =
