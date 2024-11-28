@@ -22,17 +22,17 @@ public static class ParameterExtensions
         return parameterSymbols;
     }
     
-    public static IEnumerable<ITypeSymbol> WithoutCancellationTokenParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
+    public static ImmutableArray<ITypeSymbol> WithoutCancellationTokenParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
     {
         if (typeSymbols.IsDefaultOrEmpty)
         {
             return typeSymbols;
         }
 
-        if (typeSymbols.Last().ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+        if (typeSymbols.Last().GloballyQualified() ==
             WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
         {
-            return typeSymbols.Take(typeSymbols.Length - 1);
+            return ImmutableArray.Create(typeSymbols, 0, typeSymbols.Length - 1);
         }
 
         return typeSymbols;

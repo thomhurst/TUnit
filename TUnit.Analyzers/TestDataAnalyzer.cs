@@ -173,7 +173,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         IEnumerable<ITypeSymbol?> types = [..parameters.Select(x => x.Type), propertySymbol?.Type];
 
-        return types.OfType<ITypeSymbol>().ToImmutableArray();
+        return types.OfType<ITypeSymbol>().ToImmutableArray().WithoutCancellationTokenParameter();
     }
 
     private void CheckMatrix(SymbolAnalysisContext context, ImmutableArray<IParameterSymbol> parameters)
@@ -389,7 +389,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
                         string.Join(", ", unwrappedTypes),
-                        string.Join<ITypeSymbol>(", ", testParameterTypes))
+                        string.Join(", ", testParameterTypes))
                 );
                 return;
             }
@@ -512,12 +512,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray.Create(type);
         }
         
-        if (methodContainingTestData.ReturnType is not INamedTypeSymbol namedTypeSymbol)
+        if (methodContainingTestData.ReturnType is not INamedTypeSymbol and not IArrayTypeSymbol)
         {
             return ImmutableArray.Create(methodContainingTestData.ReturnType);
         }
         
-        if (namedTypeSymbol.IsIEnumerable(context.Compilation, out var enumerableInnerType))
+        if (methodContainingTestData.ReturnType.IsIEnumerable(context.Compilation, out var enumerableInnerType))
         {
             isEnumerable = true;
             type = enumerableInnerType;

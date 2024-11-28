@@ -172,7 +172,7 @@ public static class TestSourceDataModelRetriever
 
             if (parameter.Type.IsGenericDefinition())
             {
-                yield return argumentTypes.ElementAt(i);
+                yield return argumentTypes.ElementAtOrDefault(i) ?? "global::System.Threading.CancellationToken";
             }
             else
             {

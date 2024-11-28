@@ -1,7 +1,10 @@
 ﻿// ReSharper disable UseCollectionExpression
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace TUnit.TestProject;
 
+[SuppressMessage("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")]
 public class MethodDataSourceDrivenWithCancellationTokenTests
 {
     [Test]
@@ -14,7 +17,6 @@ public class MethodDataSourceDrivenWithCancellationTokenTests
     public void MyTest(int value, CancellationToken cancellationToken)
     {
         Console.WriteLine(value);
-        // Dummy method
     }
     
     public static int T() => 1;
@@ -25,11 +27,7 @@ public class MethodDataSourceDrivenWithCancellationTokenTests
 
     public static IEnumerable<Func<int>> EnumerableFuncT() => [() => 1];
 
-    public static IEnumerable<int> ArrayT() => [1];
+    public static int[] ArrayT() => [1];
 
-    public static IEnumerable<Func<int>> ArrayFuncT() => [() => 1];
-
-    public abstract class BaseValue;
-
-    public class ConcreteValue : BaseValue;
+    public static Func<int>[] ArrayFuncT() => [() => 1];
 }

@@ -94,47 +94,48 @@ public static class MethodDataSourceRetriever
         {
             return ImmutableArray.Create(dataSourceMethod.ReturnType);
         }
+
+        var type = dataSourceMethod.ReturnType;
+        if (type.IsIEnumerable(context.SemanticModel.Compilation, out var enumerableInnerType))
+        {
+            isExpandableEnumerable = true;
+            type = enumerableInnerType;
+        }
         
-        if (dataSourceMethod.ReturnType is not INamedTypeSymbol type)
+        if (type is not INamedTypeSymbol namedType)
         {
             return ImmutableArray.Create(dataSourceMethod.ReturnType);
         }
 
-        if (type.IsIEnumerable(context.SemanticModel.Compilation, out var enumerableInnerType))
-        {
-            isExpandableEnumerable = true;
-            type = (INamedTypeSymbol)enumerableInnerType;
-        }
-
         if (parameterOrPropertyTypes.Length == 1
-            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, parameterOrPropertyTypes[0]))
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(namedType, parameterOrPropertyTypes[0]))
         {
-            return ImmutableArray.Create<ITypeSymbol>(type);
+            return ImmutableArray.Create<ITypeSymbol>(namedType);
         }
         
         var genericFunc = context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName());
 
-        if (type.IsGenericType
-            && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, genericFunc)
-            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, genericFunc.Construct(GetTypeOrTuplesType(context.SemanticModel.Compilation, parameterOrPropertyTypes))))
+        if (namedType.IsGenericType
+            && SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, genericFunc)
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(namedType, genericFunc.Construct(GetTypeOrTuplesType(context.SemanticModel.Compilation, parameterOrPropertyTypes))))
         {
             isExpandableFunc = true;
-            type = (INamedTypeSymbol)type.TypeArguments[0];
+            namedType = (INamedTypeSymbol)namedType.TypeArguments[0];
         }
         
         if (parameterOrPropertyTypes.Length == 1
-            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, parameterOrPropertyTypes[0]))
+            && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(namedType, parameterOrPropertyTypes[0]))
         {
-            return ImmutableArray.Create<ITypeSymbol>(type);
+            return ImmutableArray.Create<ITypeSymbol>(namedType);
         }
 
-        if (type.IsTupleType)
+        if (namedType.IsTupleType)
         {
             isExpandableTuples = true;
-            return type.TupleUnderlyingType?.TypeArguments ?? type.TypeArguments;
+            return namedType.TupleUnderlyingType?.TypeArguments ?? namedType.TypeArguments;
         }
         
-        return ImmutableArray.Create<ITypeSymbol>(type);
+        return ImmutableArray.Create<ITypeSymbol>(namedType);
     }
 
     private static ITypeSymbol GetTypeOrTuplesType(Compilation compilation, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes)
