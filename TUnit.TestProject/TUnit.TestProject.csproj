@@ -25,7 +25,7 @@
     <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
-    <NoWarn>IL2118</NoWarn>
+    <NoWarn>IL2118;NU1507</NoWarn>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
