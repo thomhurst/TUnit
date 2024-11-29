@@ -27,21 +27,21 @@ internal static class RunHelpers
         });
         
         cancellationTokenSource.CancelAfter(timeout);
-        
-        _ = taskDelegate(cancellationToken).ContinueWith(async t =>
-        {
-            try
-            {
-                await t;
-                taskCompletionSource.TrySetResult();
-            }
-            catch (Exception e)
-            {
-                taskCompletionSource.TrySetException(e);
-            }
-        }, CancellationToken.None);
 
-        await taskCompletionSource.Task;
+        try
+        {
+            await await Task.WhenAny
+            (
+                taskDelegate(cancellationToken),
+                taskCompletionSource.Task
+            );
+        }
+        finally
+        {
+            // Try set result if it doesn't have one so it finishes
+            // and doesn't stay pending in background
+            taskCompletionSource.TrySetResult();
+        }
     }
     
     [StackTraceHidden]

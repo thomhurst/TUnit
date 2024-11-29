@@ -416,7 +416,7 @@ internal class SingleTestExecutor(
 
     private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
     {
-        return testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions);
+        return Task.Run(() => testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions), cancellationToken);
     }
 
     private async ValueTask WaitForDependsOnTests(DiscoveredTest test, ITestExecutionFilter? filter,
