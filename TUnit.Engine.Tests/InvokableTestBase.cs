@@ -26,7 +26,7 @@ public abstract class InvokableTestBase
         await RunWithSingleFile(filter, assertions, runOptions, assertionExpression);
     }
 
-    private static async Task RunWithoutAot(string filter,
+    private async Task RunWithoutAot(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
         var testProject = FindFile(x => x.Name == "TUnit.TestProject.csproj")!;
@@ -53,7 +53,7 @@ public abstract class InvokableTestBase
         await AssertTrx(result, assertions, trxFilename, assertionExpression);
     }
     
-    private static async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
+    private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
         RunOptions runOptions, string assertionExpression)
     {
         if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
@@ -86,7 +86,7 @@ public abstract class InvokableTestBase
         await AssertTrx(result, assertions, trxFilename, assertionExpression);
     }
     
-    private static async Task RunWithSingleFile(string filter,
+    private async Task RunWithSingleFile(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
         if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") != "true")
@@ -129,7 +129,7 @@ public abstract class InvokableTestBase
         return FileSystemHelpers.FindFolder(predicate);
     }
 
-    private static async Task AssertTrx(BufferedCommandResult commandResult,
+    private async Task AssertTrx(BufferedCommandResult commandResult,
         List<Action<TestRun>> assertions,
         string trxFilename, string assertionExpression)
     {
@@ -153,7 +153,7 @@ public abstract class InvokableTestBase
             Console.WriteLine(@$"Output: {commandResult.StandardOutput}");
 
             throw new Exception($"""
-                                 Error asserting results
+                                 Error asserting results for {GetType().Name}: {e.Message}
 
                                  Expression: {assertionExpression}
                                  """, e);
