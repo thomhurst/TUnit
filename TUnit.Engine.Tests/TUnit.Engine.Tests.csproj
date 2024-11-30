@@ -13,6 +13,7 @@
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
         <PackageReference Include="CliWrap" />
         <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="Sourcy.DotNet" />
         <PackageReference Include="trxparser" />
     </ItemGroup>
     
