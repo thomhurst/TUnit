@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" />
+  <img src="assets/banner.png" width="800"/>
   <a href="https://trendshift.io/repositories/11781" target="_blank"><img src="https://trendshift.io/api/badge/repositories/11781" alt="thomhurst%2FTUnit | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
 
