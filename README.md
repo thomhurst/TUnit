@@ -3,8 +3,6 @@
   <a href="https://trendshift.io/repositories/11781" target="_blank"><img src="https://trendshift.io/api/badge/repositories/11781" alt="thomhurst%2FTUnit | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
 
-<a href="https://trendshift.io/repositories/11781" target="_blank"><img src="https://trendshift.io/api/badge/repositories/11781" alt="thomhurst%2FTUnit | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-
 A modern, flexible and fast testing framework for .NET 8 and up. With Native AOT and Trimmed Single File application support included! 
 
 TUnit is designed to aid with all testing types:
