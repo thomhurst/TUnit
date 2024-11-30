@@ -90,7 +90,10 @@ internal class SingleTestExecutor(
                 {
                     throw new SkipTestException("The test session has been cancelled...");
                 }
-
+                
+                // Ideally all these 'Set up' hooks would be refactored into inner/classes and/or methods,
+                // But users may want to set AsyncLocal values, and so the method must be a parent/ancestor of the method that starts the test!
+                // So actually refactoring these into other methods would mean they wouldn't be a parent/ancestor and would break async local!
                 var assemblyHooksTaskCompletionSource = assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
                     _ => new TaskCompletionSource(), out var assemblyHooksTaskPreviouslyExisted);
                 
@@ -172,8 +175,11 @@ internal class SingleTestExecutor(
 
                 TestContext.Current = testContext;
 
-                await ExecuteOnTestStartEvents(testContext);
-
+                foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
+                {
+                    await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
+                }
+                
                 await ExecuteWithRetries(test, cleanUpExceptions);
 
                 ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
@@ -250,14 +256,6 @@ internal class SingleTestExecutor(
         {
             testContext.SetResult(e);
             throw;
-        }
-    }
-
-    private async ValueTask ExecuteOnTestStartEvents(TestContext testContext)
-    {
-        foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
-        {
-            await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
         }
     }
 
