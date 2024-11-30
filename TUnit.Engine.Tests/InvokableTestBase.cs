@@ -29,7 +29,7 @@ public abstract class InvokableTestBase
     private async Task RunWithoutAot(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
-        var testProject = Sourcy.DotNet.Projects.TUnit_TestProject.FullName;
+        var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
         var trxFilename = Guid.NewGuid().ToString("N") + ".trx";
         var result = await Cli.Wrap("dotnet")
             .WithArguments(
