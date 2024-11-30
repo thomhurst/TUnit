@@ -14,6 +14,7 @@
         <PackageReference Include="CliWrap" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="Sourcy.DotNet" />
+        <PackageReference Include="Sourcy.Git" />
         <PackageReference Include="trxparser" />
     </ItemGroup>
     
