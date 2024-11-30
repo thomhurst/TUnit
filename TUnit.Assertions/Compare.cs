@@ -54,21 +54,23 @@ public static class Compare
             yield break;
         }
 
+        if (actual.Equals(expected))
+        {
+            yield break;
+        }
+
         if (actual.GetType().IsPrimitive
             || actual.GetType().IsEnum
             || actual.GetType().IsValueType
             || actual is string)
         {
-            if (!actual.Equals(expected))
+            yield return new ComparisonFailure
             {
-                yield return new ComparisonFailure
-                {
-                    Type = memberType,
-                    Actual = actual,
-                    Expected = expected,
-                    NestedMemberNames = memberNames
-                };
-            }
+                Type = memberType,
+                Actual = actual,
+                Expected = expected,
+                NestedMemberNames = memberNames
+            };
 
             yield break;
         }
