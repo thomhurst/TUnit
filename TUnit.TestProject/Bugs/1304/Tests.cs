@@ -6,8 +6,6 @@ namespace TUnit.TestProject.Bugs._1304;
 
 public class Tests
 {
-    // This test continues indefinitely without finishing (hangs)
-// and, depending on the number of tests in the class, it causes other tests to wait
     [Test]
     [Arguments("\"2c48c152-7cb7-4f51-8f01-704454f36e60\"")]
     [Arguments("invalidNotAGui")]
@@ -17,14 +15,13 @@ public class Tests
     public async Task TryParse_InvalidString_ReturnsFailure(string? input, CancellationToken cancellationToken)
     {
         // Act
-        bool success = AccountId.TryParse(input, out var id);
+        var success = AccountId.TryParse(input, out var id);
 
         // Assert
         await Assert.That(success).IsFalse();
         await Assert.That(id).IsNull();
     }
 
-// This tests works fine
     [Test]
     [Arguments("\"2c48c152-7cb7-4f51-8f01-704454f36e60\"")]
     [Arguments("invalidNotAGui")]
@@ -33,7 +30,7 @@ public class Tests
     [Arguments(null)]
     public async Task Parse_InvalidString_ThrowsException(string? input)
     {
-        await Assert.That(() => AccountId.Parse(input)).ThrowsException();
+        await Assert.That(() => AccountId.Parse(input!)).ThrowsException();
     }
 
 // This test works fine
@@ -43,7 +40,7 @@ public class Tests
     public async Task TryParse_ValidString_ReturnsAccountId(string input)
     {
         // Act
-        bool success = AccountId.TryParse(input, out var id);
+        var success = AccountId.TryParse(input, out var id);
 
         // Assert
         //using var _ = Assert.Multiple();
