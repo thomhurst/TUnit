@@ -3,20 +3,13 @@
 public class TestBase
 {
     [ClassDataSource<MyFactory>(Shared = SharedType.PerTestSession)]
-    public static MyFactory Factory { get; set; } = null!;
+    public required MyFactory Factory { get; set; } = null!;
     
     protected HttpClient Client { get; private set; } = null!;
 
-    [Before(HookType.Test)]
+    [Before(Test)]
     public void BeforeTest()
     {
         Client = Factory.CreateClient();
-    }
-
-    [Before(HookType.TestSession)]
-    public static async Task PrepareSession()
-    {
-        Factory.CreateClient();
-        await Task.CompletedTask;
     }
 }
