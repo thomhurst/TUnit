@@ -178,6 +178,7 @@ internal class SingleTestExecutor(
                 foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
                 {
                     await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
+                    testStartEventsObject.OnTestStartSynchronous(new BeforeTestContext(testContext.InternalDiscoveredTest));
                 }
                 
                 await ExecuteWithRetries(test, cleanUpExceptions);
