@@ -212,7 +212,7 @@ public static class MethodDataSourceRetriever
             return string.Empty;
         }
         
-        var arguments = attributeSyntax.ArgumentList!.Arguments;
+        var arguments = attributeSyntax.ArgumentList?.Arguments ?? [];
 
         var argumentsSyntax = arguments.FirstOrDefault(x => x.NameEquals?.Name.Identifier.ToString() == "Arguments")
             ?.Expression;
