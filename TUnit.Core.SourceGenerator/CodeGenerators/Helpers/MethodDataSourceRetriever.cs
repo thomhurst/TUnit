@@ -207,8 +207,11 @@ public static class MethodDataSourceRetriever
 
     private static string GetArgumentsExpression(GeneratorAttributeSyntaxContext context, AttributeData methodDataAttribute)
     {
-        var attributeSyntax = (AttributeSyntax)methodDataAttribute.ApplicationSyntaxReference!.GetSyntax();
-
+        if (methodDataAttribute.ApplicationSyntaxReference?.GetSyntax() is not AttributeSyntax attributeSyntax)
+        {
+            return string.Empty;
+        }
+        
         var arguments = attributeSyntax.ArgumentList!.Arguments;
 
         var argumentsSyntax = arguments.FirstOrDefault(x => x.NameEquals?.Name.Identifier.ToString() == "Arguments")
