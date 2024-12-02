@@ -7,14 +7,27 @@ internal class AssertionScope : IDisposable
 {
     private static readonly AsyncLocal<AssertionScope?> CurrentScope = new();
     private readonly AssertionScope? _parent;
-    private readonly List<AssertionException> _exceptions = [];
+    private readonly List<Exception> _exceptions = [];
 
+    static AssertionScope()
+    {
+        AppDomain.CurrentDomain.FirstChanceException += InterceptException;
+    }
+    
     internal AssertionScope()
     {
         _parent = GetCurrentAssertionScope();
         SetCurrentAssertionScope(this);
     }
-    
+
+    private static void InterceptException(object? sender, FirstChanceExceptionEventArgs firstChanceExceptionEventArgs)
+    {
+        if (GetCurrentAssertionScope() is { } validScope)
+        {
+            validScope._exceptions.Add(firstChanceExceptionEventArgs.Exception);
+        }
+    }
+
     public void Dispose()
     {
         SetCurrentAssertionScope(_parent);
@@ -28,7 +41,7 @@ internal class AssertionScope : IDisposable
             
             return;
         }
-
+        
         if (_exceptions.Count == 1)
         {
             ExceptionDispatchInfo.Throw(_exceptions[0]);
@@ -39,7 +52,7 @@ internal class AssertionScope : IDisposable
             throw new AggregateException(_exceptions);
         }
     }
-
+    
     internal static AssertionScope? GetCurrentAssertionScope()
     {
         return CurrentScope.Value;
