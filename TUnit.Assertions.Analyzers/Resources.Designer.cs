@@ -238,5 +238,32 @@ namespace TUnit.Assertions.Analyzers {
                 return ResourceManager.GetString("TUnitAssertions0006Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cast dynamic values to `object?` when using Assert.That(...)..
+        /// </summary>
+        internal static string TUnitAssertions0007Description {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0007Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cast dynamic values to `object?` when using Assert.That(...).
+        /// </summary>
+        internal static string TUnitAssertions0007MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0007MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cast dynamic values to `object?` when using Assert.That(...).
+        /// </summary>
+        internal static string TUnitAssertions0007Title {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0007Title", resourceCulture);
+            }
+        }
     }
 }

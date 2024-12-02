@@ -10,37 +10,41 @@ namespace TUnit.Assertions.Analyzers;
 /// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class ConstantInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
+public class DynamicInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.ConstantValueInAssertThat);
+        ImmutableArray.Create(Rules.DynamicValueInAssertThat);
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
+        context.RegisterOperationAction(AnalyzeOperation, OperationKind.DynamicInvocation);
     }
     
     private void AnalyzeOperation(OperationAnalysisContext context)
     {
-        if (context.Operation is not IInvocationOperation invocationOperation)
+        if (context.Operation is not IDynamicInvocationOperation dynamicInvocationOperation)
         {
             return;
         }
 
-        var targetMethod = invocationOperation.TargetMethod;
+        if (context.Operation.SemanticModel?.GetSymbolInfo(context.Operation.Syntax).CandidateSymbols.FirstOrDefault() is
+            not IMethodSymbol targetMethod)
+        {
+            return;
+        }
         
         if (targetMethod.Name != "That"
             || !SymbolEqualityComparer.Default.Equals(targetMethod.ContainingType, context.Compilation.GetTypeByMetadataName("TUnit.Assertions.Assert")))
         {
             return;
         }
-        
-        // True if constant
-        var firstArgument = invocationOperation.Arguments[0];
-        if (firstArgument.ConstantValue.HasValue || firstArgument.Value.ConstantValue.HasValue)
+
+        var firstArgument = dynamicInvocationOperation.Arguments[0];
+
+        if (SymbolEqualityComparer.Default.Equals(firstArgument.Type, context.Compilation.DynamicType))
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(Rules.ConstantValueInAssertThat, invocationOperation.Syntax.GetLocation())
+                Diagnostic.Create(Rules.DynamicValueInAssertThat, dynamicInvocationOperation.Syntax.GetLocation())
             );
         }
     }
