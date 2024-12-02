@@ -9,6 +9,6 @@ public class DynamicAssertionTests
     public async Task Test1()
     {
         dynamic? foo = null;
-        await TUnitAssert.That(foo).IsNotNull();
+        await TUnitAssert.That((object?)foo).IsNotNull();
     }
 }
