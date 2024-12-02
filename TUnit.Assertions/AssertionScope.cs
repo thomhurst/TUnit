@@ -24,7 +24,7 @@ internal class AssertionScope : IDisposable
     {
         if (GetCurrentAssertionScope() is { } validScope)
         {
-            validScope._exceptions.Add(firstChanceExceptionEventArgs.Exception);
+            validScope._exceptions.Add(new MaybeCaughtException(firstChanceExceptionEventArgs.Exception));
         }
     }
 
@@ -42,7 +42,9 @@ internal class AssertionScope : IDisposable
             return;
         }
         
-        if (_exceptions.Count == 1)
+        // It could be an intercepted exception,
+        // In which case it should just throw itself, so we don't need to do that
+        if (_exceptions is [AssertionException])
         {
             ExceptionDispatchInfo.Throw(_exceptions[0]);
         }
