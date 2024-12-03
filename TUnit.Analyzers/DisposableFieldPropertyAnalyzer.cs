@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,7 +10,6 @@ using TUnit.Analyzers.Extensions;
 namespace TUnit.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-[SuppressMessage("ReSharper", "UnusedMember.Local")]
 public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
