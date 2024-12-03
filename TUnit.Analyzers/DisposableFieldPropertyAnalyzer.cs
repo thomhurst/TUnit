@@ -89,12 +89,14 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
                .OfType<IObjectCreationOperation>()
                .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true))
             {
-                if(assignmentOperation.Target is IFieldReferenceOperation fieldReferenceOperation)
+                if(assignmentOperation.Target is IFieldReferenceOperation fieldReferenceOperation
+                   && context.Compilation.HasImplicitConversion(methodSymbol.ContainingType, fieldReferenceOperation.Field.ContainingType))
                 {
                     createdObjects.TryAdd(fieldReferenceOperation.Field, level);
                 }
 
-                if(assignmentOperation.Target is IPropertyReferenceOperation propertyReferenceOperation)
+                if(assignmentOperation.Target is IPropertyReferenceOperation propertyReferenceOperation
+                   && context.Compilation.HasImplicitConversion(methodSymbol.ContainingType, propertyReferenceOperation.Property.ContainingType))
                 {
                     createdObjects.TryAdd(propertyReferenceOperation.Property, level);
                 }
