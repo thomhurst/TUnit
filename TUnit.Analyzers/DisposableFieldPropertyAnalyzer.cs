@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -43,7 +44,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static void CheckMethods(SyntaxNodeAnalysisContext context, IMethodSymbol[] methods, bool isStaticMethod)
     {
-        var createdObjects = new Dictionary<ISymbol, HookLevel?>(SymbolEqualityComparer.Default);
+        var createdObjects = new ConcurrentDictionary<ISymbol, HookLevel?>(SymbolEqualityComparer.Default);
 
         var methodSymbols = methods.Where(x => x.IsStatic == isStaticMethod).ToArray();
         
@@ -66,7 +67,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static void CheckSetUps(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, Dictionary<ISymbol, HookLevel?> createdObjects)
+    private static void CheckSetUps(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
     {
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
             .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
@@ -90,18 +91,18 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 if(assignmentOperation.Target is IFieldReferenceOperation fieldReferenceOperation)
                 {
-                    createdObjects.Add(fieldReferenceOperation.Field, level);
+                    createdObjects.TryAdd(fieldReferenceOperation.Field, level);
                 }
 
                 if(assignmentOperation.Target is IPropertyReferenceOperation propertyReferenceOperation)
                 {
-                    createdObjects.Add(propertyReferenceOperation.Property, level);
+                    createdObjects.TryAdd(propertyReferenceOperation.Property, level);
                 }
             }
         }
     }
 
-    private static void CheckTeardowns(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, Dictionary<ISymbol, HookLevel?> createdObjects)
+    private static void CheckTeardowns(SyntaxNodeAnalysisContext context, IMethodSymbol methodSymbol, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
     {
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
             .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
@@ -123,12 +124,12 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             
             if (fieldOrPropertyOperation is IFieldReferenceOperation fieldReferenceOperation && createdObjects.TryGetValue(fieldReferenceOperation.Field, out var createdObjectLevel) && createdObjectLevel == level)
             {
-                createdObjects.Remove(fieldReferenceOperation.Field);
+                createdObjects.TryRemove(fieldReferenceOperation.Field, out _);
             }
                 
             if (fieldOrPropertyOperation is IPropertyReferenceOperation propertyReferenceOperation && createdObjects.TryGetValue(propertyReferenceOperation.Property, out createdObjectLevel) && createdObjectLevel == level)
             {
-                createdObjects.Remove(propertyReferenceOperation.Property);
+                createdObjects.TryRemove(propertyReferenceOperation.Property, out _);
             }
         }
     }
