@@ -31,7 +31,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
 
-        if (namedTypeSymbol == null)
+        if (namedTypeSymbol == null || !namedTypeSymbol.IsTestClass(context.Compilation))
         {
             return;
         }
