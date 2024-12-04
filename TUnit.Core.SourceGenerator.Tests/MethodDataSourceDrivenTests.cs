@@ -11,7 +11,7 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
             "MethodDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(6);
+            await Assert.That(generatedFiles.Length).IsEqualTo(7);
             
             await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();");
             await AssertFileContains(generatedFiles[0], "classInstance.DataSource_Method(methodArg)");
@@ -30,5 +30,8 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
             
             await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(global::TUnit.TestProject.MethodDataSourceDrivenTests.MyString, 5, true)");
             await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(global::TUnit.TestProject.MethodDataSourceDrivenTests.MyString, 5, true)");
+            
+            await AssertFileContains(generatedFiles[6], "foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTestData())");
+            await AssertFileContains(generatedFiles[6], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.EnumerableFuncArrayTest(methodData)),");
         });
 }
