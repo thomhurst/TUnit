@@ -1,5 +1,7 @@
 ﻿// ReSharper disable UseCollectionExpression
 
+using TUnit.Assertions;
+
 namespace TUnit.TestProject;
 
 public class MethodDataSourceDrivenTests
@@ -51,6 +53,22 @@ public class MethodDataSourceDrivenTests
     [MethodDataSource(nameof(MethodWithBaseReturn))]
     public void DataSource_WithBaseReturn(BaseValue value)
     {
+    }
+    
+    [Test]
+    [MethodDataSource(nameof(EnumerableFuncArrayTestData))]
+    public async Task EnumerableFuncArrayTest(string[] strings)
+    {
+        await Assert.That(strings).IsTypeOf<string[]>();
+    }
+
+    public static IEnumerable<Func<string[]>> EnumerableFuncArrayTestData()
+    {
+        return
+        [
+            () => ["str1", "str2"],
+            () => ["str3", "str4"]
+        ];
     }
 
     public static int SomeMethod() => 1;
