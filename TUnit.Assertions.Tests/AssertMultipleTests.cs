@@ -55,4 +55,19 @@ public class AssertMultipleTests
         await Assert.That(exception!.Message)
             .Contains("(This exception may or may not have been caught) System.Exception: Hello World");
     }
+
+    [Test]
+    public async Task CanAssertThrowsException_Within_AssertMultiple()
+    {
+        using (Assert.Multiple())
+        {
+            await Assert.That(
+                static () => throw new InvalidOperationException()
+            ).ThrowsExactly<InvalidOperationException>();
+            
+            await Assert.That(
+                static () => throw new InvalidOperationException()
+            ).ThrowsExactly<InvalidOperationException>();
+        }
+    }
 }
