@@ -6,7 +6,7 @@ public static class SyntaxExtensions
 {
     public static IOperation? GetOperation(this SyntaxNode syntaxNode, SemanticModel semanticModel)
     {
-        if (semanticModel.SyntaxTree != syntaxNode.SyntaxTree)
+        if (semanticModel.SyntaxTree != syntaxNode.SyntaxTree && semanticModel.Compilation.ContainsSyntaxTree(syntaxNode.SyntaxTree))
         {
             semanticModel = semanticModel.Compilation.GetSemanticModel(syntaxNode.SyntaxTree);
         }
