@@ -41,10 +41,16 @@ internal class AssertionScope : IDisposable
             
             return;
         }
+
+        if (_exceptions.Count > 0 && _exceptions.All(e => e is not AssertionException))
+        {
+            // If there's no assertion exceptions, return, and user thrown exceptions should just propogate up
+            return;
+        }
         
         // It could be an intercepted exception,
         // In which case it should just throw itself, so we don't need to do that
-        if (_exceptions is [AssertionException])
+        if (_exceptions.Count == 1)
         {
             ExceptionDispatchInfo.Throw(_exceptions[0]);
         }
@@ -65,8 +71,16 @@ internal class AssertionScope : IDisposable
         CurrentScope.Value = scope;
     }
 
-    public void AddException(AssertionException exception)
+    internal void AddException(AssertionException exception)
     {
         _exceptions.Add(exception);
+    }
+    
+    internal void RemoveException(Exception exception)
+    {
+        if(_exceptions.Contains(exception))
+        {
+            _exceptions.Remove(exception);
+        }
     }
 }
