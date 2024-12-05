@@ -21,5 +21,5 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Run Tests
-        run: dotnet run -c Release
+        run: dotnet run -c Release -f net9.0
         working-directory: "TUnit.Example.WebProject.Tests"
