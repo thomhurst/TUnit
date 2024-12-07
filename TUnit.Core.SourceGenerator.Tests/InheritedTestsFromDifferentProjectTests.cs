@@ -24,6 +24,6 @@ internal class InheritedTestsFromDifferentProjectTests : TestsBase<TestsGenerato
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(3);
+            await Assert.That(generatedFiles.Length).IsEqualTo(4);
         });
 }
