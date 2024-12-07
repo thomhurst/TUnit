@@ -205,6 +205,8 @@ internal class SingleTestExecutor(
         }
         finally
         {
+            semaphore?.Release();
+
             var result = test.TestContext.Result!;
             
             var task = result.Status switch
@@ -215,8 +217,6 @@ internal class SingleTestExecutor(
             };
 
             await task;
-            
-            semaphore?.Release();
         }
     }
 
