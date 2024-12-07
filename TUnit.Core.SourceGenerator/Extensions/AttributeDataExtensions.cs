@@ -33,8 +33,7 @@ public static class AttributeDataExtensions
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
     {
         return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
-                   x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ==
-                   WellKnownFullyQualifiedClassNames.IDataAttribute.WithGlobalPrefix)
+                   x.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataAttribute.WithGlobalPrefix)
                == true;
     }
     
