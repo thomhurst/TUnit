@@ -14,30 +14,16 @@ public static class MethodDataSourceRetriever
         ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
         INamedTypeSymbol namedTypeSymbol, AttributeData methodDataAttribute, ArgumentsType argumentsType, int index)
     {
-        string typeName;
-        IMethodSymbol? dataSourceMethod;
-        if (methodDataAttribute.ConstructorArguments.Length == 1)
-        {
-            typeName =
-                namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
-
-            dataSourceMethod = namedTypeSymbol
-                .GetMembersIncludingBase()
-                .OfType<IMethodSymbol>()
-                .First(x => x.Name == methodDataAttribute.ConstructorArguments[0].Value!.ToString());
-        }
-        else
-        {
-            var typeContainingDataSourceMethod = (INamedTypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!;
-            
-            typeName = typeContainingDataSourceMethod.ToDisplayString(DisplayFormats
-                .FullyQualifiedGenericWithGlobalPrefix);
-
-            dataSourceMethod = typeContainingDataSourceMethod
-                .GetMembersIncludingBase()
-                .OfType<IMethodSymbol>()
-                .First(x => x.Name == methodDataAttribute.ConstructorArguments[1].Value!.ToString());
-        }
+        var type = GetMethodClass(methodDataAttribute, namedTypeSymbol);
+        
+        var dataSourceMethod = type
+            .GetMembersIncludingBase()
+            .OfType<IMethodSymbol>()
+            .First(x =>
+            {
+                var methodNameIndex = methodDataAttribute.ConstructorArguments.Length == 2 ? 1 : 0;
+                return x.Name == methodDataAttribute.ConstructorArguments[methodNameIndex].Value?.ToString();
+            });
 
         var methodName = dataSourceMethod.Name;
         var isStatic = dataSourceMethod.IsStatic;
@@ -66,7 +52,7 @@ public static class MethodDataSourceRetriever
             IsExpandableTuples: isExpandableTuples,
             IsStatic: isStatic,
             MethodName: methodName,
-            TypeName: typeName,
+            TypeName: type.GloballyQualified(),
             MethodReturnType: dataSourceMethod.ReturnType,
             ArgumentsExpression: argumentsExpression
         )
@@ -75,6 +61,21 @@ public static class MethodDataSourceRetriever
             AttributeIndex = index,
             DisposeAfterTest = disposeAfterTest,
         };
+    }
+
+    private static ITypeSymbol GetMethodClass(AttributeData methodDataAttribute, INamedTypeSymbol typeContainingAttribute)
+    {
+        if (methodDataAttribute.AttributeClass?.IsGenericType is true)
+        {
+            return methodDataAttribute.AttributeClass.TypeArguments[0]!;
+        }
+
+        if (methodDataAttribute.ConstructorArguments.Length is 2)
+        {
+            return (ITypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!;
+        }
+
+        return typeContainingAttribute;
     }
 
     private static ImmutableArray<ITypeSymbol> GetInjectableTypes(GeneratorAttributeSyntaxContext context, 
@@ -148,63 +149,6 @@ public static class MethodDataSourceRetriever
         return compilation.CreateTupleTypeSymbol(parameterOrPropertyTypes);
     }
 
-    private static bool TryGetTupleTypes(GeneratorAttributeSyntaxContext context, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, IMethodSymbol dataSourceMethod, out ImmutableArray<ITypeSymbol> tupleTypes)
-    {
-        if (parameterOrPropertyTypes.Length <= 1)
-        {
-            tupleTypes = ImmutableArray<ITypeSymbol>.Empty;
-            return false;
-        }
-
-        var returnType = dataSourceMethod.ReturnType;
-        
-        if (returnType is INamedTypeSymbol { IsGenericType: true } enumerableSymbol && 
-            SymbolEqualityComparer.Default.Equals(dataSourceMethod.ReturnType.OriginalDefinition,
-                context.SemanticModel.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
-        {
-            returnType = enumerableSymbol.TypeArguments[0];
-        }
-
-        if (returnType is INamedTypeSymbol { IsGenericType: true } funcSymbol &&
-            SymbolEqualityComparer.Default.Equals(dataSourceMethod.ReturnType.OriginalDefinition,
-                context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName())))
-        {
-            returnType = funcSymbol.TypeArguments[0];
-        }
-
-        if (returnType.IsTupleType)
-        {
-            var tupleType = (INamedTypeSymbol) returnType;
-            tupleTypes = tupleType.TupleUnderlyingType?.TypeArguments ?? tupleType.TypeArguments;
-            return true;
-        }
-
-        tupleTypes = ImmutableArray<ITypeSymbol>.Empty;
-        return false;
-    }
-
-    private static bool ShouldUnfoldFunc(GeneratorAttributeSyntaxContext context, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, IMethodSymbol dataSourceMethod)
-    {
-        if (parameterOrPropertyTypes.Length != 1)
-        {
-            return false;
-        }
-        
-        var parameterType = parameterOrPropertyTypes[0];
-
-        var returnType = dataSourceMethod.ReturnType;
-        
-        if (returnType.OriginalDefinition.IsGenericDefinition() && SymbolEqualityComparer.Default.Equals(returnType.OriginalDefinition,
-                context.SemanticModel.Compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
-        {
-            returnType = ((INamedTypeSymbol)returnType).TypeArguments[0];
-        }
-        
-        return SymbolEqualityComparer.Default
-                   .Equals(context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName())?.Construct(parameterType),
-                       returnType);
-    }
-
     private static string GetArgumentsExpression(GeneratorAttributeSyntaxContext context, AttributeData methodDataAttribute)
     {
         if (methodDataAttribute.ApplicationSyntaxReference?.GetSyntax() is not AttributeSyntax attributeSyntax)
@@ -223,16 +167,5 @@ public static class MethodDataSourceRetriever
         }
 
         return argumentsSyntax.Accept(new CollectionToArgumentsListRewriter(context.SemanticModel))?.ToFullString() ?? string.Empty;
-    }
-
-    private static IEnumerable<ITypeSymbol> CheckTupleTypes(ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, ImmutableArray<ITypeSymbol> tupleTypes)
-    {
-        for (var index = 0; index < tupleTypes.Length; index++)
-        {
-            var tupleType = tupleTypes.ElementAtOrDefault(index);
-            var parameterType = parameterOrPropertyTypes.ElementAtOrDefault(index);
-
-            yield return tupleType ?? parameterType!;
-        }
     }
 }
