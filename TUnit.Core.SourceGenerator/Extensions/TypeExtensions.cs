@@ -22,7 +22,7 @@ public static class TypeExtensions
         {
             if (symbol is IErrorTypeSymbol)
             {
-                throw new Exception("ErrorTypeSymbol - Have you added any missing file sources to the compilation?");
+                throw new Exception($"ErrorTypeSymbol for {symbol.Name} - Have you added any missing file sources to the compilation?");
             }
 
             if (symbol.SpecialType == SpecialType.System_Object)

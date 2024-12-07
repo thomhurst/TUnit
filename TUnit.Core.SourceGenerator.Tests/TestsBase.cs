@@ -59,7 +59,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
         
-        foreach (var error in diagnostics.Where(x => IsError(x)))
+        foreach (var error in diagnostics.Where(IsError))
         {
             throw new Exception
             (
