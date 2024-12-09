@@ -13,17 +13,24 @@ internal static class ArgumentFormatter
         {
             return "null";
         }
+        
+        var toString = o.ToString()!;
 
-        if (o is Enum @enum)
+        if (o is Enum)
         {
-            return @enum.ToString();
+            return toString;
         }
         
         if (o.GetType().IsPrimitive || o is string)
         {
-            return o.ToString()!;
+            return toString;
         }
 
-        return o.GetType().Name;
+        if (toString == o.GetType().FullName)
+        {
+            return o.GetType().Name;
+        }
+        
+        return toString;
     }
 }
