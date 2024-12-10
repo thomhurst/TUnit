@@ -61,7 +61,6 @@ public static class Compare
 
         if (actual.GetType().IsPrimitive
             || actual.GetType().IsEnum
-            || actual.GetType().IsValueType
             || actual is string)
         {
             yield return new ComparisonFailure
