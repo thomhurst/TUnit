@@ -233,6 +233,37 @@ public class EquivalentAssertionTests
     }
     
     [Test]
+    public async Task Struct_Objects_With_Nested_Matches_Are_Equivalent()
+    {
+        var object1 = new MyStruct
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar",
+                Inner = new InnerClass
+                {
+                    Value = "Baz"
+                }
+            }
+        };
+        var object2 = new MyStruct
+        {
+            Value = "Foo",
+            Inner = new InnerClass
+            {
+                Value = "Bar",
+                Inner = new InnerClass
+                {
+                    Value = "Baz"
+                }
+            }
+        };
+
+        await TUnitAssert.That(object1).IsEquivalentTo(object2);
+    }
+    
+    [Test]
     public void Objects_With_Nested_Enumerable_Mismatch_Are_Not_Equivalent()
     {
         var object1 = new MyClass
@@ -358,5 +389,11 @@ public class EquivalentAssertionTests
         public InnerClass? Inner { get; set; }
         
         public IEnumerable<string>? Collection { get; set; } 
+    }
+    
+    public struct MyStruct
+    {
+        public string? Value { get; set; }
+        public InnerClass? Inner { get; set; }
     }
 }
