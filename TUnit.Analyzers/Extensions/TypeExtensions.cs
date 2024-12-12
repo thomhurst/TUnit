@@ -24,7 +24,7 @@ public static class TypeExtensions
     {
         var type = namedTypeSymbol;
 
-        while (type != null)
+        while (type != null && type.SpecialType != SpecialType.System_Object)
         {
             yield return type;
             type = type.BaseType;
