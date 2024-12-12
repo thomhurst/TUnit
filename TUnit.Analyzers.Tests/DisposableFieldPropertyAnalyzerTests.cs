@@ -183,7 +183,41 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
+    [Test]
+    public async Task New_Disposable_No_Issue_When_Cleaned_Up_PrimaryConstructor()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Net.Http;
+                using TUnit.Core;
+                
+                public class Test() // note the use of primary constructor here
+                {
+                    private HttpClient _client = null!;
+                
+                    [Before(HookType.Test)]
+                    public void Setup()
+                    {
+                        _client = new HttpClient();
+                    }
+                
+                    [After(HookType.Test)]
+                    public void Cleanup()
+                    {
+                        _client.Dispose();
+                    }
+                
+                    [Test]
+                    public void TestMethod()
+                    {
+                    }
+                }
+                """
+            );
+    }
+
     [Test]
     public async Task New_Disposable__Static_No_Issue_When_Cleaned_Up_Nullable()
     {

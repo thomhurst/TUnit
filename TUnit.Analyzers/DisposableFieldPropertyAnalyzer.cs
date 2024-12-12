@@ -70,7 +70,17 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
             .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
 
-        methodSymbol.IsHookMethod(context.Compilation, out _, out var level, out _);
+        var isHookMethod = methodSymbol.IsHookMethod(context.Compilation, out _, out var level, out _);
+        
+        if (!isHookMethod && methodSymbol.MethodKind != MethodKind.Constructor)
+        {
+            return;
+        }
+
+        if (methodSymbol.MethodKind == MethodKind.Constructor)
+        {
+            level = HookLevel.Test;
+        }
         
         foreach (var assignment in syntaxNodes
                      .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression)))
