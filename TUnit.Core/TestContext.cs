@@ -28,6 +28,8 @@ public partial class TestContext : Context, IDisposable
     }
 
     public TestContextEvents Events { get; }
+    
+    public bool IsRegistered { get; internal set; }
 
     public DateTimeOffset? TestStart { get; internal set; }
     
