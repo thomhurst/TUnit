@@ -56,7 +56,9 @@ internal class AssemblyHookOrchestrator(InstanceTracker instanceTracker, HooksCo
             yield break;
         }
         
-        foreach (var testEndEventsObject in testContext.GetLastTestInAssemblyEventObjects())
+        var allTestContextsInAssembly = GetContext(assembly).AllTests;
+        
+        foreach (var testEndEventsObject in allTestContextsInAssembly.SelectMany(tc => tc.GetLastTestInAssemblyEventObjects()))
         {
             yield return new LastTestInAssemblyAdapter(testEndEventsObject, testContext);
         }

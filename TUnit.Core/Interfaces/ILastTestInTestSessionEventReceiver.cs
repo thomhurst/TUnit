@@ -2,5 +2,5 @@
 
 public interface ILastTestInTestSessionEventReceiver : IEventReceiver
 {
-    ValueTask IfLastTestInTestSession(TestSessionContext current, TestContext testContext);
+    ValueTask OnLastTestInTestSession(TestSessionContext current, TestContext testContext);
 }

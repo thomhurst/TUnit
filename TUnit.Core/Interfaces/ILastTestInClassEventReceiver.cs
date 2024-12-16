@@ -2,5 +2,5 @@
 
 public interface ILastTestInClassEventReceiver : IEventReceiver
 {
-    ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext);
+    ValueTask OnLastTestInClass(ClassHookContext context, TestContext testContext);
 }
