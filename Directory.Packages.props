@@ -52,9 +52,9 @@
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.1.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="TUnit" Version="0.5.0" />
-    <PackageVersion Include="TUnit.Core" Version="0.5.0" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.5.0" />
+    <PackageVersion Include="TUnit" Version="0.5.1" />
+    <PackageVersion Include="TUnit.Core" Version="0.5.1" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.5.1" />
     <PackageVersion Include="Vogen" Version="5.0.6" />
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
