@@ -303,10 +303,12 @@ internal class SingleTestExecutor(
         
         if (instanceTracker.IsLastTest())
         {
-            foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
+            var testSessionContext = TestSessionContext.Current!;
+            var allTests = testSessionContext.AllTests;
+            foreach (var testEndEventsObject in allTests.SelectMany(tc => tc.GetLastTestInTestSessionEventObjects()))
             {
                 await RunHelpers.RunValueTaskSafelyAsync(
-                    () => testEndEventsObject.OnLastTestInTestSession(TestSessionContext.Current!, testContext),
+                    () => testEndEventsObject.OnLastTestInTestSession(testSessionContext, testContext),
                     cleanUpExceptions);
             }
         }

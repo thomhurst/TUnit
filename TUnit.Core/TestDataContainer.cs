@@ -21,16 +21,33 @@ public static class TestDataContainer
 
     private static Disposer Disposer => new(GlobalContext.Current.GlobalLogger);
     
-    public static T GetInstanceForType<T>(Type key, Func<T> func)
+    public static T GetInstanceForClass<T>(Type testClass, Func<T> func, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        var objectsForClass = InjectedSharedPerClassType.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
-        return  (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
+        var objectsForClass = InjectedSharedPerClassType.GetOrAdd(testClass, _ => new GetOnlyDictionary<Type, object>());
+        return (T)objectsForClass.GetOrAdd(typeof(T), _ =>
+        {
+            var t = func()!;
+
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnLastTestInClass += async (_, _) =>
+                await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(t);
+            
+            return t;
+        });
     }
     
-    public static T GetInstanceForAssembly<T>(Assembly assembly, Func<T> func)
+    public static T GetInstanceForAssembly<T>(Assembly assembly, Func<T> func,
+        DataGeneratorMetadata dataGeneratorMetadata)
     {
         var objectsForClass = InjectedSharedPerAssembly.GetOrAdd(assembly, _ => new GetOnlyDictionary<Type, object>());
-        return  (T)objectsForClass.GetOrAdd(typeof(T), _ => func()!);
+        return  (T)objectsForClass.GetOrAdd(typeof(T), _ =>
+        {
+            var t = func()!;
+
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnLastTestInAssembly += async (_, _) =>
+                await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(t);
+            
+            return t;
+        });
     }
     
     public static void IncrementGlobalUsage(Type type)
@@ -40,7 +57,7 @@ public static class TestDataContainer
         CountsPerGlobalType[type] = count + 1;
     }
     
-    public static T GetGlobalInstance<T>(Func<T> func)
+    public static T GetGlobalInstance<T>(Func<T> func, DataGeneratorMetadata dataGeneratorMetadata)
     {
         return (T)InjectedSharedGlobally.GetOrAdd(typeof(T), _ => func()!);
     }
@@ -58,7 +75,7 @@ public static class TestDataContainer
     {
         var instancesForType = InjectedSharedPerKey.GetOrAdd(typeof(T), _ => new GetOnlyDictionary<string, object>());
 
-        return  (T)instancesForType.GetOrAdd(key, _ => func()!);
+        return (T)instancesForType.GetOrAdd(key, _ => func()!);
     }
     
     internal static async ValueTask ConsumeKey(string key, Type type)

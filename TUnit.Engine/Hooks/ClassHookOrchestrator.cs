@@ -56,15 +56,17 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
             yield break;
         }
         
+        var allTestContextsInClass = GetContext(testClassType).Tests;
+
+        foreach (var testEndEventsObject in allTestContextsInClass.SelectMany(tc => tc.GetLastTestInClassEventObjects()))
+        {
+            yield return new LastTestInClassAdapter(testEndEventsObject, testContext);
+        }
+        
         var typesIncludingBase = GetTypesIncludingBase(testClassType);
 
         foreach (var type in typesIncludingBase)
         {
-            foreach (var testEndEventsObject in testContext.GetLastTestInClassEventObjects())
-            {
-                yield return new LastTestInClassAdapter(testEndEventsObject, testContext);
-            }
-                
             var list = hooksCollector.AfterClassHooks
                 .GetOrAdd(type, _ => []).OrderBy(x => x.Order);
 
