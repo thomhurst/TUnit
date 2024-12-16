@@ -12,7 +12,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
         yield return () =>
         {
             var item = ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId)
-                .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key);
+                .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
 
             dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (_, context) =>
             {
@@ -43,23 +43,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
             {
                 await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnTestEnd(Shared, Key, item);
             };
-
-            if (Shared is SharedType.PerClass)
-            {
-                dataGeneratorMetadata.TestBuilderContext.Current.Events.OnLastTestInClass += async (_, context) =>
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnLastTestInClass<T>(context.Item2);
-                };
-            }
-
-            if (Shared is SharedType.PerAssembly)
-            {
-                dataGeneratorMetadata.TestBuilderContext.Current.Events.OnLastTestInAssembly += async (_, context) =>
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata!.TestSessionId).OnLastTestInAssembly<T>(context.Item2);
-                };
-            }
-
+            
             return item;
         };
     }

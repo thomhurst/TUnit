@@ -22,14 +22,14 @@ internal class ClassDataSources
 
     public static ClassDataSources Get(string sessionId) => SourcesPerSession.GetOrAdd(sessionId, _ => new());
     
-    public (T, SharedType, string) GetItemForIndex<T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys) where T : new()
+    public (T, SharedType, string) GetItemForIndex<T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
         var shared = sharedTypes.ElementAtOrDefault(index);
         var key = shared == SharedType.Keyed ? GetKey(index, sharedTypes, keys) : string.Empty;
 
         return
         (
-            Get<T>(shared, testClassType, key),
+            Get<T>(shared, testClassType, key, dataGeneratorMetadata),
             shared,
             key
         );
@@ -42,17 +42,38 @@ internal class ClassDataSources
         return keys.ElementAtOrDefault(keyedIndex) ?? throw new ArgumentException($"Key at index {keyedIndex} not found");
     }
     
-    public T Get<T>(SharedType sharedType, Type testClassType, string key) where T : new()
+    public T Get<T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
-        return sharedType switch
+        if (sharedType == SharedType.None)
         {
-            SharedType.None => Create<T>(),
-            SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(Create<T>),
-            SharedType.PerClass => TestDataContainer.GetInstanceForType(testClassType, Create<T>),
-            SharedType.Keyed => TestDataContainer.GetInstanceForKey(key, Create<T>),
-            SharedType.PerAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, Create<T>),
-            _ => throw new ArgumentOutOfRangeException()
-        };
+            var t = Create<T>();
+            
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (_, _) => await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(t);
+            
+            return t;
+        }
+
+        if (sharedType == SharedType.PerTestSession)
+        {
+            return TestDataContainer.GetGlobalInstance(Create<T>, dataGeneratorMetadata);
+        }
+
+        if (sharedType == SharedType.PerClass)
+        {
+            return TestDataContainer.GetInstanceForClass(testClassType, Create<T>, dataGeneratorMetadata);
+        }
+
+        if (sharedType == SharedType.Keyed)
+        {
+            return TestDataContainer.GetInstanceForKey(key, Create<T>);
+        }
+
+        if (sharedType == SharedType.PerAssembly)
+        {
+            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, Create<T>, dataGeneratorMetadata);
+        }
+
+        throw new ArgumentOutOfRangeException();
     }
     
     public Task InitializeObject(object? item)
@@ -145,11 +166,6 @@ internal class ClassDataSources
 
     public async ValueTask OnTestEnd<T>(SharedType shared, string key, T? item)
     {
-        if (shared == SharedType.None)
-        {
-            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(item);
-        }
-
         if (shared == SharedType.Keyed)
         {
             await TestDataContainer.ConsumeKey(key, typeof(T));
@@ -159,20 +175,6 @@ internal class ClassDataSources
         {
             await TestDataContainer.ConsumeGlobalCount(typeof(T));
         }
-    }
-
-    public async ValueTask OnLastTestInClass<T>(TestContext testContext)
-    {
-        var instance = TestDataContainer.GetInstanceForType(testContext.TestDetails.ClassType, () => default(T)!);
-        
-        await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(instance);
-    }
-
-    public async ValueTask OnLastTestInAssembly<T>(TestContext testContext)
-    {
-        var instance = TestDataContainer.GetInstanceForAssembly(testContext.TestDetails.ClassType.Assembly, () => default(T)!);
-        
-        await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(instance);
     }
 
     private static T Create<T>() where T : new()
