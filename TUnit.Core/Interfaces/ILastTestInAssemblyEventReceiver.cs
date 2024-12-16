@@ -2,5 +2,5 @@
 
 public interface ILastTestInAssemblyEventReceiver : IEventReceiver
 {
-    ValueTask IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext);
+    ValueTask OnLastTestInAssembly(AssemblyHookContext context, TestContext testContext);
 }

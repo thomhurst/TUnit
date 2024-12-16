@@ -43,17 +43,17 @@ public record TestContextEvents :
         return OnTestSkipped?.InvokeAsync(this, testContext) ?? ValueTask.CompletedTask;
     }
 
-    public ValueTask IfLastTestInClass(ClassHookContext context, TestContext testContext)
+    ValueTask ILastTestInClassEventReceiver.OnLastTestInClass(ClassHookContext context, TestContext testContext)
     {
         return OnLastTestInClass?.InvokeAsync(this, (context, testContext)) ?? ValueTask.CompletedTask;
     }
 
-    public ValueTask IfLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
+    ValueTask ILastTestInAssemblyEventReceiver.OnLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
     {
         return OnLastTestInAssembly?.InvokeAsync(this, (context, testContext)) ?? ValueTask.CompletedTask;
     }
 
-    public ValueTask IfLastTestInTestSession(TestSessionContext context, TestContext testContext)
+    ValueTask ILastTestInTestSessionEventReceiver.OnLastTestInTestSession(TestSessionContext context, TestContext testContext)
     {
         return OnLastTestInTestSession?.InvokeAsync(this, (context, testContext)) ?? ValueTask.CompletedTask;
     }

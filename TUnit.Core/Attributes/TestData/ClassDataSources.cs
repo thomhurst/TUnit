@@ -161,20 +161,18 @@ internal class ClassDataSources
         }
     }
 
-    public async ValueTask IfLastTestInClass<T>(SharedType shared)
+    public async ValueTask OnLastTestInClass<T>(TestContext testContext)
     {
-        if (shared == SharedType.PerClass)
-        {
-            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(TestDataContainer.GetInstanceForType(typeof(T), () => default(T)!));
-        }
+        var instance = TestDataContainer.GetInstanceForType(testContext.TestDetails.ClassType, () => default(T)!);
+        
+        await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(instance);
     }
 
-    public async ValueTask IfLastTestInAssembly<T>(SharedType shared)
+    public async ValueTask OnLastTestInAssembly<T>(TestContext testContext)
     {
-        if (shared == SharedType.PerAssembly)
-        {
-            await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(TestDataContainer.GetInstanceForType(typeof(T), () => default(T)!));
-        }
+        var instance = TestDataContainer.GetInstanceForAssembly(testContext.TestDetails.ClassType.Assembly, () => default(T)!);
+        
+        await new Disposer(GlobalContext.Current.GlobalLogger).DisposeAsync(instance);
     }
 
     private static T Create<T>() where T : new()
