@@ -29,7 +29,8 @@ internal class SingleTestExecutor(
     ITestFinder testFinder,
     ITUnitMessageBus messageBus,
     TUnitFrameworkLogger logger,
-    EngineCancellationToken engineCancellationToken)
+    EngineCancellationToken engineCancellationToken,
+    TestRegistrar testRegistrar)
     : IDataProducer
 {
     private static readonly Lock Lock = new();
@@ -75,6 +76,8 @@ internal class SingleTestExecutor(
                 await WaitForDependsOnTests(test, filter, context);
 
                 start = DateTimeOffset.Now;
+
+                await RegisterIfNotAlready(testContext);
 
                 if (!explicitFilterService.CanRun(test.TestDetails, filter))
                 {
@@ -217,6 +220,21 @@ internal class SingleTestExecutor(
             };
 
             await task;
+        }
+    }
+
+    private Task RegisterIfNotAlready(TestContext testContext)
+    {
+        lock (Lock)
+        {
+            // Could not be registered if it's triggered from a [DependsOn]
+            if (!testContext.IsRegistered)
+            {
+                return testRegistrar.RegisterInstance(testContext.InternalDiscoveredTest,
+                    _ => ValueTask.CompletedTask);
+            }
+            
+            return Task.CompletedTask;
         }
     }
 

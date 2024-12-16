@@ -13,12 +13,12 @@ internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrches
 		{
 			var testContext = discoveredTest.TestContext;
 			
+			testContext.IsRegistered = true;
+			
 			var testRegisteredEventsObjects = testContext.GetTestRegisteredEventsObjects();
 
 			var classType = testContext.TestDetails.ClassType;
-		
-			instanceTracker.Register(classType);
-		
+			
 			RegisterTestContext(classType, testContext);
 
 			foreach (var testRegisteredEventsObject in testRegisteredEventsObjects)
@@ -34,6 +34,8 @@ internal class TestRegistrar(InstanceTracker instanceTracker, AssemblyHookOrches
 
 	private void RegisterTestContext(Type type, TestContext testContext)
 	{
+		instanceTracker.Register(type);
+
 		var classHookContext = classHookOrchestrator.GetContext(type);
 
 		classHookContext.Tests.Add(testContext);
