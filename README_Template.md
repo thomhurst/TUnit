@@ -142,16 +142,16 @@ or with more complex test orchestration needs
 
     [Retry(3)]
     [Test, DisplayName("Register an account")]
-    [MethodData(nameof(GetAuthDetails))]
+    [MethodDataSource(nameof(GetAuthDetails))]
     public async Task Register(string username, string password) { ... }
 
     [Repeat(5)]
     [Test, DependsOn(nameof(Register))]
-    [MethodData(nameof(GetAuthDetails))]
+    [MethodDataSource(nameof(GetAuthDetails))]
     public async Task Login(string username, string password) { ... }
 
     [Test, DependsOn(nameof(Login), [typeof(string), typeof(string)])]
-    [MethodData(nameof(GetAuthDetails))]
+    [MethodDataSource(nameof(GetAuthDetails))]
     public async Task DeleteAccount(string username, string password) { ... }
 
     [Category("Downloads")]
