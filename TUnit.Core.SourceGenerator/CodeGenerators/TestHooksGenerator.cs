@@ -99,6 +99,7 @@ public class TestHooksGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();
+            sourceBuilder.WriteLine("[global::System.Diagnostics.StackTraceHidden]");
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
             
             var distinctHookLevelsForClass = groupedByTypeName.Select(x => x.HookLevel).Distinct().ToList();
