@@ -7,7 +7,6 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanticModel) : CSharpSyntaxRewriter
 {
-    
     public override SyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
@@ -25,7 +24,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
             .WithoutTrivia();
     }
-    
+
     public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
@@ -84,11 +83,27 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         {
             // nameof() syntax
             var argumentList = (ArgumentListSyntax) childNodes[1];
-            var innerIdentifierNameSyntax = (IdentifierNameSyntax)argumentList.Arguments[0].Expression;
+            var argumentExpression = argumentList.Arguments[0].Expression;
+            
+            if (argumentExpression is IdentifierNameSyntax identifierNameSyntax)
+            {
+                return SyntaxFactory.LiteralExpression(
+                    SyntaxKind.StringLiteralExpression,
+                    SyntaxFactory.Literal(identifierNameSyntax!.Identifier.ValueText)
+                );
+            }
+
+            if (argumentExpression is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+            {
+                return SyntaxFactory.LiteralExpression(
+                    SyntaxKind.StringLiteralExpression,
+                    SyntaxFactory.Literal(memberAccessExpressionSyntax.Name.Identifier.ValueText)
+                );
+            }
 
             return SyntaxFactory.LiteralExpression(
                 SyntaxKind.StringLiteralExpression,
-                SyntaxFactory.Literal(innerIdentifierNameSyntax!.Identifier.ValueText)
+                SyntaxFactory.Literal(argumentExpression!.ToString())
             );
         }
         
