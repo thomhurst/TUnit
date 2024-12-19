@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.TestProject.Bugs._1432;
+﻿namespace TUnit.TestProject.Bugs._1432;
 
 public class EnumMemberNamesTests
 {
