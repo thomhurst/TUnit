@@ -26,10 +26,9 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
             await AssertFileContains(generatedFiles[3], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(5)");
 
             await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(\"Hello World!\", 5, true)");
-            await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(\"Hello World!\", 5, true)");
-            
-            await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(global::TUnit.TestProject.MethodDataSourceDrivenTests.MyString, 5, true)");
-            await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(global::TUnit.TestProject.MethodDataSourceDrivenTests.MyString, 5, true)");
+            await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(\"Hello World!\", 6, true)");
+            await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(\"Hello World!\", 7, true)");
+            await AssertFileContains(generatedFiles[4], "global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod(\"Hello World!\", 8, true)");
             
             await AssertFileContains(generatedFiles[6], "foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTestData())");
             await AssertFileContains(generatedFiles[6], "TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.EnumerableFuncArrayTest(methodData)),");

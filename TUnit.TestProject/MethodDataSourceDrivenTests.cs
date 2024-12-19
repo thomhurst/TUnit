@@ -40,9 +40,9 @@ public class MethodDataSourceDrivenTests
     
     [Test]
     [MethodDataSource(nameof(SomeMethod), Arguments = ["Hello World!", 5, true])]
-    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { "Hello World!", 5, true })]
-    [MethodDataSource(nameof(SomeMethod), Arguments = [MyString, 5, true])]
-    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { MyString, 5, true })]
+    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { "Hello World!", 6, true })]
+    [MethodDataSource(nameof(SomeMethod), Arguments = [MyString, 7, true])]
+    [MethodDataSource(nameof(SomeMethod), Arguments = new object[] { MyString, 8, true })]
     public void DataSource_Method4(int value)
     {
         Console.WriteLine(value);
