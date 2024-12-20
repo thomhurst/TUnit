@@ -33,11 +33,7 @@ internal class SingleTestExecutor(
     TestRegistrar testRegistrar)
     : IDataProducer
 {
-#if NET
-    private static readonly Lock Lock = new();
-#else
-    private static readonly Backport.System.Threading.Lock Lock = Backport.System.Threading.LockFactory.Create();
-#endif
+    private static readonly Lock Lock = LockFactory.Create();
     
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
         bool isStartedAsDependencyForAnotherTest)

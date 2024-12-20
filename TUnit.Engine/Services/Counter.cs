@@ -5,11 +5,7 @@ namespace TUnit.Engine.Services;
 [DebuggerDisplay("Count = {CurrentCount}")]
 public class Counter
 {
-#if NET
-    private readonly Lock _locker = new();
-#else
-    private readonly Backport.System.Threading.Lock _locker = Backport.System.Threading.LockFactory.Create();
-#endif
+    private readonly Lock _locker = LockFactory.Create();
 
     private int _count;
 
