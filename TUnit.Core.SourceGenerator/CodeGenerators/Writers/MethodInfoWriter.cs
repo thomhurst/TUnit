@@ -8,8 +8,7 @@ public static class MethodInfoWriter
     {
         if (testSourceDataModel.MethodGenericTypeCount == 0)
         {
-            return
-                $"typeof({testSourceDataModel.FullyQualifiedTypeName}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}])";
+            return $"((Action<{string.Join(", ", methodParameterTypesList)}>)(({testSourceDataModel.FullyQualifiedTypeName} instance) => instance.{testSourceDataModel.MethodName})).Method";
         }
 
         return

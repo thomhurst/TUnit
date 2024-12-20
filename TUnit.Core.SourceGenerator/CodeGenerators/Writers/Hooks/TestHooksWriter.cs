@@ -20,7 +20,7 @@ public class TestHooksWriter : BaseHookWriter
             }
             
             sourceBuilder.WriteLine("{ ");
-            sourceBuilder.WriteLine($"""MethodInfo = typeof({model.FullyQualifiedTypeName}).GetMethod("{model.MethodName}", 0, [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]),""");
+            sourceBuilder.WriteLine($"""MethodInfo = ((Action<{string.Join(", ", model.ParameterTypes)}>)(({model.FullyQualifiedTypeName} instance) => instance.{model.MethodName})).Method""");
             
             if(model.IsVoid)
             {
@@ -42,7 +42,7 @@ public class TestHooksWriter : BaseHookWriter
 
         sourceBuilder.WriteLine($"new InstanceHookMethod<{model.FullyQualifiedTypeName}>");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"""MethodInfo = typeof({model.FullyQualifiedTypeName}).GetMethod("{model.MethodName}", 0, [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]),""");
+        sourceBuilder.WriteLine($"""MethodInfo = ((Action<{string.Join(", ", model.ParameterTypes)}>)(({model.FullyQualifiedTypeName} instance) => instance.{model.MethodName})).Method""");
         
         if(model.IsVoid)
         {
