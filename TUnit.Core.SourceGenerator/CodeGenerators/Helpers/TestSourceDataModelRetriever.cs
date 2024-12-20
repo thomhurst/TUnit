@@ -118,7 +118,7 @@ public static class TestSourceDataModelRetriever
 
         AttributeData[] allAttributes =
         [
-            ..methodSymbol.GetAttributes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime"),
+            ..methodSymbol.GetAttributes().Where(x => x.AttributeClass?.ContainingAssembly.Name.StartsWith("System") != true),
             ..namedTypeSymbol.GetAttributesIncludingBaseTypes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime"),
             ..namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime")
         ];
@@ -128,9 +128,6 @@ public static class TestSourceDataModelRetriever
             .Select(x => x.PropertySymbol)
             .SelectMany(x => x.GetAttributes())
             .Where(x => x.IsDataSourceAttribute());
-
-        var methodNonGenericTypes = GetNonGenericTypes(testGenerationContext.MethodSymbol.Parameters,
-            testArguments.GetArgumentTypes());
         
         return new TestSourceDataModel
         {
@@ -165,24 +162,6 @@ public static class TestSourceDataModelRetriever
             if (parameter.Type.IsGenericDefinition())
             {
                 yield return argumentTypes[index];
-            }
-            else
-            {
-                yield return parameter.Type.GloballyQualified();
-            }
-        }
-    }
-
-    private static IEnumerable<string> GetNonGenericTypes(ImmutableArray<IParameterSymbol> methodSymbolParameters,
-        string[] argumentTypes)
-    {
-        for (var i = 0; i < methodSymbolParameters.Length; i++)
-        {
-            var parameter = methodSymbolParameters[i];
-
-            if (parameter.Type.IsGenericDefinition())
-            {
-                yield return argumentTypes.ElementAtOrDefault(i) ?? "global::System.Threading.CancellationToken";
             }
             else
             {
