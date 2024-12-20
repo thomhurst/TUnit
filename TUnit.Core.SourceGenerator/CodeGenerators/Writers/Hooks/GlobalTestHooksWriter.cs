@@ -10,7 +10,7 @@ public static class GlobalTestHooksWriter
     { 
         sourceBuilder.WriteLine($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model.FullyQualifiedTypeName, model.MethodName, model.ParameterTypes)},""");
+        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model.FullyQualifiedTypeName, model.MethodName, model.ParameterTypes, true)},""");
 
         if (model.IsVoid)
         {
