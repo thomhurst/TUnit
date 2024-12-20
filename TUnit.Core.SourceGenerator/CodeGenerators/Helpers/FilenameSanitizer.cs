@@ -9,6 +9,6 @@ public static class FilenameSanitizer
             .Replace('.', '_')
             .Replace('-', '_');
 
-        return $"{sanitizedFilename}_{Guid.NewGuid():N}";
+        return $"{sanitizedFilename}";
     }
 }
