@@ -4,7 +4,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Backport.System.Threading.Lock" Version="3.1.4">
+        <PackageReference Include="Backport.System.Threading.Lock">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>analyzers</IncludeAssets>
         </PackageReference>
