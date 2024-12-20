@@ -6,6 +6,11 @@
         <IsTestProject>false</IsTestProject>
     </PropertyGroup>
 
+      <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>EmittedSourceGeneratedFiles</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
 

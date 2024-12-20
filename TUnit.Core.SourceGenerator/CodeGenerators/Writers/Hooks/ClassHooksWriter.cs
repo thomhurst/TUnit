@@ -18,7 +18,7 @@ public static class ClassHooksWriter
         }
 
         sourceBuilder.WriteLine("{ ");
-        sourceBuilder.WriteLine($"""MethodInfo = ((Action<{string.Join(", ", model.ParameterTypes)}>)(({model.FullyQualifiedTypeName} instance) => instance.{model.MethodName})).Method""");
+        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model.FullyQualifiedTypeName, model.MethodName, model.ParameterTypes)},""");
 
         if(model.IsVoid)
         {

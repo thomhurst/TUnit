@@ -1,25 +1,18 @@
-﻿using TUnit.Core.SourceGenerator.Models;
-
-namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
+﻿namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public static class MethodInfoWriter
 {
-    public static string Write(TestSourceDataModel testSourceDataModel, string methodParameterTypesList)
+    public static string Write(string type, string methodName, string[] parameters)
     {
-        if (testSourceDataModel.MethodGenericTypeCount == 0)
-        {
-            return $"((Action<{string.Join(", ", methodParameterTypesList)}>)(({testSourceDataModel.FullyQualifiedTypeName} instance) => instance.{testSourceDataModel.MethodName})).Method";
-        }
+        string[] actionTypes =
+        [
+            type,
+            ..parameters
+        ];
 
+        var actionLambdaParameters = actionTypes.Select((x, i) => $"{x} a{i}");
+        
         return
-            $"""
-             typeof({testSourceDataModel.FullyQualifiedTypeName})
-                .GetMethods()
-                .Where(method => method.IsPublic)
-                .Where(method => method.Name == "{testSourceDataModel.MethodName}")
-                .Where(method => method.GetParameters().Length == {testSourceDataModel.MethodParameterTypes.Length})
-                .Where(method => method.GetGenericArguments().Length == {testSourceDataModel.MethodGenericTypeCount})
-                .First()
-             """;
+            $"((Action<{string.Join(", ", actionTypes)}>)(({string.Join(", ", actionLambdaParameters)}) => a0.{methodName}({string.Join(", ", parameters.Select((x, i) => $"a{i+1}"))}))).Method";
     }
 }
