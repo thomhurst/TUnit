@@ -30,7 +30,6 @@ internal static class TestExtensions
                     ParameterTypeFullNames: testDetails.TestMethodParameterTypes.Select(x => x.FullName!).ToArray(),
                     ReturnTypeFullName: testDetails.ReturnType.FullName!
                     ),
-                
                 // Custom TUnit Properties
                 ..testDetails.Categories.Select(category => new TestMetadataProperty(category, string.Empty)),
                 ..testDetails.CustomProperties.Select(x => new TestMetadataProperty(x.Key, x.Value)),

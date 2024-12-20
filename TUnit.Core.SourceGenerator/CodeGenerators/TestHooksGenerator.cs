@@ -84,7 +84,7 @@ public class TestHooksGenerator : IIncrementalGenerator
     {
         foreach (var groupedByTypeName in hooks.GroupBy(x => x.MinimalTypeName))
         {
-            var className = FilenameSanitizer.Sanitize($"Hooks_{groupedByTypeName.Key}");
+            var className = $"Hooks_{groupedByTypeName.Key}";
                 
             using var sourceBuilder = new SourceCodeWriter();
 
@@ -168,7 +168,7 @@ public class TestHooksGenerator : IIncrementalGenerator
 
             sourceBuilder.WriteLine("}");
                 
-            productionContext.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
+            productionContext.AddSource($"{className}-{Guid.NewGuid():N}.Generated.cs", sourceBuilder.ToString());
         }
     }
 
