@@ -45,38 +45,39 @@ public class PolyfillGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(context.CompilationProvider
             .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer()), (productionContext, compilation) =>
         {
-            if (compilation.SupportsRuntimeCapability(RuntimeCapability.DefaultImplementationsOfInterfaces))
+            if (!compilation.ContainsSymbolsWithName("System.Runtime.CompilerServices.ModuleInitializerAttribute", SymbolFilter.Type))
             {
-                return;
+                productionContext.AddSource("ModuleInitializerAttribute.g.cs",
+                    """
+                    namespace System.Runtime.CompilerServices;
+
+                    using System;
+                    using System.Diagnostics;
+                    using System.Diagnostics.CodeAnalysis;
+
+                    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+                    sealed class ModuleInitializerAttribute : Attribute;
+                    """);
             }
 
-            productionContext.AddSource("ModuleInitializerAttribute.g.cs",
-                """
-                namespace System.Runtime.CompilerServices;
+            if (!compilation.ContainsSymbolsWithName("System.Diagnostics.StackTraceHiddenAttribute", SymbolFilter.Type))
+            {
+                productionContext.AddSource("StackTraceHiddenAttribute.g.cs",
+                    """
+                    namespace System.Diagnostics;
 
-                using System;
-                using System.Diagnostics;
-                using System.Diagnostics.CodeAnalysis;
+                    using System;
+                    using System.Diagnostics.CodeAnalysis;
 
-                [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-                sealed class ModuleInitializerAttribute : Attribute;
-                """);
-            
-            productionContext.AddSource("StackTraceHiddenAttribute.g.cs",
-                """
-                namespace System.Diagnostics;
-
-                using System;
-                using System.Diagnostics.CodeAnalysis;
-
-                [AttributeUsage(
-                    AttributeTargets.Class |
-                    AttributeTargets.Method |
-                    AttributeTargets.Constructor |
-                    AttributeTargets.Struct,
-                    Inherited = false)]
-                sealed class StackTraceHiddenAttribute : Attribute;
-                """);
+                    [AttributeUsage(
+                        AttributeTargets.Class |
+                        AttributeTargets.Method |
+                        AttributeTargets.Constructor |
+                        AttributeTargets.Struct,
+                        Inherited = false)]
+                    sealed class StackTraceHiddenAttribute : Attribute;
+                    """);
+            }
         });
     }
 }
