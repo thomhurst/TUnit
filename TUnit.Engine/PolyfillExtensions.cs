@@ -2,7 +2,7 @@
 
 namespace TUnit;
 
-static class PolyfillExtensions
+internal static class PolyfillExtensions
 {
     internal static void Deconstruct<K, V>(this KeyValuePair<K, V> pair, out K key, out V val)
     {
@@ -18,6 +18,7 @@ static class PolyfillExtensions
     }
 
     internal static bool StartsWith(this string value, char ch) => value.Length > 0 && value[0] == ch;
+    internal static bool Contains(this string value, string substring, StringComparison stringComparison) => value.IndexOf(substring, stringComparison) != -1;
 
     internal static bool TryPop<T>(this Stack<T> stack, [MaybeNullWhen(false)] out T value)
     {
@@ -79,14 +80,14 @@ static class PolyfillExtensions
             }
         }
 
-        TSource value = e.Current;
-        TKey key = keySelector(value);
+        var value = e.Current;
+        var key = keySelector(value);
 
         if (default(TKey) is null)
         {
             if (key is null)
             {
-                TSource firstValue = value;
+                var firstValue = value;
 
                 do
                 {
@@ -104,8 +105,8 @@ static class PolyfillExtensions
 
             while (e.MoveNext())
             {
-                TSource nextValue = e.Current;
-                TKey nextKey = keySelector(nextValue);
+                var nextValue = e.Current;
+                var nextKey = keySelector(nextValue);
                 if (nextKey is not null && comparer.Compare(nextKey, key) < 0)
                 {
                     key = nextKey;
@@ -115,12 +116,12 @@ static class PolyfillExtensions
         }
         else
         {
-            if (comparer == Comparer<TKey>.Default)
+            if (Equals(comparer, Comparer<TKey>.Default))
             {
                 while (e.MoveNext())
                 {
-                    TSource nextValue = e.Current;
-                    TKey nextKey = keySelector(nextValue);
+                    var nextValue = e.Current;
+                    var nextKey = keySelector(nextValue);
                     if (Comparer<TKey>.Default.Compare(nextKey, key) < 0)
                     {
                         key = nextKey;
@@ -132,8 +133,8 @@ static class PolyfillExtensions
             {
                 while (e.MoveNext())
                 {
-                    TSource nextValue = e.Current;
-                    TKey nextKey = keySelector(nextValue);
+                    var nextValue = e.Current;
+                    var nextKey = keySelector(nextValue);
                     if (comparer.Compare(nextKey, key) < 0)
                     {
                         key = nextKey;
@@ -192,14 +193,14 @@ static class PolyfillExtensions
             }
         }
 
-        TSource value = e.Current;
-        TKey key = keySelector(value);
+        var value = e.Current;
+        var key = keySelector(value);
 
         if (default(TKey) is null)
         {
             if (key is null)
             {
-                TSource firstValue = value;
+                var firstValue = value;
 
                 do
                 {
@@ -217,8 +218,8 @@ static class PolyfillExtensions
 
             while (e.MoveNext())
             {
-                TSource nextValue = e.Current;
-                TKey nextKey = keySelector(nextValue);
+                var nextValue = e.Current;
+                var nextKey = keySelector(nextValue);
                 if (nextKey is not null && comparer.Compare(nextKey, key) > 0)
                 {
                     key = nextKey;
@@ -228,12 +229,12 @@ static class PolyfillExtensions
         }
         else
         {
-            if (comparer == Comparer<TKey>.Default)
+            if (Equals(comparer, Comparer<TKey>.Default))
             {
                 while (e.MoveNext())
                 {
-                    TSource nextValue = e.Current;
-                    TKey nextKey = keySelector(nextValue);
+                    var nextValue = e.Current;
+                    var nextKey = keySelector(nextValue);
                     if (Comparer<TKey>.Default.Compare(nextKey, key) > 0)
                     {
                         key = nextKey;
@@ -245,8 +246,8 @@ static class PolyfillExtensions
             {
                 while (e.MoveNext())
                 {
-                    TSource nextValue = e.Current;
-                    TKey nextKey = keySelector(nextValue);
+                    var nextValue = e.Current;
+                    var nextKey = keySelector(nextValue);
                     if (comparer.Compare(nextKey, key) > 0)
                     {
                         key = nextKey;
