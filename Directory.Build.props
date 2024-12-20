@@ -4,7 +4,6 @@
     <TargetFrameworks Condition="'$(OutputType)' == 'Exe' and '$(SDK_VERSION)' == ''">net472;net8.0;net9.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OutputType)' != 'Exe' and '$(SDK_VERSION)' == ''">netstandard2.0;net8.0;net9.0</TargetFrameworks>
     <!--suppress MsbuildTargetFrameworkTagInspection -->
-    <TargetFrameworks Condition="'$(SDK_VERSION)' == 'netstandard'">netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net8'">net8.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net9'">net8.0;net9.0</TargetFrameworks>
 

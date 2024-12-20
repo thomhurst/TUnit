@@ -25,7 +25,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build .NET 472
-        run: dotnet build -c Release -p:TreatWarningsAsErrors=true -p:SDK_VERSION=netstandard
+        run: dotnet build -c Release -p:TreatWarningsAsErrors=true
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
