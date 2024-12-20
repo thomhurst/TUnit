@@ -46,8 +46,8 @@
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
   </ItemGroup>
   <PropertyGroup>
-           <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-           <CompilerGeneratedFilesOutputPath>EmittedSourceGeneratedFiles</CompilerGeneratedFilesOutputPath>
+           <!-- <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles> -->
+           <!-- <CompilerGeneratedFilesOutputPath>EmittedSourceGeneratedFiles</CompilerGeneratedFilesOutputPath> -->
   </PropertyGroup>
   <ItemGroup>
     <None Update="Data\Blah.txt">
