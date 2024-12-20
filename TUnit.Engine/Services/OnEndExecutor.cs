@@ -36,11 +36,12 @@ internal class OnEndExecutor(
         {
             var path = Path.Combine(Environment.CurrentDirectory, GetFilename());
         
-            await using var file = File.Create(path);
+            using var file = File.Create(path);
 
             var jsonOutput = GetJsonOutput(testSessionContext);
         
             await JsonSerializer.SerializeAsync(file, jsonOutput, JsonContext.Default.TestSessionJson);
+            await file.FlushAsync();
 
             await logger.LogInformationAsync($"TUnit JSON output saved to: {path}");
         }

@@ -31,7 +31,7 @@ public static partial class DoesNotExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, _) =>
             {
-                ArgumentNullException.ThrowIfNull(actual);
+                Verify.ArgNotNull(actual);
                 return !actual.StartsWith(expected, stringComparison);
             },
             (actual, _, _) => $"\"{actual}\" does start with \"{expected}\"",
@@ -50,7 +50,7 @@ public static partial class DoesNotExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, _) =>
             {
-                ArgumentNullException.ThrowIfNull(actual);
+                Verify.ArgNotNull(actual);
                 return !actual.EndsWith(expected, stringComparison);
             },
             (actual, _, _) => $"\"{actual}\" does end with \"{expected}\"",

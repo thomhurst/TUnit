@@ -13,6 +13,6 @@ public class AssignableToExpectedValueAssertCondition<TActual>(Type expectedType
             .FailIf(() => actualValue is null,
                 () => "actual is null")
             .OrFailIf(
-                () => !actualValue!.GetType().IsAssignableTo(expectedType),
+                () => !expectedType.IsAssignableFrom(actualValue!.GetType()),
                 () => $"it is {ActualValue?.GetType().Name ?? "null"}");
 }

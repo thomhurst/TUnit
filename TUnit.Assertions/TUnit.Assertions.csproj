@@ -1,18 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\Polyfill.props" />
 
     <PropertyGroup>
       <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
-                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-        
+        <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Assertions.Analyzers\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-        
-        <ProjectReference Include="..\TUnit.Assertions.Analyzers.CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj"
-                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-        
+
+        <ProjectReference Include="..\TUnit.Assertions.Analyzers.CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Assertions.Analyzers.CodeFixers\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.Analyzers.CodeFixers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
@@ -21,11 +20,16 @@
 </ItemGroup>
 
 <ItemGroup>
+  <Compile Include="..\TUnit.Engine\PolyfillExtensions.cs" Link="PolyfillExtensions.cs" />
+  <Compile Include="..\TUnit.Engine\Verify.cs" Link="Verify.cs" />
+</ItemGroup>
+
+<ItemGroup>
     <Content Include="TUnit.Assertions.props">
         <Pack>true</Pack>
         <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
     </Content>
-    
+
     <Content Include="TUnit.Assertions.targets">
         <Pack>true</Pack>
         <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>

@@ -4,6 +4,8 @@ namespace TUnit.Core;
 
 public abstract class ArgumentDisplayFormatterAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
 {
+    public virtual int Order => 0;
+
     public abstract ArgumentDisplayFormatter Formatter { get; }
     
     public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)

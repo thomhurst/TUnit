@@ -114,9 +114,14 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+#if NET
         await StandardOutConsoleInterceptor.DisposeAsync();
         await StandardErrorConsoleInterceptor.DisposeAsync();
-        
+#else
+        StandardOutConsoleInterceptor.Dispose();
+        StandardErrorConsoleInterceptor.Dispose();
+#endif
+
         foreach (var servicesValue in _services.Values)
         {
             await Disposer.DisposeAsync(servicesValue);
@@ -132,6 +137,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     public object? GetService(Type serviceType)
     {
-        return _services.GetValueOrDefault(serviceType);
+        _services.TryGetValue(serviceType, out object? result);
+        return result;
     }
 }

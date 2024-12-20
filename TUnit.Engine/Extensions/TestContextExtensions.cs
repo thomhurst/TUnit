@@ -40,7 +40,7 @@ public static class TestContextExtensions
                     }
                     catch (TargetInvocationException e)
                     {
-                        ExceptionDispatchInfo.Throw(e.InnerException ?? e);
+                        ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
                     }
                 }
             ) with

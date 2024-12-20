@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+﻿#if NET
+
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
@@ -20,3 +22,5 @@ public class DateOnlyEqualToAssertionBuilderWrapper : InvokableValueAssertionBui
         return this;
     }
 }
+
+#endif

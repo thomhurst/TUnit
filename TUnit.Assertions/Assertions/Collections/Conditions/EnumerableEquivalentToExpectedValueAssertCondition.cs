@@ -9,7 +9,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-    protected override string GetExpectation() => $"to be equivalent to {(expected != null ? string.Join(',', expected) : null)}";
+    protected override string GetExpectation() => $"to be equivalent to {(expected != null ? string.Join(",", expected) : null)}";
 
     protected override AssertionResult GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
@@ -38,7 +38,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
                 () => "it is not null")
             .OrFailIf(
                 () => !orderedActual!.SequenceEqual(expectedValue!, equalityComparer),
-                () => $"it is {string.Join(',', orderedActual!)}"
+                () => $"it is {string.Join(",", orderedActual!)}"
             );
     }
 }

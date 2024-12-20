@@ -1,0 +1,14 @@
+<Project>
+    <PropertyGroup>
+        <TargetFrameworks>$(TargetFrameworks);netstandard2.0</TargetFrameworks>
+        <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Backport.System.Threading.Lock" />
+        <PackageReference Include="PolySharp" PrivateAssets="all" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFrameworkIdentifier)'!='.NETCoreApp'">
+        <PackageReference Include="System.Text.Json" />
+        <PackageReference Include="System.Threading.Tasks.Extensions" />
+    </ItemGroup>
+</Project>

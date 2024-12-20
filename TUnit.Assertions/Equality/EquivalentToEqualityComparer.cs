@@ -1,4 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if !NET
+#pragma warning disable CS8767 // Nullability of type parameters in type of collection doesn't match implicitly implemented member (possibly because of nullability attributes).
+#endif
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Assertions.Equality;
 

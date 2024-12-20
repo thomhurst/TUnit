@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Polyfill.props" />
   <PropertyGroup>
     <IsTestProject>false</IsTestProject>
     <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
@@ -7,8 +8,9 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(LaunchDebugger)' != ''">
     <DefineConstants>LAUNCH_DEBUGGER</DefineConstants>
   </PropertyGroup>
-  
+
   <ItemGroup>
+    <PackageReference Include="C5" />
     <PackageReference Include="EnumerableAsyncProcessor" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Platform" />

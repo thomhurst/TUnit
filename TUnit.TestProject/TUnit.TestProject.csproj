@@ -6,13 +6,13 @@
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-    <IsAotCompatible>true</IsAotCompatible>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(Aot)' == 'true'">
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
@@ -27,7 +27,7 @@
     <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
     <NoWarn>IL2118</NoWarn>
   </PropertyGroup>
-  
+
   <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
   </ItemGroup>

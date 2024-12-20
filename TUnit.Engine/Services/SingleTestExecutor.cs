@@ -33,7 +33,11 @@ internal class SingleTestExecutor(
     TestRegistrar testRegistrar)
     : IDataProducer
 {
+#if NET
     private static readonly Lock Lock = new();
+#else
+    private static readonly Backport.System.Threading.Lock Lock = Backport.System.Threading.LockFactory.Create();
+#endif
     
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
         bool isStartedAsDependencyForAnotherTest)
@@ -98,7 +102,7 @@ internal class SingleTestExecutor(
                 // But users may want to set AsyncLocal values, and so the method must be a parent/ancestor of the method that starts the test!
                 // So actually refactoring these into other methods would mean they wouldn't be a parent/ancestor and would break async local!
                 var assemblyHooksTaskCompletionSource = assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
-                    _ => new TaskCompletionSource(), out var assemblyHooksTaskPreviouslyExisted);
+                    _ => new TaskCompletionSource<bool>(), out var assemblyHooksTaskPreviouslyExisted);
                 
                 if (assemblyHooksTaskPreviouslyExisted)
                 {
@@ -128,7 +132,7 @@ internal class SingleTestExecutor(
                         }
 
                         AssemblyHookContext.Current = null;
-                        assemblyHooksTaskCompletionSource.SetResult();
+                        assemblyHooksTaskCompletionSource.SetResult(false);
                     }
                     catch (Exception e)
                     {
@@ -138,7 +142,7 @@ internal class SingleTestExecutor(
                 }
 
                 var classHooksTaskCompletionSource = classHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType,
-                    _ => new TaskCompletionSource(), out var classHooksTaskPreviouslyExisted);
+                    _ => new TaskCompletionSource<bool>(), out var classHooksTaskPreviouslyExisted);
                 
                 if (classHooksTaskPreviouslyExisted)
                 {
@@ -167,7 +171,7 @@ internal class SingleTestExecutor(
                         }
 
                         ClassHookContext.Current = null;
-                        classHooksTaskCompletionSource.SetResult();
+                        classHooksTaskCompletionSource.SetResult(false);
                     }
                     catch (Exception e)
                     {
@@ -216,7 +220,7 @@ internal class SingleTestExecutor(
             {
                 Status.Passed => messageBus.Passed(test.TestContext, start.GetValueOrDefault()),
                 Status.Failed => messageBus.Failed(test.TestContext, result.Exception!, start.GetValueOrDefault()),
-                _ => ValueTask.CompletedTask,
+                _ => default,
             };
 
             await task;
@@ -231,7 +235,7 @@ internal class SingleTestExecutor(
             if (!testContext.IsRegistered)
             {
                 return testRegistrar.RegisterInstance(testContext.InternalDiscoveredTest,
-                    _ => ValueTask.CompletedTask);
+                    _ => default);
             }
             
             return Task.CompletedTask;

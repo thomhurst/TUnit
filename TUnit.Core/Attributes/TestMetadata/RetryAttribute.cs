@@ -5,6 +5,8 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
 public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
 {
+    public int Order => 0;
+
     public int Times { get; }
 
     public RetryAttribute(int times)

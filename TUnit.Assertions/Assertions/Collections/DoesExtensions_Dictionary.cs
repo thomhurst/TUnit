@@ -16,7 +16,7 @@ public static partial class DoesExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TDictionary, TKey>(expected,
             (actual, _, _) =>
             {
-                ArgumentNullException.ThrowIfNull(actual);
+                Verify.ArgNotNull(actual);
                 return actual.Keys.Cast<TKey>().Contains(expected, equalityComparer);
             },
             (_, _, _) => $"The key \"{expected}\" was not found in the dictionary",
@@ -30,7 +30,7 @@ public static partial class DoesExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TDictionary, TValue>(expected,
             (actual, _, _) =>
             {
-                ArgumentNullException.ThrowIfNull(actual);
+                Verify.ArgNotNull(actual);
                 return actual.Values.Cast<TValue>().Contains(expected, equalityComparer);
             },
             (_, _, _) => $"The value \"{expected}\" was not found in the dictionary",
