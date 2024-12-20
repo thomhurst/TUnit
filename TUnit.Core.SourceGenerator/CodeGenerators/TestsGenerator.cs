@@ -93,7 +93,7 @@ public class TestsGenerator : IIncrementalGenerator
                      .TestSourceDataModels
                      .GroupBy(x => $"{prefix}{x.ClassNameToGenerate}"))
         {
-            var className = FilenameSanitizer.Sanitize(classGrouping.Key);
+            var className = classGrouping.Key;
             var count = classGrouping.Count();
 
             using var sourceBuilder = new SourceCodeWriter();
@@ -160,7 +160,7 @@ public class TestsGenerator : IIncrementalGenerator
 
             sourceBuilder.WriteLine("}");
 
-            context.AddSource($"{className}.Generated.cs", sourceBuilder.ToString());
+            context.AddSource($"{className}-{Guid.NewGuid():N}.Generated.cs", sourceBuilder.ToString());
         }
     }
 }
