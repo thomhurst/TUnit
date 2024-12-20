@@ -131,11 +131,6 @@ public static class TestSourceDataModelRetriever
 
         var methodNonGenericTypes = GetNonGenericTypes(testGenerationContext.MethodSymbol.Parameters,
             testArguments.GetArgumentTypes());
-
-        var classNonGenericTypes =
-            GetNonGenericTypes(
-                testGenerationContext.ClassSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty,
-                classArguments.GetArgumentTypes());
         
         return new TestSourceDataModel
         {
@@ -148,12 +143,10 @@ public static class TestSourceDataModelRetriever
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
-            ClassParameterOrArgumentNonGenericTypes = classNonGenericTypes.ToArray(),
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.GloballyQualified())],
-            MethodParameterOrArgumentNonGenericTypes = methodNonGenericTypes.ToArray(),
+            MethodParameterTypes = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
             MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
             TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
@@ -161,6 +154,23 @@ public static class TestSourceDataModelRetriever
             PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
         };
+    }
+
+    private static IEnumerable<string> GetParameterTypes(IMethodSymbol methodSymbol, string[] argumentTypes)
+    {
+        for (var index = 0; index < methodSymbol.Parameters.Length; index++)
+        {
+            var parameter = methodSymbol.Parameters[index];
+
+            if (parameter.Type.IsGenericDefinition())
+            {
+                yield return argumentTypes[index];
+            }
+            else
+            {
+                yield return parameter.Type.GloballyQualified();
+            }
+        }
     }
 
     private static IEnumerable<string> GetNonGenericTypes(ImmutableArray<IParameterSymbol> methodSymbolParameters,

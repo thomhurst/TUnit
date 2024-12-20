@@ -46,14 +46,11 @@ public record TestSourceDataModel
     public required string MethodName { get; init; }
     public required BaseContainer ClassArguments { get; init; }
     
-    public required string[] ClassParameterOrArgumentNonGenericTypes { get; init; }
-
     public required BaseContainer MethodArguments { get; init; }
     
     public required string[] MethodParameterTypes { get; init; }
     public required string[] MethodParameterNames { get; init; }
-    public required string[] MethodParameterOrArgumentNonGenericTypes { get; init; }
-
+    
     public required int MethodGenericTypeCount { get; init; }
     
     public required string TestId { get; init; }

@@ -6,16 +6,15 @@
         <IsTestProject>false</IsTestProject>
     </PropertyGroup>
 
-      <PropertyGroup>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <CompilerGeneratedFilesOutputPath>EmittedSourceGeneratedFiles</CompilerGeneratedFilesOutputPath>
-  </PropertyGroup>
-
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
 
         <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="EmittedSourceGeneratedFiles\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.CodeGenerators.TestHooksGenerator\" />
     </ItemGroup>
 
 </Project>
