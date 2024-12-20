@@ -1,12 +1,25 @@
 <Project>
     <PropertyGroup>
-        <TargetFrameworks>$(TargetFrameworks);netstandard2.0</TargetFrameworks>
         <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
     </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="Backport.System.Threading.Lock" />
+        <PackageReference Include="Backport.System.Threading.Lock" Version="3.1.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>analyzers</IncludeAssets>
+        </PackageReference>
+        <Using Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))"
+            Alias="Lock" Include="System.Threading.Lock" />
+        <Using
+            Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))"
+            Alias="Lock" Include="Backport.System.Threading.Lock" />
+        <Using Alias="LockFactory" Include="Backport.System.Threading.LockFactory" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="PolySharp" PrivateAssets="all" />
     </ItemGroup>
+
     <ItemGroup Condition="'$(TargetFrameworkIdentifier)'!='.NETCoreApp'">
         <PackageReference Include="System.Text.Json" />
         <PackageReference Include="System.Threading.Tasks.Extensions" />

@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup>
+      <IsLibraryPackage>true</IsLibraryPackage>
+    </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>

@@ -2,6 +2,7 @@
     <Import Project="..\Polyfill.props" />
 
     <PropertyGroup>
+      <IsLibraryPackage>true</IsLibraryPackage>
       <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
