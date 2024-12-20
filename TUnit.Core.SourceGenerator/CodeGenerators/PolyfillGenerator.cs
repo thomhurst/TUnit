@@ -45,7 +45,7 @@ public class PolyfillGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(context.CompilationProvider
             .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer()), (productionContext, compilation) =>
         {
-            if (!compilation.ContainsSymbolsWithName("System.Runtime.CompilerServices.ModuleInitializerAttribute", SymbolFilter.Type))
+            if (compilation.GetTypeByMetadataName("System.Runtime.CompilerServices.ModuleInitializerAttribute") == null)
             {
                 productionContext.AddSource("ModuleInitializerAttribute.g.cs",
                     """
@@ -60,7 +60,7 @@ public class PolyfillGenerator : IIncrementalGenerator
                     """);
             }
 
-            if (!compilation.ContainsSymbolsWithName("System.Diagnostics.StackTraceHiddenAttribute", SymbolFilter.Type))
+            if (compilation.GetTypeByMetadataName("System.Diagnostics.StackTraceHiddenAttribute") == null)
             {
                 productionContext.AddSource("StackTraceHiddenAttribute.g.cs",
                     """
