@@ -37,7 +37,7 @@ public class SourceCodeWriter : IDisposable
         
         _stringBuilder.AppendLine(value);
 
-        if (value[0] is '{' or '[')
+        if (value is ['{' or '['])
         {
             _tabLevel++;
         }
