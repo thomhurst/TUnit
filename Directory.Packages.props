@@ -4,7 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
-    <PackageVersion Include="Backport.System.Threading.Lock" Version="3.1.4" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="C5" Version="3.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
@@ -45,7 +44,7 @@
     <PackageVersion Include="NUnit.Analyzers" Version="4.4.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="Polly" Version="8.5.0" />
-    <PackageVersion Include="PolySharp" Version="1.15.0" />
+    <PackageVersion Include="Polyfill" Version="7.8.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="0.0.66" />
     <PackageVersion Include="Sourcy.Git" Version="0.0.66" />
     <PackageVersion Include="StreamJsonRpc" Version="2.20.20" />

@@ -41,9 +41,9 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
 
     private void Push(TAssertionBuilder assertionBuilder, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
     {
-        if (_assertConditions.TryPop(out var assertCondition))
+        if (_assertConditions.Count > 0)
         {
-            _assertConditions.Push(new OrAssertCondition<TActual>(assertCondition, assert(assertionBuilder).Assertions.Pop()));
+            _assertConditions.Push(new OrAssertCondition<TActual>(_assertConditions.Pop(), assert(assertionBuilder).Assertions.Pop()));
         }
         else
         {

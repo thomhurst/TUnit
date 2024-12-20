@@ -21,8 +21,8 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         IEnumerable<TInner>? orderedActual;
         if (collectionOrdering == CollectionOrdering.Any)
         {
-            orderedActual = actualValue?.Order();
-            expectedValue = expectedValue?.Order();
+            orderedActual = actualValue?.OrderBy(x => x);
+            expectedValue = expectedValue?.OrderBy(x => x);
         }
         else
         {

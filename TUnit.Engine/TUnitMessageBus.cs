@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.TestHost;
+using Polyfills;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
 #pragma warning disable TPEXP

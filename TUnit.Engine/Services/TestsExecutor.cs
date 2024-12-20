@@ -2,6 +2,7 @@
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using Polyfills;
 using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;

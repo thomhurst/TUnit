@@ -9,7 +9,7 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
 {
     private ConcurrentDictionary<TKey, TValue> InnerDictionary { get; } = new();
 
-    private static readonly Lock Lock = LockFactory.Create();
+    private static readonly Lock Lock = new();
 
     public ICollection<TKey> Keys => InnerDictionary.Keys;
     public ICollection<TValue> Values => InnerDictionary.Values;

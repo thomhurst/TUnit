@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.Extensions;
+﻿#if NET
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 
@@ -42,3 +43,4 @@ public class DateOnlyEqualToAssertionTests
         NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithinDays(1));
     }
 }
+#endif

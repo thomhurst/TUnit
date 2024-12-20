@@ -5,10 +5,11 @@
     <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
+  
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(LaunchDebugger)' != ''">
     <DefineConstants>LAUNCH_DEBUGGER</DefineConstants>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="C5" />
     <PackageReference Include="EnumerableAsyncProcessor" />

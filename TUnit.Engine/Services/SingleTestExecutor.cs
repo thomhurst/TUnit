@@ -33,7 +33,7 @@ internal class SingleTestExecutor(
     TestRegistrar testRegistrar)
     : IDataProducer
 {
-    private static readonly Lock Lock = LockFactory.Create();
+    private static readonly Lock Lock = new();
     
     public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter, ExecuteRequestContext context,
         bool isStartedAsDependencyForAnotherTest)

@@ -1,23 +1,6 @@
 <Project>
-    <PropertyGroup>
-        <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
-    </PropertyGroup>
-
     <ItemGroup>
-        <PackageReference Include="Backport.System.Threading.Lock">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>analyzers</IncludeAssets>
-        </PackageReference>
-        <Using Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))"
-            Alias="Lock" Include="System.Threading.Lock" />
-        <Using
-            Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))"
-            Alias="Lock" Include="Backport.System.Threading.Lock" />
-        <Using Alias="LockFactory" Include="Backport.System.Threading.LockFactory" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="PolySharp" PrivateAssets="all" />
+        <PackageReference Include="Polyfill" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFrameworkIdentifier)'!='.NETCoreApp'">

@@ -37,4 +37,8 @@
     </Content>
 </ItemGroup>
 
+<ItemGroup>
+  <PackageReference Remove="Backport.System.Threading.Lock" />
+</ItemGroup>
+
 </Project>

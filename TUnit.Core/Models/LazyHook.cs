@@ -2,7 +2,7 @@
 
 internal class LazyHook<T1, T2>(Func<T1, T2, Task> func)
 {
-    private readonly Lock _lock = LockFactory.Create();
+    private readonly Lock _lock = new();
 
     private Task? _value;
 

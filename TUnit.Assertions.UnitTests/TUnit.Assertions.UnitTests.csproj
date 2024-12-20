@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Polyfill.props" />
 
   <PropertyGroup>
     <IsLibraryTestProject>true</IsLibraryTestProject>
@@ -20,5 +21,10 @@
     <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\TUnit.Engine\PolyfillExtensions.cs">
+      <Link>PolyfillExtensions.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

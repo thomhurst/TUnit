@@ -5,7 +5,7 @@ namespace TUnit.Engine.Services;
 [DebuggerDisplay("Count = {CurrentCount}")]
 public class Counter
 {
-    private readonly Lock _locker = LockFactory.Create();
+    private readonly Lock _locker = new();
 
     private int _count;
 

@@ -5,7 +5,7 @@ namespace TUnit.Core;
 public class AsyncEvent<TEventArgs>
 {
     private readonly List<Func<object, TEventArgs, Task>> _invocationList;
-    private readonly Lock _locker = LockFactory.Create();
+    private readonly Lock _locker = new();
 
     private AsyncEvent()
     {
