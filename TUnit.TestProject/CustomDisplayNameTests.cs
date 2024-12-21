@@ -57,6 +57,8 @@ public class CustomDisplayNameTests
         {
             discoveredTestContext.SetDisplayName($"{discoveredTestContext.TestDetails.TestName}(REDACTED)");
         }
+
+        public int Order => 0;
     }
 
     public static string Method() => "bar";

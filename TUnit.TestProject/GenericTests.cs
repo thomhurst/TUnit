@@ -84,3 +84,4 @@ public class GenericDouble : GenericTests<double>
         yield return 4.4;
     }
 }
+#endif
