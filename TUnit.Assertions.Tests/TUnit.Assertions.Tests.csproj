@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Polyfill.props" />
+
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <IsLibraryTestProject>true</IsLibraryTestProject>
     <LangVersion>preview</LangVersion>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     <IsPackable>false</IsPackable>
