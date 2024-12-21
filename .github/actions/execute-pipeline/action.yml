@@ -20,6 +20,10 @@ inputs:
     description: 'Environment'
     required: false
     default: 'Development'
+  netversion:
+    description: 'Net version'
+    required: false
+    default: 'net9.0'
 
 runs:
   using: "composite"
@@ -34,3 +38,4 @@ runs:
         DOTNET_ENVIRONMENT: ${{ inputs.environment }}
         NuGet__ApiKey: ${{ inputs.nuget-apikey }}
         NuGet__ShouldPublish: ${{ inputs.publish-packages }}
+        NET_VERSION: ${{ inputs.netversion }}

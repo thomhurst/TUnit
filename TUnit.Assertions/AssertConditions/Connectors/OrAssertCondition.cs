@@ -7,8 +7,8 @@ internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
 
     public OrAssertCondition(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2)
     {
-        ArgumentNullException.ThrowIfNull(condition1);
-        ArgumentNullException.ThrowIfNull(condition2);
+        Verify.ArgNotNull(condition1);
+        Verify.ArgNotNull(condition2);
         
         _condition1 = condition1;
         _condition2 = condition2;

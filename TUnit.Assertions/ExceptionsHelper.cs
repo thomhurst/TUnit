@@ -10,7 +10,7 @@ internal static class ExceptionsHelper
     {
         if (exceptions.Count == 1)
         {
-            ExceptionDispatchInfo.Throw(exceptions[0]);
+            ExceptionDispatchInfo.Capture(exceptions[0]).Throw();
         }
 
         if (exceptions.Count > 1)

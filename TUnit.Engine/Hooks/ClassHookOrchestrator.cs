@@ -13,7 +13,7 @@ internal class ClassHookOrchestrator(InstanceTracker instanceTracker, HooksColle
     
     private readonly ConcurrentDictionary<Type, bool> _beforeHooksReached = new();
 
-    internal GetOnlyDictionary<Type, TaskCompletionSource> PreviouslyRunBeforeHooks { get; } = new();
+    internal GetOnlyDictionary<Type, TaskCompletionSource<bool>> PreviouslyRunBeforeHooks { get; } = new();
 
     public IEnumerable<StaticHookMethod<ClassHookContext>> CollectBeforeHooks(Type testClassType)
     {

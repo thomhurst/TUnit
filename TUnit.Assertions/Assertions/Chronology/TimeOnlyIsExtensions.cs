@@ -1,5 +1,7 @@
 ﻿#nullable disable
 
+#if NET
+
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Chronology;
@@ -64,3 +66,5 @@ public static class TimeOnlyIsExtensions
             , [doNotPopulateThisValue]);
     }
 }
+
+#endif

@@ -23,7 +23,7 @@ public static class TestSourceDataModelRetriever
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, constructorParameters, constructorParameters.Select(x => x.Type).ToImmutableArray(), GetClassAttributes(namedTypeSymbol).Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
         var methodParametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
-        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes().ToImmutableArray(), namedTypeSymbol, ArgumentsType.Method);
         var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol);
         
         var repeatCount =
@@ -118,9 +118,9 @@ public static class TestSourceDataModelRetriever
 
         AttributeData[] allAttributes =
         [
-            ..methodSymbol.GetAttributes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime"),
-            ..namedTypeSymbol.GetAttributesIncludingBaseTypes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime"),
-            ..namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime")
+            ..methodSymbol.GetAttributes(),
+            ..namedTypeSymbol.GetAttributesIncludingBaseTypes(),
+            ..namedTypeSymbol.ContainingAssembly.GetAttributes()
         ];
 
         var propertyAttributes = testGenerationContext.PropertyArguments
@@ -129,14 +129,6 @@ public static class TestSourceDataModelRetriever
             .SelectMany(x => x.GetAttributes())
             .Where(x => x.IsDataSourceAttribute());
 
-        var methodNonGenericTypes = GetNonGenericTypes(testGenerationContext.MethodSymbol.Parameters,
-            testArguments.GetArgumentTypes());
-
-        var classNonGenericTypes =
-            GetNonGenericTypes(
-                testGenerationContext.ClassSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty,
-                classArguments.GetArgumentTypes());
-        
         return new TestSourceDataModel
         {
             TestId = TestInformationRetriever.GetTestId(testGenerationContext),
@@ -148,31 +140,38 @@ public static class TestSourceDataModelRetriever
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
-            ClassParameterOrArgumentNonGenericTypes = classNonGenericTypes.ToArray(),
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.GloballyQualified())],
-            MethodParameterOrArgumentNonGenericTypes = methodNonGenericTypes.ToArray(),
+            MethodParameterTypes = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
             MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
-            AttributeTypes = allAttributes.Where(x => !x.IsDataSourceAttribute()).Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().Distinct().ToArray(),
-            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().ToArray(),
+            TestExecutor = allAttributes
+                .FirstOrDefault(x =>
+                    x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)
+                ?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
+            AttributeTypes = allAttributes.ExceptSystemAttributes()
+                .Where(x => x.AttributeClass!.DeclaredAccessibility == Accessibility.Public)
+                .Where(x => !x.IsDataSourceAttribute())
+                .Select(x => x.AttributeClass?.GloballyQualified())
+                .OfType<string>()
+                .Distinct()
+                .ToArray(),
+            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified())
+                .OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
         };
     }
 
-    private static IEnumerable<string> GetNonGenericTypes(ImmutableArray<IParameterSymbol> methodSymbolParameters,
-        string[] argumentTypes)
+    private static IEnumerable<string> GetParameterTypes(IMethodSymbol methodSymbol, string[] argumentTypes)
     {
-        for (var i = 0; i < methodSymbolParameters.Length; i++)
+        for (var index = 0; index < methodSymbol.Parameters.Length; index++)
         {
-            var parameter = methodSymbolParameters[i];
+            var parameter = methodSymbol.Parameters[index];
 
             if (parameter.Type.IsGenericDefinition())
             {
-                yield return argumentTypes.ElementAtOrDefault(i) ?? "global::System.Threading.CancellationToken";
+                yield return argumentTypes[index];
             }
             else
             {

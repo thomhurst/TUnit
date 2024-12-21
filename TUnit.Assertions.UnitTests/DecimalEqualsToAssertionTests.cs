@@ -22,6 +22,7 @@ public class DecimalEqualsToAssertionTests
         NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2));
     }
     
+#if NET
     [Test]
     public async Task Decimal_EqualsTo__With_Tolerance_Success()
     {
@@ -39,4 +40,5 @@ public class DecimalEqualsToAssertionTests
         
         NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2).Within(0.0001));
     }
+#endif
 }

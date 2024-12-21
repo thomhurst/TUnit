@@ -83,7 +83,7 @@ public static class Compare
             {
                 string?[] readOnlySpan = [..memberNames, $"[{i}]"];
 
-                if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
+                if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
                 {
                     continue;
                 }
@@ -106,7 +106,7 @@ public static class Compare
         {
             string?[] readOnlySpan = [..memberNames, fieldName];
 
-            if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
+            if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
             {
                 continue;
             }
@@ -147,7 +147,7 @@ public static class Compare
         {
             string?[] readOnlySpan = [..memberNames, propertyName];
 
-            if (options.MembersToIgnore.Contains(string.Join('.', readOnlySpan)))
+            if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
             {
                 continue;
             }

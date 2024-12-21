@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿#if NET
+
+using System.Numerics;
 
 namespace TUnit.Assertions.Extensions;
 
@@ -10,3 +12,5 @@ internal static class NumberExtensions
         return number.CompareTo(min) >= 0 && number.CompareTo(max) <= 0;
     }
 }
+
+#endif

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup>
+        <IsLibraryPackage>true</IsLibraryPackage>
         <IsTestProject>false</IsTestProject>
         <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
     </PropertyGroup>

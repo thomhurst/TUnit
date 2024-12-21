@@ -22,13 +22,13 @@ public class AsyncTaskTests
     [Test]
     public async Task Func_Awaited_ValueTask_Is_Callable()
     {
-        await TUnitAssert.That(async () => await ValueTask.FromResult("Hello")).IsNotNullOrEmpty().And.IsEqualTo("Hello");
+        await TUnitAssert.That(async () => await new ValueTask<string>(Task.FromResult("Hello"))).IsNotNullOrEmpty().And.IsEqualTo("Hello");
     }
     
     [Test]
     public async Task ValueTask_Is_Callable()
     {
-        await TUnitAssert.That(ValueTask.FromResult("Hello")).IsNotNullOrEmpty().And.IsEqualTo("Hello");
+        await TUnitAssert.That(new ValueTask<string>(Task.FromResult("Hello"))).IsNotNullOrEmpty().And.IsEqualTo("Hello");
     }
     
     [Test]
@@ -52,7 +52,7 @@ public class AsyncTaskTests
     [Test]
     public async Task Func_Throws_Awaited_ValueTask_Is_Callable()
     {
-        await TUnitAssert.ThrowsAsync(async () => await ValueTask.FromException(new DivideByZeroException()));
+        await TUnitAssert.ThrowsAsync(async () => await new ValueTask(Task.FromException(new DivideByZeroException())));
     }
     
     [Test]
@@ -64,6 +64,6 @@ public class AsyncTaskTests
     [Test]
     public async Task Throws_ValueTask_Is_Callable()
     {
-        await TUnitAssert.ThrowsAsync(ValueTask.FromException(new DivideByZeroException()));
+        await TUnitAssert.ThrowsAsync(new ValueTask(Task.FromException(new DivideByZeroException())));
     }
 }

@@ -13,6 +13,8 @@ public record TestContextEvents :
     ILastTestInTestSessionEventReceiver,
     ITestRetryEventReceiver
 {
+    public int Order => 0;
+
     public EventHandler? OnDispose { get; set; }
     public AsyncEvent<TestRegisteredContext>? OnTestRegistered { get; set; }
     public AsyncEvent<BeforeTestContext>? OnTestStart { get; set; }
@@ -25,46 +27,50 @@ public record TestContextEvents :
 
     ValueTask ITestRegisteredEventReceiver.OnTestRegistered(TestRegisteredContext context)
     {
-        return OnTestRegistered?.InvokeAsync(this, context) ?? ValueTask.CompletedTask;
+        return OnTestRegistered?.InvokeAsync(this, context) ?? default;
     }
 
     ValueTask ITestStartEventReceiver.OnTestStart(BeforeTestContext beforeTestContext)
     {
-        return OnTestStart?.InvokeAsync(this, beforeTestContext) ?? ValueTask.CompletedTask;
+        return OnTestStart?.InvokeAsync(this, beforeTestContext) ?? default;
     }
 
     ValueTask ITestEndEventReceiver.OnTestEnd(TestContext testContext)
     {
-        return OnTestEnd?.InvokeAsync(this, testContext) ?? ValueTask.CompletedTask;
+        return OnTestEnd?.InvokeAsync(this, testContext) ?? default;
     }
     
     ValueTask ITestSkippedEventReceiver.OnTestSkipped(TestContext testContext)
     {
-        return OnTestSkipped?.InvokeAsync(this, testContext) ?? ValueTask.CompletedTask;
+        return OnTestSkipped?.InvokeAsync(this, testContext) ?? default;
     }
 
     ValueTask ILastTestInClassEventReceiver.OnLastTestInClass(ClassHookContext context, TestContext testContext)
     {
-        return OnLastTestInClass?.InvokeAsync(this, (context, testContext)) ?? ValueTask.CompletedTask;
+        return OnLastTestInClass?.InvokeAsync(this, (context, testContext)) ?? default;
     }
 
     ValueTask ILastTestInAssemblyEventReceiver.OnLastTestInAssembly(AssemblyHookContext context, TestContext testContext)
     {
-        return OnLastTestInAssembly?.InvokeAsync(this, (context, testContext)) ?? ValueTask.CompletedTask;
+        return OnLastTestInAssembly?.InvokeAsync(this, (context, testContext)) ?? default;
     }
 
     ValueTask ILastTestInTestSessionEventReceiver.OnLastTestInTestSession(TestSessionContext context, TestContext testContext)
     {
-        return OnLastTestInTestSession?.InvokeAsync(this, (context, testContext)) ?? ValueTask.CompletedTask;
+        return OnLastTestInTestSession?.InvokeAsync(this, (context, testContext)) ?? default;
     }
 
     ValueTask ITestRetryEventReceiver.OnTestRetry(TestContext testContext, int retryAttempt)
     {
-        return OnTestRetry?.InvokeAsync(this, (testContext, retryAttempt)) ?? ValueTask.CompletedTask;
+        return OnTestRetry?.InvokeAsync(this, (testContext, retryAttempt)) ?? default;
     }
     
     public void Dispose()
     {
         OnDispose?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void OnTestStartSynchronous(BeforeTestContext beforeTestContext)
+    {
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace TUnit.TestProject;
+﻿using System.Net.Http;
+
+namespace TUnit.TestProject;
 
 public class DisposableFieldTests
 {

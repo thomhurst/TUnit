@@ -42,7 +42,11 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
             $"TUnit v{typeof(BannerCapability).Assembly.GetName().Version!.ToString()}",
             GetApplicationMemorySize(),
             RuntimeInformation.OSDescription,
+#if NET
             RuntimeInformation.RuntimeIdentifier,
+#else
+            ".NET Framework",
+#endif
             RuntimeInformation.FrameworkDescription,
             $"Microsoft Testing Platform v{platformInformation.Version}"
         ];

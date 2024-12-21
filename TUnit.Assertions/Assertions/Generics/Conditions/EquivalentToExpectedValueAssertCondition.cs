@@ -40,7 +40,7 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
                         {
                             MembersToIgnore = [.._ignoredMembers]
                         })),
-                    () => $"it is {string.Join(',', actualEnumerable)}");
+                    () => $"it is {string.Join(",", actualEnumerable)}");
         }
 
         bool? isEqual = null;
@@ -78,7 +78,7 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
             }
 
             return FailWithMessage($"""
-                                    {firstFailure.Type} {string.Join('.', firstFailure.NestedMemberNames)} did not match
+                                    {firstFailure.Type} {string.Join(".", firstFailure.NestedMemberNames)} did not match
                                     Expected: {Formatter.Format(firstFailure.Expected)}
                                     Received: {Formatter.Format(firstFailure.Actual)}
                                     """);

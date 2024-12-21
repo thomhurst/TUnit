@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.Extensions;
+﻿#if NET
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 
@@ -42,3 +43,4 @@ public class TimeOnlyEqualToAssertionTests
         NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).Within(TimeSpan.FromSeconds(0.1)));
     }
 }
+#endif

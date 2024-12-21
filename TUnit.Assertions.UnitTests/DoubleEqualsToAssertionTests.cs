@@ -22,6 +22,7 @@ public class DoubleEqualsToAssertionTests
         NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2));
     }
     
+#if NET
     [Test]
     public async Task Double_EqualsTo__With_Tolerance_Success()
     {
@@ -30,7 +31,7 @@ public class DoubleEqualsToAssertionTests
         
         await TUnitAssert.That(double1).IsEqualTo(double2).Within(0.1);
     }
-    
+
     [Test]
     public void Double_EqualsTo__With_Tolerance_Failure()
     {
@@ -39,4 +40,5 @@ public class DoubleEqualsToAssertionTests
         
         NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2).Within(0.1));
     }
+#endif
 }

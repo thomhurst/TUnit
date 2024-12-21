@@ -1,5 +1,7 @@
 ﻿#nullable disable
 
+#if NET
+
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
@@ -135,3 +137,5 @@ public static class NumberIsExtensions
             , []);
     }
 }
+
+#endif

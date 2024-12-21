@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.Chronology;
+﻿#if NET
+
+namespace TUnit.Assertions.AssertConditions.Chronology;
 
 public class TimeOnlyEqualsExpectedValueAssertCondition(TimeOnly expected) : ExpectedValueAssertCondition<TimeOnly, TimeOnly>(expected) 
 {
@@ -38,3 +40,5 @@ public class TimeOnlyEqualsExpectedValueAssertCondition(TimeOnly expected) : Exp
         _tolerance = tolerance;
     }
 }
+
+#endif

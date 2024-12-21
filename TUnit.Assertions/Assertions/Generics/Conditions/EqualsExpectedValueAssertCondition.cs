@@ -1,4 +1,7 @@
-﻿using TUnit.Assertions.AssertConditions;
+﻿#if !NET
+#pragma warning disable CS8604 // Possible null reference argument.
+#endif
+using TUnit.Assertions.AssertConditions;
 
 namespace TUnit.Assertions.Assertions.Generics.Conditions;
 

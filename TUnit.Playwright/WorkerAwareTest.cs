@@ -77,6 +77,8 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
             context.SetParallelLimiter(new DefaultPlaywrightParallelLimiter());
         }
         
-        return ValueTask.CompletedTask;
+        return default;
     }
+
+    int IEventReceiver.Order => 0;
 }

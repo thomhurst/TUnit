@@ -6,7 +6,7 @@ namespace TUnit.Engine.Services;
 public class Counter
 {
     private readonly Lock _locker = new();
-    
+
     private int _count;
 
     public int Increment()

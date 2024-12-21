@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
+using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
@@ -40,7 +41,7 @@ public static class TestContextExtensions
                     }
                     catch (TargetInvocationException e)
                     {
-                        ExceptionDispatchInfo.Throw(e.InnerException ?? e);
+                        ExceptionDispatchInfo.Capture(e.InnerException ?? e).Throw();
                     }
                 }
             ) with

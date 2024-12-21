@@ -20,7 +20,10 @@ public class AfterTestAttributeTests
         public async ValueTask OnTestEnd(TestContext testContext)
         {
             Console.WriteLine(@"Writing file inside WriteFileAfterTestAttribute!");
+            
             await File.WriteAllTextAsync(Filename, "Foo!");
         }
+
+        public int Order => 0;
     }
 }

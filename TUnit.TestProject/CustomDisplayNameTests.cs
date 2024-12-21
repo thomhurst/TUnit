@@ -60,4 +60,6 @@ public class CustomDisplayNameTests
     }
 
     public static string Method() => "bar";
+    
+    public int Order => 0;
 }

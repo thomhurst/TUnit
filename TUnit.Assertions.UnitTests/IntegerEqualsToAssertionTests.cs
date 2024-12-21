@@ -22,6 +22,7 @@ public class IntegerEqualsToAssertionTests
         NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
     }
     
+#if NET
     [Test]
     public async Task Integer_EqualsTo__With_Tolerance_Success()
     {
@@ -39,4 +40,5 @@ public class IntegerEqualsToAssertionTests
         
         NUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).Within(1));
     }
+#endif
 }

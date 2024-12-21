@@ -14,7 +14,7 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<CopyToLocalNuGetModule>]
 public class TestNugetPackageModule : Module<CommandResult[]>
 {
-    private readonly string[] _frameworks = ["net8.0", "net9.0"];
+    private readonly string[] _frameworks = ["net8.0", "net9.0", "net472"];
 
     protected override async Task<CommandResult[]?> ExecuteAsync(IPipelineContext context,
         CancellationToken cancellationToken)

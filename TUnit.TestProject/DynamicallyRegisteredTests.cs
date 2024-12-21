@@ -67,4 +67,6 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
     {
         return testContext.ObjectBag.ContainsKey("DynamicDataGeneratorRetry");
     }
+    
+    public int Order => 0;
 }

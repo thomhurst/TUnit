@@ -20,7 +20,7 @@ public class RunUnitTestsModule : Module<CommandResult>
         {
             NoBuild = true,
             Configuration = Configuration.Release,
-            Framework = "net8.0"
+            Framework = Environment.GetEnvironmentVariable("NET_VERSION"),
         }, cancellationToken);
     }
 }

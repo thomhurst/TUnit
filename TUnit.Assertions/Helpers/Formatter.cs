@@ -27,8 +27,10 @@ internal abstract class Formatter
         new SimpleFormatter<char>(value => $"'{value}'"),
         new SimpleFormatter<DateTime>(value => $"<{value:O}>"),
         new SimpleFormatter<DateTimeOffset>(value => value.ToString("<yyyy-MM-dd HH:mm:ss.fff tt>", CultureInfo.InvariantCulture)),
+#if NET
         new SimpleFormatter<DateOnly>(value => value.ToString("<yyyy-MM-dd>", CultureInfo.InvariantCulture)),
         new SimpleFormatter<TimeOnly>(value => value.ToString("<HH:mm:ss.fff>", CultureInfo.InvariantCulture)),
+#endif
         new SimpleFormatter<IEnumerable>(value => $"[{string.Join(", ", value.Cast<object>().Select(Format))}]")
     ];
 

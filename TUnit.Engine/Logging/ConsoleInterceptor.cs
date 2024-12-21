@@ -16,12 +16,14 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
     
     private protected abstract void ResetDefault();
 
+#if NET
     public override ValueTask DisposeAsync()
     {
         ResetDefault();
         return ValueTask.CompletedTask;
     }
-    
+#endif
+
     public override void Flush()
     {
         GetOriginalOut().Flush();
@@ -403,27 +405,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
         RedirectedOut?.Write(buffer, index, count);
     }
 
-    public override void Write(ReadOnlySpan<char> buffer)
-    {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
-        {
-            GetOriginalOut().Write(buffer);
-        }
-
-        RedirectedOut?.Write(buffer);
-    }
-
     public override void Write(string? value)
-    {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
-        {
-            GetOriginalOut().Write(value);
-        }
-
-        RedirectedOut?.Write(value);
-    }
-
-    public override void Write(StringBuilder? value)
     {
         if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
         {
@@ -453,16 +435,6 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
         await (RedirectedOut?.WriteAsync(buffer, index, count) ?? Task.CompletedTask);
     }
 
-    public override async Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
-    {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
-        {
-            await GetOriginalOut().WriteAsync(buffer, cancellationToken);
-        }
-
-        await (RedirectedOut?.WriteAsync(buffer, cancellationToken) ?? Task.CompletedTask);
-    }
-
     public override async Task WriteAsync(string? value)
     {
         if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
@@ -471,6 +443,37 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
         }
 
         await (RedirectedOut?.WriteAsync(value) ?? Task.CompletedTask);
+    }
+
+#if NET
+    public override void Write(ReadOnlySpan<char> buffer)
+    {
+        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        {
+            GetOriginalOut().Write(buffer);
+        }
+
+        RedirectedOut?.Write(buffer);
+    }
+
+    public override void Write(StringBuilder? value)
+    {
+        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        {
+            GetOriginalOut().Write(value);
+        }
+
+        RedirectedOut?.Write(value);
+    }
+
+    public override async Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
+    {
+        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        {
+            await GetOriginalOut().WriteAsync(buffer, cancellationToken);
+        }
+
+        await (RedirectedOut?.WriteAsync(buffer, cancellationToken) ?? Task.CompletedTask);
     }
 
     public override async Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new())
@@ -503,6 +506,27 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
         RedirectedOut?.WriteLine(value);
     }
 
+    public override async Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
+    {
+        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        {
+            await GetOriginalOut().WriteLineAsync(buffer, cancellationToken);
+        }
+
+        await (RedirectedOut?.WriteLineAsync(buffer, cancellationToken) ?? Task.CompletedTask);
+    }
+
+    public override async Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
+    {
+        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        {
+            await GetOriginalOut().WriteLineAsync(value, cancellationToken);
+        }
+
+        await (RedirectedOut?.WriteLineAsync(value, cancellationToken) ?? Task.CompletedTask);
+    }
+#endif
+
     public override async Task WriteLineAsync(char value)
     {
         if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
@@ -523,16 +547,6 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
         await (RedirectedOut?.WriteLineAsync(buffer, index, count) ?? Task.CompletedTask);
     }
 
-    public override async Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
-    {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
-        {
-            await GetOriginalOut().WriteLineAsync(buffer, cancellationToken);
-        }
-
-        await (RedirectedOut?.WriteLineAsync(buffer, cancellationToken) ?? Task.CompletedTask);
-    }
-
     public override async Task WriteLineAsync(string? value)
     {
         if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
@@ -541,15 +555,5 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
         }
 
         await (RedirectedOut?.WriteLineAsync(value) ?? Task.CompletedTask);
-    }
-
-    public override async Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
-    {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
-        {
-            await GetOriginalOut().WriteLineAsync(value, cancellationToken);
-        }
-
-        await (RedirectedOut?.WriteLineAsync(value, cancellationToken) ?? Task.CompletedTask);
     }
 }

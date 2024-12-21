@@ -3,6 +3,7 @@
 internal class LazyHook<T1, T2>(Func<T1, T2, Task> func)
 {
     private readonly Lock _lock = new();
+
     private Task? _value;
 
     public Task Value(T1 arg1, T2 arg2)
