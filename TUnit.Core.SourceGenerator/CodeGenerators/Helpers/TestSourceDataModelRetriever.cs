@@ -23,7 +23,7 @@ public static class TestSourceDataModelRetriever
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, constructorParameters, constructorParameters.Select(x => x.Type).ToImmutableArray(), GetClassAttributes(namedTypeSymbol).Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
         var methodParametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
-        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes().ToImmutableArray(), namedTypeSymbol, ArgumentsType.Method);
         var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol);
         
         var repeatCount =
@@ -118,17 +118,17 @@ public static class TestSourceDataModelRetriever
 
         AttributeData[] allAttributes =
         [
-            ..methodSymbol.GetAttributes().Where(x => x.AttributeClass?.ContainingNamespace.Name.StartsWith("System") != true),
-            ..namedTypeSymbol.GetAttributesIncludingBaseTypes().Where(x => x.AttributeClass?.ContainingNamespace.Name.StartsWith("System") != true),
-            ..namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.AttributeClass?.ContainingNamespace.Name.StartsWith("System") != true)
+            ..methodSymbol.GetAttributes(),
+            ..namedTypeSymbol.GetAttributesIncludingBaseTypes(),
+            ..namedTypeSymbol.ContainingAssembly.GetAttributes()
         ];
 
         var propertyAttributes = testGenerationContext.PropertyArguments
             .InnerContainers
             .Select(x => x.PropertySymbol)
-            .SelectMany(x => x.GetAttributes().Where(x => x.AttributeClass?.ContainingNamespace.Name.StartsWith("System") != true))
+            .SelectMany(x => x.GetAttributes())
             .Where(x => x.IsDataSourceAttribute());
-        
+
         return new TestSourceDataModel
         {
             TestId = TestInformationRetriever.GetTestId(testGenerationContext),
@@ -146,9 +146,19 @@ public static class TestSourceDataModelRetriever
             MethodParameterTypes = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
             MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
-            AttributeTypes = allAttributes.Where(x => !x.IsDataSourceAttribute()).Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().Distinct().ToArray(),
-            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().ToArray(),
+            TestExecutor = allAttributes
+                .FirstOrDefault(x =>
+                    x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)
+                ?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
+            AttributeTypes = allAttributes.ExceptSystemAttributes()
+                .Where(x => x.AttributeClass!.DeclaredAccessibility == Accessibility.Public)
+                .Where(x => !x.IsDataSourceAttribute())
+                .Select(x => x.AttributeClass?.GloballyQualified())
+                .OfType<string>()
+                .Distinct()
+                .ToArray(),
+            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified())
+                .OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
         };
     }
