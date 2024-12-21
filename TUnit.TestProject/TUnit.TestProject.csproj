@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <IsLibraryTestProject>true</IsLibraryTestProject>
     <IsPackable>false</IsPackable>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     <OutputType>Exe</OutputType>
