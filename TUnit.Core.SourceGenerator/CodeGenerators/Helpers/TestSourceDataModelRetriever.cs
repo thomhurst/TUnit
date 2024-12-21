@@ -126,7 +126,7 @@ public static class TestSourceDataModelRetriever
         var propertyAttributes = testGenerationContext.PropertyArguments
             .InnerContainers
             .Select(x => x.PropertySymbol)
-            .SelectMany(x => x.GetAttributes())
+            .SelectMany(x => x.GetAttributes().Where(x => x.AttributeClass?.ContainingNamespace.Name.StartsWith("System") != true))
             .Where(x => x.IsDataSourceAttribute());
         
         return new TestSourceDataModel
