@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <EnablePolyfill>false</EnablePolyfill>
     <IsLibraryPackage>true</IsLibraryPackage>
     <IsTestProject>false</IsTestProject>
     <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
@@ -9,7 +10,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(LaunchDebugger)' != ''">
     <DefineConstants>LAUNCH_DEBUGGER</DefineConstants>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="C5" />
     <PackageReference Include="EnumerableAsyncProcessor" />

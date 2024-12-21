@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <EnablePolyfill>false</EnablePolyfill>
         <IsLibraryTestProject>true</IsLibraryTestProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
