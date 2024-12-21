@@ -39,7 +39,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Polly" />
-    <PackageReference Include="System.Text.Json" />
     <PackageReference Include="Vogen" />
   </ItemGroup>
   <ItemGroup>
