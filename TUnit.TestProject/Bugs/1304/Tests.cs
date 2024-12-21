@@ -67,6 +67,4 @@ public readonly partial record struct AccountId : IIdentifiable<AccountId>
 public interface IIdentifiable<out TId>
 {
     bool HasValue { get; }
-    static abstract TId Empty { get; }
-    static abstract TId New { get; }
 }

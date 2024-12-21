@@ -27,4 +27,6 @@ public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEv
             .AddTransient<DummyReferenceTypeClass>()
             .BuildServiceProvider();
     }
+    
+    public int Order => 0;
 }

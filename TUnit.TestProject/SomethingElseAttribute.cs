@@ -8,4 +8,6 @@ public class SomethingElseAttribute : Attribute, ITestStartEventReceiver
     {
         return ValueTask.CompletedTask;
     }
+    
+    public int Order => 0;
 }
