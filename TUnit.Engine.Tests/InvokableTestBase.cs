@@ -21,6 +21,11 @@ public abstract class InvokableTestBase
     {
         await RunWithoutAot(filter, assertions, runOptions, assertionExpression);
 
+        if (Environment.GetEnvironmentVariable("NET_VERSION") == "net472")
+        {
+            return;
+        }
+        
         await RunWithAot(filter, assertions, runOptions, assertionExpression);
 
         await RunWithSingleFile(filter, assertions, runOptions, assertionExpression);
@@ -36,7 +41,7 @@ public abstract class InvokableTestBase
                 [
                     "run",
                     "--no-build",
-                    "-f", "net9.0",
+                    "-f", Environment.GetEnvironmentVariable("NET_VERSION")!,
                     "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
