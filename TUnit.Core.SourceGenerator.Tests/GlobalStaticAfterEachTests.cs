@@ -14,95 +14,12 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(14);
             
-            await AssertFileContains(generatedFiles[7], 
-                """
-                new AfterTestHookMethod
-                { 
-                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1).GetMethod("AfterAll1", 0, [typeof(global::TUnit.Core.TestContext)]),
-                AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase1.AfterAll1(context)),
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                FilePath = @"", 
-                LineNumber = 5,
-                },
-                """);
-            
-            await AssertFileContains(generatedFiles[8], 
-                """
-                new AfterTestHookMethod
-                { 
-                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2).GetMethod("AfterAll2", 0, [typeof(global::TUnit.Core.TestContext)]),
-                AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase2.AfterAll2(context)),
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                FilePath = @"", 
-                LineNumber = 20,
-                },
-                """);
-            
-            await AssertFileContains(generatedFiles[9], 
-                """
-                new AfterTestHookMethod
-                { 
-                MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3).GetMethod("AfterAll3", 0, [typeof(global::TUnit.Core.TestContext)]),
-                AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalBase3.AfterAll3(context)),
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                FilePath = @"", 
-                LineNumber = 35,
-                },
-                """);
-            
-            await AssertFileContains(generatedFiles[10], 
-                """
-                    new AfterTestHookMethod
-                    { 
-                    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUp", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context)),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                    FilePath = @"", 
-                    LineNumber = 50,
-                    },
-                    """);
-            
-            await AssertFileContains(generatedFiles[11], 
-                """
-                    new AfterTestHookMethod
-                    { 
-                    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUp", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUp(context, cancellationToken)),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                    FilePath = @"", 
-                    LineNumber = 56,
-                    },
-                    """);
-            
-            await AssertFileContains(generatedFiles[12], 
-                """
-                    new AfterTestHookMethod
-                    { 
-                    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context)),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                    FilePath = @"", 
-                    LineNumber = 62,
-                    },
-                    """);
-            
-            await AssertFileContains(generatedFiles[13], 
-                """
-                    new AfterTestHookMethod
-                    { 
-                    MethodInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUpWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.GlobalCleanUpTests.AfterAllCleanUpWithContext(context, cancellationToken)),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                    FilePath = @"", 
-                    LineNumber = 68,
-                    },
-                    """);
+            await Verify(generatedFiles[7]);
+            await Verify(generatedFiles[8]);
+            await Verify(generatedFiles[9]);
+            await Verify(generatedFiles[10]);
+            await Verify(generatedFiles[11]);
+            await Verify(generatedFiles[12]);
+            await Verify(generatedFiles[13]);
         });
 }

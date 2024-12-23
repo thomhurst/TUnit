@@ -38,9 +38,6 @@ internal class MatrixTests : TestsBase<TestsGenerator>
 
     private async Task AssertTestThree(string[] generatedFiles)
     {
-        await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);");
-        await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;");
-        await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);");
-        await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;");
+        await Verify(generatedFiles[2]);
     }
 }

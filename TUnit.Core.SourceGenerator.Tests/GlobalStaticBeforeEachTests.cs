@@ -14,95 +14,18 @@ internal class GlobalStaticBeforeEachTests : TestsBase<TestHooksGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(14);
             
-            await AssertFileContains(generatedFiles[7], 
-                """
-                new BeforeTestHookMethod
-                { 
-                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1).GetMethod("BeforeAll1", 0, [typeof(global::TUnit.Core.TestContext)]),
-                AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase1.BeforeAll1(context)),
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                FilePath = @"", 
-                LineNumber = 5,
-                },
-                """);
+            await Verify(generatedFiles[7]);
             
-            await AssertFileContains(generatedFiles[8], 
-                """
-                new BeforeTestHookMethod
-                { 
-                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2).GetMethod("BeforeAll2", 0, [typeof(global::TUnit.Core.TestContext)]),
-                AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase2.BeforeAll2(context)),
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                FilePath = @"", 
-                LineNumber = 20,
-                },
-                """);
+            await Verify(generatedFiles[8]);
             
-            await AssertFileContains(generatedFiles[9], 
-                """
-                new BeforeTestHookMethod
-                { 
-                MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3).GetMethod("BeforeAll3", 0, [typeof(global::TUnit.Core.TestContext)]),
-                AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalBase3.BeforeAll3(context)),
-                HookExecutor = DefaultExecutor.Instance,
-                Order = 0,
-                FilePath = @"", 
-                LineNumber = 35,
-                },
-                """);
+            await Verify(generatedFiles[9]);
             
-            await AssertFileContains(generatedFiles[10], 
-                """
-                    new BeforeTestHookMethod
-                    { 
-                    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUp", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context)),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                    FilePath = @"", 
-                    LineNumber = 50,
-                    },
-                    """);
+            await Verify(generatedFiles[10]);
             
-            await AssertFileContains(generatedFiles[11], 
-                """
-                    new BeforeTestHookMethod
-                    { 
-                    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUp", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUp(context, cancellationToken)),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                    FilePath = @"", 
-                    LineNumber = 56,
-                    },
-                    """);
+            await Verify(generatedFiles[11]);
             
-            await AssertFileContains(generatedFiles[12], 
-                """
-                    new BeforeTestHookMethod
-                    { 
-                    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
-                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context)),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                    FilePath = @"", 
-                    LineNumber = 62,
-                    },
-                    """);
+            await Verify(generatedFiles[12]);
             
-            await AssertFileContains(generatedFiles[13], 
-                """
-                    new BeforeTestHookMethod
-                    { 
-                    MethodInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUpWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
-                    AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.GlobalSetUpTests.BeforeAllSetUpWithContext(context, cancellationToken)),
-                    HookExecutor = DefaultExecutor.Instance,
-                    Order = 0,
-                    FilePath = @"", 
-                    LineNumber = 68,
-                    },
-                    """);
+            await Verify(generatedFiles[13]);
         });
 }

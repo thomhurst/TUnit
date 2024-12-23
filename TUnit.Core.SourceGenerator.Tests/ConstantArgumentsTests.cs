@@ -13,25 +13,18 @@ internal class ConstantArgumentsTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(7);
 
-            await AssertFileContains(generatedFiles[0], 
-                "global::System.String methodArg = \"123\";");
+            await Verify(generatedFiles[0]);
             
-            await AssertFileContains(generatedFiles[1], 
-                "global::System.Int32 methodArg = 123;");
+            await Verify(generatedFiles[1]);
             
-            await AssertFileContains(generatedFiles[2], 
-                "global::System.Double methodArg = 1.23;");
+            await Verify(generatedFiles[2]);
             
-            await AssertFileContains(generatedFiles[3], 
-                "global::System.Single methodArg = 1.23F;");
+            await Verify(generatedFiles[3]);
             
-            await AssertFileContains(generatedFiles[4], 
-                "global::System.Int64 methodArg = 123L;");
+            await Verify(generatedFiles[4]);
             
-            await AssertFileContains(generatedFiles[5], 
-                "global::System.UInt32 methodArg = 123U;");
+            await Verify(generatedFiles[5]);
             
-            await AssertFileContains(generatedFiles[6], 
-                "global::System.UInt64 methodArg = 123UL;");
+            await Verify(generatedFiles[6]);
         });
 }

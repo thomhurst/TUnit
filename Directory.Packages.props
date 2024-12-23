@@ -55,6 +55,7 @@
     <PackageVersion Include="TUnit" Version="0.5.28" />
     <PackageVersion Include="TUnit.Core" Version="0.5.28" />
     <PackageVersion Include="TUnit.Assertions" Version="0.5.28" />
+    <PackageVersion Include="Verify.NUnit" Version="28.7.0" />
     <PackageVersion Include="Vogen" Version="5.0.6" />
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />

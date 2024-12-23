@@ -15,6 +15,7 @@
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="TUnit.Assertions" />
+    <PackageReference Include="Verify.NUnit" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />

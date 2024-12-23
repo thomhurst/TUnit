@@ -13,10 +13,8 @@ internal class EnumerableDataSourceDrivenTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(3);
             
-            await AssertFileContains(generatedFiles[0], "foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())");
-            await AssertFileContains(generatedFiles[0], "TestMethodArguments = [methodData],");
+            await Verify(generatedFiles[0]);
             
-            await AssertFileContains(generatedFiles[1], "foreach (var methodDataAccessor in global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod())");
-            await AssertFileContains(generatedFiles[1], "TestMethodArguments = [methodData],");
+            await Verify(generatedFiles[1]);
         });
 }

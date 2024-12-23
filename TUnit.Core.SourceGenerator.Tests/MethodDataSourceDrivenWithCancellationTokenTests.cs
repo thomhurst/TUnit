@@ -13,26 +13,6 @@ internal class MethodDataSourceDrivenWithCancellationTokenTests : TestsBase<Test
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(1);
             
-            await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T();");
-            await AssertFileContains(generatedFiles[0], "classInstance.MyTest(methodArg, cancellationToken)");
-
-            await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()();");
-            await AssertFileContains(generatedFiles[0], "classInstance.MyTest(methodArg, cancellationToken)");
-            
-            await AssertFileContains(generatedFiles[0], "foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT())");
-            await AssertFileContains(generatedFiles[0], "var methodData = methodDataAccessor;");
-            await AssertFileContains(generatedFiles[0], "classInstance.MyTest(methodData, cancellationToken)");
-
-            await AssertFileContains(generatedFiles[0], "foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT())");
-            await AssertFileContains(generatedFiles[0], "var methodData = methodDataAccessor();");
-            await AssertFileContains(generatedFiles[0], "classInstance.MyTest(methodData, cancellationToken)");
-            
-            await AssertFileContains(generatedFiles[0], "foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT())");
-            await AssertFileContains(generatedFiles[0], "var methodData = methodDataAccessor;");
-            await AssertFileContains(generatedFiles[0], "classInstance.MyTest(methodData, cancellationToken)");
-
-            await AssertFileContains(generatedFiles[0], "foreach (var methodDataAccessor in global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT())");
-            await AssertFileContains(generatedFiles[0], "var methodData = methodDataAccessor();");
-            await AssertFileContains(generatedFiles[0], "classInstance.MyTest(methodData, cancellationToken)");
+            await Verify(generatedFiles[0]);
         });
 }

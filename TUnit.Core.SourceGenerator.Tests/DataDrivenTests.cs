@@ -23,35 +23,24 @@ internal class DataDrivenTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(10);
 
-            await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = 1;");
-            await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = 2;");
-            await AssertFileContains(generatedFiles[0], "global::System.Int32 methodArg = 3;");
+            await Verify(generatedFiles[0]);
 
-            await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = 1;");
-            await AssertFileContains(generatedFiles[1], "global::System.String methodArg1 = \"String\";");
-            await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = 2;");
-            await AssertFileContains(generatedFiles[1], "global::System.String methodArg1 = \"String2\";");
-            await AssertFileContains(generatedFiles[1], "global::System.Int32 methodArg = 3;");
-            await AssertFileContains(generatedFiles[1], "global::System.String methodArg1 = \"String3\";");
+            await Verify(generatedFiles[1]);
 
-            await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg = global::TUnit.TestProject.TestEnum.One;");
-            await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg = global::TUnit.TestProject.TestEnum.Two;");
-            await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg = (global::TUnit.TestProject.TestEnum)(-1);");
+            await Verify(generatedFiles[2]);
             
-            await AssertFileContains(generatedFiles[3], "global::System.String methodArg = null;");
+            await Verify(generatedFiles[3]);
             
-            await AssertFileContains(generatedFiles[4], "global::System.String methodArg = \"\";");
+            await Verify(generatedFiles[4]);
             
-            await AssertFileContains(generatedFiles[5], "global::System.String methodArg = \"Foo bar!\";");
+            await Verify(generatedFiles[5]);
             
-            await AssertFileContains(generatedFiles[6], "global::System.Boolean? methodArg = null;");
-            await AssertFileContains(generatedFiles[6], "global::System.Boolean? methodArg = false;");
-            await AssertFileContains(generatedFiles[6], "global::System.Boolean? methodArg = true;");
+            await Verify(generatedFiles[6]);
 
-            await AssertFileContains(generatedFiles[7], "global::System.Type methodArg = typeof(global::System.Object);");
+            await Verify(generatedFiles[7]);
 
-            await AssertFileContains(generatedFiles[8], "global::System.Int32[] methodArg = new[] { 1, 2, 3 };");
+            await Verify(generatedFiles[8]);
 
-            await AssertFileContains(generatedFiles[9], "global::System.Int32 methodArg = global::System.Int32.MaxValue;");
+            await Verify(generatedFiles[9]);
         });
 }

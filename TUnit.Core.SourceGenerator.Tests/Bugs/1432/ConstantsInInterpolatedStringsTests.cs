@@ -15,6 +15,6 @@ internal class ConstantsInInterpolatedStringsTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(1);
             
-            await AssertFileContains(generatedFiles[0], "global::System.String methodArg = $\"{\"Value\"}1\";");
+            await Verify(generatedFiles[0]);
         });
 }
