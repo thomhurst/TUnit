@@ -12,4 +12,5 @@ public record TestGenerationContext
     public required BaseContainer ClassArguments { get; init; }
     public required ClassPropertiesContainer PropertyArguments { get; init; }
     public required int CurrentRepeatAttempt { get; init; }
+    public required GeneratorAttributeSyntaxContext Context { get; init; }
 }
