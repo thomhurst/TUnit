@@ -17,7 +17,7 @@
 
   <PropertyGroup>
     <DefineConstants Condition="$(RoslynVersion) >= 4.7">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
-    <EnableTrimAnalyzer Condition="'$(TargetFramework)' != 'netstandard2.0'">true</EnableTrimAnalyzer>
+    <EnableTrimAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</EnableTrimAnalyzer>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
