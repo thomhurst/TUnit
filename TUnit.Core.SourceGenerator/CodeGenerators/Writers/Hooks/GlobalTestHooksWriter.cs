@@ -10,18 +10,12 @@ public static class GlobalTestHooksWriter
     { 
         sourceBuilder.WriteLine($"new {GetClassType(model.HookLevel, model.HookLocationType)}");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"""MethodInfo = typeof({model.FullyQualifiedTypeName}).GetMethod("{model.MethodName}", 0, [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]),""");
+        sourceBuilder.WriteLine($"MethodInfo = {MethodInfoWriter.Write(model.FullyQualifiedTypeName, model.MethodName, model.ParameterTypes, true)},");
 
-        if (model.IsVoid)
-        {
-            sourceBuilder.WriteLine(
-                $"Body = (context, cancellationToken) => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)}),"); 
-        }
-        else
-        {
-            sourceBuilder.WriteLine(
-                $"AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)})),");
-        }
+        sourceBuilder.WriteLine(
+            model.IsVoid
+                ? $"Body = (context, cancellationToken) => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)}),"
+                : $"AsyncBody = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model, model.HookLocationType)})),");
 
         sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
         sourceBuilder.WriteLine($"Order = {model.Order},");

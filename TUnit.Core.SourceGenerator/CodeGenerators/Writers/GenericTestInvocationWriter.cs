@@ -13,12 +13,9 @@ public static class GenericTestInvocationWriter
 
         var fullyQualifiedClassType = testSourceDataModel.FullyQualifiedTypeName;
         
-        var methodParameterTypesList = string.Join(", ", testSourceDataModel.MethodParameterOrArgumentNonGenericTypes.Select(x => $"typeof({x})"));
-        
         sourceBuilder.WriteLine($"var testClassType = typeof({fullyQualifiedClassType});");
         
-        sourceBuilder.WriteLine($"var methodInfo = {MethodInfoWriter.Write(testSourceDataModel, methodParameterTypesList)};");
-        
+        sourceBuilder.WriteLine($"var methodInfo = {MethodInfoWriter.Write(testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.MethodName, testSourceDataModel.MethodParameterTypes, false)};");        
         sourceBuilder.WriteLine();
         
         sourceBuilder.WriteLine("var testBuilderContext = new global::TUnit.Core.TestBuilderContext();");
