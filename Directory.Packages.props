@@ -41,8 +41,8 @@
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.42.140" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.7.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.7.0" />
-    <PackageVersion Include="NUnit" Version="4.3.0" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.4.0" />
+    <PackageVersion Include="NUnit" Version="4.3.1" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.5.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="Polly" Version="8.5.0" />
     <PackageVersion Include="Polyfill" Version="7.8.0" />
