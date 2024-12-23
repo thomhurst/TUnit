@@ -14,13 +14,13 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Aot)' == 'true'">
+  <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
     <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SingleFile)' == 'true'">
+  <PropertyGroup Condition="'$(SingleFile)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <UseAppHost>true</UseAppHost>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
