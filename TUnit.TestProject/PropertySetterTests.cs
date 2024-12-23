@@ -1,6 +1,7 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Polyfills;
 
 namespace TUnit.TestProject;
 
@@ -95,7 +96,7 @@ public class PropertySetterTests
             
             if (IsMatchingTestFilter())
             {
-                await File.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
+                await FilePolyfill.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
             }
         }
     }
@@ -118,7 +119,7 @@ public class PropertySetterTests
             
             if (IsMatchingTestFilter())
             {
-                await File.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
+                await FilePolyfill.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
             }
         }
     }
@@ -130,13 +131,13 @@ public class PropertySetterTests
         if (GlobalContext.Current.TestFilter is "/*/*/PropertySetterTests/*")
         {
             Console.WriteLine(message);
-            await File.AppendAllLinesAsync("PropertySetterTests_CapturedOutput.txt", [message]);
+            await FilePolyfill.AppendAllLinesAsync("PropertySetterTests_CapturedOutput.txt", [message]);
         }
         
         if (GlobalContext.Current.TestFilter is "/*/*/InheritedPropertySetterTests/*")
         {
             Console.WriteLine(message);
-            await File.AppendAllLinesAsync("InheritedPropertySetterTests_CapturedOutput.txt", [message]);
+            await FilePolyfill.AppendAllLinesAsync("InheritedPropertySetterTests_CapturedOutput.txt", [message]);
         }
     }
 

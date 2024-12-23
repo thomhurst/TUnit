@@ -1,4 +1,6 @@
-﻿namespace TUnit.TestProject;
+﻿#if NET
+
+namespace TUnit.TestProject;
 
 public class AsyncDisposableFieldTests
 {
@@ -22,3 +24,4 @@ public class AsyncDisposableFieldTests
         // Dummy method
     }
 }
+#endif

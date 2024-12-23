@@ -17,6 +17,6 @@ public class BasicTests
     [Test]
     public async ValueTask ValueTaskAsynchronousTest()
     {
-        await default;
+        await new ValueTask();
     }
 }
