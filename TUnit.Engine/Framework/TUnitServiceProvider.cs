@@ -88,14 +88,14 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testHookOrchestrator = Register(new TestHookOrchestrator(hooksCollector));
 
         var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
-        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, LoggerFactory, extension));
+        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, Logger, extension));
         
         TestFinder = Register(new TestsFinder(TestDiscoverer));
         Register<ITestFinder>(TestFinder);
         
         Disposer = Register(new Disposer(Logger));
         
-        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Disposer));
+        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Logger, Disposer));
         var explicitFilterService = Register(new ExplicitFilterService());
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
         

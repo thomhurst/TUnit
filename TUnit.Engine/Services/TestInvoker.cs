@@ -1,13 +1,16 @@
-﻿using TUnit.Core;
+﻿using System.Diagnostics;
+using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Hooks;
+using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer disposer)
+internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, TUnitFrameworkLogger logger, Disposer disposer)
 {
     private readonly SemaphoreSlim _consoleStandardOutLock = new(1, 1);
 
@@ -17,6 +20,8 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
         {
             if (discoveredTest.TestDetails.ClassInstance is IAsyncInitializer asyncInitializer)
             {
+                await logger.LogDebugAsync("Initializing IAsyncInitializer test class...");
+
                 await asyncInitializer.InitializeAsync();
             }
 
@@ -32,17 +37,23 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
             {
                 if (executableHook.IsSynchronous)
                 {
+                    await logger.LogDebugAsync("Executing synchronous [Before(Test)] hook");
+                    
                     Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
                         executableHook.Execute(discoveredTest.TestContext, cancellationToken)
                     );
                 }
                 else
                 {
+                    await logger.LogDebugAsync("Executing asynchronous [Before(Test)] hook");
+
                     await Timings.Record($"Before(Test): {executableHook.Name}", discoveredTest.TestContext, () =>
                         executableHook.ExecuteAsync(discoveredTest.TestContext, cancellationToken)
                     );
                 }
             }
+
+            await logger.LogDebugAsync("Executing test body");
 
             await Timings.Record("Test Body", discoveredTest.TestContext,
                 () => discoveredTest.ExecuteTest(cancellationToken));
@@ -68,24 +79,30 @@ internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer d
         {
             if (executableHook.IsSynchronous)
             {
+                await logger.LogDebugAsync("Executing synchronous [After(Test)] hook");
+
                 Timings.Record($"After(Test): {executableHook.Name}", testContext, () =>
                     executableHook.Execute(testContext, CancellationToken.None)
                 );
             }
             else
             {
+                await logger.LogDebugAsync("Executing asynchronous [After(Test)] hook");
+
                 await Timings.Record($"After(Test): {executableHook.Name}", testContext, () =>
                     executableHook.ExecuteAsync(testContext, CancellationToken.None)
                 );
             }
         }
         
+        await logger.LogDebugAsync("Disposing test class");
         await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(testContext.TestDetails.ClassInstance), cleanUpExceptions);
         
         await _consoleStandardOutLock.WaitAsync();
 
         try
         {
+            await logger.LogDebugAsync("Disposing test context");
             await disposer.DisposeAsync(testContext);
         }
         finally

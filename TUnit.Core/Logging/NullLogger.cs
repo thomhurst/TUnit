@@ -2,10 +2,10 @@
 
 internal class NullLogger : ILogger
 {
-    public Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception,
+    public ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
-        return Task.CompletedTask;
+        return default;
     }
 
     public void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)

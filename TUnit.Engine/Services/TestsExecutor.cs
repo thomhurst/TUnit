@@ -45,7 +45,10 @@ internal class TestsExecutor
 
     public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
-        using var _ = _engineCancellationToken.Token.Register(() => _onFinished.TrySetCanceled());
+        using var _ = _engineCancellationToken.Token.Register(() =>
+        {
+            _onFinished.TrySetCanceled();
+        });
 
         try
         {
@@ -92,20 +95,13 @@ internal class TestsExecutor
     private async Task ProcessQueue(ITestExecutionFilter? filter, ExecuteRequestContext context,
         PriorityQueue<DiscoveredTest, int> tests)
     {
-#if NET
-        while (tests.TryDequeue(out var testInformation, out _))
-        {
-            await ProcessTest(testInformation, filter, context, context.CancellationToken);
-        }
-#else
-        await Task.Run(delegate
+        await Task.Run(async delegate
         {
             while (tests.TryDequeue(out var testInformation, out _))
             {
-                ProcessTest(testInformation, filter, context, context.CancellationToken);
+                await ProcessTest(testInformation, filter, context, context.CancellationToken);
             }
         });
-#endif
     }
 
     private async Task ProcessParallelTests(IEnumerable<DiscoveredTest> queue, ITestExecutionFilter? filter,
@@ -125,14 +121,9 @@ internal class TestsExecutor
             CancellationToken = context.CancellationToken
         }, (test, token) => ProcessTest(test, filter, context, token));
 #else
-        await Task.Run(delegate
-        {
-            Parallel.ForEach(queue, new ParallelOptions
-            {
-                MaxDegreeOfParallelism = _maximumParallelTests,
-                CancellationToken = context.CancellationToken
-            }, (test, token) => ProcessTest(test, filter, context, context.CancellationToken));
-        });
+        await queue
+            .ForEachAsync(test => ProcessTest(test, filter, context, context.CancellationToken))
+            .ProcessInParallel(_maximumParallelTests);
 #endif
     }
 
@@ -153,12 +144,12 @@ internal class TestsExecutor
         }
     }
 #else
-    private void ProcessTest(DiscoveredTest test,
+    private async Task ProcessTest(DiscoveredTest test,
         ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
     {
         try
         {
-            _singleTestExecutor.ExecuteTestAsync(test, filter, context, false);
+            await _singleTestExecutor.ExecuteTestAsync(test, filter, context, false);
         }
         catch
         {
