@@ -15,6 +15,11 @@ public class PublishSingleFileModule : Module<CommandResult>
 {
     public override ModuleRunType ModuleRunType => ModuleRunType.AlwaysRun;
     
+    protected override Task<SkipDecision> ShouldSkip(IPipelineContext context)
+    {
+        return Task.FromResult<SkipDecision>(Environment.GetEnvironmentVariable("NET_VERSION") == "net472");
+    }
+    
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var testProject = context.Git().RootDirectory!.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
