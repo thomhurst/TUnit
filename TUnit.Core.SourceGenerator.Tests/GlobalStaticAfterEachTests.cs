@@ -14,12 +14,6 @@ internal class GlobalStaticAfterEachTests : TestsBase<TestHooksGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(14);
             
-            await Verify(generatedFiles[7]);
-            await Verify(generatedFiles[8]);
-            await Verify(generatedFiles[9]);
-            await Verify(generatedFiles[10]);
-            await Verify(generatedFiles[11]);
-            await Verify(generatedFiles[12]);
-            await Verify(generatedFiles[13]);
+            await Verify(generatedFiles);
         });
 }

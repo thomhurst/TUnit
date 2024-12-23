@@ -13,8 +13,6 @@ internal class NullableByteArgumentTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(2);
 
-            await Verify(generatedFiles[0]);
-            
-            await Verify(generatedFiles[1]);
+            await Verify(generatedFiles);
         });
 }

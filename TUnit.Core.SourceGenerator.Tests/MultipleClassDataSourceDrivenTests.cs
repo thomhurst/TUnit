@@ -13,6 +13,6 @@ internal class MultipleClassDataSourceDrivenTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(2);
 
-            await Verify(generatedFiles[0]);
+            await Verify(generatedFiles);
         });
 }

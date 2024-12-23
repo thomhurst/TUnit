@@ -13,6 +13,6 @@ internal class EnumerableTupleDataSourceDrivenTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles).HasCount().EqualTo(1);
             
-            await Verify(generatedFiles[0]);
+            await Verify(generatedFiles);
         });
 }

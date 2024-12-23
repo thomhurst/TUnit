@@ -24,8 +24,6 @@ internal class ClassDataSourceDrivenTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(7);
 
-            await Verify(generatedFiles[0]);
-
-            await Verify(generatedFiles[1]);
+            await Verify(generatedFiles);
         });
 }

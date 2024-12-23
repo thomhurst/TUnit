@@ -13,18 +13,6 @@ internal class MethodDataSourceDrivenTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(7);
             
-            await Verify(generatedFiles[0]);
-
-            await Verify(generatedFiles[1]);
-
-            await Verify(generatedFiles[2]);
-            
-            await Verify(generatedFiles[3]);
-
-            await Verify(generatedFiles[4]);
-            
-            await Verify(generatedFiles[5]);
-            
-            await Verify(generatedFiles[6]);
+            await Verify(generatedFiles);
         });
 }

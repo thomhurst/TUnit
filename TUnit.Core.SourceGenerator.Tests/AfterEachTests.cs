@@ -14,18 +14,6 @@ internal class AfterTests : TestsBase<TestHooksGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(14);
 
-            await Verify(generatedFiles[1]);
-            
-            await Verify(generatedFiles[3]);
-            
-            await Verify(generatedFiles[5]);
-            
-            await Verify(generatedFiles[10]);
-            
-            await Verify(generatedFiles[11]);
-            
-            await Verify(generatedFiles[12]);
-                        
-            await Verify(generatedFiles[13]);
+            await Verify(generatedFiles);
         });
 }

@@ -13,10 +13,6 @@ internal class RepeatTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(3);
             
-            await Verify(generatedFiles[0]);
-            
-            await Verify(generatedFiles[1]);
-            
-            await Verify(generatedFiles[2]);
+            await Verify(generatedFiles);
         });
 }

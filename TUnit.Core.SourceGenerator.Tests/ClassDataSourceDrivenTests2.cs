@@ -13,6 +13,6 @@ internal class ClassDataSourceDrivenTests2 : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles).HasCount().EqualTo(2);
 
-            await Verify(generatedFiles[0]);
+            await Verify(generatedFiles);
         });
 }

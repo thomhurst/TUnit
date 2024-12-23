@@ -23,21 +23,6 @@ internal class MatrixTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(3);
 
-            AssertTestOne(generatedFiles);
-            AssertTestTwo(generatedFiles);
-            await AssertTestThree(generatedFiles);
+            await Verify(generatedFiles);
         });
-
-    private void AssertTestOne(string[] generatedFiles)
-    {
-    }
-
-    private void AssertTestTwo(string[] generatedFiles)
-    {
-    }
-
-    private async Task AssertTestThree(string[] generatedFiles)
-    {
-        await Verify(generatedFiles[2]);
-    }
 }

@@ -23,5 +23,6 @@ internal class PriorityFilteringTests : TestsBase<TestsGenerator>
         async generatedFiles =>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(6);
+            await Verify(generatedFiles);
         });
 }

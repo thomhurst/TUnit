@@ -13,12 +13,7 @@ internal class NumberArgumentTests : TestsBase<TestsGenerator>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(6);
             
-            await Verify(generatedFiles[0]);
-            await Verify(generatedFiles[1]);
-            await Verify(generatedFiles[2]);
-            await Verify(generatedFiles[3]);
-            await Verify(generatedFiles[4]);
-            await Verify(generatedFiles[5]);
+            await Verify(generatedFiles);
         });
 
     [Test]
