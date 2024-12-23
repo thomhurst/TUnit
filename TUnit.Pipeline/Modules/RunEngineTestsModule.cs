@@ -23,7 +23,7 @@ public class RunEngineTestsModule : Module<CommandResult>
             Project = project.Name,
             NoBuild = true,
             Configuration = Configuration.Release,
-            Framework = Environment.GetEnvironmentVariable("NET_VERSION"),
+            Framework = "net9.0",
             WorkingDirectory = project.Folder!
         }, cancellationToken);
     }
