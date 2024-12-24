@@ -25,7 +25,7 @@ internal record DiscoveredTest<
     public override IClassConstructor? ClassConstructor => resettableLazyTestClassFactory.ClassConstructor;
 }
 
-internal abstract record DiscoveredTest : IComparable<DiscoveredTest>
+internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparable
 {
     public required TestContext TestContext { get; init; }
 
