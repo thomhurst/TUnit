@@ -13,4 +13,7 @@
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Verify.TUnit" />
+  </ItemGroup>
 </Project>

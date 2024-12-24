@@ -12,9 +12,5 @@ internal class STAThreadHooksTests : TestsBase<TestHooksGenerator>
         async generatedFiles =>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(2);
-            
-            await AssertFileContains(generatedFiles[0], "HookExecutor = new global::TUnit.Core.STAThreadExecutor(),");
-            
-            await AssertFileContains(generatedFiles[1], "HookExecutor = new global::TUnit.Core.STAThreadExecutor(),");
         });
 }

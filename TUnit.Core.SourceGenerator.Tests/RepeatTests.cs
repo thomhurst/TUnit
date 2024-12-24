@@ -12,29 +12,5 @@ internal class RepeatTests : TestsBase<TestsGenerator>
         async generatedFiles =>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(3);
-            
-            await AssertFileContains(generatedFiles[0], "RepeatLimit = 1,");
-            await AssertFileContains(generatedFiles[0], "RepeatLimit = 1,");
-            
-            await AssertFileContains(generatedFiles[1], "RepeatLimit = 2,");
-            await AssertFileContains(generatedFiles[1], "RepeatLimit = 2,");
-            await AssertFileContains(generatedFiles[1], "RepeatLimit = 2,");
-            
-            await AssertFileContains(generatedFiles[2], "RepeatLimit = 3,");
-            await AssertFileContains(generatedFiles[2], "RepeatLimit = 3,");
-            await AssertFileContains(generatedFiles[2], "RepeatLimit = 3,");
-            await AssertFileContains(generatedFiles[2], "RepeatLimit = 3,");
-            
-            await AssertFileContains(generatedFiles[0], "CurrentRepeatAttempt = 0,");
-            await AssertFileContains(generatedFiles[0], "CurrentRepeatAttempt = 1,");
-            
-            await AssertFileContains(generatedFiles[1], "CurrentRepeatAttempt = 0,");
-            await AssertFileContains(generatedFiles[1], "CurrentRepeatAttempt = 1,");
-            await AssertFileContains(generatedFiles[1], "CurrentRepeatAttempt = 2,");
-            
-            await AssertFileContains(generatedFiles[2], "CurrentRepeatAttempt = 0,");
-            await AssertFileContains(generatedFiles[2], "CurrentRepeatAttempt = 1,");
-            await AssertFileContains(generatedFiles[2], "CurrentRepeatAttempt = 2,");
-            await AssertFileContains(generatedFiles[2], "CurrentRepeatAttempt = 3,");
         });
 }

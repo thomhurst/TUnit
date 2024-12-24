@@ -22,25 +22,5 @@ internal class MatrixTests : TestsBase<TestsGenerator>
         async generatedFiles =>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(3);
-
-            AssertTestOne(generatedFiles);
-            AssertTestTwo(generatedFiles);
-            await AssertTestThree(generatedFiles);
         });
-
-    private void AssertTestOne(string[] generatedFiles)
-    {
-    }
-
-    private void AssertTestTwo(string[] generatedFiles)
-    {
-    }
-
-    private async Task AssertTestThree(string[] generatedFiles)
-    {
-        await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);");
-        await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;");
-        await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(-1);");
-        await AssertFileContains(generatedFiles[2], "global::TUnit.TestProject.TestEnum methodArg1 = global::TUnit.TestProject.TestEnum.One;");
-    }
 }
