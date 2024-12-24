@@ -15,7 +15,7 @@ public static class GenericTestInvocationWriter
         
         sourceBuilder.WriteLine($"var testClassType = typeof({fullyQualifiedClassType});");
         
-        sourceBuilder.WriteLine($"var methodInfo = {MethodInfoWriter.Write(testSourceDataModel.FullyQualifiedTypeName, testSourceDataModel.MethodName, testSourceDataModel.MethodParameterTypes, false)};");
+        sourceBuilder.WriteLine($"var methodInfo = {MethodInfoWriter.Write(testSourceDataModel)};");
         
         sourceBuilder.WriteLine();
         

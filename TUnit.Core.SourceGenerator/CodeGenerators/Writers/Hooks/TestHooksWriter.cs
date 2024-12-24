@@ -21,7 +21,7 @@ public class TestHooksWriter : BaseHookWriter
             }
             
             sourceBuilder.WriteLine("{ ");
-            sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model.FullyQualifiedTypeName, model.MethodName, model.ParameterTypes, model.IsEveryHook)},""");
+            sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
             
             if(model.IsVoid)
             {
@@ -49,7 +49,7 @@ public class TestHooksWriter : BaseHookWriter
 
         sourceBuilder.WriteLine($"new InstanceHookMethod<{model.FullyQualifiedTypeName}>");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model.FullyQualifiedTypeName, model.MethodName, model.ParameterTypes, model.IsEveryHook)},""");
+        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
         
         if(model.IsVoid)
         {

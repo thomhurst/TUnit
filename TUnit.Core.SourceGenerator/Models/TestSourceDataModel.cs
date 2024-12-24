@@ -1,4 +1,5 @@
-﻿using TUnit.Core.SourceGenerator.Extensions;
+﻿using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.Models;

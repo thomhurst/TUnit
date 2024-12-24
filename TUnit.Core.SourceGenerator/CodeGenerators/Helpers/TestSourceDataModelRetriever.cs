@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
