@@ -7,15 +7,16 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class DataSourceGeneratorRetriever
 {
-    public static ArgumentsContainer Parse(
-        INamedTypeSymbol namedTypeSymbol, 
-        AttributeData attributeData, 
-        ArgumentsType argumentsType, 
+    public static ArgumentsContainer Parse(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol,
+        AttributeData attributeData,
+        ArgumentsType argumentsType,
         int index,
         string? propertyName)
     {
         return new GeneratedArgumentsContainer
         (
+            context,
+            attributeData: attributeData,
             ArgumentsType: argumentsType,
             TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             AttributeDataGeneratorType: attributeData.AttributeClass!.ToDisplayString(DisplayFormats

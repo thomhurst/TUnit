@@ -63,7 +63,7 @@ public static class ArgumentsRetriever
                 if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
                         .DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
-                    yield return DataSourceGeneratorRetriever.Parse(namedTypeSymbol, dataAttribute, argumentsType,
+                    yield return DataSourceGeneratorRetriever.Parse(context, namedTypeSymbol, dataAttribute, argumentsType,
                         index, propertyName);
                 }
             }

@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Enums;
 
@@ -5,9 +6,13 @@ namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
 public record GeneratedArgumentsContainer : ArgumentsContainer
 {
-    public GeneratedArgumentsContainer(ArgumentsType ArgumentsType, int AttributeIndex, string TestClassTypeName, string[] GenericArguments, string AttributeDataGeneratorType) : base(ArgumentsType)
+    public GeneratedArgumentsContainer(GeneratorAttributeSyntaxContext context, AttributeData attributeData,
+        ArgumentsType ArgumentsType, int AttributeIndex, string TestClassTypeName, string[] GenericArguments,
+        string AttributeDataGeneratorType) : base(ArgumentsType)
     {
         this.AttributeIndex = AttributeIndex;
+        Context = context;
+        AttributeData = attributeData;
         this.TestClassTypeName = TestClassTypeName;
         this.GenericArguments = GenericArguments;
         this.AttributeDataGeneratorType = AttributeDataGeneratorType;
@@ -57,8 +62,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         var arrayVariableName = $"{VariableNamePrefix}GeneratedDataArray";
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
 
-        var dataAttr = GenerateDataAttributeVariable("var",
-            $"{objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt({AttributeIndex})",
+        var dataAttr = GenerateDataAttributeVariable("var", AttributeWriter.WriteAttribute(Context, AttributeData),
             ref variableIndex);
             
         sourceCodeWriter.WriteLine(dataAttr.ToString());
@@ -110,7 +114,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         if (ArgumentsType == ArgumentsType.Property)
         {
             var attr = GenerateDataAttributeVariable("var",
-                $"{objectToGetAttributesFrom}.GetCustomAttributes<{AttributeDataGeneratorType}>(true).ElementAt(0)",
+                AttributeWriter.WriteAttribute(Context, AttributeData),
                 ref variableIndex);
             
             sourceCodeWriter.WriteLine(attr.ToString());
@@ -170,6 +174,8 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         return GenericArguments;
     }
 
+    public GeneratorAttributeSyntaxContext Context { get; }
+    public AttributeData AttributeData { get; }
     public string TestClassTypeName { get; }
 
     public string[] GenericArguments { get; }
