@@ -2,32 +2,18 @@
   
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <RootNamespace>TUnit.Core.SourceGenerator.Tests</RootNamespace>
+    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+    <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.12.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="NUnit" />
-    <PackageReference Include="NUnit.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="NUnit3TestAdapter" />
-    <PackageReference Include="TUnit.Assertions" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
-    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" ReferenceOutputAssembly="false"/>
-    <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
+    <ProjectReference Include="..\TUnit\TUnit.csproj" />
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
   </ItemGroup>
-  
   <ItemGroup>
-    <None Include="..\TUnit.Core\bin\$(Configuration)\$(TargetFramework)\TUnit.Core.dll">
-      <Link>%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="Verify.TUnit" />
   </ItemGroup>
 </Project>

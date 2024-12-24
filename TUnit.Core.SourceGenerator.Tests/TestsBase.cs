@@ -88,6 +88,8 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         }
 
         await assertions(generatedFiles);
+        
+        await Verify(generatedFiles);
     }
 
     private static bool IsError(Diagnostic x)
@@ -103,10 +105,5 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         }
         
         return false;
-    }
-
-    protected async Task AssertFileContains(string file, string expected, [CallerArgumentExpression("file")] string fileExpression = "", [CallerArgumentExpression("expected")] string expectedExpression = "")
-    {
-        await Assert.That(file, fileExpression).Contains(expected, expectedExpression).IgnoringWhitespace();
     }
 }

@@ -12,48 +12,5 @@ internal class StringArgumentTests : TestsBase<TestsGenerator>
         async generatedFiles =>
         {
             await Assert.That(generatedFiles.Length).IsEqualTo(2);
-
-            await AssertFileContains(generatedFiles[0], 
-                """
-                global::System.String methodArg = "";
-                """);
-            
-            await AssertFileContains(generatedFiles[0], 
-                """
-                global::System.String methodArg = @"\";
-                """);
-            
-            await AssertFileContains(generatedFiles[0], 
-                """
-                global::System.String methodArg = @"\t";
-                """);
-            
-            await AssertFileContains(generatedFiles[0], 
-                """
-                global::System.String methodArg = "\t";
-                """);
-            
-            await AssertFileContains(generatedFiles[0], 
-                """
-                global::System.String methodArg = "\\t";
-                """);
-            
-            await AssertFileContains(generatedFiles[0], 
-                """
-                global::System.String methodArg = "\\\t";
-                """);
-            
-            await AssertFileContains(generatedFiles[0], 
-                """
-                global::System.String methodArg = "\\\\t";
-                """);
-
-            await AssertFileContains(generatedFiles[0], 
-                """"
-                global::System.String methodArg = """
-                        Hello
-                        World
-                        """;
-                """");
         });
 }
