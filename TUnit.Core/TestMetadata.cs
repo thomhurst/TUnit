@@ -20,7 +20,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 		var testDetails = new TestDetails<TClassType>
 		{
 			TestId = testId,
-			LazyClassInstance = ResettableClassFactory!,
+			LazyClassInstance = ResettableClassFactory,
 			ClassType = classType,
 			AssemblyAttributes = AssemblyAttributes,
 			ClassAttributes = ClassAttributes,
@@ -57,7 +57,7 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
     {
 	    return this with
 	    {
-		    TestMethodFactory = (@class, token) => testMethodFactory.Invoke(@class!, token),
+		    TestMethodFactory = testMethodFactory.Invoke,
 		    ResettableClassFactory = ResettableClassFactory.Clone()
 	    };
     }

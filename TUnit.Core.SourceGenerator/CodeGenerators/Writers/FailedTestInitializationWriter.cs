@@ -15,7 +15,7 @@ public static class FailedTestInitializationWriter
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestClass = typeof({testSourceDataModel.FullyQualifiedTypeName}),");
         sourceBuilder.WriteLine($"ReturnType = {MethodInfoWriter.Write(testSourceDataModel)}.ReturnType,");
-        sourceBuilder.WriteLine($"ParameterTypeFullNames = [{string.Join(", ", testSourceDataModel.MethodParameterTypes.Select(x => $"typeof({x})"))}],");
+        sourceBuilder.WriteLine($"ParameterTypeFullNames = [{string.Join(", ", testSourceDataModel.MethodArgumentTypes.Select(x => $"typeof({x})"))}],");
         sourceBuilder.WriteLine($"TestName = \"{testSourceDataModel.MethodName}\",");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
