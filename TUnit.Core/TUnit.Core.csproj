@@ -24,5 +24,6 @@
 
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
+        <None Remove="compiler-diagnostics.sarif" />
     </ItemGroup>
 </Project>

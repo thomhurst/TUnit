@@ -5,10 +5,11 @@ namespace TUnit.Core.SourceGenerator.Tests;
 
 internal class ClassTupleDataSourceDrivenTests : TestsBase<TestsGenerator>
 {
-    [TestCase(0, "TupleMethod", "TupleMethod")]
-    [TestCase(0, "NamedTupleMethod", "TupleMethod")]
-    [TestCase(0, "TupleMethod", "NamedTupleMethod")]
-    [TestCase(0, "NamedTupleMethod", "NamedTupleMethod")]
+    [Test]
+    [Arguments(0, "TupleMethod", "TupleMethod")]
+    [Arguments(0, "NamedTupleMethod", "TupleMethod")]
+    [Arguments(0, "TupleMethod", "NamedTupleMethod")]
+    [Arguments(0, "NamedTupleMethod", "NamedTupleMethod")]
     public Task Test(int index, string classMethodName, string testMethodName) => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "ClassTupleDataSourceDrivenTests.cs"),

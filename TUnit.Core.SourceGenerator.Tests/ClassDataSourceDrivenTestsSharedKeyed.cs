@@ -5,7 +5,7 @@ namespace TUnit.Core.SourceGenerator.Tests;
 
 internal class ClassDataSourceDrivenTestsSharedKeyed : TestsBase<TestsGenerator>
 {
-    [NUnit.Framework.Test]
+    [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "ClassDataSourceDrivenTestsSharedKeyed.cs"),

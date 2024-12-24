@@ -9,5 +9,9 @@
       <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
       <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <None Remove="compiler-diagnostics.sarif" />
+    </ItemGroup>
 
 </Project>

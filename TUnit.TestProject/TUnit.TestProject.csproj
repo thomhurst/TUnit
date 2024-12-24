@@ -56,5 +56,6 @@
     <None Update="Data\Zip.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Remove="compiler-diagnostics.sarif" />
   </ItemGroup>
 </Project>
