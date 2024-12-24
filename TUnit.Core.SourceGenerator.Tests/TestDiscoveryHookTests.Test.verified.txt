@@ -32,7 +32,7 @@ file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGe
 				Order = 5,
 				FilePath = @"",
 				LineNumber = 5,
-				MethodAttributes = [ new global::TUnit.Core.BeforeEveryAttribute(4)
+				MethodAttributes = [ new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
 {
     Order = 5,
 } ],
@@ -89,7 +89,7 @@ file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGe
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 10,
-				MethodAttributes = [ new global::TUnit.Core.AfterEveryAttribute(4)
+				MethodAttributes = [ new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
 {
     
 } ],

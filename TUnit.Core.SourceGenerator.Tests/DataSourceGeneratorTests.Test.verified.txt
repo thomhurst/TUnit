@@ -46,7 +46,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -62,7 +65,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-				var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>>(true).ElementAt(0);
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>()
+{
+    
+};
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -156,7 +162,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -172,7 +181,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-				var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>>(true).ElementAt(0);
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>()
+{
+    
+};
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -295,7 +307,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -311,7 +326,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-				var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>>(true).ElementAt(0);
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>()
+{
+    
+};
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -409,7 +427,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -425,7 +446,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-				var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>>(true).ElementAt(0);
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>()
+{
+    
+};
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -552,7 +576,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -568,7 +595,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-				var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute>(true).ElementAt(0);
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+{
+    
+};
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -666,7 +696,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -682,7 +715,10 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-				var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute>(true).ElementAt(0);
+				var methodDataAttribute = new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute()
+{
+    
+};
 
 				var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 

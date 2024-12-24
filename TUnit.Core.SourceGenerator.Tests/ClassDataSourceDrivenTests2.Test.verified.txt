@@ -46,7 +46,10 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -131,7 +134,10 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -245,7 +251,10 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -330,7 +339,10 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>()
+{
+    
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 

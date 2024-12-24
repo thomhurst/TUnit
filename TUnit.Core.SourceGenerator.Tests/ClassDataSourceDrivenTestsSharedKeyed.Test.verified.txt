@@ -42,7 +42,10 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>>(true).ElementAt(0);
+			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
+{
+    Shared = global::TUnit.Core.SharedType.Keyed, Key = "🔑",
+};
 
 			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
@@ -149,7 +152,10 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var methodDataAttribute = methodInfo.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>>(true).ElementAt(0);
+			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
+{
+    Shared = global::TUnit.Core.SharedType.Keyed, Key = "🔑",
+};
 
 			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
