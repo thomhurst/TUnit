@@ -33,7 +33,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
-			var methodInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -125,7 +125,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-				ReturnType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "GeneratedData_Method",
 				TestFilePath = @"",
@@ -143,7 +143,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
-			var methodInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -235,7 +235,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-				ReturnType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "GeneratedData_Method",
 				TestFilePath = @"",
@@ -282,7 +282,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
-			var methodInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method2", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -378,7 +378,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method2(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-				ReturnType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method2", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
 				TestName = "GeneratedData_Method2",
 				TestFilePath = @"",
@@ -396,7 +396,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
-			var methodInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method2", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -492,7 +492,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method2(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-				ReturnType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method2", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method2", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
 				TestName = "GeneratedData_Method2",
 				TestFilePath = @"",
@@ -539,7 +539,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
-			var methodInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method3", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -635,7 +635,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method3(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-				ReturnType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method3", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
 				TestName = "GeneratedData_Method3",
 				TestFilePath = @"",
@@ -653,7 +653,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests);
-			var methodInfo = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method3", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -749,7 +749,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method3(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-				ReturnType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests).GetMethod("GeneratedData_Method3", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.DataSourceGeneratorTests), "GeneratedData_Method3", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
 				TestName = "GeneratedData_Method3",
 				TestFilePath = @"",

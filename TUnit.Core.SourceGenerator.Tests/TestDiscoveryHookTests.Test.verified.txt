@@ -26,12 +26,18 @@ file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGe
 		[
 			new global::TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod
 			{
-				MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("BeforeDiscovery", 0, []),
+				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TestDiscoveryHookTests), "BeforeDiscovery", 0, []),
 				Body = (context, cancellationToken) => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery(),
 				HookExecutor = DefaultExecutor.Instance,
 				Order = 5,
 				FilePath = @"",
 				LineNumber = 5,
+				MethodAttributes = [ new global::TUnit.Core.BeforeEveryAttribute(4)
+{
+    Order = 5,
+} ],
+				ClassAttributes = [  ],
+				AssemblyAttributes = [  ],
 			},
 		];
 	}
@@ -77,12 +83,18 @@ file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGe
 		[
 			new global::TUnit.Core.Hooks.AfterTestDiscoveryHookMethod
 			{
-				MethodInfo = typeof(global::TUnit.TestProject.TestDiscoveryHookTests).GetMethod("AfterDiscovery", 0, []),
+				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TestDiscoveryHookTests), "AfterDiscovery", 0, []),
 				Body = (context, cancellationToken) => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery(),
 				HookExecutor = DefaultExecutor.Instance,
 				Order = 0,
 				FilePath = @"",
 				LineNumber = 10,
+				MethodAttributes = [ new global::TUnit.Core.AfterEveryAttribute(4)
+{
+    
+} ],
+				ClassAttributes = [  ],
+				AssemblyAttributes = [  ],
 			},
 		];
 	}

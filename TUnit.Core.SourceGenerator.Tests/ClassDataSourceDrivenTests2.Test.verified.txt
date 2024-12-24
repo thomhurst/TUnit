@@ -33,7 +33,7 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetMethod("Base_Derived1", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), "Base_Derived1", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -100,7 +100,7 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived1:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetMethod("Base_Derived1", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), "Base_Derived1", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Base_Derived1",
 				TestFilePath = @"",
@@ -118,7 +118,7 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetMethod("Base_Derived1", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), "Base_Derived1", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -185,7 +185,7 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived1:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetMethod("Base_Derived1", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), "Base_Derived1", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Base_Derived1",
 				TestFilePath = @"",
@@ -232,7 +232,7 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetMethod("Base_Derived2", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), "Base_Derived2", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -299,7 +299,7 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived2:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetMethod("Base_Derived2", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), "Base_Derived2", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Base_Derived2",
 				TestFilePath = @"",
@@ -317,7 +317,7 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetMethod("Base_Derived2", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), "Base_Derived2", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -384,7 +384,7 @@ file partial class ClassDataSourceDrivenTests2 : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>:{classDataIndex}:CL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.TestProject.ClassDataSourceDrivenTests2.Base).Base_Derived2:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetMethod("Base_Derived2", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), "Base_Derived2", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Base_Derived2",
 				TestFilePath = @"",

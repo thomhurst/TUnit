@@ -29,7 +29,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class", 0, [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "DataSource_Class", 0, [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -93,7 +93,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class(TUnit.TestProject.Dummy.SomeAsyncDisposableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class", 0, [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "DataSource_Class", 0, [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)],
 				TestName = "DataSource_Class",
 				TestFilePath = @"",
@@ -136,7 +136,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic", 0, [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "DataSource_Class_Generic", 0, [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -200,7 +200,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic(TUnit.TestProject.Dummy.SomeAsyncDisposableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic", 0, [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "DataSource_Class_Generic", 0, [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass)],
 				TestName = "DataSource_Class_Generic",
 				TestFilePath = @"",
@@ -243,7 +243,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource", 0, [typeof(global::TUnit.TestProject.InitializableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_1_ClassDataSource", 0, [typeof(global::TUnit.TestProject.InitializableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -307,7 +307,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource(TUnit.TestProject.InitializableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource", 0, [typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_1_ClassDataSource", 0, [typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.InitializableClass)],
 				TestName = "IsInitialized_With_1_ClassDataSource",
 				TestFilePath = @"",
@@ -350,7 +350,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_2_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -417,7 +417,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_2_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)],
 				TestName = "IsInitialized_With_2_ClassDataSources",
 				TestFilePath = @"",
@@ -460,7 +460,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_3_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -528,7 +528,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_3_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)],
 				TestName = "IsInitialized_With_3_ClassDataSources",
 				TestFilePath = @"",
@@ -571,7 +571,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_4_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -640,7 +640,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_4_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)],
 				TestName = "IsInitialized_With_4_ClassDataSources",
 				TestFilePath = @"",
@@ -683,7 +683,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_5_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -753,7 +753,7 @@ file partial class ClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGene
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources(TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass,TUnit.TestProject.InitializableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests), "IsInitialized_With_5_ClassDataSources", 0, [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass), typeof(global::TUnit.TestProject.InitializableClass)],
 				TestName = "IsInitialized_With_5_ClassDataSources",
 				TestFilePath = @"",

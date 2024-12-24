@@ -38,10 +38,22 @@ file partial class Hooks_STAThreadTests : TUnit.Core.Interfaces.SourceGenerator.
 		[
 			new InstanceHookMethod<global::TUnit.TestProject.STAThreadTests>
 			{
-				MethodInfo = typeof(global::TUnit.TestProject.STAThreadTests).GetMethod("BeforeTest", 0, []),
+				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.STAThreadTests), "BeforeTest", 0, []),
 				Body = (classInstance, context, cancellationToken) => classInstance.BeforeTest(),
 				HookExecutor = new global::TUnit.Core.STAThreadExecutor(),
 				Order = 0,
+				MethodAttributes = [ new global::TUnit.Core.BeforeAttribute(0)
+{
+    
+}, new global::TUnit.Core.Executors.HookExecutorAttribute<global::TUnit.Core.STAThreadExecutor>()
+{
+    
+} ],
+				ClassAttributes = [ new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
+{
+    
+} ],
+				AssemblyAttributes = [  ],
 			},
 		];
 	}
@@ -99,10 +111,22 @@ file partial class Hooks_STAThreadTests : TUnit.Core.Interfaces.SourceGenerator.
 		[
 			new InstanceHookMethod<global::TUnit.TestProject.STAThreadTests>
 			{
-				MethodInfo = typeof(global::TUnit.TestProject.STAThreadTests).GetMethod("AfterTest", 0, []),
+				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.STAThreadTests), "AfterTest", 0, []),
 				Body = (classInstance, context, cancellationToken) => classInstance.AfterTest(),
 				HookExecutor = new global::TUnit.Core.STAThreadExecutor(),
 				Order = 0,
+				MethodAttributes = [ new global::TUnit.Core.AfterAttribute(0)
+{
+    
+}, new global::TUnit.Core.Executors.HookExecutorAttribute<global::TUnit.Core.STAThreadExecutor>()
+{
+    
+} ],
+				ClassAttributes = [ new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
+{
+    
+} ],
+				AssemblyAttributes = [  ],
 			},
 		];
 	}

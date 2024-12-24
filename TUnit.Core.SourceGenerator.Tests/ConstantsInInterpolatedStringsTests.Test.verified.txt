@@ -29,7 +29,7 @@ file partial class ConstantsInInterpolatedStringsTests : TUnit.Core.Interfaces.S
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests).GetMethod("SomeTest", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests), "SomeTest", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -77,7 +77,7 @@ file partial class ConstantsInInterpolatedStringsTests : TUnit.Core.Interfaces.S
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests.SomeTest(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests),
-				ReturnType = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests).GetMethod("SomeTest", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests), "SomeTest", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "SomeTest",
 				TestFilePath = @"",

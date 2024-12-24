@@ -37,7 +37,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -102,7 +102,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -120,7 +120,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -185,7 +185,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -203,7 +203,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -272,7 +272,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -290,7 +290,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -359,7 +359,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -377,7 +377,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -446,7 +446,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -464,7 +464,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -533,7 +533,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",

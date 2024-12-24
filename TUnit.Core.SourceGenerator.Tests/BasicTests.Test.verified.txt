@@ -29,7 +29,7 @@ file partial class BasicTests : TUnit.Core.Interfaces.SourceGenerator.ITestSourc
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.BasicTests);
-			var methodInfo = typeof(global::TUnit.TestProject.BasicTests).GetMethod("SynchronousTest", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "SynchronousTest", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -72,7 +72,7 @@ file partial class BasicTests : TUnit.Core.Interfaces.SourceGenerator.ITestSourc
 			{
 				TestId = $"TUnit.TestProject.BasicTests.SynchronousTest:0",
 				TestClass = typeof(global::TUnit.TestProject.BasicTests),
-				ReturnType = typeof(global::TUnit.TestProject.BasicTests).GetMethod("SynchronousTest", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "SynchronousTest", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "SynchronousTest",
 				TestFilePath = @"",
@@ -115,7 +115,7 @@ file partial class BasicTests : TUnit.Core.Interfaces.SourceGenerator.ITestSourc
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.BasicTests);
-			var methodInfo = typeof(global::TUnit.TestProject.BasicTests).GetMethod("AsynchronousTest", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "AsynchronousTest", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -158,7 +158,7 @@ file partial class BasicTests : TUnit.Core.Interfaces.SourceGenerator.ITestSourc
 			{
 				TestId = $"TUnit.TestProject.BasicTests.AsynchronousTest:0",
 				TestClass = typeof(global::TUnit.TestProject.BasicTests),
-				ReturnType = typeof(global::TUnit.TestProject.BasicTests).GetMethod("AsynchronousTest", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "AsynchronousTest", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "AsynchronousTest",
 				TestFilePath = @"",
@@ -201,7 +201,7 @@ file partial class BasicTests : TUnit.Core.Interfaces.SourceGenerator.ITestSourc
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.BasicTests);
-			var methodInfo = typeof(global::TUnit.TestProject.BasicTests).GetMethod("ValueTaskAsynchronousTest", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "ValueTaskAsynchronousTest", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -244,7 +244,7 @@ file partial class BasicTests : TUnit.Core.Interfaces.SourceGenerator.ITestSourc
 			{
 				TestId = $"TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest:0",
 				TestClass = typeof(global::TUnit.TestProject.BasicTests),
-				ReturnType = typeof(global::TUnit.TestProject.BasicTests).GetMethod("ValueTaskAsynchronousTest", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.BasicTests), "ValueTaskAsynchronousTest", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "ValueTaskAsynchronousTest",
 				TestFilePath = @"",

@@ -29,7 +29,7 @@ file partial class ClassConstructorTest : TUnit.Core.Interfaces.SourceGenerator.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassConstructorTest);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassConstructorTest).GetMethod("Test", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassConstructorTest), "Test", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -73,7 +73,7 @@ file partial class ClassConstructorTest : TUnit.Core.Interfaces.SourceGenerator.
 			{
 				TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassConstructorTest),
-				ReturnType = typeof(global::TUnit.TestProject.ClassConstructorTest).GetMethod("Test", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassConstructorTest), "Test", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Test",
 				TestFilePath = @"",

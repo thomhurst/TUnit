@@ -33,7 +33,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("One", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "One", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -82,7 +82,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.One:0",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("One", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "One", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "One",
 				TestFilePath = @"",
@@ -100,7 +100,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("One", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "One", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -149,7 +149,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.One:1",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("One", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "One", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "One",
 				TestFilePath = @"",
@@ -197,7 +197,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Two", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Two", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -246,7 +246,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Two:0",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Two", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Two", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Two",
 				TestFilePath = @"",
@@ -264,7 +264,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Two", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Two", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -313,7 +313,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Two:1",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Two", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Two", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Two",
 				TestFilePath = @"",
@@ -331,7 +331,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Two", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Two", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -380,7 +380,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Two:2",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Two", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Two", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Two",
 				TestFilePath = @"",
@@ -429,7 +429,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Three", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Three", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -475,7 +475,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Three:0",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Three", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Three", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Three",
 				TestFilePath = @"",
@@ -493,7 +493,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Three", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Three", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -539,7 +539,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Three:1",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Three", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Three", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Three",
 				TestFilePath = @"",
@@ -557,7 +557,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Three", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Three", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -603,7 +603,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Three:2",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Three", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Three", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Three",
 				TestFilePath = @"",
@@ -621,7 +621,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.RepeatTests);
-			var methodInfo = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Three", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Three", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -667,7 +667,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Three:3",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
-				ReturnType = typeof(global::TUnit.TestProject.RepeatTests).GetMethod("Three", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.RepeatTests), "Three", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Three",
 				TestFilePath = @"",

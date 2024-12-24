@@ -35,7 +35,7 @@ file partial class ClassTupleDataSourceDrivenTests : TUnit.Core.Interfaces.Sourc
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests);
-			var methodInfo = ((Action<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests, global::System.Int32, global::System.String, global::System.Boolean>)((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests a0, global::System.Int32 a1, global::System.String a2, global::System.Boolean a3) => a0.DataSource_TupleMethod(a1, a2, a3))).Method;
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -108,7 +108,7 @@ file partial class ClassTupleDataSourceDrivenTests : TUnit.Core.Interfaces.Sourc
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-				ReturnType = ((Action<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests, global::System.Int32, global::System.String, global::System.Boolean>)((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests a0, global::System.Int32 a1, global::System.String a2, global::System.Boolean a3) => a0.DataSource_TupleMethod(a1, a2, a3))).Method.ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
@@ -126,7 +126,7 @@ file partial class ClassTupleDataSourceDrivenTests : TUnit.Core.Interfaces.Sourc
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests);
-			var methodInfo = ((Action<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests, global::System.Int32, global::System.String, global::System.Boolean>)((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests a0, global::System.Int32 a1, global::System.String a2, global::System.Boolean a3) => a0.DataSource_TupleMethod(a1, a2, a3))).Method;
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -199,7 +199,7 @@ file partial class ClassTupleDataSourceDrivenTests : TUnit.Core.Interfaces.Sourc
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-				ReturnType = ((Action<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests, global::System.Int32, global::System.String, global::System.Boolean>)((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests a0, global::System.Int32 a1, global::System.String a2, global::System.Boolean a3) => a0.DataSource_TupleMethod(a1, a2, a3))).Method.ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
@@ -217,7 +217,7 @@ file partial class ClassTupleDataSourceDrivenTests : TUnit.Core.Interfaces.Sourc
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests);
-			var methodInfo = ((Action<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests, global::System.Int32, global::System.String, global::System.Boolean>)((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests a0, global::System.Int32 a1, global::System.String a2, global::System.Boolean a3) => a0.DataSource_TupleMethod(a1, a2, a3))).Method;
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -290,7 +290,7 @@ file partial class ClassTupleDataSourceDrivenTests : TUnit.Core.Interfaces.Sourc
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-				ReturnType = ((Action<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests, global::System.Int32, global::System.String, global::System.Boolean>)((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests a0, global::System.Int32 a1, global::System.String a2, global::System.Boolean a3) => a0.DataSource_TupleMethod(a1, a2, a3))).Method.ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
@@ -308,7 +308,7 @@ file partial class ClassTupleDataSourceDrivenTests : TUnit.Core.Interfaces.Sourc
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests);
-			var methodInfo = ((Action<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests, global::System.Int32, global::System.String, global::System.Boolean>)((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests a0, global::System.Int32 a1, global::System.String a2, global::System.Boolean a3) => a0.DataSource_TupleMethod(a1, a2, a3))).Method;
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -381,7 +381,7 @@ file partial class ClassTupleDataSourceDrivenTests : TUnit.Core.Interfaces.Sourc
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-				ReturnType = ((Action<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests, global::System.Int32, global::System.String, global::System.Boolean>)((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests a0, global::System.Int32 a1, global::System.String a2, global::System.Boolean a3) => a0.DataSource_TupleMethod(a1, a2, a3))).Method.ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",

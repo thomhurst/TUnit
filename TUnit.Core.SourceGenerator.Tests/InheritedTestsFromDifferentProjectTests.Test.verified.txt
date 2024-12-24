@@ -29,7 +29,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("Test", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "Test", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -75,7 +75,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 			{
 				TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test:0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("Test", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "Test", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Test",
 				TestFilePath = @"",
@@ -118,7 +118,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -168,7 +168,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "GenericMethodDataSource",
 				TestFilePath = @"",
@@ -211,7 +211,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -261,7 +261,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "NonGenericMethodDataSource",
 				TestFilePath = @"",
@@ -304,7 +304,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : TUnit.Cor
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("BaseTest", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "BaseTest", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -350,7 +350,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : TUnit.Cor
 			{
 				TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest:0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("BaseTest", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "BaseTest", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "BaseTest",
 				TestFilePath = @"",

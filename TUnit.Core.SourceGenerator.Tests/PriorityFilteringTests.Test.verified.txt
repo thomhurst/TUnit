@@ -29,7 +29,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests);
-			var methodInfo = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("High_1", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "High_1", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -75,7 +75,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_1:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-				ReturnType = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("High_1", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "High_1", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "High_1",
 				TestFilePath = @"",
@@ -118,7 +118,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests);
-			var methodInfo = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("High_2", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "High_2", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -164,7 +164,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_2:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-				ReturnType = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("High_2", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "High_2", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "High_2",
 				TestFilePath = @"",
@@ -207,7 +207,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests);
-			var methodInfo = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("High_3", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "High_3", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -253,7 +253,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_3:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-				ReturnType = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("High_3", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "High_3", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "High_3",
 				TestFilePath = @"",
@@ -296,7 +296,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests);
-			var methodInfo = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("Medium_1", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "Medium_1", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -342,7 +342,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_1:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-				ReturnType = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("Medium_1", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "Medium_1", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Medium_1",
 				TestFilePath = @"",
@@ -385,7 +385,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests);
-			var methodInfo = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("Medium_2", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "Medium_2", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -431,7 +431,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_2:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-				ReturnType = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("Medium_2", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "Medium_2", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Medium_2",
 				TestFilePath = @"",
@@ -474,7 +474,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests);
-			var methodInfo = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("Low_1", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "Low_1", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -520,7 +520,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.Low_1:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-				ReturnType = typeof(global::TUnit.TestProject.PriorityFilteringTests).GetMethod("Low_1", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PriorityFilteringTests), "Low_1", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Low_1",
 				TestFilePath = @"",

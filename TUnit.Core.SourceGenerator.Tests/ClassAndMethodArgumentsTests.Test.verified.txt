@@ -33,7 +33,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("Simple", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "Simple", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -84,7 +84,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).Simple:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("Simple", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "Simple", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Simple",
 				TestFilePath = @"",
@@ -102,7 +102,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("Simple", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "Simple", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -153,7 +153,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).Simple:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("Simple", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "Simple", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Simple",
 				TestFilePath = @"",
@@ -202,7 +202,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -261,7 +261,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "WithMethodLevel",
 				TestFilePath = @"",
@@ -279,7 +279,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -338,7 +338,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "WithMethodLevel",
 				TestFilePath = @"",
@@ -356,7 +356,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -415,7 +415,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "WithMethodLevel",
 				TestFilePath = @"",
@@ -433,7 +433,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -492,7 +492,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "WithMethodLevel",
 				TestFilePath = @"",
@@ -541,7 +541,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -600,7 +600,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "IgnoreParameters",
 				TestFilePath = @"",
@@ -618,7 +618,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -677,7 +677,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "IgnoreParameters",
 				TestFilePath = @"",
@@ -695,7 +695,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -754,7 +754,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "IgnoreParameters",
 				TestFilePath = @"",
@@ -772,7 +772,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -831,7 +831,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "IgnoreParameters",
 				TestFilePath = @"",

@@ -29,7 +29,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", 0, [typeof(SomeAsyncDisposableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), "DataSource_Class", 0, [typeof(SomeAsyncDisposableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -93,7 +93,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class(SomeAsyncDisposableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", 0, [typeof(SomeAsyncDisposableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), "DataSource_Class", 0, [typeof(SomeAsyncDisposableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(SomeAsyncDisposableClass)],
 				TestName = "DataSource_Class",
 				TestFilePath = @"",
@@ -136,7 +136,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed);
-			var methodInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", 0, [typeof(SomeAsyncDisposableClass)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), "DataSource_Class_Generic", 0, [typeof(SomeAsyncDisposableClass)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -200,7 +200,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic(SomeAsyncDisposableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
-				ReturnType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", 0, [typeof(SomeAsyncDisposableClass)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), "DataSource_Class_Generic", 0, [typeof(SomeAsyncDisposableClass)]).ReturnType,
 				ParameterTypeFullNames = [typeof(SomeAsyncDisposableClass)],
 				TestName = "DataSource_Class_Generic",
 				TestFilePath = @"",
