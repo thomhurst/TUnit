@@ -179,6 +179,7 @@ public static class TestSourceDataModelRetriever
     private static string[] WriteAttributes(GeneratorAttributeSyntaxContext context, ImmutableArray<AttributeData> attributeDatas)
     {
         return attributeDatas
+            .Where(x => x.AttributeClass?.ContainingAssembly?.Name != "System.Runtime")
             .Select(x => WriteAttribute(context, x))
             .Where(x => !string.IsNullOrEmpty(x))
             .ToArray();
