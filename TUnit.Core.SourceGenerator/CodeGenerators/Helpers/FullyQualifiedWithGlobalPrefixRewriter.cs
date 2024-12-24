@@ -29,7 +29,14 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
-        if (symbol.IsConst(out var constantValue))
+        if (symbol is not IFieldSymbol
+                {
+                    Type: INamedTypeSymbol
+                    {
+                        TypeKind: TypeKind.Enum
+                    }
+                }
+            && symbol.IsConst(out var constantValue))
         {
             return Literal(constantValue);
         }
