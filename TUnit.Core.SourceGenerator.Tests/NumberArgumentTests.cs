@@ -28,7 +28,7 @@ internal class NumberArgumentTests : TestsBase<TestsGenerator>
     [TestExecutor<SetCulture>]
     public Task TestDE() => Test();
 
-    public class SetCulture() : GenericAbstractExecutor
+    public class SetCulture : GenericAbstractExecutor
     {
         protected override async Task ExecuteAsync(Func<Task> action)
         {
