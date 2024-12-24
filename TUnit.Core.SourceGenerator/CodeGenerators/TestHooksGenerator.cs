@@ -61,6 +61,8 @@ public class TestHooksGenerator : IIncrementalGenerator
 
             yield return new HooksDataModel
             {
+                Context = context,
+                Method = methodSymbol,
                 MethodName = methodSymbol.Name,
                 HookLocationType = hookLocationType,
                 IsEveryHook = isEveryHook && hookLevel is not "TUnit.Core.HookType.TestDiscovery" and not "TUnit.Core.HookType.TestSession",

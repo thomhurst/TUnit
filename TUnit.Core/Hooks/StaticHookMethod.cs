@@ -29,12 +29,16 @@ public abstract record StaticHookMethod
     public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name))})";
     public Type ClassType => MethodInfo.ReflectedType!;
     public Assembly Assembly => ClassType.Assembly;
+    
+    public required Attribute[] MethodAttributes { get; init; }
+    public required Attribute[] ClassAttributes { get; init; }
+    public required Attribute[] AssemblyAttributes { get; init; }
 
     [field: AllowNull, MaybeNull]
     public IEnumerable<Attribute> Attributes => field ??=
-        [..MethodInfo.GetCustomAttributes(), ..ClassType.GetCustomAttributes(), ..Assembly.GetCustomAttributes()];
+        [..MethodAttributes, ..ClassAttributes, ..AssemblyAttributes];
 
-    public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => AttributeHelper.GetAttribute<TAttribute>(Attributes);
+    public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
     

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
@@ -62,5 +63,13 @@ public static class AttributeDataExtensions
                || SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
                    compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.AfterEveryAttribute
                        .WithoutGlobalPrefix));
+    }
+
+    public static ImmutableArray<AttributeData> ExcludingSystemAttributes(
+        this IEnumerable<AttributeData> attributeDatas)
+    {
+        return attributeDatas
+            .Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime")
+            .ToImmutableArray();
     }
 }
