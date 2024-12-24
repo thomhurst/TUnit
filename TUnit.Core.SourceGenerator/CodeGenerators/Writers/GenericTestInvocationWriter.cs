@@ -73,7 +73,11 @@ public static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
         sourceBuilder.WriteLine($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.WriteLine($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        sourceBuilder.WriteLine($"AttributeTypes = [ {testSourceDataModel.AttributeTypes.Select(x => $"typeof({x})").ToCommaSeparatedString()} ],");
+        
+        sourceBuilder.WriteLine($"TestAttributes = [ {testSourceDataModel.TestAttributes.ToCommaSeparatedString()} ],");
+        sourceBuilder.WriteLine($"ClassAttributes = [ {testSourceDataModel.ClassAttributes.ToCommaSeparatedString()} ],");
+        sourceBuilder.WriteLine($"AssemblyAttributes = [ {testSourceDataModel.AssemblyAttributes.ToCommaSeparatedString()} ],");
+
         sourceBuilder.WriteLine($"DataAttributes = [ {dataContainers.SelectMany(x => x.DataAttributesVariables).Select(x => x.Name).ToCommaSeparatedString()} ],");
         sourceBuilder.WriteLine("TestBuilderContext = testBuilderContext,");
         sourceBuilder.WriteLine("});");

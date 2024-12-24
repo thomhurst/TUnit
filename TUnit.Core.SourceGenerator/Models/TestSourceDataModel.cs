@@ -61,7 +61,11 @@ public record TestSourceDataModel
 
     public required int RepeatLimit { get; init; }
     public required string? TestExecutor { get; init; }
-    public required string[] AttributeTypes { get; init; }
+    
+    public required string[] TestAttributes { get; init; }
+    public required string[] ClassAttributes { get; init; }
+    public required string[] AssemblyAttributes { get; init; }
+    
     public required string[] PropertyAttributeTypes { get; init; }
     public required ClassPropertiesContainer PropertyArguments { get; init; }
     public required string AssemblyName { get; init; }

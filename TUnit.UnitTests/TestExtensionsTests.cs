@@ -56,7 +56,9 @@ public class TestExtensionsTests
         return _fixture.Build<TestMetadata<TestExtensionsTests>>()
             .Without(x => x.MethodInfo)
             .Without(x => x.ResettableClassFactory)
-            .With(x => x.AttributeTypes, [])
+            .With(x => x.TestAttributes, [])
+            .With(x => x.ClassAttributes, [])
+            .With(x => x.AssemblyAttributes, [])
             .With(x => x.DataAttributes, [])
             .Create();
     }

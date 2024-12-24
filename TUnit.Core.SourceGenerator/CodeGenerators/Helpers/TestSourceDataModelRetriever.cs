@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
@@ -23,7 +24,7 @@ public static class TestSourceDataModelRetriever
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, constructorParameters, constructorParameters.Select(x => x.Type).ToImmutableArray(), GetClassAttributes(namedTypeSymbol).Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
         var methodParametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
-        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes().ToImmutableArray(), namedTypeSymbol, ArgumentsType.Method);
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
         var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol);
         
         var repeatCount =
@@ -35,7 +36,7 @@ public static class TestSourceDataModelRetriever
         {
             foreach (var classArguments in classArgumentsContainers)
             {
-                foreach (var testSourceDataModel in GenerateTestSourceDataModels(methodSymbol, namedTypeSymbol, classArguments, runCount, testAttribute, testArguments, propertyArgumentsContainer))
+                foreach (var testSourceDataModel in GenerateTestSourceDataModels(context, methodSymbol, namedTypeSymbol, classArguments, runCount, testAttribute, testArguments, propertyArgumentsContainer))
                 {
                     yield return testSourceDataModel;
                 }
@@ -48,12 +49,14 @@ public static class TestSourceDataModelRetriever
         return namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(t => t.GetAttributes());
     }
 
-    private static IEnumerable<TestSourceDataModel> GenerateTestSourceDataModels(IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol,
-        BaseContainer classArguments, int runCount, AttributeData testAttribute, BaseContainer testArguments, ClassPropertiesContainer classPropertiesContainer)
+    private static IEnumerable<TestSourceDataModel> GenerateTestSourceDataModels(
+        GeneratorAttributeSyntaxContext context, IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol,
+        BaseContainer classArguments, int runCount, AttributeData testAttribute, BaseContainer testArguments,
+        ClassPropertiesContainer classPropertiesContainer)
     {
         if (classArguments is EmptyArgumentsContainer)
         {
-            foreach (var testSourceDataModel in GenerateSingleClassInstance(methodSymbol, namedTypeSymbol, runCount, testAttribute, testArguments, classPropertiesContainer))
+            foreach (var testSourceDataModel in GenerateSingleClassInstance(context, methodSymbol, namedTypeSymbol, runCount, testAttribute, testArguments, classPropertiesContainer))
             {
                 yield return testSourceDataModel;
             }
@@ -61,14 +64,15 @@ public static class TestSourceDataModelRetriever
             yield break;
         }
 
-        foreach (var generateMultipleClassInstance in GenerateMultipleClassInstances(methodSymbol, namedTypeSymbol, runCount, testAttribute,
+        foreach (var generateMultipleClassInstance in GenerateMultipleClassInstances(context, methodSymbol, namedTypeSymbol, runCount, testAttribute,
                      classArguments, testArguments, classPropertiesContainer))
         {
             yield return generateMultipleClassInstance;
         }
     }
 
-    private static IEnumerable<TestSourceDataModel> GenerateSingleClassInstance(IMethodSymbol methodSymbol,
+    private static IEnumerable<TestSourceDataModel> GenerateSingleClassInstance(GeneratorAttributeSyntaxContext context,
+        IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute,
         BaseContainer testArguments,
         ClassPropertiesContainer classPropertiesContainer)
@@ -77,18 +81,20 @@ public static class TestSourceDataModelRetriever
         {
             yield return GetTestSourceDataModel(new TestGenerationContext
             {
-                    MethodSymbol = methodSymbol,
-                    ClassSymbol = namedTypeSymbol,
-                    ClassArguments = new EmptyArgumentsContainer(),
-                    TestArguments = testArguments,
-                    CurrentRepeatAttempt = i,
-                    TestAttribute = testAttribute,
-                    PropertyArguments = classPropertiesContainer
-                });
+                Context = context,
+                MethodSymbol = methodSymbol,
+                ClassSymbol = namedTypeSymbol,
+                ClassArguments = new EmptyArgumentsContainer(),
+                TestArguments = testArguments,
+                CurrentRepeatAttempt = i,
+                TestAttribute = testAttribute,
+                PropertyArguments = classPropertiesContainer
+            });
         }
     }
 
-    private static IEnumerable<TestSourceDataModel> GenerateMultipleClassInstances(IMethodSymbol methodSymbol,
+    private static IEnumerable<TestSourceDataModel> GenerateMultipleClassInstances(
+        GeneratorAttributeSyntaxContext context, IMethodSymbol methodSymbol,
         INamedTypeSymbol namedTypeSymbol, int runCount, AttributeData testAttribute, BaseContainer classArguments,
         BaseContainer testArguments,
         ClassPropertiesContainer classPropertiesContainer)
@@ -97,6 +103,7 @@ public static class TestSourceDataModelRetriever
         {
             yield return GetTestSourceDataModel(new TestGenerationContext
             {
+                Context = context,
                 MethodSymbol = methodSymbol,
                 ClassSymbol = namedTypeSymbol,
                 ClassArguments = classArguments,
@@ -116,11 +123,15 @@ public static class TestSourceDataModelRetriever
         var testArguments = testGenerationContext.TestArguments;
         var testAttribute = testGenerationContext.TestAttribute;
 
+        var testAttributes = methodSymbol.GetAttributes();
+        var classAttributes = namedTypeSymbol.GetAttributesIncludingBaseTypes().ToImmutableArray();
+        var assemblyAttributes = namedTypeSymbol.ContainingAssembly.GetAttributes();
+        
         AttributeData[] allAttributes =
         [
-            ..methodSymbol.GetAttributes(),
-            ..namedTypeSymbol.GetAttributesIncludingBaseTypes(),
-            ..namedTypeSymbol.ContainingAssembly.GetAttributes()
+            ..testAttributes.Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime"),
+            ..classAttributes.Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime"),
+            ..assemblyAttributes.Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime")
         ];
 
         var propertyAttributes = testGenerationContext.PropertyArguments
@@ -128,7 +139,7 @@ public static class TestSourceDataModelRetriever
             .Select(x => x.PropertySymbol)
             .SelectMany(x => x.GetAttributes())
             .Where(x => x.IsDataSourceAttribute());
-
+        
         return new TestSourceDataModel
         {
             TestId = TestInformationRetriever.GetTestId(testGenerationContext),
@@ -143,24 +154,60 @@ public static class TestSourceDataModelRetriever
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            MethodParameterTypes = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
-            MethodParameterNames = [..methodSymbol.Parameters.Select(x => x.Name)],
+            MethodParameterTypes = [..methodSymbol.Parameters.Select(x => x.Type.GloballyQualified())],
+            MethodParameterNames = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
-            TestExecutor = allAttributes
-                .FirstOrDefault(x =>
-                    x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)
-                ?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
-            AttributeTypes = allAttributes.ExceptSystemAttributes()
-                .Where(x => x.AttributeClass!.DeclaredAccessibility == Accessibility.Public)
-                .Where(x => !x.IsDataSourceAttribute())
-                .Select(x => x.AttributeClass?.GloballyQualified())
-                .OfType<string>()
-                .Distinct()
-                .ToArray(),
-            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified())
-                .OfType<string>().ToArray(),
+            TestExecutor = allAttributes.FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.TestExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
+            TestAttributes = WriteAttributes(testGenerationContext.Context, testAttributes),
+            ClassAttributes = WriteAttributes(testGenerationContext.Context, classAttributes),
+            AssemblyAttributes = WriteAttributes(testGenerationContext.Context, assemblyAttributes),
+            PropertyAttributeTypes = propertyAttributes.Select(x => x.AttributeClass?.GloballyQualified()).OfType<string>().ToArray(),
             PropertyArguments = testGenerationContext.PropertyArguments,
         };
+    }
+    
+    private static string[] WriteAttributes(GeneratorAttributeSyntaxContext context, ImmutableArray<AttributeData> attributeDatas)
+    {
+        return attributeDatas
+            .Where(x => x.AttributeClass?.ContainingAssembly?.Name != "System.Runtime")
+            .Select(x => WriteAttribute(context, x))
+            .Where(x => !string.IsNullOrEmpty(x))
+            .ToArray();
+    }
+
+    private static string WriteAttribute(GeneratorAttributeSyntaxContext context, AttributeData attributeData)
+    {
+        if (attributeData.ApplicationSyntaxReference is null)
+        {
+            return string.Empty;
+        }
+
+        var attributeSyntax = attributeData.ApplicationSyntaxReference.GetSyntax();
+
+        var constructorArgumentSyntaxes = attributeSyntax.DescendantNodes()
+            .OfType<AttributeArgumentSyntax>()
+            .Where(x => x.NameEquals is null);
+
+        var typedConstantsToExpression =
+            constructorArgumentSyntaxes.Zip(attributeData.ConstructorArguments, (syntax, constant) => (syntax, constant));
+        
+        var constructorArguments = typedConstantsToExpression.Select(x =>
+            TypedConstantParser.GetTypedConstantValue(context.SemanticModel, x.syntax.Expression, x.constant.Type));
+
+        var namedArgSyntaxes = attributeSyntax.DescendantNodes()
+            .OfType<AttributeArgumentSyntax>()
+            .Where(x => x.NameEquals is not null)
+            .ToArray();
+
+        var namedArguments = attributeData.NamedArguments.Select(x =>
+            $"{x.Key} = {TypedConstantParser.GetTypedConstantValue(context.SemanticModel, namedArgSyntaxes.First(stx => stx.NameEquals?.Name.Identifier.ValueText == x.Key).Expression, x.Value.Type)},");
+
+        return $$"""
+                new {{attributeData.AttributeClass!.GloballyQualified()}}({{string.Join(", ", constructorArguments)}})
+                {
+                    {{string.Join(" ", namedArguments)}}
+                }
+                """;
     }
 
     private static IEnumerable<string> GetParameterTypes(IMethodSymbol methodSymbol, string[] argumentTypes)

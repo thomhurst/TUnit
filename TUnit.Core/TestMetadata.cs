@@ -14,21 +14,17 @@ public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMember
 		var methodInfo = MethodInfo;
 		var classType = typeof(TClassType);
 
-		var methodAttributes = AttributeTypes.SelectMany(x => methodInfo.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
 		var dataAttributes = DataAttributes;
-		var typeAttributes = AttributeTypes.SelectMany(x => classType.GetCustomAttributes(x, true)).Distinct().OfType<Attribute>().Where(x => !x.IsDefaultAttribute()).ToArray();
-		var assemblyAttributes = AttributeTypes.SelectMany(x => classType.Assembly.GetCustomAttributes(x, false)).Distinct().OfType<Attribute>().ToArray();
-		Attribute[] attributes = [..methodAttributes, ..typeAttributes, ..assemblyAttributes];
-		
+		Attribute[] attributes = [..TestAttributes, ..ClassAttributes, ..AssemblyAttributes];
 		
 		var testDetails = new TestDetails<TClassType>
 		{
 			TestId = testId,
 			LazyClassInstance = ResettableClassFactory!,
 			ClassType = classType,
-			AssemblyAttributes = assemblyAttributes,
-			ClassAttributes = typeAttributes,
-			TestAttributes = methodAttributes,
+			AssemblyAttributes = AssemblyAttributes,
+			ClassAttributes = ClassAttributes,
+			TestAttributes = TestAttributes,
 			DataAttributes = dataAttributes,
 			Attributes = attributes,
 			TestClassArguments = TestClassArguments,
@@ -83,7 +79,9 @@ public abstract record TestMetadata
     public required object?[] TestClassProperties { get; init; }
     
     // Need to be referenced statically for AOT
-    public required Type[] AttributeTypes { get; init; }
+    public required Attribute[] TestAttributes { get; init; }
+    public required Attribute[] ClassAttributes { get; init; }
+    public required Attribute[] AssemblyAttributes { get; init; }
     
     public required Attribute[] DataAttributes { get; init; }
     

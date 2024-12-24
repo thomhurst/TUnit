@@ -1,3 +1,3 @@
-﻿global using NUnit.Framework;
-global using Assert = TUnit.Assertions.Assert;
-global using TestAttribute = NUnit.Framework.TestAttribute;
+﻿global using Assert = TUnit.Assertions.Assert;
+global using TestAttribute = TUnit.Core.TestAttribute;
+global using static TUnit.Core.HookType;
