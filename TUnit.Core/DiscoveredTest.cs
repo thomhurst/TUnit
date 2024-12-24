@@ -50,8 +50,8 @@ internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparab
         return CompareTo((DiscoveredTest)obj);
     }
 
-    public int CompareTo(DiscoveredTest other)
+    public int CompareTo(DiscoveredTest? other)
     {
-        return string.Compare(other.TestDetails.TestId, TestDetails.TestId, StringComparison.Ordinal);
+        return string.Compare(other?.TestDetails.TestId, TestDetails.TestId, StringComparison.Ordinal);
     }
 }
