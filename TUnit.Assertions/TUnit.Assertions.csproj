@@ -14,8 +14,6 @@
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Assertions.Analyzers.CodeFixers\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.Analyzers.CodeFixers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-        
-        <None Remove="compiler-diagnostics.sarif" />
     </ItemGroup>
 
 <ItemGroup>

@@ -25,7 +25,4 @@
   <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="compiler-diagnostics.sarif" />
-  </ItemGroup>
 </Project>
