@@ -19,7 +19,8 @@ public class AttributeWriter
 
     public static string WriteAttribute(GeneratorAttributeSyntaxContext context, AttributeData attributeData)
     {
-        if (attributeData.ApplicationSyntaxReference is null)
+        if (attributeData.ApplicationSyntaxReference is null
+            || attributeData.AttributeClass?.ContainingAssembly?.Name == "System.Runtime")
         {
             return string.Empty;
         }
