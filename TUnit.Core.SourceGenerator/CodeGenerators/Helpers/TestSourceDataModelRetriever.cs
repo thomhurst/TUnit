@@ -178,7 +178,10 @@ public static class TestSourceDataModelRetriever
     
     private static string[] WriteAttributes(GeneratorAttributeSyntaxContext context, ImmutableArray<AttributeData> attributeDatas)
     {
-        return attributeDatas.Select(x => WriteAttribute(context, x)).ToArray();
+        return attributeDatas
+            .Select(x => WriteAttribute(context, x))
+            .Where(x => !string.IsNullOrEmpty(x))
+            .ToArray();
     }
 
     private static string WriteAttribute(GeneratorAttributeSyntaxContext context, AttributeData attributeData)
@@ -190,30 +193,29 @@ public static class TestSourceDataModelRetriever
 
         var attributeSyntax = attributeData.ApplicationSyntaxReference.GetSyntax();
 
-        var argumentSyntaxes = attributeSyntax.DescendantNodes()
-            .OfType<InvocationExpressionSyntax>()
-            .FirstOrDefault()
-            ?.DescendantNodes()
-            .OfType<ArgumentSyntax>() ?? [];
+        var constructorArgumentSyntaxes = attributeSyntax.DescendantNodes()
+            .OfType<AttributeArgumentSyntax>()
+            .Where(x => x.NameEquals is null);
 
         var typedConstantsToExpression =
-            argumentSyntaxes.Zip(attributeData.ConstructorArguments, (syntax, constant) => (syntax, constant));
+            constructorArgumentSyntaxes.Zip(attributeData.ConstructorArguments, (syntax, constant) => (syntax, constant));
         
         var constructorArguments = typedConstantsToExpression.Select(x =>
             TypedConstantParser.GetTypedConstantValue(context.SemanticModel, x.syntax.Expression, x.constant.Type));
 
         var namedArgSyntaxes = attributeSyntax.DescendantNodes()
-            .OfType<MemberAccessExpressionSyntax>()
+            .OfType<AttributeArgumentSyntax>()
+            .Where(x => x.NameEquals is not null)
             .ToArray();
 
         var namedArguments = attributeData.NamedArguments.Select(x =>
-            $"{x.Key} = {TypedConstantParser.GetTypedConstantValue(context.SemanticModel, namedArgSyntaxes.FirstOrDefault(stx => stx.Name.Identifier.ValueText == x.Key), x.Value.Type)}");
+            $"{x.Key} = {TypedConstantParser.GetTypedConstantValue(context.SemanticModel, namedArgSyntaxes.First(stx => stx.NameEquals?.Name.Identifier.ValueText == x.Key).Expression, x.Value.Type)},");
 
         return $$"""
                 new {{attributeData.AttributeClass!.GloballyQualified()}}({{string.Join(", ", constructorArguments)}})
                 {
-                    {{string.Join(", ", namedArguments)}}
-                };
+                    {{string.Join(" ", namedArguments)}}
+                }
                 """;
     }
 
