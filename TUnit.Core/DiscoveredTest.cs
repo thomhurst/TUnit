@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-internal class DiscoveredTest<
+internal record DiscoveredTest<
     [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis
         .DynamicallyAccessedMemberTypes.All)]
     TTestClass
@@ -25,7 +25,7 @@ internal class DiscoveredTest<
     public override IClassConstructor? ClassConstructor => resettableLazyTestClassFactory.ClassConstructor;
 }
 
-internal abstract class DiscoveredTest
+internal abstract record DiscoveredTest
 {
     public required TestContext TestContext { get; init; }
 
