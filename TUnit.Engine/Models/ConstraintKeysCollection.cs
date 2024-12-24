@@ -27,7 +27,7 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
         return _constraintKeys.Intersect(other._constraintKeys).Any();
     }
 
-    public int CompareTo(ConstraintKeysCollection other)
+    public int CompareTo(ConstraintKeysCollection? other)
     {
         if (Equals(other, null))
         {
