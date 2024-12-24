@@ -54,10 +54,15 @@
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.1.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="TUnit" Version="0.5.28" />
-    <PackageVersion Include="TUnit.Core" Version="0.5.28" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.5.28" />
     <PackageVersion Include="Verify.NUnit" Version="28.7.0" />
+    <PackageVersion Include="TUnit" Version="0.5.32" />
+    <PackageVersion Include="TUnit.Core" Version="0.5.32" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.5.32" />
+    <PackageVersion Include="Verify.TUnit" Version="28.7.0" />
+    <PackageVersion Include="C5" Version="3.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageVersion Include="Polyfill" Version="7.8.0" />
+    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
     <PackageVersion Include="Vogen" Version="5.0.6" />
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
