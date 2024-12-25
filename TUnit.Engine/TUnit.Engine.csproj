@@ -12,7 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="C5" />
     <PackageReference Include="EnumerableAsyncProcessor" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Platform" />

@@ -5,7 +5,6 @@
   <ItemGroup>
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
-    <PackageVersion Include="C5" Version="3.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="CliWrap" Version="3.7.0" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="1.4.0" />
