@@ -1,53 +1,114 @@
-﻿#if !NET
+﻿using System.Diagnostics.CodeAnalysis;
 
-using C5;
-using System.Diagnostics.CodeAnalysis;
+#if !NET
 
-namespace TUnit.Engine;
-
-class PriorityQueue<TElement, TPriority>
+namespace TUnit.Engine
 {
-    struct Element : IComparer<Element>
+    public class PriorityQueue<TElement, TPriority> where TPriority : IComparable<TPriority>
     {
-        public TElement Value;
-        public TPriority Priority;
+        private readonly List<Element> _elements = [];
 
-        public Element(TElement value, TPriority priority)
+        private struct Element(TElement value, TPriority priority)
         {
-            Value = value;
-            Priority = priority;
+            public readonly TElement Value = value;
+            public readonly TPriority Priority = priority;
         }
-        public int Compare(Element x, Element y)
+
+        public int Count => _elements.Count;
+
+        public void Enqueue(TElement value, TPriority priority)
         {
-            return Comparer<TPriority>.Default.Compare(x.Priority, y.Priority);
+            var element = new Element(value, priority);
+            _elements.Add(element);
+            HeapifyUp(_elements.Count - 1);
         }
-    }
 
-    private IPriorityQueue<Element> list;
-
-    public PriorityQueue()
-    {
-        this.list = new C5.IntervalHeap<Element>();
-    }
-
-    public void Enqueue(TElement item, TPriority priority)
-    {
-        list.Add(new Element(item, priority));
-    }
-
-    public bool TryDequeue([MaybeNullWhen(false)] out TElement item, [MaybeNullWhen(false)] out TPriority priority)
-    {
-        if (list.Count > 0)
+        public TElement Dequeue()
         {
-            Element element = list.DeleteMin();
-            item = element.Value;
+            if (_elements.Count == 0)
+            {
+                throw new InvalidOperationException("The priority queue is empty.");
+            }
+
+            var element = _elements[0];
+            _elements[0] = _elements[^1];
+            _elements.RemoveAt(_elements.Count - 1);
+            HeapifyDown(0);
+
+            return element.Value;
+        }
+        
+        public bool TryDequeue([NotNullWhen(true)] out TElement? value, [NotNullWhen(true)] out TPriority? priority)
+        {
+            if (_elements.Count == 0)
+            {
+                value = default;
+                priority = default;
+                return false;
+            }
+
+            var element = _elements[0];
+            _elements[0] = _elements[^1];
+            _elements.RemoveAt(_elements.Count - 1);
+            HeapifyDown(0);
+
+            value = element.Value!;
             priority = element.Priority;
             return true;
         }
 
-        item = default;
-        priority = default;
-        return false;
+        public TElement Peek()
+        {
+            if (_elements.Count == 0)
+            {
+                throw new InvalidOperationException("The priority queue is empty.");
+            }
+
+            return _elements[0].Value;
+        }
+
+        private void HeapifyUp(int index)
+        {
+            while (index > 0)
+            {
+                var parentIndex = (index - 1) / 2;
+                if (_elements[index].Priority.CompareTo(_elements[parentIndex].Priority) >= 0)
+                {
+                    break;
+                }
+
+                Swap(index, parentIndex);
+                index = parentIndex;
+            }
+        }
+
+        private void HeapifyDown(int index)
+        {
+            while (index < _elements.Count / 2)
+            {
+                var leftChildIndex = 2 * index + 1;
+                var rightChildIndex = 2 * index + 2;
+                var smallestChildIndex = leftChildIndex;
+
+                if (rightChildIndex < _elements.Count && _elements[rightChildIndex].Priority.CompareTo(_elements[leftChildIndex].Priority) < 0)
+                {
+                    smallestChildIndex = rightChildIndex;
+                }
+
+                if (_elements[index].Priority.CompareTo(_elements[smallestChildIndex].Priority) <= 0)
+                {
+                    break;
+                }
+
+                Swap(index, smallestChildIndex);
+                index = smallestChildIndex;
+            }
+        }
+
+        private void Swap(int index1, int index2)
+        {
+            (_elements[index1], _elements[index2]) = (_elements[index2], _elements[index1]);
+        }
     }
 }
 
