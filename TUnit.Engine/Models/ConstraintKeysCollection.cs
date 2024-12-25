@@ -3,7 +3,10 @@
 namespace TUnit.Engine.Models;
 
 internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
-    : IReadOnlyList<string>, IEquatable<ConstraintKeysCollection>, IComparable<ConstraintKeysCollection>, IComparable
+    : IReadOnlyList<string>, 
+        IEquatable<ConstraintKeysCollection>, 
+        IComparable<ConstraintKeysCollection>, 
+        IComparable
 {
     private readonly IReadOnlyList<string> _constraintKeys = constraintKeys;
 
@@ -64,12 +67,7 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
 
     public int CompareTo(object? obj)
     {
-        if (obj is null)
-        {
-            return -1;
-        }
-        
-        return CompareTo((ConstraintKeysCollection)obj);
+        return CompareTo(obj as ConstraintKeysCollection);
     }
 
     public static bool operator ==(ConstraintKeysCollection? left, ConstraintKeysCollection? right)

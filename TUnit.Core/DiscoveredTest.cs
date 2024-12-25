@@ -40,14 +40,10 @@ internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparab
     public abstract IClassConstructor? ClassConstructor { get; }
     
     public IHookExecutor? HookExecutor { get; internal set; }
+    
     public int CompareTo(object? obj)
     {
-        if (obj is null)
-        {
-            return -1;
-        }
-        
-        return CompareTo((DiscoveredTest)obj);
+        return CompareTo(obj as DiscoveredTest);
     }
 
     public int CompareTo(DiscoveredTest? other)
