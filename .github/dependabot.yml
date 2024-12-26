@@ -1,0 +1,12 @@
+# Please see the documentation for all configuration options:
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: /
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: System.Text.Json # Should be updated with minimum .NET target version
+    update-types: ["version-update:semver-major"]
