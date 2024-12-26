@@ -29,7 +29,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "String1", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -77,7 +77,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.String1(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "String1", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "String1",
 				TestFilePath = @"",
@@ -120,7 +120,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Int", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -168,7 +168,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Int(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Int", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "Int",
 				TestFilePath = @"",
@@ -211,7 +211,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", 0, [typeof(global::System.Double)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Double", 0, [typeof(global::System.Double)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -259,7 +259,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Double(System.Double):0",
 				TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", 0, [typeof(global::System.Double)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Double", 0, [typeof(global::System.Double)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Double)],
 				TestName = "Double",
 				TestFilePath = @"",
@@ -302,7 +302,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", 0, [typeof(global::System.Single)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Float", 0, [typeof(global::System.Single)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -350,7 +350,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Float(System.Single):0",
 				TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", 0, [typeof(global::System.Single)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Float", 0, [typeof(global::System.Single)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Single)],
 				TestName = "Float",
 				TestFilePath = @"",
@@ -393,7 +393,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", 0, [typeof(global::System.Int64)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Long", 0, [typeof(global::System.Int64)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -441,7 +441,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.Long(System.Int64):0",
 				TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", 0, [typeof(global::System.Int64)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "Long", 0, [typeof(global::System.Int64)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int64)],
 				TestName = "Long",
 				TestFilePath = @"",
@@ -484,7 +484,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", 0, [typeof(global::System.UInt32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "UInt", 0, [typeof(global::System.UInt32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -532,7 +532,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.UInt(System.UInt32):0",
 				TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", 0, [typeof(global::System.UInt32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "UInt", 0, [typeof(global::System.UInt32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.UInt32)],
 				TestName = "UInt",
 				TestFilePath = @"",
@@ -575,7 +575,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ConstantArgumentsTests);
-			var methodInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", 0, [typeof(global::System.UInt64)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "ULong", 0, [typeof(global::System.UInt64)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -623,7 +623,7 @@ file partial class ConstantArgumentsTests : TUnit.Core.Interfaces.SourceGenerato
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ConstantArgumentsTests.ULong(System.UInt64):0",
 				TestClass = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-				ReturnType = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", 0, [typeof(global::System.UInt64)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ConstantArgumentsTests), "ULong", 0, [typeof(global::System.UInt64)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.UInt64)],
 				TestName = "ULong",
 				TestFilePath = @"",

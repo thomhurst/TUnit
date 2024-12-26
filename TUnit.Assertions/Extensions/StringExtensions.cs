@@ -14,7 +14,9 @@ internal static class StringExtensions
 
     public static string ReplaceNewLines(this string value)
     {
-        return value.ReplaceLineEndings(" ");
+        return value.Replace("\r\n", " ")
+            .Replace("\n", " ")
+            .Replace("\r", " ");
     }
 
     public static string ShowNewLines(this string value)

@@ -16,5 +16,7 @@ public class FilterByDynamicAddedPropertyTests
         {
             discoveredTestContext.AddProperty("MyKey", "MyDynamicallyAddedValue");
         }
+        
+        public int Order => 0;
     }
 }

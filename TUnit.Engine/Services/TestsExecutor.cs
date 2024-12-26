@@ -2,6 +2,7 @@
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using Polyfills;
 using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
@@ -17,7 +18,7 @@ internal class TestsExecutor
     private readonly EngineCancellationToken _engineCancellationToken;
 
     private readonly Counter _executionCounter = new();
-    private readonly TaskCompletionSource _onFinished = new();
+    private readonly TaskCompletionSource<bool> _onFinished = new();
 
     private readonly int _maximumParallelTests;
 
@@ -37,14 +38,17 @@ internal class TestsExecutor
         {
             if (count == 0)
             {
-                _onFinished.TrySetResult();
+                _onFinished.TrySetResult(false);
             }
         };
     }
 
     public async Task ExecuteAsync(GroupedTests tests, ITestExecutionFilter? filter, ExecuteRequestContext context)
     {
-        await using var _ = _engineCancellationToken.Token.Register(() => _onFinished.TrySetCanceled());
+        using var _ = _engineCancellationToken.Token.Register(() =>
+        {
+            _onFinished.TrySetCanceled();
+        });
 
         try
         {
@@ -91,10 +95,13 @@ internal class TestsExecutor
     private async Task ProcessQueue(ITestExecutionFilter? filter, ExecuteRequestContext context,
         PriorityQueue<DiscoveredTest, int> tests)
     {
-        while (tests.TryDequeue(out var testInformation, out _))
+        await Task.Run(async delegate
         {
-            await ProcessTest(testInformation, filter, context, context.CancellationToken);
-        }
+            while (tests.TryDequeue(out var testInformation, out _))
+            {
+                await ProcessTest(testInformation, filter, context, context.CancellationToken);
+            }
+        });
     }
 
     private async Task ProcessParallelTests(IEnumerable<DiscoveredTest> queue, ITestExecutionFilter? filter,
@@ -107,13 +114,20 @@ internal class TestsExecutor
         ITestExecutionFilter? filter,
         ExecuteRequestContext context)
     {
+#if NET
         await Parallel.ForEachAsync(queue, new ParallelOptions
         {
             MaxDegreeOfParallelism = _maximumParallelTests,
             CancellationToken = context.CancellationToken
         }, (test, token) => ProcessTest(test, filter, context, token));
+#else
+        await queue
+            .ForEachAsync(test => ProcessTest(test, filter, context, context.CancellationToken))
+            .ProcessInParallel(_maximumParallelTests);
+#endif
     }
 
+#if NET
     private async ValueTask ProcessTest(DiscoveredTest test,
         ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
     {
@@ -129,6 +143,23 @@ internal class TestsExecutor
             }
         }
     }
+#else
+    private async Task ProcessTest(DiscoveredTest test,
+        ITestExecutionFilter? filter, ExecuteRequestContext context, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _singleTestExecutor.ExecuteTestAsync(test, filter, context, false);
+        }
+        catch
+        {
+            if (_commandLineOptions.IsOptionSet(FailFastCommandProvider.FailFast))
+            {
+                _engineCancellationToken.CancellationTokenSource.Cancel();
+            }
+        }
+    }
+#endif
 
     private int GetParallelTestsLimit()
     {

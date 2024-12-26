@@ -1,9 +1,11 @@
-﻿using TUnit.Core.SourceGenerator.Enums;
+﻿using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Enums;
 
 namespace TUnit.Core.SourceGenerator.Models;
 
 public record HooksDataModel
 {
+    public required GeneratorAttributeSyntaxContext Context { get; init; }
     public required string FullyQualifiedTypeName { get; init; }
     public required HookLocationType HookLocationType { get; init; }
     public required string MinimalTypeName { get; init; }
@@ -20,6 +22,8 @@ public record HooksDataModel
     public required bool IsEveryHook { get; init; }
     
     public required bool IsVoid { get; init; }
+    
+    public required IMethodSymbol Method { get; init; }
 
     public virtual bool Equals(HooksDataModel? other)
     {

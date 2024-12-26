@@ -19,8 +19,13 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
     public string DisplayName => extension.DisplayName;
     public string Description => extension.Description;
     
-    public async Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    public async ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
+        if (!IsEnabled(logLevel))
+        {
+            return;
+        }
+        
         var text = formatter(state, exception);
 
         await outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
@@ -43,6 +48,11 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
 
     public void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
+        if (!IsEnabled(logLevel))
+        {
+            return;
+        }
+        
         var text = formatter(state, exception);
 
         outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)

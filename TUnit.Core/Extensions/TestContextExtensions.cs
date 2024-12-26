@@ -5,6 +5,8 @@ namespace TUnit.Core.Extensions;
 
 public static class TestContextExtensions
 {
+    private static readonly char[] ClassTypeNameSplitter = { '.' };
+
     public static TestContext[] GetTests(this TestContext context, string testName)
     {
         return GetTests(context, testName, []);
@@ -25,13 +27,13 @@ public static class TestContextExtensions
         
         return tests;
     }
-    
+
     public static string GetClassTypeName(this TestContext testContext)
     {
         var testDetails = testContext.TestDetails;
         
         var classTypeName = testDetails.ClassType.FullName?
-                                .Split('.', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                                .Split(ClassTypeNameSplitter, StringSplitOptions.RemoveEmptyEntries)
                                 .LastOrDefault()
                             ?? testDetails.ClassType.Name;
         
@@ -50,7 +52,7 @@ public static class TestContextExtensions
 
         if (!string.IsNullOrWhiteSpace(testDetails.DisplayName))
         {
-            return testDetails.DisplayName;
+            return testDetails.DisplayName!;
         }
         
         if (testDetails.TestMethodArguments.Length == 0)

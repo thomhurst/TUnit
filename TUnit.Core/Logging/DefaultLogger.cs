@@ -41,7 +41,7 @@ public class DefaultLogger : TUnitLogger
     }
 
 
-    public override async Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    public override async ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         var message = GenerateMessage(formatter(state, exception), exception, logLevel);
         

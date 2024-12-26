@@ -34,7 +34,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests);
-			var methodInfo = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetMethod("SomeTest", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -88,7 +88,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetMethod("SomeTest", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "SomeTest",
 				TestFilePath = @"",
@@ -106,7 +106,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests);
-			var methodInfo = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetMethod("SomeTest", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -160,7 +160,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetMethod("SomeTest", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "SomeTest",
 				TestFilePath = @"",
@@ -178,7 +178,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests);
-			var methodInfo = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetMethod("SomeTest", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(global::System.String)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -232,7 +232,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
-				ReturnType = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetMethod("SomeTest", 0, [typeof(global::System.String)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests), "SomeTest", 0, [typeof(global::System.String)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String)],
 				TestName = "SomeTest",
 				TestFilePath = @"",

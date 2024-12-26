@@ -33,7 +33,7 @@ file partial class NullableByteArgumentTests : TUnit.Core.Interfaces.SourceGener
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.NullableByteArgumentTests);
-			var methodInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test", 0, [typeof(global::System.Byte?)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.NullableByteArgumentTests), "Test", 0, [typeof(global::System.Byte?)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -84,7 +84,7 @@ file partial class NullableByteArgumentTests : TUnit.Core.Interfaces.SourceGener
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test(System.Byte?):0",
 				TestClass = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-				ReturnType = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test", 0, [typeof(global::System.Byte?)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.NullableByteArgumentTests), "Test", 0, [typeof(global::System.Byte?)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Byte?)],
 				TestName = "Test",
 				TestFilePath = @"",
@@ -102,7 +102,7 @@ file partial class NullableByteArgumentTests : TUnit.Core.Interfaces.SourceGener
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.NullableByteArgumentTests);
-			var methodInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test", 0, [typeof(global::System.Byte?)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.NullableByteArgumentTests), "Test", 0, [typeof(global::System.Byte?)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -153,7 +153,7 @@ file partial class NullableByteArgumentTests : TUnit.Core.Interfaces.SourceGener
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test(System.Byte?):0",
 				TestClass = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-				ReturnType = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test", 0, [typeof(global::System.Byte?)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.NullableByteArgumentTests), "Test", 0, [typeof(global::System.Byte?)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Byte?)],
 				TestName = "Test",
 				TestFilePath = @"",
@@ -200,7 +200,7 @@ file partial class NullableByteArgumentTests : TUnit.Core.Interfaces.SourceGener
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.NullableByteArgumentTests);
-			var methodInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", 0, [typeof(global::System.Byte), typeof(global::System.Byte?)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.NullableByteArgumentTests), "Test2", 0, [typeof(global::System.Byte), typeof(global::System.Byte?)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -252,7 +252,7 @@ file partial class NullableByteArgumentTests : TUnit.Core.Interfaces.SourceGener
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.NullableByteArgumentTests.Test2(System.Byte,System.Byte?):0",
 				TestClass = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-				ReturnType = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", 0, [typeof(global::System.Byte), typeof(global::System.Byte?)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.NullableByteArgumentTests), "Test2", 0, [typeof(global::System.Byte), typeof(global::System.Byte?)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Byte), typeof(global::System.Byte?)],
 				TestName = "Test2",
 				TestFilePath = @"",
@@ -270,7 +270,7 @@ file partial class NullableByteArgumentTests : TUnit.Core.Interfaces.SourceGener
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.NullableByteArgumentTests);
-			var methodInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", 0, [typeof(global::System.Byte), typeof(global::System.Byte?)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.NullableByteArgumentTests), "Test2", 0, [typeof(global::System.Byte), typeof(global::System.Byte?)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -322,7 +322,7 @@ file partial class NullableByteArgumentTests : TUnit.Core.Interfaces.SourceGener
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.NullableByteArgumentTests.Test2(System.Byte,System.Byte?):0",
 				TestClass = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
-				ReturnType = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", 0, [typeof(global::System.Byte), typeof(global::System.Byte?)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.NullableByteArgumentTests), "Test2", 0, [typeof(global::System.Byte), typeof(global::System.Byte?)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Byte), typeof(global::System.Byte?)],
 				TestName = "Test2",
 				TestFilePath = @"",

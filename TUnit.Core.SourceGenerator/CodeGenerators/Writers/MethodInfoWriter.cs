@@ -4,23 +4,13 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public static class MethodInfoWriter
 {
-    public static string Write(TestSourceDataModel testSourceDataModel, string methodParameterTypesList)
+    public static string Write(TestSourceDataModel testSourceDataModel)
     {
-        if (testSourceDataModel.MethodGenericTypeCount == 0)
-        {
-            return
-                $"typeof({testSourceDataModel.FullyQualifiedTypeName}).GetMethod(\"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{methodParameterTypesList}])";
-        }
-
-        return
-            $"""
-             typeof({testSourceDataModel.FullyQualifiedTypeName})
-                .GetMethods()
-                .Where(method => method.IsPublic)
-                .Where(method => method.Name == "{testSourceDataModel.MethodName}")
-                .Where(method => method.GetParameters().Length == {testSourceDataModel.MethodParameterTypes.Length})
-                .Where(method => method.GetGenericArguments().Length == {testSourceDataModel.MethodGenericTypeCount})
-                .First()
-             """;
+        return $"global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof({testSourceDataModel.FullyQualifiedTypeName}), \"{testSourceDataModel.MethodName}\", {testSourceDataModel.MethodGenericTypeCount}, [{string.Join(", ", testSourceDataModel.MethodArgumentTypes.Select(x => $"typeof({x})"))}])";
+    }
+    
+    public static string Write(HooksDataModel hooksDataModel)
+    {
+        return $"global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof({hooksDataModel.FullyQualifiedTypeName}), \"{hooksDataModel.MethodName}\", {hooksDataModel.Method.TypeParameters.Length}, [{string.Join(", ", hooksDataModel.ParameterTypes.Select(x => $"typeof({x})"))}])";
     }
 }

@@ -187,7 +187,11 @@ internal class ClassDataSources
         {
             if (targetInvocationException.InnerException != null)
             {
+#if NET
                 ExceptionDispatchInfo.Throw(targetInvocationException.InnerException);
+#else
+                ExceptionDispatchInfo.Capture(targetInvocationException.InnerException).Throw();
+#endif
             }
 
             throw;

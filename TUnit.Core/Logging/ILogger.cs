@@ -11,7 +11,7 @@ public interface ILogger
     /// <param name="exception">The exception associated with the message.</param>
     /// <param name="formatter">The formatter function to format the message.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter);
+    ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter);
 
     /// <summary>
     /// Logs a message with the specified log level, state, exception, and formatter.

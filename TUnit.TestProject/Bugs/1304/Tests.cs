@@ -15,7 +15,7 @@ public class Tests
     public async Task TryParse_InvalidString_ReturnsFailure(string? input, CancellationToken cancellationToken)
     {
         // Act
-        var success = AccountId.TryParse(input, out var id);
+        var success = AccountId.TryParse(input!, out var id);
 
         // Assert
         await Assert.That(success).IsFalse();
@@ -67,6 +67,4 @@ public readonly partial record struct AccountId : IIdentifiable<AccountId>
 public interface IIdentifiable<out TId>
 {
     bool HasValue { get; }
-    static abstract TId Empty { get; }
-    static abstract TId New { get; }
 }

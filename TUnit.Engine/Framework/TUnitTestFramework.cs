@@ -52,10 +52,12 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
         var stringFilter = serviceProvider.FilterParser.GetTestFilter(context);
 
+        var logger = serviceProvider.Logger;
+        
         GlobalContext.Current = new GlobalContext
         {
             TestFilter = stringFilter,
-            GlobalLogger = serviceProvider.Logger
+            GlobalLogger = logger
         };
         
         serviceProvider.StandardOutConsoleInterceptor.Initialize();
@@ -94,10 +96,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     {
                         if(beforeSessionHook.IsSynchronous)
                         {
+                            await logger.LogDebugAsync("Executing synchronous [Before(TestSession)] hook");
+
                             beforeSessionHook.Execute(testSessionContext, context.CancellationToken);
                         }
                         else
                         {
+                            await logger.LogDebugAsync("Executing asynchronous [Before(TestSession)] hook");
+
                             await beforeSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
                         }
                     }
@@ -114,10 +120,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     {
                         if(afterSessionHook.IsSynchronous)
                         {
+                            await logger.LogDebugAsync("Executing synchronous [After(TestSession)] hook");
+
                             afterSessionHook.Execute(testSessionContext, context.CancellationToken);
                         }
                         else
                         {
+                            await logger.LogDebugAsync("Executing asynchronous [After(TestSession)] hook");
+
                             await afterSessionHook.ExecuteAsync(testSessionContext, context.CancellationToken);
                         }
                     }
@@ -135,11 +145,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         catch (Exception e) when (e is TaskCanceledException or OperationCanceledException &&
                                   context.CancellationToken.IsCancellationRequested)
         {
-            await serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
+            await logger.LogErrorAsync("The test run was cancelled.");
         }
         catch (Exception e)
         {
-            await serviceProvider.Logger.LogErrorAsync(e);
+            await logger.LogErrorAsync(e);
             
             await context.MessageBus.PublishAsync(
                 dataProducer: this,

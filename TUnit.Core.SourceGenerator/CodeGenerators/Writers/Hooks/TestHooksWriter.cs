@@ -1,5 +1,6 @@
 ﻿using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Enums;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
@@ -20,7 +21,7 @@ public class TestHooksWriter : BaseHookWriter
             }
             
             sourceBuilder.WriteLine("{ ");
-            sourceBuilder.WriteLine($"""MethodInfo = typeof({model.FullyQualifiedTypeName}).GetMethod("{model.MethodName}", 0, [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]),""");
+            sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
             
             if(model.IsVoid)
             {
@@ -35,6 +36,12 @@ public class TestHooksWriter : BaseHookWriter
             sourceBuilder.WriteLine($"Order = {model.Order},");
             sourceBuilder.WriteLine($"""FilePath = @"{model.FilePath}",""");
             sourceBuilder.WriteLine($"LineNumber = {model.LineNumber},");
+            sourceBuilder.WriteLine(
+                $"MethodAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.GetAttributes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
+            sourceBuilder.WriteLine(
+                $"ClassAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
+            sourceBuilder.WriteLine(
+                $"AssemblyAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
             sourceBuilder.WriteLine("},");
 
             return;
@@ -42,7 +49,7 @@ public class TestHooksWriter : BaseHookWriter
 
         sourceBuilder.WriteLine($"new InstanceHookMethod<{model.FullyQualifiedTypeName}>");
         sourceBuilder.WriteLine("{");
-        sourceBuilder.WriteLine($"""MethodInfo = typeof({model.FullyQualifiedTypeName}).GetMethod("{model.MethodName}", 0, [{string.Join(", ", model.ParameterTypes.Select(x => $"typeof({x})"))}]),""");
+        sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
         
         if(model.IsVoid)
         {
@@ -55,6 +62,12 @@ public class TestHooksWriter : BaseHookWriter
 
         sourceBuilder.WriteLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
         sourceBuilder.WriteLine($"Order = {model.Order},");
+        sourceBuilder.WriteLine(
+            $"MethodAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.GetAttributes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
+        sourceBuilder.WriteLine(
+            $"ClassAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.ContainingType.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
+        sourceBuilder.WriteLine(
+            $"AssemblyAttributes = [ {AttributeWriter.WriteAttributes(model.Context, model.Method.ContainingAssembly.GetAttributes().ExcludingSystemAttributes()).ToCommaSeparatedString()} ],");
         sourceBuilder.WriteLine("},");
     }
 }

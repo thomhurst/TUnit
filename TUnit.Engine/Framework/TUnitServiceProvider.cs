@@ -88,14 +88,14 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testHookOrchestrator = Register(new TestHookOrchestrator(hooksCollector));
 
         var testRegistrar = Register(new TestRegistrar(instanceTracker, AssemblyHookOrchestrator, classHookOrchestrator));
-        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, LoggerFactory, extension));
+        TestDiscoverer = Register(new TUnitTestDiscoverer(hooksCollector, testsLoader, testFilterService, TestGrouper, testRegistrar, TestDiscoveryHookOrchestrator, TUnitMessageBus, Logger, extension));
         
         TestFinder = Register(new TestsFinder(TestDiscoverer));
         Register<ITestFinder>(TestFinder);
         
         Disposer = Register(new Disposer(Logger));
         
-        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Disposer));
+        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Logger, Disposer));
         var explicitFilterService = Register(new ExplicitFilterService());
         var parallelLimitProvider = Register(new ParallelLimitLockProvider());
         
@@ -114,9 +114,14 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+#if NET
         await StandardOutConsoleInterceptor.DisposeAsync();
         await StandardErrorConsoleInterceptor.DisposeAsync();
-        
+#else
+        StandardOutConsoleInterceptor.Dispose();
+        StandardErrorConsoleInterceptor.Dispose();
+#endif
+
         foreach (var servicesValue in _services.Values)
         {
             await Disposer.DisposeAsync(servicesValue);
@@ -132,6 +137,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     public object? GetService(Type serviceType)
     {
-        return _services.GetValueOrDefault(serviceType);
+        _services.TryGetValue(serviceType, out object? result);
+        return result;
     }
 }

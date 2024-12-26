@@ -1,6 +1,7 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Polyfills;
 
 namespace TUnit.TestProject;
 
@@ -20,7 +21,10 @@ public class AfterTestAttributeTests
         public async ValueTask OnTestEnd(TestContext testContext)
         {
             Console.WriteLine(@"Writing file inside WriteFileAfterTestAttribute!");
-            await File.WriteAllTextAsync(Filename, "Foo!");
+            
+            await FilePolyfill.WriteAllTextAsync(Filename, "Foo!");
         }
+
+        public int Order => 0;
     }
 }

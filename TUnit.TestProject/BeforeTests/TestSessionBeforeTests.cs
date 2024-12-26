@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Polyfills;
 
 namespace TUnit.TestProject.BeforeTests;
 
@@ -14,7 +15,7 @@ public class TestSessionBeforeHooks
     [BeforeEvery(TestSession)]
     public static async Task BeforeEveryTestSession(TestSessionContext context)
     {
-        await File.WriteAllTextAsync($"TestSessionBeforeTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests in session");
+        await FilePolyfill.WriteAllTextAsync($"TestSessionBeforeTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests in session");
 
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(TestSessionBeforeTests.EnsureBeforeEveryTestSessionHit));

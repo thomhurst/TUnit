@@ -1,4 +1,5 @@
-﻿using TUnit.Core.SourceGenerator.Extensions;
+﻿using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.Models;
@@ -29,7 +30,7 @@ public record TestSourceDataModel
             hashCode = (hashCode * 397) ^ MethodName.GetHashCode();
             hashCode = (hashCode * 397) ^ ClassArguments.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodArguments.GetHashCode();
-            hashCode = (hashCode * 397) ^ MethodParameterTypes.GetHashCode();
+            hashCode = (hashCode * 397) ^ MethodArgumentTypes.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodParameterNames.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodGenericTypeCount;
             hashCode = (hashCode * 397) ^ TestId.GetHashCode();
@@ -46,14 +47,12 @@ public record TestSourceDataModel
     public required string MethodName { get; init; }
     public required BaseContainer ClassArguments { get; init; }
     
-    public required string[] ClassParameterOrArgumentNonGenericTypes { get; init; }
-
     public required BaseContainer MethodArguments { get; init; }
     
     public required string[] MethodParameterTypes { get; init; }
+    public required string[] MethodArgumentTypes { get; init; }
     public required string[] MethodParameterNames { get; init; }
-    public required string[] MethodParameterOrArgumentNonGenericTypes { get; init; }
-
+    
     public required int MethodGenericTypeCount { get; init; }
     
     public required string TestId { get; init; }
@@ -82,7 +81,7 @@ public record TestSourceDataModel
             ? argumentsContainer.DataVariables.Select(x => x.Name)
             : [];
         
-        if (MethodParameterTypes.Any(type => type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix))
+        if (MethodArgumentTypes.Any(type => type == WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix))
         {
             variableNames = [..variableNames, "cancellationToken"];
         }

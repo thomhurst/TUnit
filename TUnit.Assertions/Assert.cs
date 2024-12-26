@@ -97,7 +97,7 @@ public static class Assert
         {
             await @delegate();
         }
-        catch (Exception e) when (e.GetType().IsAssignableTo(type))
+        catch (Exception e) when (type.IsAssignableFrom(e.GetType()))
         {
             return e;
         }
@@ -121,7 +121,7 @@ public static class Assert
         {
             @delegate();
         }
-        catch (Exception e) when (e.GetType().IsAssignableTo(type))
+        catch (Exception e) when (type.IsAssignableFrom(e.GetType()))
         {
             return e;
         }

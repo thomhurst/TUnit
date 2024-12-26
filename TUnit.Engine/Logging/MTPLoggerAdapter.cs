@@ -4,9 +4,9 @@ namespace TUnit.Engine.Logging;
 
 internal class MTPLoggerAdapter(global::Microsoft.Testing.Platform.Logging.ILogger logger) : ILogger
 {
-    public Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    public async ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        return logger.LogAsync(Map(logLevel), state, exception, formatter);
+        await logger.LogAsync(Map(logLevel), state, exception, formatter);
     }
 
     public void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)

@@ -59,7 +59,7 @@ public static partial class DoesExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, string>(expected,
             (actual, _, _) =>
             {
-                ArgumentNullException.ThrowIfNull(actual);
+                Verify.ArgNotNull(actual);
                 return actual.EndsWith(expected, stringComparison);
             },
             (actual, _, _) => $"\"{actual}\" does not end with \"{expected}\"",
@@ -77,7 +77,7 @@ public static partial class DoesExtensions
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, Regex>(regex,
             (actual, _, _) =>
             {
-                ArgumentNullException.ThrowIfNull(actual);
+                Verify.ArgNotNull(actual);
                 return regex.IsMatch(actual);
             },
             (actual, _, _) => $"The regex \"{regex}\" does not match with \"{actual}\"",

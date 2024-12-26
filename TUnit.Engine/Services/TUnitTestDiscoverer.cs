@@ -1,10 +1,11 @@
 ﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
-using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Logging;
 using TUnit.Engine.Hooks;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
@@ -17,11 +18,9 @@ internal class TUnitTestDiscoverer(
     TestRegistrar testRegistrar,
     TestDiscoveryHookOrchestrator testDiscoveryHookOrchestrator,
     ITUnitMessageBus tUnitMessageBus,
-    ILoggerFactory loggerFactory,
+    TUnitFrameworkLogger logger,
     IExtension extension) : IDataProducer
 {
-    private readonly ILogger<TUnitTestDiscoverer> _logger = loggerFactory.CreateLogger<TUnitTestDiscoverer>();
-    
     private IReadOnlyCollection<DiscoveredTest>? _cachedTests;
 
     public IReadOnlyCollection<DiscoveredTest> GetCachedTests()
@@ -39,7 +38,7 @@ internal class TUnitTestDiscoverer(
         
         var filteredTests = testFilterService.FilterTests(executionRequest?.Filter, allDiscoveredTests).ToArray();
         
-        await _logger.LogTraceAsync($"Found {filteredTests.Length} tests after filtering.");
+        await logger.LogTraceAsync($"Found {filteredTests.Length} tests after filtering.");
         
         var organisedTests = testGrouper.OrganiseTests(filteredTests);
         
@@ -72,10 +71,14 @@ internal class TUnitTestDiscoverer(
         {
             if(beforeDiscoveryHook.IsSynchronous)
             {
+                await logger.LogDebugAsync("Executing synchronous [Before(TestDiscovery)] hook");
+
                 beforeDiscoveryHook.Execute(beforeContext, CancellationToken.None);
             }
             else
             {
+                await logger.LogDebugAsync("Executing asynchronous [Before(TestDiscovery)] hook");
+
                 await beforeDiscoveryHook.ExecuteAsync(beforeContext, CancellationToken.None);
             }
         }
@@ -89,10 +92,14 @@ internal class TUnitTestDiscoverer(
         {
             if(afterDiscoveryHook.IsSynchronous)
             {
+                await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
+
                 afterDiscoveryHook.Execute(afterContext, CancellationToken.None);
             }
             else
             {
+                await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
+
                 await afterDiscoveryHook.ExecuteAsync(afterContext, CancellationToken.None);
             }
         }        

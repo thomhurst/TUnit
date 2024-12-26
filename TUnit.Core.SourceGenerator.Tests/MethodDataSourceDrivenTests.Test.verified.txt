@@ -29,7 +29,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -76,7 +76,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "DataSource_Method",
 				TestFilePath = @"",
@@ -119,7 +119,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method2", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method2", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -166,7 +166,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method2(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method2", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method2", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "DataSource_Method2",
 				TestFilePath = @"",
@@ -209,7 +209,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method_WithAction", 0, [typeof(global::System.Action)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method_WithAction", 0, [typeof(global::System.Action)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -256,7 +256,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method_WithAction(void System.Action()):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method_WithAction", 0, [typeof(global::System.Action)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method_WithAction", 0, [typeof(global::System.Action)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Action)],
 				TestName = "DataSource_Method_WithAction",
 				TestFilePath = @"",
@@ -303,7 +303,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method3", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method3", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -353,7 +353,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method3(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method3", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method3", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "DataSource_Method3",
 				TestFilePath = @"",
@@ -371,7 +371,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method3", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method3", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -421,7 +421,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method3(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method3", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method3", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "DataSource_Method3",
 				TestFilePath = @"",
@@ -470,7 +470,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -526,7 +526,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "DataSource_Method4",
 				TestFilePath = @"",
@@ -544,7 +544,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -600,7 +600,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "DataSource_Method4",
 				TestFilePath = @"",
@@ -618,7 +618,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -674,7 +674,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "DataSource_Method4",
 				TestFilePath = @"",
@@ -692,7 +692,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", 0, [typeof(global::System.Int32)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -748,7 +748,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS3:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_Method4(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", 0, [typeof(global::System.Int32)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_Method4", 0, [typeof(global::System.Int32)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Int32)],
 				TestName = "DataSource_Method4",
 				TestFilePath = @"",
@@ -791,7 +791,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_WithBaseReturn", 0, [typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_WithBaseReturn", 0, [typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -838,7 +838,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenTests.DataSource_WithBaseReturn(TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_WithBaseReturn", 0, [typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue)]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "DataSource_WithBaseReturn", 0, [typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue)],
 				TestName = "DataSource_WithBaseReturn",
 				TestFilePath = @"",
@@ -881,7 +881,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("EnumerableFuncArrayTest", 0, [typeof(global::System.String[])]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "EnumerableFuncArrayTest", 0, [typeof(global::System.String[])]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -932,7 +932,7 @@ file partial class MethodDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTest(System.String[]):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("EnumerableFuncArrayTest", 0, [typeof(global::System.String[])]).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests), "EnumerableFuncArrayTest", 0, [typeof(global::System.String[])]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.String[])],
 				TestName = "EnumerableFuncArrayTest",
 				TestFilePath = @"",

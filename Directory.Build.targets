@@ -1,34 +1,45 @@
 <Project>
-  <PropertyGroup>
-  </PropertyGroup>
-    <PropertyGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
-        <OutputType>Exe</OutputType>
-        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
-        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-        <IsTestProject>true</IsTestProject>
-      </PropertyGroup>
+  <Import
+    Condition="('$(IsLibraryPackage)' == 'true' or '$(IsLibraryTestProject)' == 'true') and '$(EnablePolyfill)' != 'false'"
+    Project="$(MSBuildThisFileDirectory)Polyfill.props" />
 
-      <PropertyGroup>
-          <DefineConstants Condition="$(RoslynVersion) >= 4.7">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
-          <EnableTrimAnalyzer Condition="'$(TargetFramework)' != 'netstandard2.0'">true</EnableTrimAnalyzer>
-      </PropertyGroup>
-    
-      <ItemGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
-        <Using Include="TUnit.Core.HookType" Static="True" />
-        <Using Include="TUnit.Core" />
-        
-        <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
-        <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
-        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
-    
-        <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Analyzers\TUnit.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    
-        <TestingPlatformBuilderHook Include="6ADF853A-6945-4A06-9A4B-D99BC1DC1094">
-          <DisplayName>TUnit</DisplayName>
-          <TypeFullName>TUnit.Engine.Framework.TestingPlatformBuilderHook</TypeFullName>
-        </TestingPlatformBuilderHook>
-      </ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks Condition="'$(IsLibraryPackage)' == 'true'">netstandard2.0;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(IsLibraryTestProject)' == 'true'">net472;net8.0;net9.0</TargetFrameworks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
+    <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition="$(RoslynVersion) >= 4.7">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
+    <EnableTrimAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</EnableTrimAnalyzer>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
+    <Using Include="TUnit.Core.HookType" Static="True" />
+    <Using Include="TUnit.Core" />
+
+    <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
+
+    <ProjectReference
+      Include="$(MSBuildThisFileDirectory)TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj"
+      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Analyzers\TUnit.Analyzers.csproj"
+      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference
+      Include="$(MSBuildThisFileDirectory)TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
+      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+    <TestingPlatformBuilderHook Include="6ADF853A-6945-4A06-9A4B-D99BC1DC1094">
+      <DisplayName>TUnit</DisplayName>
+      <TypeFullName>TUnit.Engine.Framework.TestingPlatformBuilderHook</TypeFullName>
+    </TestingPlatformBuilderHook>
+  </ItemGroup>
 </Project>

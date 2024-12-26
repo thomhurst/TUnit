@@ -23,7 +23,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
     
     public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return () => Random.Shared.Next();
+        yield return () => new Random().Next();
     }
 
     public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
@@ -33,7 +33,11 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
             beforeTestContext.AddLinkedCancellationToken(_cancellationTokenSource.Token);
         }
         
-        return ValueTask.CompletedTask;
+        return default;
+    }
+
+    public void OnTestStartSynchronous(BeforeTestContext beforeTestContext)
+    {
     }
 
     [Experimental("WIP")]
@@ -55,7 +59,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
                 // testContext.SuppressReportingResult();
             }
 
-            await testContext.ReregisterTestWithArguments(methodArguments: [Random.Shared.Next()],
+            await testContext.ReregisterTestWithArguments(methodArguments: [new Random().Next()],
                 objectBag: new()
                 {
                     ["DynamicDataGeneratorRetry"] = true
@@ -67,4 +71,6 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
     {
         return testContext.ObjectBag.ContainsKey("DynamicDataGeneratorRetry");
     }
+    
+    public int Order => 0;
 }

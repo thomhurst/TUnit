@@ -1,5 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.TestProject.Polyfills;
 
 namespace TUnit.TestProject.AfterTests;
 
@@ -14,7 +15,7 @@ public class TestDiscoveryAfterHooks
     [AfterEvery(TestDiscovery)]
     public static async Task AfterEveryTestDiscovery(TestDiscoveryContext context)
     {
-        await File.WriteAllTextAsync($"TestDiscoveryAfterTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests found");
+        await FilePolyfill.WriteAllTextAsync($"TestDiscoveryAfterTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests found");
         
         var test = context.AllTests.First(x =>
             x.TestDetails.TestName == nameof(TestDiscoveryAfterTests.EnsureAfterEveryTestDiscoveryHit));

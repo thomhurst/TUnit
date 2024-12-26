@@ -1,0 +1,13 @@
+<Project>
+    <ItemGroup>
+        <PackageReference Include="Polyfill">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFrameworkIdentifier)'!='.NETCoreApp'">
+        <PackageReference Include="System.Text.Json" />
+        <PackageReference Include="System.Threading.Tasks.Extensions" />
+    </ItemGroup>
+</Project>

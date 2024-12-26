@@ -29,7 +29,7 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.PropertySetterTests);
-			var methodInfo = typeof(global::TUnit.TestProject.PropertySetterTests).GetMethod("Test", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PropertySetterTests), "Test", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -37,7 +37,10 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 
 			global::System.String propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
 			var propertyInfo2 = testClassType.GetProperty("Property3", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute2 = propertyInfo2.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>>(true).ElementAt(0);
+			var propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{
+    
+};
 			var propertyArg2 = propertyDataAttribute2.GenerateDataSources(new DataGeneratorMetadata
 {
    Type = TUnit.Core.Enums.DataGeneratorType.Property,
@@ -49,7 +52,10 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 }).ElementAtOrDefault(0)();
 
 			var propertyInfo3 = testClassType.GetProperty("Property4", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute3 = propertyInfo3.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>>(true).ElementAt(0);
+			var propertyDataAttribute3 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{
+    Shared = global::TUnit.Core.SharedType.PerTestSession,
+};
 			var propertyArg3 = propertyDataAttribute3.GenerateDataSources(new DataGeneratorMetadata
 {
    Type = TUnit.Core.Enums.DataGeneratorType.Property,
@@ -61,7 +67,10 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 }).ElementAtOrDefault(0)();
 
 			var propertyInfo4 = testClassType.GetProperty("Property5", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute4 = propertyInfo4.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>>(true).ElementAt(0);
+			var propertyDataAttribute4 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{
+    Shared = global::TUnit.Core.SharedType.PerClass,
+};
 			var propertyArg4 = propertyDataAttribute4.GenerateDataSources(new DataGeneratorMetadata
 {
    Type = TUnit.Core.Enums.DataGeneratorType.Property,
@@ -73,7 +82,10 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 }).ElementAtOrDefault(0)();
 
 			var propertyInfo5 = testClassType.GetProperty("Property6", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute5 = propertyInfo5.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>>(true).ElementAt(0);
+			var propertyDataAttribute5 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{
+    Shared = global::TUnit.Core.SharedType.Keyed, Key = "Key",
+};
 			var propertyArg5 = propertyDataAttribute5.GenerateDataSources(new DataGeneratorMetadata
 {
    Type = TUnit.Core.Enums.DataGeneratorType.Property,
@@ -85,7 +97,10 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 }).ElementAtOrDefault(0)();
 
 			var propertyInfo6 = testClassType.GetProperty("StaticProperty", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-			var propertyDataAttribute6 = propertyInfo6.GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>>(true).ElementAt(0);
+			var propertyDataAttribute6 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.StaticInnerModel>()
+{
+    Shared = global::TUnit.Core.SharedType.PerTestSession,
+};
 			var propertyArg6 = propertyDataAttribute6.GenerateDataSources(new DataGeneratorMetadata
 {
    Type = TUnit.Core.Enums.DataGeneratorType.Property,
@@ -124,7 +139,7 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 				TestFilePath = @"",
-				TestLineNumber = 69,
+				TestLineNumber = 70,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -147,11 +162,11 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 			{
 				TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
 				TestClass = typeof(global::TUnit.TestProject.PropertySetterTests),
-				ReturnType = typeof(global::TUnit.TestProject.PropertySetterTests).GetMethod("Test", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.PropertySetterTests), "Test", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Test",
 				TestFilePath = @"",
-				TestLineNumber = 69,
+				TestLineNumber = 70,
 				Exception = exception,
 			});
 		}

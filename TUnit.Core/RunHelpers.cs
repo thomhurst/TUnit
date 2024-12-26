@@ -13,9 +13,9 @@ internal static class RunHelpers
 
         var cancellationToken = cancellationTokenSource.Token;
 
-        var taskCompletionSource = new TaskCompletionSource();
+        var taskCompletionSource = new TaskCompletionSource<bool>();
 
-        await using var cancellationTokenRegistration = cancellationToken.Register(() =>
+        using var cancellationTokenRegistration = cancellationToken.Register(() =>
         {
             if (token.IsCancellationRequested)
             {
@@ -40,12 +40,16 @@ internal static class RunHelpers
         {
             // Try set result if it doesn't have one so it finishes
             // and doesn't stay pending in background
-            taskCompletionSource.TrySetResult();
+            taskCompletionSource.TrySetResult(false);
         }
     }
     
     [StackTraceHidden]
+#if NET
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+#else
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static void RunSafely(Action action, List<Exception> exceptions)
     {
         try
@@ -59,7 +63,11 @@ internal static class RunHelpers
     }
     
     [StackTraceHidden]
+#if NET
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+#else
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static async Task RunSafelyAsync(Func<Task> action, List<Exception> exceptions)
     {
         try
@@ -73,7 +81,11 @@ internal static class RunHelpers
     }
     
     [StackTraceHidden]
+#if NET
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+#else
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     public static async Task RunValueTaskSafelyAsync(Func<ValueTask> action, List<Exception> exceptions)
     {
         try

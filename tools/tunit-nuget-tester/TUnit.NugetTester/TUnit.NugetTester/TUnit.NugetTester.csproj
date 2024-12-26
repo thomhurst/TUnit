@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <TargetFrameworks>net472; net8.0; net9.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
         <OutputType>Exe</OutputType>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <IsLibraryTestProject>true</IsLibraryTestProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -10,7 +12,8 @@
     <ItemGroup>
         <PackageReference Include="TUnit">
             <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
-        </PackageReference>    
+        </PackageReference> 
+        <PackageReference Include="Polyfill" />
     </ItemGroup>
 
     <ItemGroup>

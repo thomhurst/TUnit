@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-internal class DiscoveredTest<
+internal record DiscoveredTest<
     [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis
         .DynamicallyAccessedMemberTypes.All)]
     TTestClass
@@ -25,7 +25,7 @@ internal class DiscoveredTest<
     public override IClassConstructor? ClassConstructor => resettableLazyTestClassFactory.ClassConstructor;
 }
 
-internal abstract class DiscoveredTest
+internal abstract record DiscoveredTest : IComparable<DiscoveredTest>, IComparable
 {
     public required TestContext TestContext { get; init; }
 
@@ -40,4 +40,14 @@ internal abstract class DiscoveredTest
     public abstract IClassConstructor? ClassConstructor { get; }
     
     public IHookExecutor? HookExecutor { get; internal set; }
+    
+    public int CompareTo(object? obj)
+    {
+        return CompareTo(obj as DiscoveredTest);
+    }
+
+    public int CompareTo(DiscoveredTest? other)
+    {
+        return string.Compare(other?.TestDetails.TestId, TestDetails.TestId, StringComparison.Ordinal);
+    }
 }

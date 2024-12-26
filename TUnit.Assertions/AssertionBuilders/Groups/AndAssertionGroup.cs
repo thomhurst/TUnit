@@ -43,11 +43,11 @@ public class AndAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TAct
     {
         InvokableAssertionBuilder<TActual> invokableAssertionBuilder;
         
-        if (_assertConditions.TryPop(out var assertCondition))
+        if (_assertConditions.Count > 0)
         {
             invokableAssertionBuilder = assert(assertionBuilder);
             var assertion2 = invokableAssertionBuilder.Assertions.Pop();
-            _assertConditions.Push(new AndAssertCondition<TActual>(assertCondition, assertion2));
+            _assertConditions.Push(new AndAssertCondition<TActual>(_assertConditions.Pop(), assertion2));
         }
         else
         {

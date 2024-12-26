@@ -29,12 +29,12 @@ public class ReturnTypeTests
     [Test]
     public ValueTask Test5()
     {
-        return ValueTask.CompletedTask;
+        return default;
     }
     
     [Test]
     public ValueTask<int> Test6()
     {
-        return ValueTask.FromResult(1);
+        return new ValueTask<int>(1);
     }
 }

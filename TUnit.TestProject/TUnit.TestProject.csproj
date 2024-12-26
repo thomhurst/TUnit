@@ -1,25 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <IsLibraryTestProject>true</IsLibraryTestProject>
     <IsPackable>false</IsPackable>
     <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
     <OutputType>Exe</OutputType>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
-    <IsAotCompatible>true</IsAotCompatible>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Aot)' == 'true'">
+
+  <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
     <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SingleFile)' == 'true'">
+  <PropertyGroup Condition="'$(SingleFile)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <UseAppHost>true</UseAppHost>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
@@ -27,7 +28,7 @@
     <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
     <NoWarn>IL2118</NoWarn>
   </PropertyGroup>
-  
+
   <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
   </ItemGroup>
@@ -35,10 +36,9 @@
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Humanizer" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="Polly" />
-    <PackageReference Include="System.Text.Json" />
     <PackageReference Include="Vogen" />
   </ItemGroup>
   <ItemGroup>
@@ -46,8 +46,8 @@
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
   </ItemGroup>
   <PropertyGroup>
-    <!--        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
-    <!--        <CompilerGeneratedFilesOutputPath>EmittedSourceGeneratedFiles</CompilerGeneratedFilesOutputPath>-->
+           <!-- <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles> -->
+           <!-- <CompilerGeneratedFilesOutputPath>EmittedSourceGeneratedFiles</CompilerGeneratedFilesOutputPath> -->
   </PropertyGroup>
   <ItemGroup>
     <None Update="Data\Blah.txt">

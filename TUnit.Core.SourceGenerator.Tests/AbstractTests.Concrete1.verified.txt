@@ -29,7 +29,7 @@ file partial class Inherited_ConcreteClass1 : TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1);
-			var methodInfo = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1).GetMethod("AssertClassName", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1), "AssertClassName", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -75,7 +75,7 @@ file partial class Inherited_ConcreteClass1 : TUnit.Core.Interfaces.SourceGenera
 			{
 				TestId = $"TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName:0",
 				TestClass = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
-				ReturnType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1).GetMethod("AssertClassName", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1), "AssertClassName", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "AssertClassName",
 				TestFilePath = @"",

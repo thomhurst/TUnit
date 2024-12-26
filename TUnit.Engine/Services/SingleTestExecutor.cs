@@ -98,7 +98,7 @@ internal class SingleTestExecutor(
                 // But users may want to set AsyncLocal values, and so the method must be a parent/ancestor of the method that starts the test!
                 // So actually refactoring these into other methods would mean they wouldn't be a parent/ancestor and would break async local!
                 var assemblyHooksTaskCompletionSource = assemblyHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType.Assembly,
-                    _ => new TaskCompletionSource(), out var assemblyHooksTaskPreviouslyExisted);
+                    _ => new TaskCompletionSource<bool>(), out var assemblyHooksTaskPreviouslyExisted);
                 
                 if (assemblyHooksTaskPreviouslyExisted)
                 {
@@ -119,16 +119,20 @@ internal class SingleTestExecutor(
                         {
                             if (beforeHook.IsSynchronous)
                             {
+                                await logger.LogDebugAsync("Executing synchronous [Before(Assembly)] hook");
+
                                 beforeHook.Execute(assemblyHookContext, CancellationToken.None);
                             }
                             else
                             {
+                                await logger.LogDebugAsync("Executing asynchronous [Before(Assembly)] hook");
+
                                 await beforeHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
                             }
                         }
 
                         AssemblyHookContext.Current = null;
-                        assemblyHooksTaskCompletionSource.SetResult();
+                        assemblyHooksTaskCompletionSource.SetResult(false);
                     }
                     catch (Exception e)
                     {
@@ -138,7 +142,7 @@ internal class SingleTestExecutor(
                 }
 
                 var classHooksTaskCompletionSource = classHookOrchestrator.PreviouslyRunBeforeHooks.GetOrAdd(testContext.TestDetails.ClassType,
-                    _ => new TaskCompletionSource(), out var classHooksTaskPreviouslyExisted);
+                    _ => new TaskCompletionSource<bool>(), out var classHooksTaskPreviouslyExisted);
                 
                 if (classHooksTaskPreviouslyExisted)
                 {
@@ -158,16 +162,20 @@ internal class SingleTestExecutor(
                         {
                             if (beforeHook.IsSynchronous)
                             {
+                                await logger.LogDebugAsync("Executing synchronous [Before(Class)] hook");
+
                                 beforeHook.Execute(classHookContext, CancellationToken.None);
                             }
                             else
                             {
+                                await logger.LogDebugAsync("Executing asynchronous [Before(Class)] hook");
+
                                 await beforeHook.ExecuteAsync(classHookContext, CancellationToken.None);
                             }
                         }
 
                         ClassHookContext.Current = null;
-                        classHooksTaskCompletionSource.SetResult();
+                        classHooksTaskCompletionSource.SetResult(false);
                     }
                     catch (Exception e)
                     {
@@ -180,6 +188,8 @@ internal class SingleTestExecutor(
 
                 foreach (var testStartEventsObject in testContext.GetTestStartEventObjects())
                 {
+                    await logger.LogDebugAsync("Executing ITestStartEventReceivers");
+
                     await testStartEventsObject.OnTestStart(new BeforeTestContext(testContext.InternalDiscoveredTest));
                     testStartEventsObject.OnTestStartSynchronous(new BeforeTestContext(testContext.InternalDiscoveredTest));
                 }
@@ -198,6 +208,7 @@ internal class SingleTestExecutor(
             }
             catch (Exception e)
             {
+                await logger.LogDebugAsync($"Error in test: {e}");
                 testContext.SetResult(e);
                 throw;
             }
@@ -216,7 +227,7 @@ internal class SingleTestExecutor(
             {
                 Status.Passed => messageBus.Passed(test.TestContext, start.GetValueOrDefault()),
                 Status.Failed => messageBus.Failed(test.TestContext, result.Exception!, start.GetValueOrDefault()),
-                _ => ValueTask.CompletedTask,
+                _ => default,
             };
 
             await task;
@@ -231,7 +242,7 @@ internal class SingleTestExecutor(
             if (!testContext.IsRegistered)
             {
                 return testRegistrar.RegisterInstance(testContext.InternalDiscoveredTest,
-                    _ => ValueTask.CompletedTask);
+                    _ => default);
             }
             
             return Task.CompletedTask;
@@ -247,6 +258,8 @@ internal class SingleTestExecutor(
             {
                 foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
                 {
+                    await logger.LogDebugAsync("Executing ITestEndEventReceivers");
+
                     await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(testContext),
                         cleanUpExceptions);
                 }
@@ -255,6 +268,8 @@ internal class SingleTestExecutor(
             {
                 foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
                 {
+                    await logger.LogDebugAsync("Executing ITestSkippedEventReceivers");
+
                     await RunHelpers.RunValueTaskSafelyAsync(() => testSkippedEventReceiver.OnTestSkipped(testContext),
                         cleanUpExceptions);
                 }
@@ -290,10 +305,14 @@ internal class SingleTestExecutor(
         {
             if(afterHook.IsSynchronous)
             {
+                await logger.LogDebugAsync("Executing synchronous [After(Class)] hook");
+
                 RunHelpers.RunSafely(() => afterHook.Execute(classHookContext, CancellationToken.None), cleanUpExceptions);
             }
             else
             {
+                await logger.LogDebugAsync("Executing asynchronous [After(Class)] hook");
+
                 await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(classHookContext, CancellationToken.None), cleanUpExceptions);
             }
         }
@@ -309,10 +328,14 @@ internal class SingleTestExecutor(
         {
             if(afterHook.IsSynchronous)
             {
+                await logger.LogDebugAsync("Executing synchronous [After(Assembly)] hook");
+
                 RunHelpers.RunSafely(() => afterHook.Execute(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
             }
             else
             {
+                await logger.LogDebugAsync("Executing asynchronous [After(Assembly)] hook");
+
                 await RunHelpers.RunSafelyAsync(() => afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None), cleanUpExceptions);
             }
         }
@@ -325,6 +348,8 @@ internal class SingleTestExecutor(
             var allTests = testSessionContext.AllTests;
             foreach (var testEndEventsObject in allTests.SelectMany(tc => tc.GetLastTestInTestSessionEventObjects()))
             {
+                await logger.LogDebugAsync("Executing ILastTestInTestSessionEventReceivers");
+
                 await RunHelpers.RunValueTaskSafelyAsync(
                     () => testEndEventsObject.OnLastTestInTestSession(testSessionContext, testContext),
                     cleanUpExceptions);

@@ -52,7 +52,7 @@ internal class AssertionScope : IDisposable
         // In which case it should just throw itself, so we don't need to do that
         if (_exceptions.Count == 1)
         {
-            ExceptionDispatchInfo.Throw(_exceptions[0]);
+            ExceptionDispatchInfo.Capture(_exceptions[0]).Throw();
         }
 
         if (_exceptions.Count > 1)

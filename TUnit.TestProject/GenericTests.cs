@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿#if NET
+
+using System.Numerics;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 
@@ -82,3 +84,4 @@ public class GenericDouble : GenericTests<double>
         yield return 4.4;
     }
 }
+#endif

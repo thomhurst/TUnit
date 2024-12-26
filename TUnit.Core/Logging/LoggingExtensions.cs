@@ -10,28 +10,28 @@ public static class LoggingExtensions
 #pragma warning restore RS0030 // Do not use banned APIs
                 : state;
 
-    public static Task LogTraceAsync(this ILogger logger, string message)
+    public static ValueTask LogTraceAsync(this ILogger logger, string message)
         => logger.LogAsync(LogLevel.Trace, message, null, Formatter);
 
-    public static Task LogDebugAsync(this ILogger logger, string message)
+    public static ValueTask LogDebugAsync(this ILogger logger, string message)
         => logger.LogAsync(LogLevel.Debug, message, null, Formatter);
 
-    public static Task LogInformationAsync(this ILogger logger, string message)
+    public static ValueTask LogInformationAsync(this ILogger logger, string message)
         => logger.LogAsync(LogLevel.Information, message, null, Formatter);
 
-    public static Task LogWarningAsync(this ILogger logger, string message)
+    public static ValueTask LogWarningAsync(this ILogger logger, string message)
         => logger.LogAsync(LogLevel.Warning, message, null, Formatter);
 
-    public static Task LogErrorAsync(this ILogger logger, string message)
+    public static ValueTask LogErrorAsync(this ILogger logger, string message)
         => logger.LogAsync(LogLevel.Error, message, null, Formatter);
 
-    public static Task LogErrorAsync(this ILogger logger, string message, Exception ex)
+    public static ValueTask LogErrorAsync(this ILogger logger, string message, Exception ex)
         => logger.LogAsync(LogLevel.Error, message, ex, Formatter);
 
-    public static Task LogErrorAsync(this ILogger logger, Exception ex)
+    public static ValueTask LogErrorAsync(this ILogger logger, Exception ex)
     => logger.LogAsync(LogLevel.Error, ex.ToString(), null, Formatter);
 
-    public static Task LogCriticalAsync(this ILogger logger, string message)
+    public static ValueTask LogCriticalAsync(this ILogger logger, string message)
         => logger.LogAsync(LogLevel.Critical, message, null, Formatter);
 
     public static void LogTrace(this ILogger logger, string message)

@@ -33,13 +33,7 @@ file partial class GenericMethodTests : TUnit.Core.Interfaces.SourceGenerator.IT
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.GenericMethodTests);
-			var methodInfo = typeof(global::TUnit.TestProject.GenericMethodTests)
-   .GetMethods()
-   .Where(method => method.IsPublic)
-   .Where(method => method.Name == "AggregateBy_HasExpectedOutput")
-   .Where(method => method.GetParameters().Length == 6)
-   .Where(method => method.GetGenericArguments().Length == 3)
-   .First();
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.GenericMethodTests), "AggregateBy_HasExpectedOutput", 3, [typeof(global::System.Collections.Generic.IEnumerable<global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32, global::System.Int32>), typeof(global::System.Collections.Generic.IEqualityComparer<global::System.Int32>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.Int32, global::System.Int32>>)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -100,13 +94,7 @@ file partial class GenericMethodTests : TUnit.Core.Interfaces.SourceGenerator.IT
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
 				TestClass = typeof(global::TUnit.TestProject.GenericMethodTests),
-				ReturnType = typeof(global::TUnit.TestProject.GenericMethodTests)
-   .GetMethods()
-   .Where(method => method.IsPublic)
-   .Where(method => method.Name == "AggregateBy_HasExpectedOutput")
-   .Where(method => method.GetParameters().Length == 6)
-   .Where(method => method.GetGenericArguments().Length == 3)
-   .First().ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.GenericMethodTests), "AggregateBy_HasExpectedOutput", 3, [typeof(global::System.Collections.Generic.IEnumerable<global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32, global::System.Int32>), typeof(global::System.Collections.Generic.IEqualityComparer<global::System.Int32>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.Int32, global::System.Int32>>)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32>), typeof(global::System.Func<global::System.Int32, global::System.Int32, global::System.Int32>), typeof(global::System.Collections.Generic.IEqualityComparer<global::System.Int32>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.Int32, global::System.Int32>>)],
 				TestName = "AggregateBy_HasExpectedOutput",
 				TestFilePath = @"",
@@ -124,13 +112,7 @@ file partial class GenericMethodTests : TUnit.Core.Interfaces.SourceGenerator.IT
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.GenericMethodTests);
-			var methodInfo = typeof(global::TUnit.TestProject.GenericMethodTests)
-   .GetMethods()
-   .Where(method => method.IsPublic)
-   .Where(method => method.Name == "AggregateBy_HasExpectedOutput")
-   .Where(method => method.GetParameters().Length == 6)
-   .Where(method => method.GetGenericArguments().Length == 3)
-   .First();
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.GenericMethodTests), "AggregateBy_HasExpectedOutput", 3, [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>), typeof(global::System.Func<global::System.String, global::System.String>), typeof(global::System.Func<global::System.String, global::System.String>), typeof(global::System.Func<global::System.String, global::System.String, global::System.String>), typeof(global::System.Collections.Generic.IEqualityComparer<global::System.String>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.String, global::System.String>>)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -191,13 +173,7 @@ file partial class GenericMethodTests : TUnit.Core.Interfaces.SourceGenerator.IT
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput(System.Collections.Generic.IEnumerable<TSource>,TKey System.Func<TSource, TKey>(TSource),TAccumulate System.Func<TKey, TAccumulate>(TKey),TAccumulate System.Func<TAccumulate, TSource, TAccumulate>(TAccumulate, TSource),System.Collections.Generic.IEqualityComparer<TKey>,System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>):0",
 				TestClass = typeof(global::TUnit.TestProject.GenericMethodTests),
-				ReturnType = typeof(global::TUnit.TestProject.GenericMethodTests)
-   .GetMethods()
-   .Where(method => method.IsPublic)
-   .Where(method => method.Name == "AggregateBy_HasExpectedOutput")
-   .Where(method => method.GetParameters().Length == 6)
-   .Where(method => method.GetGenericArguments().Length == 3)
-   .First().ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.GenericMethodTests), "AggregateBy_HasExpectedOutput", 3, [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>), typeof(global::System.Func<global::System.String, global::System.String>), typeof(global::System.Func<global::System.String, global::System.String>), typeof(global::System.Func<global::System.String, global::System.String, global::System.String>), typeof(global::System.Collections.Generic.IEqualityComparer<global::System.String>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.String, global::System.String>>)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>), typeof(global::System.Func<global::System.String, global::System.String>), typeof(global::System.Func<global::System.String, global::System.String>), typeof(global::System.Func<global::System.String, global::System.String, global::System.String>), typeof(global::System.Collections.Generic.IEqualityComparer<global::System.String>), typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<global::System.String, global::System.String>>)],
 				TestName = "AggregateBy_HasExpectedOutput",
 				TestFilePath = @"",

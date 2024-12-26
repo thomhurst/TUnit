@@ -5,12 +5,11 @@ namespace TUnit.Core;
 public class AsyncEvent<TEventArgs>
 {
     private readonly List<Func<object, TEventArgs, Task>> _invocationList;
-    private readonly Lock _locker;
+    private readonly Lock _locker = new();
 
     private AsyncEvent()
     {
         _invocationList = [];
-        _locker = new();
     }
 
     public static AsyncEvent<TEventArgs> operator +(

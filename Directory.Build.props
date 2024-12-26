@@ -5,7 +5,7 @@
     <!--suppress MsbuildTargetFrameworkTagInspection -->
     <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net8'">net8.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(SDK_VERSION)' == 'net9'">net8.0;net9.0</TargetFrameworks>
-    
+
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -30,16 +30,7 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Core</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Assertions</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>TUnit.Engine</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit</_Parameter1>
     </AssemblyAttribute>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>TUnit.UnitTests</_Parameter1>
@@ -84,5 +75,5 @@
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
     <None Include="$(MSBuildThisFileDirectory)assets/logo.png" Pack="true" PackagePath="\" />
   </ItemGroup>
-  
+
 </Project>

@@ -29,7 +29,7 @@ file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.So
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetMethod("Test1", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests), "Test1", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -42,7 +42,10 @@ file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.So
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+{
+    Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -99,7 +102,7 @@ file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.So
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
 				TestClass = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetMethod("Test1", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests), "Test1", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Test1",
 				TestFilePath = @"",
@@ -142,7 +145,7 @@ file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.So
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests);
-			var methodInfo = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetMethod("Test2", 0, []);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests), "Test2", 0, []);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -155,7 +158,10 @@ file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.So
    TestBuilderContext = testBuilderContextAccessor,
    TestSessionId = sessionId,
 };
-			var classDataAttribute = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetCustomAttributes<global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>>(true).ElementAt(0);
+			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+{
+    Shared = [global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None, global::TUnit.Core.SharedType.None],
+};
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
 
@@ -212,7 +218,7 @@ file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.So
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
 				TestClass = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
-				ReturnType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests).GetMethod("Test2", 0, []).ReturnType,
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests), "Test2", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
 				TestName = "Test2",
 				TestFilePath = @"",

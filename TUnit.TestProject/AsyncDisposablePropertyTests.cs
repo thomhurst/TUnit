@@ -13,9 +13,9 @@ public class AsyncDisposablePropertyTests
     }
 
     [After(Test)]
-    public async Task Blah()
+    public void Blah()
     {
-        await TextWriter!.DisposeAsync();
+        TextWriter!.Dispose();
     }
 
     [Test]
