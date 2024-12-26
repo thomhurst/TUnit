@@ -21,7 +21,7 @@ public abstract class InvokableTestBase
     {
         await RunWithoutAot(filter, assertions, runOptions, assertionExpression);
 
-        if (Environment.GetEnvironmentVariable("NET_VERSION") == "net472")
+        if (EnvironmentVariables.IsNet472)
         {
             return;
         }

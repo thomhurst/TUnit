@@ -18,7 +18,7 @@ public class TestNugetPackageModule : Module<CommandResult[]>
 
     public TestNugetPackageModule()
     {
-        if (Environment.GetEnvironmentVariable("NET_VERSION") == "net472")
+        if (EnvironmentVariables.IsNet472)
         {
             _frameworks.Add("net472");
         }

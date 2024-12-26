@@ -15,7 +15,7 @@ public class PublishAOTModule : Module<CommandResult>
 
     protected override Task<SkipDecision> ShouldSkip(IPipelineContext context)
     {
-        return Task.FromResult<SkipDecision>(Environment.GetEnvironmentVariable("NET_VERSION") == "net472");
+        return Task.FromResult<SkipDecision>(EnvironmentVariables.IsNet472);
     }
 
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
