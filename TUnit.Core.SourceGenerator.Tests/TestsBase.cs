@@ -1,7 +1,6 @@
-using System.Runtime.CompilerServices;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using TUnit.Assertions.Extensions;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
@@ -19,7 +18,11 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
     
     public async Task RunTest(string inputFile, RunTestOptions runTestOptions, Func<string[], Task> assertions)
     {
+#if NET
         var source = await File.ReadAllTextAsync(inputFile);
+#else
+        var source = File.ReadAllText(inputFile);
+#endif
 
         string[] additionalSources =
         [
@@ -35,17 +38,29 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             global using global::TUnit.Core;
             global using static global::TUnit.Core.HookType;
             """,
+#if NET
             ..await Task.WhenAll(runTestOptions.AdditionalFiles.Select(x => File.ReadAllTextAsync(x)))
+#else
+            ..runTestOptions.AdditionalFiles.Select(x => File.ReadAllText(x))
+#endif
         ];
         
         // Create an instance of the source generator.
         var generator = new TGenerator();
 
         // Source generators should be tested using 'GeneratorDriver'.
-        var driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+
+        if (runTestOptions.BuildProperties != null)
+        {
+            driver = driver.WithUpdatedAnalyzerConfigOptions(new TestAnalyzerConfigOptionsProvider(
+                    runTestOptions.BuildProperties.ToImmutableDictionary()
+                )
+            );
+        }
         
         // To run generators, we can use an empty compilation.
-
+        
         var compilation = CSharpCompilation.Create(
                 GetType().Name,
                 [
@@ -53,7 +68,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
                 ],
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             )
-            .AddReferences(ReferencesHelper.References)
+            .WithReferences(ReferencesHelper.References)
             .AddSyntaxTrees(additionalSources.Select(x => CSharpSyntaxTree.ParseText(x)));
         
         // Run generators. Don't forget to use the new compilation rather than the previous one.

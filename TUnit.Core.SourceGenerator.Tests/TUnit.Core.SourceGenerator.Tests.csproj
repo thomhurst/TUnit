@@ -2,6 +2,7 @@
   
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <TargetFrameworks>net8.0;net9.0;net472</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
@@ -9,6 +10,8 @@
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit.Analyzers">
@@ -16,12 +19,13 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="Sourcy.Git" />
     <PackageReference Include="TUnit.Assertions" />
     <PackageReference Include="Verify.NUnit" />
   </ItemGroup>
   
   <ItemGroup>
-    <None Include="..\TUnit.Core\bin\$(Configuration)\$(TargetFramework)\TUnit.Core.dll">
+    <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\$(TargetFramework)\TUnit.TestProject.Library.dll">
