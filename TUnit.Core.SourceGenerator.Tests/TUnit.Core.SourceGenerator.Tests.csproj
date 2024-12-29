@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  
+
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
@@ -19,7 +20,7 @@
     <PackageReference Include="TUnit.Assertions" />
     <PackageReference Include="Verify.NUnit" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Include="..\TUnit.Core\bin\$(Configuration)\$(TargetFramework)\TUnit.Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

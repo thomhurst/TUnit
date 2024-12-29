@@ -7,8 +7,9 @@
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+        <SignAssembly>false</SignAssembly>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
         <PackageReference Include="CliWrap" />
@@ -17,7 +18,7 @@
         <PackageReference Include="Sourcy.Git" />
         <PackageReference Include="trxparser" />
     </ItemGroup>
-    
+
     <ItemGroup>
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
