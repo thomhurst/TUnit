@@ -46,5 +46,6 @@ If you're used to other testing frameworks, you're probably used to the package 
 This should NOT be used with TUnit. It'll stop test discovery from working properly.
 
 ## .NET Framework
-If you are still targeting .NET Framework, you may have compilation errors around missing types, such as the `ModuleInitialiserAttribute`.
-These are looked at by the compiler, not the runtime, so you can define them yourselves or use a polyfill library. Using a Polyfill library is the easiest, for example, just reference the NuGet package `Polyfill`.
+If you are still targeting .NET Framework, TUnit will try to Polyfill some missing types that are used by the compiler, such as the `ModuleInitialiserAttribute`.
+
+If you have issues with other Polyfill libraries also defining them, in your project files, you can define the property `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>`

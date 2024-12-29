@@ -1,0 +1,23 @@
+﻿[  
+namespace System.Runtime.CompilerServices;
+
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
+[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+sealed class ModuleInitializerAttribute : Attribute;
+  
+namespace System.Diagnostics;
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+
+[AttributeUsage(
+    AttributeTargets.Class |
+    AttributeTargets.Method |
+    AttributeTargets.Constructor |
+    AttributeTargets.Struct,
+    Inherited = false)]
+sealed class StackTraceHiddenAttribute : Attribute;
+]
