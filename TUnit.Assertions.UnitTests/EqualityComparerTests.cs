@@ -1,4 +1,6 @@
-﻿using TUnit.Assertions.Extensions;
+﻿#pragma warning disable
+
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.UnitTests;
 
