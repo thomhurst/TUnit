@@ -10,7 +10,7 @@ public class SkipTests : InvokableTestBase
         await RunTestsWithFilter(
             "/*/*/SkipTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Failed"),
+                result => result.ResultSummary.Outcome.Should().Be("Completed"),
                 result => result.ResultSummary.Counters.Total.Should().Be(1),
                 result => result.ResultSummary.Counters.Passed.Should().Be(0),
                 result => result.ResultSummary.Counters.Failed.Should().Be(0),

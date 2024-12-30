@@ -8,6 +8,8 @@ namespace TUnit.Engine.Tests;
 
 public abstract class InvokableTestBase
 {
+    private static readonly string GetEnvironmentVariable = Environment.GetEnvironmentVariable("NET_VERSION") ?? "net9.0";
+
     protected Task RunTestsWithFilter(string filter,
         List<Action<TestRun>> assertions,
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
@@ -41,7 +43,7 @@ public abstract class InvokableTestBase
                 [
                     "run",
                     "--no-build",
-                    "-f", Environment.GetEnvironmentVariable("NET_VERSION")!,
+                    "-f", GetEnvironmentVariable,
                     "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
