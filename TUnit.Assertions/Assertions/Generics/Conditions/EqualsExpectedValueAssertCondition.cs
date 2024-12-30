@@ -16,6 +16,11 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected, IEqua
 
     protected override AssertionResult GetResult(TActual? actualValue, TActual? expectedValue)
     {
+        if (equalityComparer.Equals(actualValue, expectedValue))
+        {
+            return AssertionResult.Passed;
+        }
+        
         if (actualValue is IEquatable<TActual> equatable)
         {
             return AssertionResult
@@ -26,7 +31,7 @@ public class EqualsExpectedValueAssertCondition<TActual>(TActual expected, IEqua
 
         return AssertionResult
             .FailIf(
-                () => !Equals(actualValue, expectedValue) && !equalityComparer.Equals(actualValue, expectedValue),
+                () => !Equals(actualValue, expectedValue),
                 () => $"found {actualValue}");
     }
 }
