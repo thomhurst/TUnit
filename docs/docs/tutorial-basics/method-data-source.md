@@ -12,7 +12,7 @@ If we want test data represented in the form of objects, or just to use somethin
 - If you pass in one argument, this is the method name containing your data. TUnit will assume this is in the current test class.
 - If you pass in two arguments, the first should be the `Type` of the class containing your test source data method, and the second should be the name of the method.
 
-If methods are returning reference types, they should return a `Func<T>` rather than just a `T` - This ensures each test has its own instance of that object and tests aren't sharing objects which could lead to unintended side effects.
+If methods are returning reference types, they should return a `Func<T>` rather than just a `T`, and make sure that `Func<>` returns a `new T()`, and not a reference to an already instantiated object - This ensures each test has its own instance of that object and tests aren't sharing objects which could lead to unintended side effects.
 
 Here's an example returning a simple object:
 
@@ -86,7 +86,7 @@ public class MyTestClass
 }
 ```
 
-This attribute can also accept `IEnumerable<>`. For each item returned, a new test will be created with that item passed in to the parameters.
+This attribute can also accept `IEnumerable<>`. For each item returned, a new test will be created with that item passed in to the parameters. Again, if using a reference type, return an `IEnumerable<Func<T>>` and make sure each `Func<>` returns a `new T()`
 
 Here's an example where the test would be invoked 3 times:
 
