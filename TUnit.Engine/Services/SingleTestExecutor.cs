@@ -303,7 +303,7 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterClassHooks)
         {
-            if(afterHook.IsSynchronous)
+            if (afterHook.IsSynchronous)
             {
                 await logger.LogDebugAsync("Executing synchronous [After(Class)] hook");
 
@@ -326,7 +326,7 @@ internal class SingleTestExecutor(
                 
         foreach (var afterHook in afterAssemblyHooks)
         {
-            if(afterHook.IsSynchronous)
+            if (afterHook.IsSynchronous)
             {
                 await logger.LogDebugAsync("Executing synchronous [After(Assembly)] hook");
 

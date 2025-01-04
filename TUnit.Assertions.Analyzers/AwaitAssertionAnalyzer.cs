@@ -31,12 +31,12 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var fullyQualifiedNonGenericMethodName = methodSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
         
-        if(fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple")
+        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple")
         {
             CheckMultipleInvocation(context, invocationOperation);
         }
         
-        if(fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That")
+        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That")
         {
             CheckAssertInvocation(context, invocationOperation);
         }

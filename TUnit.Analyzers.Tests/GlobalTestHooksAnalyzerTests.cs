@@ -29,7 +29,7 @@ public class GlobalTestHooksAnalyzerTests
             );
     }
     
-    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestDiscovery", "TestDiscoveryContext")]
     [TestCase("TestSession", "TestSessionContext")]
     [TestCase("Test", "TestContext")]
     [TestCase("Class", "ClassHookContext")]
@@ -97,24 +97,71 @@ public class GlobalTestHooksAnalyzerTests
             );
     }
     
-    [Test]
-    public async Task BeforeEvery_Assembly_Error()
+    [TestCase("Before")]
+    [TestCase("BeforeEvery")]
+    public async Task BeforeEvery_Assembly_Error(string hookAttribute)
     {
         await Verifier
             .VerifyAnalyzerAsync(
-                """
-                using TUnit.Core;
-                using static TUnit.Core.HookType;
-                     
-                public class Tests
-                {
-                    [BeforeEvery(Assembly)]
-                    public static void {|#0:SetUp|}()
-                    {
-                    }
-                }
-                """,
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [{{hookAttribute}}(Assembly)]
+                      public static void {|#0:SetUp|}()
+                      {
+                      }
+                  }
+                  """,
                 Verifier.Diagnostic(Rules.SingleAssemblyHookContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [TestCase("Before")]
+    [TestCase("BeforeEvery")]
+    public async Task Before_TestSession_Error(string hookAttribute)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [{{hookAttribute}}(TestSession)]
+                      public static void {|#0:SetUp|}()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.SingleTestSessionHookContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [TestCase("Before")]
+    [TestCase("BeforeEvery")]
+    public async Task Before_TestDiscovery_Error(string hookAttribute)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [{{hookAttribute}}(TestDiscovery)]
+                      public static void {|#0:SetUp|}()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.SingleBeforeTestDiscoveryHookContextParameterRequired)
                     .WithLocation(0)
             );
     }
@@ -163,24 +210,71 @@ public class GlobalTestHooksAnalyzerTests
             );
     }
     
-    [Test]
-    public async Task AfterEvery_Assembly_Error()
+    [TestCase("After")]
+    [TestCase("AfterEvery")]
+    public async Task AfterEvery_Assembly_Error(string hookAttribute)
     {
         await Verifier
             .VerifyAnalyzerAsync(
-                """
+                $$"""
                 using TUnit.Core;
                 using static TUnit.Core.HookType;
                      
                 public class Tests
                 {
-                    [AfterEvery(Assembly)]
+                    [{{hookAttribute}}(Assembly)]
                     public static void {|#0:CleanUp|}()
                     {
                     }
                 }
                 """,
                 Verifier.Diagnostic(Rules.SingleAssemblyHookContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [TestCase("After")]
+    [TestCase("AfterEvery")]
+    public async Task After_TestSession_Error(string hookAttribute)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [{{hookAttribute}}(TestSession)]
+                      public static void {|#0:CleanUp|}()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.SingleTestSessionHookContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [TestCase("After")]
+    [TestCase("AfterEvery")]
+    public async Task After_TestDiscovery_Error(string hookAttribute)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [{{hookAttribute}}(TestDiscovery)]
+                      public static void {|#0:CleanUp|}()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.SingleTestDiscoveryHookContextParameterRequired)
                     .WithLocation(0)
             );
     }
@@ -216,7 +310,7 @@ public class GlobalTestHooksAnalyzerTests
             );
     }
     
-    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestDiscovery", "TestDiscoveryContext")]
     [TestCase("TestSession", "TestSessionContext")]
     [TestCase("Test", "TestContext")]
     [TestCase("Class", "ClassHookContext")]
@@ -276,7 +370,7 @@ public class GlobalTestHooksAnalyzerTests
             );
     }
     
-    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestDiscovery", "TestDiscoveryContext")]
     [TestCase("TestSession", "TestSessionContext")]
     [TestCase("Assembly", "AssemblyHookContext")]
     public async Task After_SeparateClass_Error(string hookType, string parameterType)

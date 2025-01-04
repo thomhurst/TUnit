@@ -66,7 +66,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         Exception = exception;
         ActualExpression = actualExpression;
         
-        if(exception is not null)
+        if (exception is not null)
         {
             AssertionScope.GetCurrentAssertionScope()?.RemoveException(exception);
         }

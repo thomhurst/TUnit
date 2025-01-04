@@ -45,7 +45,7 @@ public class DefaultLogger : TUnitLogger
     {
         var message = GenerateMessage(formatter(state, exception), exception, logLevel);
         
-        if(logLevel >= LogLevel.Error)
+        if (logLevel >= LogLevel.Error)
         {
             await Console.Error.WriteLineAsync(message);
         }
@@ -59,7 +59,7 @@ public class DefaultLogger : TUnitLogger
     {
         var message = GenerateMessage(formatter(state, exception), exception, logLevel);
         
-        if(logLevel >= LogLevel.Error)
+        if (logLevel >= LogLevel.Error)
         {
             Console.Error.WriteLine(message);
         }

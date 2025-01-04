@@ -11,7 +11,7 @@ public class TestHooksWriter : BaseHookWriter
     {
         if (model.IsEveryHook)
         {
-            if(model.HookLocationType == HookLocationType.Before)
+            if (model.HookLocationType == HookLocationType.Before)
             {
                 sourceBuilder.WriteLine("new BeforeTestHookMethod");
             }
@@ -23,7 +23,7 @@ public class TestHooksWriter : BaseHookWriter
             sourceBuilder.WriteLine("{ ");
             sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
             
-            if(model.IsVoid)
+            if (model.IsVoid)
             {
                 sourceBuilder.WriteLine($"Body = (context, cancellationToken) => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)}),");
             }
@@ -51,7 +51,7 @@ public class TestHooksWriter : BaseHookWriter
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
         
-        if(model.IsVoid)
+        if (model.IsVoid)
         {
             sourceBuilder.WriteLine($"Body = (classInstance, context, cancellationToken) => classInstance.{model.MethodName}({GetArgs(model)}),");
         }

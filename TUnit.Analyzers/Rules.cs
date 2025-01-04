@@ -111,6 +111,15 @@ public static class Rules
     public static readonly DiagnosticDescriptor AsyncLocalVoidMethod =
         CreateDescriptor("TUnit0047", UsageCategory, DiagnosticSeverity.Warning);
     
+    public static readonly DiagnosticDescriptor SingleTestSessionHookContextParameterRequired =
+        CreateDescriptor("TUnit0048", UsageCategory, DiagnosticSeverity.Error);
+        
+    public static readonly DiagnosticDescriptor SingleBeforeTestDiscoveryHookContextParameterRequired =
+        CreateDescriptor("TUnit0049", UsageCategory, DiagnosticSeverity.Error);
+    
+    public static readonly DiagnosticDescriptor SingleTestDiscoveryHookContextParameterRequired =
+        CreateDescriptor("TUnit0050", UsageCategory, DiagnosticSeverity.Error);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

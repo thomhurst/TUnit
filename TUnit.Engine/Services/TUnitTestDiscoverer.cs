@@ -69,7 +69,7 @@ internal class TUnitTestDiscoverer(
         
         foreach (var beforeDiscoveryHook in beforeDiscoveryHooks)
         {
-            if(beforeDiscoveryHook.IsSynchronous)
+            if (beforeDiscoveryHook.IsSynchronous)
             {
                 await logger.LogDebugAsync("Executing synchronous [Before(TestDiscovery)] hook");
 
@@ -90,7 +90,7 @@ internal class TUnitTestDiscoverer(
         
         foreach (var afterDiscoveryHook in afterDiscoveryHooks)
         {
-            if(afterDiscoveryHook.IsSynchronous)
+            if (afterDiscoveryHook.IsSynchronous)
             {
                 await logger.LogDebugAsync("Executing asynchronous [After(TestDiscovery)] hook");
 

@@ -15,7 +15,7 @@ public static class AssemblyHooksWriter
             return;
         }
         
-        if(model.HookLocationType == HookLocationType.Before)
+        if (model.HookLocationType == HookLocationType.Before)
         {
             sourceBuilder.WriteLine("new BeforeAssemblyHookMethod");
         }
@@ -27,7 +27,7 @@ public static class AssemblyHooksWriter
         sourceBuilder.WriteLine("{ ");
         sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
         
-        if(model.IsVoid)
+        if (model.IsVoid)
         {
             sourceBuilder.WriteLine($"Body = (context, cancellationToken) => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)}),");
         }
