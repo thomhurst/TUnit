@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.Testing;
 using NUnit.Framework;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.GlobalTestHooksAnalyzer>;
 
@@ -6,6 +5,8 @@ namespace TUnit.Analyzers.Tests;
 
 public class GlobalTestHooksAnalyzerTests
 {
+    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestSession", "TestSessionContext")]
     [TestCase("Test", "TestContext")]
     [TestCase("Class", "ClassHookContext")]
     [TestCase("Assembly", "AssemblyHookContext")]
@@ -28,6 +29,8 @@ public class GlobalTestHooksAnalyzerTests
             );
     }
     
+    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestSession", "TestSessionContext")]
     [TestCase("Test", "TestContext")]
     [TestCase("Class", "ClassHookContext")]
     [TestCase("Assembly", "AssemblyHookContext")]
@@ -178,6 +181,126 @@ public class GlobalTestHooksAnalyzerTests
                 }
                 """,
                 Verifier.Diagnostic(Rules.SingleAssemblyHookContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestSession", "TestSessionContext")]
+    [TestCase("Test", "TestContext")]
+    [TestCase("Class", "ClassHookContext")]
+    [TestCase("Assembly", "AssemblyHookContext")]
+    public async Task BeforeEvery_SeparateClass_Error(string hookType, string parameterType)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [BeforeEvery({{hookType}})]
+                      public static void {|#0:MyHook|}({{parameterType}} context)
+                      {
+                      }
+                      
+                      [Test]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.GlobalHooksSeparateClass)
+                    .WithLocation(0)
+            );
+    }
+    
+    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestSession", "TestSessionContext")]
+    [TestCase("Test", "TestContext")]
+    [TestCase("Class", "ClassHookContext")]
+    [TestCase("Assembly", "AssemblyHookContext")]
+    public async Task AfterEvery_SeparateClass_Error(string hookType, string parameterType)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [AfterEvery({{hookType}})]
+                      public static void {|#0:MyHook|}({{parameterType}} context)
+                      {
+                      }
+                      
+                      [Test]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.GlobalHooksSeparateClass)
+                    .WithLocation(0)
+            );
+    }
+    
+    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestSession", "TestSessionContext")]
+    [TestCase("Assembly", "AssemblyHookContext")]
+    public async Task Before_SeparateClass_Error(string hookType, string parameterType)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [Before({{hookType}})]
+                      public static void {|#0:MyHook|}({{parameterType}} context)
+                      {
+                      }
+                      
+                      [Test]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.GlobalHooksSeparateClass)
+                    .WithLocation(0)
+            );
+    }
+    
+    [TestCase("TestDiscovery", "BeforeTestDiscoveryContext")]
+    [TestCase("TestSession", "TestSessionContext")]
+    [TestCase("Assembly", "AssemblyHookContext")]
+    public async Task After_SeparateClass_Error(string hookType, string parameterType)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using TUnit.Core;
+                  using static TUnit.Core.HookType;
+                       
+                  public class Tests
+                  {
+                      [After({{hookType}})]
+                      public static void {|#0:MyHook|}({{parameterType}} context)
+                      {
+                      }
+                      
+                      [Test]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """,
+                Verifier.Diagnostic(Rules.GlobalHooksSeparateClass)
                     .WithLocation(0)
             );
     }

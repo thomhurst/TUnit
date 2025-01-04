@@ -36,7 +36,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var globalHooks = attributes
-            .Where(x => x.IsEveryHook(context.Compilation, out _, out _, out _))
+            .Where(x => IsGlobalHook(context, x))
             .ToList();
 
         if (!globalHooks.Any())
@@ -92,6 +92,17 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
+    }
+
+    private static bool IsGlobalHook(SymbolAnalysisContext context, AttributeData x)
+    {
+        if (x.IsStandardHook(context.Compilation, out _, out var hookLevel, out _)
+            && hookLevel is HookLevel.Assembly or HookLevel.TestSession or HookLevel.TestDiscovery)
+        {
+            return true;
+        }
+        
+        return x.IsEveryHook(context.Compilation, out _, out _, out _);
     }
 
     private static bool HasSingleParameter(IMethodSymbol methodSymbol, string parameterType)
