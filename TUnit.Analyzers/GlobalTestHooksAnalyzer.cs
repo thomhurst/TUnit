@@ -19,10 +19,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         Rules.GlobalHooksSeparateClass,
         Rules.SingleTestContextParameterRequired,
         Rules.SingleClassHookContextParameterRequired,
-        Rules.SingleAssemblyHookContextParameterRequired,
-        Rules.SingleTestSessionHookContextParameterRequired,
-        Rules.SingleTestDiscoveryHookContextParameterRequired,
-        Rules.SingleBeforeTestDiscoveryHookContextParameterRequired
+        Rules.SingleAssemblyHookContextParameterRequired
     );
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -40,7 +37,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributes = methodSymbol.GetAttributes();
 
         var globalHooks = attributes
-            .Where(x => IsGlobalHook(context, x, out _, out _))
+            .Where(x => IsGlobalHook(context, x, out _))
             .ToList();
 
         if (!globalHooks.Any())
@@ -71,7 +68,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         
         foreach (var attributeData in globalHooks)
         {
-            IsGlobalHook(context, attributeData, out var hookLevel, out var hookType);
+            IsGlobalHook(context, attributeData, out var hookLevel);
             
             if (hookLevel == HookLevel.Test
                 && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext.WithGlobalPrefix))
@@ -86,27 +83,10 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             }
             
             else if (hookLevel == HookLevel.Assembly
-                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix))
+                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix)
+                && attributeData.IsEveryHook(context.Compilation, out _, out _, out _))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleAssemblyHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
-            }
-            
-            else if (hookLevel == HookLevel.TestSession
-                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestSessionContext.WithGlobalPrefix))
-            {
-                context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestSessionHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
-            }
-            
-            else if (hookLevel == HookLevel.TestDiscovery)
-            {
-                if (hookType == HookType.Before && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.BeforeTestDiscoveryContext.WithGlobalPrefix))
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.SingleBeforeTestDiscoveryHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
-                }
-                else if (hookType == HookType.After && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestDiscoveryContext.WithGlobalPrefix))
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestDiscoveryHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
-                }
             }
         }
         
@@ -118,15 +98,15 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static bool IsGlobalHook(SymbolAnalysisContext context, AttributeData x, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
+    private static bool IsGlobalHook(SymbolAnalysisContext context, AttributeData x, [NotNullWhen(true)] out HookLevel? hookLevel)
     {
-        if (x.IsStandardHook(context.Compilation, out _, out hookLevel, out hookType)
+        if (x.IsStandardHook(context.Compilation, out _, out hookLevel, out _)
             && hookLevel is HookLevel.Assembly or HookLevel.TestSession or HookLevel.TestDiscovery)
         {
             return true;
         }
         
-        return x.IsEveryHook(context.Compilation, out _, out hookLevel, out hookType);
+        return x.IsEveryHook(context.Compilation, out _, out hookLevel, out _);
     }
 
     private static bool HasSingleParameter(IMethodSymbol methodSymbol, string parameterType)
