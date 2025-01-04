@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.Testing;
 using NUnit.Framework;
 using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.GlobalTestHooksAnalyzer>;
 
@@ -46,6 +47,138 @@ public class GlobalTestHooksAnalyzerTests
                     }
                 }
                 """
+            );
+    }
+    
+    [Test]
+    public async Task BeforeEvery_Test_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [BeforeEvery(Test)]
+                    public static void {|#0:SetUp|}()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.SingleTestContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task BeforeEvery_Class_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [BeforeEvery(Class)]
+                    public static void {|#0:SetUp|}()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.SingleClassHookContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task BeforeEvery_Assembly_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [BeforeEvery(Assembly)]
+                    public static void {|#0:SetUp|}()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.SingleAssemblyHookContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task AfterEvery_Test_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [AfterEvery(Test)]
+                    public static void {|#0:CleanUp|}()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.SingleTestContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task AfterEvery_Class_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [AfterEvery(Class)]
+                    public static void {|#0:CleanUp|}()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.SingleClassHookContextParameterRequired)
+                    .WithLocation(0)
+            );
+    }
+    
+    [Test]
+    public async Task AfterEvery_Assembly_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [AfterEvery(Assembly)]
+                    public static void {|#0:CleanUp|}()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.SingleAssemblyHookContextParameterRequired)
+                    .WithLocation(0)
             );
     }
 }
