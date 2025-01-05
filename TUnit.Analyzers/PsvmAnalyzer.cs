@@ -38,7 +38,7 @@ public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
         
-        if(!HasKnownParameters(context, methodSymbol))
+        if (!HasKnownParameters(context, methodSymbol))
         {
             return;
         }

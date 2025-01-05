@@ -27,7 +27,7 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
         
-        if(awaitOperation.Operation.Type?.AllInterfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+        if (awaitOperation.Operation.Type?.AllInterfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
         is "global::TUnit.Assertions.AssertionBuilders.IInvokableAssertionBuilder") != true)
         {
             return;

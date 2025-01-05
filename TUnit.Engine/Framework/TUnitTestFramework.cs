@@ -94,7 +94,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     foreach (var beforeSessionHook in beforeSessionHooks)
                     {
-                        if(beforeSessionHook.IsSynchronous)
+                        if (beforeSessionHook.IsSynchronous)
                         {
                             await logger.LogDebugAsync("Executing synchronous [Before(TestSession)] hook");
 
@@ -118,7 +118,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
                     foreach (var afterSessionHook in afterSessionHooks)
                     {
-                        if(afterSessionHook.IsSynchronous)
+                        if (afterSessionHook.IsSynchronous)
                         {
                             await logger.LogDebugAsync("Executing synchronous [After(TestSession)] hook");
 

@@ -78,7 +78,7 @@ internal class AssertionScope : IDisposable
     
     internal void RemoveException(Exception exception)
     {
-        if(_exceptions.Contains(exception))
+        if (_exceptions.Contains(exception))
         {
             _exceptions.Remove(exception);
         }

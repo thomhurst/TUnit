@@ -80,7 +80,7 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
             return ConsoleColor.DarkYellow;
         }
         
-        if(logLevel >= LogLevel.Error)
+        if (logLevel >= LogLevel.Error)
         {
             return ConsoleColor.DarkRed;
         }

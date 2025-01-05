@@ -9,7 +9,7 @@ public static class ClassHooksWriter
 {
     public static void Execute(SourceCodeWriter sourceBuilder, HooksDataModel model)
     { 
-        if(model.HookLocationType == HookLocationType.Before)
+        if (model.HookLocationType == HookLocationType.Before)
         {
             sourceBuilder.WriteLine("new BeforeClassHookMethod");
         }
@@ -21,7 +21,7 @@ public static class ClassHooksWriter
         sourceBuilder.WriteLine("{ ");
         sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
 
-        if(model.IsVoid)
+        if (model.IsVoid)
         {
             sourceBuilder.WriteLine($"Body = (context, cancellationToken) => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)}),");
         }

@@ -49,7 +49,7 @@ public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             );
         }
         
-        if(methodSymbol.DeclaredAccessibility != Accessibility.Public)
+        if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
                 context.Symbol.Locations.FirstOrDefault())

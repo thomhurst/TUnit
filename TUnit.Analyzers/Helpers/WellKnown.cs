@@ -24,6 +24,9 @@ public static class WellKnown
         public static readonly FullyQualifiedTypeName TestContext = GetTypeName("TestContext");
         public static readonly FullyQualifiedTypeName ClassHookContext = GetTypeName("ClassHookContext");
         public static readonly FullyQualifiedTypeName AssemblyHookContext = GetTypeName("AssemblyHookContext");
+        public static readonly FullyQualifiedTypeName TestSessionContext = GetTypeName("TestSessionContext");
+        public static readonly FullyQualifiedTypeName BeforeTestDiscoveryContext = GetTypeName("BeforeTestDiscoveryContext");
+        public static readonly FullyQualifiedTypeName TestDiscoveryContext = GetTypeName("TestDiscoveryContext");
 
         public static readonly FullyQualifiedTypeName InheritsTestsAttribute = GetTypeName("InheritsTestsAttribute");
 

@@ -1,4 +1,6 @@
-﻿using TUnit.Assertions;
+﻿#pragma warning disable TUnit0042
+
+using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Polyfills;
@@ -44,9 +46,7 @@ public class PropertySetterTests
     }
     
     [Before(Assembly)]
-#pragma warning disable TUnit0042
     public static async Task BeforeAssembly()
-#pragma warning restore TUnit0042
     {
         if (IsMatchingTestFilter())
         {

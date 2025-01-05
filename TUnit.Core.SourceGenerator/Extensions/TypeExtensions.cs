@@ -34,7 +34,7 @@ public static class TypeExtensions
             symbol = symbol.BaseType;
         }
         
-        if(reverse)
+        if (reverse)
         {
             list.Reverse();
         }
