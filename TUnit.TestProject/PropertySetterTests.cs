@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Polyfills;
@@ -6,6 +7,7 @@ using TUnit.TestProject.Polyfills;
 namespace TUnit.TestProject;
 
 [NotInParallel(nameof(PropertySetterTests))]
+[SuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 public class PropertySetterTests
 {
     [Arguments("1")]
