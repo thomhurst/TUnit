@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#pragma warning disable TUnit0042
+
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
@@ -7,7 +8,6 @@ using TUnit.TestProject.Polyfills;
 namespace TUnit.TestProject;
 
 [NotInParallel(nameof(PropertySetterTests))]
-[SuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 public class PropertySetterTests
 {
     [Arguments("1")]
@@ -46,9 +46,7 @@ public class PropertySetterTests
     }
     
     [Before(Assembly)]
-#pragma warning disable TUnit0042
     public static async Task BeforeAssembly()
-#pragma warning restore TUnit0042
     {
         if (IsMatchingTestFilter())
         {
