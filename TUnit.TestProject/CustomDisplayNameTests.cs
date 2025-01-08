@@ -7,6 +7,8 @@ namespace TUnit.TestProject;
 
 public class CustomDisplayNameTests
 {
+    public const string SameClassConstant = "My constant";
+
     [Test]
     [DisplayName("A super important test!")]
     public async Task Test()
@@ -46,6 +48,27 @@ public class CustomDisplayNameTests
         await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("PasswordTest(REDACTED)");
     }
     
+    [Test]
+    [DisplayName($"My test {SameClassConstant}")]
+    public async Task SameClassConstantTest()
+    {
+        await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("My test My constant");
+    }
+    
+    [Test]
+    [DisplayName($"My test {DifferentClassConstants.Constant}")]
+    public async Task DifferentClassConstantTest()
+    {
+        await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("My test My constant");
+    }
+        
+    [Test]
+    [DisplayName($"My test {NestedClassConstants.Constant}")]
+    public async Task NestedClassConstantTest()
+    {
+        await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("My test My constant");
+    }
+    
     public class MyGenerator : DataSourceGeneratorAttribute<string>, ITestDiscoveryEventReceiver
     {
         public override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
@@ -64,4 +87,14 @@ public class CustomDisplayNameTests
     public static string Method() => "bar";
     
     public int Order => 0;
+    
+    public static class NestedClassConstants
+    {
+        public const string Constant = "My constant";
+    }
+}
+
+public static class DifferentClassConstants
+{
+    public const string Constant = "My constant";
 }

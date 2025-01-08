@@ -31,5 +31,9 @@
     <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\$(TargetFramework)\TUnit.TestProject.Library.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="CustomDisplayNameTests.*.txt">
+      <ParentFile>CustomDisplayNameTests</ParentFile>
+      <DependentUpon>CustomDisplayNameTests.cs</DependentUpon>
+    </None>
   </ItemGroup>
 </Project>

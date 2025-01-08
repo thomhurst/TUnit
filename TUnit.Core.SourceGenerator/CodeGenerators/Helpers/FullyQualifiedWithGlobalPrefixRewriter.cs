@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -11,6 +12,11 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
+        if (node.Name is IdentifierNameSyntax identifierName)
+        {
+            return VisitIdentifierName(identifierName);
+        }
+        
         return SyntaxFactory
             .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
             .WithoutTrivia();
@@ -29,22 +35,35 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
-        if (symbol is not IFieldSymbol
-                {
-                    Type: INamedTypeSymbol
-                    {
-                        TypeKind: TypeKind.Enum
-                    }
-                }
-            && symbol.IsConst(out var constantValue))
+        if (TryParseConstant(symbol, out var constantValue))
         {
-            return Literal(constantValue);
+            return constantValue;
         }
-        
+
         return SyntaxFactory
             .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
             .WithoutTrivia();
     }
+
+    private static bool TryParseConstant(ISymbol? symbol, [NotNullWhen(true)] out SyntaxNode? literalSyntax)
+    {
+        if (symbol is not IFieldSymbol
+            {
+                Type: INamedTypeSymbol
+                {
+                    TypeKind: TypeKind.Enum
+                }
+            }
+            && symbol.IsConst(out var constantValue))
+        {
+            literalSyntax = Literal(constantValue);
+            return true;
+        }
+
+        literalSyntax = null;
+        return false;
+    }
+
 
     private static SyntaxNode Literal(object? constantValue)
     {

@@ -1476,7 +1476,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.Int32 methodArg = global::System.Int32.MaxValue;
+			global::System.Int32 methodArg = 2147483647;
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.DataDrivenTests>(() => 
 			new global::TUnit.TestProject.DataDrivenTests()
@@ -1500,7 +1500,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(global::System.Int32.MaxValue)
+}, new global::TUnit.Core.ArgumentsAttribute(2147483647)
 {
     
 } ],
