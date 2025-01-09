@@ -28,12 +28,20 @@
     <TfmSpecificPackageFile Include="TUnit.Assertions.props">
         <Pack>true</Pack>
         <PackagePath>$(BuildTransitivePath)</PackagePath>
+    </TfmSpecificPackageFile>
+
+    <TfmSpecificPackageFile Include="TUnit.Assertions.props">
+        <Pack>true</Pack>
         <PackagePath>$(BuildPath)</PackagePath>
     </TfmSpecificPackageFile>
 
     <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
         <Pack>true</Pack>
         <PackagePath>$(BuildTransitivePath)</PackagePath>
+    </TfmSpecificPackageFile>
+
+    <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
+        <Pack>true</Pack>
         <PackagePath>$(BuildPath)</PackagePath>
     </TfmSpecificPackageFile>
 </ItemGroup>

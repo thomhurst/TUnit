@@ -20,6 +20,10 @@
     <TfmSpecificPackageFile Include="TUnit.Engine.props">
       <Pack>true</Pack>
       <PackagePath>$(BuildTransitivePath)</PackagePath>
+    </TfmSpecificPackageFile>
+    
+    <TfmSpecificPackageFile Include="TUnit.Engine.props">
+      <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>
     </TfmSpecificPackageFile>
   </ItemGroup>

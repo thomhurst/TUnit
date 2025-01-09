@@ -99,6 +99,11 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             stringBuilder.AppendLine($"| {inProgress.Length} | In Progress (never completed) |");
         }
 
+        if (passedCount == last.Count)
+        {
+            return Task.CompletedTask;
+        }
+
         stringBuilder.AppendLine();
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("## Information");
