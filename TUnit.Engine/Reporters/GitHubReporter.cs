@@ -29,7 +29,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         return await extension.IsEnabledAsync();
     }
 
-    public string Uid => extension.Uid;
+    public string Uid { get; } = $"{extension.Uid}GitHubReporter";
 
     public string Version => extension.Version;
 
