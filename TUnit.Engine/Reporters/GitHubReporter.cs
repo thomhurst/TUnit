@@ -72,9 +72,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         var inProgress = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine("# Summary");
+        stringBuilder.AppendLine("# TUnit Summary");
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine("| Count | Status |");
+        stringBuilder.AppendLine("| Test Count | Status |");
         stringBuilder.AppendLine("| --- | --- |");
         stringBuilder.AppendLine($"| {passedCount} | Passed |");
         stringBuilder.AppendLine($"| {failed.Length} | Failed |");
@@ -106,7 +106,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
         stringBuilder.AppendLine();
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine("## Information");
+        stringBuilder.AppendLine("## TUnit Extra Information");
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test | Status | Details | Duration |");
         stringBuilder.AppendLine("| --- | --- | --- | --- |");
@@ -134,9 +134,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         }
 
 #if NET
-        return File.WriteAllTextAsync(_outputSummaryFilePath, stringBuilder.ToString(), Encoding.UTF8, cancellation);
+        return File.AppendAllTextAsync(_outputSummaryFilePath, stringBuilder.ToString(), Encoding.UTF8, cancellation);
 #else
-        File.WriteAllText(_outputSummaryFilePath, stringBuilder.ToString(), Encoding.UTF8);
+        File.AppendAllText(_outputSummaryFilePath, stringBuilder.ToString(), Encoding.UTF8);
         return Task.CompletedTask;
 #endif
     }
