@@ -101,7 +101,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
         if (passedCount == last.Count)
         {
-            return Task.CompletedTask;
+            return WriteFile(stringBuilder.ToString());
         }
 
         stringBuilder.AppendLine();
@@ -133,10 +133,16 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             stringBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
         }
 
+        return WriteFile(stringBuilder.ToString());
+    }
+
+    private Task WriteFile(string contents)
+    {
 #if NET
         return File.AppendAllTextAsync(_outputSummaryFilePath, stringBuilder.ToString(), Encoding.UTF8, cancellation);
 #else
         File.AppendAllText(_outputSummaryFilePath, stringBuilder.ToString(), Encoding.UTF8);
+
         return Task.CompletedTask;
 #endif
     }
