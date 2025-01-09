@@ -8,11 +8,11 @@
     <ItemGroup>
         <Content Include="TUnit.Core.props">
             <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
         </Content>
         <Content Include="TUnit.Core.targets">
             <Pack>true</Pack>
-            <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
         </Content>
     </ItemGroup>
     <ItemGroup>

@@ -27,12 +27,12 @@
 <ItemGroup>
     <Content Include="TUnit.Assertions.props">
         <Pack>true</Pack>
-        <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        <PackagePath>$(BuildTransitivePath)</PackagePath>
     </Content>
 
     <Content Include="TUnit.Assertions.targets">
         <Pack>true</Pack>
-        <PackagePath>buildTransitive/$(TargetFramework)/</PackagePath>
+        <PackagePath>$(BuildTransitivePath)</PackagePath>
     </Content>
 </ItemGroup>
 
