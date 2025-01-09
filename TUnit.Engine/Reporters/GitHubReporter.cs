@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text;
 using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions;
@@ -72,7 +73,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         var inProgress = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine("# TUnit Summary");
+        stringBuilder.AppendLine($"# TUnit Summary ({Assembly.GetEntryAssembly()?.FullName})");
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test Count | Status |");
         stringBuilder.AppendLine("| --- | --- |");
