@@ -139,9 +139,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
     private Task WriteFile(string contents)
     {
 #if NET
-        return File.AppendAllTextAsync(_outputSummaryFilePath, stringBuilder.ToString(), Encoding.UTF8, cancellation);
+        return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8, cancellation);
 #else
-        File.AppendAllText(_outputSummaryFilePath, stringBuilder.ToString(), Encoding.UTF8);
+        File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
 
         return Task.CompletedTask;
 #endif
