@@ -57,8 +57,13 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
     public Task AfterRunAsync(int exitCode, CancellationToken cancellation)
     {
+        if (_updates.Count is 0)
+        {
+            return Task.CompletedTask;
+        }
+        
         var last = _updates.ToDictionary(x => x.Key, x => x.Value.Last());
-
+        
         var passedCount = last.Count(x => x.Value.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
         var failed = last.Where(x => x.Value.Properties.AsEnumerable().Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
         var cancelled = last.Where(x => x.Value.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
@@ -70,7 +75,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         stringBuilder.AppendLine("# Summary");
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Count | Status |");
-        stringBuilder.AppendLine("| _ | _ |");
+        stringBuilder.AppendLine("| --- | --- |");
         stringBuilder.AppendLine($"| {passedCount} | Passed |");
         stringBuilder.AppendLine($"| {failed.Length} | Failed |");
         
@@ -99,7 +104,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         stringBuilder.AppendLine("## Information");
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test | Status | Details | Duration |");
-        stringBuilder.AppendLine("| _ | _ | _ | _ |");
+        stringBuilder.AppendLine("| --- | --- | --- | --- |");
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
