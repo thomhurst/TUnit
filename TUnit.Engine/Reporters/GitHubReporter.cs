@@ -18,7 +18,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             return false;
         }
 
-        if (Environment.GetEnvironmentVariable("OUTPUT_SUMMARY") is not { } fileName
+        if (Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY") is not { } fileName
             || !File.Exists(fileName))
         {
             return false;
