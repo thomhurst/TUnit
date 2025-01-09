@@ -140,7 +140,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
     private Task WriteFile(string contents)
     {
 #if NET
-        return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8, cancellation);
+        return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
 #else
         File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
 
