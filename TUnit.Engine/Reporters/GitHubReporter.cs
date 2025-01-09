@@ -64,12 +64,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         
         var last = _updates.ToDictionary(x => x.Key, x => x.Value.Last());
         
-        var passedCount = last.Count(x => x.Value.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
-        var failed = last.Where(x => x.Value.Properties.AsEnumerable().Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
-        var cancelled = last.Where(x => x.Value.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
-        var timeout = last.Where(x => x.Value.Properties.AsEnumerable().Any(p => p is TimeoutTestNodeStateProperty)).ToArray();
-        var skipped = last.Where(x => x.Value.Properties.AsEnumerable().Any(p => p is SkippedTestNodeStateProperty)).ToArray();
-        var inProgress = last.Where(x => x.Value.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
+        var passedCount = last.Count(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
+        var failed = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
+        var cancelled = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
+        var timeout = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is TimeoutTestNodeStateProperty)).ToArray();
+        var skipped = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is SkippedTestNodeStateProperty)).ToArray();
+        var inProgress = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("# Summary");
@@ -110,7 +110,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         {
             var name = testNodeUpdateMessage.TestNode.DisplayName;
 
-            var stateProperty = testNodeUpdateMessage.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
+            var stateProperty = testNodeUpdateMessage.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
             
             if (stateProperty is PassedTestNodeStateProperty)
             {
@@ -119,9 +119,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             
             var status = GetStatus(stateProperty);
 
-            var details = GetDetails(stateProperty, testNodeUpdateMessage.Properties);
+            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
             
-            var timingProperty = testNodeUpdateMessage.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
+            var timingProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
             
             var duration = timingProperty?.GlobalTiming.Duration;
             
