@@ -12,7 +12,7 @@
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <NoWarn>NU1507;NU1903;CS9107</NoWarn>
     <BuildTransitivePath>buildTransitive/$(TargetFramework)/</BuildTransitivePath>
-    <BuildPath>build/</BuildPath>
+    <BuildPath>buildMultiTargeting/</BuildPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(MSBuildProjectName.StartsWith('TUnit.Analyzers.Roslyn'))">
