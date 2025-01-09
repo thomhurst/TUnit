@@ -98,32 +98,29 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("## Information");
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine("| Test | Status | Start | End | Duration |");
-        stringBuilder.AppendLine("| _ | _ | _ | _ | _ |");
+        stringBuilder.AppendLine("| Test | Status | Details | Duration |");
+        stringBuilder.AppendLine("| _ | _ | _ | _ |");
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
             var name = testNodeUpdateMessage.TestNode.DisplayName;
-            
-            var status = GetStatus(testNodeUpdateMessage);
 
-            if (status == "Passed")
+            var stateProperty = testNodeUpdateMessage.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
+            
+            if (stateProperty is PassedTestNodeStateProperty)
             {
                 continue;
             }
+            
+            var status = GetStatus(stateProperty);
 
+            var details = GetDetails(stateProperty, testNodeUpdateMessage.Properties);
+            
             var timingProperty = testNodeUpdateMessage.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
             
-            var start = timingProperty
-                ?.GlobalTiming.StartTime;
+            var duration = timingProperty?.GlobalTiming.Duration;
             
-            var end = timingProperty
-                ?.GlobalTiming.StartTime;
-            
-            var duration = timingProperty
-                ?.GlobalTiming.Duration;
-            
-            stringBuilder.AppendLine($"| {name} | {status} | {start} | {end} | {duration} |");
+            stringBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
         }
 
 #if NET
@@ -134,10 +131,51 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 #endif
     }
 
-    private static string GetStatus(TestNodeUpdateMessage testNodeUpdateMessage)
+    private string GetDetails(TestNodeStateProperty? stateProperty, PropertyBag properties)
     {
-        var stateProperty = testNodeUpdateMessage.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
+        if (stateProperty is FailedTestNodeStateProperty 
+            or ErrorTestNodeStateProperty 
+            or TimeoutTestNodeStateProperty
+            or CancelledTestNodeStateProperty)
+        {
+            return GetError(stateProperty)!;
+        }
 
+        if (stateProperty is SkippedTestNodeStateProperty skippedTestNodeStateProperty)
+        {
+            return skippedTestNodeStateProperty.Explanation ?? "Skipped (No reason provided)";
+        }
+
+        if (stateProperty is InProgressTestNodeStateProperty)
+        {
+            var timingProperty = properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
+
+            var start = timingProperty?.GlobalTiming.StartTime;
+            var end = timingProperty?.GlobalTiming.EndTime;
+
+            return $"Start: {start} | End: {end}";
+        }
+        
+        return "Unknown Test State";
+    }
+
+    private string? GetError(TestNodeStateProperty? stateProperty)
+    {
+        return stateProperty switch
+        {
+            ErrorTestNodeStateProperty errorTestNodeStateProperty => errorTestNodeStateProperty.Exception?.ToString() ??
+                                                                     errorTestNodeStateProperty.Explanation,
+            FailedTestNodeStateProperty failedTestNodeStateProperty =>
+                failedTestNodeStateProperty.Exception?.ToString() ?? failedTestNodeStateProperty.Explanation,
+            TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Exception
+                ?.ToString() ?? timeoutTestNodeStateProperty.Explanation,
+            CancelledTestNodeStateProperty cancelledTestNodeStateProperty => cancelledTestNodeStateProperty.Exception?.ToString() ?? cancelledTestNodeStateProperty.Explanation,
+            _ => null
+        };
+    }
+
+    private static string GetStatus(TestNodeStateProperty? stateProperty)
+    {
         return stateProperty switch
         {
             CancelledTestNodeStateProperty => "Cancelled",
