@@ -48,4 +48,4 @@ This should NOT be used with TUnit. It'll stop test discovery from working prope
 ## .NET Framework
 If you are still targeting .NET Framework, TUnit will try to Polyfill some missing types that are used by the compiler, such as the `ModuleInitialiserAttribute`.
 
-If you have issues with other Polyfill libraries also defining them, in your project files, you can define the property `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>`
+If you have issues with other Polyfill libraries also defining them, in your project files, you can define the property `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>` to stop TUnit generating them for you.
