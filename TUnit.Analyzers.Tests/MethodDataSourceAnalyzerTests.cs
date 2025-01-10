@@ -665,4 +665,37 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                            }
                                            """);
     }
+    
+    [Test]
+    public async Task Bug_1538()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Threading.Tasks;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [Test]
+                    [MethodDataSource(nameof(T5_DeconstructTestDataSource))]
+                    public async Task T5_Deconstruct_Should_ReturnAllResults(bool expectedSuccess, string? expectedError,
+                        string? expectedT0, string? expectedT1, string? expectedT2, string? expectedT3, string? expectedT4, string? expectedT5)
+                    {
+                    }
+                    
+                    public static
+                        IEnumerable<(bool success, string? expectedError, string? expectedT0, string? expectedT1, string? expectedT2,
+                            string? expectedT3, string? expectedT4, string? expectedT5)>
+                        T5_DeconstructTestDataSource()
+                    {
+                        yield return (true, null, "This is a success", null, null, null, null, null);
+                        yield return (false, "This is a failure", null, null, null, null, null, null);
+                    }
+                } 
+                """
+            );
+    }
 }
