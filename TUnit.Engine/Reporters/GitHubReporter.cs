@@ -74,6 +74,10 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"## {Assembly.GetEntryAssembly()?.GetName().Name}");
+        if (!string.IsNullOrEmpty(Filter))
+        {
+            stringBuilder.AppendLine($"### Filter: {Filter}");
+        }
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test Count | Status |");
         stringBuilder.AppendLine("| --- | --- |");
@@ -125,7 +129,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             
             var status = GetStatus(stateProperty);
 
-            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
+            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties).Replace("\n", "<br/>");
             
             var timingProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
             
@@ -215,4 +219,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             _ => "Unknown"
         };
     }
+
+    public ITestApplicationLifecycleCallbacks WithFilter(string? filter)
+    {
+        Filter = filter;
+        return this;
+    }
+
+    public string? Filter { get; set; }
 }
