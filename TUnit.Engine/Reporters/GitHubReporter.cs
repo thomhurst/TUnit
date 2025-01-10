@@ -155,7 +155,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             or TimeoutTestNodeStateProperty
             or CancelledTestNodeStateProperty)
         {
-            return GetError(stateProperty)!;
+            return $"<pre>{GetError(stateProperty)}</pre>";
         }
 
         if (stateProperty is SkippedTestNodeStateProperty skippedTestNodeStateProperty)

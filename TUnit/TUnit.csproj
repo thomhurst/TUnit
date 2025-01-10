@@ -11,7 +11,7 @@
     <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <None Include="TUnit.props">
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>
@@ -21,6 +21,6 @@
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>
     </None>
-  </ItemGroup>
+  </ItemGroup> -->
 
 </Project>
