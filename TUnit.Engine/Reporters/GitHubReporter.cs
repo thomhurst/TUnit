@@ -83,7 +83,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine($"## {Assembly.GetEntryAssembly()?.GetName().Name}");
+        stringBuilder.AppendLine($"### {Assembly.GetEntryAssembly()?.GetName().Name}");
         
         if (!string.IsNullOrEmpty(Filter))
         {
