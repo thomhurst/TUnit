@@ -9,6 +9,7 @@ namespace TUnit.Engine.Reporters;
 
 public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicationLifecycleCallbacks
 {
+    private const long MaxFileSizeInBytes = 1 * 1024 * 1024; // 1MB
     private string _outputSummaryFilePath = null!;
     
     public async Task<bool> IsEnabledAsync()
@@ -138,6 +139,17 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
     private Task WriteFile(string contents)
     {
+        var fileInfo = new FileInfo(_outputSummaryFilePath);
+        var currentFileSize = fileInfo.Exists ? fileInfo.Length : 0;
+        long newContentSize = Encoding.UTF8.GetByteCount(contents);
+        var newSize = currentFileSize + newContentSize;
+
+        if (newSize > MaxFileSizeInBytes)
+        {
+            Console.WriteLine("Appending to the GitHub Step Summary would exceed the 1MB file size limit.");
+            return Task.CompletedTask;
+        }
+        
 #if NET
         return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
 #else
