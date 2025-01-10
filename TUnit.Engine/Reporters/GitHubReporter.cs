@@ -87,7 +87,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         
         if (!string.IsNullOrEmpty(Filter))
         {
-            stringBuilder.AppendLine($"### Filter: {Filter}");
+            stringBuilder.AppendLine($"### Filter: <pre>{Filter}</pre>");
         }
         
         stringBuilder.AppendLine();
