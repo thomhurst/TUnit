@@ -72,7 +72,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         var inProgress = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine($"# TUnit Summary ({Assembly.GetEntryAssembly()?.FullName})");
+        stringBuilder.AppendLine($"# TUnit Summary ({Assembly.GetEntryAssembly()?.GetName().Name})");
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test Count | Status |");
         stringBuilder.AppendLine("| --- | --- |");
