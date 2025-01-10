@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text;
 using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions;
@@ -72,9 +73,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         var inProgress = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine("# Summary");
+        stringBuilder.AppendLine($"# TUnit Summary ({Assembly.GetEntryAssembly()?.FullName})");
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine("| Count | Status |");
+        stringBuilder.AppendLine("| Test Count | Status |");
         stringBuilder.AppendLine("| --- | --- |");
         stringBuilder.AppendLine($"| {passedCount} | Passed |");
         stringBuilder.AppendLine($"| {failed.Length} | Failed |");
@@ -106,7 +107,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
         stringBuilder.AppendLine();
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine("## Information");
+        stringBuilder.AppendLine("## TUnit Extra Information");
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test | Status | Details | Duration |");
         stringBuilder.AppendLine("| --- | --- | --- | --- |");
@@ -139,9 +140,10 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
     private Task WriteFile(string contents)
     {
 #if NET
-        return File.WriteAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
+        return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
 #else
-        File.WriteAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
+        File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
+
         return Task.CompletedTask;
 #endif
     }
