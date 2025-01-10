@@ -5,6 +5,7 @@
         <LangVersion>latest</LangVersion>
         <IsLibraryTestProject>true</IsLibraryTestProject>
         <ImplicitUsings>enable</ImplicitUsings>
+        <OutputType>exe</OutputType>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
