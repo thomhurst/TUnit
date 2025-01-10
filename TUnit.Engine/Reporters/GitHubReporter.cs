@@ -107,7 +107,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
         stringBuilder.AppendLine();
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine("## TUnit Extra Information");
+        stringBuilder.AppendLine("## Details");
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test | Status | Details | Duration |");
         stringBuilder.AppendLine("| --- | --- | --- | --- |");
