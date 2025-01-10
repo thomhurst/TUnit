@@ -12,30 +12,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TfmSpecificPackageFile Include="../TUnit.Engine/TUnit.Engine.props">
+    <None Include="TUnit.props">
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>
-    </TfmSpecificPackageFile>
+    </None>
 
-    <TfmSpecificPackageFile Include="../TUnit.Core/TUnit.Core.props">
+    <None Include="TUnit.targets">
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>
-    </TfmSpecificPackageFile>
-
-    <TfmSpecificPackageFile Include="../TUnit.Core/TUnit.Core.targets">
-      <Pack>true</Pack>
-      <PackagePath>$(BuildPath)</PackagePath>
-    </TfmSpecificPackageFile>
-
-    <TfmSpecificPackageFile Include="../TUnit.Assertions/TUnit.Assertions.props">
-      <Pack>true</Pack>
-      <PackagePath>$(BuildPath)</PackagePath>
-    </TfmSpecificPackageFile>
-
-    <TfmSpecificPackageFile Include="../TUnit.Assertions/TUnit.Assertions.targets">
-      <Pack>true</Pack>
-      <PackagePath>$(BuildPath)</PackagePath>
-    </TfmSpecificPackageFile>
+    </None>
   </ItemGroup>
 
 </Project>
