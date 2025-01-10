@@ -14,15 +14,18 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly IExtension _extension;
     private readonly IServiceProvider _frameworkServiceProvider;
     private readonly ITestFrameworkCapabilities _capabilities;
+    private readonly IEnumerable<IFilterReceiver> _filterReceivers;
     private static readonly ConcurrentDictionary<string, TUnitServiceProvider> ServiceProvidersPerSession = [];
 
     public TUnitTestFramework(IExtension extension,
         IServiceProvider frameworkServiceProvider,
-        ITestFrameworkCapabilities capabilities)
+        ITestFrameworkCapabilities capabilities,
+        IEnumerable<IFilterReceiver> filterReceivers)
     {
         _extension = extension;
         _frameworkServiceProvider = frameworkServiceProvider;
         _capabilities = capabilities;
+        _filterReceivers = filterReceivers;
     }
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
@@ -51,6 +54,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         );
 
         var stringFilter = serviceProvider.FilterParser.GetTestFilter(context);
+        
+        foreach (var filterReceiver in _filterReceivers)
+        {
+            filterReceiver.Filter = stringFilter;
+        }
 
         var logger = serviceProvider.Logger;
         

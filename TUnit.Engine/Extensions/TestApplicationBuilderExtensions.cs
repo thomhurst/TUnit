@@ -23,7 +23,7 @@ internal static class TestApplicationBuilderExtensions
         
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider  => new TestFrameworkCapabilities(new TrxReportCapability(), new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>(), serviceProvider.GetCommandLineOptions())),
-            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
+            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities, [githubReporter]));
         
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         // TODO: testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
@@ -34,6 +34,6 @@ internal static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
         
         testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
-        testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(sp => githubReporter.WithFilter(FilterParser.StringifyFilter(sp.GetRequiredService<ITestExecutionFilter>())));
+        testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(_ => githubReporter);
     }
 }

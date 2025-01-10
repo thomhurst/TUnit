@@ -4,10 +4,11 @@ using System.Text;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
+using TUnit.Engine.Framework;
 
 namespace TUnit.Engine.Reporters;
 
-public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicationLifecycleCallbacks
+public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicationLifecycleCallbacks, IFilterReceiver
 {
     private const long MaxFileSizeInBytes = 1 * 1024 * 1024; // 1MB
     private string _outputSummaryFilePath = null!;
@@ -62,22 +63,33 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         {
             return Task.CompletedTask;
         }
-        
+
         var last = _updates.ToDictionary(x => x.Key, x => x.Value.Last());
-        
-        var passedCount = last.Count(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
-        var failed = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
-        var cancelled = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
-        var timeout = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is TimeoutTestNodeStateProperty)).ToArray();
-        var skipped = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is SkippedTestNodeStateProperty)).ToArray();
-        var inProgress = last.Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
+
+        var passedCount = last.Count(x =>
+            x.Value.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
+        var failed = last.Where(x =>
+            x.Value.TestNode.Properties.AsEnumerable()
+                .Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
+        var cancelled = last.Where(x =>
+            x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
+        var timeout = last
+            .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is TimeoutTestNodeStateProperty))
+            .ToArray();
+        var skipped = last
+            .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is SkippedTestNodeStateProperty))
+            .ToArray();
+        var inProgress = last.Where(x =>
+            x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"## {Assembly.GetEntryAssembly()?.GetName().Name}");
+        
         if (!string.IsNullOrEmpty(Filter))
         {
             stringBuilder.AppendLine($"### Filter: {Filter}");
         }
+        
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("| Test Count | Status |");
         stringBuilder.AppendLine("| --- | --- |");
@@ -218,12 +230,6 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             TimeoutTestNodeStateProperty => "Timed Out",
             _ => "Unknown"
         };
-    }
-
-    public ITestApplicationLifecycleCallbacks WithFilter(string? filter)
-    {
-        Filter = filter;
-        return this;
     }
 
     public string? Filter { get; set; }
