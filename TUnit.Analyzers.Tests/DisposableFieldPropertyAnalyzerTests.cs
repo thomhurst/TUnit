@@ -206,7 +206,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     [After(HookType.Test)]
                     public void Cleanup()
                     {
-                        _client.Dispose();
+                        _client?.Dispose();
                     }
                 
                     [Test]
