@@ -80,14 +80,22 @@ public record MethodDataSourceAttributeContainer(
         var accessorIndex = index + 1;
 
         string accessor;
-        if (accessorIndex % 8 != 0)
+        if (accessorIndex < 8)
         {
             accessor = $"{tupleVariableName}.Item{accessorIndex}";
         }
         else
         {
-            var newIndex = accessorIndex % 8 + 1;
-            var restAccessor = string.Join(".", Enumerable.Repeat("Rest", newIndex));
+            var newIndex = (accessorIndex + 1) % 8;
+            var repeatCount = (accessorIndex + 1) / 8;
+
+            if (accessorIndex >= 15)
+            {
+                newIndex++;
+            }
+            
+            var restAccessor = string.Join(".", Enumerable.Repeat("Rest", repeatCount));
+            
             accessor = $"{tupleVariableName}.{restAccessor}.Item{newIndex}";
         }
 
