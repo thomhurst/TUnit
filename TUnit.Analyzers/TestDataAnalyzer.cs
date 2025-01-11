@@ -547,7 +547,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
             isTuples = true;
-            return tupleType.TupleUnderlyingType?.TypeArguments ?? tupleType.TypeArguments;
+            return tupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
         }
         
         return ImmutableArray.Create(type);

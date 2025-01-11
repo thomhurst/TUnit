@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -29,17 +30,23 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                     return solution;
                 }
 
-                var parseOptions = project.ParseOptions as CSharpParseOptions;
-
-                if (parseOptions is null)
+                if (compilationOptions is CSharpCompilationOptions cSharpCompilationOptions)
+                {
+                    compilationOptions =
+                        cSharpCompilationOptions.WithNullableContextOptions(NullableContextOptions.Enable);
+                }
+                
+                if (project.ParseOptions is not CSharpParseOptions parseOptions)
                 {
                     return solution;
                 }
 
-                compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
-
+                compilationOptions = compilationOptions
+                    .WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
+                
                 solution = solution.WithProjectCompilationOptions(projectId, compilationOptions)
-                    .WithProjectParseOptions(projectId, parseOptions.WithLanguageVersion(LanguageVersion.Preview));
+                    .WithProjectParseOptions(projectId, parseOptions
+                        .WithLanguageVersion(LanguageVersion.Preview));
 
                 return solution;
             });
