@@ -35,5 +35,9 @@
       <ParentFile>CustomDisplayNameTests</ParentFile>
       <DependentUpon>CustomDisplayNameTests.cs</DependentUpon>
     </None>
+    <None Update="Bugs\1539\BasicTests.Test.verified.txt">
+      <ParentFile>BasicTests</ParentFile>
+      <DependentUpon>BasicTests.cs</DependentUpon>
+    </None>
   </ItemGroup>
 </Project>

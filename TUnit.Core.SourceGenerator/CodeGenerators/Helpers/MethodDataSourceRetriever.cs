@@ -133,7 +133,7 @@ public static class MethodDataSourceRetriever
         if (type.IsTupleType && type is INamedTypeSymbol namedTupleType)
         {
             isExpandableTuples = true;
-            return namedTupleType.TupleUnderlyingType?.TypeArguments ?? namedTupleType.TypeArguments;
+            return namedTupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
         }
         
         return ImmutableArray.Create(type);

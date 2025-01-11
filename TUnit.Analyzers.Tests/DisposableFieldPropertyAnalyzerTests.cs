@@ -16,7 +16,7 @@ public class DisposableFieldPropertyAnalyzerTests
 
                 public class DisposableFieldTests
                 {
-                    private HttpClient {|#0:_httpClient|};
+                    private HttpClient? {|#0:_httpClient|};
                             
                     [Before(HookType.Test)]
                     public void Setup()
@@ -48,7 +48,7 @@ public class DisposableFieldPropertyAnalyzerTests
 
                 public class DisposableFieldTests
                 {
-                    private static HttpClient {|#0:_httpClient|};
+                    private static HttpClient? {|#0:_httpClient|};
                             
                     [Before(HookType.Class)]
                     public static void Setup()
@@ -85,7 +85,7 @@ public class DisposableFieldPropertyAnalyzerTests
 
                 public class DisposableFieldTests
                 {
-                    private static HttpClient {|#0:_httpClient|};
+                    private static HttpClient? {|#0:_httpClient|};
                             
                     [Before(HookType.{{beforeHook}})]
                     public static void Setup()
@@ -96,7 +96,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     [After(HookType.{{afterHook}})]
                     public static void Cleanup()
                     {
-                        _httpClient.Dispose();
+                        _httpClient?.Dispose();
                     }
                             
                     [Test]
@@ -125,7 +125,7 @@ public class DisposableFieldPropertyAnalyzerTests
 
                 public class DisposableFieldTests
                 {
-                    private static HttpClient {|#0:_httpClient|};
+                    private static HttpClient? {|#0:_httpClient|};
                             
                     [Before(HookType.{{hook}})]
                     public static void Setup()
@@ -136,7 +136,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     [After(HookType.{{hook}})]
                     public static void Cleanup()
                     {
-                        _httpClient.Dispose();
+                        _httpClient?.Dispose();
                     }
                             
                     [Test]
@@ -195,7 +195,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 
                 public class Test() // note the use of primary constructor here
                 {
-                    private HttpClient _client = null!;
+                    private HttpClient? _client = null!;
                 
                     [Before(HookType.Test)]
                     public void Setup()
@@ -206,7 +206,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     [After(HookType.Test)]
                     public void Cleanup()
                     {
-                        _client.Dispose();
+                        _client?.Dispose();
                     }
                 
                     [Test]
@@ -339,7 +339,7 @@ public class DisposableFieldPropertyAnalyzerTests
 
                 public class DisposableFieldTests
                 {
-                    private HttpClient {|#0:_httpClient|};
+                    private HttpClient? {|#0:_httpClient|};
                             
                     [Before(HookType.Test)]
                     public void Setup()
@@ -350,7 +350,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     [After(HookType.Test)]
                     public void Cleanup()
                     {
-                        _httpClient.Dispose();
+                        _httpClient?.Dispose();
                     }
                             
                     [Test]
@@ -373,7 +373,7 @@ public class DisposableFieldPropertyAnalyzerTests
 
                 public class DisposableFieldTests
                 {
-                    private static HttpClient {|#0:_httpClient|};
+                    private static HttpClient? {|#0:_httpClient|};
                             
                     [Before(HookType.Class)]
                     public static void Setup()
@@ -384,7 +384,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     [After(HookType.Class)]
                     public static void Cleanup()
                     {
-                        _httpClient.Dispose();
+                        _httpClient?.Dispose();
                     }
                             
                     [Test]
@@ -408,7 +408,7 @@ public class DisposableFieldPropertyAnalyzerTests
 
                 public class DisposableFieldTests
                 {
-                    private StringWriter {|#0:_stringWriter|};
+                    private StringWriter? {|#0:_stringWriter|};
                             
                     [Before(HookType.Test)]
                     public void Setup()
@@ -419,7 +419,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     [After(HookType.Test)]
                     public async Task Cleanup()
                     {
-                        await _stringWriter.DisposeAsync();
+                        await _stringWriter!.DisposeAsync();
                     }
                             
                     [Test]
@@ -443,7 +443,7 @@ public class DisposableFieldPropertyAnalyzerTests
 
                 public class DisposableFieldTests
                 {
-                    private static StringWriter {|#0:_stringWriter|};
+                    private static StringWriter? {|#0:_stringWriter|};
                             
                     [Before(HookType.Class)]
                     public static void Setup()
@@ -454,7 +454,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     [After(HookType.Class)]
                     public static async Task Cleanup()
                     {
-                        await _stringWriter.DisposeAsync();
+                        await _stringWriter!.DisposeAsync();
                     }
                             
                     [Test]
@@ -478,7 +478,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 [ClassDataSource<HttpClient>(Shared = SharedType.Keyed, Key = "key")]
                 public class DisposableFieldTests
                 {
-                    private HttpClient _httpClient;
+                    private HttpClient? _httpClient;
                             
                     public DisposableFieldTests(HttpClient httpClient)
                     {

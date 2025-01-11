@@ -141,7 +141,7 @@ public static class TypeExtensions
 
         if (enumerableInnerType.IsTupleType && enumerableInnerType is INamedTypeSymbol namedInnerType)
         {
-            var tupleTypes = namedInnerType.TupleUnderlyingType?.TypeArguments ?? namedInnerType.TypeArguments;
+            var tupleTypes = namedInnerType.TupleElements.Select(x => x.Type).ToImmutableArray();
 
             for (var index = 0; index < tupleTypes.Length; index++)
             {
