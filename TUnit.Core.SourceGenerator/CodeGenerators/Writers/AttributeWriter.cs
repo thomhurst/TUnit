@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -30,12 +31,21 @@ public class AttributeWriter
         var constructorArgumentSyntaxes = attributeSyntax.DescendantNodes()
             .OfType<AttributeArgumentSyntax>()
             .Where(x => x.NameEquals is null);
-
-        var typedConstantsToExpression =
-            constructorArgumentSyntaxes.Zip(attributeData.ConstructorArguments, (syntax, constant) => (syntax, constant));
         
-        var constructorArguments = typedConstantsToExpression.Select(x =>
-            TypedConstantParser.GetTypedConstantValue(context.SemanticModel, x.syntax.Expression, x.constant.Type));
+        var constructorArguments = attributeData.ConstructorArguments
+            .Select((constant, index) =>
+            {
+                var elementAtOrDefault = constructorArgumentSyntaxes.ElementAtOrDefault(index);
+                return new
+                {
+                    Syntax = elementAtOrDefault,
+                    Constant = constant,
+                    Name = elementAtOrDefault?.NameColon?.ToString()
+                };
+            })
+            .Where(x => x.Syntax != null)
+            .Select(x =>
+                $"{x.Name}{TypedConstantParser.GetTypedConstantValue(context.SemanticModel, x.Syntax!.Expression, x.Constant.Type)}");
 
         var namedArgSyntaxes = attributeSyntax.DescendantNodes()
             .OfType<AttributeArgumentSyntax>()
