@@ -2,7 +2,7 @@ using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests.Bugs._1538;
 
-internal class Tests : TestsBase<TestsGenerator>
+internal class Tests1538 : TestsBase<TestsGenerator>
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
