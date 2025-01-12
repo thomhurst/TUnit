@@ -35,7 +35,6 @@ public class AttributeWriter
         var constructorArguments = attributeData.ConstructorArguments
             .Select((constant, index) =>
             {
-                var parameter = attributeData.AttributeConstructor?.Parameters[index];
                 var elementAtOrDefault = constructorArgumentSyntaxes.ElementAtOrDefault(index);
                 return new
                 {
