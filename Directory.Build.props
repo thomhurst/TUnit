@@ -31,12 +31,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.Engine</_Parameter1>
-    </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>TUnit.UnitTests</_Parameter1>
-    </AssemblyAttribute>
+    <InternalsVisibleTo Include="TUnit.Engine" />
+    <InternalsVisibleTo Include="TUnit.UnitTests" />
   </ItemGroup>
 
   <PropertyGroup>
