@@ -17,7 +17,7 @@
     
     <ItemGroup>
         <PackageReference Include="FluentAssertions" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" VersionOverride="9.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" VersionOverride="9.0.1" />
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     </ItemGroup>
