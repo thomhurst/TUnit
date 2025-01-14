@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
@@ -7,7 +8,9 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class DataSourceGeneratorRetriever
 {
-    public static ArgumentsContainer Parse(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol,
+    public static ArgumentsContainer Parse(GeneratorAttributeSyntaxContext context,
+        INamedTypeSymbol namedTypeSymbol,
+        ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
         AttributeData attributeData,
         ArgumentsType argumentsType,
         int index,
@@ -18,11 +21,12 @@ public static class DataSourceGeneratorRetriever
             context,
             attributeData: attributeData,
             ArgumentsType: argumentsType,
+            parameterOrPropertyTypes: parameterOrPropertyTypes,
             TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
             AttributeDataGeneratorType: attributeData.AttributeClass!.ToDisplayString(DisplayFormats
                 .FullyQualifiedGenericWithGlobalPrefix),
-            GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass).TypeArguments
-                .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray(),
+            GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass)?.TypeArguments
+                .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray() ?? [],
             AttributeIndex: index
         )
         {
@@ -36,11 +40,16 @@ public static class DataSourceGeneratorRetriever
         };
     }
 
-    private static INamedTypeSymbol GetDataGeneratorAttributeBaseClass(ITypeSymbol attributeClass)
+    private static INamedTypeSymbol? GetDataGeneratorAttributeBaseClass(ITypeSymbol attributeClass)
     {
         var selfAndBaseTypes = attributeClass.GetSelfAndBaseTypes();
 
-        return (INamedTypeSymbol) selfAndBaseTypes.First(HasGeneratorInterface);
+        if (selfAndBaseTypes.FirstOrDefault(HasGeneratorInterface) is INamedTypeSymbol generatorInterface)
+        {
+            return generatorInterface;
+        }
+
+        return null;
     }
 
     private static bool HasGeneratorInterface(ITypeSymbol t)

@@ -1,18 +1,22 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Enums;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
 public record GeneratedArgumentsContainer : ArgumentsContainer
 {
     public GeneratedArgumentsContainer(GeneratorAttributeSyntaxContext context, AttributeData attributeData,
-        ArgumentsType ArgumentsType, int AttributeIndex, string TestClassTypeName, string[] GenericArguments,
+        ArgumentsType ArgumentsType, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes, int AttributeIndex,
+        string TestClassTypeName, string[] GenericArguments,
         string AttributeDataGeneratorType) : base(ArgumentsType)
     {
         this.AttributeIndex = AttributeIndex;
         Context = context;
         AttributeData = attributeData;
+        ParameterOrPropertyTypes = parameterOrPropertyTypes;
         this.TestClassTypeName = TestClassTypeName;
         this.GenericArguments = GenericArguments;
         this.AttributeDataGeneratorType = AttributeDataGeneratorType;
@@ -137,8 +141,17 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
         var generatedDataVariableName = $"{VariableNamePrefix}GeneratedData";
         
         sourceCodeWriter.WriteLine($"var {generatedDataVariableName} = {generatedDataVariableName}Accessor();");
-        
-        if (GenericArguments.Length > 1)
+
+        if (GenericArguments.Length == 0)
+        {
+            for (var i = 0; i < ParameterOrPropertyTypes.Length; i++)
+            {
+                var refIndex = i;
+                
+                sourceCodeWriter.WriteLine(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"({ParameterOrPropertyTypes[i].GloballyQualified()}){generatedDataVariableName}[{i}]", ref refIndex).ToString());
+            }
+        }
+        else if (GenericArguments.Length > 1)
         {
             for (var i = 0; i < GenericArguments.Length; i++)
             {
@@ -176,6 +189,7 @@ public record GeneratedArgumentsContainer : ArgumentsContainer
 
     public GeneratorAttributeSyntaxContext Context { get; }
     public AttributeData AttributeData { get; }
+    public ImmutableArray<ITypeSymbol> ParameterOrPropertyTypes { get; }
     public string TestClassTypeName { get; }
 
     public string[] GenericArguments { get; }
