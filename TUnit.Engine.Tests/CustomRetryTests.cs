@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 
 namespace TUnit.Engine.Tests;
 
@@ -10,11 +10,11 @@ public class CustomRetryTests : InvokableTestBase
         await RunTestsWithFilter(
             "/*/*/CustomRetryTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Failed"),
-                result => result.ResultSummary.Counters.Total.Should().Be(5),
-                result => result.ResultSummary.Counters.Passed.Should().Be(1),
-                result => result.ResultSummary.Counters.Failed.Should().Be(4),
-                result => result.ResultSummary.Counters.NotExecuted.Should().Be(0)
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(5),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(4),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
 }

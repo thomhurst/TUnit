@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using FluentAssertions;
+using Shouldly;
 
 namespace TUnit.Example.WebProject.Tests;
 
@@ -11,6 +11,6 @@ public class Tests : TestBase
         var response = await Client.GetAsync("/weatherforecast");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 }
