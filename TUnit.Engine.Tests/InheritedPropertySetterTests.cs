@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 using TUnit.Engine.Tests.Extensions;
 
 namespace TUnit.Engine.Tests;
@@ -11,12 +11,12 @@ public class InheritedPropertySetterTests : InvokableTestBase
         await RunTestsWithFilter(
             "/*/*/InheritedPropertySetterTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Completed"),
-                result => result.ResultSummary.Counters.Total.Should().Be(1),
-                result => result.ResultSummary.Counters.Passed.Should().Be(1),
-                result => result.ResultSummary.Counters.Failed.Should().Be(0),
-                result => result.ResultSummary.Counters.NotExecuted.Should().Be(0),
-                _ => File.ReadAllText(FindFile(x => x.Name == "InheritedPropertySetterTests_CapturedOutput.txt").AssertExists().FullName).Should().Contain(
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0),
+                _ => File.ReadAllText(FindFile(x => x.Name == "InheritedPropertySetterTests_CapturedOutput.txt").AssertExists().FullName).ShouldContain(
                     """
                     Initializing Static Property
                     Before Test Session

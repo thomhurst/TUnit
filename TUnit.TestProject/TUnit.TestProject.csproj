@@ -35,7 +35,7 @@
   <ItemGroup>
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="coverlet.collector" />
-    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Shouldly" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />

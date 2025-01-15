@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 
 namespace TUnit.Engine.Tests;
 
@@ -14,11 +14,11 @@ public class JsonOutputTests : InvokableTestBase
         await RunTestsWithFilter(
             "/*/*/PassFailTests/*",
             [
-                result => result.ResultSummary.Outcome.Should().Be("Failed"),
-                result => result.ResultSummary.Counters.Total.Should().Be(172),
-                result => result.ResultSummary.Counters.Passed.Should().Be(86),
-                result => result.ResultSummary.Counters.Failed.Should().Be(86),
-                result => result.ResultSummary.Counters.NotExecuted.Should().Be(0)
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(172),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(86),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(86),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ],
             new RunOptions
             {

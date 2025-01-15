@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using Shouldly;
 
 namespace TUnit.TestProject;
 
@@ -25,11 +25,11 @@ public class UniqueBuilderContextsOnEnumerableDataGeneratorTestsGenerator : Data
         
         var id4 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
 
-        id1.Should().Be(id2);
+        id1.ShouldBe(id2);
         
-        id3.Should().NotBe(id1);
+        id3.ShouldNotBe(id1);
         
-        id4.Should().NotBe(id1);
-        id4.Should().NotBe(id3);
+        id4.ShouldNotBe(id1);
+        id4.ShouldNotBe(id3);
     }
 }

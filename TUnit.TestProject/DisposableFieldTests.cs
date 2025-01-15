@@ -1,21 +1,19 @@
-﻿using System.Net.Http;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 public class DisposableFieldTests
 {
-    private HttpClient? _httpClient;
+    private Stream? _stream;
 
     [Before(Test)]
     public void Setup()
     {
-        _httpClient = new HttpClient();
+        _stream = new MemoryStream();
     }
 
     [After(Test)]
     public void Blah()
     {
-        _httpClient?.Dispose();
+        _stream?.Dispose();
     }
 
     [Test]

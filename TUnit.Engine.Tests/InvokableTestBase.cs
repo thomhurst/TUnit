@@ -1,7 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using CliWrap;
 using CliWrap.Buffered;
-using FluentAssertions.Execution;
 using TrxTools.TrxParser;
 
 namespace TUnit.Engine.Tests;
@@ -148,10 +147,7 @@ public abstract class InvokableTestBase
 
             var testRun = TrxControl.ReadTrx(new StringReader(trxFileContents));
             
-            using (new AssertionScope())
-            {
-                assertions.ForEach(x => x.Invoke(testRun));
-            }
+            assertions.ForEach(x => x.Invoke(testRun));
         }
         catch (Exception e)
         {
