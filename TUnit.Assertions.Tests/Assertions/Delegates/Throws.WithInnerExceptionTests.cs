@@ -41,7 +41,7 @@ public partial class Throws
 
             var result = await Assert.That(action).Throws<CustomException>().WithInnerException();
 
-            await Assert.That((object?)result).IsSameReferenceAs(exception);
+            await Assert.That(result).IsSameReferenceAs(exception);
         }
 
         [Test]
