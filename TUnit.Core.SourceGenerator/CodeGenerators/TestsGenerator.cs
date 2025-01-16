@@ -109,13 +109,13 @@ public class TestsGenerator : IIncrementalGenerator
             sourceBuilder.WriteLine();
             sourceBuilder.WriteLine("[global::System.Diagnostics.StackTraceHidden]");
             sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.WriteLine($"file partial class {className} : TUnit.Core.Interfaces.SourceGenerator.ITestSource");
+            sourceBuilder.WriteLine($"file partial class {className} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
             sourceBuilder.WriteLine("{");
 
             sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             sourceBuilder.WriteLine("public static void Initialise()");
             sourceBuilder.WriteLine("{");
-            sourceBuilder.WriteLine($"SourceRegistrar.Register(new {className}());");
+            sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.Register(new {className}());");
             sourceBuilder.WriteLine("}");
 
             sourceBuilder.WriteLine("public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)");

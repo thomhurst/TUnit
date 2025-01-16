@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new PriorityFilteringTests());
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -71,7 +71,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_1:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -99,12 +99,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new PriorityFilteringTests());
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -160,7 +160,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_2:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -188,12 +188,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new PriorityFilteringTests());
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -249,7 +249,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.High_3:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -277,12 +277,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new PriorityFilteringTests());
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -338,7 +338,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_1:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -366,12 +366,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new PriorityFilteringTests());
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -427,7 +427,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.Medium_2:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -455,12 +455,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class PriorityFilteringTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new PriorityFilteringTests());
+		global::TUnit.Core.SourceRegistrar.Register(new PriorityFilteringTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -516,7 +516,7 @@ file partial class PriorityFilteringTests : TUnit.Core.Interfaces.SourceGenerato
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.PriorityFilteringTests.Low_1:0",
 				TestClass = typeof(global::TUnit.TestProject.PriorityFilteringTests),

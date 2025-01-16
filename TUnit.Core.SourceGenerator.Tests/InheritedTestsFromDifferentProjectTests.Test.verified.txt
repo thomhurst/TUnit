@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
+		global::TUnit.Core.SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -71,7 +71,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test:0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -99,12 +99,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
+		global::TUnit.Core.SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -164,7 +164,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -192,12 +192,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
+		global::TUnit.Core.SourceRegistrar.Register(new InheritedTestsFromDifferentProjectTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -257,7 +257,7 @@ file partial class InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfac
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -285,12 +285,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class Inherited_InheritedTestsFromDifferentProjectTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class Inherited_InheritedTestsFromDifferentProjectTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new Inherited_InheritedTestsFromDifferentProjectTests());
+		global::TUnit.Core.SourceRegistrar.Register(new Inherited_InheritedTestsFromDifferentProjectTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -346,7 +346,7 @@ file partial class Inherited_InheritedTestsFromDifferentProjectTests : TUnit.Cor
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest:0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),

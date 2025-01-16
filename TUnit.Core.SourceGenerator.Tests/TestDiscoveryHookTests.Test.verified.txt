@@ -12,7 +12,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
+file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
@@ -20,7 +20,7 @@ file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGe
 		var instance = new Hooks_TestDiscoveryHookTests();
 		SourceRegistrar.RegisterTestDiscoveryHookSource(instance);
 	}
-	public global::System.Collections.Generic.IReadOnlyList<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)
 	{
 		return
 		[
@@ -41,7 +41,7 @@ file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGe
 			},
 		];
 	}
-	public global::System.Collections.Generic.IReadOnlyList<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)
 	{
 		return
 		[
@@ -63,7 +63,7 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
+file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
@@ -71,13 +71,13 @@ file partial class Hooks_TestDiscoveryHookTests : TUnit.Core.Interfaces.SourceGe
 		var instance = new Hooks_TestDiscoveryHookTests();
 		SourceRegistrar.RegisterTestDiscoveryHookSource(instance);
 	}
-	public global::System.Collections.Generic.IReadOnlyList<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)
 	{
 		return
 		[
 		];
 	}
-	public global::System.Collections.Generic.IReadOnlyList<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)
+	public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)
 	{
 		return
 		[

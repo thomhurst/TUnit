@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataSourceClassCombinedWithDataSourceMethod : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataSourceClassCombinedWithDataSourceMethod());
+		global::TUnit.Core.SourceRegistrar.Register(new DataSourceClassCombinedWithDataSourceMethod());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -99,7 +99,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
@@ -180,7 +180,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
@@ -261,7 +261,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
@@ -342,7 +342,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
@@ -423,7 +423,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
@@ -504,7 +504,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
@@ -585,7 +585,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
@@ -666,7 +666,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),
@@ -747,7 +747,7 @@ file partial class DataSourceClassCombinedWithDataSourceMethod : TUnit.Core.Inte
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS2:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS2:TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(System.Int32).DataSourceClassCombinedWithDataSourceMethodTest(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),

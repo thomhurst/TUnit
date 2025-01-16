@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new ClassDataSourceDrivenTestsSharedKeyed());
+		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTestsSharedKeyed());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -92,7 +92,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class(SomeAsyncDisposableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
@@ -120,12 +120,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class ClassDataSourceDrivenTestsSharedKeyed : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new ClassDataSourceDrivenTestsSharedKeyed());
+		global::TUnit.Core.SourceRegistrar.Register(new ClassDataSourceDrivenTestsSharedKeyed());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -202,7 +202,7 @@ file partial class ClassDataSourceDrivenTestsSharedKeyed : TUnit.Core.Interfaces
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic(SomeAsyncDisposableClass):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),

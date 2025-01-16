@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -191,11 +190,11 @@ public class TestHooksGenerator : IIncrementalGenerator
     {
         return hookLevel switch
         {
-            "TUnit.Core.HookType.TestDiscovery" => "TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource",
-            "TUnit.Core.HookType.TestSession" => "TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource", 
-            "TUnit.Core.HookType.Assembly" => "TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource", 
-            "TUnit.Core.HookType.Class" => "TUnit.Core.Interfaces.SourceGenerator.IClassHookSource", 
-            "TUnit.Core.HookType.Test" => "TUnit.Core.Interfaces.SourceGenerator.ITestHookSource", 
+            "TUnit.Core.HookType.TestDiscovery" => "global::TUnit.Core.Interfaces.SourceGenerator.ITestDiscoveryHookSource",
+            "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.Interfaces.SourceGenerator.ITestSessionHookSource", 
+            "TUnit.Core.HookType.Assembly" => "global::TUnit.Core.Interfaces.SourceGenerator.IAssemblyHookSource", 
+            "TUnit.Core.HookType.Class" => "global::TUnit.Core.Interfaces.SourceGenerator.IClassHookSource", 
+            "TUnit.Core.HookType.Test" => "global::TUnit.Core.Interfaces.SourceGenerator.ITestHookSource", 
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -205,13 +204,13 @@ public class TestHooksGenerator : IIncrementalGenerator
         return hookLevel switch
         {
             "TUnit.Core.HookType.TestDiscovery" 
-                when hookLocationType == HookLocationType.Before => "StaticHookMethod<BeforeTestDiscoveryContext>",
-            "TUnit.Core.HookType.TestDiscovery" => "StaticHookMethod<TestDiscoveryContext>",
-            "TUnit.Core.HookType.TestSession" => "StaticHookMethod<TestSessionContext>",
-            "TUnit.Core.HookType.Assembly" => "StaticHookMethod<AssemblyHookContext>",
-            "TUnit.Core.HookType.Class" => "StaticHookMethod<ClassHookContext>",
-            "TUnit.Core.HookType.Test" when isEvery => "StaticHookMethod<TestContext>",
-            "TUnit.Core.HookType.Test" => "InstanceHookMethod",
+                when hookLocationType == HookLocationType.Before => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.BeforeTestDiscoveryContext>",
+            "TUnit.Core.HookType.TestDiscovery" => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestDiscoveryContext>",
+            "TUnit.Core.HookType.TestSession" => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestSessionContext>",
+            "TUnit.Core.HookType.Assembly" => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.AssemblyHookContext>",
+            "TUnit.Core.HookType.Class" => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.ClassHookContext>",
+            "TUnit.Core.HookType.Test" when isEvery => "global::TUnit.Core.Hooks.StaticHookMethod<global::TUnit.Core.TestContext>",
+            "TUnit.Core.HookType.Test" => "global::TUnit.Core.Hooks.InstanceHookMethod",
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -259,12 +258,5 @@ public class TestHooksGenerator : IIncrementalGenerator
             
             _ => throw new ArgumentOutOfRangeException()
         };
-    }
-    
-    private static bool IsPartOfCompilation(Compilation compilation, ITypeSymbol x)
-    {
-        var syntaxTree = x.DeclaringSyntaxReferences.FirstOrDefault()?.SyntaxTree;
-        
-        return syntaxTree is not null && compilation.ContainsSyntaxTree(syntaxTree);
     }
 }

@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class AutoDataTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new AutoDataTests());
+		global::TUnit.Core.SourceRegistrar.Register(new AutoDataTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -96,7 +96,7 @@ file partial class AutoDataTests : TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(System.String,System.Int32,System.Double,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.AutoDataTests),

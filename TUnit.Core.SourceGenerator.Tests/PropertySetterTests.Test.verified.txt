@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new PropertySetterTests());
+		global::TUnit.Core.SourceRegistrar.Register(new PropertySetterTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -158,7 +158,7 @@ file partial class PropertySetterTests : TUnit.Core.Interfaces.SourceGenerator.I
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.PropertySetterTests.Test:0",
 				TestClass = typeof(global::TUnit.TestProject.PropertySetterTests),

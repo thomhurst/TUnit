@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class ConstantInBaseClassTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class ConstantInBaseClassTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new ConstantInBaseClassTests());
+		global::TUnit.Core.SourceRegistrar.Register(new ConstantInBaseClassTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -73,7 +73,7 @@ file partial class ConstantInBaseClassTests : TUnit.Core.Interfaces.SourceGenera
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests.SomeTest(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests),

@@ -1,5 +1,4 @@
-﻿using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Models;
+﻿using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
@@ -10,7 +9,7 @@ public static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
         
-        sourceBuilder.WriteLine("nodes.Add(new FailedInitializationTest");
+        sourceBuilder.WriteLine("nodes.Add(new global::TUnit.Core.FailedInitializationTest");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestClass = typeof({testSourceDataModel.FullyQualifiedTypeName}),");

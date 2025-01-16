@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataSourceGeneratorTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -127,7 +127,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
@@ -243,7 +243,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
@@ -271,12 +271,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataSourceGeneratorTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -392,7 +392,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method2(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
@@ -512,7 +512,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method2(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
@@ -540,12 +540,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataSourceGeneratorTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataSourceGeneratorTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataSourceGeneratorTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -661,7 +661,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute<global::System.Int32, global::System.String, global::System.Boolean>:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method3(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
@@ -781,7 +781,7 @@ file partial class DataSourceGeneratorTests : TUnit.Core.Interfaces.SourceGenera
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{classDataIndex}:CL-GAC0:global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.DataSourceGeneratorTests(System.Int32,System.String,System.Boolean).GeneratedData_Method3(System.Int32,System.String,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),

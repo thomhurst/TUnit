@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new MultipleClassDataSourceDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new MultipleClassDataSourceDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -98,7 +98,7 @@ file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.So
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test1:0",
 				TestClass = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
@@ -126,12 +126,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class MultipleClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new MultipleClassDataSourceDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new MultipleClassDataSourceDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -214,7 +214,7 @@ file partial class MultipleClassDataSourceDrivenTests : TUnit.Core.Interfaces.So
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>:{classDataIndex}:CL-GAC0:TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4,TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5).Test2:0",
 				TestClass = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
