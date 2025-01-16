@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.Tests.Assertions.Delegates;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Assertions.Tests.Assertions.Delegates;
 
 public partial class Throws
 {
@@ -33,6 +35,7 @@ public partial class Throws
         }
 
         [Test]
+        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
         public async Task Returns_Exception_When_Awaited()
         {
             Exception exception = CreateCustomException(
@@ -41,7 +44,7 @@ public partial class Throws
 
             var result = await Assert.That(action).Throws<CustomException>().WithInnerException();
 
-            await Assert.That((object?)result).IsSameReferenceAs(exception);
+            await Assert.That(result).IsSameReferenceAs(exception);
         }
 
         [Test]
