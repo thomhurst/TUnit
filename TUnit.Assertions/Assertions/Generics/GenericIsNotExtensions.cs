@@ -31,9 +31,9 @@ public static class GenericIsNotExtensions
             , [doNotPopulateThisValue]);
     }
     
-    public static InvokableValueAssertionBuilder<object> IsNotSameReferenceAs(this IValueSource<object> valueSource, object expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "")
+    public static InvokableValueAssertionBuilder<TActual> IsNotSameReferenceAs<TActual, TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "")
     {
-        return valueSource.RegisterAssertion(new NotSameReferenceExpectedValueAssertCondition<object, object>(expected)
+        return valueSource.RegisterAssertion(new NotSameReferenceExpectedValueAssertCondition<TActual, TExpected>(expected)
             , [doNotPopulateThisValue1]);
     }
     
