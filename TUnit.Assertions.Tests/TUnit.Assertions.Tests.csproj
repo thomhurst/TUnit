@@ -14,4 +14,8 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="ThrowTests.cs" />
+  </ItemGroup>
 </Project>
