@@ -4,7 +4,7 @@ namespace TUnit.TestProject.Attributes;
 
 public class AutoDataAttribute : NonTypedDataSourceGeneratorAttribute
 {
-    private static AutoFixture.Fixture _fixture = new();
+    private static readonly AutoFixture.Fixture Fixture = new();
     
     public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
@@ -20,7 +20,7 @@ public class AutoDataAttribute : NonTypedDataSourceGeneratorAttribute
     {
         foreach (var parameterInfo in dataGeneratorMetadata.ParameterInfos ?? [])
         {
-            yield return _fixture.Create(parameterInfo.ParameterType, new SpecimenContext(_fixture));
+            yield return Fixture.Create(parameterInfo.ParameterType, new SpecimenContext(Fixture));
         }
     }
 }
