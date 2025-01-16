@@ -16,7 +16,7 @@ public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
         }
 
 #if NET
-        foreach (var enumValue in Enum.GetValues(parameterType))
+        foreach (var enumValue in Enum.GetValuesAsUnderlyingType(parameterType))
         {
             yield return () => [enumValue];
         }       
