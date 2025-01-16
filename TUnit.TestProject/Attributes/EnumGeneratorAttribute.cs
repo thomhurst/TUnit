@@ -14,10 +14,18 @@ public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
         {
             throw new Exception("Expecting Enum parameter");
         }
-        
-        foreach (var enumValue in Enum.GetValuesAsUnderlyingType(parameterType))
+
+#if NET
+        foreach (var enumValue in Enum.GetValues(parameterType))
+        {
+            yield return () => [enumValue];
+        }       
+#else
+        foreach (var enumValue in Enum.GetValues(parameterType))
         {
             yield return () => [enumValue];
         }
+#endif
+        
     }
 }
