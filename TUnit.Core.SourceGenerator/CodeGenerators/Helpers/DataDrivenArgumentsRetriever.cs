@@ -58,6 +58,17 @@ public static class DataDrivenArgumentsRetriever
             return [new Argument(type, null)];
         }
 
+        if (parameterOrPropertyTypeSymbols is { Length: 1 }
+            && parameterOrPropertyTypeSymbols[0].IsCollectionType(context.SemanticModel.Compilation, out var innerType)
+            && objectArray.Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
+        {
+            return
+            [
+                new Argument(parameterOrPropertyTypeSymbols[0].GloballyQualified(),
+                    $"[{string.Join(", ", objectArray.Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, arguments[i].Expression, x.Type)))}]")
+            ];
+        }
+
         return objectArray.Zip(arguments, (typedConstant, a) => (typedConstant, a))
             .Select((element, index) =>
             {
