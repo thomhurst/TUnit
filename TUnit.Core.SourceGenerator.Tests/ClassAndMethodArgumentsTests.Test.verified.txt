@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
+		global::TUnit.Core.SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -80,7 +80,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).Simple:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -149,7 +149,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).Simple:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -177,12 +177,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
+		global::TUnit.Core.SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -257,7 +257,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -334,7 +334,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -411,7 +411,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -488,7 +488,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -516,12 +516,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
+		global::TUnit.Core.SourceRegistrar.Register(new ClassAndMethodArgumentsTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -596,7 +596,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -673,7 +673,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -750,7 +750,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -827,7 +827,7 @@ file partial class ClassAndMethodArgumentsTests : TUnit.Core.Interfaces.SourceGe
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),

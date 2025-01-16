@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new MethodDataSourceDrivenWithCancellationTokenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new MethodDataSourceDrivenWithCancellationTokenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -98,7 +98,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
@@ -181,7 +181,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
@@ -268,7 +268,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
@@ -355,7 +355,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
@@ -442,7 +442,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
@@ -529,7 +529,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : TUnit.Core
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),

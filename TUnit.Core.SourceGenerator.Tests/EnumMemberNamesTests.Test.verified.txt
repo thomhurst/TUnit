@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class EnumMemberNamesTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new EnumMemberNamesTests());
+		global::TUnit.Core.SourceRegistrar.Register(new EnumMemberNamesTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -84,7 +84,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
@@ -156,7 +156,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),
@@ -228,7 +228,7 @@ file partial class EnumMemberNamesTests : TUnit.Core.Interfaces.SourceGenerator.
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests),

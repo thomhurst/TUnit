@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -84,7 +84,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.DataSource_Method(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -156,7 +156,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.DataDrivenTests.DataSource_Method(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -228,7 +228,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.DataDrivenTests.DataSource_Method(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -256,12 +256,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -331,7 +331,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.DataSource_Method(System.Int32,System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -404,7 +404,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.DataDrivenTests.DataSource_Method(System.Int32,System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -477,7 +477,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.DataDrivenTests.DataSource_Method(System.Int32,System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -505,12 +505,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -579,7 +579,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.EnumValue(TUnit.TestProject.TestEnum):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -651,7 +651,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.DataDrivenTests.EnumValue(TUnit.TestProject.TestEnum):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -723,7 +723,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.DataDrivenTests.EnumValue(TUnit.TestProject.TestEnum):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -751,12 +751,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -814,7 +814,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.NullValue(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -842,12 +842,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -905,7 +905,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.EmptyString(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -933,12 +933,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -996,7 +996,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.NonEmptyString(System.String):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -1024,12 +1024,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -1098,7 +1098,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.BooleanString(System.Boolean?):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -1170,7 +1170,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.DataDrivenTests.BooleanString(System.Boolean?):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -1242,7 +1242,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.DataDrivenTests.BooleanString(System.Boolean?):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -1270,12 +1270,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -1333,7 +1333,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.Type(System.Type):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -1361,12 +1361,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -1424,7 +1424,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.IntegerArray(System.Int32[]):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -1452,12 +1452,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new DataDrivenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new DataDrivenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -1515,7 +1515,7 @@ file partial class DataDrivenTests : TUnit.Core.Interfaces.SourceGenerator.ITest
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.DataDrivenTests.IntMaxValue(System.Int32):0",
 				TestClass = typeof(global::TUnit.TestProject.DataDrivenTests),

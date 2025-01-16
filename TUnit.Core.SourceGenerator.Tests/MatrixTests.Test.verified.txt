@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new MatrixTests());
+		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -98,7 +98,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS0:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -163,7 +163,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS1:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -228,7 +228,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS2:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -293,7 +293,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS3:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -358,7 +358,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS4:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -423,7 +423,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS5:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -488,7 +488,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS6:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -553,7 +553,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS7:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -618,7 +618,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS8:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -683,7 +683,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS9:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -748,7 +748,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS10:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -813,7 +813,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS11:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -878,7 +878,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS12:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -943,7 +943,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS13:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1008,7 +1008,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS14:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1073,7 +1073,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS15:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1138,7 +1138,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS16:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1203,7 +1203,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS17:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1268,7 +1268,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS18:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1333,7 +1333,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS19:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1398,7 +1398,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS20:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1463,7 +1463,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS21:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1528,7 +1528,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS22:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1593,7 +1593,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS23:TUnit.TestProject.MatrixTests.MatrixTest_One(System.String,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1621,12 +1621,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new MatrixTests());
+		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -1734,7 +1734,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS0:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1800,7 +1800,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS1:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1866,7 +1866,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS2:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1932,7 +1932,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS3:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -1998,7 +1998,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS4:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2064,7 +2064,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS5:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2130,7 +2130,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS6:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2196,7 +2196,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS7:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2262,7 +2262,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS8:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2328,7 +2328,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS9:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2394,7 +2394,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS10:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2460,7 +2460,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS11:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2526,7 +2526,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS12:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2592,7 +2592,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS13:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2658,7 +2658,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS14:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2724,7 +2724,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS15:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2790,7 +2790,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS16:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2856,7 +2856,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS17:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2922,7 +2922,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS18:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -2988,7 +2988,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS19:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3054,7 +3054,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS20:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3120,7 +3120,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS21:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3186,7 +3186,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS22:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3252,7 +3252,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS23:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3318,7 +3318,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS24:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3384,7 +3384,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS25:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3450,7 +3450,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS26:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3516,7 +3516,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS27:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3582,7 +3582,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS28:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3648,7 +3648,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS29:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3714,7 +3714,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS30:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3780,7 +3780,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS31:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3846,7 +3846,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS32:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3912,7 +3912,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS33:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -3978,7 +3978,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS34:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4044,7 +4044,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS35:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4110,7 +4110,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS36:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4176,7 +4176,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS37:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4242,7 +4242,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS38:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4308,7 +4308,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS39:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4374,7 +4374,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS40:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4440,7 +4440,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS41:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4506,7 +4506,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS42:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4572,7 +4572,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS43:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4638,7 +4638,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS44:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4704,7 +4704,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS45:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4770,7 +4770,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS46:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4836,7 +4836,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS47:TUnit.TestProject.MatrixTests.MatrixTest_Two(System.Int32,System.Int32,System.Int32,System.Boolean):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4864,12 +4864,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class MatrixTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new MatrixTests());
+		global::TUnit.Core.SourceRegistrar.Register(new MatrixTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -4931,7 +4931,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS0:TUnit.TestProject.MatrixTests.MatrixTest_Enum(System.Int32,TUnit.TestProject.TestEnum):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -4995,7 +4995,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS1:TUnit.TestProject.MatrixTests.MatrixTest_Enum(System.Int32,TUnit.TestProject.TestEnum):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -5059,7 +5059,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS2:TUnit.TestProject.MatrixTests.MatrixTest_Enum(System.Int32,TUnit.TestProject.TestEnum):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),
@@ -5123,7 +5123,7 @@ file partial class MatrixTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TL-ARGS3:TUnit.TestProject.MatrixTests.MatrixTest_Enum(System.Int32,TUnit.TestProject.TestEnum):0",
 				TestClass = typeof(global::TUnit.TestProject.MatrixTests),

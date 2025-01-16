@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new RepeatTests());
+		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -78,7 +78,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.One:0",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
@@ -145,7 +145,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.One:1",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
@@ -173,12 +173,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new RepeatTests());
+		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -242,7 +242,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Two:0",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
@@ -309,7 +309,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Two:1",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
@@ -376,7 +376,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Two:2",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
@@ -404,12 +404,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class RepeatTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new RepeatTests());
+		global::TUnit.Core.SourceRegistrar.Register(new RepeatTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -471,7 +471,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Three:0",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
@@ -535,7 +535,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Three:1",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
@@ -599,7 +599,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Three:2",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),
@@ -663,7 +663,7 @@ file partial class RepeatTests : TUnit.Core.Interfaces.SourceGenerator.ITestSour
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"TUnit.TestProject.RepeatTests.Three:3",
 				TestClass = typeof(global::TUnit.TestProject.RepeatTests),

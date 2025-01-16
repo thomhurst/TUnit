@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class ClassConstructorTest : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new ClassConstructorTest());
+		global::TUnit.Core.SourceRegistrar.Register(new ClassConstructorTest());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -69,7 +69,7 @@ file partial class ClassConstructorTest : TUnit.Core.Interfaces.SourceGenerator.
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassConstructorTest),

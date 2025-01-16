@@ -10,12 +10,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new TimeoutCancellationTokenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -75,7 +75,7 @@ file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceG
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DefaultTest(System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -103,12 +103,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new TimeoutCancellationTokenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -174,7 +174,7 @@ file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceG
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).BasicTest(System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -202,12 +202,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new TimeoutCancellationTokenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -270,7 +270,7 @@ file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceG
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).InheritedTimeoutAttribute(System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -298,12 +298,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new TimeoutCancellationTokenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -371,7 +371,7 @@ file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceG
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DataTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -399,12 +399,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new TimeoutCancellationTokenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -471,7 +471,7 @@ file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceG
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DataSourceTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -499,12 +499,12 @@ namespace TUnit.SourceGenerated;
 
 [global::System.Diagnostics.StackTraceHidden]
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceGenerator.ITestSource
+file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
 	[global::System.Runtime.CompilerServices.ModuleInitializer]
 	public static void Initialise()
 	{
-		SourceRegistrar.Register(new TimeoutCancellationTokenTests());
+		global::TUnit.Core.SourceRegistrar.Register(new TimeoutCancellationTokenTests());
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
@@ -577,7 +577,7 @@ file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceG
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -653,7 +653,7 @@ file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceG
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS1:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -729,7 +729,7 @@ file partial class TimeoutCancellationTokenTests : TUnit.Core.Interfaces.SourceG
 		}
 		catch (global::System.Exception exception)
 		{
-			nodes.Add(new FailedInitializationTest
+			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS2:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
