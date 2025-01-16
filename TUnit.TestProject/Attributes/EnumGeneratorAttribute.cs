@@ -1,10 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace TUnit.TestProject.Attributes;
+﻿namespace TUnit.TestProject.Attributes;
 
 public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
 {
-    [RequiresDynamicCode("Inspecting Enums requires reflection")]
     public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.ParameterInfos is not { Length: 1 })
@@ -18,7 +15,7 @@ public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
             throw new Exception("Expecting Enum parameter");
         }
         
-        foreach (var enumValue in parameterType.GetEnumValues())
+        foreach (var enumValue in Enum.GetValuesAsUnderlyingType(parameterType))
         {
             yield return () => [enumValue];
         }
