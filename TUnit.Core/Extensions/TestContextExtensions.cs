@@ -18,7 +18,8 @@ public static class TestContextExtensions
             testName: testName, 
             methodParameterTypes: parameterTypes, 
             classType: context.TestDetails.ClassType, 
-            classParameterTypes: context.TestDetails.TestClassParameterTypes);
+            classParameterTypes: context.TestDetails.TestClassParameterTypes,
+            classArguments: context.TestDetails.TestClassArguments);
 
         if (tests.Any(x => x.TestTask?.IsCompleted is not true))
         {
