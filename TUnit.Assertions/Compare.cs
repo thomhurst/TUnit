@@ -97,6 +97,8 @@ public static class Compare
                     yield return comparisonFailure;
                 }
             }
+            
+            yield break;
         }
 
         foreach (var fieldName in actual.GetType().GetFields().Concat(expected.GetType().GetFields())
