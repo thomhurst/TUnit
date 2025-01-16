@@ -141,7 +141,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
             
             var status = GetStatus(stateProperty);
 
-            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties).Replace("\n", "<br/>");
+            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties).Replace("\n", " <br> ");
             
             var timingProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
             
