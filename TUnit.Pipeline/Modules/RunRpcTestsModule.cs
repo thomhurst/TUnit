@@ -20,7 +20,11 @@ public class RunRpcTestsModule : Module<CommandResult>
         {
             NoBuild = true,
             Configuration = Configuration.Release,
-            Framework = "net8.0"
+            Framework = "net8.0",
+            EnvironmentVariables = new Dictionary<string, string?>
+            {
+                ["DISABLE_GITHUB_REPORTER"] = "true",
+            }
         }, cancellationToken);
     }
 }
