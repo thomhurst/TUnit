@@ -4,7 +4,7 @@ namespace TUnit.TestProject.Attributes;
 
 public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
 {
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
+    [RequiresDynamicCode("Inspecting Enums requires reflection")]
     public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.ParameterInfos is not { Length: 1 })
