@@ -39,5 +39,9 @@
       <ParentFile>BasicTests</ParentFile>
       <DependentUpon>BasicTests.cs</DependentUpon>
     </None>
+    <None Update="ArgsAsArrayTests.Test.verified.txt">
+      <ParentFile>BasicTests</ParentFile>
+      <DependentUpon>ArgsAsArrayTests.cs</DependentUpon>
+    </None>
   </ItemGroup>
 </Project>

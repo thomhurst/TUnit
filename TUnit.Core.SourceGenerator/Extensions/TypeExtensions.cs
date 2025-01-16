@@ -185,4 +185,33 @@ public static class TypeExtensions
 
         return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
     }
+    
+    public static bool IsCollectionType(this ITypeSymbol typeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
+    {
+        if (typeSymbol is IArrayTypeSymbol arrayTypeSymbol)
+        {
+            innerType = arrayTypeSymbol.ElementType;
+            return true;
+        }
+
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol
+        && SymbolEqualityComparer.Default.Equals(typeSymbol.OriginalDefinition,
+                compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
+        {
+            innerType = namedTypeSymbol.TypeArguments[0];
+            return true;
+        }
+
+        if (typeSymbol.AllInterfaces
+                .FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition,
+                    compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T)))
+            is {} enumerableType)
+        {
+            innerType = enumerableType.TypeArguments[0];
+            return true;
+        }
+
+        innerType = null;
+        return false;
+    }
 }

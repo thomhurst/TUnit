@@ -218,7 +218,15 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             : argumentsAttribute.ConstructorArguments.First().Values;
 
         var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
-        
+
+        if (parameters is { Length: 1 }
+            && parameters[0].Type.IsCollectionType(context.Compilation, out var innerType)
+            && arguments.All(x => SymbolEqualityComparer.Default.Equals(x.Type, innerType)))
+        {
+            // All arguments can be used in the single array
+            return;
+        }
+
         for (var i = 0; i < parameters.Length; i++)
         {
             var methodParameter = parameters[i];
