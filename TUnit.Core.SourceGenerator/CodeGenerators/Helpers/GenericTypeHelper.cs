@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Extensions;
 
@@ -22,14 +23,43 @@ internal static class GenericTypeHelper
 
             foreach (var typeNode in typeNodes)
             {
-                if (semanticModel.GetTypeInfo(typeNode).Type 
-                        is INamedTypeSymbol { IsGenericType: true } typeSymbol 
-                    && !typeSymbol.IsGenericDefinition()
-                    && SymbolEqualityComparer.Default.Equals(typeSymbol.OriginalDefinition, originalGenericDefinition))
+                if (semanticModel.GetTypeInfo(typeNode).Type is not INamedTypeSymbol { IsGenericType: true } typeSymbol
+                    || typeSymbol.IsGenericDefinition())
+                {
+                    continue;
+                }
+                
+                if (SymbolEqualityComparer.Default.Equals(typeSymbol.OriginalDefinition, originalGenericDefinition))
                 {
                     yield return typeSymbol;
+                    continue;
+                }
+
+                if (IsAncestor(originalGenericDefinition, typeSymbol, out var matchingTypeParameter))
+                {
+                    yield return matchingTypeParameter;
                 }
             }
         }
+    }
+
+    private static bool IsAncestor(INamedTypeSymbol genericTypeDefinition, INamedTypeSymbol typeSymbol, [NotNullWhen(true)] out INamedTypeSymbol? foundMatch)
+    {
+        if (typeSymbol.GetBaseTypes()
+            .FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, genericTypeDefinition))
+            is not {} matchingType)
+        {
+            foundMatch = null;
+            return false;
+        }
+
+        if (matchingType is not INamedTypeSymbol namedMatchingType)
+        {
+            foundMatch = null;
+            return false;
+        }
+        
+        foundMatch = namedMatchingType;
+        return true;
     }
 }
