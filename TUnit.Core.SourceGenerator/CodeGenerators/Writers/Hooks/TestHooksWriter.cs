@@ -13,11 +13,11 @@ public class TestHooksWriter : BaseHookWriter
         {
             if (model.HookLocationType == HookLocationType.Before)
             {
-                sourceBuilder.WriteLine("new BeforeTestHookMethod");
+                sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.BeforeTestHookMethod");
             }
             else
             {
-                sourceBuilder.WriteLine("new AfterTestHookMethod");
+                sourceBuilder.WriteLine("new global::TUnit.Core.Hooks.AfterTestHookMethod");
             }
             
             sourceBuilder.WriteLine("{ ");
@@ -47,7 +47,7 @@ public class TestHooksWriter : BaseHookWriter
             return;
         }
 
-        sourceBuilder.WriteLine($"new InstanceHookMethod<{model.FullyQualifiedTypeName}>");
+        sourceBuilder.WriteLine($"new global::TUnit.Core.Hooks.InstanceHookMethod<{model.FullyQualifiedTypeName}>");
         sourceBuilder.WriteLine("{");
         sourceBuilder.WriteLine($"""MethodInfo = {MethodInfoWriter.Write(model)},""");
         

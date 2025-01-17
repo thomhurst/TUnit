@@ -143,3 +143,5 @@ public static class Assert
     [DoesNotReturn]
     public static void Fail(string reason) => TUnit.Assertions.Fail.Test(reason);
 }
+
+public class EnumerableAssertionBuilder<TActual, TInner>(TActual actual, string doNotPopulateThisValue)  : ValueAssertionBuilder<TActual>(actual, doNotPopulateThisValue) where TActual : IEnumerable<TInner>;
