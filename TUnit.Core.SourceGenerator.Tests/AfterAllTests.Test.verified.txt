@@ -105,7 +105,7 @@ file partial class Hooks_Base1 : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base1>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base1>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AfterTests.Base1), "AfterEach1", 0, []),
 				AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach1()),
@@ -229,7 +229,7 @@ file partial class Hooks_Base2 : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base2>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base2>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AfterTests.Base2), "AfterEach2", 0, []),
 				AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach2()),
@@ -353,7 +353,7 @@ file partial class Hooks_Base3 : global::TUnit.Core.Interfaces.SourceGenerator.I
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base3>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.Base3>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AfterTests.Base3), "AfterEach3", 0, []),
 				AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.AfterEach3()),
@@ -666,7 +666,7 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), "Cleanup", 0, []),
 				AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup()),
@@ -727,7 +727,7 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), "Cleanup", 0, [typeof(global::System.Threading.CancellationToken)]),
 				AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.Cleanup(cancellationToken)),
@@ -791,7 +791,7 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), "CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext)]),
 				AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(context)),
@@ -852,7 +852,7 @@ file partial class Hooks_CleanupTests : global::TUnit.Core.Interfaces.SourceGene
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.AfterTests.CleanupTests>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AfterTests.CleanupTests), "CleanupWithContext", 0, [typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken)]),
 				AsyncBody = (classInstance, context, cancellationToken) => AsyncConvert.Convert(() => classInstance.CleanupWithContext(context, cancellationToken)),

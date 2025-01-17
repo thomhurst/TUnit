@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Inject.NET.SourceGenerator;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers.Hooks;
 using TUnit.Core.SourceGenerator.Enums;
@@ -53,31 +54,46 @@ public class TestHooksGenerator : IIncrementalGenerator
         {
             yield break;
         }
+        
+        var containingType = methodSymbol.ContainingType;
+        IEnumerable<INamedTypeSymbol> classTypes;
 
-        foreach (var contextAttribute in context.Attributes)
+        if (containingType.IsGenericDefinition())
         {
-            var hookLevel = contextAttribute.ConstructorArguments[0].ToCSharpString();
+            classTypes = GenericTypeHelper.GetConstructedTypes(context.SemanticModel.Compilation, containingType);
+        }
+        else
+        {
+            classTypes = [containingType];
+        }
 
-            yield return new HooksDataModel
+        foreach (var classType in classTypes)
+        {
+            foreach (var contextAttribute in context.Attributes)
             {
-                Context = context,
-                Method = methodSymbol,
-                MethodName = methodSymbol.Name,
-                HookLocationType = hookLocationType,
-                IsEveryHook = isEveryHook && hookLevel is not "TUnit.Core.HookType.TestDiscovery" and not "TUnit.Core.HookType.TestSession",
-                HookLevel = hookLevel,
-                FullyQualifiedTypeName =
-                    methodSymbol.ContainingType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-                MinimalTypeName = methodSymbol.ContainingType.Name,
-                ParameterTypes = methodSymbol.Parameters
-                    .Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
-                    .ToArray(),
-                HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.HookExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
-                Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
-                FilePath = contextAttribute.ConstructorArguments[1].Value?.ToString() ?? string.Empty,
-                LineNumber = contextAttribute.ConstructorArguments[2].Value as int? ?? 0,
-                IsVoid = methodSymbol.ReturnsVoid,
-            };
+                var hookLevel = contextAttribute.ConstructorArguments[0].ToCSharpString();
+            
+                yield return new HooksDataModel
+                {
+                    Context = context,
+                    Method = methodSymbol,
+                    MethodName = methodSymbol.Name,
+                    HookLocationType = hookLocationType,
+                    IsEveryHook = isEveryHook && hookLevel is not "TUnit.Core.HookType.TestDiscovery" and not "TUnit.Core.HookType.TestSession",
+                    HookLevel = hookLevel,
+                    FullyQualifiedTypeName =
+                        classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                    MinimalTypeName = classType.Name,
+                    ParameterTypes = methodSymbol.Parameters
+                        .Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+                        .ToArray(),
+                    HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.HookExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                    Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
+                    FilePath = contextAttribute.ConstructorArguments[1].Value?.ToString() ?? string.Empty,
+                    LineNumber = contextAttribute.ConstructorArguments[2].Value as int? ?? 0,
+                    IsVoid = methodSymbol.ReturnsVoid,
+                };
+            }
         }
     }
 
