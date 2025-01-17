@@ -36,7 +36,7 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.STAThreadTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.STAThreadTests>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.STAThreadTests), "BeforeTest", 0, []),
 				Body = (classInstance, context, cancellationToken) => classInstance.BeforeTest(),
@@ -109,7 +109,7 @@ file partial class Hooks_STAThreadTests : global::TUnit.Core.Interfaces.SourceGe
 	{
 		return
 		[
-			new InstanceHookMethod<global::TUnit.TestProject.STAThreadTests>
+			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.STAThreadTests>
 			{
 				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.STAThreadTests), "AfterTest", 0, []),
 				Body = (classInstance, context, cancellationToken) => classInstance.AfterTest(),
