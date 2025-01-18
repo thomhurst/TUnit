@@ -33,7 +33,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
@@ -43,7 +43,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DefaultTest(System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DefaultTest(System.Threading.CancellationToken):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [],
 				TestClassProperties = [],
@@ -77,7 +77,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DefaultTest(System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DefaultTest(System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DefaultTest", 0, [typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Threading.CancellationToken)],
@@ -126,7 +126,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
@@ -136,7 +136,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).BasicTest(System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).BasicTest(System.Threading.CancellationToken):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [],
 				TestClassProperties = [],
@@ -176,7 +176,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).BasicTest(System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).BasicTest(System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "BasicTest", 0, [typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Threading.CancellationToken)],
@@ -225,7 +225,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
@@ -235,7 +235,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).InheritedTimeoutAttribute(System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).InheritedTimeoutAttribute(System.Threading.CancellationToken):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [],
 				TestClassProperties = [],
@@ -272,7 +272,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).InheritedTimeoutAttribute(System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).InheritedTimeoutAttribute(System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "InheritedTimeoutAttribute", 0, [typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(global::System.Threading.CancellationToken)],
@@ -317,13 +317,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DataTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DataTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
-			global::System.Int32 methodArg = 1;
+			int methodArg = 1;
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
@@ -333,7 +333,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DataTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataTest(int,System.Threading.CancellationToken):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -373,10 +373,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DataTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DataTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DataTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "DataTest",
 				TestFilePath = @"",
 				TestLineNumber = 36,
@@ -418,13 +418,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DataSourceTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DataSourceTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
-			global::System.Int32 methodArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int methodArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
 			, sessionId, testBuilderContext);
@@ -433,7 +433,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DataSourceTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataSourceTest(int,System.Threading.CancellationToken):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -473,10 +473,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).DataSourceTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).DataSourceTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DataSourceTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "DataSourceTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "DataSourceTest",
 				TestFilePath = @"",
 				TestLineNumber = 47,
@@ -523,13 +523,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
-			global::System.Int32 methodArg = 1;
+			int methodArg = 1;
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
@@ -539,7 +539,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -579,10 +579,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MatrixTest",
 				TestFilePath = @"",
 				TestLineNumber = 54,
@@ -599,13 +599,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
-			global::System.Int32 methodArg = 2;
+			int methodArg = 2;
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
@@ -615,7 +615,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS1:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS1:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -655,10 +655,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS1:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS1:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MatrixTest",
 				TestFilePath = @"",
 				TestLineNumber = 54,
@@ -675,13 +675,13 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.Int32 classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
-			global::System.Int32 methodArg = 3;
+			int methodArg = 3;
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
@@ -691,7 +691,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS2:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS2:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -731,10 +731,10 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS2:TUnit.TestProject.TimeoutCancellationTokenTests(System.Int32).MatrixTest(System.Int32,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS2:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.Threading.CancellationToken)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MatrixTest",
 				TestFilePath = @"",
 				TestLineNumber = 54,

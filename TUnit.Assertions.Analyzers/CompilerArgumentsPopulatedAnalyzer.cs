@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -48,7 +49,7 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         if (argumentOperation.Parameter?.GetAttributes().Any(x =>
-                x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+                x.AttributeClass?.GloballyQualified()
                     is "global::System.Runtime.CompilerServices.CallerMemberNameAttribute"
                     or "global::System.Runtime.CompilerServices.CallerArgumentExpressionAttribute") 
             == true)

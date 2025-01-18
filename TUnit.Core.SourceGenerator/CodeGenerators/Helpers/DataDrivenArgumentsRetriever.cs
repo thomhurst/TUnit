@@ -20,7 +20,7 @@ public static class DataDrivenArgumentsRetriever
         if (constructorArgument.IsNull)
         {
             return new ArgumentsAttributeContainer(argumentsType, [new Argument(type: parameterOrPropertyTypeSymbols.SafeFirstOrDefault()?
-                    .ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var",
+                    .GloballyQualified() ?? "var",
                 invocation: null
             )])
             {
@@ -53,7 +53,7 @@ public static class DataDrivenArgumentsRetriever
         if (objectArray.IsDefaultOrEmpty)
         {
             var type = parameterOrPropertyTypeSymbols.SafeFirstOrDefault()
-                ?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ?? "var";
+                ?.GloballyQualified() ?? "var";
 
             return [new Argument(type, null)];
         }
@@ -74,7 +74,7 @@ public static class DataDrivenArgumentsRetriever
             {
                 var type = GetTypeFromParameters(parameterOrPropertyTypeSymbols, index);
 
-                return new Argument(type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
+                return new Argument(type?.GloballyQualified() ??
                                     TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(
                                         element.typedConstant),
                     

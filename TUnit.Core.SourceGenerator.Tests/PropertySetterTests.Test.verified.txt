@@ -33,9 +33,9 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String propertyArg = "1";
+			string propertyArg = "1";
 
-			global::System.String propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
+			string propertyArg1 = global::TUnit.TestProject.PropertySetterTests.MethodData();
 			var propertyInfo2 = testClassType.GetProperty("Property3", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
 			var propertyDataAttribute2 = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
 {

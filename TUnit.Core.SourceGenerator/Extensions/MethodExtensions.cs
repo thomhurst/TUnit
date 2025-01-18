@@ -7,7 +7,7 @@ public static class MethodExtensions
     public static AttributeData? GetTestAttribute(this IMethodSymbol methodSymbol)
     {
         return methodSymbol.GetAttributes()
-            .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) 
+            .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.GloballyQualified() 
                                  == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
     }
 
@@ -61,7 +61,7 @@ public static class MethodExtensions
         }
 
         if (methodSymbol.Parameters.Last().Type
-                .ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+                .GloballyQualifiedNonGeneric() ==
             WellKnownFullyQualifiedClassNames.CancellationToken.WithGlobalPrefix)
         {
             return methodSymbol.Parameters.Take(methodSymbol.Parameters.Length - 1);

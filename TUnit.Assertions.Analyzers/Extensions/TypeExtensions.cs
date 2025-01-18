@@ -6,7 +6,7 @@ public static class TypeExtensions
 {
     public static string GetFullNameWithoutGenericArity(this Type type)
     {
-        var name = type.FullName;
+        var name = type.FullName ?? type.Name;
         
         var index = name.IndexOf('`');
         
@@ -24,17 +24,23 @@ public static class TypeExtensions
         }
     }
     
+    public static string GloballyQualified(this ISymbol typeSymbol) =>
+        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    
+    public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
+        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+    
     public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, string typeName)
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == typeName);
+            .Any(x => x.GloballyQualified() == typeName);
     }
     
     public static bool IsOrInheritsNonGeneric(this ITypeSymbol namedTypeSymbol, string typeName)
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == typeName);
+            .Any(x => x.GloballyQualifiedNonGeneric() == typeName);
     }
 }

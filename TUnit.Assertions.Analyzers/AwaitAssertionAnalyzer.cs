@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -29,7 +30,7 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var methodSymbol = invocationOperation.TargetMethod;
 
-        var fullyQualifiedNonGenericMethodName = methodSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+        var fullyQualifiedNonGenericMethodName = methodSymbol.GloballyQualifiedNonGeneric();
         
         if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.Multiple")
         {

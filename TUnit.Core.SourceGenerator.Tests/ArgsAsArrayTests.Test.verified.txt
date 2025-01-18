@@ -29,12 +29,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "Params", 0, [typeof(global::System.String[])]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "Params", 0, [typeof(string[])]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.String[] methodArg = ["arg1", "arg2", "arg3"];
+			string[] methodArg = ["arg1", "arg2", "arg3"];
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 			new global::TUnit.TestProject.ArgsAsArrayTests()
@@ -44,7 +44,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Params(System.String[]):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Params(string[]):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -75,10 +75,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Params(System.String[]):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Params(string[]):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "Params", 0, [typeof(global::System.String[])]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String[])],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "Params", 0, [typeof(string[])]).ReturnType,
+				ParameterTypeFullNames = [typeof(string[])],
 				TestName = "Params",
 				TestFilePath = @"",
 				TestLineNumber = 5,
@@ -120,12 +120,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "NonParams", 0, [typeof(global::System.String[])]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "NonParams", 0, [typeof(string[])]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.String[] methodArg = ["arg1", "arg2", "arg3"];
+			string[] methodArg = ["arg1", "arg2", "arg3"];
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 			new global::TUnit.TestProject.ArgsAsArrayTests()
@@ -135,7 +135,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.NonParams(System.String[]):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.NonParams(string[]):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -166,10 +166,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.NonParams(System.String[]):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.NonParams(string[]):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "NonParams", 0, [typeof(global::System.String[])]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String[])],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "NonParams", 0, [typeof(string[])]).ReturnType,
+				ParameterTypeFullNames = [typeof(string[])],
 				TestName = "NonParams",
 				TestFilePath = @"",
 				TestLineNumber = 15,
@@ -211,12 +211,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "ParamsEnumerable", 0, [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "ParamsEnumerable", 0, [typeof(global::System.Collections.Generic.IEnumerable<string>)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.Collections.Generic.IEnumerable<global::System.String> methodArg = ["arg1", "arg2", "arg3"];
+			global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 			new global::TUnit.TestProject.ArgsAsArrayTests()
@@ -226,7 +226,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable(System.Collections.Generic.IEnumerable<System.String>):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable(System.Collections.Generic.IEnumerable<string>):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -257,10 +257,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable(System.Collections.Generic.IEnumerable<System.String>):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable(System.Collections.Generic.IEnumerable<string>):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "ParamsEnumerable", 0, [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "ParamsEnumerable", 0, [typeof(global::System.Collections.Generic.IEnumerable<string>)]).ReturnType,
+				ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<string>)],
 				TestName = "ParamsEnumerable",
 				TestFilePath = @"",
 				TestLineNumber = 25,
@@ -302,12 +302,12 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "Enumerable", 0, [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "Enumerable", 0, [typeof(global::System.Collections.Generic.IEnumerable<string>)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.Collections.Generic.IEnumerable<global::System.String> methodArg = ["arg1", "arg2", "arg3"];
+			global::System.Collections.Generic.IEnumerable<string> methodArg = ["arg1", "arg2", "arg3"];
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ArgsAsArrayTests>(() => 
 			new global::TUnit.TestProject.ArgsAsArrayTests()
@@ -317,7 +317,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Enumerable(System.Collections.Generic.IEnumerable<System.String>):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Enumerable(System.Collections.Generic.IEnumerable<string>):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -348,10 +348,10 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Enumerable(System.Collections.Generic.IEnumerable<System.String>):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ArgsAsArrayTests.Enumerable(System.Collections.Generic.IEnumerable<string>):0",
 				TestClass = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "Enumerable", 0, [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<global::System.String>)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ArgsAsArrayTests), "Enumerable", 0, [typeof(global::System.Collections.Generic.IEnumerable<string>)]).ReturnType,
+				ParameterTypeFullNames = [typeof(global::System.Collections.Generic.IEnumerable<string>)],
 				TestName = "Enumerable",
 				TestFilePath = @"",
 				TestLineNumber = 35,

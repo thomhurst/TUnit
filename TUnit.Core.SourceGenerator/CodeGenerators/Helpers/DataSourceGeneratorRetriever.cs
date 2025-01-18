@@ -22,11 +22,11 @@ public static class DataSourceGeneratorRetriever
             attributeData: attributeData,
             ArgumentsType: argumentsType,
             parameterOrPropertyTypes: parameterOrPropertyTypes,
-            TestClassTypeName: namedTypeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+            TestClassTypeName: namedTypeSymbol.GloballyQualified(),
             AttributeDataGeneratorType: attributeData.AttributeClass!.ToDisplayString(DisplayFormats
                 .FullyQualifiedGenericWithGlobalPrefix),
             GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass)?.TypeArguments
-                .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).ToArray() ?? [],
+                .Select(x => x.GloballyQualified()).ToArray() ?? [],
             AttributeIndex: index
         )
         {
@@ -54,6 +54,6 @@ public static class DataSourceGeneratorRetriever
 
     private static bool HasGeneratorInterface(ITypeSymbol t)
     {
-        return t.Interfaces.Select(i => i.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)).Contains(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute.WithGlobalPrefix);
+        return t.Interfaces.Select(i => i.GloballyQualified()).Contains(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute.WithGlobalPrefix);
     }
 }

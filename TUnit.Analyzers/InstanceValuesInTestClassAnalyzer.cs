@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
@@ -29,7 +30,7 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         var tests = classMembers
             .OfType<IMethodSymbol>()
             .Where(x => x.GetAttributes()
-                .Any(a => WellKnown.AttributeFullyQualifiedClasses.Test.WithGlobalPrefix == a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
+                .Any(a => WellKnown.AttributeFullyQualifiedClasses.Test.WithGlobalPrefix == a.AttributeClass?.GloballyQualifiedNonGeneric())
             )
             .ToList();
 

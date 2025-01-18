@@ -57,7 +57,7 @@ public static class MatrixRetriever
         {
             var type = parameterSymbols.ElementAt(index).Type;
 
-            return new Argument(type?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) ??
+            return new Argument(type?.GloballyQualified() ??
                                 TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(element.ArgumentConstant),
                 TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element.ArgumentSyntax.Expression, type));
         });

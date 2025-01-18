@@ -29,7 +29,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_Method", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_Method", 0, [typeof(int)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -46,7 +46,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method(System.Int32):0",
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodData],
 					TestClassProperties = [],
@@ -78,10 +78,10 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method(System.Int32):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method(int):0",
 				TestClass = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_Method", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_Method", 0, [typeof(int)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method",
 				TestFilePath = @"",
 				TestLineNumber = 8,
@@ -123,7 +123,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_Method2", 0, [typeof(global::System.Int32)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_Method2", 0, [typeof(int)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -140,7 +140,7 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method2(System.Int32):0",
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method2(int):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodData],
 					TestClassProperties = [],
@@ -172,10 +172,10 @@ file partial class EnumerableDataSourceDrivenTests : global::TUnit.Core.Interfac
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method2(System.Int32):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableDataSourceDrivenTests.DataSource_Method2(int):0",
 				TestClass = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_Method2", 0, [typeof(global::System.Int32)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), "DataSource_Method2", 0, [typeof(int)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method2",
 				TestFilePath = @"",
 				TestLineNumber = 15,

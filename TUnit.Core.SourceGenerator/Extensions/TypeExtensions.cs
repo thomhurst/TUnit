@@ -7,6 +7,25 @@ namespace TUnit.Core.SourceGenerator.Extensions;
 
 public static class TypeExtensions
 {
+    private static readonly Dictionary<string, string> ReservedTypeKeywords = new()
+    {
+        { "System.Boolean", "bool" },
+        { "System.Byte", "byte" },
+        { "System.SByte", "sbyte" },
+        { "System.Char", "char" },
+        { "System.Decimal", "decimal" },
+        { "System.Double", "double" },
+        { "System.Single", "float" },
+        { "System.Int32", "int" },
+        { "System.UInt32", "uint" },
+        { "System.Int64", "long" },
+        { "System.UInt64", "ulong" },
+        { "System.Int16", "short" },
+        { "System.UInt16", "ushort" },
+        { "System.Object", "object" },
+        { "System.String", "string" }
+    };
+    
     public static string GetMetadataName(this Type type)
     {
         return $"{type.Namespace}.{type.Name}";
@@ -67,7 +86,7 @@ public static class TypeExtensions
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == typeName);
+            .Any(x => x.GloballyQualifiedNonGeneric() == typeName);
     }
     
     public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, ITypeSymbol inheritedType)
@@ -165,12 +184,12 @@ public static class TypeExtensions
         return false;
     }
     
-    public static string GloballyQualified(this ITypeSymbol typeSymbol) =>
+    public static string GloballyQualified(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     
-    public static string GloballyQualifiedNonGeneric(this ITypeSymbol typeSymbol) =>
+    public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
-    
+
     public static bool IsGenericDefinition(this ITypeSymbol typeSymbol)
     {
         if (typeSymbol is ITypeParameterSymbol)

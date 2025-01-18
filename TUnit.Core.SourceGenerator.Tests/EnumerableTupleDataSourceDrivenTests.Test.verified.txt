@@ -33,7 +33,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -42,10 +42,10 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 				testMethodDataIndex++;
 
 				var methodData = methodDataAccessor;
-				var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(methodData);
-				global::System.Int32 methodArg = methodArgTuples.Item1;
-				global::System.String methodArg1 = methodArgTuples.Item2;
-				global::System.Boolean methodArg2 = methodArgTuples.Item3;
+				var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(methodData);
+				int methodArg = methodArgTuples.Item1;
+				string methodArg1 = methodArgTuples.Item2;
+				bool methodArg2 = methodArgTuples.Item3;
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
 				new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
 				, sessionId, testBuilderContext);
@@ -54,7 +54,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2],
 					TestClassProperties = [],
@@ -89,10 +89,10 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
 				TestLineNumber = 5,
@@ -109,7 +109,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -118,10 +118,10 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 				testMethodDataIndex++;
 
 				var methodData = methodDataAccessor;
-				var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(methodData);
-				global::System.Int32 methodArg = methodArgTuples.Item1;
-				global::System.String methodArg1 = methodArgTuples.Item2;
-				global::System.Boolean methodArg2 = methodArgTuples.Item3;
+				var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(methodData);
+				int methodArg = methodArgTuples.Item1;
+				string methodArg1 = methodArgTuples.Item2;
+				bool methodArg2 = methodArgTuples.Item3;
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(() => 
 				new global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests()
 				, sessionId, testBuilderContext);
@@ -130,7 +130,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
 				{
-					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2],
 					TestClassProperties = [],
@@ -165,10 +165,10 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
 				TestLineNumber = 5,
