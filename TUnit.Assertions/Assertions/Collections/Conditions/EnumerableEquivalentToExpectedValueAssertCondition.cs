@@ -1,4 +1,6 @@
+using System.Text;
 using TUnit.Assertions.Enums;
+using TUnit.Assertions.Equality;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
@@ -9,7 +11,15 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-    protected override string GetExpectation() => $"to be equivalent to {(expected != null ? string.Join(",", expected) : null)}";
+    protected override string GetExpectation()
+    {
+        if (equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 })
+        {
+            return "to match";
+        }
+        
+        return $"to be equivalent to {(expected != null ? string.Join(",", expected) : null)}";
+    }
 
     protected override AssertionResult GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
@@ -38,7 +48,30 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
                 () => "it is not null")
             .OrFailIf(
                 () => !orderedActual!.SequenceEqual(expectedValue!, equalityComparer),
-                () => $"it is {string.Join(",", orderedActual!)}"
+                () => FailureMessage(orderedActual)
             );
+    }
+
+    private string FailureMessage(IEnumerable<TInner>? orderedActual)
+    {
+        if (equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 } equivalentToEqualityComparer)
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine("found the following mismatches:");
+            stringBuilder.AppendLine();
+            
+            foreach (var comparisonFailure in equivalentToEqualityComparer.ComparisonFailures)
+            {
+                stringBuilder.AppendLine($"{typeof(TInner).Name}.{string.Join(".", comparisonFailure.NestedMemberNames)}:");
+                stringBuilder.AppendLine($"\tExpected: {comparisonFailure.Expected}");
+                stringBuilder.AppendLine($"\tActual: {comparisonFailure.Actual}");
+                stringBuilder.AppendLine();
+            }
+            
+            return stringBuilder.ToString();
+        }
+        
+        return $"it is {string.Join(",", orderedActual!)}";
     }
 }

@@ -8,13 +8,17 @@ namespace TUnit.Assertions.Equality;
 
 public class EquivalentToEqualityComparer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(CompareOptions compareOptions) : IEqualityComparer<T>
 {
+    public ComparisonFailure[]? ComparisonFailures { get; private set; }
+
     public EquivalentToEqualityComparer() : this(new CompareOptions())
     {
     }
     
     public bool Equals(T? x, T? y)
     {
-        return !Compare.CheckEquivalent(x, y, compareOptions).Any();
+        ComparisonFailures = Compare.CheckEquivalent(x, y, compareOptions).ToArray();
+        
+        return ComparisonFailures.Length == 0;
     }
 
     public int GetHashCode([DisallowNull] T obj)
