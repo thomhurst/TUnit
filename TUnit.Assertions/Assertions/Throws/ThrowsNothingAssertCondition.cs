@@ -9,7 +9,6 @@ public class ThrowsNothingAssertCondition<TActual> : DelegateAssertCondition<TAc
 
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult
-        .FailIf(
-            () => exception is not null,
-            () => $"{exception?.GetType().Name.PrependAOrAn()} was thrown:{Environment.NewLine}{exception?.Message}");
+        .FailIf(exception is not null,
+            $"{exception?.GetType().Name.PrependAOrAn()} was thrown:{Environment.NewLine}{exception?.Message}");
 }

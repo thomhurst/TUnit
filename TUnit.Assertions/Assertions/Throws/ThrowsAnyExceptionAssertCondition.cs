@@ -7,7 +7,6 @@ public class ThrowsAnyExceptionAssertCondition<TActual>
         => "to throw an exception";
 
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
-        => AssertionResult.FailIf(
-            () => exception is null,
-            () => "none was thrown");
+        => AssertionResult.FailIf(exception is null,
+            "none was thrown");
 }

@@ -17,15 +17,13 @@ public class StringContainsExpectedValueAssertCondition(string expected, StringC
         if (actualValue is null)
         {
             return AssertionResult
-                .FailIf(
-                    () => expectedValue is not null,
-                    () => "it was null");
+                .FailIf(expectedValue is not null,
+                    "it was null");
         }
 
         return AssertionResult
-            .FailIf(
-                () => !actualValue.Contains(expectedValue!, stringComparison),
-                () => $"it was not found. {MessageSuffix()}");
+            .FailIf(!actualValue.Contains(expectedValue!, stringComparison),
+                $"it was not found. {MessageSuffix()}");
     }
 
     private string MessageSuffix()

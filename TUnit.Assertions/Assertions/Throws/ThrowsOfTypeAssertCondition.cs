@@ -9,11 +9,8 @@ public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : Delegate
 
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult
-        .FailIf(
-            () => exception is null,
-            () => "none was thrown")
-        .OrFailIf(
-            () => !typeof(TExpectedException).IsAssignableFrom(exception!.GetType()),
-            () => $"{exception?.GetType().Name.PrependAOrAn()} was thrown"
+        .FailIf(exception is null, "none was thrown")
+        .OrFailIf(!typeof(TExpectedException).IsAssignableFrom(exception!.GetType()),
+            $"{exception?.GetType().Name.PrependAOrAn()} was thrown"
         );
 }

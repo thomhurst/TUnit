@@ -10,10 +10,8 @@ public class EnumerableContainsExpectedValueAssertCondition<TActual, TInner>(
 
     protected override AssertionResult GetResult(TActual? actualValue, TInner? inner)
         => AssertionResult
-            .FailIf(
-                () => actualValue is null,
-                () => $"{ActualExpression ?? typeof(TActual).Name} is null")
-            .OrFailIf(
-                () => !actualValue!.Contains(inner, equalityComparer),
-                () => "it was not found in the collection");
+            .FailIf(actualValue is null,
+                $"{ActualExpression ?? typeof(TActual).Name} is null")
+            .OrFailIf(!actualValue!.Contains(inner, equalityComparer),
+                "it was not found in the collection");
 }

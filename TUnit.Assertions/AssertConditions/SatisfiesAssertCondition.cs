@@ -26,7 +26,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
     {
         if (actualValue is null)
         {
-            return AssertionResult.Fail(() => "is null");
+            return AssertionResult.Fail("is null");
         }
         
         var innerItemTask = _mapper(actualValue);

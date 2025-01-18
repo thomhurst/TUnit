@@ -10,12 +10,10 @@ public class EnumerableAllExpectedFuncAssertCondition<TActual, TInner>(
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {
         return AssertionResult
-            .FailIf(
-                () => actualValue is null,
-                () => $"{ActualExpression ?? typeof(TActual).Name} is null")
-            .OrFailIf(
-                () => !actualValue!.All(matcher),
+            .FailIf(actualValue is null,
+                $"{ActualExpression ?? typeof(TActual).Name} is null")
+            .OrFailIf(!actualValue!.All(matcher),
                 //TODO: Add entry that failed to match
-                () => $"not all entries in the collection matched");
+                $"not all entries in the collection matched");
     }
 }

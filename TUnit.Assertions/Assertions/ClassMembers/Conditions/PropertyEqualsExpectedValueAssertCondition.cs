@@ -15,12 +15,10 @@ public class PropertyEqualsExpectedValueAssertCondition<TRootObjectType, TProper
     {
         var propertyValue = GetPropertyValue(actualValue);
         return AssertionResult
-            .FailIf(
-                () => actualValue is null,
-                () => $"Object `{typeof(TRootObjectType).Name}` was null")
-            .OrFailIf(
-                () => Equals(propertyValue, expectedValue) != isEqual,
-                () => $"received {GetPropertyValue(actualValue)?.ToString()}"
+            .FailIf(actualValue is null,
+                $"Object `{typeof(TRootObjectType).Name}` was null")
+            .OrFailIf(Equals(propertyValue, expectedValue) != isEqual,
+                $"received {GetPropertyValue(actualValue)?.ToString()}"
             );
     }
 

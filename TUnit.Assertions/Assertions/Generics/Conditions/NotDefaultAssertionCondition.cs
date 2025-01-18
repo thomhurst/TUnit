@@ -11,7 +11,6 @@ public class NotDefaultExpectedValueAssertCondition<TActual>() : ExpectedValueAs
 
         protected override AssertionResult GetResult(TActual? actualValue, TActual? expectedValue)
             => AssertionResult
-                .FailIf(
-                    () => actualValue is null || actualValue.Equals(_defaultValue),
-                    () => "it was");
+                .FailIf(actualValue is null || actualValue.Equals(_defaultValue),
+                    "it was");
 }

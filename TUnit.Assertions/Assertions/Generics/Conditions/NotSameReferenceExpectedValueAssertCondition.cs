@@ -9,7 +9,6 @@ public class NotSameReferenceExpectedValueAssertCondition<TActual, TExpected>(TE
         => $"to not have the same reference as {expected}";
 
     protected override AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue) => AssertionResult
-        .FailIf(
-            () => ReferenceEquals(actualValue, expectedValue),
-            () => "they did");
+        .FailIf(ReferenceEquals(actualValue, expectedValue),
+            "they did");
 }

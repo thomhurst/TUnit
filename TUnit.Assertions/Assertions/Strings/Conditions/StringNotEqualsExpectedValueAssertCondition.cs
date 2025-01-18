@@ -15,14 +15,12 @@ public class StringNotEqualsExpectedValueAssertCondition(string expected, String
         if (actualValue is null)
         {
             return AssertionResult
-                .FailIf(
-                    () => expectedValue is null,
-                    () => "it was null");
+                .FailIf(expectedValue is null,
+                    "it was null");
         }
 
         return AssertionResult
-            .FailIf(
-                () => string.Equals(actualValue, expectedValue, stringComparison),
-                () => "it was");
+            .FailIf(string.Equals(actualValue, expectedValue, stringComparison),
+                "it was");
     }
 }

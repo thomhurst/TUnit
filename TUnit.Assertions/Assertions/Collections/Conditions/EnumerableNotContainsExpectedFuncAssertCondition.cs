@@ -10,11 +10,9 @@ public class EnumerableNotContainsExpectedFuncAssertCondition<TActual, TInner>(
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
     {
         return AssertionResult
-            .FailIf(
-                () => actualValue is null,
-                () => $"{ActualExpression ?? typeof(TActual).Name} is null")
-            .OrFailIf(
-                () => actualValue!.Any(matcher),
-                () => "there was a match found in the collection");
+            .FailIf(actualValue is null,
+                $"{ActualExpression ?? typeof(TActual).Name} is null")
+            .OrFailIf(actualValue!.Any(matcher),
+                "there was a match found in the collection");
     }
 }

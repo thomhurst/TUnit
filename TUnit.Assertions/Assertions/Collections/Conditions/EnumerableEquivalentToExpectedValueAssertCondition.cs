@@ -43,15 +43,11 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         }
 
         return AssertionResult
-            .FailIf(
-                () => orderedActual is null,
-                () => "it is null")
-            .OrFailIf(
-                () => expectedValue is null,
-                () => "it is not null")
-            .OrFailIf(
-                () => !orderedActual!.SequenceEqual(expectedValue!, equalityComparer),
-                () => FailureMessage(orderedActual)
+            .FailIf(orderedActual is null,
+                "it is null")
+            .OrFailIf(expectedValue is null,
+                "it is not null")
+            .OrFailIf(!orderedActual!.SequenceEqual(expectedValue!, equalityComparer), FailureMessage(orderedActual)
             );
     }
 
