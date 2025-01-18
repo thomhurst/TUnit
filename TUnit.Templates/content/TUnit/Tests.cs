@@ -44,10 +44,6 @@ public class Tests
 
         Console.WriteLine("These can also be shared among other tests, or new'd up each time, by using the `Shared` property on the attribute");
     }
-    
-    // You can even inject in ClassDataSources as properties to avoid repetitive constructors if you're using inheritance!
-    [ClassDataSource<DataClass>]
-    public required DataClass DataClass { get; init; }
 
     [Test]
     [DataGenerator]
