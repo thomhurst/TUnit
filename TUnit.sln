@@ -69,6 +69,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Analyzers.Roslyn47", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Engine.Tests", "TUnit.Engine.Tests\TUnit.Engine.Tests.csproj", "{E0E07E64-BC0A-489E-B562-2982F3836994}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TUnit.Templates\content\TUnit\TestProject.csproj", "{4BFDDFDB-96D9-42AA-85CE-9FBD017ACBE1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -183,6 +185,10 @@ Global
 		{E0E07E64-BC0A-489E-B562-2982F3836994}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0E07E64-BC0A-489E-B562-2982F3836994}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0E07E64-BC0A-489E-B562-2982F3836994}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BFDDFDB-96D9-42AA-85CE-9FBD017ACBE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BFDDFDB-96D9-42AA-85CE-9FBD017ACBE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BFDDFDB-96D9-42AA-85CE-9FBD017ACBE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BFDDFDB-96D9-42AA-85CE-9FBD017ACBE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -211,6 +217,7 @@ Global
 		{744CD312-B913-48E0-B917-531ED2A9A541} = {503DA9FA-045D-4910-8AF6-905E6048B1F1}
 		{54D5F1A7-7979-4C07-8FE1-426233846018} = {503DA9FA-045D-4910-8AF6-905E6048B1F1}
 		{E0E07E64-BC0A-489E-B562-2982F3836994} = {62AD1EAF-43C4-4AC0-B9FA-CD59739B3850}
+		{4BFDDFDB-96D9-42AA-85CE-9FBD017ACBE1} = {0BA988BF-ADCE-4343-9098-B4EF65C43709}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {109D285A-36B3-4503-BCDF-8E26FB0E2C5B}

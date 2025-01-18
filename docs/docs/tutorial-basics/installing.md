@@ -4,6 +4,15 @@ sidebar_position: 1
 
 # Installing TUnit
 
+## Easily
+
+Assuming you have the .NET SDK installed, simply run:
+
+`dotnet new install TUnit.Templates`
+`dotnet new TUnit`
+
+## Manually
+
 First create an empty .NET console application:
 
 ```powershell

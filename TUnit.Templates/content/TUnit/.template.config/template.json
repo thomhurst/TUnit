@@ -1,0 +1,42 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Tom Longhurst",
+    "description": "Templates for getting started with TUnit",
+    "classifications": [
+      "Test",
+      "TUnit"
+    ],
+    "name": "TUnit Test Project",
+    "identity": "TUnit.Test.Project",
+    "groupIdentity": "TUnit",
+    "shortName": "TUnit",
+    "tags": {
+      "language": "C#",
+      "type": "project"
+    },
+    "sourceName": "TestProject",
+    "preferNameDirectory": true,
+    "primaryOutputs": [
+      {
+        "path": "TestProject.csproj"
+      }
+    ],
+    "postActions": [
+      {
+        "description": "Restore NuGet packages required by this project",
+        "manualInstructions": [
+          {
+            "text": "Run 'dotnet restore'"
+          }
+        ],
+        "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+        "continueOnError": true,
+        "args": {
+          "files": [
+            "TestProject.csproj"
+          ]
+        }
+      }
+    ]
+  }
+  
