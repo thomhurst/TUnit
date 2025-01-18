@@ -4,6 +4,17 @@ sidebar_position: 1
 
 # Installing TUnit
 
+## Easily
+
+Assuming you have the .NET SDK installed, simply run:
+
+`dotnet new install TUnit.Templates`
+`dotnet new TUnit -n "YourProjectName"`
+
+A new test project will be created for you with some samples of different test types and tips. When you're ready to get going, delete them and create your own!
+
+## Manually
+
 First create an empty .NET console application:
 
 ```powershell

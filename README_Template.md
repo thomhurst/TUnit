@@ -16,6 +16,15 @@ TUnit is designed to aid with all testing types:
  [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) [![NuGet Downloads](https://img.shields.io/nuget/dt/TUnit)](https://www.nuget.org/packages/TUnit/)
  ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit) 
 
+## Quick Start
+
+Assuming you have the .NET SDK installed, simply run:
+
+`dotnet new install TUnit.Templates`
+`dotnet new TUnit -n "YourProjectName"`
+
+A new test project will be created for you with some samples of different test types and tips. When you're ready to get going, delete them and create your own!
+
 ## Documentation
 
 See here: <https://thomhurst.github.io/TUnit/>
