@@ -24,12 +24,10 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         if (actualValue is null || ExpectedValue is null)
         {
             return AssertionResult
-                .FailIf(
-                    () => actualValue is null,
-                    () => "it is null")
-                .OrFailIf(
-                    () => expectedValue is null,
-                    () => "it is not null");
+                .FailIf(actualValue is null,
+                    "it is null")
+                .OrFailIf(expectedValue is null,
+                    "it is not null");
         }
 
         if (actualValue is IEnumerable actualEnumerable && ExpectedValue is IEnumerable expectedEnumerable)
@@ -41,20 +39,11 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
                 });
             
             var castedActual = actualEnumerable.Cast<object?>().ToArray();
-            
+
             return AssertionResult
-                .FailIf(
-                    () => !castedActual.SequenceEqual(expectedEnumerable.Cast<object?>(),
+                .FailIf(!castedActual.SequenceEqual(expectedEnumerable.Cast<object?>(),
                         collectionEquivalentToEqualityComparer),
-                    () =>
-                    {
-                        if (castedActual.ElementAtOrDefault(0)?.GetType().IsSimpleType() == false)
-                        {
-                            return collectionEquivalentToEqualityComparer.GetFailureMessages();
-                        }
-                        
-                        return $"it is {Formatter.Format(actualEnumerable)}";
-                    });
+                    $"{GetFailureMessage(castedActual, collectionEquivalentToEqualityComparer)}");
         }
 
         bool? isEqual = null;
@@ -74,9 +63,8 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         if (isEqual != null)
         {
             return AssertionResult
-                .FailIf(
-                    () => !isEqual.Value,
-                    () => $"found {actualValue}");
+                .FailIf(!isEqual.Value,
+                    $"found {actualValue}");
         }
 
         var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions
@@ -99,6 +87,17 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         }
 
         return AssertionResult.Passed;
+    }
+
+    private static string GetFailureMessage(object?[] castedActual,
+        CollectionEquivalentToEqualityComparer<object?> collectionEquivalentToEqualityComparer)
+    {
+        if (castedActual.ElementAtOrDefault(0)?.GetType().IsSimpleType() == false)
+        {
+            return collectionEquivalentToEqualityComparer.GetFailureMessages();
+        }
+
+        return $"it is {Formatter.Format(castedActual)}";
     }
 
     public void IgnoringMember(string fieldName)

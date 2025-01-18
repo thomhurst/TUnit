@@ -22,15 +22,13 @@ public class DateTimeEqualsExpectedValueAssertCondition(DateTime expected) : Exp
             var max = expectedValue + _tolerance;
 
             return AssertionResult
-                .FailIf(
-                    () => actualValue < min || actualValue > max,
-                    () => $"the received value {actualValue} is outside the tolerances");
+                .FailIf(actualValue < min || actualValue > max,
+                    $"the received value {actualValue} is outside the tolerances");
         }
 
         return AssertionResult
-            .FailIf(
-                () => actualValue != expected,
-                () => $"the received value {actualValue} is different");
+            .FailIf(actualValue != expected,
+                $"the received value {actualValue} is different");
     }
 
     public void SetTolerance(TimeSpan tolerance)

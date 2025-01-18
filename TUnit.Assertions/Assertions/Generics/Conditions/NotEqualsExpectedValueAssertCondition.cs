@@ -9,7 +9,6 @@ public class NotEqualsExpectedValueAssertCondition<TActual>(TActual expected)
         => $"to not be equal to {expected}";
 
     protected override AssertionResult GetResult(TActual? actualValue, TActual? expectedValue) => AssertionResult
-        .FailIf(
-            () => Equals(actualValue, expectedValue),
-            () => "it was");
+        .FailIf(Equals(actualValue, expectedValue),
+            "it was");
 }

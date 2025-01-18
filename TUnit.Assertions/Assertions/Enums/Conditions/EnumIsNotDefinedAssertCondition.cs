@@ -11,7 +11,7 @@ public class EnumIsNotDefinedAssertCondition<TEnum> : BaseAssertCondition<TEnum>
 
     protected override Task<AssertionResult> GetResult(TEnum? actualValue, Exception? exception)
     {
-        return AssertionResult.FailIf(() => actualValue is null, () => "the source enum is null")
-            .OrFailIf(() => Enum.IsDefined(typeof(TEnum), actualValue!), () => "it was");
+        return AssertionResult.FailIf(actualValue is null, "the source enum is null")
+            .OrFailIf(Enum.IsDefined(typeof(TEnum), actualValue!), "it was");
     }
 }

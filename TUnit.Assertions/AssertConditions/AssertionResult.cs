@@ -1,31 +1,37 @@
-﻿namespace TUnit.Assertions.AssertConditions;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
+
+namespace TUnit.Assertions.AssertConditions;
 
 public class AssertionResult
 {
     public bool IsPassed { get; }
-    public string Message
-    {
-        get
-        {
-            return _message.Value;
-        }
-    }
-    private readonly Lazy<string> _message;
+    public string Message { get; }
 
-    private AssertionResult(bool isPassed, Func<string> messageGenerator)
+    private AssertionResult(bool isPassed, string message)
     {
         IsPassed = isPassed;
-        _message = new Lazy<string>(messageGenerator);
+        Message = message;
     }
 
-    public static AssertionResult FailIf(Func<bool> isFailed, Func<string> messageGenerator)
+    public static AssertionResult FailIf(bool isFailed, string message)
     {
-        if (!isFailed())
+        if (!isFailed)
         {
             return Passed;
         }
         
-        return new AssertionResult(false, messageGenerator);
+        return new AssertionResult(false, message);
+    }
+    
+    public static AssertionResult FailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler stringHandler)
+    {
+        if (!isFailed)
+        {
+            return Passed;
+        }
+        
+        return new AssertionResult(false, stringHandler.GetFormattedText());
     }
 
     public AssertionResult And(AssertionResult other)
@@ -44,50 +50,81 @@ public class AssertionResult
         {
             return this;
         }
-
-        return Fail(() =>
-        {
-            if (Message == other.Message)
-            {
-                return Message;
-            }
-
-            return Message + " and " + other.Message;
-        });
+        
+        return Message == other.Message 
+            ? Fail(Message) 
+            : Fail(Message + " and " + other.Message);
     }
 
     public AssertionResult Or(AssertionResult other)
     {
         if (!IsPassed && !other.IsPassed)
         {
-            return Fail(() =>
-            {
-                if (Message == other.Message)
-                {
-                    return Message;
-                }
-
-                return Message + " and " + other.Message;
-            });
+            return Message == other.Message 
+                ? Fail(Message) 
+                : Fail(Message + " and " + other.Message);
         }
 
         return Passed;
     }
 
-    public AssertionResult OrFailIf(Func<bool> isFailed, Func<string> message)
+    public AssertionResult OrFailIf(bool isFailed, string message)
     {
-        if (!IsPassed || !isFailed())
+        if (!IsPassed || !isFailed)
         {
             return this;
         }
         
         return new AssertionResult(false, message);
     }
+    
+    public AssertionResult OrFailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler stringHandler)
+    {
+        if (!IsPassed || !isFailed)
+        {
+            return this;
+        }
+        
+        return new AssertionResult(false, stringHandler.GetFormattedText());
+    }
 
-    public static AssertionResult Fail(Func<string> message)
+    public static AssertionResult Fail(string message)
         => new(false, message);
 
-    public static AssertionResult Passed { get; } = new(true, () => string.Empty);
+    public static AssertionResult Passed { get; } = new(true, string.Empty);
     
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
+
+    [InterpolatedStringHandler]
+    public readonly struct InterpolatedStringHandler
+    {
+        private readonly StringBuilder _builder;
+
+        public InterpolatedStringHandler(int literalLength, int formattedCount, bool isFailed, out bool enabled)
+        {
+            enabled = isFailed;
+            
+            _builder = enabled ? new StringBuilder(literalLength) : null!;
+        }
+        
+        public void AppendLiteral(string s)
+        {
+            _builder.Append(s);
+        }
+
+        public void AppendFormatted<T>(T? t)
+        {
+            _builder.Append(t);
+        }
+        
+        public void AppendFormatted<T>(T? t, string format) where T : IFormattable
+        {
+            _builder.Append(t?.ToString(format, null));
+        }
+
+        internal string GetFormattedText()
+        {
+            return _builder?.ToString() ?? string.Empty;
+        }
+    }
 }

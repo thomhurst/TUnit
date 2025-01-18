@@ -7,7 +7,6 @@ public class NotNullExpectedValueAssertCondition<TActual> : BaseAssertCondition<
 
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult
-            .FailIf(
-                () => actualValue is null,
-                () => "it was");
+            .FailIf(actualValue is null,
+                "it was");
 }

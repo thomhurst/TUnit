@@ -10,7 +10,6 @@ public class NotTypeOfExpectedValueAssertCondition<TActual>(Type expected)
 
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult
-            .FailIf(
-                () => actualValue?.GetType() == expected,
-                () => "it was");
+            .FailIf(actualValue?.GetType() == expected,
+                "it was");
 }

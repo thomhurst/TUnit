@@ -18,7 +18,8 @@ public abstract class BaseAssertCondition
     public AssertionResult FailWithMessage(string message)
     {
         OverriddenMessage = message;
-        return AssertionResult.Fail(() => message);
+        
+        return AssertionResult.Fail(message);
     }
     
     public string? OverriddenMessage { get; internal set; }

@@ -11,7 +11,6 @@ public class DefaultExpectedValueAssertCondition<TActual> : BaseAssertCondition<
 
     protected override Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
         => AssertionResult
-            .FailIf(
-                () => actualValue is not null && !actualValue.Equals(_defaultValue),
-                () => $"found {actualValue}");
+            .FailIf(actualValue is not null && !actualValue.Equals(_defaultValue),
+                $"found {actualValue}");
 }

@@ -11,7 +11,7 @@ public class EnumDoesNotHaveFlagAssertCondition<TEnum>(TEnum expected) : BaseAss
 
     protected override Task<AssertionResult> GetResult(TEnum? actualValue, Exception? exception)
     {
-        return AssertionResult.FailIf(() => actualValue is null, () => "the source enum is null")
-            .OrFailIf(() => actualValue!.HasFlag(expected), () => "the flag was present");
+        return AssertionResult.FailIf(actualValue is null, "the source enum is null")
+            .OrFailIf(actualValue!.HasFlag(expected), "the flag was present");
     }
 }

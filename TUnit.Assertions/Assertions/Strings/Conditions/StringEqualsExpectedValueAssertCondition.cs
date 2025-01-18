@@ -14,14 +14,12 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
         if (actualValue is null)
         {
             return AssertionResult
-                .FailIf(
-                    () => expectedValue is not null,
-                    () => "it was null");
+                .FailIf(expectedValue is not null,
+                    "it was null");
         }
 
         return AssertionResult
-            .FailIf(
-                () => !string.Equals(actualValue, expectedValue, stringComparison),
-                () => $"found {Formatter.Format(ActualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue, expectedValue)}");
+            .FailIf(!string.Equals(actualValue, expectedValue, stringComparison),
+                $"found {Formatter.Format(ActualValue).TruncateWithEllipsis(100)} which {new StringDifference(actualValue, expectedValue)}");
     }
 }
