@@ -1,4 +1,8 @@
+using System.Text;
 using TUnit.Assertions.Enums;
+using TUnit.Assertions.Equality;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
@@ -9,7 +13,16 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-    protected override string GetExpectation() => $"to be equivalent to {(expected != null ? string.Join(",", expected) : null)}";
+    protected override string GetExpectation()
+    {
+        if (!typeof(TInner).IsSimpleType()
+            && equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 })
+        {
+            return "to match";
+        }
+        
+        return $"to be equivalent to {(expected != null ? Formatter.Format(expected) : null)}";
+    }
 
     protected override AssertionResult GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
     {
@@ -38,7 +51,18 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
                 () => "it is not null")
             .OrFailIf(
                 () => !orderedActual!.SequenceEqual(expectedValue!, equalityComparer),
-                () => $"it is {string.Join(",", orderedActual!)}"
+                () => FailureMessage(orderedActual)
             );
+    }
+
+    private string FailureMessage(IEnumerable<TInner>? orderedActual)
+    {
+        if (!typeof(TInner).IsSimpleType()
+            && equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 } equivalentToEqualityComparer)
+        {
+            return equivalentToEqualityComparer.GetFailureMessages();
+        }
+        
+        return $"it is {string.Join(",", Formatter.Format(orderedActual!))}";
     }
 }

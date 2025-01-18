@@ -16,19 +16,23 @@ public static class CollectionsIsExtensions
     public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
         where TActual : IEnumerable<TInner>
     {
-        return IsEquivalentTo(valueSource, expected, new EquivalentToEqualityComparer<TInner>(), doNotPopulateThisValue);
+        return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), doNotPopulateThisValue);
     }
-    
-    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
-            where TActual : IEnumerable<TInner>
-        {
-            return IsEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue);
-        }
-    
+
+    public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource,
+        IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer,
+        [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+        where TActual : IEnumerable<TInner>
+    {
+        return IsEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue);
+    }
+
     public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
         where TActual : IEnumerable<TInner>
     {
-        return IsEquivalentTo(valueSource, expected, new EquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue);
+        return IsEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue);
     }
     
     public static InvokableValueAssertionBuilder<TActual> IsEquivalentTo<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TActual, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
@@ -36,7 +40,7 @@ public static class CollectionsIsExtensions
     {
         return valueSource.RegisterAssertion(
             new EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(expected,
-                new EquivalentToEqualityComparer<TInner>(), collectionOrdering), [doNotPopulateThisValue]);
+                comparer, collectionOrdering), [doNotPopulateThisValue]);
     }
     
     public static InvokableValueAssertionBuilder<TActual> IsEmpty<TActual>(this IValueSource<TActual> valueSource)

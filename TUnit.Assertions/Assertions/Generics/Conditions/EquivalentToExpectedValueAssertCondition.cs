@@ -2,6 +2,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Equality;
+using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Assertions.Generics.Conditions;
@@ -33,14 +34,27 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
 
         if (actualValue is IEnumerable actualEnumerable && ExpectedValue is IEnumerable expectedEnumerable)
         {
+            var collectionEquivalentToEqualityComparer = new CollectionEquivalentToEqualityComparer<object?>(
+                new CompareOptions
+                {
+                    MembersToIgnore = [.._ignoredMembers]
+                });
+            
+            var castedActual = actualEnumerable.Cast<object?>().ToArray();
+            
             return AssertionResult
                 .FailIf(
-                    () => !actualEnumerable.Cast<object?>().SequenceEqual(expectedEnumerable.Cast<object?>(),
-                        new EquivalentToEqualityComparer<object?>(new CompareOptions()
+                    () => !castedActual.SequenceEqual(expectedEnumerable.Cast<object?>(),
+                        collectionEquivalentToEqualityComparer),
+                    () =>
+                    {
+                        if (castedActual.ElementAtOrDefault(0)?.GetType().IsSimpleType() == false)
                         {
-                            MembersToIgnore = [.._ignoredMembers]
-                        })),
-                    () => $"it is {string.Join(",", actualEnumerable)}");
+                            return collectionEquivalentToEqualityComparer.GetFailureMessages();
+                        }
+                        
+                        return $"it is {Formatter.Format(actualEnumerable)}";
+                    });
         }
 
         bool? isEqual = null;
@@ -68,7 +82,7 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions
         {
             MembersToIgnore = [.._ignoredMembers],
-        }).ToList();
+        }, null).ToList();
 
         if (failures.FirstOrDefault() is { } firstFailure)
         {
