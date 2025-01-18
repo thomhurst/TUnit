@@ -10,7 +10,12 @@ public static class CompilationExtensions
     {
         if (parameterType?.IsGenericDefinition() == false)
         {
-            var conversion = compilation.ClassifyConversion(argumentType!, parameterType);
+            if (argumentType is null)
+            {
+                return false;
+            }
+            
+            var conversion = compilation.ClassifyConversion(argumentType, parameterType);
             return conversion.IsImplicit || conversion.IsNumeric;
         }
         
