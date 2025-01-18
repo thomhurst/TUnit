@@ -25,7 +25,7 @@ public static class Compare
         TExpected expected, CompareOptions options, 
         int? index)
     {
-        return CheckEquivalent(actual, expected, options, [InitialMemberName<TActual>(index)], MemberType.Value);
+        return CheckEquivalent(actual, expected, options, [InitialMemberName<TActual>(actual, index)], MemberType.Value);
     }
     
     private static IEnumerable<ComparisonFailure> CheckEquivalent<
@@ -182,13 +182,15 @@ public static class Compare
         }
     }
 
-    private static string InitialMemberName<TActual>(int? index)
+    private static string InitialMemberName<TActual>(object? actual, int? index)
     {
+        var type = actual?.GetType().Name ?? typeof(TActual).Name;
+        
         if (index is null)
         {
-            return typeof(TActual).Name;
+            return type;
         }
         
-        return $"{typeof(TActual).Name}[{index}]";
+        return $"{type}[{index}]";
     }
 }

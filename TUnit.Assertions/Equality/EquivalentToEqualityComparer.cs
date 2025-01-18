@@ -3,6 +3,8 @@
 #endif
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Equality;
 
@@ -26,5 +28,23 @@ public class EquivalentToEqualityComparer<[DynamicallyAccessedMembers(Dynamicall
     public int GetHashCode([DisallowNull] T obj)
     {
         return obj.GetHashCode();
+    }
+
+    public string GetFailureMessages()
+    {
+        var stringBuilder = new StringBuilder();
+
+        stringBuilder.AppendLine("found the following mismatches:");
+        stringBuilder.AppendLine();
+            
+        foreach (var comparisonFailure in ComparisonFailures ?? [])
+        {
+            stringBuilder.AppendLine($"{string.Join(".", comparisonFailure.NestedMemberNames)}:");
+            stringBuilder.AppendLine($"\tExpected: {Formatter.Format(comparisonFailure.Expected)}");
+            stringBuilder.AppendLine($"\tActual: {Formatter.Format(comparisonFailure.Actual)}");
+            stringBuilder.AppendLine();
+        }
+            
+        return stringBuilder.ToString();
     }
 }

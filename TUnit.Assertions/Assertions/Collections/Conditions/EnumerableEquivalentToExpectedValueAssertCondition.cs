@@ -60,20 +60,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         if (!typeof(TInner).IsSimpleType()
             && equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 } equivalentToEqualityComparer)
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.AppendLine("found the following mismatches:");
-            stringBuilder.AppendLine();
-            
-            foreach (var comparisonFailure in equivalentToEqualityComparer.ComparisonFailures)
-            {
-                stringBuilder.AppendLine($"{string.Join(".", comparisonFailure.NestedMemberNames)}:");
-                stringBuilder.AppendLine($"\tExpected: {Formatter.Format(comparisonFailure.Expected)}");
-                stringBuilder.AppendLine($"\tActual: {Formatter.Format(comparisonFailure.Actual)}");
-                stringBuilder.AppendLine();
-            }
-            
-            return stringBuilder.ToString();
+            return equivalentToEqualityComparer.GetFailureMessages();
         }
         
         return $"it is {string.Join(",", Formatter.Format(orderedActual!))}";
