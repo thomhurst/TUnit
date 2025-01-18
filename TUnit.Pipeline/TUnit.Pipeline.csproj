@@ -4,6 +4,12 @@
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Sourcy.EnableSourcyAttribute">
+      <_Parameter1>$(MSBuildProjectFullPath)</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>

@@ -10,16 +10,14 @@ public class GetPackageProjectsModule : Module<List<File>>
     {
         await Task.CompletedTask;
 
-        return Get().ToList();
-    }
-
-    private IEnumerable<File> Get()
-    {
-        yield return Sourcy.DotNet.Projects.TUnit_Assertions;
-        yield return Sourcy.DotNet.Projects.TUnit_Core;
-        yield return Sourcy.DotNet.Projects.TUnit_Engine;
-        yield return Sourcy.DotNet.Projects.TUnit;
-        yield return Sourcy.DotNet.Projects.TUnit_Playwright;
-        yield return Sourcy.DotNet.Projects.TUnit_Templates;
+        return
+        [
+            Sourcy.DotNet.Projects.TUnit_Assertions,
+            Sourcy.DotNet.Projects.TUnit_Core,
+            Sourcy.DotNet.Projects.TUnit_Engine,
+            Sourcy.DotNet.Projects.TUnit,
+            Sourcy.DotNet.Projects.TUnit_Playwright,
+            Sourcy.DotNet.Projects.TUnit_Templates
+        ];
     }
 }

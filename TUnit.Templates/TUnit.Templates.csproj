@@ -1,19 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- The package metadata. Fill in the properties marked as TODO below -->
-    <!-- Follow the instructions on https://learn.microsoft.com/en-us/nuget/create-packages/package-authoring-best-practices -->
     <PackageId>TUnit.Templates</PackageId>
     <PackageVersion>1.0</PackageVersion>
-    <Title>TODO: fill the package name here</Title>
+    <Title>TUnit Templates</Title>
     <Authors>Tom Longhurst</Authors>
-    <Description>TODO: fill the package description here</Description>
+    <Description>Templates for getting started with TUnit</Description>
     <PackageTags>TUnit,test,testing,unit,integration,acceptance</PackageTags>
     <PackageProjectUrl>https://www.github.com/thomhurst/TUnit</PackageProjectUrl>
 
-    <!-- Keep package type as 'Template' to show the package as a template package on nuget.org and make your template available in dotnet new search.-->
     <PackageType>Template</PackageType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
