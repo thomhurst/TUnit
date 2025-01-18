@@ -7,6 +7,7 @@ public class MoreTests(string title)
     [Test]
     public void ClassLevelDataRow()
     {
+        Console.WriteLine(title);
         Console.WriteLine("Did I forget that data injection works on classes too?");
     }
     
