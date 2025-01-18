@@ -18,7 +18,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         }
         
         return SyntaxFactory
-            .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+            .IdentifierName(symbol!.GloballyQualified())
             .WithoutTrivia();
     }
 
@@ -27,7 +27,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         var symbol = node.GetSymbolInfo(semanticModel);
         
         return SyntaxFactory
-            .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+            .IdentifierName(symbol!.GloballyQualified())
             .WithoutTrivia();
     }
 
@@ -41,7 +41,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         }
 
         return SyntaxFactory
-            .IdentifierName(symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+            .IdentifierName(symbol!.GloballyQualified())
             .WithoutTrivia();
     }
 
@@ -93,7 +93,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         return SyntaxFactory
             .TypeOfExpression(
                 SyntaxFactory.ParseTypeName(
-                    symbol!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+                    symbol!.GloballyQualified())
             )
             .WithoutTrivia();
     }

@@ -185,13 +185,32 @@ public class DataDrivenTestArgumentsAnalyzerTests
 
                 public class MyClass
                 {
-                            
                     [Test]
                     [Arguments(ProjectReferenceEnum.Value1)]
                     public void MyTest(ProjectReferenceEnum value)
                     {
                     }
 
+                }
+                """
+            );
+    }
+    
+    [Test]
+    public async Task Convertible_Type_Does_Not_Flag()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(-123)]
+                    public void Int_To_Short(short value)
+                    {
+                    }
                 }
                 """
             );

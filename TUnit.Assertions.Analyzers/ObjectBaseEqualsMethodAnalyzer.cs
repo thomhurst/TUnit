@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -34,7 +35,7 @@ public class ObjectBaseEqualsMethodAnalyzer : ConcurrentDiagnosticAnalyzer
         
         if ((invocationOperation.Instance?.Type as INamedTypeSymbol)
             ?.AllInterfaces
-            .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix))
+            .Select(x => x.GloballyQualifiedNonGeneric())
             .Any(x => x is "global::TUnit.Assertions.AssertConditions.Interfaces.IValueSource"
             or "global::TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource") != true)
         {

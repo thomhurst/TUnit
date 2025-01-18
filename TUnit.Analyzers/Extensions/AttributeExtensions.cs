@@ -16,7 +16,7 @@ public static class AttributeExtensions
         }
         
         return attributeDatas.FirstOrDefault(x =>
-            x.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix)
+            x.AttributeClass?.GloballyQualifiedNonGeneric()
             == fullyQualifiedName);
     }
     

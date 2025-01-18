@@ -29,7 +29,7 @@ public static class SymbolExtensions
         }
 
         return parameters.Value.Any(p => p.GetAttributes().Any(a =>
-            a.AttributeClass?.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+            a.AttributeClass?.GloballyQualifiedNonGeneric() ==
             WellKnown.AttributeFullyQualifiedClasses.Matrix.WithGlobalPrefix));
     }
 }

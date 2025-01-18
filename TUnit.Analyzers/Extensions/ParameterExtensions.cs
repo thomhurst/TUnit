@@ -13,7 +13,7 @@ public static class ParameterExtensions
             return parameterSymbols;
         }
 
-        if (parameterSymbols.Last().Type.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) ==
+        if (parameterSymbols.Last().Type.GloballyQualifiedNonGeneric() ==
             WellKnown.AttributeFullyQualifiedClasses.CancellationToken.WithGlobalPrefix)
         {
             return ImmutableArray.Create(parameterSymbols, 0, parameterSymbols.Length - 1);

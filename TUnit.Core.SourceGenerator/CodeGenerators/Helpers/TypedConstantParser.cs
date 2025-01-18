@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
@@ -14,7 +15,7 @@ public static class TypedConstantParser
         if (parameterType?.TypeKind == TypeKind.Enum && 
             (newExpression.IsKind(SyntaxKind.UnaryMinusExpression) || newExpression.IsKind(SyntaxKind.UnaryPlusExpression)))
         {
-            return $"({parameterType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix)})({newExpression})";
+            return $"({parameterType.GloballyQualified()})({newExpression})";
         }
 
         if (parameterType?.SpecialType == SpecialType.System_Decimal)
@@ -30,12 +31,12 @@ public static class TypedConstantParser
         if (typedConstant.Kind == TypedConstantKind.Type)
         {
             var type = (INamedTypeSymbol)typedConstant.Value!;
-            return type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            return type.GloballyQualified();
         }
 
         if (typedConstant.Kind == TypedConstantKind.Enum)
         {
-            return typedConstant.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            return typedConstant.Type!.GloballyQualified();
         }
 
         if (typedConstant.Kind is not TypedConstantKind.Error and not TypedConstantKind.Array)
@@ -43,6 +44,6 @@ public static class TypedConstantParser
             return $"global::{typedConstant.Value!.GetType().FullName}";
         }
 
-        return typedConstant.Type!.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        return typedConstant.Type!.GloballyQualified();
     }
 }

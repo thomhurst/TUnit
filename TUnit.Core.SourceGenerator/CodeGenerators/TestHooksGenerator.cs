@@ -82,12 +82,12 @@ public class TestHooksGenerator : IIncrementalGenerator
                     IsEveryHook = isEveryHook && hookLevel is not "TUnit.Core.HookType.TestDiscovery" and not "TUnit.Core.HookType.TestSession",
                     HookLevel = hookLevel,
                     FullyQualifiedTypeName =
-                        classType.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                        classType.GloballyQualified(),
                     MinimalTypeName = classType.Name,
                     ParameterTypes = methodSymbol.Parameters
-                        .Select(x => x.Type.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix))
+                        .Select(x => x.Type.GloballyQualified())
                         .ToArray(),
-                    HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.HookExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix),
+                    HookExecutor = methodSymbol.GetAttributes().FirstOrDefault(x => x.AttributeClass?.IsOrInherits("global::TUnit.Core.Executors.HookExecutorAttribute") == true)?.AttributeClass?.TypeArguments.FirstOrDefault()?.GloballyQualified(),
                     Order = contextAttribute.NamedArguments.FirstOrDefault(x => x.Key == "Order").Value.Value as int? ?? 0,
                     FilePath = contextAttribute.ConstructorArguments[1].Value?.ToString() ?? string.Empty,
                     LineNumber = contextAttribute.ConstructorArguments[2].Value as int? ?? 0,

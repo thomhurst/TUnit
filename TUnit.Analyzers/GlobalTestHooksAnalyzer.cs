@@ -112,6 +112,6 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
     private static bool HasSingleParameter(IMethodSymbol methodSymbol, string parameterType)
     {
         return methodSymbol.Parameters.WithoutCancellationTokenParameter().Count() == 1
-               && methodSymbol.Parameters[0].Type.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == parameterType;
+               && methodSymbol.Parameters[0].Type.GloballyQualifiedNonGeneric() == parameterType;
     }
 }

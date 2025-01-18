@@ -71,10 +71,10 @@ public static class TypeExtensions
         return false;
     }
 
-    public static string GloballyQualified(this ITypeSymbol typeSymbol) =>
+    public static string GloballyQualified(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     
-    public static string GloballyQualifiedNonGeneric(this ITypeSymbol typeSymbol) =>
+    public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
     
     public static bool IsGenericDefinition(this ITypeSymbol typeSymbol)
@@ -119,7 +119,7 @@ public static class TypeExtensions
     public static bool IsAsyncDisposable(this ITypeSymbol type)
     {
         return type.AllInterfaces
-            .Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix) == "global::System.IAsyncDisposable");
+            .Any(x => x.GloballyQualifiedNonGeneric() == "global::System.IAsyncDisposable");
     }
 
     public static bool IsCollectionType(this ITypeSymbol typeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
