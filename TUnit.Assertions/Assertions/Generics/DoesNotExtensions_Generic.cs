@@ -13,4 +13,11 @@ public static partial class DoesNotExtensions
         return valueSource.RegisterAssertion(new EnumerableNotContainsExpectedValueAssertCondition<TActual, TInner>(expected, equalityComparer)
             , [doNotPopulateThisValue]);
     }
+
+    public static InvokableValueAssertionBuilder<TActual> DoesNotContain<TActual, TInner>(this IValueSource<TActual> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = "")
+        where TActual : IEnumerable<TInner>
+    {
+        return valueSource.RegisterAssertion(new EnumerableNotContainsExpectedFuncAssertCondition<TActual, TInner>(matcher, doNotPopulateThisValue)
+            , [doNotPopulateThisValue]);
+    }
 }
