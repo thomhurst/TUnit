@@ -25,11 +25,10 @@ public static class TypeExtensions
     }
     
     public static string GloballyQualified(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
-            .WithGenericsOptions(SymbolDisplayGenericsOptions.None));
+        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
     
     public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, string typeName)
     {
