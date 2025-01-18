@@ -8,30 +8,30 @@ public class AssertionResult
     public bool IsPassed { get; }
     public string Message { get; }
 
-    private AssertionResult(bool isPassed, string messageGenerator)
+    private AssertionResult(bool isPassed, string message)
     {
         IsPassed = isPassed;
-        Message = messageGenerator;
+        Message = message;
     }
 
-    public static AssertionResult FailIf(bool isFailed, string messageGenerator)
+    public static AssertionResult FailIf(bool isFailed, string message)
     {
         if (!isFailed)
         {
             return Passed;
         }
         
-        return new AssertionResult(false, messageGenerator);
+        return new AssertionResult(false, message);
     }
     
-    public static AssertionResult FailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler messageGenerator)
+    public static AssertionResult FailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler stringHandler)
     {
         if (!isFailed)
         {
             return Passed;
         }
         
-        return new AssertionResult(false, messageGenerator.GetFormattedText());
+        return new AssertionResult(false, stringHandler.GetFormattedText());
     }
 
     public AssertionResult And(AssertionResult other)
@@ -78,14 +78,14 @@ public class AssertionResult
         return new AssertionResult(false, message);
     }
     
-    public AssertionResult OrFailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler message)
+    public AssertionResult OrFailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler stringHandler)
     {
         if (!IsPassed || !isFailed)
         {
             return this;
         }
         
-        return new AssertionResult(false, message.GetFormattedText());
+        return new AssertionResult(false, stringHandler.GetFormattedText());
     }
 
     public static AssertionResult Fail(string message)
