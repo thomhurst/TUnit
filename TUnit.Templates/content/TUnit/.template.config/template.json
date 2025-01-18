@@ -15,28 +15,6 @@
       "type": "project"
     },
     "sourceName": "TestProject",
-    "preferNameDirectory": true,
-    "primaryOutputs": [
-      {
-        "path": "TestProject.csproj"
-      }
-    ],
-    "postActions": [
-      {
-        "description": "Restore NuGet packages required by this project",
-        "manualInstructions": [
-          {
-            "text": "Run 'dotnet restore'"
-          }
-        ],
-        "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
-        "continueOnError": true,
-        "args": {
-          "files": [
-            "TestProject.csproj"
-          ]
-        }
-      }
-    ]
+    "preferNameDirectory": true
   }
   
