@@ -29,7 +29,7 @@ public class DisplayFormats
     );
 
     public static readonly SymbolDisplayFormat? FullyQualifiedGenericWithGlobalPrefix = new(
-        SymbolDisplayGlobalNamespaceStyle.Omitted,
+        SymbolDisplayGlobalNamespaceStyle.Included,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
         SymbolDisplayGenericsOptions.None,
         SymbolDisplayMemberOptions.IncludeContainingType,
