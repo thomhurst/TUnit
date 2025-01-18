@@ -36,11 +36,11 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
             return AssertionResult
                 .FailIf(
                     () => !actualEnumerable.Cast<object?>().SequenceEqual(expectedEnumerable.Cast<object?>(),
-                        new EquivalentToEqualityComparer<object?>(new CompareOptions()
+                        new CollectionEquivalentToEqualityComparer<object?>(new CompareOptions
                         {
                             MembersToIgnore = [.._ignoredMembers]
                         })),
-                    () => $"it is {string.Join(",", actualEnumerable)}");
+                    () => $"it is {Formatter.Format(actualEnumerable)}");
         }
 
         bool? isEqual = null;
@@ -68,7 +68,7 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions
         {
             MembersToIgnore = [.._ignoredMembers],
-        }).ToList();
+        }, null).ToList();
 
         if (failures.FirstOrDefault() is { } firstFailure)
         {

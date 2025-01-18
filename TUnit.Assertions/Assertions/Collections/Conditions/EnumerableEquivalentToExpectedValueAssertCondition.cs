@@ -1,6 +1,8 @@
 using System.Text;
 using TUnit.Assertions.Enums;
 using TUnit.Assertions.Equality;
+using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertConditions.Collections;
 
@@ -13,12 +15,13 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
 {
     protected override string GetExpectation()
     {
-        if (equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 })
+        if (!typeof(TInner).IsSimpleType()
+            && equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 })
         {
             return "to match";
         }
         
-        return $"to be equivalent to {(expected != null ? string.Join(",", expected) : null)}";
+        return $"to be equivalent to {(expected != null ? Formatter.Format(expected) : null)}";
     }
 
     protected override AssertionResult GetResult(TActual? actualValue, IEnumerable<TInner>? expectedValue)
@@ -54,7 +57,8 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
 
     private string FailureMessage(IEnumerable<TInner>? orderedActual)
     {
-        if (equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 } equivalentToEqualityComparer)
+        if (!typeof(TInner).IsSimpleType()
+            && equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 } equivalentToEqualityComparer)
         {
             var stringBuilder = new StringBuilder();
 
@@ -63,15 +67,15 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
             
             foreach (var comparisonFailure in equivalentToEqualityComparer.ComparisonFailures)
             {
-                stringBuilder.AppendLine($"{typeof(TInner).Name}.{string.Join(".", comparisonFailure.NestedMemberNames)}:");
-                stringBuilder.AppendLine($"\tExpected: {comparisonFailure.Expected}");
-                stringBuilder.AppendLine($"\tActual: {comparisonFailure.Actual}");
+                stringBuilder.AppendLine($"{string.Join(".", comparisonFailure.NestedMemberNames)}:");
+                stringBuilder.AppendLine($"\tExpected: {Formatter.Format(comparisonFailure.Expected)}");
+                stringBuilder.AppendLine($"\tActual: {Formatter.Format(comparisonFailure.Actual)}");
                 stringBuilder.AppendLine();
             }
             
             return stringBuilder.ToString();
         }
         
-        return $"it is {string.Join(",", orderedActual!)}";
+        return $"it is {string.Join(",", Formatter.Format(orderedActual!))}";
     }
 }

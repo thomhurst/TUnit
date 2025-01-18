@@ -8,15 +8,17 @@ namespace TUnit.Assertions.Equality;
 
 public class EquivalentToEqualityComparer<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(CompareOptions compareOptions) : IEqualityComparer<T>
 {
+    public virtual int? EnumerableIndex { get; protected set; }
+
     public ComparisonFailure[]? ComparisonFailures { get; private set; }
 
     public EquivalentToEqualityComparer() : this(new CompareOptions())
     {
     }
     
-    public bool Equals(T? x, T? y)
+    public virtual bool Equals(T? x, T? y)
     {
-        ComparisonFailures = Compare.CheckEquivalent(x, y, compareOptions).ToArray();
+        ComparisonFailures = Compare.CheckEquivalent(x, y, compareOptions, EnumerableIndex).ToArray();
         
         return ComparisonFailures.Length == 0;
     }
