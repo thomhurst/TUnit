@@ -211,14 +211,14 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(string), typeof(int), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.String methodArg = "foo";
-			global::System.Int32 methodArg1 = 1;
-			global::System.Boolean methodArg2 = true;
+			string methodArg = "foo";
+			int methodArg1 = 1;
+			bool methodArg2 = true;
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 			new global::TUnit.TestProject.CustomDisplayNameTests()
@@ -228,7 +228,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.CustomDisplayNameTests.Test3(System.String,System.Int32,System.Boolean):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg, methodArg1, methodArg2],
 				TestClassProperties = [],
@@ -265,10 +265,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.CustomDisplayNameTests.Test3(System.String,System.Int32,System.Boolean):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(string), typeof(int), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
 				TestName = "Test3",
 				TestFilePath = @"",
 				TestLineNumber = 26,
@@ -285,14 +285,14 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(string), typeof(int), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.String methodArg = "bar";
-			global::System.Int32 methodArg1 = 2;
-			global::System.Boolean methodArg2 = false;
+			string methodArg = "bar";
+			int methodArg1 = 2;
+			bool methodArg2 = false;
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 			new global::TUnit.TestProject.CustomDisplayNameTests()
@@ -302,7 +302,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.CustomDisplayNameTests.Test3(System.String,System.Int32,System.Boolean):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg, methodArg1, methodArg2],
 				TestClassProperties = [],
@@ -339,10 +339,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.CustomDisplayNameTests.Test3(System.String,System.Int32,System.Boolean):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.CustomDisplayNameTests.Test3(string,int,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "Test3", 0, [typeof(string), typeof(int), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string), typeof(int), typeof(bool)],
 				TestName = "Test3",
 				TestFilePath = @"",
 				TestLineNumber = 26,
@@ -384,12 +384,12 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "MethodDataSourceTest", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "MethodDataSourceTest", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.String methodArg = global::TUnit.TestProject.CustomDisplayNameTests.Method();
+			string methodArg = global::TUnit.TestProject.CustomDisplayNameTests.Method();
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.CustomDisplayNameTests>(() => 
 			new global::TUnit.TestProject.CustomDisplayNameTests()
 			, sessionId, testBuilderContext);
@@ -398,7 +398,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest(System.String):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest(string):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -432,10 +432,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest(System.String):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest(string):0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "MethodDataSourceTest", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "MethodDataSourceTest", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "MethodDataSourceTest",
 				TestFilePath = @"",
 				TestLineNumber = 36,
@@ -477,7 +477,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "PasswordTest", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "PasswordTest", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -510,7 +510,7 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
 				{
-					TestId = $"global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.CustomDisplayNameTests.PasswordTest(System.String):0",
+					TestId = $"global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.CustomDisplayNameTests.PasswordTest(string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArgGeneratedData],
 					TestClassProperties = [],
@@ -542,10 +542,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.CustomDisplayNameTests.PasswordTest(System.String):0",
+				TestId = $"global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.CustomDisplayNameTests.PasswordTest(string):0",
 				TestClass = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "PasswordTest", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.CustomDisplayNameTests), "PasswordTest", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "PasswordTest",
 				TestFilePath = @"",
 				TestLineNumber = 44,

@@ -37,7 +37,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "1";
+			string classArg = "1";
 
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
@@ -48,7 +48,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).Simple:0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).Simple:0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [],
 				TestClassProperties = [],
@@ -82,7 +82,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).Simple:0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).Simple:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "Simple", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
@@ -106,7 +106,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "2";
+			string classArg = "2";
 
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
@@ -117,7 +117,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).Simple:0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).Simple:0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [],
 				TestClassProperties = [],
@@ -151,7 +151,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).Simple:0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).Simple:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
 				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "Simple", 0, []).ReturnType,
 				ParameterTypeFullNames = [],
@@ -202,14 +202,14 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "1";
+			string classArg = "1";
 
 
-			global::System.String methodArg = "3";
+			string methodArg = "3";
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -219,7 +219,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -259,10 +259,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "WithMethodLevel",
 				TestFilePath = @"",
 				TestLineNumber = 11,
@@ -279,14 +279,14 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "2";
+			string classArg = "2";
 
 
-			global::System.String methodArg = "3";
+			string methodArg = "3";
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -296,7 +296,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -336,10 +336,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "WithMethodLevel",
 				TestFilePath = @"",
 				TestLineNumber = 11,
@@ -356,14 +356,14 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "1";
+			string classArg = "1";
 
 
-			global::System.String methodArg = "4";
+			string methodArg = "4";
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -373,7 +373,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -413,10 +413,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "WithMethodLevel",
 				TestFilePath = @"",
 				TestLineNumber = 11,
@@ -433,14 +433,14 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "2";
+			string classArg = "2";
 
 
-			global::System.String methodArg = "4";
+			string methodArg = "4";
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -450,7 +450,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -490,10 +490,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).WithMethodLevel(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).WithMethodLevel(string):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "WithMethodLevel", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "WithMethodLevel",
 				TestFilePath = @"",
 				TestLineNumber = 11,
@@ -541,14 +541,14 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "1";
+			string classArg = "1";
 
 
-			global::System.String methodArg = "3";
+			string methodArg = "3";
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -558,7 +558,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -598,10 +598,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "IgnoreParameters",
 				TestFilePath = @"",
 				TestLineNumber = 16,
@@ -618,14 +618,14 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "2";
+			string classArg = "2";
 
 
-			global::System.String methodArg = "3";
+			string methodArg = "3";
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -635,7 +635,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -675,10 +675,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "IgnoreParameters",
 				TestFilePath = @"",
 				TestLineNumber = 16,
@@ -695,14 +695,14 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "1";
+			string classArg = "1";
 
 
-			global::System.String methodArg = "4";
+			string methodArg = "4";
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -712,7 +712,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -752,10 +752,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS0:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "IgnoreParameters",
 				TestFilePath = @"",
 				TestLineNumber = 16,
@@ -772,14 +772,14 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			global::System.String classArg = "2";
+			string classArg = "2";
 
 
-			global::System.String methodArg = "4";
+			string methodArg = "4";
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(() => 
 			new global::TUnit.TestProject.ClassAndMethodArgumentsTests(classArg)
@@ -789,7 +789,7 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
 				TestClassArguments = [classArg],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -829,10 +829,10 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(System.String).IgnoreParameters(System.String):0",
+				TestId = $"global::TUnit.Core.ArgumentsAttribute:{classDataIndex}:CL-ARGS1:global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.ClassAndMethodArgumentsTests(string).IgnoreParameters(string):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), "IgnoreParameters", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "IgnoreParameters",
 				TestFilePath = @"",
 				TestLineNumber = 16,

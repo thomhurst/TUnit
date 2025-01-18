@@ -29,7 +29,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.Bugs._1538.Tests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "Eight_Args", 0, [typeof(global::System.Boolean), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "Eight_Args", 0, [typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -38,15 +38,15 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				testMethodDataIndex++;
 
 				var methodData = methodDataAccessor;
-				var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Boolean, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String>(methodData);
-				global::System.Boolean methodArg = methodArgTuples.Item1;
-				global::System.String methodArg1 = methodArgTuples.Item2;
-				global::System.String methodArg2 = methodArgTuples.Item3;
-				global::System.String methodArg3 = methodArgTuples.Item4;
-				global::System.String methodArg4 = methodArgTuples.Item5;
-				global::System.String methodArg5 = methodArgTuples.Item6;
-				global::System.String methodArg6 = methodArgTuples.Item7;
-				global::System.String methodArg7 = methodArgTuples.Rest.Item1;
+				var methodArgTuples = global::System.TupleExtensions.ToTuple<bool, string, string, string, string, string, string, string>(methodData);
+				bool methodArg = methodArgTuples.Item1;
+				string methodArg1 = methodArgTuples.Item2;
+				string methodArg2 = methodArgTuples.Item3;
+				string methodArg3 = methodArgTuples.Item4;
+				string methodArg4 = methodArgTuples.Item5;
+				string methodArg5 = methodArgTuples.Item6;
+				string methodArg6 = methodArgTuples.Item7;
+				string methodArg7 = methodArgTuples.Rest.Item1;
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1538.Tests>(() => 
 				new global::TUnit.TestProject.Bugs._1538.Tests()
 				, sessionId, testBuilderContext);
@@ -55,7 +55,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
 				{
-					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(System.Boolean,System.String,System.String,System.String,System.String,System.String,System.String,System.String):0",
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(bool,string,string,string,string,string,string,string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7],
 					TestClassProperties = [],
@@ -87,10 +87,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(System.Boolean,System.String,System.String,System.String,System.String,System.String,System.String,System.String):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.Eight_Args(bool,string,string,string,string,string,string,string):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "Eight_Args", 0, [typeof(global::System.Boolean), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Boolean), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "Eight_Args", 0, [typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string)],
 				TestName = "Eight_Args",
 				TestFilePath = @"",
 				TestLineNumber = 5,
@@ -132,7 +132,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.Bugs._1538.Tests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "SixteenArgs", 0, [typeof(global::System.Boolean), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "SixteenArgs", 0, [typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -141,23 +141,23 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				testMethodDataIndex++;
 
 				var methodData = methodDataAccessor;
-				var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Boolean, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String, global::System.String>(methodData);
-				global::System.Boolean methodArg = methodArgTuples.Item1;
-				global::System.String methodArg1 = methodArgTuples.Item2;
-				global::System.String methodArg2 = methodArgTuples.Item3;
-				global::System.String methodArg3 = methodArgTuples.Item4;
-				global::System.String methodArg4 = methodArgTuples.Item5;
-				global::System.String methodArg5 = methodArgTuples.Item6;
-				global::System.String methodArg6 = methodArgTuples.Item7;
-				global::System.String methodArg7 = methodArgTuples.Rest.Item1;
-				global::System.String methodArg8 = methodArgTuples.Rest.Item2;
-				global::System.String methodArg9 = methodArgTuples.Rest.Item3;
-				global::System.String methodArg10 = methodArgTuples.Rest.Item4;
-				global::System.String methodArg11 = methodArgTuples.Rest.Item5;
-				global::System.String methodArg12 = methodArgTuples.Rest.Item6;
-				global::System.String methodArg13 = methodArgTuples.Rest.Item7;
-				global::System.String methodArg14 = methodArgTuples.Rest.Rest.Item1;
-				global::System.String methodArg15 = methodArgTuples.Rest.Rest.Item2;
+				var methodArgTuples = global::System.TupleExtensions.ToTuple<bool, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string>(methodData);
+				bool methodArg = methodArgTuples.Item1;
+				string methodArg1 = methodArgTuples.Item2;
+				string methodArg2 = methodArgTuples.Item3;
+				string methodArg3 = methodArgTuples.Item4;
+				string methodArg4 = methodArgTuples.Item5;
+				string methodArg5 = methodArgTuples.Item6;
+				string methodArg6 = methodArgTuples.Item7;
+				string methodArg7 = methodArgTuples.Rest.Item1;
+				string methodArg8 = methodArgTuples.Rest.Item2;
+				string methodArg9 = methodArgTuples.Rest.Item3;
+				string methodArg10 = methodArgTuples.Rest.Item4;
+				string methodArg11 = methodArgTuples.Rest.Item5;
+				string methodArg12 = methodArgTuples.Rest.Item6;
+				string methodArg13 = methodArgTuples.Rest.Item7;
+				string methodArg14 = methodArgTuples.Rest.Rest.Item1;
+				string methodArg15 = methodArgTuples.Rest.Rest.Item2;
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1538.Tests>(() => 
 				new global::TUnit.TestProject.Bugs._1538.Tests()
 				, sessionId, testBuilderContext);
@@ -166,7 +166,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.Bugs._1538.Tests>
 				{
-					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(System.Boolean,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String):0",
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(bool,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3, methodArg4, methodArg5, methodArg6, methodArg7, methodArg8, methodArg9, methodArg10, methodArg11, methodArg12, methodArg13, methodArg14, methodArg15],
 					TestClassProperties = [],
@@ -198,10 +198,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(System.Boolean,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.Bugs._1538.Tests.SixteenArgs(bool,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "SixteenArgs", 0, [typeof(global::System.Boolean), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Boolean), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String), typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1538.Tests), "SixteenArgs", 0, [typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string)],
 				TestName = "SixteenArgs",
 				TestFilePath = @"",
 				TestLineNumber = 13,

@@ -35,23 +35,23 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
-			global::System.Int32 classArg = classArgTuples.Item1;
-			global::System.String classArg1 = classArgTuples.Item2;
-			global::System.Boolean classArg2 = classArgTuples.Item3;
-			(global::System.Int32, global::System.String, global::System.Boolean) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
-			(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
-			(global::System.Int32, global::System.String, global::System.Boolean) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
-			(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg3 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
+			var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
+			int classArg = classArgTuples.Item1;
+			string classArg1 = classArgTuples.Item2;
+			bool classArg2 = classArgTuples.Item3;
+			(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
+			(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
+			(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
+			(int Number, string Word, bool Flag) propertyArg3 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 
-			var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
-			global::System.Int32 methodArg = methodArgTuples.Item1;
-			global::System.String methodArg1 = methodArgTuples.Item2;
-			global::System.Boolean methodArg2 = methodArgTuples.Item3;
+			var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
+			int methodArg = methodArgTuples.Item1;
+			string methodArg1 = methodArgTuples.Item2;
+			bool methodArg2 = methodArgTuples.Item3;
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => 
 			new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)
 			{
@@ -66,7 +66,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 				TestClassArguments = [classArg, classArg1, classArg2],
 				TestMethodArguments = [methodArg, methodArg1, methodArg2],
 				TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3],
@@ -106,10 +106,10 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
 				TestLineNumber = 24,
@@ -126,23 +126,23 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
-			global::System.Int32 classArg = classArgTuples.Item1;
-			global::System.String classArg1 = classArgTuples.Item2;
-			global::System.Boolean classArg2 = classArgTuples.Item3;
-			(global::System.Int32, global::System.String, global::System.Boolean) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
-			(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
-			(global::System.Int32, global::System.String, global::System.Boolean) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
-			(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg3 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
+			var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
+			int classArg = classArgTuples.Item1;
+			string classArg1 = classArgTuples.Item2;
+			bool classArg2 = classArgTuples.Item3;
+			(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
+			(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
+			(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
+			(int Number, string Word, bool Flag) propertyArg3 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 
-			var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
-			global::System.Int32 methodArg = methodArgTuples.Item1;
-			global::System.String methodArg1 = methodArgTuples.Item2;
-			global::System.Boolean methodArg2 = methodArgTuples.Item3;
+			var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
+			int methodArg = methodArgTuples.Item1;
+			string methodArg1 = methodArgTuples.Item2;
+			bool methodArg2 = methodArgTuples.Item3;
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => 
 			new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)
 			{
@@ -157,7 +157,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 				TestClassArguments = [classArg, classArg1, classArg2],
 				TestMethodArguments = [methodArg, methodArg1, methodArg2],
 				TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3],
@@ -197,10 +197,10 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
 				TestLineNumber = 24,
@@ -217,23 +217,23 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
-			global::System.Int32 classArg = classArgTuples.Item1;
-			global::System.String classArg1 = classArgTuples.Item2;
-			global::System.Boolean classArg2 = classArgTuples.Item3;
-			(global::System.Int32, global::System.String, global::System.Boolean) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
-			(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
-			(global::System.Int32, global::System.String, global::System.Boolean) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
-			(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg3 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
+			var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()());
+			int classArg = classArgTuples.Item1;
+			string classArg1 = classArgTuples.Item2;
+			bool classArg2 = classArgTuples.Item3;
+			(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
+			(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
+			(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
+			(int Number, string Word, bool Flag) propertyArg3 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 
-			var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
-			global::System.Int32 methodArg = methodArgTuples.Item1;
-			global::System.String methodArg1 = methodArgTuples.Item2;
-			global::System.Boolean methodArg2 = methodArgTuples.Item3;
+			var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
+			int methodArg = methodArgTuples.Item1;
+			string methodArg1 = methodArgTuples.Item2;
+			bool methodArg2 = methodArgTuples.Item3;
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => 
 			new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)
 			{
@@ -248,7 +248,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 				TestClassArguments = [classArg, classArg1, classArg2],
 				TestMethodArguments = [methodArg, methodArg1, methodArg2],
 				TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3],
@@ -288,10 +288,10 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
 				TestLineNumber = 24,
@@ -308,23 +308,23 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			var classArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
-			global::System.Int32 classArg = classArgTuples.Item1;
-			global::System.String classArg1 = classArgTuples.Item2;
-			global::System.Boolean classArg2 = classArgTuples.Item3;
-			(global::System.Int32, global::System.String, global::System.Boolean) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
-			(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
-			(global::System.Int32, global::System.String, global::System.Boolean) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
-			(global::System.Int32 Number, global::System.String Word, global::System.Boolean Flag) propertyArg3 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
+			var classArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
+			int classArg = classArgTuples.Item1;
+			string classArg1 = classArgTuples.Item2;
+			bool classArg2 = classArgTuples.Item3;
+			(int, string, bool) propertyArg = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
+			(int Number, string Word, bool Flag) propertyArg1 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
+			(int, string, bool) propertyArg2 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod()();
+			(int Number, string Word, bool Flag) propertyArg3 = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()();
 
-			var methodArgTuples = global::System.TupleExtensions.ToTuple<global::System.Int32, global::System.String, global::System.Boolean>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
-			global::System.Int32 methodArg = methodArgTuples.Item1;
-			global::System.String methodArg1 = methodArgTuples.Item2;
-			global::System.Boolean methodArg2 = methodArgTuples.Item3;
+			var methodArgTuples = global::System.TupleExtensions.ToTuple<int, string, bool>(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod()());
+			int methodArg = methodArgTuples.Item1;
+			string methodArg1 = methodArgTuples.Item2;
+			bool methodArg2 = methodArgTuples.Item3;
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>(() => 
 			new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(classArg, classArg1, classArg2)
 			{
@@ -339,7 +339,7 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 				TestClassArguments = [classArg, classArg1, classArg2],
 				TestMethodArguments = [methodArg, methodArg1, methodArg2],
 				TestClassProperties = [propertyArg, propertyArg1, propertyArg2, propertyArg3],
@@ -379,10 +379,10 @@ file partial class ClassTupleDataSourceDrivenTests : global::TUnit.Core.Interfac
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(System.Int32,System.String,System.Boolean).DataSource_TupleMethod(System.Int32,System.String,System.Boolean):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS1:global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.ClassTupleDataSourceDrivenTests(int,string,bool).DataSource_TupleMethod(int,string,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.Int32), typeof(global::System.String), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
 				TestLineNumber = 24,

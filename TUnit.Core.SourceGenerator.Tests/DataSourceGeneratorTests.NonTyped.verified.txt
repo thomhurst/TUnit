@@ -29,7 +29,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.AutoDataTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AutoDataTests), "Test1", 0, [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Double), typeof(global::System.Boolean)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AutoDataTests), "Test1", 0, [typeof(string), typeof(int), typeof(double), typeof(bool)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -54,10 +54,10 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				global::System.String methodArg = (global::System.String)methodArgGeneratedData[0];
-				global::System.Int32 methodArg1 = (global::System.Int32)methodArgGeneratedData[1];
-				global::System.Double methodArg2 = (global::System.Double)methodArgGeneratedData[2];
-				global::System.Boolean methodArg3 = (global::System.Boolean)methodArgGeneratedData[3];
+				string methodArg = (string)methodArgGeneratedData[0];
+				int methodArg1 = (int)methodArgGeneratedData[1];
+				double methodArg2 = (double)methodArgGeneratedData[2];
+				bool methodArg3 = (bool)methodArgGeneratedData[3];
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AutoDataTests>(() => 
 				new global::TUnit.TestProject.AutoDataTests()
 				, sessionId, testBuilderContext);
@@ -66,7 +66,7 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 
 				nodes.Add(new TestMetadata<global::TUnit.TestProject.AutoDataTests>
 				{
-					TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(System.String,System.Int32,System.Double,System.Boolean):0",
+					TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
 					TestClassArguments = [],
 					TestMethodArguments = [methodArg, methodArg1, methodArg2, methodArg3],
 					TestClassProperties = [],
@@ -98,10 +98,10 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(System.String,System.Int32,System.Double,System.Boolean):0",
+				TestId = $"global::TUnit.TestProject.Attributes.AutoDataAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.AutoDataTests.Test1(string,int,double,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.AutoDataTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AutoDataTests), "Test1", 0, [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Double), typeof(global::System.Boolean)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String), typeof(global::System.Int32), typeof(global::System.Double), typeof(global::System.Boolean)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.AutoDataTests), "Test1", 0, [typeof(string), typeof(int), typeof(double), typeof(bool)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string), typeof(int), typeof(double), typeof(bool)],
 				TestName = "Test1",
 				TestFilePath = @"",
 				TestLineNumber = 8,

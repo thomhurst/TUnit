@@ -118,12 +118,12 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.String methodArg = global::TUnit.TestProject.TestData.Foo();
+			string methodArg = global::TUnit.TestProject.TestData.Foo();
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
 			new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
 			, sessionId, testBuilderContext);
@@ -132,7 +132,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(System.String):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(string):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -166,10 +166,10 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(System.String):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource(string):0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "GenericMethodDataSource", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "GenericMethodDataSource",
 				TestFilePath = @"",
 				TestLineNumber = 11,
@@ -211,12 +211,12 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 		try
 		{
 			var testClassType = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", 0, [typeof(global::System.String)]);
+			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", 0, [typeof(string)]);
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			global::System.String methodArg = global::TUnit.TestProject.TestData.Foo();
+			string methodArg = global::TUnit.TestProject.TestData.Foo();
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(() => 
 			new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests()
 			, sessionId, testBuilderContext);
@@ -225,7 +225,7 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 
 			nodes.Add(new TestMetadata<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(System.String):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(string):0",
 				TestClassArguments = [],
 				TestMethodArguments = [methodArg],
 				TestClassProperties = [],
@@ -259,10 +259,10 @@ file partial class InheritedTestsFromDifferentProjectTests : global::TUnit.Core.
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(System.String):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource(string):0",
 				TestClass = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", 0, [typeof(global::System.String)]).ReturnType,
-				ParameterTypeFullNames = [typeof(global::System.String)],
+				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests), "NonGenericMethodDataSource", 0, [typeof(string)]).ReturnType,
+				ParameterTypeFullNames = [typeof(string)],
 				TestName = "NonGenericMethodDataSource",
 				TestFilePath = @"",
 				TestLineNumber = 17,
