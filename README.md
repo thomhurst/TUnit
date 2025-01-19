@@ -1,130 +1,137 @@
-<p align="center">
-  <img src="assets/banner.png" width="800"/>
-  <a href="https://trendshift.io/repositories/11781" target="_blank"><img src="https://trendshift.io/api/badge/repositories/11781" alt="thomhurst%2FTUnit | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-</p>
+![](assets/banner.png)
 
-A modern, flexible and fast testing framework for C#. With Native AOT and Trimmed Single File application support included! 
+A modern, flexible and fast testing framework for C#. With Native AOT and Trimmed Single File application support included!
 
 TUnit is designed to aid with all testing types:
+
 - Unit
 - Integration
 - Acceptance
 - and more!
 
+[![thomhurst%2FTUnit | Trendshift](https://trendshift.io/api/badge/repositories/11781)](https://trendshift.io/repositories/11781)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8231644d844435eb9fd15110ea771d8)](https://app.codacy.com/gh/thomhurst/TUnit?utm_source=github.com&utm_medium=referral&utm_content=thomhurst/TUnit&utm_campaign=Badge_Grade)
-![GitHub Repo stars](https://img.shields.io/github/stars/thomhurst/TUnit) [![GitHub Sponsors](https://img.shields.io/github/sponsors/thomhurst)](https://github.com/sponsors/thomhurst)
- [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) [![NuGet Downloads](https://img.shields.io/nuget/dt/TUnit)](https://www.nuget.org/packages/TUnit/)
- ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit) 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8231644d844435eb9fd15110ea771d8)](https://app.codacy.com/gh/thomhurst/TUnit?utm_source=github.com&utm_medium=referral&utm_content=thomhurst/TUnit&utm_campaign=Badge_Grade) ![GitHub Repo stars](https://img.shields.io/github/stars/thomhurst/TUnit) [![GitHub Sponsors](https://img.shields.io/github/sponsors/thomhurst)](https://github.com/sponsors/thomhurst) [![nuget](https://img.shields.io/nuget/v/TUnit.svg)](https://www.nuget.org/packages/TUnit/) [![NuGet Downloads](https://img.shields.io/nuget/dt/TUnit)](https://www.nuget.org/packages/TUnit/) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/thomhurst/TUnit/dotnet.yml) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/thomhurst/TUnit/main) ![License](https://img.shields.io/github/license/thomhurst/TUnit)
 
-## Quick Start
+# Quick Start
 
 Assuming you have the .NET SDK installed, simply run:
 
-`dotnet new install TUnit.Templates`
-`dotnet new TUnit -n "YourProjectName"`
+`dotnet new install TUnit.Templates` `dotnet new TUnit -n "YourProjectName"`
 
 A new test project will be created for you with some samples of different test types and tips. When you're ready to get going, delete them and create your own!
 
-## Documentation
+# Documentation
 
 See here: <https://thomhurst.github.io/TUnit/>
 
-## Modern and Fast
+# Modern and Fast
+
 TUnit leverages source generators to locate and register your tests as opposed to reflection. You'll have a slight bump in build time, but a speedier runtime.
 
 TUnit also builds upon the newer Microsoft.Testing.Platform, whereas most other frameworks you'll have used will use VSTest. The new platform was reconstructed from the ground up to address pain points, be more extensible, and be faster.
 
-## Hooks, Events and Lifecycles
-One of the most powerful parts of TUnit is the information you have available to you because of the source generation and the events you can subscribe to.
-Because tests are constructed at the point of discovery, and not at runtime, you know all your arguments, properties, etc. upfront.
+# Hooks, Events and Lifecycles
+
+One of the most powerful parts of TUnit is the information you have available to you because of the source generation and the events you can subscribe to. Because tests are constructed at the point of discovery, and not at runtime, you know all your arguments, properties, etc. upfront.
 
 You can then register to be notified about various events such as test registered (scheduled to run in this test session at some point in the future), test started, test finished, etc.
 
-Say we injected an external object into our tests:
-By knowing how many tests are registered, we could count them up, and then on a test end event, we could decrease the count. When hitting 0, we know our object isn't going to be used by any other tests, so we can dispose of it. We know when we can handle the lifecycle, and this prevents it from living till the end of the test session where it could be hanging on to precious resources.
+Say we injected an external object into our tests: By knowing how many tests are registered, we could count them up, and then on a test end event, we could decrease the count. When hitting 0, we know our object isn't going to be used by any other tests, so we can dispose of it. We know when we can handle the lifecycle, and this prevents it from living till the end of the test session where it could be hanging on to precious resources.
 
-## Built in Analyzers
+# Built in Analyzers
+
 TUnit tries to help you write your tests correctly with analyzers. If something isn't quite right, an analyzer should tell you what's wrong.
 
-## IDE
+# IDE
 
 TUnit is built on top of the newer Microsoft.Testing.Platform, as opposed to the older VSTest platform. Because the infrastructure behind the scenes is new and different, you may need to enable some settings. This should just be a one time thing.
 
-### Visual Studio
+## Visual Studio
 
 Visual Studio is supported. The "Use testing platform server mode" option must be selected in Tools > Manage Preview Features.
 
-<img src="/docs/static/img/visual-studio.png" height="300px">
+![](/docs/static/img/visual-studio.png)
 
-### Rider
+## Rider
 
 Rider is supported. The [Enable Testing Platform support](https://www.jetbrains.com/help/rider/Reference__Options__Tools__Unit_Testing__VSTest.html) option must be selected in Settings > Build, Execution, Deployment > Unit Testing > VSTest.
 
-<img src="/docs/static/img/rider.png" height="300px">
+![](/docs/static/img/rider.png)
 
-## VS Code
+# VS Code
+
 Visual Studio Code is supported.
 
 - Install the extension Name: [C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit)
 - Go to the C# Dev Kit extension's settings
 - Enable Dotnet > Test Window > Use Testing Platform Protocol
 
-<img src="/docs/static/img/visual-studio-code.png" height="300px">
+![](/docs/static/img/visual-studio-code.png)
 
-### CLI
+## CLI
+
 `dotnet` CLI - Fully supported. Tests should be runnable with `dotnet test`, `dotnet run`, `dotnet exec` or executing an executable directly. See the docs for more information!
 
-## Packages
+# Packages
 
-### TUnit.Core
+## TUnit.Core
+
 To be used when you want to define re-useable components, such as a test library, but it wouldn't be run as its own test suite.
 
-### TUnit.Engine
+## TUnit.Engine
+
 For test suites. This contains the test execution logic and test adapter. Only install this on actual test projects you intend to run, not class libraries.
 
-### TUnit.Assertions
+## TUnit.Assertions
+
 This is independent from the framework and can be used wherever - Even in other test frameworks. It is just an assertion library used to assert data is as you expect. It uses an asychronous syntax which may be different to other assertion libraries you may have used.
 
-### TUnit
+## TUnit
+
 This is a helper package to combine the above 3 packages. If you just want a standard test app where you can write, run and assert tests, just install this!
 
-### TUnit.Playwright
-This provides you base classes, similarly to Microsoft.Playwright.NUnit or Microsoft.Playwright.MSTest, to automatically create and dispose of Playwright objects in tests, to make it easier for you to write tests without worrying about lifecycles or disposing. The base classes are named the same as the other libraries: `PageTest`,  `ContextTest`, `BrowserTest`, and `PlaywrightTest`.
+## TUnit.Playwright
 
-## Features
+This provides you base classes, similarly to Microsoft.Playwright.NUnit or Microsoft.Playwright.MSTest, to automatically create and dispose of Playwright objects in tests, to make it easier for you to write tests without worrying about lifecycles or disposing. The base classes are named the same as the other libraries: `PageTest`, `ContextTest`, `BrowserTest`, and `PlaywrightTest`.
+
+# Features
 
 - Native AOT / Trimmed Single File application support
 - Source generated tests
 - Property injection
 - Full async support
 - Parallel by default, with mechanisms to:
-    - Run specific tests completely on their own
-    - Run specific tests not in parallel with other specific tests
-    - Limit the parallel limit on a per-test, class or assembly level
+
+  - Run specific tests completely on their own
+  - Run specific tests not in parallel with other specific tests
+  - Limit the parallel limit on a per-test, class or assembly level
+
 - Tests can depend on other tests to form chains, useful for if one test depends on state from another action. While not recommended for unit tests, this can be useful in integration testing where state matters
 - Easy to read assertions - though you're also free to use whichever assertion library you like
 - Injectable test data via classes, methods, compile-time args, or matrices
 - Hooks before and after: 
-    - TestDiscover
-    - TestSession
-    - Assembly
-    - Class
-    - Test
+
+  - TestDiscover
+  - TestSession
+  - Assembly
+  - Class
+  - Test
+
 - Designed to avoid common pitfalls such as leaky test states
 - Dependency injection support ([See here](https://thomhurst.github.io/TUnit/docs/tutorial-extras/class-constructors))
 - Ability to view and interrogate metadata and results from various assembly/class/test context objects
 
-## Installation
+# Installation
 
 `dotnet add package TUnit --prerelease`
 
-## Example test
+# Example test
 
 ```csharp
-    private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
+private static readonly TimeOnly Midnight = TimeOnly.FromTimeSpan(TimeSpan.Zero);
     private static readonly TimeOnly Noon = TimeOnly.FromTimeSpan(TimeSpan.FromHours(12));
-    
+
     [Test]
     public async Task IsMorning()
     {
@@ -138,7 +145,7 @@ This provides you base classes, similarly to Microsoft.Playwright.NUnit or Micro
 or with more complex test orchestration needs
 
 ```csharp
-    [Before(Class)]
+[Before(Class)]
     public static async Task ClearDatabase(ClassHookContext context) { ... }
 
     [After(Class)]
@@ -232,7 +239,7 @@ or with more complex test orchestration needs
     }
 ```
 
-## Motivations
+# Motivations
 
 TUnit is inspired by NUnit and xUnit - two of the most popular testing frameworks for .NET.
 
@@ -240,7 +247,7 @@ It aims to build upon the useful features of both while trying to address any pa
 
 [Read more here](https://thomhurst.github.io/TUnit/docs/comparison/framework-differences)
 
-## Prerelease
+# Prerelease
 
 You'll notice that version 1.0 isn't out yet. While this framework is mostly feature complete, I'm waiting for a few things:
 
@@ -251,213 +258,187 @@ You'll notice that version 1.0 isn't out yet. While this framework is mostly fea
 
 As such, the API may change. I'll try to limit this but it's a possibility.
 
-## Benchmark
+# Benchmark
 
-### Scenario: Building the test project
+## Scenario: Building the test project
 
-#### macos-latest
+### macos-latest
 
 ```
-
 BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
-```
-| Method       | Mean       | Error    | StdDev   |
-|------------- |-----------:|---------:|---------:|
-| Build_TUnit  | 1,003.6 ms | 19.74 ms | 24.25 ms |
-| Build_NUnit  |   845.4 ms | 14.13 ms | 13.22 ms |
-| Build_xUnit  |   865.6 ms | 16.82 ms | 18.70 ms |
-| Build_MSTest |   900.7 ms | 17.45 ms | 22.68 ms |
-
-
-
-#### ubuntu-latest
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
 
+Method       |       Mean |    Error |   StdDev
+------------ | ---------: | -------: | -------:
+Build_TUnit  | 1,003.6 ms | 19.74 ms | 24.25 ms
+Build_NUnit  |   845.4 ms | 14.13 ms | 13.22 ms
+Build_xUnit  |   865.6 ms | 16.82 ms | 18.70 ms
+Build_MSTest |   900.7 ms | 17.45 ms | 22.68 ms
+
+### ubuntu-latest
+
+```
 BenchmarkDotNet v0.14.0, Ubuntu 22.04.5 LTS (Jammy Jellyfish)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
-```
-| Method       | Mean    | Error    | StdDev   |
-|------------- |--------:|---------:|---------:|
-| Build_TUnit  | 1.829 s | 0.0359 s | 0.0384 s |
-| Build_NUnit  | 1.497 s | 0.0241 s | 0.0226 s |
-| Build_xUnit  | 1.502 s | 0.0283 s | 0.0291 s |
-| Build_MSTest | 1.567 s | 0.0126 s | 0.0105 s |
-
-
-
-#### windows-latest
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
 
+Method       |    Mean |    Error |   StdDev
+------------ | ------: | -------: | -------:
+Build_TUnit  | 1.829 s | 0.0359 s | 0.0384 s
+Build_NUnit  | 1.497 s | 0.0241 s | 0.0226 s
+Build_xUnit  | 1.502 s | 0.0283 s | 0.0291 s
+Build_MSTest | 1.567 s | 0.0126 s | 0.0105 s
+
+### windows-latest
+
+```
 BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2966) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
-```
-| Method       | Mean    | Error    | StdDev   |
-|------------- |--------:|---------:|---------:|
-| Build_TUnit  | 1.838 s | 0.0351 s | 0.0431 s |
-| Build_NUnit  | 1.507 s | 0.0288 s | 0.0320 s |
-| Build_xUnit  | 1.528 s | 0.0221 s | 0.0206 s |
-| Build_MSTest | 1.570 s | 0.0218 s | 0.0204 s |
-
-
-### Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
-
-#### macos-latest
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
 
+Method       |    Mean |    Error |   StdDev
+------------ | ------: | -------: | -------:
+Build_TUnit  | 1.838 s | 0.0351 s | 0.0431 s
+Build_NUnit  | 1.507 s | 0.0288 s | 0.0320 s
+Build_xUnit  | 1.528 s | 0.0221 s | 0.0206 s
+Build_MSTest | 1.570 s | 0.0218 s | 0.0204 s
+
+## Scenario: A single test that completes instantly (including spawning a new process and initialising the test framework)
+
+### macos-latest
+
+```
 BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
-```
-| Method    | Mean      | Error     | StdDev    |
-|---------- |----------:|----------:|----------:|
-| TUnit_AOT |  81.74 ms |  1.372 ms |  1.832 ms |
-| TUnit     | 519.70 ms | 10.231 ms | 15.929 ms |
-| NUnit     | 751.01 ms | 10.674 ms |  9.463 ms |
-| xUnit     | 769.82 ms | 12.237 ms | 10.848 ms |
-| MSTest    | 673.89 ms |  8.399 ms |  7.857 ms |
-
-
-
-#### ubuntu-latest
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
 
+Method    |      Mean |     Error |    StdDev
+--------- | --------: | --------: | --------:
+TUnit_AOT |  81.74 ms |  1.372 ms |  1.832 ms
+TUnit     | 519.70 ms | 10.231 ms | 15.929 ms
+NUnit     | 751.01 ms | 10.674 ms |  9.463 ms
+xUnit     | 769.82 ms | 12.237 ms | 10.848 ms
+MSTest    | 673.89 ms |  8.399 ms |  7.857 ms
+
+### ubuntu-latest
+
+```
 BenchmarkDotNet v0.14.0, Ubuntu 22.04.5 LTS (Jammy Jellyfish)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
-```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    46.60 ms |  0.921 ms |  1.661 ms |
-| TUnit     |   852.07 ms | 16.497 ms | 26.165 ms |
-| NUnit     | 1,307.76 ms | 11.020 ms |  9.769 ms |
-| xUnit     | 1,366.43 ms | 14.481 ms | 13.545 ms |
-| MSTest    | 1,156.89 ms | 12.453 ms | 10.399 ms |
-
-
-
-#### windows-latest
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
 
+Method    |        Mean |     Error |    StdDev
+--------- | ----------: | --------: | --------:
+TUnit_AOT |    46.60 ms |  0.921 ms |  1.661 ms
+TUnit     |   852.07 ms | 16.497 ms | 26.165 ms
+NUnit     | 1,307.76 ms | 11.020 ms |  9.769 ms
+xUnit     | 1,366.43 ms | 14.481 ms | 13.545 ms
+MSTest    | 1,156.89 ms | 12.453 ms | 10.399 ms
+
+### windows-latest
+
+```
 BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2966) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
-```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    56.10 ms |  1.876 ms |  5.531 ms |
-| TUnit     |   847.54 ms | 16.821 ms | 27.638 ms |
-| NUnit     | 1,283.10 ms |  6.313 ms |  5.905 ms |
-| xUnit     | 1,337.54 ms | 14.829 ms | 13.871 ms |
-| MSTest    | 1,141.95 ms | 11.965 ms | 11.192 ms |
-
-
-### Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
-
-#### macos-latest
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
 
+Method    |        Mean |     Error |    StdDev
+--------- | ----------: | --------: | --------:
+TUnit_AOT |    56.10 ms |  1.876 ms |  5.531 ms
+TUnit     |   847.54 ms | 16.821 ms | 27.638 ms
+NUnit     | 1,283.10 ms |  6.313 ms |  5.905 ms
+xUnit     | 1,337.54 ms | 14.829 ms | 13.871 ms
+MSTest    | 1,141.95 ms | 11.965 ms | 11.192 ms
+
+## Scenario: A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)
+
+### macos-latest
+
+```
 BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
 Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
-```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    246.9 ms |  15.42 ms |  45.48 ms |
-| TUnit     |    640.4 ms |  20.15 ms |  58.79 ms |
-| NUnit     | 13,847.6 ms | 273.09 ms | 526.16 ms |
-| xUnit     | 14,083.6 ms | 257.74 ms | 215.22 ms |
-| MSTest    | 14,385.8 ms | 281.76 ms | 542.85 ms |
-
-
-
-#### ubuntu-latest
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
 
+Method    |        Mean |     Error |    StdDev
+--------- | ----------: | --------: | --------:
+TUnit_AOT |    246.9 ms |  15.42 ms |  45.48 ms
+TUnit     |    640.4 ms |  20.15 ms |  58.79 ms
+NUnit     | 13,847.6 ms | 273.09 ms | 526.16 ms
+xUnit     | 14,083.6 ms | 257.74 ms | 215.22 ms
+MSTest    | 14,385.8 ms | 281.76 ms | 542.85 ms
+
+### ubuntu-latest
+
+```
 BenchmarkDotNet v0.14.0, Ubuntu 22.04.5 LTS (Jammy Jellyfish)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
-```
-| Method    | Mean        | Error     | StdDev    |
-|---------- |------------:|----------:|----------:|
-| TUnit_AOT |    77.52 ms |  0.491 ms |  0.383 ms |
-| TUnit     |   929.63 ms | 18.527 ms | 28.844 ms |
-| NUnit     | 6,538.95 ms | 28.311 ms | 23.641 ms |
-| xUnit     | 6,579.27 ms | 26.933 ms | 23.876 ms |
-| MSTest    | 6,451.82 ms | 25.273 ms | 23.640 ms |
-
-
-
-#### windows-latest
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
 
+Method    |        Mean |     Error |    StdDev
+--------- | ----------: | --------: | --------:
+TUnit_AOT |    77.52 ms |  0.491 ms |  0.383 ms
+TUnit     |   929.63 ms | 18.527 ms | 28.844 ms
+NUnit     | 6,538.95 ms | 28.311 ms | 23.641 ms
+xUnit     | 6,579.27 ms | 26.933 ms | 23.876 ms
+MSTest    | 6,451.82 ms | 25.273 ms | 23.640 ms
+
+### windows-latest
+
+```
 BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2966) (Hyper-V)
 AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.101
   [Host]   : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
   .NET 9.0 : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
 
-Job=.NET 9.0  Runtime=.NET 9.0  
-
+Job=.NET 9.0  Runtime=.NET 9.0
 ```
-| Method    | Mean       | Error    | StdDev   | Median     |
-|---------- |-----------:|---------:|---------:|-----------:|
-| TUnit_AOT |   137.3 ms |  2.73 ms |  6.37 ms |   140.2 ms |
-| TUnit     |   907.3 ms | 17.53 ms | 24.57 ms |   903.2 ms |
-| NUnit     | 7,491.5 ms | 21.77 ms | 20.36 ms | 7,498.4 ms |
-| xUnit     | 7,531.1 ms | 19.66 ms | 17.43 ms | 7,536.9 ms |
-| MSTest    | 7,428.2 ms | 25.21 ms | 22.35 ms | 7,423.7 ms |
 
-
-
+Method    |       Mean |    Error |   StdDev |     Median
+--------- | ---------: | -------: | -------: | ---------:
+TUnit_AOT |   137.3 ms |  2.73 ms |  6.37 ms |   140.2 ms
+TUnit     |   907.3 ms | 17.53 ms | 24.57 ms |   903.2 ms
+NUnit     | 7,491.5 ms | 21.77 ms | 20.36 ms | 7,498.4 ms
+xUnit     | 7,531.1 ms | 19.66 ms | 17.43 ms | 7,536.9 ms
+MSTest    | 7,428.2 ms | 25.21 ms | 22.35 ms | 7,423.7 ms
