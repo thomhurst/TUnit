@@ -93,6 +93,7 @@ public abstract class AssertionBuilder<TActual>
             return this;
         }
 
+        ExpressionBuilder?.Append('.');
         ExpressionBuilder?.Append(methodName);
         ExpressionBuilder?.Append('(');
 
