@@ -63,7 +63,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
                 continue;
             }
             
-            assertionBuilder.AppendRaw(argumentExpression);
+            assertionBuilder.AppendRaw(argumentExpression!);
 
             if (index < argumentExpressions.Length - 1)
             {
