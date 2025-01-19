@@ -56,7 +56,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         
         for (var index = 0; index < stringExpressions.Length; index++)
         {
-            var argumentExpression = argumentExpressions[index];
+            var argumentExpression = stringExpressions[index];
 
             if (string.IsNullOrEmpty(argumentExpression))
             {
