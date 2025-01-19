@@ -52,11 +52,11 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         assertionBuilder.AppendExpression(caller)
             .AppendRaw('(');
 
-        var stringExpressions = argumentExpressions.OfType<string>().ToArray();
+        argumentExpressions = argumentExpressions.OfType<string>().ToArray();
         
-        for (var index = 0; index < stringExpressions.Length; index++)
+        for (var index = 0; index < argumentExpressions.Length; index++)
         {
-            var argumentExpression = stringExpressions[index];
+            var argumentExpression = argumentExpressions[index];
 
             if (string.IsNullOrEmpty(argumentExpression))
             {
@@ -65,7 +65,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
             
             assertionBuilder.AppendRaw(argumentExpression);
 
-            if (index < stringExpressions.Length - 1)
+            if (index < argumentExpressions.Length - 1)
             {
                 assertionBuilder.AppendRaw(',');
                 assertionBuilder.AppendRaw(' ');
