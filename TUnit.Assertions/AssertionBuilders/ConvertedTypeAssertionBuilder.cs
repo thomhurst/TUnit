@@ -11,7 +11,7 @@ public abstract class ConvertedTypeAssertionBuilder<TFromType, TToType> : Assert
     // When using And/Or, we pop the last assertion off the stack to combine it.
     // However, when converting to a different type, it's a new assertion builder
     // Due to the new generic constraint, so we need to populate the stack with something
-    internal ConvertedTypeAssertionBuilder(InvokableAssertionBuilder<TFromType> otherTypeAssertionBuilder, Func<Task<AssertionData<TToType>>> actual,
+    internal ConvertedTypeAssertionBuilder(InvokableAssertionBuilder<TFromType> otherTypeAssertionBuilder, ValueTask<AssertionData<TToType>> actual,
         string actualExpression, StringBuilder expressionBuilder) 
         : base(actual, actualExpression, expressionBuilder, new Stack<BaseAssertCondition<TToType>>([new NoOpWithMessageAssertionCondition<TToType>(otherTypeAssertionBuilder.Assertions.Peek().GetExpectationWithReason())]))
     {

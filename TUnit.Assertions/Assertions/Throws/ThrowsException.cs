@@ -48,12 +48,13 @@ public class ThrowsException<TActual, TException> where TException : Exception
         return task.GetAwaiter();
     }
     
-    public AndConvertedTypeAssertionBuilder<TActual, TException> And => new(_delegateAssertionBuilder, async () =>
+    public AndConvertedTypeAssertionBuilder<TActual, TException> And => new(_delegateAssertionBuilder, AssertionDataTask(), _delegateAssertionBuilder.ActualExpression!, _delegateAssertionBuilder.ExpressionBuilder!.Append(".And"));
+
+    public DelegateOr<TActual> Or => _delegateAssertionBuilder.Or;
+
+    private async ValueTask<AssertionData<TException>> AssertionDataTask()
     {
         var value = await this;
         return new AssertionData<TException>(value, null, _delegateAssertionBuilder.ActualExpression);
-
-    }, _delegateAssertionBuilder.ActualExpression!, _delegateAssertionBuilder.ExpressionBuilder!.Append(".And"));
-    
-    public DelegateOr<TActual> Or => _delegateAssertionBuilder.Or;
+    }
 }
