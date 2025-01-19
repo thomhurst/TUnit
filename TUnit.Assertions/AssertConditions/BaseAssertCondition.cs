@@ -42,7 +42,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return assertionBuilder.WithAssertion(this);
     }
     
-    internal InvokableAssertionBuilder<TActual> ChainedTo(AssertionBuilder<TActual> assertionBuilder, string[] argumentExpressions, [CallerMemberName] string caller = "")
+    internal InvokableAssertionBuilder<TActual> ChainedTo(AssertionBuilder<TActual> assertionBuilder, string?[] argumentExpressions, [CallerMemberName] string caller = "")
     {
         if (string.IsNullOrEmpty(caller))
         {
@@ -52,7 +52,9 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         assertionBuilder.AppendExpression(caller)
             .AppendRaw('(');
 
-        for (var index = 0; index < argumentExpressions.Length; index++)
+        var stringExpressions = argumentExpressions.OfType<string>().ToArray();
+        
+        for (var index = 0; index < stringExpressions.Length; index++)
         {
             var argumentExpression = argumentExpressions[index];
 
