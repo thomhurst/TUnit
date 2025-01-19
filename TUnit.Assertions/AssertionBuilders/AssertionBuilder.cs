@@ -101,7 +101,7 @@ public abstract class AssertionBuilder<TActual>
             var expression = expressions[index];
             ExpressionBuilder?.Append(expression);
 
-            if (index != expressions.Length - 1)
+            if (index < expressions.Length - 1)
             {
                 ExpressionBuilder?.Append(',');
                 ExpressionBuilder?.Append(' ');
