@@ -65,7 +65,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
             
             assertionBuilder.AppendRaw(argumentExpression);
 
-            if (index < argumentExpressions.Length - 1)
+            if (index < stringExpressions.Length - 1)
             {
                 assertionBuilder.AppendRaw(',');
                 assertionBuilder.AppendRaw(' ');
