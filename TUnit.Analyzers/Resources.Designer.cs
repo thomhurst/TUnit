@@ -1302,7 +1302,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test methods must not be static..
+        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods..
         /// </summary>
         internal static string TUnit0047Description {
             get {
@@ -1311,7 +1311,7 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test methods must not be static..
+        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods..
         /// </summary>
         internal static string TUnit0047MessageFormat {
             get {
@@ -1320,11 +1320,38 @@ namespace TUnit.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test methods must not be static.
+        ///   Looks up a localized string similar to Before hooks setting AsyncLocal values should be non-async void returning methods.
         /// </summary>
         internal static string TUnit0047Title {
             get {
                 return ResourceManager.GetString("TUnit0047Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test methods must not be static..
+        /// </summary>
+        internal static string TUnit0048Description {
+            get {
+                return ResourceManager.GetString("TUnit0048Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test methods must not be static..
+        /// </summary>
+        internal static string TUnit0048MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0048MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test methods must not be static.
+        /// </summary>
+        internal static string TUnit0048Title {
+            get {
+                return ResourceManager.GetString("TUnit0048Title", resourceCulture);
             }
         }
     }
