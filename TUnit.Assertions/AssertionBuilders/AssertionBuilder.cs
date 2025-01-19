@@ -12,19 +12,19 @@ public abstract class AssertionBuilder<TActual>
 {
     protected IInvokableAssertionBuilder? OtherTypeAssertionBuilder;
     
-    protected AssertionData<TActual>? InvokedAssertionData;
+    protected AssertionData<TActual>? AwaitedAssertionData;
 
-    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions)
+    public AssertionBuilder(ValueTask<AssertionData<TActual>> assertionDataTask, string actualExpression, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions)
     {
-        AssertionDataDelegate = assertionDataDelegate;
+        AssertionDataTask = assertionDataTask;
         ActualExpression = actualExpression;
         ExpressionBuilder = expressionBuilder;
         Assertions = assertions;
     }
     
-    public AssertionBuilder(Func<Task<AssertionData<TActual>>> assertionDataDelegate, string actualExpression)
+    public AssertionBuilder(ValueTask<AssertionData<TActual>> assertionDataTask, string actualExpression)
     {
-        AssertionDataDelegate = assertionDataDelegate;
+        AssertionDataTask = assertionDataTask;
         ActualExpression = actualExpression;
         
         if (string.IsNullOrEmpty(actualExpression))
@@ -43,7 +43,7 @@ public abstract class AssertionBuilder<TActual>
     
     internal StringBuilder? ExpressionBuilder { get; init; }
     internal string? ActualExpression { get; init; }
-    internal Func<Task<AssertionData<TActual>>> AssertionDataDelegate { get; }
+    internal ValueTask<AssertionData<TActual>> AssertionDataTask { get; }
     
     internal readonly Stack<BaseAssertCondition<TActual>> Assertions = new();
     protected readonly List<AssertionResult> Results = [];
@@ -78,7 +78,6 @@ public abstract class AssertionBuilder<TActual>
 
         ExpressionBuilder?.Append(methodName);
         ExpressionBuilder?.Append('(');
-        ExpressionBuilder?.Append(methodName);
 
         for (var index = 0; index < expressions.Length; index++)
         {
@@ -120,13 +119,13 @@ public abstract class AssertionBuilder<TActual>
             await OtherTypeAssertionBuilder;
         }
         
-        InvokedAssertionData ??= await AssertionDataDelegate();
+        AwaitedAssertionData ??= await AssertionDataTask;
 
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
         
         foreach (var assertion in Assertions.Reverse())
         {
-            var result = await assertion.Assert(InvokedAssertionData.Value.Result, InvokedAssertionData.Value.Exception, InvokedAssertionData.Value.ActualExpression);
+            var result = await assertion.Assert(AwaitedAssertionData.Value.Result, AwaitedAssertionData.Value.Exception, AwaitedAssertionData.Value.ActualExpression);
             
             Results.Add(result);
             
@@ -134,7 +133,7 @@ public abstract class AssertionBuilder<TActual>
             {
                 if (assertion.Subject is null)
                 {
-                    assertion.SetSubject(InvokedAssertionData.Value.ActualExpression);
+                    assertion.SetSubject(AwaitedAssertionData.Value.ActualExpression);
                 }
 
                 var exception = new AssertionException(
@@ -157,7 +156,7 @@ public abstract class AssertionBuilder<TActual>
             }
         }
         
-        return InvokedAssertionData.Value;
+        return AwaitedAssertionData.Value;
     }
     
     [Obsolete("This is a base `object` method that should not be called.", true)]

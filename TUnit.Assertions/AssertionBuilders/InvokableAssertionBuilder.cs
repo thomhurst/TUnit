@@ -6,11 +6,11 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class InvokableAssertionBuilder<TActual> : 
     AssertionBuilder<TActual>, IInvokableAssertionBuilder 
 {
-    internal InvokableAssertionBuilder(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder.AssertionDataDelegate, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
+    internal InvokableAssertionBuilder(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder.AssertionDataTask, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
     {
         if (assertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
         {
-            InvokedAssertionData = invokableAssertionBuilder.InvokedAssertionData;
+            AwaitedAssertionData = invokableAssertionBuilder.AwaitedAssertionData;
         }
     }
 
