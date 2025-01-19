@@ -35,7 +35,9 @@ public abstract class AssertionBuilder<TActual>
         else
         {
             ActualExpression = actualExpression;
-            ExpressionBuilder = new StringBuilder($"Assert.That({actualExpression})");
+            ExpressionBuilder = new StringBuilder("Assert.That(");
+            ExpressionBuilder.Append(actualExpression);
+            ExpressionBuilder.Append(')');
         }
     }
     
@@ -50,7 +52,8 @@ public abstract class AssertionBuilder<TActual>
     {
         if (!string.IsNullOrEmpty(expression))
         {
-            ExpressionBuilder?.Append($".{expression}");
+            ExpressionBuilder?.Append('.');
+            ExpressionBuilder?.Append(expression);
         }
 
         return this;
@@ -73,7 +76,25 @@ public abstract class AssertionBuilder<TActual>
             return this;
         }
 
-        return AppendExpression($"{methodName}({string.Join(", ", expressions)})");
+        ExpressionBuilder?.Append(methodName);
+        ExpressionBuilder?.Append('(');
+        ExpressionBuilder?.Append(methodName);
+
+        for (var index = 0; index < expressions.Length; index++)
+        {
+            var expression = expressions[index];
+            ExpressionBuilder?.Append(expression);
+
+            if (index != expressions.Length - 1)
+            {
+                ExpressionBuilder?.Append(',');
+                ExpressionBuilder?.Append(' ');
+            }
+        }
+
+        ExpressionBuilder?.Append(')');
+
+        return this;
     }
 
     internal InvokableAssertionBuilder<TActual> WithAssertion(BaseAssertCondition<TActual> assertCondition)
@@ -105,7 +126,7 @@ public abstract class AssertionBuilder<TActual>
         
         foreach (var assertion in Assertions.Reverse())
         {
-            var result = await assertion.Assert(InvokedAssertionData.Result, InvokedAssertionData.Exception, InvokedAssertionData.ActualExpression);
+            var result = await assertion.Assert(InvokedAssertionData.Value.Result, InvokedAssertionData.Value.Exception, InvokedAssertionData.Value.ActualExpression);
             
             Results.Add(result);
             
@@ -113,7 +134,7 @@ public abstract class AssertionBuilder<TActual>
             {
                 if (assertion.Subject is null)
                 {
-                    assertion.SetSubject(InvokedAssertionData.ActualExpression);
+                    assertion.SetSubject(InvokedAssertionData.Value.ActualExpression);
                 }
 
                 var exception = new AssertionException(
@@ -136,7 +157,7 @@ public abstract class AssertionBuilder<TActual>
             }
         }
         
-        return InvokedAssertionData;
+        return InvokedAssertionData.Value;
     }
     
     [Obsolete("This is a base `object` method that should not be called.", true)]
