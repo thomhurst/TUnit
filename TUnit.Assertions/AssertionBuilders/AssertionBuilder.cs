@@ -59,6 +59,23 @@ public abstract class AssertionBuilder<TActual>
         return this;
     }
     
+    protected internal AssertionBuilder<TActual> AppendRaw(string value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            ExpressionBuilder?.Append(value);
+        }
+
+        return this;
+    }
+    
+    protected internal AssertionBuilder<TActual> AppendRaw(char value)
+    {
+        ExpressionBuilder?.Append(value);
+
+        return this;
+    }
+    
     internal AssertionBuilder<TActual> AppendConnector(ChainType chainType)
     {
         if (chainType == ChainType.None)

@@ -48,8 +48,24 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         {
             return assertionBuilder.WithAssertion(this);
         }
-        
-        return assertionBuilder.AppendExpression($"{caller}({string.Join(", ", argumentExpressions.Where(x => !string.IsNullOrEmpty(x)))})").WithAssertion(this);
+
+        assertionBuilder.AppendExpression(caller)
+            .AppendRaw('(');
+
+        for (var index = 0; index < argumentExpressions.Where(x => !string.IsNullOrEmpty(x)).ToArray().Length; index++)
+        {
+            var argumentExpression = argumentExpressions.Where(x => !string.IsNullOrEmpty(x)).ToArray()[index];
+            assertionBuilder.AppendRaw(argumentExpression);
+
+            if (index != argumentExpressions.Length - 1)
+            {
+                assertionBuilder.AppendRaw(',');
+                assertionBuilder.AppendRaw(' ');
+            }
+        }
+
+        return assertionBuilder.AppendRaw(')')
+            .WithAssertion(this);
     }
     
     internal Task<AssertionResult> Assert(AssertionData<TActual> assertionData)
