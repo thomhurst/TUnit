@@ -11,7 +11,6 @@ public class MarkMethodStaticSuppressor : DiagnosticSuppressor
 {
     public override void ReportSuppressions(SuppressionAnalysisContext context)
     {
-        var blah = new StringBuilder().AppendLine("");
         foreach (var diagnostic in context.ReportedDiagnostics)
         {
             if (diagnostic.Location.SourceTree?.GetRoot().FindNode(diagnostic.Location.SourceSpan) is not { } node)
