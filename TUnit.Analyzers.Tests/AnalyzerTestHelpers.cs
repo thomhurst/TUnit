@@ -130,11 +130,9 @@ public static class AnalyzerTestHelpers
 					"Microsoft.NETCore.App.Ref",
 					"8.0.0"),
 				Path.Combine("ref", "net8.0")
-			),
-			CompilerDiagnostics = CompilerDiagnostics.All,
-			DisabledDiagnostics = { "CS8019", "CS1591" }
+			)
 		};
-
+		
 		test.TestState.AdditionalReferences
 			.AddRange([
 				MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),

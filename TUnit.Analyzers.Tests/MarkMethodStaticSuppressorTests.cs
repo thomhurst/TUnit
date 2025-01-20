@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
+using Microsoft.CodeQuality.Analyzers.QualityGuidelines;
 using NUnit.Framework;
 
 namespace TUnit.Analyzers.Tests;
@@ -27,6 +28,7 @@ public class MarkMethodStaticSuppressorTests
                 }
                 """
             )
+            .WithAnalyzer<MarkMembersAsStaticAnalyzer>()
             .WithSpecificDiagnostics(CA1822)
             .WithExpectedDiagnosticsResults(CA1822.WithLocation(0).WithIsSuppressed(true))
             .RunAsync();
@@ -44,6 +46,7 @@ public class MarkMethodStaticSuppressorTests
                 }
                 """
             )
+            .WithAnalyzer<MarkMembersAsStaticAnalyzer>()
             .WithSpecificDiagnostics(CA1822)
             .WithExpectedDiagnosticsResults(CA1822.WithLocation(0).WithIsSuppressed(false))
             .RunAsync();
