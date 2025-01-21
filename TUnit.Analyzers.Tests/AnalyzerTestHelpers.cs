@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -121,15 +122,16 @@ public static class AnalyzerTestHelpers
 	)
 		where TSuppressor : DiagnosticSuppressor, new()
 	{
+		var currentVersion = Environment.Version.Major;
 		var test = new CSharpSuppressorTest<TSuppressor, DefaultVerifier>
 		{
 			TestCode = inputSource,
 			ReferenceAssemblies = new ReferenceAssemblies(
-				"net8.0",
+				$"net{currentVersion}.0",
 				new PackageIdentity(
 					"Microsoft.NETCore.App.Ref",
-					"8.0.0"),
-				Path.Combine("ref", "net8.0")
+					$"{currentVersion}.0.0"),
+				Path.Combine("ref", $"net{currentVersion}.0")
 			)
 		};
 		
