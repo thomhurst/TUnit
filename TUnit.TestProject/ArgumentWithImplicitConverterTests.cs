@@ -1,6 +1,4 @@
-﻿using Vogen;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 public class ArgumentWithImplicitConverterTests
 {
