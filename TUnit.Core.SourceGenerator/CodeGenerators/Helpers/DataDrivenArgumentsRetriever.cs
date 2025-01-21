@@ -65,7 +65,7 @@ public static class DataDrivenArgumentsRetriever
             return
             [
                 new Argument(parameterOrPropertyTypeSymbols[0].GloballyQualified(),
-                    $"[{string.Join(", ", objectArray.Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, arguments[i].Expression, x.Type)))}]")
+                    $"[{string.Join(", ", objectArray.Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x, arguments[i]), x.Type)))}]")
             ];
         }
 
@@ -78,7 +78,7 @@ public static class DataDrivenArgumentsRetriever
                                     TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(
                                         element.typedConstant),
                     
-                    TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element.a.Expression, type));
+                    TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element, type));
             });
     }
 

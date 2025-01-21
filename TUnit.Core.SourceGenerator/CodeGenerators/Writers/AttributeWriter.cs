@@ -44,7 +44,7 @@ public class AttributeWriter
             })
             .Where(x => x.Syntax != null)
             .Select(x =>
-                $"{x.Name}{TypedConstantParser.GetTypedConstantValue(context.SemanticModel, x.Syntax!.Expression, x.Constant.Type)}");
+                $"{x.Name}{TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x.Constant, x.Syntax), x.Constant.Type)}");
 
         var namedArgSyntaxes = attributeSyntax.DescendantNodes()
             .OfType<AttributeArgumentSyntax>()
@@ -52,7 +52,7 @@ public class AttributeWriter
             .ToArray();
 
         var namedArguments = attributeData.NamedArguments.Select(x =>
-            $"{x.Key} = {TypedConstantParser.GetTypedConstantValue(context.SemanticModel, namedArgSyntaxes.First(stx => stx.NameEquals?.Name.Identifier.ValueText == x.Key).Expression, x.Value.Type)},");
+            $"{x.Key} = {TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (default, namedArgSyntaxes.First(stx => stx.NameEquals?.Name.Identifier.ValueText == x.Key)), x.Value.Type)},");
 
         return $$"""
                  new {{attributeData.AttributeClass!.GloballyQualified()}}({{string.Join(", ", constructorArguments)}})

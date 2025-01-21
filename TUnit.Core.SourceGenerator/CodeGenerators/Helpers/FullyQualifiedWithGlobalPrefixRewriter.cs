@@ -57,6 +57,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             && symbol.IsConst(out var constantValue))
         {
             literalSyntax = Literal(constantValue);
+            
             return true;
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
 using TUnit.Analyzers.Helpers;
@@ -603,7 +604,17 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             // e.g. [Arguments(1.55)]
             return true;
         }
-        
+
+        if (argument.Type is not null
+            && methodParameterType is not null
+            && context.Compilation.ClassifyConversion(argument.Type, methodParameterType)
+                is { IsImplicit: true }
+                or { IsExplicit: true }
+                or { IsNumeric: true })
+        {
+            return true;
+        }
+
         return context.Compilation.HasImplicitConversionOrGenericParameter(argument.Type, methodParameterType);
     }
 
