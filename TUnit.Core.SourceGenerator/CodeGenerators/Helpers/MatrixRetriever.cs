@@ -59,7 +59,7 @@ public static class MatrixRetriever
 
             return new Argument(type?.GloballyQualified() ??
                                 TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(element.ArgumentConstant),
-                TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element.ArgumentSyntax.Expression, type));
+                TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element, type));
         });
     }
 
