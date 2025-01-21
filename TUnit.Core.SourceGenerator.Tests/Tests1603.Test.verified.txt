@@ -125,7 +125,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
-			short methodArg = -123;
+			short methodArg = (short)(-123);
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.Bugs._1603.Tests>(() => 
 			new global::TUnit.TestProject.Bugs._1603.Tests()

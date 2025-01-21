@@ -59,7 +59,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 7,
+				TestLineNumber = 5,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -92,7 +92,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
 				TestName = "Explicit",
 				TestFilePath = @"",
-				TestLineNumber = 7,
+				TestLineNumber = 5,
 				Exception = exception,
 			});
 		}
@@ -131,7 +131,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 7,
+				TestLineNumber = 5,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -164,7 +164,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
 				TestName = "Explicit",
 				TestFilePath = @"",
-				TestLineNumber = 7,
+				TestLineNumber = 5,
 				Exception = exception,
 			});
 		}
@@ -203,7 +203,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Explicit(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 7,
+				TestLineNumber = 5,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -236,7 +236,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ExplicitInteger)],
 				TestName = "Explicit",
 				TestFilePath = @"",
-				TestLineNumber = 7,
+				TestLineNumber = 5,
 				Exception = exception,
 			});
 		}
@@ -305,7 +305,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 16,
+				TestLineNumber = 14,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -338,7 +338,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
 				TestName = "Implicit",
 				TestFilePath = @"",
-				TestLineNumber = 16,
+				TestLineNumber = 14,
 				Exception = exception,
 			});
 		}
@@ -377,7 +377,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 16,
+				TestLineNumber = 14,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -410,7 +410,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
 				TestName = "Implicit",
 				TestFilePath = @"",
-				TestLineNumber = 16,
+				TestLineNumber = 14,
 				Exception = exception,
 			});
 		}
@@ -449,7 +449,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Implicit(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 16,
+				TestLineNumber = 14,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -482,7 +482,7 @@ file partial class ArgumentWithImplicitConverterTests : global::TUnit.Core.Inter
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.ImplicitInteger)],
 				TestName = "Implicit",
 				TestFilePath = @"",
-				TestLineNumber = 16,
+				TestLineNumber = 14,
 				Exception = exception,
 			});
 		}
