@@ -37,9 +37,13 @@ public class MyTests
     [Test]
     public async Task Test1()
     {
-        var response = await HttpHelper.Get("/my/endpoint");
+        var client = WebAppFactory.CreateClient();
 
+        var response = await client.GetAsync("/my/endpoint");
+        
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
     }
 }
 ```
+
+Alternatively, you can use the `[NotInParallel]` attribute to avoid parallelism and multi-initialisation. But you'll most likely be sacrificing test speeds if tests can't run in parallel.
