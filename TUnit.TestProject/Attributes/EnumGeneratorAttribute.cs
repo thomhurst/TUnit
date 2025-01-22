@@ -4,12 +4,12 @@ public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
 {
     public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        if (dataGeneratorMetadata.ParameterInfos is not { Length: 1 })
+        if (dataGeneratorMetadata.MembersToGenerate is not [SourceGeneratedParameterInformation sourceGeneratedParameterInformation])
         {
             throw new Exception("Expecting one parameter");
         }
 
-        var parameterType = dataGeneratorMetadata.ParameterInfos[0].ParameterType;
+        var parameterType = sourceGeneratedParameterInformation.Type;
         if (parameterType is not { IsEnum: true })
         {
             throw new Exception("Expecting Enum parameter");

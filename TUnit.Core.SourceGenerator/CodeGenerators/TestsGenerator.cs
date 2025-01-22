@@ -147,7 +147,7 @@ public class TestsGenerator : IIncrementalGenerator
 
                 sourceBuilder.WriteLine("try");
                 sourceBuilder.WriteLine("{");
-                GenericTestInvocationWriter.GenerateTestInvocationCode(sourceBuilder, model);
+                GenericTestInvocationWriter.GenerateTestInvocationCode(context, sourceBuilder, model);
                 sourceBuilder.WriteLine("}");
                 sourceBuilder.WriteLine("catch (global::System.Exception exception)");
                 sourceBuilder.WriteLine("{");

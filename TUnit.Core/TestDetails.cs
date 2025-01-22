@@ -30,7 +30,6 @@ public abstract record TestDetails(Type ClassType)
 
     internal readonly List<string> MutableCategories = [];
     public IReadOnlyList<string> Categories => MutableCategories;
-    
     public required MethodInfo MethodInfo { get; init; }
     public abstract object? ClassInstance { get; }
     public required int CurrentRepeatAttempt { get; init; }
