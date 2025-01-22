@@ -31,4 +31,22 @@ public class MatrixTests
     {
         await Task.CompletedTask;
     }
+    
+    [Test]
+    [MatrixDataSource]
+    public async Task AutoGenerateBools(
+        [Matrix("A", "B", "C")] string str, 
+        bool boolean)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [Test]
+    [MatrixDataSource]
+    public async Task AutoGenerateBools2(
+        [Matrix("A", "B", "C")] string str, 
+        [Matrix] bool boolean)
+    {
+        await Task.CompletedTask;
+    }
 }

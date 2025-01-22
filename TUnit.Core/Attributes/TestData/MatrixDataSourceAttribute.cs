@@ -15,7 +15,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
         {
             throw new Exception("[MatrixDataSource] only supports parameterised tests");
         }
-
+        
         foreach (var row in GetMatrixValues(parameterInformation.Select(GetAllArguments)))
         {
             yield return () => row.ToArray();
@@ -24,17 +24,33 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 
     private IReadOnlyList<object?> GetAllArguments(SourceGeneratedParameterInformation sourceGeneratedParameterInformation)
     {
-        var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault() 
-                              ?? throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
+        var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault();
+
+        if (matrixAttribute is null or { Objects.Length: 0 })
+        {
+            var type = sourceGeneratedParameterInformation.Type;
+            
+            if (type == typeof(bool))
+            {
+                return [true, false];
+            }
+
+            if (type.IsEnum)
+            {
+                return Enum.GetValues(type).Cast<object>().ToArray();
+            }
+            
+            throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
+        }
 
         return matrixAttribute.Objects;
     }
     
+    private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];
+
     private IEnumerable<IEnumerable<object?>> GetMatrixValues(IEnumerable<IReadOnlyList<object?>> elements)
     {
-        IEnumerable<IEnumerable<object?>> seed = [[]];
-        
-        return elements.Aggregate(seed, (accumulator, enumerable)
+        return elements.Aggregate(_seed, (accumulator, enumerable)
             => accumulator.SelectMany(x => enumerable.Select(x.Append)));
     }
 }
