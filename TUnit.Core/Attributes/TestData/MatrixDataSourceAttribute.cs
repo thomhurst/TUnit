@@ -1,6 +1,7 @@
 ﻿namespace TUnit.Core;
 
-public class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
 {
     public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {

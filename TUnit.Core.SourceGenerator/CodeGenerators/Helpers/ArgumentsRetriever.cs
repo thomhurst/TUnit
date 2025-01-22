@@ -18,16 +18,11 @@ public static class ArgumentsRetriever
         ArgumentsType argumentsType,
         string? propertyName = null)
     {
-        if (parameterOrPropertyTypes.IsDefaultOrEmpty || !IsDataDriven(dataAttributes, parameters))
+        if (parameterOrPropertyTypes.IsDefaultOrEmpty || !IsDataDriven(dataAttributes))
         {
             yield return new EmptyArgumentsContainer();
             
             yield break;
-        }
-        
-        foreach (var argumentsContainer in MatrixRetriever.Parse(context, parameters, argumentsType))
-        {
-            yield return argumentsContainer;
         }
 
         foreach (var attributeTypeGroup in dataAttributes.GroupBy(x => x.AttributeClass,
@@ -79,11 +74,9 @@ public static class ArgumentsRetriever
         }
     }
 
-    private static bool IsDataDriven(ImmutableArray<AttributeData> dataAttributes,
-        ImmutableArray<IParameterSymbol> parameters)
+    private static bool IsDataDriven(ImmutableArray<AttributeData> dataAttributes)
     {
-        return dataAttributes.Any(x => x.IsDataSourceAttribute())
-               || parameters.HasMatrixAttribute();
+        return dataAttributes.Any(x => x.IsDataSourceAttribute());
     }
 
     public static ClassPropertiesContainer GetProperties(GeneratorAttributeSyntaxContext context,

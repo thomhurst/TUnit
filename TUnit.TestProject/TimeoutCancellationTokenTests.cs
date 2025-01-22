@@ -52,6 +52,7 @@ public class TimeoutCancellationTokenTests
     }
     
     [Test]
+    [MatrixDataSource]
     [Timeout(5_000)]
     [Category("Blah")]
     public async Task MatrixTest(
