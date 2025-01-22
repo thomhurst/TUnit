@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.TestDataAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.MatrixAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
