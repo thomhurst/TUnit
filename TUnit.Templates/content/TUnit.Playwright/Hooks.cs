@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
 
-namespace TUnit.Playwright.Tests;
+namespace TestProject;
 
 public class Hooks
 {
-    [Before(Assembly)]
+    [Before(TestSession)]
     public static void InstallPlaywright()
     {
         if (Debugger.IsAttached)

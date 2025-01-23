@@ -1,15 +1,17 @@
 {
     "$schema": "http://json.schemastore.org/template",
     "author": "Tom Longhurst",
-    "description": "Templates for getting started with TUnit",
+    "description": "A template for testing an ASP.NET Core project with TUnit",
     "classifications": [
       "Test",
-      "TUnit"
+      "TUnit",
+      "Asp",
+      "ASP.NET"
     ],
-    "name": "TUnit Mixed Test Project",
-    "identity": "TUnit.Test.Mixed",
+    "name": "TUnit ASP.NET Core Project",
+    "identity": "TUnit.Test.AspNet",
     "groupIdentity": "TUnit",
-    "shortName": "TUnit",
+    "shortName": "TUnit.AspNet",
     "tags": {
       "language": "C#",
       "type": "project"
