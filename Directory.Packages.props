@@ -47,7 +47,7 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="Polly" Version="8.5.1" />
     <PackageVersion Include="Polyfill" Version="7.13.0" />
-    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="0.0.79" />
     <PackageVersion Include="Sourcy.Git" Version="0.0.79" />
     <PackageVersion Include="StreamJsonRpc" Version="2.20.20" />
