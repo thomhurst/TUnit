@@ -33,18 +33,58 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.Bugs._1589.MyTests>
+{
+     Name = "MyTests",
+     Attributes = 
+     [
+         new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
+{
+    Shared = global::TUnit.Core.SharedType.None
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
+    {
+        Name = "myFixture",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.Bugs._1589.MyTests>
+{
+     Name = "Test1",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = classInformation,
+};
 			var classArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
    TestClassType = testClassType,
-   ParameterInfos = typeof(global::TUnit.TestProject.Bugs._1589.MyTests).GetConstructors().First().GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Bugs._1589.MyFixture>
+    {
+        Name = "myFixture",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var classDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
 {
-    Shared = global::TUnit.Core.SharedType.None,
+    Shared = global::TUnit.Core.SharedType.None
 };
 
 			var classArgGeneratedDataArray = classDataAttribute.GenerateDataSources(classArgDataGeneratorMetadata);
@@ -79,7 +119,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 } ],
 					ClassAttributes = [ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
 {
-    Shared = global::TUnit.Core.SharedType.None,
+    Shared = global::TUnit.Core.SharedType.None
 } ],
 					AssemblyAttributes = [  ],
 					DataAttributes = [ classDataAttribute ],

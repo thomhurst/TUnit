@@ -7,7 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" ReferenceOutputAssembly="false" />
+<!--    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" ReferenceOutputAssembly="false" />-->
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
@@ -46,6 +46,10 @@
     <None Update="ArgumentWithImplicitConverterTests.Test.verified.txt">
       <ParentFile>BasicTests</ParentFile>
       <DependentUpon>ArgumentWithImplicitConverterTests.cs</DependentUpon>
+    </None>
+    <None Update="AttributeTests.Test.verified.txt">
+      <ParentFile>BasicTests</ParentFile>
+      <DependentUpon>AttributeTests.cs</DependentUpon>
     </None>
   </ItemGroup>
 </Project>

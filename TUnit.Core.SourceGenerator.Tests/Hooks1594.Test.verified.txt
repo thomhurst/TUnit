@@ -48,7 +48,7 @@ file partial class Hooks_MyTests : global::TUnit.Core.Interfaces.SourceGenerator
 } ],
 				ClassAttributes = [ new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>()
 {
-    Shared = global::TUnit.Core.SharedType.None,
+    Shared = global::TUnit.Core.SharedType.None
 } ],
 				AssemblyAttributes = [  ],
 			},
