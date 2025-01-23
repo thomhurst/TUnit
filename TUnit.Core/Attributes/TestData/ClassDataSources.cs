@@ -176,6 +176,11 @@ internal class ClassDataSources
             await TestDataContainer.ConsumeGlobalCount(typeof(T));
         }
     }
+    
+    public static bool IsStaticProperty(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        return dataGeneratorMetadata.MembersToGenerate is [SourceGeneratedPropertyInformation { IsStatic: true }];
+    }
 
     private static T Create<T>() where T : new()
     {

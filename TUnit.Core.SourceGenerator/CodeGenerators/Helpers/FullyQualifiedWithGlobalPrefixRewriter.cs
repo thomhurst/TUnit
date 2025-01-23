@@ -8,6 +8,11 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanticModel) : CSharpSyntaxRewriter
 {
+    public override SyntaxNode VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+    {
+        return SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(node.ToFullString()));
+    }
+
     public override SyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
@@ -40,10 +45,22 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             return constantValue;
         }
 
+        if (symbol is IMethodSymbol methodSymbol)
+        {
+            var type = methodSymbol.ReceiverType
+                ?? methodSymbol.ContainingType;
+            
+            return SyntaxFactory
+                .IdentifierName(type.GloballyQualified())
+                .WithoutTrivia();
+        }
+
         return SyntaxFactory
             .IdentifierName(symbol!.GloballyQualified())
             .WithoutTrivia();
     }
+    
+    
 
     private static bool TryParseConstant(ISymbol? symbol, [NotNullWhen(true)] out SyntaxNode? literalSyntax)
     {

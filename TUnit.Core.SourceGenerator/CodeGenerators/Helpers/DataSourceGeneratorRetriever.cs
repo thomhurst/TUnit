@@ -9,7 +9,10 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 public static class DataSourceGeneratorRetriever
 {
     public static ArgumentsContainer Parse(GeneratorAttributeSyntaxContext context,
-        INamedTypeSymbol namedTypeSymbol,
+        INamedTypeSymbol testClass,
+        IMethodSymbol testMethod,
+        ImmutableArray<IParameterSymbol> parameters,
+        IPropertySymbol? property,
         ImmutableArray<ITypeSymbol> parameterOrPropertyTypes,
         AttributeData attributeData,
         ArgumentsType argumentsType,
@@ -18,16 +21,15 @@ public static class DataSourceGeneratorRetriever
     {
         return new GeneratedArgumentsContainer
         (
-            context,
-            attributeData: attributeData,
+            Context: context,
+            AttributeData: attributeData,
             ArgumentsType: argumentsType,
-            parameterOrPropertyTypes: parameterOrPropertyTypes,
-            TestClassTypeName: namedTypeSymbol.GloballyQualified(),
-            AttributeDataGeneratorType: attributeData.AttributeClass!.ToDisplayString(DisplayFormats
-                .FullyQualifiedGenericWithGlobalPrefix),
-            GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass)?.TypeArguments
-                .Select(x => x.GloballyQualified()).ToArray() ?? [],
-            AttributeIndex: index
+            ParameterOrPropertyTypes: parameterOrPropertyTypes,
+            TestClass: testClass,
+            TestMethod: testMethod,
+            Property: property,
+            Parameters: parameters,
+            GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass)?.TypeArguments.Select(x => x.GloballyQualified()).ToArray() ?? []
         )
         {
             DisposeAfterTest =
@@ -40,11 +42,11 @@ public static class DataSourceGeneratorRetriever
         };
     }
 
-    private static INamedTypeSymbol? GetDataGeneratorAttributeBaseClass(ITypeSymbol attributeClass)
+    private static INamedTypeSymbol? GetDataGeneratorAttributeBaseClass(ITypeSymbol? attributeClass)
     {
-        var selfAndBaseTypes = attributeClass.GetSelfAndBaseTypes();
+        var selfAndBaseTypes = attributeClass?.GetSelfAndBaseTypes();
 
-        if (selfAndBaseTypes.FirstOrDefault(HasGeneratorInterface) is INamedTypeSymbol generatorInterface)
+        if (selfAndBaseTypes?.FirstOrDefault(HasGeneratorInterface) is INamedTypeSymbol generatorInterface)
         {
             return generatorInterface;
         }

@@ -3,6 +3,7 @@
 public class MatrixTests
 {
     [Test]
+    [MatrixDataSource]
     public async Task MatrixTest_One(
         [Matrix("A", "B", "C", "D")] string str, 
         [Matrix(1, 2, 3)] int i, 
@@ -12,6 +13,7 @@ public class MatrixTests
     }
     
     [Test]
+    [MatrixDataSource]
     public async Task MatrixTest_Two(
         [Matrix(1, 2)] int i, 
         [Matrix(1, 2, 3)] int i2, 
@@ -22,9 +24,28 @@ public class MatrixTests
     }
     
     [Test]
+    [MatrixDataSource]
     public async Task MatrixTest_Enum(
         [Matrix(1, 2)] int i, 
         [Matrix(-1, TestEnum.One)] TestEnum testEnum)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [Test]
+    [MatrixDataSource]
+    public async Task AutoGenerateBools(
+        [Matrix("A", "B", "C")] string str, 
+        bool boolean)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [Test]
+    [MatrixDataSource]
+    public async Task AutoGenerateBools2(
+        [Matrix("A", "B", "C")] string str, 
+        [Matrix] bool boolean)
     {
         await Task.CompletedTask;
     }

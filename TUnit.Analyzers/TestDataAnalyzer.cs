@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -8,7 +7,6 @@ using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
-[SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1024:Symbols should be compared for equality")]
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 {
@@ -25,7 +23,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.TooManyArgumentsInTestMethod,
             Rules.PropertyRequiredNotSet,
             Rules.MustHavePropertySetter,
-            Rules.ReturnFunc);
+            Rules.ReturnFunc,
+            Rules.MatrixDataSourceAttributeRequired);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -148,8 +147,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 CheckDataGenerator(context, attribute, types);
             }
         }
-
-        CheckMatrix(context, parameters);
     }
 
     private void CheckPropertyAccessor(SymbolAnalysisContext context, IPropertySymbol? propertySymbol)
@@ -175,31 +172,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         IEnumerable<ITypeSymbol?> types = [..parameters.Select(x => x.Type), propertySymbol?.Type];
 
         return types.OfType<ITypeSymbol>().ToImmutableArray().WithoutCancellationTokenParameter();
-    }
-
-    private void CheckMatrix(SymbolAnalysisContext context, ImmutableArray<IParameterSymbol> parameters)
-    {
-        if (!parameters.Any(x => x.HasMatrixAttribute(context.Compilation)))
-        {
-            return;
-        }
-        
-        foreach (var parameterSymbol in parameters)
-        {
-            if (SymbolEqualityComparer.Default.Equals(parameters.LastOrDefault()?.Type,
-                    context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!)))
-            {
-                continue;
-            }
-            
-            if (!parameterSymbol.HasMatrixAttribute(context.Compilation))
-            {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.NoTestDataProvided,
-                        context.Symbol.Locations.FirstOrDefault())
-                );
-            }
-        }
     }
     
     private void CheckArguments(SymbolAnalysisContext context, AttributeData argumentsAttribute,
@@ -366,7 +338,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             var unwrappedTypes = UnwrapTypes(context,
                 dataSourceMethod,
                 testParameterTypes,
-                out var isEnumerable,
                 out var isFunc,
                 out var isTuples);
 
@@ -491,11 +462,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context,
         IMethodSymbol methodContainingTestData,
         ImmutableArray<ITypeSymbol> testParameterTypes,
-        out bool isEnumerable,
         out bool isFunc,
         out bool isTuples)
     {
-        isEnumerable = false;
         isFunc = false;
         isTuples = false;
 
@@ -528,7 +497,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         
         if (methodContainingTestData.ReturnType.IsIEnumerable(context.Compilation, out var enumerableInnerType))
         {
-            isEnumerable = true;
             type = enumerableInnerType;
         }
         
