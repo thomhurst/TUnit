@@ -98,7 +98,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Run Benchmark
-        run: ${{ matrix.os != 'windows-latest' && 'sudo -E ' || '' }}dotnet run -c Release --allCategories=Build --framework net9.0
+        run: dotnet run -c Release --allCategories=Build --framework net9.0
         working-directory: "tools/speed-comparison/Tests.Benchmark"
 
       - name: Upload Markdown
