@@ -37,12 +37,12 @@ public class TestTemplatePackageModule : Module<CommandResult>
         
         await context.DotNet().New(new DotNetNewOptions("TUnit.AspNet")
         {
-            Name = "MyTestProject"
+            Name = "MyTestProject2"
         }, cancellationToken);
         
         return await context.DotNet().New(new DotNetNewOptions("TUnit.Playwright")
         {
-            Name = "MyTestProject"
+            Name = "MyTestProject3"
         }, cancellationToken);
     }
 }
