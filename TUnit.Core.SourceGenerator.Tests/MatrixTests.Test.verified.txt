@@ -145,9 +145,9 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				string methodArg = (dynamic)methodArgGeneratedData[0];
-				int methodArg1 = (dynamic)methodArgGeneratedData[1];
-				bool methodArg2 = (dynamic)methodArgGeneratedData[2];
+				string methodArg = (string)(dynamic)methodArgGeneratedData[0];
+				int methodArg1 = (int)(dynamic)methodArgGeneratedData[1];
+				bool methodArg2 = (bool)(dynamic)methodArgGeneratedData[2];
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
 				new global::TUnit.TestProject.MatrixTests()
 				, sessionId, testBuilderContext);
@@ -371,10 +371,10 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = (dynamic)methodArgGeneratedData[0];
-				int methodArg1 = (dynamic)methodArgGeneratedData[1];
-				int methodArg2 = (dynamic)methodArgGeneratedData[2];
-				bool methodArg3 = (dynamic)methodArgGeneratedData[3];
+				int methodArg = (int)(dynamic)methodArgGeneratedData[0];
+				int methodArg1 = (int)(dynamic)methodArgGeneratedData[1];
+				int methodArg2 = (int)(dynamic)methodArgGeneratedData[2];
+				bool methodArg3 = (bool)(dynamic)methodArgGeneratedData[3];
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
 				new global::TUnit.TestProject.MatrixTests()
 				, sessionId, testBuilderContext);
@@ -554,8 +554,8 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestPro
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = (dynamic)methodArgGeneratedData[0];
-				global::TUnit.TestProject.TestEnum methodArg1 = (dynamic)methodArgGeneratedData[1];
+				int methodArg = (int)(dynamic)methodArgGeneratedData[0];
+				global::TUnit.TestProject.TestEnum methodArg1 = (global::TUnit.TestProject.TestEnum)(dynamic)methodArgGeneratedData[1];
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
 				new global::TUnit.TestProject.MatrixTests()
 				, sessionId, testBuilderContext);
@@ -729,8 +729,8 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				string methodArg = (dynamic)methodArgGeneratedData[0];
-				bool methodArg1 = (dynamic)methodArgGeneratedData[1];
+				string methodArg = (string)(dynamic)methodArgGeneratedData[0];
+				bool methodArg1 = (bool)(dynamic)methodArgGeneratedData[1];
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
 				new global::TUnit.TestProject.MatrixTests()
 				, sessionId, testBuilderContext);
@@ -910,8 +910,8 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				string methodArg = (dynamic)methodArgGeneratedData[0];
-				bool methodArg1 = (dynamic)methodArgGeneratedData[1];
+				string methodArg = (string)(dynamic)methodArgGeneratedData[0];
+				bool methodArg1 = (bool)(dynamic)methodArgGeneratedData[1];
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
 				new global::TUnit.TestProject.MatrixTests()
 				, sessionId, testBuilderContext);
@@ -1091,8 +1091,8 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				OneOf<global::TUnit.TestProject.TestEnum, TestEnum2> methodArg = (dynamic)methodArgGeneratedData[0];
-				bool methodArg1 = (dynamic)methodArgGeneratedData[1];
+				OneOf<global::TUnit.TestProject.TestEnum, TestEnum2> methodArg = (OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>)(dynamic)methodArgGeneratedData[0];
+				bool methodArg1 = (bool)(dynamic)methodArgGeneratedData[1];
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.MatrixTests>(() => 
 				new global::TUnit.TestProject.MatrixTests()
 				, sessionId, testBuilderContext);

@@ -118,7 +118,7 @@ public record GeneratedArgumentsContainer(
                 }
                 else
                 {
-                    sourceCodeWriter.WriteLine(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"(dynamic){generatedDataVariableName}[{i}]", ref refIndex).ToString());
+                    sourceCodeWriter.WriteLine(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"({ParameterOrPropertyTypes[i].GloballyQualified()})(dynamic){generatedDataVariableName}[{i}]", ref refIndex).ToString());
                 }
             }
         }
