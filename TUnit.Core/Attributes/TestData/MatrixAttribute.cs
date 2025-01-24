@@ -4,4 +4,6 @@ namespace TUnit.Core;
 public sealed class MatrixAttribute(params object?[]? objects) : TestDataAttribute
 {
     public object?[] Objects { get; } = objects ?? [];
+
+    public object?[]? Excluding { get; init; }
 }
