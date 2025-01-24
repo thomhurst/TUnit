@@ -11,11 +11,14 @@ using ModularPipelines.Modules;
 namespace TUnit.Pipeline.Modules;
 
 [DependsOn<CopyToLocalNuGetModule>]
+[DependsOn<GenerateVersionModule>]
 public class TestTemplatePackageModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context,
         CancellationToken cancellationToken)
     {
+        var version = await GetModule<GenerateVersionModule>();
+
         await context.DotNet().New(new DotNetNewOptions("uninstall")
         {
             Arguments = ["TUnit.Templates"],
@@ -24,7 +27,7 @@ public class TestTemplatePackageModule : Module<CommandResult>
         
         await context.DotNet().New(new DotNetNewOptions("install")
         {
-            Arguments = ["TUnit.Templates"]
+            Arguments = [$"TUnit.Templates::{version.Value!.SemVer}"]
         }, cancellationToken);
         
         await context.DotNet().New(new DotNetNewOptions("TUnit")
