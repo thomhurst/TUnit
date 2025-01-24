@@ -1211,7 +1211,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
         Name = "enum",
         Attributes = 
         [
-            new global::TUnit.Core.MatrixAttribute()
+            new global::TUnit.Core.MatrixAttribute<global::TUnit.TestProject.MatrixTests.CountToTenEnum>()
 {
     Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven]
 }
@@ -1241,7 +1241,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
         Name = "enum",
         Attributes = 
         [
-            new global::TUnit.Core.MatrixAttribute()
+            new global::TUnit.Core.MatrixAttribute<global::TUnit.TestProject.MatrixTests.CountToTenEnum>()
 {
     Excluding = [global::TUnit.TestProject.MatrixTests.CountToTenEnum.Three, global::TUnit.TestProject.MatrixTests.CountToTenEnum.Seven]
 }
