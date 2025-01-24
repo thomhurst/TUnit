@@ -10,7 +10,7 @@
     ],
     "name": "TUnit ASP.NET Core Project",
     "identity": "TUnit.Test.AspNet",
-    "groupIdentity": "TUnit",
+    "groupIdentity": "TUnit.AspNet",
     "shortName": "TUnit.AspNet",
     "tags": {
       "language": "C#",
