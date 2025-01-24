@@ -9,7 +9,7 @@
     ],
     "name": "TUnit Playwright Project",
     "identity": "TUnit.Test.Playwright",
-    "groupIdentity": "TUnit",
+    "groupIdentity": "TUnit.Playwright",
     "shortName": "TUnit.Playwright",
     "tags": {
       "language": "C#",
