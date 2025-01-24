@@ -36,7 +36,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             .WithoutTrivia();
     }
 
-    public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
+    public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
@@ -55,8 +55,13 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
                 .WithoutTrivia();
         }
 
+        if (symbol is null)
+        {
+            return base.VisitIdentifierName(node);
+        }
+
         return SyntaxFactory
-            .IdentifierName(symbol!.GloballyQualified())
+            .IdentifierName(symbol.GloballyQualified())
             .WithoutTrivia();
     }
     
