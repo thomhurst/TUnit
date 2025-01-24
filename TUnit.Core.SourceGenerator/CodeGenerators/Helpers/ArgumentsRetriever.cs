@@ -60,15 +60,33 @@ public static class ArgumentsRetriever
                 if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
                         .DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
-                    yield return DataSourceGeneratorRetriever.Parse(context, testClass, testMethod, parameters, property, parameterOrPropertyTypes, dataAttribute, argumentsType,
-                        index, propertyName);
+                    yield return DataSourceGeneratorRetriever.Parse(context, 
+                        testClass, 
+                        testMethod, 
+                        parameters, 
+                        property, 
+                        parameterOrPropertyTypes, 
+                        dataAttribute, 
+                        argumentsType,
+                        index, 
+                        propertyName, 
+                        true);
                 }
                 
                 if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
                         .NonTypedDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
-                    yield return DataSourceGeneratorRetriever.Parse(context, testClass, testMethod, parameters, property, parameterOrPropertyTypes, dataAttribute, argumentsType,
-                        index, propertyName);
+                    yield return DataSourceGeneratorRetriever.Parse(context, 
+                        testClass, 
+                        testMethod, 
+                        parameters, 
+                        property, 
+                        parameterOrPropertyTypes, 
+                        dataAttribute, 
+                        argumentsType,
+                        index, 
+                        propertyName,
+                        false);
                 }
             }
         }

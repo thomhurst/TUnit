@@ -18,6 +18,7 @@ public record GeneratedArgumentsContainer(
     string[] GenericArguments) : ArgumentsContainer(ArgumentsType)
 {
     public required string? PropertyName { get; init; }
+    public required bool IsStronglyTyped { get; init; }
 
     public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
     {
@@ -111,7 +112,14 @@ public record GeneratedArgumentsContainer(
             {
                 var refIndex = i;
                 
-                sourceCodeWriter.WriteLine(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"({ParameterOrPropertyTypes[i].GloballyQualified()}){generatedDataVariableName}[{i}]", ref refIndex).ToString());
+                if (IsStronglyTyped)
+                {
+                    sourceCodeWriter.WriteLine(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"({ParameterOrPropertyTypes[i].GloballyQualified()}){generatedDataVariableName}[{i}]", ref refIndex).ToString());
+                }
+                else
+                {
+                    sourceCodeWriter.WriteLine(GenerateVariable(ParameterOrPropertyTypes[i].GloballyQualified(), $"global::TUnit.Core.Helpers.CastHelper.Cast<{ParameterOrPropertyTypes[i].GloballyQualified()}>({generatedDataVariableName}[{i}])", ref refIndex).ToString());
+                }
             }
         }
         else if (GenericArguments.Length > 1)

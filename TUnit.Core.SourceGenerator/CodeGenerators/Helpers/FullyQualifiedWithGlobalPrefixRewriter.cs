@@ -13,13 +13,18 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         return SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(node.ToFullString()));
     }
 
-    public override SyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+    public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
         if (node.Name is IdentifierNameSyntax identifierName)
         {
             return VisitIdentifierName(identifierName);
+        }
+
+        if (symbol is null)
+        {
+            return base.VisitMemberAccessExpression(node);
         }
         
         return SyntaxFactory
@@ -36,7 +41,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             .WithoutTrivia();
     }
 
-    public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
+    public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
@@ -55,8 +60,13 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
                 .WithoutTrivia();
         }
 
+        if (symbol is null)
+        {
+            return base.VisitIdentifierName(node);
+        }
+
         return SyntaxFactory
-            .IdentifierName(symbol!.GloballyQualified())
+            .IdentifierName(symbol.GloballyQualified())
             .WithoutTrivia();
     }
     
