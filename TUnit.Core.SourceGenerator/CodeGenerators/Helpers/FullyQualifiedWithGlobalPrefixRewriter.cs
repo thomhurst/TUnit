@@ -13,13 +13,18 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         return SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(node.ToFullString()));
     }
 
-    public override SyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+    public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
         if (node.Name is IdentifierNameSyntax identifierName)
         {
             return VisitIdentifierName(identifierName);
+        }
+
+        if (symbol is null)
+        {
+            return base.VisitMemberAccessExpression(node);
         }
         
         return SyntaxFactory
