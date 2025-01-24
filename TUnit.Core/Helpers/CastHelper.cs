@@ -24,8 +24,8 @@ public static class CastHelper
 
         return (T?) GetImplicitConversion(value.GetType(), typeof(T)).Invoke(null, [value]);
     }
-    
-    public static MethodInfo GetImplicitConversion([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type targetType)
+
+    private static MethodInfo GetImplicitConversion([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type targetType)
     {
         return baseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
             .Concat(targetType.GetMethods(BindingFlags.Public | BindingFlags.Static))
