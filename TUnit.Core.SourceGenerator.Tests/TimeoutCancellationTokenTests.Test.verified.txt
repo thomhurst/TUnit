@@ -621,7 +621,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
 				int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				int methodArg = (int)(dynamic)methodArgGeneratedData[0];
+				int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
 				new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
 				, sessionId, testBuilderContext);
