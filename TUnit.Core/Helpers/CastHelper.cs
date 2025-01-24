@@ -5,6 +5,7 @@ namespace TUnit.Core.Helpers;
 
 public static class CastHelper
 {
+    [UnconditionalSuppressMessage("", "IL2072")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(object? value)
     {
         if (value is null)
