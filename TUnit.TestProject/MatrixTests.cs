@@ -58,6 +58,10 @@ public class MatrixTests
         [Matrix(TestEnum.One, TestEnum2.Two)] OneOf<TestEnum, TestEnum2> @enum,
         [Matrix] bool boolean)
     {
+        object @enum1 = TestEnum.One;
+        
+        OneOf<TestEnum, TestEnum2> oneOf = (OneOf<TestEnum, TestEnum2>)(dynamic) @enum1;
+        
         await Task.CompletedTask;
     }
 }
