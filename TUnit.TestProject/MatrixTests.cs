@@ -1,4 +1,6 @@
-﻿namespace TUnit.TestProject;
+﻿using OneOf;
+
+namespace TUnit.TestProject;
 
 public class MatrixTests
 {
@@ -45,6 +47,15 @@ public class MatrixTests
     [MatrixDataSource]
     public async Task AutoGenerateBools2(
         [Matrix("A", "B", "C")] string str, 
+        [Matrix] bool boolean)
+    {
+        await Task.CompletedTask;
+    }
+
+    [Test]
+    [MatrixDataSource]
+    public async Task ImplicitConversion(
+        [Matrix(TestEnum.One, TestEnum2.Two)] OneOf<TestEnum, TestEnum2> @enum,
         [Matrix] bool boolean)
     {
         await Task.CompletedTask;

@@ -35,6 +35,7 @@
   <ItemGroup>
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="OneOf" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />

@@ -17,7 +17,8 @@ public static class DataSourceGeneratorRetriever
         AttributeData attributeData,
         ArgumentsType argumentsType,
         int index,
-        string? propertyName)
+        string? propertyName, 
+        bool isStronglyTyped)
     {
         return new GeneratedArgumentsContainer
         (
@@ -38,7 +39,8 @@ public static class DataSourceGeneratorRetriever
                 true,
             PropertyName = propertyName,
             Attribute = attributeData,
-            AttributeIndex = index
+            AttributeIndex = index,
+            IsStronglyTyped = isStronglyTyped,
         };
     }
 
