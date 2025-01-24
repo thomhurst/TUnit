@@ -143,10 +143,10 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				string methodArg = (string)methodArgGeneratedData[0];
-				int methodArg1 = (int)methodArgGeneratedData[1];
-				double methodArg2 = (double)methodArgGeneratedData[2];
-				bool methodArg3 = (bool)methodArgGeneratedData[3];
+				string methodArg = (dynamic)methodArgGeneratedData[0];
+				int methodArg1 = (dynamic)methodArgGeneratedData[1];
+				double methodArg2 = (dynamic)methodArgGeneratedData[2];
+				bool methodArg3 = (dynamic)methodArgGeneratedData[3];
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AutoDataTests>(() => 
 				new global::TUnit.TestProject.AutoDataTests()
 				, sessionId, testBuilderContext);
