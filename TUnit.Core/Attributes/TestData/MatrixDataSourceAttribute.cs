@@ -37,7 +37,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 
             if (type.IsEnum)
             {
-                return Enum.GetValues(type).Cast<object>().ToArray();
+                return Enum.GetValues(type).Cast<object>().Except(matrixAttribute?.Excluding ?? []).ToArray();
             }
             
             throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");

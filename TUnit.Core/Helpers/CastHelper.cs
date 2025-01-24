@@ -13,14 +13,14 @@ public static class CastHelper
             return default;
         }
 
-        if (typeof(T).IsEnum)
-        {
-            return (T?) Enum.ToObject(typeof(T), value);
-        }
-
         if (value.GetType().IsAssignableTo<T>())
         {
             return (T)value;
+        }
+        
+        if (typeof(T).IsEnum)
+        {
+            return (T?) Enum.ToObject(typeof(T), value);
         }
 
         return (T?) GetImplicitConversion(value.GetType(), typeof(T)).Invoke(null, [value]);
