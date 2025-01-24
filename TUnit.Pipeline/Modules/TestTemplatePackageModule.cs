@@ -16,6 +16,12 @@ public class TestTemplatePackageModule : Module<CommandResult>
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context,
         CancellationToken cancellationToken)
     {
+        await context.DotNet().New(new DotNetNewOptions("uninstall")
+        {
+            Arguments = ["TUnit.Templates"],
+            ThrowOnNonZeroExitCode = false
+        }, cancellationToken);
+        
         await context.DotNet().New(new DotNetNewOptions("install")
         {
             Arguments = ["TUnit.Templates"]
