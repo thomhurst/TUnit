@@ -64,9 +64,11 @@ public static class DataDrivenArgumentsRetriever
             if (parameterOrPropertyTypeSymbols[index].IsCollectionType(context.SemanticModel.Compilation, out var innerType)
                 && objectArray.Skip(index).Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
             {
+                var paramArgs = objectArray.Skip(index)
+                    .Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x, arguments.Skip(index).ElementAt(i)), x.Type));
+                
                 yield return
-                    new Argument(parameterOrPropertyTypeSymbols[index].GloballyQualified(),
-                        $"[{string.Join(", ", objectArray.Skip(index).Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x, arguments[i]), x.Type)))}]");
+                    new Argument(parameterOrPropertyTypeSymbols[index].GloballyQualified(), $"[{string.Join(", ", paramArgs)}]");
                 
                 yield break;
             }
