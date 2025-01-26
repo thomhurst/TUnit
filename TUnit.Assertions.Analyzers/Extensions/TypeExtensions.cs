@@ -30,17 +30,10 @@ public static class TypeExtensions
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
     
-    public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, string typeName)
+    public static bool IsOrInherits(this ITypeSymbol namedTypeSymbol, ITypeSymbol typeSymbol)
     {
         return namedTypeSymbol
             .GetSelfAndBaseTypes()
-            .Any(x => x.GloballyQualified() == typeName);
-    }
-    
-    public static bool IsOrInheritsNonGeneric(this ITypeSymbol namedTypeSymbol, string typeName)
-    {
-        return namedTypeSymbol
-            .GetSelfAndBaseTypes()
-            .Any(x => x.GloballyQualifiedNonGeneric() == typeName);
+            .Any(x => SymbolEqualityComparer.Default.Equals(x, typeSymbol));
     }
 }

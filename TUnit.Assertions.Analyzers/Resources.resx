@@ -87,4 +87,13 @@
     <data name="TUnitAssertions0007Title" xml:space="preserve">
         <value>Cast dynamic values to `object?` when using Assert.That(...)</value>
     </data>
+    <data name="TUnitAssertions0008Description" xml:space="preserve">
+        <value>ValueTasks should be awaited when used within Assert.That(...).</value>
+    </data>
+    <data name="TUnitAssertions0008MessageFormat" xml:space="preserve">
+        <value>ValueTasks should be awaited when used within Assert.That(...)</value>
+    </data>
+    <data name="TUnitAssertions0008Title" xml:space="preserve">
+        <value>ValueTasks should be awaited when used within Assert.That(...)</value>
+    </data>
 </root>

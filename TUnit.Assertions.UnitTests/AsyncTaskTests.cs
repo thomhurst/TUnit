@@ -28,7 +28,7 @@ public class AsyncTaskTests
     [Test]
     public async Task ValueTask_Is_Callable()
     {
-        await TUnitAssert.That(new ValueTask<string>(Task.FromResult("Hello"))).IsNotNullOrEmpty().And.IsEqualTo("Hello");
+        await TUnitAssert.That(await new ValueTask<string>(Task.FromResult("Hello"))).IsNotNullOrEmpty().And.IsEqualTo("Hello");
     }
     
     [Test]
