@@ -265,5 +265,32 @@ namespace TUnit.Assertions.Analyzers {
                 return ResourceManager.GetString("TUnitAssertions0007Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ValueTasks should be awaited when used within Assert.That(...)..
+        /// </summary>
+        internal static string TUnitAssertions0008Description {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0008Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ValueTasks should be awaited when used within Assert.That(...).
+        /// </summary>
+        internal static string TUnitAssertions0008MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0008MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ValueTasks should be awaited when used within Assert.That(...).
+        /// </summary>
+        internal static string TUnitAssertions0008Title {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0008Title", resourceCulture);
+            }
+        }
     }
 }
