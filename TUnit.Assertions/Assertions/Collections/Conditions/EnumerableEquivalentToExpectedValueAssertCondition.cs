@@ -31,15 +31,15 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
             return AssertionResult.Passed;
         }
 
-        IEnumerable<TInner>? orderedActual;
+        TInner[]? orderedActual;
         if (collectionOrdering == CollectionOrdering.Any)
         {
-            orderedActual = actualValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer));
+            orderedActual = actualValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer)).ToArray();
             expectedValue = expectedValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer));
         }
         else
         {
-            orderedActual = actualValue;
+            orderedActual = actualValue?.ToArray();
         }
 
         return AssertionResult
@@ -66,6 +66,16 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     {
         public int Compare(T? x, T? y)
         {
+            if (x is null && y is null)
+            {
+                return 0;
+            }
+
+            if (x is null || y is null)
+            {
+                return -1;
+            }
+
             return equalityComparer.Equals(x, y) ? 0 : -1;
         }
     }
