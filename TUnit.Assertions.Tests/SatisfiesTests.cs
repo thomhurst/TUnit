@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.Tests;
+﻿using TUnit.Assertions.AssertConditions.Interfaces;
+
+namespace TUnit.Assertions.Tests;
 
 public class SatisfiesTests
 {
@@ -206,6 +208,69 @@ public class SatisfiesTests
                 """
                 );
     }
+
+    [Test]
+    public async Task All_Satisfy_Mapper_Good()
+    {
+        var myModel = new MyModel { Value = "Hello" };
+        var myModel2 = new MyModel { Value = "World" };
+        var myModel3 = new MyModel { Value = "!" };
+        List<MyModel> models = [myModel, myModel2, myModel3];
+
+        await Assert.That(models).AllSatisfy((MyModel? model) => model?.Value, assert => assert.HasCount().Positive());
+    }
+
+    [Test]
+    public async Task All_Satisfy_DirectValue_Good()
+    {
+        var myModel = new MyModel { Value = "Hello" };
+        var myModel2 = new MyModel { Value = "World" };
+        var myModel3 = new MyModel { Value = "!" };
+        List<MyModel> models = [myModel, myModel2, myModel3];
+
+        await Assert.That(models).AllSatisfy((IValueSource<MyModel?> assert) => assert.IsNotNull());
+    }
+
+    [Test]
+    public async Task All_Satisfy_DirectValue_Throws()
+    {
+        var myModel = new MyModel { Value = "Hello" };
+        var myModel2 = new MyModel { Value = "World" };
+        var myModel3 = new MyModel { Value = "!" };
+        List<MyModel?> models = [myModel, myModel2, myModel3, null];
+
+        await Assert.That(async () =>
+            await Assert.That(models).AllSatisfy((IValueSource<MyModel?> assert) => assert.IsNotNull())
+        ).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task All_Satisfy_Mapped_Throws()
+    {
+        var myModel = new MyModel { Value = "Hello" };
+        var myModel2 = new MyModel { Value = "Wrld" };
+        var myModel3 = new MyModel { Value = "!" };
+        List<MyModel?> models = [myModel, myModel2, myModel3];
+
+        await Assert.That(async () =>        
+                await Assert.That(models).AllSatisfy((MyModel? model) => model!.Value, item => item.Contains("o")!)
+        ).Throws<AssertionException>().WithMessageMatching("""
+                                                           *Expected items mapped by (MyModel? model) => model!.Value to satisfy item => item.Contains("o")!
+                                                           
+                                                           but items not satisfying the condition were found:
+                                                           at [1] it was not found. Found a closest match which differs at index 0:
+                                                               ↓
+                                                              "Wrld"
+                                                              "o"
+                                                               ↑
+                                                           at [2] it was not found. Found a closest match which differs at index 0:
+                                                               ↓
+                                                              "!"
+                                                              "o"
+                                                               ↑*
+                                                           """);
+    }
+
 
     public class MyModel
     {
