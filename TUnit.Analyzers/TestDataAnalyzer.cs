@@ -192,27 +192,25 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
 
-        if (parameters is { Length: 1 }
-            && parameters[0].Type.IsCollectionType(context.Compilation, out var innerType)
-            && arguments.All(x => SymbolEqualityComparer.Default.Equals(x.Type, innerType)))
-        {
-            // All arguments can be used in the single array
-            return;
-        }
-
         for (var i = 0; i < parameters.Length; i++)
         {
-            var methodParameter = parameters[i];
+            var parameter = parameters[i];
             var argumentExists = i + 1 <= arguments.Length;
-            var methodParameterType = methodParameter.Type;
+            var methodParameterType = parameter.Type;
             var argument = arguments.ElementAtOrDefault(i);
+            
+            if (parameter.Type.IsCollectionType(context.Compilation, out var innerType)
+                && arguments.Skip(i).Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
+            {
+                break;
+            }
             
             if (SymbolEqualityComparer.Default.Equals(methodParameterType, cancellationTokenType))
             {
                 continue;
             }
 
-            if (!argumentExists && methodParameter.IsOptional)
+            if (!argumentExists && parameter.IsOptional)
             {
                 continue;
             }
