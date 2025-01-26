@@ -35,7 +35,10 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
         {
             var currentIndex = i++;
             var assertionResult = await GetResult(itemValue, exception);
-            if (assertionResult.IsPassed) continue;
+            if (assertionResult.IsPassed)
+            {
+                continue;
+            }
             var failMessage = mergedAsserts.IsPassed ? "items not satisfying the condition were found:" : mergedAsserts.Message;
             failMessage += $"{Environment.NewLine}at [{currentIndex}] {assertionResult.Message}";
             mergedAsserts = AssertionResult.Fail(failMessage);
