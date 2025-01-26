@@ -8,7 +8,7 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(
     IEnumerable<TInner> expected,
-    IEqualityComparer<TInner?>? equalityComparer,
+    IEqualityComparer<TInner?> equalityComparer,
     CollectionOrdering collectionOrdering)
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
@@ -34,8 +34,8 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         IEnumerable<TInner>? orderedActual;
         if (collectionOrdering == CollectionOrdering.Any)
         {
-            orderedActual = actualValue?.OrderBy(x => x);
-            expectedValue = expectedValue?.OrderBy(x => x);
+            orderedActual = actualValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer));
+            expectedValue = expectedValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer));
         }
         else
         {
@@ -60,5 +60,13 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         }
         
         return $"it is {string.Join(",", Formatter.Format(orderedActual!))}";
+    }
+    
+    internal class ComparerWrapper<T>(IEqualityComparer<T> equalityComparer) : IComparer<T>
+    {
+        public int Compare(T? x, T? y)
+        {
+            return equalityComparer.Equals(x, y) ? 0 : -1;
+        }
     }
 }
