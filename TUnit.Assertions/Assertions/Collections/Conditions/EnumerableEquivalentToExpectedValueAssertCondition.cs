@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Assertions.Enums;
 using TUnit.Assertions.Equality;
 using TUnit.Assertions.Extensions;
@@ -66,6 +65,11 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     {
         public int Compare(T? x, T? y)
         {
+            if (equalityComparer is IComparer<T> comparer)
+            {
+                return comparer.Compare(x!, y!);
+            }
+            
             if (x is null && y is null)
             {
                 return 0;
@@ -76,7 +80,12 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
                 return -1;
             }
 
-            return equalityComparer.Equals(x, y) ? 0 : -1;
+            if (equalityComparer.Equals(x, y))
+            {
+                return 0;
+            }
+            
+            return Comparer<T>.Default.Compare(x, y);
         }
     }
 }
