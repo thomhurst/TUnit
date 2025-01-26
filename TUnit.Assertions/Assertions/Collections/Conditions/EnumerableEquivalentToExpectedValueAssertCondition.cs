@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Assertions.Enums;
 using TUnit.Assertions.Equality;
 using TUnit.Assertions.Extensions;
@@ -8,7 +7,7 @@ namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>(
     IEnumerable<TInner> expected,
-    IEqualityComparer<TInner?>? equalityComparer,
+    IEqualityComparer<TInner?> equalityComparer,
     CollectionOrdering collectionOrdering)
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
@@ -31,15 +30,15 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
             return AssertionResult.Passed;
         }
 
-        IEnumerable<TInner>? orderedActual;
+        TInner[]? orderedActual;
         if (collectionOrdering == CollectionOrdering.Any)
         {
-            orderedActual = actualValue?.OrderBy(x => x);
-            expectedValue = expectedValue?.OrderBy(x => x);
+            orderedActual = actualValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer)).ToArray();
+            expectedValue = expectedValue?.OrderBy(x => x, new ComparerWrapper<TInner>(equalityComparer));
         }
         else
         {
-            orderedActual = actualValue;
+            orderedActual = actualValue?.ToArray();
         }
 
         return AssertionResult
@@ -60,5 +59,33 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         }
         
         return $"it is {string.Join(",", Formatter.Format(orderedActual!))}";
+    }
+    
+    internal class ComparerWrapper<T>(IEqualityComparer<T> equalityComparer) : IComparer<T>
+    {
+        public int Compare(T? x, T? y)
+        {
+            if (equalityComparer is IComparer<T> comparer)
+            {
+                return comparer.Compare(x!, y!);
+            }
+            
+            if (x is null && y is null)
+            {
+                return 0;
+            }
+
+            if (x is null || y is null)
+            {
+                return -1;
+            }
+
+            if (equalityComparer.Equals(x, y))
+            {
+                return 0;
+            }
+            
+            return Comparer<T>.Default.Compare(x, y);
+        }
     }
 }
