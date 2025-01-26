@@ -20,13 +20,4 @@ public static class ParameterExtensions
 
         return parameterSymbols;
     }
-    
-    public static bool HasMatrixAttribute(this ImmutableArray<IParameterSymbol> parameterSymbols)
-    {
-        return parameterSymbols.Any(p =>
-            p.GetAttributes().Any(a =>
-                a.IsMatrixAttribute()
-            )
-        );
-    }
 }

@@ -89,10 +89,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 }, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("""
+}, new global::TUnit.Core.ArgumentsAttribute(        """
         Hello
         World
-        """)
+        """
+)
 {
     
 } ],
@@ -179,10 +180,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 }, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("""
+}, new global::TUnit.Core.ArgumentsAttribute(        """
         Hello
         World
-        """)
+        """
+)
 {
     
 } ],
@@ -269,10 +271,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 }, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("""
+}, new global::TUnit.Core.ArgumentsAttribute(        """
         Hello
         World
-        """)
+        """
+)
 {
     
 } ],
@@ -359,10 +362,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 }, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("""
+}, new global::TUnit.Core.ArgumentsAttribute(        """
         Hello
         World
-        """)
+        """
+)
 {
     
 } ],
@@ -449,10 +453,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 }, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("""
+}, new global::TUnit.Core.ArgumentsAttribute(        """
         Hello
         World
-        """)
+        """
+)
 {
     
 } ],
@@ -539,10 +544,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 }, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("""
+}, new global::TUnit.Core.ArgumentsAttribute(        """
         Hello
         World
-        """)
+        """
+)
 {
     
 } ],
@@ -629,10 +635,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 }, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("""
+}, new global::TUnit.Core.ArgumentsAttribute(        """
         Hello
         World
-        """)
+        """
+)
 {
     
 } ],
@@ -722,10 +729,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 }, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("""
+}, new global::TUnit.Core.ArgumentsAttribute(        """
         Hello
         World
-        """)
+        """
+)
 {
     
 } ],

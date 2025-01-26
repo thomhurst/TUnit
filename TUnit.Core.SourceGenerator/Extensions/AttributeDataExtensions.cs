@@ -38,13 +38,6 @@ public static class AttributeDataExtensions
                == true;
     }
     
-    public static bool IsMatrixAttribute(this AttributeData? attributeData)
-    {
-        var displayString = attributeData?.GetFullyQualifiedAttributeTypeName();
-
-        return WellKnownFullyQualifiedClassNames.MatrixAttribute.WithGlobalPrefix == displayString;
-    }
-    
     public static bool IsNonGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,

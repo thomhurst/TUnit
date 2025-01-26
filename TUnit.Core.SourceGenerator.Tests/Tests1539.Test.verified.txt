@@ -62,10 +62,10 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 }, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(11)
 {
     
-}, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(two:"two")
+}, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(two: "two")
 {
     
-}, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three:false)
+}, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three: false)
 {
     
 } ],

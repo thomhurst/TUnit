@@ -45,7 +45,7 @@ Your `.csproj` should be as simple as something like:
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="TUnit" VersionOverride="$(TUnitVersion)" />
+      <PackageReference Include="TUnit" Version="$(TUnitVersion)" />
     </ItemGroup>
 
 </Project>

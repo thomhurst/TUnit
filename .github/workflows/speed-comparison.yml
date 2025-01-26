@@ -61,7 +61,7 @@ jobs:
         working-directory: "tools/speed-comparison/MSTestTimer"
       
       - name: Run Benchmark
-        run: ${{ matrix.os != 'windows-latest' && 'sudo -E ' || '' }}dotnet run -c Release --framework net9.0 --allCategories=Runtime
+        run: dotnet run -c Release --framework net9.0 --allCategories=Runtime
         working-directory: "tools/speed-comparison/Tests.Benchmark"
         env:
           CLASS_NAME: ${{ matrix.class }}
@@ -98,7 +98,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Run Benchmark
-        run: ${{ matrix.os != 'windows-latest' && 'sudo -E ' || '' }}dotnet run -c Release --allCategories=Build --framework net9.0
+        run: dotnet run -c Release --allCategories=Build --framework net9.0
         working-directory: "tools/speed-comparison/Tests.Benchmark"
 
       - name: Upload Markdown

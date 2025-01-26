@@ -37,6 +37,7 @@ public class PassFailTests
     }
     
     [Test]
+    [MatrixDataSource]
     [Category("Pass")]
     public void Pass4(
         [Matrix(1, 2, 3, 4, 5)] int value,
@@ -81,6 +82,7 @@ public class PassFailTests
     }
     
     [Test]
+    [MatrixDataSource]
     [Category("Fail")]
     public void Fail4(
         [Matrix(1, 2, 3, 4, 5)] int value,

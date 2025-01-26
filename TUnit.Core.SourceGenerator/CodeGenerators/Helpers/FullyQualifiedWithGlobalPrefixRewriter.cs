@@ -8,13 +8,23 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanticModel) : CSharpSyntaxRewriter
 {
-    public override SyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+    public override SyntaxNode VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+    {
+        return SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(node.ToFullString()));
+    }
+
+    public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
         if (node.Name is IdentifierNameSyntax identifierName)
         {
             return VisitIdentifierName(identifierName);
+        }
+
+        if (symbol is null)
+        {
+            return base.VisitMemberAccessExpression(node);
         }
         
         return SyntaxFactory
@@ -31,7 +41,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             .WithoutTrivia();
     }
 
-    public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
+    public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
@@ -40,10 +50,27 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             return constantValue;
         }
 
+        if (symbol is IMethodSymbol methodSymbol)
+        {
+            var type = methodSymbol.ReceiverType
+                ?? methodSymbol.ContainingType;
+            
+            return SyntaxFactory
+                .IdentifierName(type.GloballyQualified())
+                .WithoutTrivia();
+        }
+
+        if (symbol is null)
+        {
+            return base.VisitIdentifierName(node);
+        }
+
         return SyntaxFactory
-            .IdentifierName(symbol!.GloballyQualified())
+            .IdentifierName(symbol.GloballyQualified())
             .WithoutTrivia();
     }
+    
+    
 
     private static bool TryParseConstant(ISymbol? symbol, [NotNullWhen(true)] out SyntaxNode? literalSyntax)
     {
@@ -57,6 +84,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             && symbol.IsConst(out var constantValue))
         {
             literalSyntax = Literal(constantValue);
+            
             return true;
         }
 

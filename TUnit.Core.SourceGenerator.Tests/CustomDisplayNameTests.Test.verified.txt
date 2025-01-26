@@ -242,10 +242,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("foo")
+}, new global::TUnit.Core.ArgumentsAttribute("foo", 1, true)
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("bar")
+}, new global::TUnit.Core.ArgumentsAttribute("bar", 2, false)
 {
     
 }, new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!")
@@ -316,10 +316,10 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("foo")
+}, new global::TUnit.Core.ArgumentsAttribute("foo", 1, true)
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("bar")
+}, new global::TUnit.Core.ArgumentsAttribute("bar", 2, false)
 {
     
 }, new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!")
@@ -481,13 +481,62 @@ file partial class CustomDisplayNameTests : global::TUnit.Core.Interfaces.Source
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+{
+     Name = "CustomDisplayNameTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation<int>
+    {
+        Name = "Order",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.CustomDisplayNameTests>
+{
+     Name = "PasswordTest",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "password",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "password",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()

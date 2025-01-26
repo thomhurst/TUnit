@@ -43,5 +43,13 @@
       <ParentFile>BasicTests</ParentFile>
       <DependentUpon>ArgsAsArrayTests.cs</DependentUpon>
     </None>
+    <None Update="ArgumentWithImplicitConverterTests.Test.verified.txt">
+      <ParentFile>BasicTests</ParentFile>
+      <DependentUpon>ArgumentWithImplicitConverterTests.cs</DependentUpon>
+    </None>
+    <None Update="AttributeTests.Test.verified.txt">
+      <ParentFile>BasicTests</ParentFile>
+      <DependentUpon>AttributeTests.cs</DependentUpon>
+    </None>
   </ItemGroup>
 </Project>

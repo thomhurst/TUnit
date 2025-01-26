@@ -1,4 +1,5 @@
-﻿using TUnit.Core.SourceGenerator.Extensions;
+﻿using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Models.Arguments;
 
@@ -6,7 +7,7 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public static class GenericTestInvocationWriter
 {
-    public static void GenerateTestInvocationCode(SourceCodeWriter sourceBuilder,
+    public static void GenerateTestInvocationCode(SourceProductionContext context, SourceCodeWriter sourceBuilder,
         TestSourceDataModel testSourceDataModel)
     {
         var testId = testSourceDataModel.TestId;
@@ -25,7 +26,17 @@ public static class GenericTestInvocationWriter
         var methodVariablesIndex = 0;
         var classVariablesIndex = 0;
         var propertiesVariablesIndex = 0;
-        
+
+        if (testSourceDataModel.ClassArguments is GeneratedArgumentsContainer
+            || testSourceDataModel.MethodArguments is GeneratedArgumentsContainer
+            || testSourceDataModel.PropertyArguments.InnerContainers.Any(x =>
+                x.ArgumentsContainer is GeneratedArgumentsContainer))
+        {
+            sourceBuilder.WriteLine($"var classInformation = {SourceInformationWriter.GenerateClassInformation(testSourceDataModel.TestGenerationContext.Context, testSourceDataModel.TestClass)};");
+
+            sourceBuilder.WriteLine($"var testInformation = {SourceInformationWriter.GenerateTestInformation(testSourceDataModel.TestGenerationContext.Context, testSourceDataModel.TestMethod)};");
+        }
+
         testSourceDataModel.ClassArguments.OpenScope(sourceBuilder, ref classVariablesIndex);
         testSourceDataModel.PropertyArguments.OpenScope(sourceBuilder, ref propertiesVariablesIndex);
         testSourceDataModel.MethodArguments.OpenScope(sourceBuilder, ref methodVariablesIndex);
@@ -65,7 +76,7 @@ public static class GenericTestInvocationWriter
         sourceBuilder.WriteLine($"TestId = $\"{testId}\",");
         sourceBuilder.WriteLine($"TestClassArguments = [{testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"TestMethodArguments = [{testSourceDataModel.MethodArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()}],");
-        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic).SelectMany(x => x.ArgumentsContainer.DataVariables.Select(x => x.Name)).ToCommaSeparatedString()}],");
+        sourceBuilder.WriteLine($"TestClassProperties = [{testSourceDataModel.PropertyArguments.InnerContainers.Where(x => !x.PropertySymbol.IsStatic).SelectMany(x => x.ArgumentsContainer.DataVariables.Select(variable => variable.Name)).ToCommaSeparatedString()}],");
         sourceBuilder.WriteLine($"CurrentRepeatAttempt = {testSourceDataModel.CurrentRepeatAttempt},");
         sourceBuilder.WriteLine($"RepeatLimit = {testSourceDataModel.RepeatLimit},");
         sourceBuilder.WriteLine("MethodInfo = methodInfo,");

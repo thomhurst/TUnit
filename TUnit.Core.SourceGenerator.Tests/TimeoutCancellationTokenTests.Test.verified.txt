@@ -508,12 +508,7 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 	}
 	public global::System.Collections.Generic.IReadOnlyList<SourceGeneratedTestNode> CollectTests(string sessionId)
 	{
-		return
-		[
-			..Tests0(sessionId),
-			..Tests1(sessionId),
-			..Tests2(sessionId),
-		];
+		return Tests0(sessionId);
 	}
 	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests0(string sessionId)
 	{
@@ -527,30 +522,129 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+{
+     Name = "TimeoutCancellationTokenTests",
+     Attributes = 
+     [
+         new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
+{
+    
+}, 
+new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+{
+     Name = "MatrixTest",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MatrixDataSourceAttribute()
+{
+    
+}, 
+new global::TUnit.Core.TimeoutAttribute(5_000)
+{
+    
+}, 
+new global::TUnit.Core.CategoryAttribute("Blah")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            new global::TUnit.Core.MatrixAttribute(1, 2, 3)
+{
+    
+}
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+    {
+        Name = "cancellationToken",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
+			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
+{
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+   TestClassType = testClassType,
+   TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            new global::TUnit.Core.MatrixAttribute(1, 2, 3)
+{
+    
+}
+        ]
+    }],
+   TestSessionId = sessionId,
+};
+			var methodDataAttribute = new global::TUnit.Core.MatrixDataSourceAttribute()
+{
+    
+};
 
-			int methodArg = 1;
+			var methodArgGeneratedDataArray = methodDataAttribute.GenerateDataSources(methodArgDataGeneratorMetadata);
 
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
-			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+			foreach (var methodArgGeneratedDataAccessor in methodArgGeneratedDataArray)
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken)),
-				TestFilePath = @"",
-				TestLineNumber = 54,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
+				testMethodDataIndex++;
+				int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+
+				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
+				int methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[0]);
+				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
+				new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
+				, sessionId, testBuilderContext);
+
+				var resettableClassFactory = resettableClassFactoryDelegate();
+
+				nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
+				{
+					TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
+					TestClassArguments = [classArg],
+					TestMethodArguments = [methodArg],
+					TestClassProperties = [],
+					CurrentRepeatAttempt = 0,
+					RepeatLimit = 0,
+					MethodInfo = methodInfo,
+					ResettableClassFactory = resettableClassFactory,
+					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken)),
+					TestFilePath = @"",
+					TestLineNumber = 54,
+					TestAttributes = [ new global::TUnit.Core.TestAttribute()
+{
+    
+}, new global::TUnit.Core.MatrixDataSourceAttribute()
 {
     
 }, new global::TUnit.Core.TimeoutAttribute(5_000)
@@ -560,178 +654,27 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
 {
     
 } ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
+					ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
 {
     
 }, new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
 {
     
 } ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
+					AssemblyAttributes = [  ],
+					DataAttributes = [ methodDataAttribute ],
+					TestBuilderContext = testBuilderContext,
+				});
+				resettableClassFactory = resettableClassFactoryDelegate();
+				testBuilderContext = new();
+				testBuilderContextAccessor.Current = testBuilderContext;
+			}
 		}
 		catch (global::System.Exception exception)
 		{
 			nodes.Add(new global::TUnit.Core.FailedInitializationTest
 			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
-				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
-				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
-				TestName = "MatrixTest",
-				TestFilePath = @"",
-				TestLineNumber = 54,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests1(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-
-			int methodArg = 2;
-
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
-			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS1:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken)),
-				TestFilePath = @"",
-				TestLineNumber = 54,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.TimeoutAttribute(5_000)
-{
-    
-}, new global::TUnit.Core.CategoryAttribute("Blah")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
-{
-    
-}, new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS1:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
-				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
-				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
-				TestName = "MatrixTest",
-				TestFilePath = @"",
-				TestLineNumber = 54,
-				Exception = exception,
-			});
-		}
-		return nodes;
-	}
-	private global::System.Collections.Generic.List<SourceGeneratedTestNode> Tests2(string sessionId)
-	{
-		global::System.Collections.Generic.List<SourceGeneratedTestNode> nodes = [];
-		var classDataIndex = 0;
-		var testMethodDataIndex = 0;
-		try
-		{
-			var testClassType = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
-
-			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
-			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
-			int classArg = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-
-			int methodArg = 3;
-
-			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.TimeoutCancellationTokenTests>(() => 
-			new global::TUnit.TestProject.TimeoutCancellationTokenTests(classArg)
-			, sessionId, testBuilderContext);
-
-			var resettableClassFactory = resettableClassFactoryDelegate();
-
-			nodes.Add(new TestMetadata<global::TUnit.TestProject.TimeoutCancellationTokenTests>
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS2:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
-				TestClassArguments = [classArg],
-				TestMethodArguments = [methodArg],
-				TestClassProperties = [],
-				CurrentRepeatAttempt = 0,
-				RepeatLimit = 0,
-				MethodInfo = methodInfo,
-				ResettableClassFactory = resettableClassFactory,
-				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MatrixTest(methodArg, cancellationToken)),
-				TestFilePath = @"",
-				TestLineNumber = 54,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.TimeoutAttribute(5_000)
-{
-    
-}, new global::TUnit.Core.CategoryAttribute("Blah")
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
-{
-    
-}, new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
-				TestBuilderContext = testBuilderContext,
-			});
-			resettableClassFactory = resettableClassFactoryDelegate();
-			testBuilderContext = new();
-			testBuilderContextAccessor.Current = testBuilderContext;
-		}
-		catch (global::System.Exception exception)
-		{
-			nodes.Add(new global::TUnit.Core.FailedInitializationTest
-			{
-				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:TL-ARGS2:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
+				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{classDataIndex}:CL-MDS0:global::TUnit.Core.MatrixDataSourceAttribute:{testMethodDataIndex}:TL-GAC0:TUnit.TestProject.TimeoutCancellationTokenTests(int).MatrixTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
 				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), "MatrixTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
 				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],

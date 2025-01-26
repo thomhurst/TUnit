@@ -16,6 +16,7 @@ public class MoreTests(string title)
     public required DataClass DataClass { get; init; }
     
     [Test]
+    [MatrixDataSource]
     public void Matrices(
         [Matrix(1, 2, 3)] int a, 
         [Matrix(true, false)] bool b, 

@@ -33,13 +33,54 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "ClassDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "DataSource_Class",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>()
@@ -143,13 +184,54 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "ClassDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "DataSource_Class_Generic",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Dummy.SomeAsyncDisposableClass>()
@@ -253,13 +335,54 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "ClassDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "IsInitialized_With_1_ClassDataSource",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass>()
@@ -363,13 +486,70 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "ClassDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "IsInitialized_With_2_ClassDataSources",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class2",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class2",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
@@ -476,13 +656,86 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "ClassDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "IsInitialized_With_3_ClassDataSources",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class3",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class3",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
@@ -590,13 +843,102 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "ClassDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "IsInitialized_With_4_ClassDataSources",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class3",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class4",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class3",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class4",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
@@ -705,13 +1047,118 @@ file partial class ClassDataSourceDrivenTests : global::TUnit.Core.Interfaces.So
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "ClassDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.ClassDataSourceDrivenTests>
+{
+     Name = "IsInitialized_With_5_ClassDataSources",
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class3",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class4",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class5",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class3",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class4",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.InitializableClass>
+    {
+        Name = "class5",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass, global::TUnit.TestProject.InitializableClass>()

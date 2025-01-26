@@ -22,10 +22,32 @@ public static class TestSourceDataModelRetriever
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
 
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
-        var classArgumentsContainers = ArgumentsRetriever.GetArguments(context, constructorParameters, constructorParameters.Select(x => x.Type).ToImmutableArray(), GetClassAttributes(namedTypeSymbol).Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute())).ToImmutableArray(), namedTypeSymbol, ArgumentsType.ClassConstructor).ToArray();
+        var classArgumentsContainers = ArgumentsRetriever.GetArguments(
+                context,
+                constructorParameters,
+                null,
+                constructorParameters.Select(x => x.Type).ToImmutableArray(),
+                GetClassAttributes(namedTypeSymbol)
+                    .Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute()))
+                    .ToImmutableArray(),
+                namedTypeSymbol,
+                methodSymbol,
+                ArgumentsType.ClassConstructor)
+            .ToArray();
+        
         var methodParametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
-        var testArgumentsContainers = ArgumentsRetriever.GetArguments(context, methodParametersWithoutCancellationToken, methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(), methodSymbol.GetAttributes(), namedTypeSymbol, ArgumentsType.Method);
-        var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol);
+
+        var testArgumentsContainers = ArgumentsRetriever.GetArguments(
+            context,
+            methodParametersWithoutCancellationToken,
+            null,
+            methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(),
+            methodSymbol.GetAttributes(),
+            namedTypeSymbol,
+            methodSymbol,
+            ArgumentsType.Method);
+        
+        var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol, methodSymbol);
         
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
@@ -142,11 +164,14 @@ public static class TestSourceDataModelRetriever
         
         return new TestSourceDataModel
         {
+            TestGenerationContext = testGenerationContext,
             TestId = TestInformationRetriever.GetTestId(testGenerationContext),
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = namedTypeSymbol.GloballyQualified(),
             MinimalTypeName = namedTypeSymbol.Name,
             AssemblyName = namedTypeSymbol.ContainingAssembly.Name,
+            TestClass = namedTypeSymbol,
+            TestMethod = methodSymbol,
             Namespace = namedTypeSymbol.ContainingNamespace.Name,
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,

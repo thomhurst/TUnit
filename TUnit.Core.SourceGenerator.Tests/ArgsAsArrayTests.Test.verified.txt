@@ -58,7 +58,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("arg1")
+}, new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
 {
     
 } ],
@@ -149,7 +149,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("arg1")
+}, new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
 {
     
 } ],
@@ -240,7 +240,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("arg1")
+}, new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
 {
     
 } ],
@@ -331,7 +331,7 @@ file partial class ArgsAsArrayTests : global::TUnit.Core.Interfaces.SourceGenera
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute("arg1")
+}, new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
 {
     
 } ],

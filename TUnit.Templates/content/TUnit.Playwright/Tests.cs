@@ -1,17 +1,12 @@
 ﻿using System.Text.RegularExpressions;
+using TUnit.Playwright;
 
-namespace TUnit.Playwright.Tests;
+namespace TestProject;
 
 public class Tests : PageTest
 {
     [Test]
     public async Task Test()
-    {
-        await Page.GotoAsync("https://www.github.com/thomhurst/TUnit");
-    }
-    
-    [Test]
-    public async Task HomepageHasPlaywrightInTitleAndGetStartedLinkLinkingtoTheIntroPage()
     {
         await Page.GotoAsync("https://playwright.dev");
 

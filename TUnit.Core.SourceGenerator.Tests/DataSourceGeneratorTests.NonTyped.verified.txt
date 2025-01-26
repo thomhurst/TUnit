@@ -33,13 +33,102 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
+			var classInformation = new global::TUnit.Core.SourceGeneratedClassInformation<global::TUnit.TestProject.AutoDataTests>
+{
+     Name = "AutoDataTests",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+};
+			var testInformation = new global::TUnit.Core.SourceGeneratedTestInformation<global::TUnit.TestProject.AutoDataTests>
+{
+     Name = "Test1",
+     Attributes = 
+     [
+         new global::TUnit.TestProject.Attributes.AutoDataAttribute()
+{
+    
+}, 
+new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<double>
+    {
+        Name = "value3",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+    {
+        Name = "value4",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = classInformation,
+};
 			var methodArgDataGeneratorMetadata = new DataGeneratorMetadata
 {
-   Type = TUnit.Core.Enums.DataGeneratorType.Parameters,
+   Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
    TestClassType = testClassType,
-   ParameterInfos = methodInfo.GetParameters(),
-   PropertyInfo = null,
    TestBuilderContext = testBuilderContextAccessor,
+   TestInformation = testInformation,
+   MembersToGenerate = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value1",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<double>
+    {
+        Name = "value3",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+    {
+        Name = "value4",
+        Attributes = 
+        [
+            
+        ]
+    }],
    TestSessionId = sessionId,
 };
 			var methodDataAttribute = new global::TUnit.TestProject.Attributes.AutoDataAttribute()
@@ -54,10 +143,10 @@ file partial class AutoDataTests : global::TUnit.Core.Interfaces.SourceGenerator
 				testMethodDataIndex++;
 
 				var methodArgGeneratedData = methodArgGeneratedDataAccessor();
-				string methodArg = (string)methodArgGeneratedData[0];
-				int methodArg1 = (int)methodArgGeneratedData[1];
-				double methodArg2 = (double)methodArgGeneratedData[2];
-				bool methodArg3 = (bool)methodArgGeneratedData[3];
+				string methodArg = global::TUnit.Core.Helpers.CastHelper.Cast<string>(methodArgGeneratedData[0]);
+				int methodArg1 = global::TUnit.Core.Helpers.CastHelper.Cast<int>(methodArgGeneratedData[1]);
+				double methodArg2 = global::TUnit.Core.Helpers.CastHelper.Cast<double>(methodArgGeneratedData[2]);
+				bool methodArg3 = global::TUnit.Core.Helpers.CastHelper.Cast<bool>(methodArgGeneratedData[3]);
 				var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.AutoDataTests>(() => 
 				new global::TUnit.TestProject.AutoDataTests()
 				, sessionId, testBuilderContext);

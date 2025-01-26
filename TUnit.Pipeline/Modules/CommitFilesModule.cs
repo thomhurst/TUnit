@@ -38,6 +38,8 @@ public class CommitFilesModule : Module<CommandResult>
 
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
+        var repositoryId = long.Parse(context.GitHub().EnvironmentVariables.RepositoryId!);
+        
         await context.Git().Commands.Config(new GitConfigOptions
         {
             Global = true,
@@ -68,13 +70,18 @@ public class CommitFilesModule : Module<CommandResult>
         await context.Git().Commands.Push(new GitPushOptions
         {
             Arguments = ["--set-upstream", "origin", newBranchName]
-        });
+        }, cancellationToken);
         
         await context.Git().Commands.Push(token: cancellationToken);
 
-        var pr = await context.GitHub().Client.PullRequest.Create(context.GitHub().RepositoryInfo.Owner,
-            context.GitHub().RepositoryInfo.RepositoryName,
+        var pr = await context.GitHub().Client.PullRequest.Create(repositoryId,
             new NewPullRequest("Update ReadMe", newBranchName, "main"));
+        
+        await context.GitHub().Client.Issue.Update(repositoryId, pr.Id,
+            new IssueUpdate
+            {
+                Labels = { "ignore-for-release" }
+            });
 
         return await context.Command.ExecuteCommandLineTool(new CommandLineToolOptions("gh", "pr", "merge", "--admin", "--squash", pr.Number.ToString())
         {

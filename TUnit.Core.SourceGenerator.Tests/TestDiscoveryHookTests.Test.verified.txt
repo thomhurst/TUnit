@@ -34,7 +34,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 				LineNumber = 5,
 				MethodAttributes = [ new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
 {
-    Order = 5,
+    Order = 5
 } ],
 				ClassAttributes = [  ],
 				AssemblyAttributes = [  ],

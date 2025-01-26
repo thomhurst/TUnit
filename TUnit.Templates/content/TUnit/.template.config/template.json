@@ -6,8 +6,8 @@
       "Test",
       "TUnit"
     ],
-    "name": "TUnit Test Project",
-    "identity": "TUnit.Test.Project",
+    "name": "TUnit Mixed Test Project",
+    "identity": "TUnit.Test.Mixed",
     "groupIdentity": "TUnit",
     "shortName": "TUnit",
     "tags": {

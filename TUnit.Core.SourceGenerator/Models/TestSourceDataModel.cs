@@ -1,4 +1,6 @@
-﻿using TUnit.Core.SourceGenerator.Extensions;
+﻿using System.Reflection;
+using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.Models;
@@ -44,6 +46,8 @@ public record TestSourceDataModel
     public required string FullyQualifiedTypeName { get; init; }
     public required string MinimalTypeName { get; init; }
     public required string MethodName { get; init; }
+    public required INamedTypeSymbol TestClass { get; init; }
+    public required IMethodSymbol TestMethod { get; init; }
     public required BaseContainer ClassArguments { get; init; }
     
     public required BaseContainer MethodArguments { get; init; }
@@ -73,6 +77,7 @@ public record TestSourceDataModel
     public required string Namespace { get; init; }
 
     public string ClassNameToGenerate => MinimalTypeName;
+    public required TestGenerationContext TestGenerationContext { get; init; }
 
     public string MethodVariablesWithCancellationToken()
     {

@@ -114,6 +114,9 @@ public static class Rules
     public static DiagnosticDescriptor InstanceTestMethod =
         CreateDescriptor("TUnit0048", UsageCategory, DiagnosticSeverity.Error);
 
+    public static DiagnosticDescriptor MatrixDataSourceAttributeRequired =
+        CreateDescriptor("TUnit0049", UsageCategory, DiagnosticSeverity.Error);
+    
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

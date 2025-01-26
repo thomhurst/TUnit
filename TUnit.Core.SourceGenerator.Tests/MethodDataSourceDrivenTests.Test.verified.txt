@@ -333,10 +333,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
     
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = [5],
+    Arguments = [5]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { 5 },
+    Arguments = new object[] { 5 }
 } ],
 				ClassAttributes = [  ],
 				AssemblyAttributes = [  ],
@@ -401,10 +401,10 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
     
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = [5],
+    Arguments = [5]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { 5 },
+    Arguments = new object[] { 5 }
 } ],
 				ClassAttributes = [  ],
 				AssemblyAttributes = [  ],
@@ -500,16 +500,16 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
     
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = ["Hello World!", 5, true],
+    Arguments = ["Hello World!", 5, true]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { "Hello World!", 6, true },
+    Arguments = new object[] { "Hello World!", 6, true }
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = ["Hello World!", 7, true],
+    Arguments = ["Hello World!", 7, true]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { "Hello World!", 8, true },
+    Arguments = new object[] { "Hello World!", 8, true }
 } ],
 				ClassAttributes = [  ],
 				AssemblyAttributes = [  ],
@@ -574,16 +574,16 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
     
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = ["Hello World!", 5, true],
+    Arguments = ["Hello World!", 5, true]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { "Hello World!", 6, true },
+    Arguments = new object[] { "Hello World!", 6, true }
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = ["Hello World!", 7, true],
+    Arguments = ["Hello World!", 7, true]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { "Hello World!", 8, true },
+    Arguments = new object[] { "Hello World!", 8, true }
 } ],
 				ClassAttributes = [  ],
 				AssemblyAttributes = [  ],
@@ -648,16 +648,16 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
     
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = ["Hello World!", 5, true],
+    Arguments = ["Hello World!", 5, true]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { "Hello World!", 6, true },
+    Arguments = new object[] { "Hello World!", 6, true }
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = ["Hello World!", 7, true],
+    Arguments = ["Hello World!", 7, true]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { "Hello World!", 8, true },
+    Arguments = new object[] { "Hello World!", 8, true }
 } ],
 				ClassAttributes = [  ],
 				AssemblyAttributes = [  ],
@@ -722,16 +722,16 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
     
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = ["Hello World!", 5, true],
+    Arguments = ["Hello World!", 5, true]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { "Hello World!", 6, true },
+    Arguments = new object[] { "Hello World!", 6, true }
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = ["Hello World!", 7, true],
+    Arguments = ["Hello World!", 7, true]
 }, new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
 {
-    Arguments = new object[] { "Hello World!", 8, true },
+    Arguments = new object[] { "Hello World!", 8, true }
 } ],
 				ClassAttributes = [  ],
 				AssemblyAttributes = [  ],

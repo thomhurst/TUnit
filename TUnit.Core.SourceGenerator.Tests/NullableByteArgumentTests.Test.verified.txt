@@ -230,10 +230,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute((byte)1)
+}, new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1)
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute((byte)1)
+}, new global::TUnit.Core.ArgumentsAttribute((byte)1, null)
 {
     
 } ],
@@ -276,7 +276,7 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
 
 			byte methodArg = (byte)1;
-			byte? methodArg1 = null;
+			byte? methodArg1 = (byte?)(null);
 
 			var resettableClassFactoryDelegate = () => new ResettableLazy<global::TUnit.TestProject.NullableByteArgumentTests>(() => 
 			new global::TUnit.TestProject.NullableByteArgumentTests()
@@ -300,10 +300,10 @@ file partial class NullableByteArgumentTests : global::TUnit.Core.Interfaces.Sou
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute((byte)1)
+}, new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1)
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute((byte)1)
+}, new global::TUnit.Core.ArgumentsAttribute((byte)1, null)
 {
     
 } ],

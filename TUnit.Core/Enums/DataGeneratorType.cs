@@ -2,6 +2,7 @@
 
 public enum DataGeneratorType
 {
-    Parameters,
+    ClassParameters,
+    TestParameters,
     Property,
 }

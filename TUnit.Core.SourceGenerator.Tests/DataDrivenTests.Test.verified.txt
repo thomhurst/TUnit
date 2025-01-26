@@ -310,13 +310,13 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(1)
+}, new global::TUnit.Core.ArgumentsAttribute(1, "String")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(2)
+}, new global::TUnit.Core.ArgumentsAttribute(2, "String2")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(3)
+}, new global::TUnit.Core.ArgumentsAttribute(3, "String3")
 {
     
 } ],
@@ -383,13 +383,13 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(1)
+}, new global::TUnit.Core.ArgumentsAttribute(1, "String")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(2)
+}, new global::TUnit.Core.ArgumentsAttribute(2, "String2")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(3)
+}, new global::TUnit.Core.ArgumentsAttribute(3, "String3")
 {
     
 } ],
@@ -456,13 +456,13 @@ file partial class DataDrivenTests : global::TUnit.Core.Interfaces.SourceGenerat
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(1)
+}, new global::TUnit.Core.ArgumentsAttribute(1, "String")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(2)
+}, new global::TUnit.Core.ArgumentsAttribute(2, "String2")
 {
     
-}, new global::TUnit.Core.ArgumentsAttribute(3)
+}, new global::TUnit.Core.ArgumentsAttribute(3, "String3")
 {
     
 } ],

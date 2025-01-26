@@ -18,9 +18,9 @@ public class AutoDataAttribute : NonTypedDataSourceGeneratorAttribute
 
     private static IEnumerable<object> GenerateRowEnumerable(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        foreach (var parameterInfo in dataGeneratorMetadata.ParameterInfos ?? [])
+        foreach (var member in dataGeneratorMetadata.MembersToGenerate)
         {
-            yield return Fixture.Create(parameterInfo.ParameterType, new SpecimenContext(Fixture));
+            yield return Fixture.Create(member.Type, new SpecimenContext(Fixture));
         }
     }
 }

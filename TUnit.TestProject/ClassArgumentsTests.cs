@@ -1,5 +1,6 @@
 ﻿namespace TUnit.TestProject;
 
+[MatrixDataSource]
 [Arguments("str", 1)]
 [Arguments("str2", 2)]
 [MethodDataSource(nameof(MyMethod))]
