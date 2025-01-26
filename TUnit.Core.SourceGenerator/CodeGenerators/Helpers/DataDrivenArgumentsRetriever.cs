@@ -55,31 +55,35 @@ public static class DataDrivenArgumentsRetriever
             var type = parameterOrPropertyTypeSymbols.SafeFirstOrDefault()
                 ?.GloballyQualified() ?? "var";
 
-            return [new Argument(type, null)];
+            yield return new Argument(type, null);
+            yield break;
         }
 
-        if (parameterOrPropertyTypeSymbols is { Length: 1 }
-            && parameterOrPropertyTypeSymbols[0].IsCollectionType(context.SemanticModel.Compilation, out var innerType)
-            && objectArray.Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
+        for (var index = 0; index < objectArray.Length; index++)
         {
-            return
-            [
-                new Argument(parameterOrPropertyTypeSymbols[0].GloballyQualified(),
-                    $"[{string.Join(", ", objectArray.Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x, arguments[i]), x.Type)))}]")
-            ];
-        }
-
-        return objectArray.Zip(arguments, (typedConstant, a) => (typedConstant, a))
-            .Select((element, index) =>
+            if (parameterOrPropertyTypeSymbols[index].IsCollectionType(context.SemanticModel.Compilation, out var innerType)
+                && objectArray.Skip(index).Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
             {
-                var type = GetTypeFromParameters(parameterOrPropertyTypeSymbols, index);
-
-                return new Argument(type?.GloballyQualified() ??
-                                    TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(
-                                        element.typedConstant),
+                var paramArgs = objectArray.Skip(index)
+                    .Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x, arguments.Skip(index).ElementAt(i)), x.Type));
+                
+                yield return
+                    new Argument(parameterOrPropertyTypeSymbols[index].GloballyQualified(), $"[{string.Join(", ", paramArgs)}]");
+                
+                yield break;
+            }
+            
+            var typedConstant = objectArray[index];
+            var argumentAttribute = arguments[index];
+            
+            var type = GetTypeFromParameters(parameterOrPropertyTypeSymbols, index);
+            
+            yield return new Argument(type?.GloballyQualified() ??
+                                TypedConstantParser.GetFullyQualifiedTypeNameFromTypedConstantValue(
+                                    typedConstant),
                     
-                    TypedConstantParser.GetTypedConstantValue(context.SemanticModel, element, type));
-            });
+                TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (typedConstant, argumentAttribute), type));
+        }
     }
 
     private static ITypeSymbol? GetTypeFromParameters(ImmutableArray<ITypeSymbol> parameterSymbols, int index)

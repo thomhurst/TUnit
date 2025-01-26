@@ -41,4 +41,14 @@ public class ArgsAsArrayTests
             Console.WriteLine(argument);
         }
     }
+    
+    [Test]
+    [Arguments(1, "arg1", "arg2", "arg3")]
+    public void Following_Non_Params(int i, IEnumerable<string> arguments)
+    {
+        foreach (var argument in arguments)
+        {
+            Console.WriteLine(argument);
+        }
+    }
 }
