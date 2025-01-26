@@ -58,7 +58,8 @@ public static class GenericSatisfiesExtensions
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
         where TActual : IEnumerable<TInner?>
     {
-        return valueSource.RegisterAssertion(new EnumerableSatisfiesAssertCondition<TActual, TInner, TInner>(Task.FromResult, assert, "items", assertionBuilderExpression),
+        return valueSource.RegisterAssertion(new EnumerableSatisfiesAssertCondition<TActual, TInner, TInner>(
+                inner => inner == null ? null : Task.FromResult(inner), assert, "items", assertionBuilderExpression),
             ["", assertionBuilderExpression]);
     }
 }
