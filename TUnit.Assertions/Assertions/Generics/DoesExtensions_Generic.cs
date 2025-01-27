@@ -16,17 +16,15 @@ public static partial class DoesExtensions
             , [doNotPopulateThisValue]);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> Contains<TActual, TInner>(this IValueSource<TActual> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)
-        where TActual : IEnumerable<TInner>
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> Contains<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new EnumerableContainsExpectedFuncAssertCondition<TActual, TInner>(matcher, doNotPopulateThisValue)
+        return valueSource.RegisterAssertion(new EnumerableContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>(matcher, doNotPopulateThisValue)
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> ContainsOnly<TActual, TInner>(this IValueSource<TActual> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)
-        where TActual : IEnumerable<TInner>
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> ContainsOnly<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new EnumerableAllExpectedFuncAssertCondition<TActual, TInner>(matcher, doNotPopulateThisValue)
+        return valueSource.RegisterAssertion(new EnumerableAllExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>(matcher, doNotPopulateThisValue)
             , [doNotPopulateThisValue]);
     }
 

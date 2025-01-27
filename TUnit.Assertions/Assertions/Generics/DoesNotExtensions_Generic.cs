@@ -14,10 +14,9 @@ public static partial class DoesNotExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> DoesNotContain<TActual, TInner>(this IValueSource<TActual> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string? doNotPopulateThisValue = null)
-        where TActual : IEnumerable<TInner>
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> DoesNotContain<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string? doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new EnumerableNotContainsExpectedFuncAssertCondition<TActual, TInner>(matcher, doNotPopulateThisValue)
+        return valueSource.RegisterAssertion(new EnumerableNotContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>(matcher, doNotPopulateThisValue)
             , [doNotPopulateThisValue]);
     }
 }
