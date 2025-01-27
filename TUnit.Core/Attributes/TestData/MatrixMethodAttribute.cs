@@ -8,10 +8,10 @@ namespace TUnit.Core;
 public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TClass>(string methodName)
     : MatrixAttribute(GetMethodValue(methodName))
 {
-    private static object?[]? GetMethodValue(string s)
+    private static object?[] GetMethodValue(string methodName)
     {
         var result = typeof(TClass)
-            .GetMethod(s, BindingFlags.Public | BindingFlags.Static)?
+            .GetMethod(methodName, BindingFlags.Public | BindingFlags.Static)?
             .Invoke(null, null);
 
         if (result is object?[] objectArray)
