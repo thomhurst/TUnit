@@ -44,14 +44,14 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
     {
         if (_assertConditions.Count > 0)
         {
-            _assertConditions.Push(new OrAssertCondition(_assertConditions.Pop(), assert(assertionBuilder).Assertions.Pop()));
+            _assertConditions.Push(new OrAssertCondition(_assertConditions.Pop(), ((ISource)assert(assertionBuilder)).Assertions.Pop()));
         }
         else
         {
             var invokableAssertionBuilder = assert(assertionBuilder);
             assertionBuilder.AppendConnector(ChainType.Or);
             _invokableAssertionBuilder = invokableAssertionBuilder;
-            _assertConditions.Push(_invokableAssertionBuilder.Assertions.Pop());
+            _assertConditions.Push(((ISource)_invokableAssertionBuilder).Assertions.Pop());
         }
     }
 }

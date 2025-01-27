@@ -14,15 +14,15 @@ public class InvokableValueAssertionBuilder<TActual>(ISource source) : Invokable
     public InvokableValueAssertionBuilder<TActual> Because(string reason)
     {
         var becauseReason = new BecauseReason(reason);
-        var assertion = Assertions.Peek();
+        var assertion = source.Assertions.Peek();
         assertion.SetBecauseReason(becauseReason);
         return this;
     }
 
     internal AssertionBuilder AssertionBuilder => this;
     
-    public ValueAnd<TActual> And => new(new AndAssertionBuilder<TActual>(AssertionBuilder.AppendConnector(ChainType.And)));
-    public ValueOr<TActual> Or => new(new OrAssertionBuilder<TActual>(AssertionBuilder.AppendConnector(ChainType.Or)));
+    public ValueAnd<TActual> And => new(new AndAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.And)));
+    public ValueOr<TActual> Or => new(new OrAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.Or)));
     
     public new TaskAwaiter<TActual?> GetAwaiter()
     {

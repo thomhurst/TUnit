@@ -4,9 +4,10 @@ using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AndAssertionBuilder<TActual> : AssertionBuilder, IAndAssertionBuilder
+public class AndAssertionBuilder : AssertionBuilder, IAndAssertionBuilder
 {
-    internal AndAssertionBuilder(AssertionBuilder assertionBuilder) : base(((ISource)assertionBuilder).AssertionDataTask, assertionBuilder.ActualExpression!, (
+    internal AndAssertionBuilder(AssertionBuilder assertionBuilder) : base(((ISource)assertionBuilder).AssertionDataTask, (
+        (ISource)assertionBuilder).ActualExpression!, (
         (ISource)assertionBuilder).ExpressionBuilder, ((ISource)assertionBuilder).Assertions)
     {
         if (((ISource)assertionBuilder).Assertions.Any(a => a is OrAssertCondition))

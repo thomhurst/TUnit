@@ -1,5 +1,4 @@
-﻿using System.Text;
-using TUnit.Assertions.AssertConditions;
+﻿using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 

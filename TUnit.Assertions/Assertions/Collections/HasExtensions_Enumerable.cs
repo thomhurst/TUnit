@@ -11,19 +11,19 @@ public static partial class HasExtensions
 {
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasSingleItem<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, IEqualityComparer equalityComparer = null) 
     {
-        return valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<IEnumerable<TInner>>(1)
+        return valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<TInner>(1)
             , []);
     }
     
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource) 
     {
-        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<IEnumerable<TInner>, object>(null)
+        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<TInner>(null)
             , []);
     }
     
     public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, IEqualityComparer<TInner> equalityComparer) 
     {
-        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(equalityComparer)
+        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<TInner>(equalityComparer)
             , []);
     }
     

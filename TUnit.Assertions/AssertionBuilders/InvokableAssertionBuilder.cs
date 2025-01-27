@@ -46,17 +46,5 @@ public class InvokableAssertionBuilder<TActual> :
         return $"{expression[..100]}...";
     }
 
-    public Stack<BaseAssertCondition> Assertions => _source.Assertions;
-
-    public new ISource AppendExpression(string expression)
-    {
-        base.AppendExpression(expression);
-        return this;
-    }
-
-    public new ISource WithAssertion(BaseAssertCondition assertCondition)
-    {
-        base.WithAssertion(assertCondition);
-        return this;
-    }
+    protected internal Stack<BaseAssertCondition> Assertions => _source.Assertions;
 }
