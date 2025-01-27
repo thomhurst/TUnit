@@ -26,7 +26,7 @@ public static class SourceExtensions
         return new InvokableValueAssertionBuilder<TActual>((InvokableAssertionBuilder<TActual>)invokeableAssertionBuilder);
     }
 
-    public static InvokableDelegateAssertionBuilder<TActual> RegisterAssertion<TActual>(this IDelegateSource<TActual> source,
+    public static InvokableDelegateAssertionBuilder<TActual> RegisterAssertion<TActual>(this IDelegateSource source,
         BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string caller = "")
     {
         if (!string.IsNullOrEmpty(caller))

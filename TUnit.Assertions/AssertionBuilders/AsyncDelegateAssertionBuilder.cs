@@ -6,19 +6,19 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class AsyncDelegateAssertionBuilder 
     : AssertionBuilder<object?>,
-        IDelegateSource<object?>
+        IDelegateSource
 {
     internal AsyncDelegateAssertionBuilder(Func<Task> function, string expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
     
-    public new ISource<object?> AppendExpression(string expression)
+    public new ISource AppendExpression(string expression)
     {
         base.AppendExpression(expression);
         return this;
     }
 
-    public new ISource<object?> WithAssertion(BaseAssertCondition assertCondition)
+    public new ISource WithAssertion(BaseAssertCondition assertCondition)
     {
         base.WithAssertion(assertCondition);
         return this;

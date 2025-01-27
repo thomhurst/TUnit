@@ -41,13 +41,13 @@ public class InvokableAssertionBuilder<TActual> :
         return $"{expression?[..100]}...";
     }
 
-    public ISource<object> AppendExpression(string expression)
+    public ISource AppendExpression(string expression)
     {
         base.AppendExpression(expression);
         return this;
     }
 
-    public ISource<object> WithAssertion(BaseAssertCondition assertCondition)
+    public ISource WithAssertion(BaseAssertCondition assertCondition)
     {
         base.WithAssertion(assertCondition);
         return this;

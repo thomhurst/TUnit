@@ -13,13 +13,13 @@ public class ValueAssertionBuilder<TActual>
     {
     }
 
-    public new ISource<TActual> AppendExpression(string expression)
+    public new ISource AppendExpression(string expression)
     {
         base.AppendExpression(expression);
         return this;
     }
     
-    public new ISource<TActual> WithAssertion(BaseAssertCondition assertCondition)
+    public new ISource WithAssertion(BaseAssertCondition assertCondition)
     {
         base.WithAssertion(assertCondition);
         return this;

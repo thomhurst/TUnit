@@ -12,13 +12,13 @@ public class ValueDelegateAnd<TActual>(AssertionBuilder<TActual> assertionBuilde
     
     public string? ActualExpression => assertionBuilder.ActualExpression;
 
-    public ISource<TActual> AppendExpression(string expression)
+    public ISource AppendExpression(string expression)
     {
         assertionBuilder.AppendExpression(expression);
         return this;
     }
 
-    public ISource<TActual> WithAssertion(BaseAssertCondition assertCondition)
+    public ISource WithAssertion(BaseAssertCondition assertCondition)
     {
         assertionBuilder.WithAssertion(assertCondition);
         return this;

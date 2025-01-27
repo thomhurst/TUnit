@@ -18,13 +18,13 @@ public abstract class ConvertedTypeAssertionBuilder<TFromType, TToType> : Assert
     }
 
 
-    public ISource<TToType> AppendExpression(string expression)
+    public ISource AppendExpression(string expression)
     {
         OtherTypeAssertionBuilder?.AppendExpression(expression);
         return this;
     }
 
-    public ISource<TToType> WithAssertion(BaseAssertCondition assertCondition)
+    public ISource WithAssertion(BaseAssertCondition assertCondition)
     {
         OtherTypeAssertionBuilder?.WithAssertion(assertCondition);
         return this;

@@ -6,7 +6,7 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 
 public static class ThrowsExtensions
 {
-    public static ThrowsException<object?, TException> Throws<TException>(this IDelegateSource<object?> delegateSource)
+    public static ThrowsException<object?, TException> Throws<TException>(this IDelegateSource delegateSource)
         where TException : Exception
     {
         return new ThrowsException<object?, TException>(
@@ -15,7 +15,7 @@ public static class ThrowsExtensions
             e => e);
     }
 
-    public static ThrowsException<object?, TException> ThrowsExactly<TException>(this IDelegateSource<object?> delegateSource)
+    public static ThrowsException<object?, TException> ThrowsExactly<TException>(this IDelegateSource delegateSource)
         where TException : Exception
     {
         return new ThrowsException<object?, TException>(
@@ -24,7 +24,7 @@ public static class ThrowsExtensions
             e => e);
     }
 
-    public static ThrowsException<object?, Exception> ThrowsException(this IDelegateSource<object?> delegateSource)
+    public static ThrowsException<object?, Exception> ThrowsException(this IDelegateSource delegateSource)
     {
         return new ThrowsException<object?, Exception>(
             delegateSource.RegisterAssertion(new ThrowsAnyExceptionAssertCondition<object?>(), []),
@@ -32,7 +32,7 @@ public static class ThrowsExtensions
             e => e);
     }
 
-    public static CastableAssertionBuilder<object?, object?> ThrowsNothing(this IDelegateSource<object?> delegateSource)
+    public static CastableAssertionBuilder<object?, object?> ThrowsNothing(this IDelegateSource delegateSource)
     {
         return new CastableAssertionBuilder<object?, object?>(
             delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<object?>(), []),

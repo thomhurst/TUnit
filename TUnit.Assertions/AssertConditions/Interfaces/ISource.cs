@@ -1,8 +1,8 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Interfaces;
 
-public interface ISource<out TActual>
+public interface ISource
 {
     string? ActualExpression { get; }
-    ISource<TActual> AppendExpression(string expression);
-    ISource<TActual> WithAssertion(BaseAssertCondition assertCondition);
+    ISource AppendExpression(string expression);
+    ISource WithAssertion(BaseAssertCondition assertCondition);
 }

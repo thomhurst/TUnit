@@ -3,7 +3,7 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class DelegateAnd<TActual>(AssertionBuilder<TActual> assertionBuilder) : IDelegateSource<TActual>
+public class DelegateAnd<TActual>(AssertionBuilder<TActual> assertionBuilder) : IDelegateSource
 {
     public static DelegateAnd<TActual> Create(AssertionBuilder<TActual> assertionBuilder)
     {
@@ -12,13 +12,13 @@ public class DelegateAnd<TActual>(AssertionBuilder<TActual> assertionBuilder) : 
 
     public string? ActualExpression => assertionBuilder.ActualExpression;
 
-    public ISource<TActual> AppendExpression(string expression)
+    public ISource AppendExpression(string expression)
     {
         assertionBuilder.AppendExpression(expression);
         return this;
     }
 
-    public ISource<TActual> WithAssertion(BaseAssertCondition assertCondition)
+    public ISource WithAssertion(BaseAssertCondition assertCondition)
     {
         assertionBuilder.WithAssertion(assertCondition);
         return this;

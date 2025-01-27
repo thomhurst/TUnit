@@ -9,11 +9,11 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 public class ThrowsException<TActual, TException> where TException : Exception
 {
     private readonly InvokableDelegateAssertionBuilder<TActual> _delegateAssertionBuilder;
-    private readonly IDelegateSource<TActual> _source;
+    private readonly IDelegateSource _source;
     private readonly Func<Exception?, Exception?> _selector;
 
     public ThrowsException(InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,
-        IDelegateSource<TActual> source,
+        IDelegateSource source,
         Func<Exception?, Exception?> selector)
     {
         _delegateAssertionBuilder = delegateAssertionBuilder;
