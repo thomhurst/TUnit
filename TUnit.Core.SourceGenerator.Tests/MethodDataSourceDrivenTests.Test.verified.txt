@@ -53,7 +53,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 11,
+				TestLineNumber = 12,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -80,7 +80,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method",
 				TestFilePath = @"",
-				TestLineNumber = 11,
+				TestLineNumber = 12,
 				Exception = exception,
 			});
 		}
@@ -143,7 +143,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method2(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 18,
+				TestLineNumber = 19,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -170,7 +170,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method2",
 				TestFilePath = @"",
-				TestLineNumber = 18,
+				TestLineNumber = 19,
 				Exception = exception,
 			});
 		}
@@ -233,7 +233,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method_WithAction(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 25,
+				TestLineNumber = 26,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -260,7 +260,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(global::System.Action)],
 				TestName = "DataSource_Method_WithAction",
 				TestFilePath = @"",
-				TestLineNumber = 25,
+				TestLineNumber = 26,
 				Exception = exception,
 			});
 		}
@@ -327,7 +327,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method3(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 32,
+				TestLineNumber = 33,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -357,7 +357,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method3",
 				TestFilePath = @"",
-				TestLineNumber = 32,
+				TestLineNumber = 33,
 				Exception = exception,
 			});
 		}
@@ -395,7 +395,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method3(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 32,
+				TestLineNumber = 33,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -425,7 +425,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method3",
 				TestFilePath = @"",
-				TestLineNumber = 32,
+				TestLineNumber = 33,
 				Exception = exception,
 			});
 		}
@@ -494,7 +494,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method4(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 41,
+				TestLineNumber = 42,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -530,7 +530,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method4",
 				TestFilePath = @"",
-				TestLineNumber = 41,
+				TestLineNumber = 42,
 				Exception = exception,
 			});
 		}
@@ -568,7 +568,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method4(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 41,
+				TestLineNumber = 42,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -604,7 +604,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method4",
 				TestFilePath = @"",
-				TestLineNumber = 41,
+				TestLineNumber = 42,
 				Exception = exception,
 			});
 		}
@@ -642,7 +642,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method4(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 41,
+				TestLineNumber = 42,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -678,7 +678,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method4",
 				TestFilePath = @"",
-				TestLineNumber = 41,
+				TestLineNumber = 42,
 				Exception = exception,
 			});
 		}
@@ -716,7 +716,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_Method4(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 41,
+				TestLineNumber = 42,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -752,7 +752,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "DataSource_Method4",
 				TestFilePath = @"",
-				TestLineNumber = 41,
+				TestLineNumber = 42,
 				Exception = exception,
 			});
 		}
@@ -815,7 +815,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_WithBaseReturn(methodArg)),
 				TestFilePath = @"",
-				TestLineNumber = 52,
+				TestLineNumber = 53,
 				TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -842,7 +842,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue)],
 				TestName = "DataSource_WithBaseReturn",
 				TestFilePath = @"",
-				TestLineNumber = 52,
+				TestLineNumber = 53,
 				Exception = exception,
 			});
 		}
@@ -908,7 +908,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.EnumerableFuncArrayTest(methodData)),
 					TestFilePath = @"",
-					TestLineNumber = 58,
+					TestLineNumber = 59,
 					TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -936,7 +936,7 @@ file partial class MethodDataSourceDrivenTests : global::TUnit.Core.Interfaces.S
 				ParameterTypeFullNames = [typeof(string[])],
 				TestName = "EnumerableFuncArrayTest",
 				TestFilePath = @"",
-				TestLineNumber = 58,
+				TestLineNumber = 59,
 				Exception = exception,
 			});
 		}

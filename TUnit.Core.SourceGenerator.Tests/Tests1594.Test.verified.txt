@@ -112,7 +112,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test1()),
 					TestFilePath = @"",
-					TestLineNumber = 15,
+					TestLineNumber = 12,
 					TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -140,7 +140,7 @@ file partial class MyTests : global::TUnit.Core.Interfaces.SourceGenerator.ITest
 				ParameterTypeFullNames = [],
 				TestName = "Test1",
 				TestFilePath = @"",
-				TestLineNumber = 15,
+				TestLineNumber = 12,
 				Exception = exception,
 			});
 		}
