@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.Tests;
+﻿using TUnit.Assertions.AssertConditions.Throws;
+
+namespace TUnit.Assertions.Tests;
 
 public class EnumerableTests
 {

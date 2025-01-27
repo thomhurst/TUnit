@@ -9,6 +9,8 @@ public class ValueAnd<TActual>(AssertionBuilder<TActual> assertionBuilder) : IVa
     {
         return new ValueAnd<TActual>(assertionBuilder);
     }
+    
+    public string? ActualExpression => assertionBuilder.ActualExpression;
 
     public ISource<TActual> AppendExpression(string expression)
     {

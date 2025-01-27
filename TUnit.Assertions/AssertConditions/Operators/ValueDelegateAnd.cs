@@ -9,6 +9,8 @@ public class ValueDelegateAnd<TActual>(AssertionBuilder<TActual> assertionBuilde
     {
         return new ValueDelegateAnd<TActual>(assertionBuilder);
     }
+    
+    public string? ActualExpression => assertionBuilder.ActualExpression;
 
     public ISource<TActual> AppendExpression(string expression)
     {

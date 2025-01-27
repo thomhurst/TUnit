@@ -86,7 +86,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 
     internal override Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression)
     {
-        if (actualValue is not null && actualValue is not TActual?)
+        if (actualValue is not null && actualValue is not TActual)
         {
             throw new AssertionException($"Expected {typeof(TActual).Name} but received {actualValue.GetType().Name}");
         } 

@@ -5,6 +5,8 @@ namespace TUnit.Assertions.AssertConditions.Operators;
 
 public class ValueOr<TActual>(AssertionBuilder<TActual> assertionBuilder) : IValueSource<TActual>
 {
+    public string? ActualExpression => assertionBuilder.ActualExpression;
+    
     public ISource<TActual> AppendExpression(string expression)
     {
         assertionBuilder.AppendExpression(expression);

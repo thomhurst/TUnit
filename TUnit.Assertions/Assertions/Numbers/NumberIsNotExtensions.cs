@@ -50,7 +50,7 @@ public static class NumberIsNotExtensions
                 {
                     if (value is null)
                     {
-                        self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                        self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                         return false;
                     }
 
@@ -67,7 +67,7 @@ public static class NumberIsNotExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                    self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
 
@@ -85,7 +85,7 @@ public static class NumberIsNotExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                    self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -103,7 +103,7 @@ public static class NumberIsNotExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                    self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -121,7 +121,7 @@ public static class NumberIsNotExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                    self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -139,7 +139,7 @@ public static class NumberIsNotExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                    self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -157,7 +157,7 @@ public static class NumberIsNotExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                    self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -175,7 +175,7 @@ public static class NumberIsNotExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                    self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 
@@ -193,7 +193,7 @@ public static class NumberIsNotExtensions
             {
                 if (value is null)
                 {
-                    self.OverriddenMessage = $"{valueSource.AssertionBuilder.ActualExpression ?? typeof(TActual).Name} is null";
+                    self.OverriddenMessage = $"{valueSource.ActualExpression ?? typeof(TActual).Name} is null";
                     return false;
                 }
                 

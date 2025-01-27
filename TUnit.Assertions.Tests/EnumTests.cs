@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.Assertions.Enums;
+﻿using TUnit.Assertions.AssertConditions.Throws;
+using TUnit.Assertions.Assertions.Enums;
 
 namespace TUnit.Assertions.Tests;
 

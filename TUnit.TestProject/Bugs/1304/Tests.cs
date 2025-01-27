@@ -1,4 +1,5 @@
 ﻿using TUnit.Assertions;
+using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Extensions;
 using Vogen;
 

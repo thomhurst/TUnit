@@ -7,8 +7,6 @@ namespace TUnit.Assertions.Extensions;
 
 public class StringLength(IValueSource<string> valueSource)
 {
-    protected AssertionBuilder<string> AssertionBuilder { get; } = valueSource.AssertionBuilder.AppendExpression("HasLength");
-
     public InvokableValueAssertionBuilder<string> EqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(expected, (actual, _, self) =>

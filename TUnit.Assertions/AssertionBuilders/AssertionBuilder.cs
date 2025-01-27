@@ -41,8 +41,8 @@ public abstract class AssertionBuilder<TActual>
         }
     }
     
-    internal StringBuilder ExpressionBuilder { get; init; }
-    internal string? ActualExpression { get; init; }
+    internal StringBuilder ExpressionBuilder { get; }
+    public string? ActualExpression { get; }
     internal ValueTask<AssertionData<TActual>> AssertionDataTask { get; }
     
     internal readonly Stack<BaseAssertCondition> Assertions = new();

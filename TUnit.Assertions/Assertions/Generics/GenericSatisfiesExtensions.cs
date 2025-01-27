@@ -27,7 +27,7 @@ public static class GenericSatisfiesExtensions
             [mapperExpression, assertionBuilderExpression]);
     }
     
-    public static CollectionWrapper<TActual, TInner> All<TActual, TInner>(this IValueSource<TActual> valueSource) where TActual : IEnumerable<TInner>
+    public static CollectionWrapper<TInner> All<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
     {
         return new(valueSource);
     }

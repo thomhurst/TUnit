@@ -9,8 +9,6 @@ namespace TUnit.Assertions.Extensions;
 public class EnumerableCount<TActual>(IValueSource<TActual> valueSource)
     where TActual : IEnumerable?
 {
-    protected internal AssertionBuilder<TActual> AssertionBuilder { get; } = valueSource.AssertionBuilder.AppendExpression("HasCount");
-
     public InvokableValueAssertionBuilder<TActual> EqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>

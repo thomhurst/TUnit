@@ -1,6 +1,7 @@
 ﻿// ReSharper disable UseCollectionExpression
 
 using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 

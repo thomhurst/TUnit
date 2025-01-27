@@ -37,7 +37,7 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public ThrowsException<TActual, Exception> WithInnerException()
     {
-        _source.AssertionBuilder.AppendExpression($"{nameof(WithInnerException)}()");
+        _source.AppendExpression($"{nameof(WithInnerException)}()");
         return new(_delegateAssertionBuilder, _source, e => _selector(e)?.InnerException);
     }
 

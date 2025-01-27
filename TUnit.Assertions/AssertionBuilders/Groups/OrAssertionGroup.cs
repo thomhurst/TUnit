@@ -7,7 +7,7 @@ namespace TUnit.Assertions.AssertionBuilders.Groups;
 public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActual, TAssertionBuilder>
     where TAssertionBuilder : AssertionBuilder<TActual>
 {
-    private readonly Stack<BaseAssertCondition<TActual>> _assertConditions = [];
+    private readonly Stack<BaseAssertCondition> _assertConditions = [];
     private InvokableAssertionBuilder<TActual>? _invokableAssertionBuilder;
 
     internal OrAssertionGroup(Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> initialAssert, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert, TAssertionBuilder assertionBuilder) : base(assertionBuilder)

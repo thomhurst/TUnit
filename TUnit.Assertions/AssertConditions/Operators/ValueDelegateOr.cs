@@ -10,6 +10,8 @@ public class ValueDelegateOr<TActual>(AssertionBuilder<TActual> assertionBuilder
         return new ValueDelegateOr<TActual>(assertionBuilder);
     }
     
+    public string? ActualExpression => assertionBuilder.ActualExpression;
+    
     public ISource<TActual> AppendExpression(string expression)
     {
         assertionBuilder.AppendExpression(expression);
