@@ -40,44 +40,6 @@ public abstract class BaseAssertCondition
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
-    internal InvokableAssertionBuilder<TActual> ChainedToWithoutExpression(AssertionBuilder<TActual> assertionBuilder)
-    {
-        return assertionBuilder.WithAssertion(this);
-    }
-    
-    internal InvokableAssertionBuilder<TActual> ChainedTo(AssertionBuilder<TActual> assertionBuilder, string?[] argumentExpressions, [CallerMemberName] string caller = "")
-    {
-        if (string.IsNullOrEmpty(caller))
-        {
-            return assertionBuilder.WithAssertion(this);
-        }
-
-        assertionBuilder.AppendExpression(caller)
-            .AppendRaw('(');
-
-        argumentExpressions = argumentExpressions.OfType<string>().ToArray();
-        
-        for (var index = 0; index < argumentExpressions.Length; index++)
-        {
-            var argumentExpression = argumentExpressions[index];
-
-            if (string.IsNullOrEmpty(argumentExpression))
-            {
-                continue;
-            }
-            
-            assertionBuilder.AppendRaw(argumentExpression!);
-
-            if (index < argumentExpressions.Length - 1)
-            {
-                assertionBuilder.AppendRaw(',');
-                assertionBuilder.AppendRaw(' ');
-            }
-        }
-
-        return assertionBuilder.AppendRaw(')')
-            .WithAssertion(this);
-    }
     
     internal Task<AssertionResult> Assert(AssertionData<TActual> assertionData)
     {

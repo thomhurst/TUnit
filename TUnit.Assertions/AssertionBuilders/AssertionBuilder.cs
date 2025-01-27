@@ -45,7 +45,7 @@ public abstract class AssertionBuilder<TActual>
     public string? ActualExpression { get; }
     internal ValueTask<AssertionData<TActual>> AssertionDataTask { get; }
     
-    internal readonly Stack<BaseAssertCondition> Assertions = new();
+    public Stack<BaseAssertCondition> Assertions { get; } = new();
     protected readonly List<AssertionResult> Results = [];
 
     protected internal AssertionBuilder<TActual> AppendExpression(string expression)

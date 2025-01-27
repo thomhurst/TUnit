@@ -7,11 +7,11 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
     where TActual : IEnumerable<TInner?>
 {
     private readonly Func<TInner?, Task<TExpected>?> _mapper;
-    private readonly Func<IValueSource<TExpected?>, InvokableAssertionBuilder<TExpected?>> _assertionBuilder;
+    private readonly Func<IValueSource<TExpected?>, IInvokableAssertionBuilder> _assertionBuilder;
     private readonly string _assertionBuilderExpression;
 
     public EnumerableSatisfiesAssertCondition(Func<TInner?, Task<TExpected>?> mapper,
-        Func<IValueSource<TExpected?>, InvokableAssertionBuilder<TExpected?>> assertionBuilder, string mapperExpression, string assertionBuilderExpression)
+        Func<IValueSource<TExpected?>, IInvokableAssertionBuilder> assertionBuilder, string mapperExpression, string assertionBuilderExpression)
     {
         _mapper = mapper;
         _assertionBuilder = assertionBuilder;
