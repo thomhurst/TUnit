@@ -7,7 +7,8 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class InvokableAssertionBuilder<TActual> : 
     AssertionBuilder, IInvokableAssertionBuilder 
 {
-    internal InvokableAssertionBuilder(AssertionBuilder assertionBuilder) : base(assertionBuilder.AssertionDataTask, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
+    internal InvokableAssertionBuilder(AssertionBuilder assertionBuilder) : base(((ISource)assertionBuilder).AssertionDataTask, assertionBuilder.ActualExpression!, (
+        (ISource)assertionBuilder).ExpressionBuilder, ((ISource)assertionBuilder).Assertions)
     {
         if (assertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
         {
@@ -31,7 +32,7 @@ public class InvokableAssertionBuilder<TActual> :
 
     string IInvokableAssertionBuilder.GetExpression()
     {
-        var expression = ExpressionBuilder.ToString();
+        var expression = ((ISource)this).ExpressionBuilder.ToString();
 
         if (expression?.Length < 100)
         {
@@ -40,6 +41,8 @@ public class InvokableAssertionBuilder<TActual> :
         
         return $"{expression?[..100]}...";
     }
+
+    public Stack<BaseAssertCondition> Assertions => ((ISource)this).Assertions;
 
     public new ISource AppendExpression(string expression)
     {

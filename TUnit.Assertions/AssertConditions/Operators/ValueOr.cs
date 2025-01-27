@@ -1,3 +1,4 @@
+using System.Text;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
@@ -6,6 +7,10 @@ namespace TUnit.Assertions.AssertConditions.Operators;
 public class ValueOr<TActual>(AssertionBuilder assertionBuilder) : IValueSource<TActual>
 {
     public string? ActualExpression => assertionBuilder.ActualExpression;
+    
+    public Stack<BaseAssertCondition> Assertions => ((ISource)assertionBuilder).Assertions;
+    public ValueTask<AssertionData> AssertionDataTask => ((ISource)assertionBuilder).AssertionDataTask;
+    public StringBuilder ExpressionBuilder => ((ISource)assertionBuilder).ExpressionBuilder;
     
     public ISource AppendExpression(string expression)
     {

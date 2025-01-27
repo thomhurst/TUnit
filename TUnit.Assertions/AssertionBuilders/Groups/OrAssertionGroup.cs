@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
+using TUnit.Assertions.AssertConditions.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
@@ -29,11 +30,11 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
 
     private async Task<TActual?> GetResult()
     {
-        AssertionBuilder.Assertions.Clear();
+        ((ISource)AssertionBuilder).Assertions.Clear();
         
         foreach (var condition in _assertConditions)
         {
-            AssertionBuilder.Assertions.Push(condition);
+            ((ISource)AssertionBuilder).Assertions.Push(condition);
         }
         
         return (TActual?) await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => x.Result);

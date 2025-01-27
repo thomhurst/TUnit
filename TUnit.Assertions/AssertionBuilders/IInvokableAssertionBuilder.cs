@@ -8,5 +8,4 @@ public interface IInvokableAssertionBuilder : ISource
 {
     TaskAwaiter GetAwaiter();
     string? GetExpression();
-    Stack<BaseAssertCondition> Assertions { get; }
 }

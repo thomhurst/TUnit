@@ -4,11 +4,12 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public abstract class AssertionBuilder
+public abstract class AssertionBuilder : ISource
 {
     protected IInvokableAssertionBuilder? OtherTypeAssertionBuilder;
     
@@ -16,44 +17,50 @@ public abstract class AssertionBuilder
 
     public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
     {
-        AssertionDataTask = assertionDataTask;
+        _assertionDataTask = assertionDataTask;
         ActualExpression = actualExpression;
-        ExpressionBuilder = expressionBuilder;
-        Assertions = assertions;
+        _expressionBuilder = expressionBuilder;
+        _assertions = assertions;
     }
     
     public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression)
     {
-        AssertionDataTask = assertionDataTask;
+        _assertionDataTask = assertionDataTask;
         ActualExpression = actualExpression;
         
         if (string.IsNullOrEmpty(actualExpression))
         {
             ActualExpression = null;
-            ExpressionBuilder = new StringBuilder("Assert.That(UNKNOWN)");
+            _expressionBuilder = new StringBuilder("Assert.That(UNKNOWN)");
         }
         else
         {
             ActualExpression = actualExpression;
-            ExpressionBuilder = new StringBuilder("Assert.That(");
-            ExpressionBuilder.Append(actualExpression);
-            ExpressionBuilder.Append(')');
+            _expressionBuilder = new StringBuilder("Assert.That(");
+            _expressionBuilder.Append(actualExpression);
+            _expressionBuilder.Append(')');
         }
     }
-    
-    internal StringBuilder ExpressionBuilder { get; }
-    public string? ActualExpression { get; }
-    internal ValueTask<AssertionData> AssertionDataTask { get; }
-    
-    public Stack<BaseAssertCondition> Assertions { get; } = new();
-    protected readonly List<AssertionResult> Results = [];
 
-    protected internal AssertionBuilder AppendExpression(string expression)
+    StringBuilder ISource.ExpressionBuilder => _expressionBuilder;
+
+    public string? ActualExpression { get; }
+
+    ValueTask<AssertionData> ISource.AssertionDataTask => _assertionDataTask;
+
+    Stack<BaseAssertCondition> ISource.Assertions => _assertions;
+
+    protected readonly List<AssertionResult> Results = [];
+    private readonly StringBuilder _expressionBuilder;
+    private readonly ValueTask<AssertionData> _assertionDataTask;
+    private readonly Stack<BaseAssertCondition> _assertions = new();
+
+    public ISource AppendExpression(string expression)
     {
         if (!string.IsNullOrEmpty(expression))
         {
-            ExpressionBuilder.Append('.');
-            ExpressionBuilder.Append(expression);
+            _expressionBuilder.Append('.');
+            _expressionBuilder.Append(expression);
         }
 
         return this;
@@ -66,7 +73,7 @@ public abstract class AssertionBuilder
             return this;
         }
         
-        return AppendExpression(chainType.ToString());
+        return (AssertionBuilder)AppendExpression(chainType.ToString());
     }
     
     protected internal void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
@@ -76,35 +83,37 @@ public abstract class AssertionBuilder
             return;
         }
 
-        ExpressionBuilder.Append('.');
-        ExpressionBuilder.Append(methodName);
-        ExpressionBuilder.Append('(');
+        _expressionBuilder.Append('.');
+        _expressionBuilder.Append(methodName);
+        _expressionBuilder.Append('(');
 
         for (var index = 0; index < expressions.Length; index++)
         {
             var expression = expressions[index];
-            ExpressionBuilder.Append(expression);
+            _expressionBuilder.Append(expression);
 
             if (index < expressions.Length - 1)
             {
-                ExpressionBuilder.Append(',');
-                ExpressionBuilder.Append(' ');
+                _expressionBuilder.Append(',');
+                _expressionBuilder.Append(' ');
             }
         }
 
-        ExpressionBuilder.Append(')');
+        _expressionBuilder.Append(')');
     }
 
-    internal void WithAssertion(BaseAssertCondition assertCondition)
+    public ISource WithAssertion(BaseAssertCondition assertCondition)
     {
         assertCondition = this switch
         {
-            IOrAssertionBuilder => new OrAssertCondition(Assertions.Pop(), assertCondition),
-            IAndAssertionBuilder => new AndAssertCondition(Assertions.Pop(), assertCondition),
+            IOrAssertionBuilder => new OrAssertCondition(_assertions.Pop(), assertCondition),
+            IAndAssertionBuilder => new AndAssertCondition(_assertions.Pop(), assertCondition),
             _ => assertCondition
         };
 
-        Assertions.Push(assertCondition);
+        _assertions.Push(assertCondition);
+
+        return this;
     }
     
     internal async Task<AssertionData> ProcessAssertionsAsync()
@@ -114,11 +123,11 @@ public abstract class AssertionBuilder
             await OtherTypeAssertionBuilder;
         }
         
-        AwaitedAssertionData ??= await AssertionDataTask;
+        AwaitedAssertionData ??= await _assertionDataTask;
 
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
         
-        foreach (var assertion in Assertions.Reverse())
+        foreach (var assertion in _assertions.Reverse())
         {
             var result = await assertion.Assert(AwaitedAssertionData.Value.Result, AwaitedAssertionData.Value.Exception, AwaitedAssertionData.Value.ActualExpression);
             

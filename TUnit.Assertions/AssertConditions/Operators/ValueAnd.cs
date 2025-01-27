@@ -1,3 +1,4 @@
+using System.Text;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 
@@ -9,6 +10,10 @@ public class ValueAnd<TActual>(AssertionBuilder assertionBuilder) : IValueSource
     {
         return new ValueAnd<TActual>(assertionBuilder);
     }
+    
+    public Stack<BaseAssertCondition> Assertions => ((ISource)assertionBuilder).Assertions;
+    public ValueTask<AssertionData> AssertionDataTask => ((ISource)assertionBuilder).AssertionDataTask;
+    public StringBuilder ExpressionBuilder => ((ISource)assertionBuilder).ExpressionBuilder;
     
     public string? ActualExpression => assertionBuilder.ActualExpression;
 

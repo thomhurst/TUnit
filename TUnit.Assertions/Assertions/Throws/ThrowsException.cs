@@ -48,7 +48,8 @@ public class ThrowsException<TActual, TException> where TException : Exception
         return task.GetAwaiter();
     }
     
-    public AndConvertedTypeAssertionBuilder<TException> And => new(_delegateAssertionBuilder, AssertionDataTask(), _delegateAssertionBuilder.ActualExpression!, _delegateAssertionBuilder.ExpressionBuilder!.Append(".And"));
+    public AndConvertedTypeAssertionBuilder<TException> And => new(_delegateAssertionBuilder, AssertionDataTask(), _delegateAssertionBuilder.ActualExpression!, (
+        (ISource)_delegateAssertionBuilder).ExpressionBuilder.Append(".And"));
 
     public DelegateOr<object?> Or => _delegateAssertionBuilder.Or;
 
