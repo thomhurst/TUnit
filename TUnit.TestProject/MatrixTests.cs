@@ -70,17 +70,81 @@ public class MatrixTests
             await Task.CompletedTask;
         }
 
-        public enum CountToTenEnum
+#if NET7_0_OR_GREATER
+        [Test]
+        [MatrixDataSource]
+        public async Task Range(
+            [MatrixRange<int>(-50, 50)] int item)
         {
-            One,
-            Two,
-            Three,
-            Four,
-            Five,
-            Six,
-            Seven,
-            Eight,
-            Nine,
-            Ten
+            await Task.CompletedTask;
         }
+#endif
+
+    [Test]
+    [MatrixDataSource]
+    public async Task Method1(
+        [MatrixMethod<MatrixTests>(nameof(EnumerableMethod))] int item)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [Test]
+    [MatrixDataSource]
+    public async Task Method2(
+        [MatrixMethod<MatrixTests>(nameof(ArrayMethod))] int item)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [Test]
+    [MatrixDataSource]
+    public async Task Method3(
+        [MatrixMethod<MatrixTests>(nameof(IntMethod))] int item)
+    {
+        await Task.CompletedTask;
+    }
+    
+    [Test]
+    [MatrixDataSource]
+    public async Task Method4(
+        [MatrixMethod<MatrixTests>(nameof(ObjectMethod))] int item)
+    {
+        await Task.CompletedTask;
+    }
+
+    public enum CountToTenEnum
+    {
+        One,
+        Two,
+        Three,
+        Four,
+        Five,
+        Six,
+        Seven,
+        Eight,
+        Nine,
+        Ten
+    }
+
+    public static IEnumerable<int> EnumerableMethod()
+    {
+        yield return 1;
+        yield return 2;
+        yield return 3;
+    }
+    
+    public static object?[] ArrayMethod()
+    {
+        return [1, 2, 3];
+    }
+    
+    public static int IntMethod()
+    {
+        return 1;
+    }
+    
+    public static object ObjectMethod()
+    {
+        return 1;
+    }
 }
