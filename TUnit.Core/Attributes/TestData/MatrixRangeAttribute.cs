@@ -20,7 +20,7 @@ public class MatrixRangeAttribute<[DynamicallyAccessedMembers(DynamicallyAccesse
     {
         var current = min;
         
-        while (current < max)
+        while (current <= max)
         {
             yield return current;
             current += T.One;
