@@ -97,7 +97,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     {
         return constantValue switch
         {
-            null => SyntaxFactory.LiteralExpression(SyntaxKind.NullKeyword),
+            null => SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression),
             string strValue => SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(strValue)),
             char charValue => SyntaxFactory.LiteralExpression(SyntaxKind.CharacterLiteralExpression, SyntaxFactory.Literal(charValue)),
             bool boolValue => boolValue ? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression) 
