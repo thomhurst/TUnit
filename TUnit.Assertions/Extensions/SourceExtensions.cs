@@ -28,7 +28,7 @@ public static class SourceExtensions
             return new InvokableValueAssertionBuilder<TActual>(invokableAssertionBuilder);
         }
         
-        return new InvokableValueAssertionBuilder<TActual>(new InvokableAssertionBuilder<TActual>((AssertionBuilder)invokeableAssertionBuilder));
+        return new InvokableValueAssertionBuilder<TActual>(new InvokableAssertionBuilder<TActual>(invokeableAssertionBuilder));
     }
 
     public static InvokableDelegateAssertionBuilder RegisterAssertion<TActual>(this IDelegateSource delegateSource,
@@ -51,7 +51,7 @@ public static class SourceExtensions
             return new InvokableDelegateAssertionBuilder(unTypedInvokableAssertionBuilder);
         }
 
-        return new InvokableDelegateAssertionBuilder(new InvokableAssertionBuilder<object?>((AssertionBuilder)source));
+        return new InvokableDelegateAssertionBuilder(new InvokableAssertionBuilder<object?>(source));
     }
 
     private static string BuildExpression(string caller, string[] argumentExpressions)
