@@ -5,9 +5,9 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 namespace TUnit.Assertions.AssertionBuilders;
 
 public class InvokableAssertionBuilder<TActual> : 
-    AssertionBuilder<TActual>, IInvokableAssertionBuilder 
+    AssertionBuilder, IInvokableAssertionBuilder 
 {
-    internal InvokableAssertionBuilder(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder.AssertionDataTask, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
+    internal InvokableAssertionBuilder(AssertionBuilder assertionBuilder) : base(assertionBuilder.AssertionDataTask, assertionBuilder.ActualExpression!, assertionBuilder.ExpressionBuilder, assertionBuilder.Assertions)
     {
         if (assertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
         {
@@ -15,7 +15,7 @@ public class InvokableAssertionBuilder<TActual> :
         }
     }
 
-    internal async Task<T> ProcessAssertionsAsync<T>(Func<AssertionData<TActual>, T> mapper)
+    internal async Task<T> ProcessAssertionsAsync<T>(Func<AssertionData, T> mapper)
     {
         var assertionData = await ProcessAssertionsAsync();
         return mapper(assertionData);

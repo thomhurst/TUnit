@@ -3,7 +3,7 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class ValueOr<TActual>(AssertionBuilder<TActual> assertionBuilder) : IValueSource<TActual>
+public class ValueOr<TActual>(AssertionBuilder assertionBuilder) : IValueSource<TActual>
 {
     public string? ActualExpression => assertionBuilder.ActualExpression;
     

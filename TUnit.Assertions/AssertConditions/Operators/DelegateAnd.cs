@@ -3,9 +3,9 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class DelegateAnd<TActual>(AssertionBuilder<TActual> assertionBuilder) : IDelegateSource
+public class DelegateAnd<TActual>(AssertionBuilder assertionBuilder) : IDelegateSource
 {
-    public static DelegateAnd<TActual> Create(AssertionBuilder<TActual> assertionBuilder)
+    public static DelegateAnd<TActual> Create(AssertionBuilder assertionBuilder)
     {
         return new DelegateAnd<TActual>(assertionBuilder);
     }

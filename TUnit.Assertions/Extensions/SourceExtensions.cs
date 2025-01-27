@@ -23,25 +23,35 @@ public static class SourceExtensions
             return invokableValueAssertionBuilder;
         }
         
-        return new InvokableValueAssertionBuilder<TActual>((InvokableAssertionBuilder<TActual>)invokeableAssertionBuilder);
+        if(invokeableAssertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
+        {
+            return new InvokableValueAssertionBuilder<TActual>(invokableAssertionBuilder);
+        }
+        
+        return new InvokableValueAssertionBuilder<TActual>(new InvokableAssertionBuilder<TActual>((AssertionBuilder)invokeableAssertionBuilder));
     }
 
-    public static InvokableDelegateAssertionBuilder<TActual> RegisterAssertion<TActual>(this IDelegateSource source,
+    public static InvokableDelegateAssertionBuilder RegisterAssertion<TActual>(this IDelegateSource delegateSource,
         BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string caller = "")
     {
         if (!string.IsNullOrEmpty(caller))
         {
-            source.AppendExpression(BuildExpression(caller, argumentExpressions));
+            delegateSource.AppendExpression(BuildExpression(caller, argumentExpressions));
         }
         
-        var invokeableAssertionBuilder = source.WithAssertion(assertCondition);
+        var source = delegateSource.WithAssertion(assertCondition);
 
-        if (invokeableAssertionBuilder is InvokableDelegateAssertionBuilder<TActual> invokableDelegateAssertionBuilder)
+        if (source is InvokableDelegateAssertionBuilder unTypedInvokableDelegateAssertionBuilder)
         {
-            return invokableDelegateAssertionBuilder;
+            return unTypedInvokableDelegateAssertionBuilder;
         }
-        
-        return new InvokableDelegateAssertionBuilder<TActual>((InvokableAssertionBuilder<TActual>)invokeableAssertionBuilder);
+
+        if (source is InvokableAssertionBuilder<object?> unTypedInvokableAssertionBuilder)
+        {
+            return new InvokableDelegateAssertionBuilder(unTypedInvokableAssertionBuilder);
+        }
+
+        return new InvokableDelegateAssertionBuilder(new InvokableAssertionBuilder<object?>((AssertionBuilder)source));
     }
 
     private static string BuildExpression(string caller, string[] argumentExpressions)

@@ -8,13 +8,13 @@ using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public abstract class AssertionBuilder<TActual>
+public abstract class AssertionBuilder
 {
     protected IInvokableAssertionBuilder? OtherTypeAssertionBuilder;
     
-    protected AssertionData<TActual>? AwaitedAssertionData;
+    protected AssertionData? AwaitedAssertionData;
 
-    public AssertionBuilder(ValueTask<AssertionData<TActual>> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
+    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
     {
         AssertionDataTask = assertionDataTask;
         ActualExpression = actualExpression;
@@ -22,7 +22,7 @@ public abstract class AssertionBuilder<TActual>
         Assertions = assertions;
     }
     
-    public AssertionBuilder(ValueTask<AssertionData<TActual>> assertionDataTask, string actualExpression)
+    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression)
     {
         AssertionDataTask = assertionDataTask;
         ActualExpression = actualExpression;
@@ -43,12 +43,12 @@ public abstract class AssertionBuilder<TActual>
     
     internal StringBuilder ExpressionBuilder { get; }
     public string? ActualExpression { get; }
-    internal ValueTask<AssertionData<TActual>> AssertionDataTask { get; }
+    internal ValueTask<AssertionData> AssertionDataTask { get; }
     
     public Stack<BaseAssertCondition> Assertions { get; } = new();
     protected readonly List<AssertionResult> Results = [];
 
-    protected internal AssertionBuilder<TActual> AppendExpression(string expression)
+    protected internal AssertionBuilder AppendExpression(string expression)
     {
         if (!string.IsNullOrEmpty(expression))
         {
@@ -58,25 +58,8 @@ public abstract class AssertionBuilder<TActual>
 
         return this;
     }
-    
-    protected internal AssertionBuilder<TActual> AppendRaw(string value)
-    {
-        if (!string.IsNullOrEmpty(value))
-        {
-            ExpressionBuilder.Append(value);
-        }
 
-        return this;
-    }
-    
-    protected internal AssertionBuilder<TActual> AppendRaw(char value)
-    {
-        ExpressionBuilder.Append(value);
-
-        return this;
-    }
-    
-    internal AssertionBuilder<TActual> AppendConnector(ChainType chainType)
+    internal AssertionBuilder AppendConnector(ChainType chainType)
     {
         if (chainType == ChainType.None)
         {
@@ -86,11 +69,11 @@ public abstract class AssertionBuilder<TActual>
         return AppendExpression(chainType.ToString());
     }
     
-    protected internal AssertionBuilder<TActual> AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
+    protected internal void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
     {
         if (string.IsNullOrEmpty(methodName))
         {
-            return this;
+            return;
         }
 
         ExpressionBuilder.Append('.');
@@ -110,27 +93,21 @@ public abstract class AssertionBuilder<TActual>
         }
 
         ExpressionBuilder.Append(')');
-
-        return this;
     }
 
-    internal InvokableAssertionBuilder<TActual> WithAssertion(BaseAssertCondition assertCondition)
+    internal void WithAssertion(BaseAssertCondition assertCondition)
     {
-        var builder = this as InvokableAssertionBuilder<TActual> ?? new InvokableAssertionBuilder<TActual>(this);
-
         assertCondition = this switch
         {
-            IOrAssertionBuilder => new OrAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition),
-            IAndAssertionBuilder => new AndAssertCondition<TActual>(builder.Assertions.Pop(), assertCondition),
+            IOrAssertionBuilder => new OrAssertCondition(Assertions.Pop(), assertCondition),
+            IAndAssertionBuilder => new AndAssertCondition(Assertions.Pop(), assertCondition),
             _ => assertCondition
         };
 
-        builder.Assertions.Push(assertCondition);
-        
-        return builder;
+        Assertions.Push(assertCondition);
     }
     
-    internal async Task<AssertionData<TActual>> ProcessAssertionsAsync()
+    internal async Task<AssertionData> ProcessAssertionsAsync()
     {
         if (OtherTypeAssertionBuilder is not null)
         {

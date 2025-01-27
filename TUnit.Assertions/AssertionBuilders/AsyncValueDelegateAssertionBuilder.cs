@@ -5,7 +5,7 @@ using TUnit.Assertions.Extensions;
 namespace TUnit.Assertions.AssertionBuilders;
 
 public class AsyncValueDelegateAssertionBuilder<TActual> 
-    : AssertionBuilder<TActual>, IValueDelegateSource<TActual>
+    : AssertionBuilder, IValueDelegateSource<TActual>
  {
     internal AsyncValueDelegateAssertionBuilder(Func<Task<TActual>> function, string expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {

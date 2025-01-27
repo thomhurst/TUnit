@@ -5,7 +5,7 @@ using TUnit.Assertions.Extensions;
 namespace TUnit.Assertions.AssertionBuilders;
 
 public class ValueDelegateAssertionBuilder<TActual> 
-    : AssertionBuilder<TActual>,
+    : AssertionBuilder,
         IDelegateSource,
         IValueSource<TActual>
 {

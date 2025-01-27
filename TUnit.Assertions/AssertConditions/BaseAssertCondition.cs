@@ -41,7 +41,7 @@ public abstract class BaseAssertCondition
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
     
-    internal Task<AssertionResult> Assert(AssertionData<TActual> assertionData)
+    internal Task<AssertionResult> Assert(AssertionData assertionData)
     {
         return Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
     }

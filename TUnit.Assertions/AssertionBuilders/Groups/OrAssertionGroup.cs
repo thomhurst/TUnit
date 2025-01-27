@@ -5,7 +5,7 @@ using TUnit.Assertions.AssertConditions.Connectors;
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
 public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActual, TAssertionBuilder>
-    where TAssertionBuilder : AssertionBuilder<TActual>
+    where TAssertionBuilder : AssertionBuilder
 {
     private readonly Stack<BaseAssertCondition> _assertConditions = [];
     private InvokableAssertionBuilder<TActual>? _invokableAssertionBuilder;
@@ -36,14 +36,14 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
             AssertionBuilder.Assertions.Push(condition);
         }
         
-        return await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => x.Result);
+        return (TActual?) await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => x.Result);
     }
 
     private void Push(TAssertionBuilder assertionBuilder, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
     {
         if (_assertConditions.Count > 0)
         {
-            _assertConditions.Push(new OrAssertCondition<TActual>(_assertConditions.Pop(), assert(assertionBuilder).Assertions.Pop()));
+            _assertConditions.Push(new OrAssertCondition(_assertConditions.Pop(), assert(assertionBuilder).Assertions.Pop()));
         }
         else
         {

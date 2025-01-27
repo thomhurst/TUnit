@@ -6,7 +6,7 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 
 public class ValueAssertionBuilder<TActual> 
-    : AssertionBuilder<TActual>,
+    : AssertionBuilder,
         IValueSource<TActual>
 {
     internal ValueAssertionBuilder(TActual value, string expressionBuilder) : base(value.AsAssertionData(expressionBuilder), expressionBuilder)

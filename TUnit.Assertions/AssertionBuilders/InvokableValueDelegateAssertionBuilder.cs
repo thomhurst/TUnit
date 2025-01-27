@@ -5,11 +5,11 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class InvokableValueDelegateAssertionBuilder<TActual> : InvokableAssertionBuilder<TActual>
 {
-    internal InvokableValueDelegateAssertionBuilder(ValueTask<AssertionData<TActual>> assertionDataDelegate, AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder)
+    internal InvokableValueDelegateAssertionBuilder(ValueTask<AssertionData> assertionDataDelegate, AssertionBuilder assertionBuilder) : base(assertionBuilder)
     {
     }
 
-    public AssertionBuilder<TActual> AssertionBuilder => this;
+    public AssertionBuilder AssertionBuilder => this;
     
     public ValueDelegateAnd<TActual> And => new(AssertionBuilder.AppendConnector(ChainType.And));
     public ValueDelegateOr<TActual> Or => new(AssertionBuilder.AppendConnector(ChainType.Or));

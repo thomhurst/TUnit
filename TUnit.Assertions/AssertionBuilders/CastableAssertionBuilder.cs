@@ -4,14 +4,14 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class CastableAssertionBuilder<TActual, TExpected> : InvokableValueAssertionBuilder<TActual>
 {
-    private readonly Func<AssertionData<TActual>, TExpected?> _mapper;
+    private readonly Func<AssertionData, TExpected?> _mapper;
 
     internal CastableAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder)
     {
         _mapper = DefaultMapper;
     }
 
-    internal CastableAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder, Func<AssertionData<TActual>, TExpected?> mapper) : base(assertionBuilder)
+    internal CastableAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder, Func<AssertionData, TExpected?> mapper) : base(assertionBuilder)
     {
         _mapper = mapper;
     }
@@ -21,7 +21,7 @@ public class CastableAssertionBuilder<TActual, TExpected> : InvokableValueAssert
         return AssertType().GetAwaiter();
     }
 
-    private static TExpected? DefaultMapper(AssertionData<TActual> data)
+    private static TExpected? DefaultMapper(AssertionData data)
     {
         try
         {

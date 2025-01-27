@@ -8,11 +8,11 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsException<TActual, TException> where TException : Exception
 {
-    private readonly InvokableDelegateAssertionBuilder<TActual> _delegateAssertionBuilder;
+    private readonly InvokableDelegateAssertionBuilder _delegateAssertionBuilder;
     private readonly IDelegateSource _source;
     private readonly Func<Exception?, Exception?> _selector;
 
-    public ThrowsException(InvokableDelegateAssertionBuilder<TActual> delegateAssertionBuilder,
+    public ThrowsException(InvokableDelegateAssertionBuilder delegateAssertionBuilder,
         IDelegateSource source,
         Func<Exception?, Exception?> selector)
     {
@@ -48,13 +48,13 @@ public class ThrowsException<TActual, TException> where TException : Exception
         return task.GetAwaiter();
     }
     
-    public AndConvertedTypeAssertionBuilder<TActual, TException> And => new(_delegateAssertionBuilder, AssertionDataTask(), _delegateAssertionBuilder.ActualExpression!, _delegateAssertionBuilder.ExpressionBuilder!.Append(".And"));
+    public AndConvertedTypeAssertionBuilder<TException> And => new(_delegateAssertionBuilder, AssertionDataTask(), _delegateAssertionBuilder.ActualExpression!, _delegateAssertionBuilder.ExpressionBuilder!.Append(".And"));
 
-    public DelegateOr<TActual> Or => _delegateAssertionBuilder.Or;
+    public DelegateOr<object?> Or => _delegateAssertionBuilder.Or;
 
-    private async ValueTask<AssertionData<TException>> AssertionDataTask()
+    private async ValueTask<AssertionData> AssertionDataTask()
     {
         var value = await this;
-        return new AssertionData<TException>(value, null, _delegateAssertionBuilder.ActualExpression);
+        return new AssertionData(value, null, _delegateAssertionBuilder.ActualExpression);
     }
 }

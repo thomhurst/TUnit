@@ -35,7 +35,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                 AdditionalReferences =
                 {
                     typeof(TUnitAttribute).Assembly.Location,
-                    typeof(AssertionBuilder<>).Assembly.Location,
+                    typeof(AssertionBuilder).Assembly.Location,
                 },
             },
         };

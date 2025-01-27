@@ -2,10 +2,10 @@
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AndConvertedTypeAssertionBuilder<TFromType, TToType>(
-    InvokableAssertionBuilder<TFromType> otherTypeAssertionBuilder,
-    ValueTask<AssertionData<TToType>> actual,
+public class AndConvertedTypeAssertionBuilder<TToType>(
+    InvokableAssertionBuilder<object?> otherTypeAssertionBuilder,
+    ValueTask<AssertionData> actual,
     string actualExpression,
     StringBuilder expressionBuilder)
-    : ConvertedTypeAssertionBuilder<TFromType, TToType>(otherTypeAssertionBuilder, actual, actualExpression,
+    : ConvertedTypeAssertionBuilder<object?, TToType>(otherTypeAssertionBuilder, actual, actualExpression,
         expressionBuilder), IAndAssertionBuilder;

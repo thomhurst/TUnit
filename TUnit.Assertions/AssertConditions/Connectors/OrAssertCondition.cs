@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertConditions.Connectors;
 
-internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
+internal class OrAssertCondition : BaseAssertCondition
 {
     private readonly BaseAssertCondition _condition1;
     private readonly BaseAssertCondition _condition2;
@@ -21,10 +21,10 @@ internal class OrAssertCondition<TActual> : BaseAssertCondition<TActual>
     internal override string GetExpectationWithReason()
         => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} or {_condition2.GetExpectationWithReason()}";
 
-    protected override async Task<AssertionResult> GetResult(TActual? actualValue, Exception? exception)
+    internal override async Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression)
     {
-        return (await _condition1.Assert(actualValue, exception, ActualExpression))
-            .Or(await _condition2.Assert(actualValue, exception, ActualExpression));
+        return (await _condition1.Assert(actualValue, exception, actualExpression))
+            .Or(await _condition2.Assert(actualValue, exception, actualExpression));
     }
 
     internal override void SetBecauseReason(BecauseReason becauseReason)

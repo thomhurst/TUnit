@@ -19,7 +19,7 @@ public class InvokableValueAssertionBuilder<TActual>(InvokableAssertionBuilder<T
         return this;
     }
 
-    internal AssertionBuilder<TActual> AssertionBuilder => this;
+    internal AssertionBuilder AssertionBuilder => this;
     
     public ValueAnd<TActual> And => new(new AndAssertionBuilder<TActual>(AssertionBuilder.AppendConnector(ChainType.And)));
     public ValueOr<TActual> Or => new(new OrAssertionBuilder<TActual>(AssertionBuilder.AppendConnector(ChainType.Or)));
@@ -32,6 +32,6 @@ public class InvokableValueAssertionBuilder<TActual>(InvokableAssertionBuilder<T
     private async Task<TActual?> AssertAndGet()
     {
         var data = await ProcessAssertionsAsync();
-        return data.Result;
+        return (TActual?) data.Result;
     }
 }
