@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.Tests.Bugs;
+﻿using TUnit.Assertions.AssertConditions.Throws;
+
+namespace TUnit.Assertions.Tests.Bugs;
 
 public class Tests1600
 {

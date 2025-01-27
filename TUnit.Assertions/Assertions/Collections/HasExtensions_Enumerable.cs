@@ -9,31 +9,27 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> HasSingleItem<TActual>(this IValueSource<TActual> valueSource, IEqualityComparer equalityComparer = null) 
-        where TActual : IEnumerable
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasSingleItem<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, IEqualityComparer equalityComparer = null) 
     {
-        return valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<TActual>(1)
+        return valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<IEnumerable<TInner>>(1)
             , []);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> HasDistinctItems<TActual>(this IValueSource<TActual> valueSource) 
-        where TActual : IEnumerable
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource) 
     {
-        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<TActual, object>(null)
+        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<IEnumerable<TInner>, object>(null)
             , []);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> HasDistinctItems<TActual, TInner>(this IValueSource<TActual> valueSource, IEqualityComparer<TInner> equalityComparer) 
-        where TActual : IEnumerable<TInner>
+    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, IEqualityComparer<TInner> equalityComparer) 
     {
-        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<TActual, TInner>(equalityComparer)
+        return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(equalityComparer)
             , []);
     }
     
-    public static EnumerableCount<TActual> HasCount<TActual>(this IValueSource<TActual> valueSource) 
-        where TActual : IEnumerable
+    public static EnumerableCount<TInner> HasCount<TInner>(this IValueSource<IEnumerable<TInner>> valueSource) 
     {
-        valueSource.AssertionBuilder.AppendCallerMethod([]);
-        return new EnumerableCount<TActual>(valueSource);
+        valueSource.AppendExpression("HasCount()");
+        return new EnumerableCount<TInner>(valueSource);
     }
 }

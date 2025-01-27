@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static class DateTimeIsExtensions
 {
-    public static DateTimeEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "")
+    public static DateTimeEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
         return new DateTimeEqualToAssertionBuilderWrapper(
             valueSource.RegisterAssertion(new DateTimeEqualsExpectedValueAssertCondition(expected),
@@ -20,7 +20,7 @@ public static class DateTimeIsExtensions
         );
     }
     
-    public static InvokableValueAssertionBuilder<DateTime> IsAfter(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<DateTime> IsAfter(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
             {
@@ -30,7 +30,7 @@ public static class DateTimeIsExtensions
             $"to be after {expected}")
             , [doNotPopulateThisValue]); }
     
-    public static InvokableValueAssertionBuilder<DateTime> IsAfterOrEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<DateTime> IsAfterOrEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
             {
@@ -40,7 +40,7 @@ public static class DateTimeIsExtensions
             $"to be after or equal to {expected}")
             , [doNotPopulateThisValue]); }
     
-    public static InvokableValueAssertionBuilder<DateTime> IsBefore(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "") 
+    public static InvokableValueAssertionBuilder<DateTime> IsBefore(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
             {
@@ -51,7 +51,7 @@ public static class DateTimeIsExtensions
             , [doNotPopulateThisValue]); }
 
     public static InvokableValueAssertionBuilder<DateTime> IsBeforeOrEqualTo(this IValueSource<DateTime> valueSource,
-        DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+        DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default,
                 (value, _, _) => { return value <= expected; },

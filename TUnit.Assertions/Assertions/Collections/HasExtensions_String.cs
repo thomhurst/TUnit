@@ -8,7 +8,7 @@ public static partial class HasExtensions
 {
     public static StringLength HasLength(this IValueSource<string> valueSource)
     {
-        valueSource.AssertionBuilder.AppendCallerMethod([]);
+        valueSource.AppendExpression("HasLength()");
         return new StringLength(valueSource);
     }
 }

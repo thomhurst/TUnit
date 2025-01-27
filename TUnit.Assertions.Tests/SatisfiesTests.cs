@@ -1,4 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Interfaces;
+﻿using TUnit.Assertions.AssertConditions.Throws;
 
 namespace TUnit.Assertions.Tests;
 
@@ -217,7 +217,7 @@ public class SatisfiesTests
         var myModel3 = new MyModel { Value = "!" };
         List<MyModel> models = [myModel, myModel2, myModel3];
 
-        await Assert.That(models).AllSatisfy((MyModel? model) => model?.Value, assert => assert.HasCount().Positive());
+        await Assert.That(models).All().Satisfy(model => model?.Value, assert => assert.HasCount().Positive());
     }
 
     [Test]
@@ -228,7 +228,7 @@ public class SatisfiesTests
         var myModel3 = new MyModel { Value = "!" };
         List<MyModel> models = [myModel, myModel2, myModel3];
 
-        await Assert.That(models).AllSatisfy((IValueSource<MyModel?> assert) => assert.IsNotNull());
+        await Assert.That(models).All().Satisfy(assert => assert.IsNotNull());
     }
 
     [Test]
@@ -240,7 +240,7 @@ public class SatisfiesTests
         List<MyModel?> models = [myModel, myModel2, myModel3, null];
 
         await Assert.That(async () =>
-            await Assert.That(models).AllSatisfy((IValueSource<MyModel?> assert) => assert.IsNotNull())
+            await Assert.That(models).All().Satisfy(assert => assert.IsNotNull())
         ).Throws<AssertionException>();
     }
 
@@ -253,9 +253,9 @@ public class SatisfiesTests
         List<MyModel?> models = [myModel, myModel2, myModel3];
 
         await Assert.That(async () =>        
-                await Assert.That(models).AllSatisfy((MyModel? model) => model!.Value, item => item.Contains("o")!)
+                await Assert.That(models).All().Satisfy(model => model!.Value, item => item.Contains("o")!)
         ).Throws<AssertionException>().WithMessageMatching("""
-                                                           *Expected items mapped by (MyModel? model) => model!.Value to satisfy item => item.Contains("o")!
+                                                           *Expected items mapped by model => model!.Value to satisfy item => item.Contains("o")!
                                                            
                                                            but items not satisfying the condition were found:
                                                            at [1] it was not found. Found a closest match which differs at index 0:

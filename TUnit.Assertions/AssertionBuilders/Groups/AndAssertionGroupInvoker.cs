@@ -3,7 +3,7 @@
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
 public class AndAssertionGroupInvoker<TActual, TAssertionBuilder> 
-    where TAssertionBuilder : AssertionBuilder<TActual>
+    where TAssertionBuilder : AssertionBuilder
 {
     private readonly List<AssertionGroup<TActual, TAssertionBuilder>> _assertionGroups = [];
 

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Dynamic;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
@@ -8,47 +7,47 @@ namespace TUnit.Assertions;
 
 public static class Assert
 {
-    public static ValueAssertionBuilder<TActual> That<TActual>(TActual value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static ValueAssertionBuilder<TActual> That<TActual>(TActual value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new ValueAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static DelegateAssertionBuilder That(Action value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static DelegateAssertionBuilder That(Action value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new DelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static ValueDelegateAssertionBuilder<TActual> That<TActual>(Func<TActual> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static ValueDelegateAssertionBuilder<TActual> That<TActual>(Func<TActual> value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new ValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static AsyncDelegateAssertionBuilder That(Func<Task> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static AsyncDelegateAssertionBuilder That(Func<Task> value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new AsyncDelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new AsyncValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static AsyncDelegateAssertionBuilder That(Task value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static AsyncDelegateAssertionBuilder That(Task value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new AsyncDelegateAssertionBuilder(async () => await value, doNotPopulateThisValue);
     }
     
-    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(Task<TActual> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(Task<TActual> value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new AsyncValueDelegateAssertionBuilder<TActual>(async () => await value, doNotPopulateThisValue);
     }
     
-    public static AsyncDelegateAssertionBuilder That(ValueTask value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static AsyncDelegateAssertionBuilder That(ValueTask value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new AsyncDelegateAssertionBuilder(async () => await value, doNotPopulateThisValue);
     }
     
-    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(ValueTask<TActual> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static AsyncValueDelegateAssertionBuilder<TActual> That<TActual>(ValueTask<TActual> value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new AsyncValueDelegateAssertionBuilder<TActual>(async () => await value, doNotPopulateThisValue);
     }

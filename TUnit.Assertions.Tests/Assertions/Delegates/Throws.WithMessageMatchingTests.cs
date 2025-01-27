@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Throws;
 
 namespace TUnit.Assertions.Tests.Assertions.Delegates;
 

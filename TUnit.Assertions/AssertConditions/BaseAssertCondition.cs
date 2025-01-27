@@ -1,5 +1,4 @@
-using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -30,6 +29,8 @@ public abstract class BaseAssertCondition
 
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";
+
+    internal abstract Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression);
     
     internal void SetSubject(string? subject)
         => Subject = subject;
@@ -37,48 +38,20 @@ public abstract class BaseAssertCondition
 
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
-    internal InvokableAssertionBuilder<TActual> ChainedToWithoutExpression(AssertionBuilder<TActual> assertionBuilder)
-    {
-        return assertionBuilder.WithAssertion(this);
-    }
     
-    internal InvokableAssertionBuilder<TActual> ChainedTo(AssertionBuilder<TActual> assertionBuilder, string?[] argumentExpressions, [CallerMemberName] string caller = "")
-    {
-        if (string.IsNullOrEmpty(caller))
-        {
-            return assertionBuilder.WithAssertion(this);
-        }
-
-        assertionBuilder.AppendExpression(caller)
-            .AppendRaw('(');
-
-        argumentExpressions = argumentExpressions.OfType<string>().ToArray();
-        
-        for (var index = 0; index < argumentExpressions.Length; index++)
-        {
-            var argumentExpression = argumentExpressions[index];
-
-            if (string.IsNullOrEmpty(argumentExpression))
-            {
-                continue;
-            }
-            
-            assertionBuilder.AppendRaw(argumentExpression!);
-
-            if (index < argumentExpressions.Length - 1)
-            {
-                assertionBuilder.AppendRaw(',');
-                assertionBuilder.AppendRaw(' ');
-            }
-        }
-
-        return assertionBuilder.AppendRaw(')')
-            .WithAssertion(this);
-    }
-    
-    internal Task<AssertionResult> Assert(AssertionData<TActual> assertionData)
+    internal Task<AssertionResult> Assert(AssertionData assertionData)
     {
         return Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
+    }
+
+    internal override Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression)
+    {
+        if (actualValue is not null && actualValue is not TActual)
+        {
+            throw new AssertionException($"Expected {typeof(TActual).Name} but received {actualValue.GetType().Name}");
+        } 
+        
+        return Assert((TActual?) actualValue, exception, actualExpression);
     }
 
     internal TActual? ActualValue { get; private set; }

@@ -1,6 +1,6 @@
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
-public class UnknownAssertionGroup<TActual, TAssertionBuilder> where TAssertionBuilder : AssertionBuilder<TActual>
+public class UnknownAssertionGroup<TActual, TAssertionBuilder> where TAssertionBuilder : AssertionBuilder
 {
     private readonly TAssertionBuilder _assertionBuilder;
     private readonly Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> _initialAssert;

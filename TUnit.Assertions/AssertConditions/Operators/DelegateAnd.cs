@@ -1,35 +1,31 @@
+using System.Text;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class DelegateAnd<TActual>(AssertionBuilder<TActual> assertionBuilder) : IDelegateSource<TActual>
+public class DelegateAnd<TActual>(AssertionBuilder assertionBuilder) : IDelegateSource
 {
-    public static DelegateAnd<TActual> Create(AssertionBuilder<TActual> assertionBuilder)
+    public static DelegateAnd<TActual> Create(AssertionBuilder assertionBuilder)
     {
         return new DelegateAnd<TActual>(assertionBuilder);
     }
 
-    public ThrowsException<TActual, TException> Throws<TException>() where TException : Exception
+    public string? ActualExpression => assertionBuilder.ActualExpression;
+    
+    public Stack<BaseAssertCondition> Assertions => ((ISource)assertionBuilder).Assertions;
+    public ValueTask<AssertionData> AssertionDataTask => ((ISource)assertionBuilder).AssertionDataTask;
+    public StringBuilder ExpressionBuilder => ((ISource)assertionBuilder).ExpressionBuilder;
+
+    public ISource AppendExpression(string expression)
     {
-        return new DelegateSource<TActual>(assertionBuilder).Throws<TException>();
+        assertionBuilder.AppendExpression(expression);
+        return this;
     }
 
-    public ThrowsException<TActual, TException> ThrowsExactly<TException>() where TException : Exception
+    public ISource WithAssertion(BaseAssertCondition assertCondition)
     {
-        return new DelegateSource<TActual>(assertionBuilder).ThrowsExactly<TException>();
+        assertionBuilder.WithAssertion(assertCondition);
+        return this;
     }
-
-    public ThrowsException<TActual, Exception> ThrowsException()
-    {
-        return new DelegateSource<TActual>(assertionBuilder).ThrowsException();
-    }
-
-    public CastableAssertionBuilder<TActual, TActual> ThrowsNothing()
-    {
-        return new DelegateSource<TActual>(assertionBuilder).ThrowsNothing();
-    }
-
-    AssertionBuilder<TActual> ISource<TActual>.AssertionBuilder => new AndAssertionBuilder<TActual>(assertionBuilder);
 }
