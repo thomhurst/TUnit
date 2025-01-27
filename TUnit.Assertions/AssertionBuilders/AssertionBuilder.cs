@@ -31,7 +31,7 @@ public abstract class AssertionBuilder : ISource
         _assertions = assertions;
     }
     
-    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression)
+    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string? actualExpression)
     {
         _assertionDataTask = assertionDataTask;
         ActualExpression = actualExpression;

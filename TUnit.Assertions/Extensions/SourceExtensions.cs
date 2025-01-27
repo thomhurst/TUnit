@@ -9,11 +9,11 @@ namespace TUnit.Assertions.Extensions;
 public static class SourceExtensions
 {
     public static InvokableValueAssertionBuilder<TActual> RegisterAssertion<TActual>(this IValueSource<TActual> source,
-        BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string? caller = null)
+        BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
     {
         if (!string.IsNullOrEmpty(caller))
         {
-            source.AppendExpression(BuildExpression(caller, argumentExpressions));
+            source.AppendExpression(BuildExpression(caller!, argumentExpressions));
         }
         
         var invokeableAssertionBuilder = source.WithAssertion(assertCondition);
@@ -36,7 +36,7 @@ public static class SourceExtensions
     {
         if (!string.IsNullOrEmpty(caller))
         {
-            delegateSource.AppendExpression(BuildExpression(caller, argumentExpressions));
+            delegateSource.AppendExpression(BuildExpression(caller!, argumentExpressions));
         }
         
         var source = delegateSource.WithAssertion(assertCondition);

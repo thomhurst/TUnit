@@ -9,7 +9,7 @@ public class ValueDelegateAssertionBuilder<TActual>
         IDelegateSource,
         IValueSource<TActual>
 {
-    internal ValueDelegateAssertionBuilder(Func<TActual> function, string expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
+    internal ValueDelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
 
