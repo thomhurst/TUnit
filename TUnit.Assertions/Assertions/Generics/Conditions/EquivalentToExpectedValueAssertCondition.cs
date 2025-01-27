@@ -58,7 +58,10 @@ public class EquivalentToExpectedValueAssertCondition<[DynamicallyAccessedMember
         }
         else if (actualValue is IEnumerable enumerable && ExpectedValue is IEnumerable enumerable2)
         {
-            isEqual = enumerable.Cast<object>().SequenceEqual(enumerable2.Cast<object>());
+            IEnumerable<object> castedEnumerable = [..enumerable];
+            IEnumerable<object> castedEnumerable2 = [..enumerable2];
+            
+            isEqual = castedEnumerable.SequenceEqual(castedEnumerable2);
         }
         if (isEqual != null)
         {
