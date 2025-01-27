@@ -21,7 +21,7 @@ public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccess
 
         if (result is IEnumerable enumerable)
         {
-            return enumerable.Cast<object?>().ToArray();
+            return [..enumerable];
         }
         
         return [result];
