@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
@@ -28,9 +29,9 @@ public class InvokableAssertionBuilder<TActual> :
         return Results;
     }
 
-    string? IInvokableAssertionBuilder.GetExpression()
+    string IInvokableAssertionBuilder.GetExpression()
     {
-        var expression = ExpressionBuilder?.ToString();
+        var expression = ExpressionBuilder.ToString();
 
         if (expression?.Length < 100)
         {
@@ -38,5 +39,17 @@ public class InvokableAssertionBuilder<TActual> :
         }
         
         return $"{expression?[..100]}...";
+    }
+
+    public ISource<object> AppendExpression(string expression)
+    {
+        base.AppendExpression(expression);
+        return this;
+    }
+
+    public ISource<object> WithAssertion(BaseAssertCondition assertCondition)
+    {
+        base.WithAssertion(assertCondition);
+        return this;
     }
 }

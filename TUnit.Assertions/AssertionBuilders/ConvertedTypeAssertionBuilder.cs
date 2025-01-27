@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 
 namespace TUnit.Assertions.AssertionBuilders;
@@ -13,70 +12,21 @@ public abstract class ConvertedTypeAssertionBuilder<TFromType, TToType> : Assert
     // Due to the new generic constraint, so we need to populate the stack with something
     internal ConvertedTypeAssertionBuilder(InvokableAssertionBuilder<TFromType> otherTypeAssertionBuilder, ValueTask<AssertionData<TToType>> actual,
         string actualExpression, StringBuilder expressionBuilder) 
-        : base(actual, actualExpression, expressionBuilder, new Stack<BaseAssertCondition<TToType>>([new NoOpWithMessageAssertionCondition<TToType>(otherTypeAssertionBuilder.Assertions.Peek().GetExpectationWithReason())]))
+        : base(actual, actualExpression, expressionBuilder, new Stack<BaseAssertCondition>([new NoOpWithMessageAssertionCondition<TToType>(otherTypeAssertionBuilder.Assertions.Peek().GetExpectationWithReason())]))
     {
         OtherTypeAssertionBuilder = otherTypeAssertionBuilder;
     }
 
-    AssertionBuilder<TToType> ISource<TToType>.AssertionBuilder => this;
-    
-    public InvokableValueAssertionBuilder<TToType> IsTypeOf(Type type)
+
+    public ISource<TToType> AppendExpression(string expression)
     {
-        return new ValueSource<TToType>(this).IsTypeOf(type);
+        OtherTypeAssertionBuilder?.AppendExpression(expression);
+        return this;
     }
 
-    public CastableAssertionBuilder<TToType, TExpected> IsTypeOf<TExpected>()
+    public ISource<TToType> WithAssertion(BaseAssertCondition assertCondition)
     {
-        return new ValueSource<TToType>(this).IsTypeOf<TExpected>();
-    }
-
-    public InvokableValueAssertionBuilder<TToType> IsAssignableTo(Type type)
-    {
-        return new ValueSource<TToType>(this).IsAssignableTo(type);
-    }
-
-    public CastableAssertionBuilder<TToType, TExpected> IsAssignableTo<TExpected>()
-    {
-        return new ValueSource<TToType>(this).IsAssignableTo<TExpected>();
-    }
-
-    public InvokableValueAssertionBuilder<TToType> IsAssignableFrom(Type type)
-    {
-        return new ValueSource<TToType>(this).IsAssignableFrom(type);
-    }
-
-    public InvokableValueAssertionBuilder<TToType> IsAssignableFrom<TExpected>()
-    {
-        return new ValueSource<TToType>(this).IsAssignableFrom<TExpected>();
-    }
-    
-    public InvokableValueAssertionBuilder<TToType> IsNotTypeOf(Type type)
-    {
-        return new ValueSource<TToType>(this).IsNotTypeOf(type);
-    }
-
-    public InvokableValueAssertionBuilder<TToType> IsNotTypeOf<TExpected>()
-    {
-        return new ValueSource<TToType>(this).IsNotTypeOf<TExpected>();
-    }
-
-    public InvokableValueAssertionBuilder<TToType> IsNotAssignableTo(Type type)
-    {
-        return new ValueSource<TToType>(this).IsNotAssignableTo(type);
-    }
-
-    public InvokableValueAssertionBuilder<TToType> IsNotAssignableTo<TExpected>()
-    {
-        return new ValueSource<TToType>(this).IsNotAssignableTo<TExpected>();
-    }
-
-    public InvokableValueAssertionBuilder<TToType> IsNotAssignableFrom(Type type)
-    {
-        return new ValueSource<TToType>(this).IsNotAssignableFrom(type);
-    }
-
-    public InvokableValueAssertionBuilder<TToType> IsNotAssignableFrom<TExpected>()
-    {
-        return new ValueSource<TToType>(this).IsNotAssignableFrom<TExpected>();
+        OtherTypeAssertionBuilder?.WithAssertion(assertCondition);
+        return this;
     }
 }

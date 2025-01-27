@@ -10,6 +10,15 @@ public class ValueDelegateOr<TActual>(AssertionBuilder<TActual> assertionBuilder
         return new ValueDelegateOr<TActual>(assertionBuilder);
     }
     
-    AssertionBuilder<TActual>
-        ISource<TActual>.AssertionBuilder => new OrAssertionBuilder<TActual>(assertionBuilder);
+    public ISource<TActual> AppendExpression(string expression)
+    {
+        assertionBuilder.AppendExpression(expression);
+        return this;
+    }
+
+    public ISource<TActual> WithAssertion(BaseAssertCondition assertCondition)
+    {
+        assertionBuilder.WithAssertion(assertCondition);
+        return this;
+    }
  }

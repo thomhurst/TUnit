@@ -1,6 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertConditions.Throws;
+﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
@@ -14,84 +13,15 @@ public class AsyncValueDelegateAssertionBuilder<TActual>
     {
     }
 
-    public ThrowsException<TActual, TException> Throws<TException>() where TException : Exception
+    public new ISource<TActual> AppendExpression(string expression)
     {
-        return new DelegateSource<TActual>(this).Throws<TException>();
+        base.AppendExpression(expression);
+        return this;
     }
 
-    public ThrowsException<TActual, TException> ThrowsExactly<TException>() where TException : Exception
+    public new ISource<TActual> WithAssertion(BaseAssertCondition assertCondition)
     {
-        return new DelegateSource<TActual>(this).ThrowsExactly<TException>();
-    }
-
-    public ThrowsException<TActual, Exception> ThrowsException()
-    {
-        return new DelegateSource<TActual>(this).ThrowsException();
-    }
-
-    public CastableAssertionBuilder<TActual, TActual> ThrowsNothing()
-    {
-        return new DelegateSource<TActual>(this).ThrowsNothing();
-    }
-
-    AssertionBuilder<TActual> ISource<TActual>.AssertionBuilder => this;
-    public InvokableValueAssertionBuilder<TActual> IsTypeOf(Type type)
-    {
-        return new ValueSource<TActual>(this).IsTypeOf(type);
-    }
-
-    public CastableAssertionBuilder<TActual, TExpected> IsTypeOf<TExpected>()
-    {
-        return new ValueSource<TActual>(this).IsTypeOf<TExpected>();
-    }
-
-    public InvokableValueAssertionBuilder<TActual> IsAssignableTo(Type type)
-    {
-        return new ValueSource<TActual>(this).IsAssignableTo(type);
-    }
-
-    public CastableAssertionBuilder<TActual, TExpected> IsAssignableTo<TExpected>()
-    {
-        return new ValueSource<TActual>(this).IsAssignableTo<TExpected>();
-    }
-
-    public InvokableValueAssertionBuilder<TActual> IsAssignableFrom(Type type)
-    {
-        return new ValueSource<TActual>(this).IsAssignableFrom(type);
-    }
-
-    public InvokableValueAssertionBuilder<TActual> IsAssignableFrom<TExpected>()
-    {
-        return new ValueSource<TActual>(this).IsAssignableFrom<TExpected>();
-    }
-    
-    public InvokableValueAssertionBuilder<TActual> IsNotTypeOf(Type type)
-    {
-        return new ValueSource<TActual>(this).IsNotTypeOf(type);
-    }
-
-    public InvokableValueAssertionBuilder<TActual> IsNotTypeOf<TExpected>()
-    {
-        return new ValueSource<TActual>(this).IsNotTypeOf<TExpected>();
-    }
-
-    public InvokableValueAssertionBuilder<TActual> IsNotAssignableTo(Type type)
-    {
-        return new ValueSource<TActual>(this).IsNotAssignableTo(type);
-    }
-
-    public InvokableValueAssertionBuilder<TActual> IsNotAssignableTo<TExpected>()
-    {
-        return new ValueSource<TActual>(this).IsNotAssignableTo<TExpected>();
-    }
-
-    public InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom(Type type)
-    {
-        return new ValueSource<TActual>(this).IsNotAssignableFrom(type);
-    }
-
-    public InvokableValueAssertionBuilder<TActual> IsNotAssignableFrom<TExpected>()
-    {
-        return new ValueSource<TActual>(this).IsNotAssignableFrom<TExpected>();
+        base.WithAssertion(assertCondition);
+        return this;
     }
  }

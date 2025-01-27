@@ -2,10 +2,10 @@
 
 internal class AndAssertCondition<TActual> : BaseAssertCondition<TActual>
 {
-    private readonly BaseAssertCondition<TActual> _condition1;
-    private readonly BaseAssertCondition<TActual> _condition2;
+    private readonly BaseAssertCondition _condition1;
+    private readonly BaseAssertCondition _condition2;
 
-    public AndAssertCondition(BaseAssertCondition<TActual> condition1, BaseAssertCondition<TActual> condition2)
+    public AndAssertCondition(BaseAssertCondition condition1, BaseAssertCondition condition2)
     {
         Verify.ArgNotNull(condition1);
         Verify.ArgNotNull(condition2);

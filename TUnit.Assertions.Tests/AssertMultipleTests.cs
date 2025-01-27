@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Assertions.Tests.Assertions.Delegates;
 
 namespace TUnit.Assertions.Tests;
 

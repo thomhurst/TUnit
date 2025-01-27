@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace TUnit.Engine.Tests.Extensions;
+﻿namespace TUnit.Engine.Tests.Extensions;
 
 public static class FileInfoExtensions
 {

@@ -1,6 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.Operators;
-using TUnit.Assertions.AssertConditions.Throws;
+﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
@@ -12,25 +11,16 @@ public class DelegateAssertionBuilder
     internal DelegateAssertionBuilder(Action action, string expressionBuilder) : base(action.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
-    public ThrowsException<object?, TException> Throws<TException>() where TException : Exception
+    
+    public new ISource<object?> AppendExpression(string expression)
     {
-        return new DelegateSource<object?>(this).Throws<TException>();
+        base.AppendExpression(expression);
+        return this;
     }
 
-    public ThrowsException<object?, TException> ThrowsExactly<TException>() where TException : Exception
+    public new ISource<object?> WithAssertion(BaseAssertCondition assertCondition)
     {
-        return new DelegateSource<object?>(this).ThrowsExactly<TException>();
+        base.WithAssertion(assertCondition);
+        return this;
     }
-
-    public ThrowsException<object?, Exception> ThrowsException()
-    {
-        return new DelegateSource<object?>(this).ThrowsException();
-    }
-
-    public CastableAssertionBuilder<object?, object?> ThrowsNothing()
-    {
-        return new DelegateSource<object?>(this).ThrowsNothing();
-    }
-
-    AssertionBuilder<object?> ISource<object?>.AssertionBuilder => this;
 }

@@ -10,6 +10,15 @@ public class ValueDelegateAnd<TActual>(AssertionBuilder<TActual> assertionBuilde
         return new ValueDelegateAnd<TActual>(assertionBuilder);
     }
 
-    AssertionBuilder<TActual>
-        ISource<TActual>.AssertionBuilder => new AndAssertionBuilder<TActual>(assertionBuilder);
+    public ISource<TActual> AppendExpression(string expression)
+    {
+        assertionBuilder.AppendExpression(expression);
+        return this;
+    }
+
+    public ISource<TActual> WithAssertion(BaseAssertCondition assertCondition)
+    {
+        assertionBuilder.WithAssertion(assertCondition);
+        return this;
+    }
 }

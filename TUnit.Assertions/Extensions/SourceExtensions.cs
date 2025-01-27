@@ -16,7 +16,7 @@ public static class SourceExtensions
     public static InvokableValueAssertionBuilder<TActual> RegisterAssertionWithoutExpression<TActual>(this IValueSource<TActual> source,
         BaseAssertCondition<TActual> assertCondition)
     {
-        return new InvokableValueAssertionBuilder<TActual>(assertCondition.ChainedToWithoutExpression(source.AssertionBuilder));
+        return new InvokableValueAssertionBuilder<TActual>((InvokableValueAssertionBuilder<TActual>) source.WithAssertion(assertCondition));
     }
     
     public static InvokableDelegateAssertionBuilder<TActual> RegisterAssertion<TActual>(this IDelegateSource<TActual> source,

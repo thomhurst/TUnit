@@ -1,8 +1,7 @@
-﻿using TUnit.Assertions.AssertionBuilders;
+﻿namespace TUnit.Assertions.AssertConditions.Interfaces;
 
-namespace TUnit.Assertions.AssertConditions.Interfaces;
-
-public interface ISource<TActual> 
+public interface ISource<out TActual>
 {
-    AssertionBuilder<TActual> AssertionBuilder { get; }
+    ISource<TActual> AppendExpression(string expression);
+    ISource<TActual> WithAssertion(BaseAssertCondition assertCondition);
 }

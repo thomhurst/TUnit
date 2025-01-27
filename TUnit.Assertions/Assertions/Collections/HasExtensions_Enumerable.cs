@@ -33,7 +33,7 @@ public static partial class HasExtensions
     public static EnumerableCount<TActual> HasCount<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : IEnumerable
     {
-        valueSource.AssertionBuilder.AppendCallerMethod([]);
+        valueSource.AppendExpression("HasCount()");
         return new EnumerableCount<TActual>(valueSource);
     }
 }

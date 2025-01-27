@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Dynamic;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;

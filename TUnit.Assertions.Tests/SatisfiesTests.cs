@@ -228,7 +228,7 @@ public class SatisfiesTests
         var myModel3 = new MyModel { Value = "!" };
         List<MyModel> models = [myModel, myModel2, myModel3];
 
-        await Assert.That(models).AllSatisfy((IValueSource<MyModel?> assert) => assert.IsNotNull());
+        await Assert.That(models).All().AllSatisfy((IValueSource<MyModel?> assert) => assert.IsNotNull());
     }
 
     [Test]

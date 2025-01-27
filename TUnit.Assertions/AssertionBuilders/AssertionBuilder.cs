@@ -14,7 +14,7 @@ public abstract class AssertionBuilder<TActual>
     
     protected AssertionData<TActual>? AwaitedAssertionData;
 
-    public AssertionBuilder(ValueTask<AssertionData<TActual>> assertionDataTask, string actualExpression, StringBuilder? expressionBuilder, Stack<BaseAssertCondition<TActual>> assertions)
+    public AssertionBuilder(ValueTask<AssertionData<TActual>> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
     {
         AssertionDataTask = assertionDataTask;
         ActualExpression = actualExpression;
@@ -30,7 +30,7 @@ public abstract class AssertionBuilder<TActual>
         if (string.IsNullOrEmpty(actualExpression))
         {
             ActualExpression = null;
-            ExpressionBuilder = null;
+            ExpressionBuilder = new StringBuilder("Assert.That(UNKNOWN)");
         }
         else
         {
@@ -41,19 +41,19 @@ public abstract class AssertionBuilder<TActual>
         }
     }
     
-    internal StringBuilder? ExpressionBuilder { get; init; }
+    internal StringBuilder ExpressionBuilder { get; init; }
     internal string? ActualExpression { get; init; }
     internal ValueTask<AssertionData<TActual>> AssertionDataTask { get; }
     
-    internal readonly Stack<BaseAssertCondition<TActual>> Assertions = new();
+    internal readonly Stack<BaseAssertCondition> Assertions = new();
     protected readonly List<AssertionResult> Results = [];
 
     protected internal AssertionBuilder<TActual> AppendExpression(string expression)
     {
         if (!string.IsNullOrEmpty(expression))
         {
-            ExpressionBuilder?.Append('.');
-            ExpressionBuilder?.Append(expression);
+            ExpressionBuilder.Append('.');
+            ExpressionBuilder.Append(expression);
         }
 
         return this;
@@ -63,7 +63,7 @@ public abstract class AssertionBuilder<TActual>
     {
         if (!string.IsNullOrEmpty(value))
         {
-            ExpressionBuilder?.Append(value);
+            ExpressionBuilder.Append(value);
         }
 
         return this;
@@ -71,7 +71,7 @@ public abstract class AssertionBuilder<TActual>
     
     protected internal AssertionBuilder<TActual> AppendRaw(char value)
     {
-        ExpressionBuilder?.Append(value);
+        ExpressionBuilder.Append(value);
 
         return this;
     }
@@ -93,28 +93,28 @@ public abstract class AssertionBuilder<TActual>
             return this;
         }
 
-        ExpressionBuilder?.Append('.');
-        ExpressionBuilder?.Append(methodName);
-        ExpressionBuilder?.Append('(');
+        ExpressionBuilder.Append('.');
+        ExpressionBuilder.Append(methodName);
+        ExpressionBuilder.Append('(');
 
         for (var index = 0; index < expressions.Length; index++)
         {
             var expression = expressions[index];
-            ExpressionBuilder?.Append(expression);
+            ExpressionBuilder.Append(expression);
 
             if (index < expressions.Length - 1)
             {
-                ExpressionBuilder?.Append(',');
-                ExpressionBuilder?.Append(' ');
+                ExpressionBuilder.Append(',');
+                ExpressionBuilder.Append(' ');
             }
         }
 
-        ExpressionBuilder?.Append(')');
+        ExpressionBuilder.Append(')');
 
         return this;
     }
 
-    internal InvokableAssertionBuilder<TActual> WithAssertion(BaseAssertCondition<TActual> assertCondition)
+    internal InvokableAssertionBuilder<TActual> WithAssertion(BaseAssertCondition assertCondition)
     {
         var builder = this as InvokableAssertionBuilder<TActual> ?? new InvokableAssertionBuilder<TActual>(this);
 

@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.TestProject.Bugs._1594;
+﻿namespace TUnit.TestProject.Bugs._1594;
 
 [ClassDataSource<MyFixture>(Shared = SharedType.None)]
 public class MyTests : ParentTests<MyFixture>

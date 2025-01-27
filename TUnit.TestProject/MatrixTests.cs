@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using OneOf;
+﻿using OneOf;
 
 namespace TUnit.TestProject;
 

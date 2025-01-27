@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertConditions;
 
@@ -30,6 +31,8 @@ public abstract class BaseAssertCondition
 
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";
+
+    internal abstract Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression);
     
     internal void SetSubject(string? subject)
         => Subject = subject;
@@ -79,6 +82,16 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     internal Task<AssertionResult> Assert(AssertionData<TActual> assertionData)
     {
         return Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
+    }
+
+    internal override Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression)
+    {
+        if (actualValue is not null && actualValue is not TActual?)
+        {
+            throw new AssertionException($"Expected {typeof(TActual).Name} but received {actualValue.GetType().Name}");
+        } 
+        
+        return Assert((TActual?) actualValue, exception, actualExpression);
     }
 
     internal TActual? ActualValue { get; private set; }
