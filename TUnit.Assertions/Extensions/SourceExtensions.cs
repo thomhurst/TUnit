@@ -57,8 +57,8 @@ public static class SourceExtensions
     private static string BuildExpression(string caller, string[] argumentExpressions)
     {
         var assertionBuilder = new StringBuilder();
-        assertionBuilder.Append('.')
-            .Append(caller)
+        
+        assertionBuilder.Append(caller)
             .Append('(');
         
         for (var index = 0; index < argumentExpressions.Length; index++)
