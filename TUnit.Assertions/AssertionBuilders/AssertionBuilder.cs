@@ -15,6 +15,14 @@ public abstract class AssertionBuilder : ISource
     
     protected AssertionData? AwaitedAssertionData;
 
+    public AssertionBuilder(ISource source)
+    {
+        _assertionDataTask = source.AssertionDataTask;
+        ActualExpression = source.ActualExpression;
+        _expressionBuilder = source.ExpressionBuilder;
+        _assertions = source.Assertions;
+    }
+    
     public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
     {
         _assertionDataTask = assertionDataTask;

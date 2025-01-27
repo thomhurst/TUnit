@@ -8,27 +8,27 @@ namespace TUnit.Assertions;
 
 internal static class Warn
 {
-    public static ValueAssertionBuilder<TActual> Unless<TActual>(TActual value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "") 
+    public static ValueAssertionBuilder<TActual> Unless<TActual>(TActual value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null) 
     {
         return new ValueAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static DelegateAssertionBuilder Unless(Action value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static DelegateAssertionBuilder Unless(Action value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new DelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static ValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<TActual> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static ValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<TActual> value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new ValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }
     
-    public static AsyncDelegateAssertionBuilder Unless(Func<Task> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static AsyncDelegateAssertionBuilder Unless(Func<Task> value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new AsyncDelegateAssertionBuilder(value, doNotPopulateThisValue);
     }
     
-    public static AsyncValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression(nameof(value))] string doNotPopulateThisValue = "")
+    public static AsyncValueDelegateAssertionBuilder<TActual> Unless<TActual>(Func<Task<TActual>> value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new AsyncValueDelegateAssertionBuilder<TActual>(value, doNotPopulateThisValue);
     }

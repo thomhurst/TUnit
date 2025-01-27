@@ -21,14 +21,14 @@ public class ThrowsException<TActual, TException> where TException : Exception
         _selector = selector;
     }
 
-    public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression(nameof(match))] string doNotPopulateThisValue = "")
+    public ThrowsException<TActual, TException> WithMessageMatching(StringMatcher match, [CallerArgumentExpression(nameof(match))] string? doNotPopulateThisValue = null)
     {
         _source.RegisterAssertion(new ThrowsWithMessageMatchingAssertCondition<TActual, TException>(match, _selector)
             , [doNotPopulateThisValue]);
         return this;
     }
 
-    public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public ThrowsException<TActual, TException> WithMessage(string expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         _source.RegisterAssertion(new ThrowsWithMessageAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _selector)
             , [doNotPopulateThisValue]);
@@ -47,9 +47,15 @@ public class ThrowsException<TActual, TException> where TException : Exception
             d => d.Exception as TException);
         return task.GetAwaiter();
     }
-    
-    public AndConvertedTypeAssertionBuilder<TException> And => new(_delegateAssertionBuilder, AssertionDataTask(), _delegateAssertionBuilder.ActualExpression!, (
-        (ISource)_delegateAssertionBuilder).ExpressionBuilder.Append(".And"));
+
+    public ValueAssertionBuilder<TException> And
+    {
+        get
+        {
+            _source.ExpressionBuilder.Append(".And");
+            return new ValueAssertionBuilder<TException>(_source);
+        }
+    }
 
     public DelegateOr<object?> Or => _delegateAssertionBuilder.Or;
 

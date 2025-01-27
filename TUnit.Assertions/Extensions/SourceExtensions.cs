@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Extensions;
 public static class SourceExtensions
 {
     public static InvokableValueAssertionBuilder<TActual> RegisterAssertion<TActual>(this IValueSource<TActual> source,
-        BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string caller = "")
+        BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string? caller = null)
     {
         if (!string.IsNullOrEmpty(caller))
         {
@@ -32,7 +32,7 @@ public static class SourceExtensions
     }
 
     public static InvokableDelegateAssertionBuilder RegisterAssertion<TActual>(this IDelegateSource delegateSource,
-        BaseAssertCondition<TActual> assertCondition, string[] argumentExpressions, [CallerMemberName] string caller = "")
+        BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
     {
         if (!string.IsNullOrEmpty(caller))
         {
@@ -54,9 +54,11 @@ public static class SourceExtensions
         return new InvokableDelegateAssertionBuilder(new InvokableAssertionBuilder<object?>(source));
     }
 
-    private static string BuildExpression(string caller, string[] argumentExpressions)
+    private static string BuildExpression(string caller, string?[] argumentExpressions)
     {
         var assertionBuilder = new StringBuilder();
+
+        argumentExpressions = argumentExpressions.OfType<string>().ToArray();
         
         assertionBuilder.Append(caller)
             .Append('(');

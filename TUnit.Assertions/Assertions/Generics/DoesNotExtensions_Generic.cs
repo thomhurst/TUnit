@@ -7,14 +7,14 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesNotExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> DoesNotContain<TActual, TInner>(this IValueSource<TActual> valueSource, TInner expected, IEqualityComparer<TInner?>? equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TActual> DoesNotContain<TActual, TInner>(this IValueSource<TActual> valueSource, TInner expected, IEqualityComparer<TInner?>? equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
     {
         return valueSource.RegisterAssertion(new EnumerableNotContainsExpectedValueAssertCondition<TActual, TInner>(expected, equalityComparer)
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> DoesNotContain<TActual, TInner>(this IValueSource<TActual> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = "")
+    public static InvokableValueAssertionBuilder<TActual> DoesNotContain<TActual, TInner>(this IValueSource<TActual> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string? doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
     {
         return valueSource.RegisterAssertion(new EnumerableNotContainsExpectedFuncAssertCondition<TActual, TInner>(matcher, doNotPopulateThisValue)

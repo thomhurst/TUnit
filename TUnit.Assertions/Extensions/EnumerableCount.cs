@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Extensions;
 
 public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSource)
 {
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> EqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<IEnumerable<TInner>> EqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected, (enumerable, _, self) =>
             {
@@ -42,7 +42,7 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
                 $"to be empty")
         , []);
     
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> GreaterThan(int expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<IEnumerable<TInner>> GreaterThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected,
             (enumerable, _, self) =>
@@ -61,7 +61,7 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<IEnumerable<TInner>> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected, (enumerable, _, self) =>
             {
@@ -79,7 +79,7 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> LessThan(int expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<IEnumerable<TInner>> LessThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected, (enumerable, _, self) =>
             {
@@ -97,7 +97,7 @@ public class EnumerableCount<TInner>(IValueSource<IEnumerable<TInner>> valueSour
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> LessThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = "")
+    public InvokableValueAssertionBuilder<IEnumerable<TInner>> LessThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<IEnumerable<TInner>, int>(expected, (enumerable, _, self) =>
             {

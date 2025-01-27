@@ -255,7 +255,7 @@ public class SatisfiesTests
         await Assert.That(async () =>        
                 await Assert.That(models).All().Satisfy(model => model!.Value, item => item.Contains("o")!)
         ).Throws<AssertionException>().WithMessageMatching("""
-                                                           *Expected items mapped by (MyModel? model) => model!.Value to satisfy item => item.Contains("o")!
+                                                           *Expected items mapped by model => model!.Value to satisfy item => item.Contains("o")!
                                                            
                                                            but items not satisfying the condition were found:
                                                            at [1] it was not found. Found a closest match which differs at index 0:

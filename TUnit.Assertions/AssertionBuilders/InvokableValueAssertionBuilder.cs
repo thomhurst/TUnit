@@ -1,11 +1,11 @@
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class InvokableValueAssertionBuilder<TActual>(InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
-    : InvokableAssertionBuilder<TActual>(invokableAssertionBuilder)
+public class InvokableValueAssertionBuilder<TActual>(ISource source) : InvokableAssertionBuilder<TActual>(source)
 {
     /// <summary>
     /// Provide a reason explaining why the assertion is needed.<br />
