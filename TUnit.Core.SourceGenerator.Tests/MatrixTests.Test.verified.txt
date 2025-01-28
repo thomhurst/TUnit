@@ -1450,7 +1450,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method1(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 83,
+					TestLineNumber = 91,
 					TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -1478,7 +1478,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "Method1",
 				TestFilePath = @"",
-				TestLineNumber = 83,
+				TestLineNumber = 91,
 				Exception = exception,
 			});
 		}
@@ -1608,7 +1608,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method2(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 91,
+					TestLineNumber = 99,
 					TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -1636,7 +1636,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "Method2",
 				TestFilePath = @"",
-				TestLineNumber = 91,
+				TestLineNumber = 99,
 				Exception = exception,
 			});
 		}
@@ -1766,7 +1766,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method3(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 99,
+					TestLineNumber = 107,
 					TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -1794,7 +1794,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "Method3",
 				TestFilePath = @"",
-				TestLineNumber = 99,
+				TestLineNumber = 107,
 				Exception = exception,
 			});
 		}
@@ -1924,7 +1924,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Method4(methodArg)),
 					TestFilePath = @"",
-					TestLineNumber = 107,
+					TestLineNumber = 115,
 					TestAttributes = [ new global::TUnit.Core.TestAttribute()
 {
     
@@ -1952,7 +1952,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 				ParameterTypeFullNames = [typeof(int)],
 				TestName = "Method4",
 				TestFilePath = @"",
-				TestLineNumber = 107,
+				TestLineNumber = 115,
 				Exception = exception,
 			});
 		}
