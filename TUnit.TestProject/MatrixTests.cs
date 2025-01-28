@@ -77,6 +77,14 @@ public class MatrixTests
             [MatrixRange<int>(-50, 50)] int item)
         {
             await Task.CompletedTask;
+        }    
+        
+        [Test]
+        [MatrixDataSource]
+        public async Task RangeSteps(
+            [MatrixRange<int>(-50, 50, 5)] int item)
+        {
+            await Task.CompletedTask;
         }
 #endif
 
