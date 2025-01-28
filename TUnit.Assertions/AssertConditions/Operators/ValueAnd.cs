@@ -11,21 +11,20 @@ public class ValueAnd<TActual>(AssertionBuilder assertionBuilder) : IValueSource
         return new ValueAnd<TActual>(assertionBuilder);
     }
     
-    public Stack<BaseAssertCondition> Assertions => ((ISource)assertionBuilder).Assertions;
-    public ValueTask<AssertionData> AssertionDataTask => ((ISource)assertionBuilder).AssertionDataTask;
-    public StringBuilder ExpressionBuilder => ((ISource)assertionBuilder).ExpressionBuilder;
-    
-    public string? ActualExpression => assertionBuilder.ActualExpression;
+    Stack<BaseAssertCondition> ISource.Assertions => ((ISource)assertionBuilder).Assertions;
+    ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource)assertionBuilder).AssertionDataTask;
+    StringBuilder ISource.ExpressionBuilder => ((ISource)assertionBuilder).ExpressionBuilder;
+    string? ISource.ActualExpression => ((ISource)assertionBuilder).ActualExpression;
 
-    public ISource AppendExpression(string expression)
+    ISource ISource.AppendExpression(string expression)
     {
-        assertionBuilder.AppendExpression(expression);
+        ((ISource)assertionBuilder).AppendExpression(expression);
         return this;
     }
 
-    public ISource WithAssertion(BaseAssertCondition assertCondition)
+    ISource ISource.WithAssertion(BaseAssertCondition assertCondition)
     {
-        assertionBuilder.WithAssertion(assertCondition);
+        ((ISource)assertionBuilder).WithAssertion(assertCondition);
         return this;
     }
 }

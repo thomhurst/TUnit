@@ -11,6 +11,6 @@ public class InvokableDelegateAssertionBuilder : InvokableAssertionBuilder<objec
 
     public AssertionBuilder AssertionBuilder => this;
     
-    public DelegateAnd<object?> And => new(new AndAssertionBuilder<object?>(AssertionBuilder.AppendConnector(ChainType.And)));
-    public DelegateOr<object?> Or => new(new OrAssertionBuilder<object?>(AssertionBuilder.AppendConnector(ChainType.Or)));
+    public DelegateAnd<object?> And => new(new AndAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.And)));
+    public DelegateOr<object?> Or => new(new OrAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.Or)));
 }

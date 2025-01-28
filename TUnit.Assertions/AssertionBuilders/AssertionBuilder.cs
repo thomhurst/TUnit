@@ -18,7 +18,7 @@ public abstract class AssertionBuilder : ISource
     public AssertionBuilder(ISource source)
     {
         _assertionDataTask = source.AssertionDataTask;
-        ActualExpression = source.ActualExpression;
+        _actualExpression = source.ActualExpression;
         _expressionBuilder = source.ExpressionBuilder;
         _assertions = source.Assertions;
     }
@@ -26,7 +26,7 @@ public abstract class AssertionBuilder : ISource
     public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
     {
         _assertionDataTask = assertionDataTask;
-        ActualExpression = actualExpression;
+        _actualExpression = actualExpression;
         _expressionBuilder = expressionBuilder;
         _assertions = assertions;
     }
@@ -34,16 +34,16 @@ public abstract class AssertionBuilder : ISource
     public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string? actualExpression)
     {
         _assertionDataTask = assertionDataTask;
-        ActualExpression = actualExpression;
+        _actualExpression = actualExpression;
         
         if (string.IsNullOrEmpty(actualExpression))
         {
-            ActualExpression = null;
+            _actualExpression = null;
             _expressionBuilder = new StringBuilder("Assert.That(UNKNOWN)");
         }
         else
         {
-            ActualExpression = actualExpression;
+            _actualExpression = actualExpression;
             _expressionBuilder = new StringBuilder("Assert.That(");
             _expressionBuilder.Append(actualExpression);
             _expressionBuilder.Append(')');
@@ -52,7 +52,7 @@ public abstract class AssertionBuilder : ISource
 
     StringBuilder ISource.ExpressionBuilder => _expressionBuilder;
 
-    public string? ActualExpression { get; }
+    string? ISource.ActualExpression => _actualExpression;
 
     ValueTask<AssertionData> ISource.AssertionDataTask => _assertionDataTask;
 
@@ -62,8 +62,9 @@ public abstract class AssertionBuilder : ISource
     private readonly StringBuilder _expressionBuilder;
     private readonly ValueTask<AssertionData> _assertionDataTask;
     private readonly Stack<BaseAssertCondition> _assertions = new();
+    private readonly string? _actualExpression;
 
-    public ISource AppendExpression(string expression)
+    ISource ISource.AppendExpression(string expression)
     {
         if (!string.IsNullOrEmpty(expression))
         {
@@ -81,7 +82,7 @@ public abstract class AssertionBuilder : ISource
             return this;
         }
         
-        return (AssertionBuilder)AppendExpression(chainType.ToString());
+        return (AssertionBuilder)((ISource)this).AppendExpression(chainType.ToString());
     }
     
     protected internal void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
@@ -110,7 +111,7 @@ public abstract class AssertionBuilder : ISource
         _expressionBuilder.Append(')');
     }
 
-    public ISource WithAssertion(BaseAssertCondition assertCondition)
+    ISource ISource.WithAssertion(BaseAssertCondition assertCondition)
     {
         assertCondition = this switch
         {
