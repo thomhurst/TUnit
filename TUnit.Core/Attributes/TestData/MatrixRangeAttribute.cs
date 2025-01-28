@@ -5,25 +5,30 @@ namespace TUnit.Core;
 
 #if NET7_0_OR_GREATER
 [AttributeUsage(AttributeTargets.Parameter)]
-public class MatrixRangeAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T min, T max)
-    : MatrixAttribute<T>(CreateRange(min, max))
+public class MatrixRangeAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(T min, T max, T step)
+    : MatrixAttribute<T>(CreateRange(min, max, step))
     where T : INumber<T>
 {
-    private static T?[]? CreateRange(T min, T max)
+    public MatrixRangeAttribute(T min, T max)
+        : this(min, max, T.One)
+    {
+    }
+
+    private static T?[]? CreateRange(T min, T max, T step)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);
 
-        return CreateRangeEnumerable(min, max).ToArray();
+        return CreateRangeEnumerable(min, max, step).ToArray();
     }
 
-    private static IEnumerable<T?> CreateRangeEnumerable(T min, T max)
+    private static IEnumerable<T?> CreateRangeEnumerable(T min, T max, T step)
     {
         var current = min;
         
         while (current <= max)
         {
             yield return current;
-            current += T.One;
+            current += step;
         }
     }
 
