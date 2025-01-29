@@ -1,6 +1,6 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Polyfills;
+using Polyfills;
 
 namespace TUnit.TestProject.AfterTests; 
 
