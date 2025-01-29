@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
@@ -10,6 +11,11 @@ public static class Assert
     public static ValueAssertionBuilder<TActual> That<TActual>(TActual value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
         return new ValueAssertionBuilder<TActual>(value, doNotPopulateThisValue);
+    }
+    
+    public static ValueAssertionBuilder<IEnumerable<object>> That(IEnumerable enumerable, [CallerArgumentExpression(nameof(enumerable))] string? doNotPopulateThisValue = null)
+    {
+        return new ValueAssertionBuilder<IEnumerable<object>>(enumerable.Cast<object>(), doNotPopulateThisValue);
     }
     
     public static DelegateAssertionBuilder That(Action value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
