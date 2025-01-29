@@ -93,4 +93,40 @@ public class EnumerableTests
             async () => await Assert.That(array).DoesNotContain(x => x < 3)
         ).Throws<AssertionException>();
     }
+    
+    [Test]
+    public async Task Enumerable_Ordered_Good()
+    {
+        int[] array = [1, 2, 3];
+
+        await Assert.That(array).IsInOrder();
+    }
+    
+    [Test]
+    public async Task Enumerable_Ordered_Bad()
+    {
+        int[] array = [1, 3, 2];
+
+        await Assert.That(
+            async () => await Assert.That(array).IsInOrder()
+        ).Throws<AssertionException>();
+    }
+    
+    [Test]
+    public async Task Enumerable_Ordered_Descending_Good()
+    {
+        int[] array = [3, 2, 1];
+
+        await Assert.That(array).IsInDescendingOrder();
+    }
+    
+    [Test]
+    public async Task Enumerable_Ordered_Descending_Bad()
+    {
+        int[] array = [3, 1, 2];
+
+        await Assert.That(
+            async () => await Assert.That(array).IsInDescendingOrder()
+        ).Throws<AssertionException>();
+    }
 }
