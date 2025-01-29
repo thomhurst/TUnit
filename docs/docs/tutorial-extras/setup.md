@@ -18,10 +18,10 @@ Must be an instance method. Will be executed before each test in the class it's 
 Methods will be executed bottom-up, so the base class set ups will execute first and then the inheriting classes.
 
 ### [Before(Class)]
-Must be a static method. Will run once before the first test in the class it's defined it starts.
+Must be a static method. Will run once before the first test in the class it's defined in starts.
 
 ### [Before(Assembly)]
-Must be a static method. Will run once before the first test in the assembly it's defined it starts.
+Must be a static method. Will run once before the first test in the assembly it's defined in starts.
 
 ### [Before(TestSession)]
 Must be a static method. Will run once before the first test in the test session starts.
