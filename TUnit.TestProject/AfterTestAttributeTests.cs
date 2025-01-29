@@ -1,7 +1,7 @@
 ﻿using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
-using TUnit.TestProject.Polyfills;
+using Polyfills;
 
 namespace TUnit.TestProject;
 
