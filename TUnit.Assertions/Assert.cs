@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.Wrappers;
 
 namespace TUnit.Assertions;
 
@@ -15,7 +16,7 @@ public static class Assert
     
     public static ValueAssertionBuilder<IEnumerable<object>> That(IEnumerable enumerable, [CallerArgumentExpression(nameof(enumerable))] string? doNotPopulateThisValue = null)
     {
-        return new ValueAssertionBuilder<IEnumerable<object>>(enumerable.Cast<object>(), doNotPopulateThisValue);
+        return new ValueAssertionBuilder<IEnumerable<object>>(new UnTypedEnumerableWrapper(enumerable), doNotPopulateThisValue);
     }
     
     public static DelegateAssertionBuilder That(Action value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)

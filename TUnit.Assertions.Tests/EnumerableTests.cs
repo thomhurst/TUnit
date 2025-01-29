@@ -140,4 +140,24 @@ public class EnumerableTests
 
         await Assert.That(enumerable).IsInOrder();
     }
+    
+    [Test]
+    public async Task Untyped_Enumerable_EqualTo()
+    {
+        int[] array = [1, 2, 3];
+        
+        IEnumerable enumerable = array;
+
+        await Assert.That(enumerable).IsEqualTo(enumerable);
+    }
+    
+    [Test]
+    public async Task Untyped_Enumerable_ReferenceEqualTo()
+    {
+        int[] array = [1, 2, 3];
+        
+        IEnumerable enumerable = array;
+
+        await Assert.That(enumerable).IsSameReferenceAs(enumerable);
+    }
 }
