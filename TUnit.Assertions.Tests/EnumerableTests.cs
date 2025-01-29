@@ -1,4 +1,5 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
+﻿using System.Collections;
+using TUnit.Assertions.AssertConditions.Throws;
 
 namespace TUnit.Assertions.Tests;
 
@@ -128,5 +129,15 @@ public class EnumerableTests
         await Assert.That(
             async () => await Assert.That(array).IsInDescendingOrder()
         ).Throws<AssertionException>();
+    }
+    
+    [Test]
+    public async Task Untyped_Enumerable()
+    {
+        int[] array = [1, 2, 3];
+        
+        IEnumerable enumerable = array;
+
+        await Assert.That(enumerable).IsInOrder();
     }
 }
