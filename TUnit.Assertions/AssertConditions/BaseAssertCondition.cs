@@ -58,7 +58,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     internal Exception? Exception { get; private set; }
     public string? ActualExpression { get; private set; }
     
-    public Task<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception, string? actualExpression)
+    public Task<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception, string? actualExpression = null)
     {
         ActualValue = actualValue;
         Exception = exception;
