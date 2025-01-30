@@ -21,7 +21,7 @@ internal class OrAssertCondition : BaseAssertCondition
     internal override string GetExpectationWithReason()
         => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} or {_condition2.GetExpectationWithReason()}";
 
-    public sealed override async Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression)
+    internal sealed override async Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression)
     {
         return (await _condition1.GetAssertionResult(actualValue, exception, actualExpression))
             .Or(await _condition2.GetAssertionResult(actualValue, exception, actualExpression));

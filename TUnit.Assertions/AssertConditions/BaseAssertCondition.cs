@@ -30,7 +30,7 @@ public abstract class BaseAssertCondition
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";
 
-    public abstract Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression);
+    internal abstract Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression);
     
     internal void SetSubject(string? subject)
         => Subject = subject;
@@ -44,7 +44,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
         return GetAssertionResult(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
     }
 
-    public override Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression)
+    internal override Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression)
     {
         if (actualValue is not null && actualValue is not TActual)
         {
@@ -58,7 +58,7 @@ public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
     internal Exception? Exception { get; private set; }
     public string? ActualExpression { get; private set; }
     
-    internal Task<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception, string? actualExpression)
+    public Task<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception, string? actualExpression)
     {
         ActualValue = actualValue;
         Exception = exception;
