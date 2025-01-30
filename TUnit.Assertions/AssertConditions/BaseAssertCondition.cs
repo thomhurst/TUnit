@@ -30,7 +30,7 @@ public abstract class BaseAssertCondition
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";
 
-    internal abstract Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression);
+    internal abstract Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression);
     
     internal void SetSubject(string? subject)
         => Subject = subject;
@@ -39,26 +39,26 @@ public abstract class BaseAssertCondition
 public abstract class BaseAssertCondition<TActual> : BaseAssertCondition
 {
     
-    internal Task<AssertionResult> Assert(AssertionData assertionData)
+    internal Task<AssertionResult> GetAssertionResult(AssertionData assertionData)
     {
-        return Assert(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
+        return GetAssertionResult(assertionData.Result, assertionData.Exception, assertionData.ActualExpression);
     }
 
-    internal override Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression)
+    internal override Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression)
     {
         if (actualValue is not null && actualValue is not TActual)
         {
             throw new AssertionException($"Expected {typeof(TActual).Name} but received {actualValue.GetType().Name}");
         } 
         
-        return Assert((TActual?) actualValue, exception, actualExpression);
+        return GetAssertionResult((TActual?) actualValue, exception, actualExpression);
     }
 
     internal TActual? ActualValue { get; private set; }
     internal Exception? Exception { get; private set; }
     public string? ActualExpression { get; private set; }
     
-    internal Task<AssertionResult> Assert(TActual? actualValue, Exception? exception, string? actualExpression)
+    public Task<AssertionResult> GetAssertionResult(TActual? actualValue, Exception? exception, string? actualExpression = null)
     {
         ActualValue = actualValue;
         Exception = exception;

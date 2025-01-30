@@ -39,7 +39,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
         
         foreach (var baseAssertCondition in ((ISource)assertion).Assertions)
         {
-            var result = await baseAssertCondition.Assert(innerItem, exception, "");
+            var result = await baseAssertCondition.GetAssertionResult(innerItem, exception, "");
 
             if (!result.IsPassed)
             {

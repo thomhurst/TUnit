@@ -7,7 +7,7 @@ public class EnumerableCountEqualToExpectedValueAssertCondition<TInner>(int expe
 {
     protected override string GetExpectation() => $"to have a count of {expected}";
 
-    protected override AssertionResult GetResult(IEnumerable<TInner>? actualValue, int count)
+    protected override Task<AssertionResult> GetResult(IEnumerable<TInner>? actualValue, int count)
     {
         var actualCount = GetCount(actualValue);
 
