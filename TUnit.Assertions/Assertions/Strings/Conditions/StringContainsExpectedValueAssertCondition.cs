@@ -12,7 +12,7 @@ public class StringContainsExpectedValueAssertCondition(string expected, StringC
     protected override string GetExpectation()
         => $"to contain {Formatter.Format(expected).TruncateWithEllipsis(100)}";
 
-    protected override AssertionResult GetResult(string? actualValue, string? expectedValue)
+    protected override Task<AssertionResult> GetResult(string? actualValue, string? expectedValue)
     {
         if (actualValue is null)
         {

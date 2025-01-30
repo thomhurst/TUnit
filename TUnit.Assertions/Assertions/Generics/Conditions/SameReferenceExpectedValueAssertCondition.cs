@@ -9,7 +9,7 @@ public class SameReferenceExpectedValueAssertCondition<TActual, TExpected>(TExpe
     protected override string GetExpectation()
         => $"to have the same reference as {expected}";
 
-    protected override AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue)
+    protected override Task<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
     {
         if (actualValue is UnTypedEnumerableWrapper unTypedEnumerableWrapper)
         {

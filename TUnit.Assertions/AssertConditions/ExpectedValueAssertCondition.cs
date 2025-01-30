@@ -44,5 +44,5 @@ public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected
         return GetResult(actualValue, expected);
     }
     
-    protected abstract AssertionResult GetResult(TActual? actualValue, TExpected? expectedValue);
+    protected abstract Task<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue);
 }

@@ -22,10 +22,10 @@ internal class AndAssertCondition : BaseAssertCondition
     internal override string GetExpectationWithReason()
         => $"{_condition1.GetExpectationWithReason()}{Environment.NewLine} and {_condition2.GetExpectationWithReason()}";
 
-    internal override async Task<AssertionResult> Assert(object? actualValue, Exception? exception, string? actualExpression)
+    public sealed override async Task<AssertionResult> GetAssertionResult(object? actualValue, Exception? exception, string? actualExpression)
     {
-        return (await _condition1.Assert(actualValue, exception, actualExpression))
-            .And(await _condition2.Assert(actualValue, exception, actualExpression));
+        return (await _condition1.GetAssertionResult(actualValue, exception, actualExpression))
+            .And(await _condition2.GetAssertionResult(actualValue, exception, actualExpression));
     }
 
     internal override void SetBecauseReason(BecauseReason becauseReason)

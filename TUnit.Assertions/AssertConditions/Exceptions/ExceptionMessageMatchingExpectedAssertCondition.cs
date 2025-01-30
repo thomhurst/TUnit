@@ -10,7 +10,7 @@ where TException : Exception
     protected override string GetExpectation()
         => $"message to match {Formatter.Format(match).TruncateWithEllipsis(100)}";
 
-    protected override AssertionResult GetResult(TException? actualValue, StringMatcher? expectedValue)
+    protected override Task<AssertionResult> GetResult(TException? actualValue, StringMatcher? expectedValue)
     {
         if (actualValue?.Message is null)
         {
