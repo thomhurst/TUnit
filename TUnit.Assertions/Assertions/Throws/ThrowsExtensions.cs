@@ -1,4 +1,6 @@
-﻿using TUnit.Assertions.AssertConditions.Interfaces;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions.Exceptions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
 
@@ -37,5 +39,12 @@ public static class ThrowsExtensions
         return new CastableAssertionBuilder<object?, object?>(
             delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<object?>(), []),
             assertionData => assertionData.Result);
+    }
+
+    public static ThrowsException<TActual, TException> WithParameterName<TActual, TException>(this ThrowsException<TActual, TException> throwsException, string expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+        where TException : ArgumentException
+    {
+        throwsException.RegisterAssertion((selector) => new ThrowsWithParamNameAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, ex => selector(ex) as ArgumentException), [doNotPopulateThisValue]);
+        return throwsException;
     }
 }
