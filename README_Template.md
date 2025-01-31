@@ -39,6 +39,17 @@ You can then register to be notified about various events such as test registere
 
 Say we injected an external object into our tests: By knowing how many tests are registered, we could count them up, and then on a test end event, we could decrease the count. When hitting 0, we know our object isn't going to be used by any other tests, so we can dispose of it. We know when we can handle the lifecycle, and this prevents it from living till the end of the test session where it could be hanging on to precious resources.
 
+# Flexible Data Inputs
+
+One popular feature of TUnit is the `[ClassDataSource<T>]` attribute - Allowing you to inject in classes to your tests with specific lifetimes, such as Per Test Session, or Per Test Class.
+Or if you want to run a combination of lots of different inputs, you can use a `[MatrixDataSource]` and annotate your parameters with `[Matrix(...)`] values.
+
+But guess what? Those features are built on top of a `DataSourceGenerator<T>` class - Which is exposed directly to you.
+That means that that functionality can be extended greatly. If they didn't exist already, you could implement them yourself!
+
+So if you've got creative or complex ways to generate new data, this gives you the flexibility to do it. 
+You create a class which will end up being an attribute you place on your test - So your test classes remain simple and readable! 
+
 # Built in Analyzers
 
 TUnit tries to help you write your tests correctly with analyzers. If something isn't quite right, an analyzer should tell you what's wrong.
