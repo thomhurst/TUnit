@@ -215,4 +215,27 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 """
             );
     }
+    
+    [Test]
+    public async Task Error_When_Too_Many_Arguments()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [{|#0:Arguments(null, "")|}]
+                    public void Create_Unit_Test(string? something)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.TooManyArguments)
+                    .WithLocation(0)
+            );
+    }
 }
