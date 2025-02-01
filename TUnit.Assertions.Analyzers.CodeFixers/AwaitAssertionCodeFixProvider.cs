@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.Formatting;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
 
@@ -55,75 +56,53 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
     private static async Task<Document> AwaitAssertionAsync(Document document,
         InvocationExpressionSyntax invocationExpressionSyntax, CancellationToken cancellationToken)
     {
-        var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
+        var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
+
+        // Add await to the invocation expression
+        var awaitExpression = SyntaxFactory.AwaitExpression(invocationExpressionSyntax.WithLeadingTrivia(SyntaxFactory.Space))
+            .WithLeadingTrivia(invocationExpressionSyntax.GetLeadingTrivia());
         
-        var awaitExpressionSyntax = SyntaxFactory.AwaitExpression(invocationExpressionSyntax.Expression);
+        // Find the containing method
+        var methodDeclaration = invocationExpressionSyntax.AncestorsAndSelf()
+            .OfType<MethodDeclarationSyntax>()
+            .FirstOrDefault();
 
-        editor.ReplaceNode(invocationExpressionSyntax.Expression, awaitExpressionSyntax);
-
-        var methodBody = GetMethodBody(invocationExpressionSyntax);
-
-        if (methodBody is not null)
+        if (methodDeclaration != null)
         {
-            CheckIfMethodIsAsync(editor, methodBody);
-        }
-        
-        return editor.GetChangedDocument();
-    }
-
-    private static void CheckIfMethodIsAsync(DocumentEditor editor, MethodDeclarationSyntax methodBody)
-    {
-        var methodModifiers = methodBody.Modifiers;
-
-        if (methodModifiers.Any(SyntaxKind.AsyncKeyword))
-        {
-            return;
-        }
-
-        var asyncToken = SyntaxFactory.Token(SyntaxKind.AsyncKeyword);
-        
-        var newModifiers = methodModifiers.Add(asyncToken);
-        
-        var newMethodBody = methodBody.WithModifiers(newModifiers);
-
-        var returnType = methodBody.ReturnType;
-
-        if (returnType is GenericNameSyntax { Identifier.Text: "Task" or "ValueTask" })
-        {
-            editor.ReplaceNode(methodBody, newMethodBody);
-            return;
-        }
-
-        if (returnType is not IdentifierNameSyntax identifierNameSyntax ||
-            (identifierNameSyntax.Identifier.Text != "Task" && identifierNameSyntax.Identifier.Text != "ValueTask"))
-        {
-            TypeSyntax newReturnType =
-                returnType is PredefinedTypeSyntax { Keyword.Text: "void" }
-                    ? SyntaxFactory.IdentifierName("Task")
-                    : SyntaxFactory.GenericName(
-                        SyntaxFactory.Identifier("Task"),
-                        SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList(returnType)));
-
-            newMethodBody = newMethodBody.WithReturnType(newReturnType);
-        }
-
-        editor.ReplaceNode(methodBody, newMethodBody);
-    }
-
-    private static MethodDeclarationSyntax? GetMethodBody(InvocationExpressionSyntax invocationExpressionSyntax)
-    {
-        SyntaxNode syntax = invocationExpressionSyntax;
-        
-        while (syntax != null)
-        {
-            if(syntax is MethodDeclarationSyntax methodDeclarationSyntax)
+            // Check if the method is already async
+            if (!methodDeclaration.Modifiers.Any(SyntaxKind.AsyncKeyword))
             {
-                return methodDeclarationSyntax;
+                // Add async modifier
+                var asyncModifier = SyntaxFactory.Token(SyntaxKind.AsyncKeyword);
+                var newModifiers = methodDeclaration.Modifiers.Add(asyncModifier
+                    .WithTrailingTrivia(SyntaxFactory.Space));
+
+                // Update the return type to Task or Task<T>
+                var returnType = methodDeclaration.ReturnType;
+                var newReturnType = returnType;
+
+                if (returnType is PredefinedTypeSyntax predefinedType &&
+                    predefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
+                {
+                    newReturnType = SyntaxFactory.IdentifierName("Task")
+                        .WithTrailingTrivia(SyntaxFactory.Space);
+                }
+                else if (returnType is not GenericNameSyntax genericName || genericName.Identifier.Text != "Task")
+                {
+                    newReturnType = SyntaxFactory.ParseTypeName($"Task<{returnType}>")
+                        .WithTrailingTrivia(SyntaxFactory.Space);
+                }
+
+                var newMethodDeclaration = methodDeclaration
+                    .ReplaceNode(invocationExpressionSyntax, awaitExpression)
+                    .WithModifiers(newModifiers)
+                    .WithReturnType(newReturnType)
+                    .WithAdditionalAnnotations(Formatter.Annotation);
+
+                editor.ReplaceNode(methodDeclaration, newMethodDeclaration);
             }
-            
-            syntax = syntax.Parent;
         }
 
-        return null;
+        return editor.GetChangedDocument();
     }
 }
