@@ -39,7 +39,7 @@ public class Tests(Context ctx)
 {
     private static List<Guid> Ids { get; } = [];
     private static readonly SemaphoreSlim Lock = new(1, 1);
-    
+
     [Test]
     [MethodDataSource(typeof(TestData), nameof(TestData.App1Data))]
     public async Task Test1(TestRecord r)
@@ -54,7 +54,7 @@ public class Tests(Context ctx)
     {
         await AssertUniqueContext(ctx.Id);
     }
-    
+
     [Test]
     [MethodDataSource(nameof(Contexts))]
     public async Task Test3(Context ctx2)
@@ -62,7 +62,7 @@ public class Tests(Context ctx)
         await AssertUniqueContext(ctx.Id);
         await AssertUniqueContext(ctx2.Id);
     }
-    
+
     private async Task AssertUniqueContext(Guid guid)
     {
         await Lock.WaitAsync();

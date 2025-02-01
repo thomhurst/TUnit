@@ -14,31 +14,31 @@ public class PriorityFilteringTests
     {
         await Task.CompletedTask;
     }
-    
+
     [Test, Priority(PriorityLevel.High)]
     public async Task High_2()
     {
         await Task.CompletedTask;
     }
-    
+
     [Test, Priority(PriorityLevel.High)]
     public async Task High_3()
     {
         await Task.CompletedTask;
     }
-    
+
     [Test, Priority(PriorityLevel.Medium)]
     public async Task Medium_1()
     {
         await Task.CompletedTask;
     }
-    
+
     [Test, Priority(PriorityLevel.Medium)]
     public async Task Medium_2()
     {
         await Task.CompletedTask;
     }
-    
+
     [Test, Priority(PriorityLevel.Low)]
     public async Task Low_1()
     {

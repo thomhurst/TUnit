@@ -12,7 +12,7 @@ public class HumanizerDisplayNameTests
         // Dummy method
         Console.WriteLine(TestContext.Current!.GetTestDisplayName());
     }
-    
+
     public class HumanizerDisplayNameAttribute : DisplayNameFormatterAttribute
     {
         protected override string FormatDisplayName(TestContext testContext)

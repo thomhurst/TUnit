@@ -11,7 +11,7 @@ public class ReproTest(SharedFixture fixture)
     {
         await Assert.That(fixture.IsDisposed).IsFalse();
     }
-    
+
     [Test, DependsOn(nameof(ReproTest1))]
     public async Task ReproTest2()
     {

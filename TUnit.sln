@@ -83,6 +83,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "TUnit.Templates\c
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Playwright", "Playwright", "{32F534AB-F8C1-42D0-BFB3-9270CEA6C3F3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUnit.Assertions.Analyzers.CodeFixers.Tests", "TUnit.Assertions.Analyzers.CodeFixers.Tests\TUnit.Assertions.Analyzers.CodeFixers.Tests.csproj", "{D717098D-EBC5-4385-A4A4-743C1E3999CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -209,6 +211,10 @@ Global
 		{D778BF96-702F-4A59-A2D5-E348A3320E58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D778BF96-702F-4A59-A2D5-E348A3320E58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D778BF96-702F-4A59-A2D5-E348A3320E58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D717098D-EBC5-4385-A4A4-743C1E3999CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D717098D-EBC5-4385-A4A4-743C1E3999CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D717098D-EBC5-4385-A4A4-743C1E3999CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D717098D-EBC5-4385-A4A4-743C1E3999CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -243,6 +249,7 @@ Global
 		{D778BF96-702F-4A59-A2D5-E348A3320E58} = {23F41068-7C7E-435C-B6AB-4258B6380DC2}
 		{32F534AB-F8C1-42D0-BFB3-9270CEA6C3F3} = {835A7825-FC06-46E2-B3B1-2BF791A22B97}
 		{EB92E3E9-A192-4DDD-9B10-4355D74BD119} = {32F534AB-F8C1-42D0-BFB3-9270CEA6C3F3}
+		{D717098D-EBC5-4385-A4A4-743C1E3999CF} = {62AD1EAF-43C4-4AC0-B9FA-CD59739B3850}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {109D285A-36B3-4503-BCDF-8E26FB0E2C5B}

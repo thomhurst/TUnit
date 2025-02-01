@@ -7,7 +7,7 @@ namespace TUnit.TestProject;
 public class DependsOnWithBaseTests : DependsOnBase
 {
     private static DateTime _subTypeTestStart;
-    
+
     [Test, DependsOn(nameof(BaseTest))]
     public async Task SubTypeTest()
     {

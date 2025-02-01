@@ -18,7 +18,7 @@ public class ClassDataSourceDrivenTestsSharedKeyed2
         _someAsyncDisposableClass = someAsyncDisposableClass;
         ClassLevels.Add(someAsyncDisposableClass);
     }
-    
+
     [Test]
     [ClassDataSource<SomeAsyncDisposableClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public async Task DataSource_Class(SomeAsyncDisposableClass value)
@@ -47,7 +47,7 @@ public class ClassDataSourceDrivenTestsSharedKeyed2
         {
             await Assert.That(classLevel.IsDisposed).IsTrue();
         }
-        
+
         foreach (var methodLevel in MethodLevels)
         {
             await Assert.That(methodLevel.IsDisposed).IsTrue();

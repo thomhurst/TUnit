@@ -22,7 +22,7 @@ public class InjectSharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeCla
         SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test2()
     {
@@ -34,7 +34,7 @@ public class InjectSharedGlobally1(DummyReferenceTypeClass dummyReferenceTypeCla
         SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test3()
     {
@@ -62,7 +62,7 @@ public class InjectSharedGlobally2(DummyReferenceTypeClass dummyReferenceTypeCla
         SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test2()
     {
@@ -74,7 +74,7 @@ public class InjectSharedGlobally2(DummyReferenceTypeClass dummyReferenceTypeCla
         SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test3()
     {
@@ -102,7 +102,7 @@ public class InjectSharedGlobally3(DummyReferenceTypeClass dummyReferenceTypeCla
         SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test2()
     {
@@ -114,7 +114,7 @@ public class InjectSharedGlobally3(DummyReferenceTypeClass dummyReferenceTypeCla
         SharedInjectedGloballyContainer.Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedGloballyContainer.Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test3()
     {

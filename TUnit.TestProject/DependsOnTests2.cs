@@ -17,7 +17,7 @@ public class DependsOnTests2
         _test1Start = TestContext.Current!.TestStart!.Value.DateTime;
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
-    
+
     [Test, DependsOn(nameof(Test1), parameterTypes: [typeof(string), typeof(int), typeof(bool)])]
     public async Task Test2()
     {

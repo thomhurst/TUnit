@@ -7,7 +7,7 @@ public class Base2
     {
         return Task.CompletedTask;
     }
-    
+
     [Before(Test)]
     public Task Base2SetUp()
     {

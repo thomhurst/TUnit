@@ -9,7 +9,7 @@ public class RetryTests
     public static int RetryCount1 { get; private set; }
     public static int RetryCount2 { get; private set; }
     public static int RetryCount3 { get; private set; }
-    
+
     [Test]
     [Retry(1)]
     public void One()
@@ -17,7 +17,7 @@ public class RetryTests
         RetryCount1++;
         throw new Exception();
     }
-    
+
     [Test]
     [Retry(2)]
     public void Two()
@@ -25,7 +25,7 @@ public class RetryTests
         RetryCount2++;
         throw new Exception();
     }
-    
+
     [Test]
     public void Three()
     {

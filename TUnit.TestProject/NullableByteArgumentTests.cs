@@ -8,7 +8,7 @@ public class NullableByteArgumentTests
     public void Test(byte? someByte)
     {
     }
-    
+
     [Test]
     [Arguments((byte)1, (byte)1)]
     [Arguments((byte)1, null)]

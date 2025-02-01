@@ -26,7 +26,7 @@ public class InjectSharedPerType1(DummyReferenceTypeClass dummyReferenceTypeClas
         SharedInjectedTypesContainer.TestClass1Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test2()
     {
@@ -40,7 +40,7 @@ public class InjectSharedPerType1(DummyReferenceTypeClass dummyReferenceTypeClas
         SharedInjectedTypesContainer.TestClass1Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedTypesContainer.TestClass1Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test3()
     {
@@ -72,7 +72,7 @@ public class InjectSharedPerType2(DummyReferenceTypeClass dummyReferenceTypeClas
         SharedInjectedTypesContainer.TestClass2Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test2()
     {
@@ -86,7 +86,7 @@ public class InjectSharedPerType2(DummyReferenceTypeClass dummyReferenceTypeClas
         SharedInjectedTypesContainer.TestClass2Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedTypesContainer.TestClass2Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test3()
     {
@@ -118,7 +118,7 @@ public class InjectSharedPerType3(DummyReferenceTypeClass dummyReferenceTypeClas
         SharedInjectedTypesContainer.TestClass3Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test2()
     {
@@ -132,7 +132,7 @@ public class InjectSharedPerType3(DummyReferenceTypeClass dummyReferenceTypeClas
         SharedInjectedTypesContainer.TestClass3Instances.Add(dummyReferenceTypeClass);
         await Assert.That(SharedInjectedTypesContainer.TestClass3Instances.Distinct()).HasSingleItem();
     }
-    
+
     [Test, Repeat(5)]
     public async Task Test3()
     {

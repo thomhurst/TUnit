@@ -11,7 +11,7 @@ public sealed class ClassConstructorWithEnumerableTest(IServiceProvider services
     [Before(Test)]
     public void Setup()
     {
-        if (_isDisposed) 
+        if (_isDisposed)
         {
             throw new ObjectDisposedException(nameof(ClassConstructorWithEnumerableTest));
         }

@@ -12,12 +12,12 @@ public class SkipTests : SkipDummyHooks
 public class SkipDummyHooks
 {
     public string? _dummy;
-    
+
     [Before(Test)]
     public void SetUp()
     {
     }
-    
+
     [After(Test)]
     public void TearDown()
     {

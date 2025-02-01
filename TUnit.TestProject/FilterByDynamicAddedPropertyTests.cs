@@ -9,14 +9,14 @@ public class FilterByDynamicAddedPropertyTests
     public void Test1()
     {
     }
-    
+
     public class MyDynamicallyAddedPropertyAttribute : Attribute, ITestDiscoveryEventReceiver
     {
         public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
         {
             discoveredTestContext.AddProperty("MyKey", "MyDynamicallyAddedValue");
         }
-        
+
         public int Order => 0;
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.Formatting;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
 
@@ -23,43 +24,85 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
 
     public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
-        var diagnostic = context.Diagnostics.Single();
-
-        var diagnosticSpan = diagnostic.Location.SourceSpan;
-
-        var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-
-        var diagnosticNode = root?.FindNode(diagnosticSpan);
-
-        if (diagnosticNode is not ExpressionStatementSyntax expressionStatementSyntax)
+        foreach (var diagnostic in context.Diagnostics)
         {
-            return;
-        }
+            var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-        context.RegisterCodeFix(
-            CodeAction.Create(
-                title: Resources.TUnitAssertions0002CodeFixTitle,
-                createChangedDocument: c => AwaitAssertionAsync(context.Document, expressionStatementSyntax, c),
-                equivalenceKey: nameof(Resources.TUnitAssertions0002CodeFixTitle)),
-            diagnostic);
+            var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+
+            var diagnosticNode = root?.FindNode(diagnosticSpan);
+
+            if (diagnosticNode is not InvocationExpressionSyntax invocationExpressionSyntax)
+            {
+                return;
+            }
+
+            context.RegisterCodeFix(
+                CodeAction.Create(
+                    title: Resources.TUnitAssertions0002CodeFixTitle,
+                    createChangedDocument: c => AwaitAssertionAsync(context.Document, invocationExpressionSyntax, c),
+                    equivalenceKey: nameof(Resources.TUnitAssertions0002CodeFixTitle)),
+                diagnostic);
+        }
     }
 
     /// <summary>
     /// Executed on the quick fix action raised by the user.
     /// </summary>
     /// <param name="document">Affected source file.</param>
-    /// <param name="expressionStatementSyntax">Highlighted class declaration Syntax Node.</param>
+    /// <param name="invocationExpressionSyntax">Highlighted class declaration Syntax Node.</param>
     /// <param name="cancellationToken">Any fix is cancellable by the user, so we should support the cancellation token.</param>
     /// <returns>Clone of the solution with updates: renamed class.</returns>
-    private async Task<Document> AwaitAssertionAsync(Document document,
-        ExpressionStatementSyntax expressionStatementSyntax, CancellationToken cancellationToken)
+    private static async Task<Document> AwaitAssertionAsync(Document document,
+        InvocationExpressionSyntax invocationExpressionSyntax, CancellationToken cancellationToken)
     {
-        var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
-        
-        var awaitExpressionSyntax = SyntaxFactory.AwaitExpression(expressionStatementSyntax.Expression);
+        var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
 
-        editor.ReplaceNode(expressionStatementSyntax.Expression, awaitExpressionSyntax);
+        // Add await to the invocation expression
+        var awaitExpression = SyntaxFactory.AwaitExpression(invocationExpressionSyntax.WithLeadingTrivia(SyntaxFactory.Space))
+            .WithLeadingTrivia(invocationExpressionSyntax.GetLeadingTrivia());
         
+        // Find the containing method
+        var methodDeclaration = invocationExpressionSyntax.AncestorsAndSelf()
+            .OfType<MethodDeclarationSyntax>()
+            .FirstOrDefault();
+
+        if (methodDeclaration != null)
+        {
+            // Check if the method is already async
+            if (!methodDeclaration.Modifiers.Any(SyntaxKind.AsyncKeyword))
+            {
+                // Add async modifier
+                var asyncModifier = SyntaxFactory.Token(SyntaxKind.AsyncKeyword);
+                var newModifiers = methodDeclaration.Modifiers.Add(asyncModifier
+                    .WithTrailingTrivia(SyntaxFactory.Space));
+
+                // Update the return type to Task or Task<T>
+                var returnType = methodDeclaration.ReturnType;
+                var newReturnType = returnType;
+
+                if (returnType is PredefinedTypeSyntax predefinedType &&
+                    predefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
+                {
+                    newReturnType = SyntaxFactory.IdentifierName("Task")
+                        .WithTrailingTrivia(SyntaxFactory.Space);
+                }
+                else if (returnType is not GenericNameSyntax genericName || genericName.Identifier.Text != "Task")
+                {
+                    newReturnType = SyntaxFactory.ParseTypeName($"Task<{returnType}>")
+                        .WithTrailingTrivia(SyntaxFactory.Space);
+                }
+
+                var newMethodDeclaration = methodDeclaration
+                    .ReplaceNode(invocationExpressionSyntax, awaitExpression)
+                    .WithModifiers(newModifiers)
+                    .WithReturnType(newReturnType)
+                    .WithAdditionalAnnotations(Formatter.Annotation);
+
+                editor.ReplaceNode(methodDeclaration, newMethodDeclaration);
+            }
+        }
+
         return editor.GetChangedDocument();
     }
 }

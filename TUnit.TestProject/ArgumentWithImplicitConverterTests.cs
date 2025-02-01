@@ -10,7 +10,7 @@ public class ArgumentWithImplicitConverterTests
     {
         Console.WriteLine(integer);
     }
-    
+
     [Test]
     [Arguments(1)]
     [Arguments(2)]
