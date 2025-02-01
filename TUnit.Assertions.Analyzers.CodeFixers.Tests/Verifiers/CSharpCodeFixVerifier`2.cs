@@ -80,6 +80,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
+        
         await test.RunAsync(CancellationToken.None);
     }
 }

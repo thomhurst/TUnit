@@ -41,7 +41,7 @@ public class PropertySetterTests
         {
             await PrintMessage("Before Test Session");
 
-            Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+            await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
         }
     }
 
