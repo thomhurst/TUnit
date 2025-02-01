@@ -24,7 +24,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.PropertyRequiredNotSet,
             Rules.MustHavePropertySetter,
             Rules.ReturnFunc,
-            Rules.MatrixDataSourceAttributeRequired);
+            Rules.MatrixDataSourceAttributeRequired,
+            Rules.TooManyArguments);
 
     protected override void InitializeInternal(AnalysisContext context)
     { 
@@ -192,9 +193,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
 
-        for (var i = 0; i < parameters.Length; i++)
+        for (var i = 0; i < Math.Max(parameters.Length, arguments.Length); i++)
         {
-            var parameter = parameters[i];
+            var parameter = parameters.ElementAtOrDefault(i);
+
+            if (parameter is null)
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rules.TooManyArguments, argumentsAttribute.GetLocation())
+                );
+                break;
+            }
+            
             var argumentExists = i + 1 <= arguments.Length;
             var methodParameterType = parameter.Type;
             var argument = arguments.ElementAtOrDefault(i);

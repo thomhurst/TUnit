@@ -1381,5 +1381,32 @@ namespace TUnit.Analyzers {
                 return ResourceManager.GetString("TUnit0049Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too many arguments provided..
+        /// </summary>
+        internal static string TUnit0050Description {
+            get {
+                return ResourceManager.GetString("TUnit0050Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too many arguments provided..
+        /// </summary>
+        internal static string TUnit0050MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0050MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too many arguments provided.
+        /// </summary>
+        internal static string TUnit0050Title {
+            get {
+                return ResourceManager.GetString("TUnit0050Title", resourceCulture);
+            }
+        }
     }
 }
