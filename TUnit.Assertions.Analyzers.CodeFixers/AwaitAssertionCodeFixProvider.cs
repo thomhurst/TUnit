@@ -32,7 +32,7 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
 
             var diagnosticNode = root?.FindNode(diagnosticSpan);
 
-            if (diagnosticNode is not InvocationExpressionSyntax invocationExpressionSyntax)
+            if (diagnosticNode is not ExpressionSyntax expressionSyntax)
             {
                 return;
             }
@@ -40,7 +40,7 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Resources.TUnitAssertions0002CodeFixTitle,
-                    createChangedDocument: c => AwaitAssertionAsync(context.Document, invocationExpressionSyntax, c),
+                    createChangedDocument: c => AwaitAssertionAsync(context.Document, expressionSyntax, c),
                     equivalenceKey: nameof(Resources.TUnitAssertions0002CodeFixTitle)),
                 diagnostic);
         }
@@ -50,20 +50,19 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
     /// Executed on the quick fix action raised by the user.
     /// </summary>
     /// <param name="document">Affected source file.</param>
-    /// <param name="invocationExpressionSyntax">Highlighted class declaration Syntax Node.</param>
+    /// <param name="expressionSyntax">Highlighted class declaration Syntax Node.</param>
     /// <param name="cancellationToken">Any fix is cancellable by the user, so we should support the cancellation token.</param>
     /// <returns>Clone of the solution with updates: renamed class.</returns>
-    private static async Task<Document> AwaitAssertionAsync(Document document,
-        InvocationExpressionSyntax invocationExpressionSyntax, CancellationToken cancellationToken)
+    private static async Task<Document> AwaitAssertionAsync(Document document, ExpressionSyntax expressionSyntax, CancellationToken cancellationToken)
     {
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
 
         // Add await to the invocation expression
-        var awaitExpression = SyntaxFactory.AwaitExpression(invocationExpressionSyntax.WithLeadingTrivia(SyntaxFactory.Space))
-            .WithLeadingTrivia(invocationExpressionSyntax.GetLeadingTrivia());
+        var awaitExpression = SyntaxFactory.AwaitExpression(expressionSyntax.WithLeadingTrivia(SyntaxFactory.Space))
+            .WithLeadingTrivia(expressionSyntax.GetLeadingTrivia());
         
         // Find the containing method
-        var methodDeclaration = invocationExpressionSyntax.AncestorsAndSelf()
+        var methodDeclaration = expressionSyntax.AncestorsAndSelf()
             .OfType<MethodDeclarationSyntax>()
             .FirstOrDefault();
 
@@ -94,7 +93,7 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
                 }
 
                 var newMethodDeclaration = methodDeclaration
-                    .ReplaceNode(invocationExpressionSyntax, awaitExpression)
+                    .ReplaceNode(expressionSyntax, awaitExpression)
                     .WithModifiers(newModifiers)
                     .WithReturnType(newReturnType)
                     .WithAdditionalAnnotations(Formatter.Annotation);
