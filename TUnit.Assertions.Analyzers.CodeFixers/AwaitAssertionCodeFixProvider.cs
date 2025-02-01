@@ -68,41 +68,45 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
             .OfType<MethodDeclarationSyntax>()
             .FirstOrDefault();
 
-        if (methodDeclaration != null)
+        if (methodDeclaration == null)
         {
-            // Check if the method is already async
-            if (!methodDeclaration.Modifiers.Any(SyntaxKind.AsyncKeyword))
+            return editor.GetChangedDocument();
+        }
+
+        var modifiers = methodDeclaration.Modifiers;
+        
+        var returnType = methodDeclaration.ReturnType;
+        var newReturnType = returnType;
+        
+        // Check if the method is already async
+        if (!methodDeclaration.Modifiers.Any(SyntaxKind.AsyncKeyword))
+        {
+            // Add async modifier
+            var asyncModifier = SyntaxFactory.Token(SyntaxKind.AsyncKeyword);
+            modifiers = methodDeclaration.Modifiers.Add(asyncModifier
+                .WithTrailingTrivia(SyntaxFactory.Space));
+
+            // Update the return type to Task or Task<T>
+            if (returnType is PredefinedTypeSyntax predefinedType &&
+                predefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
             {
-                // Add async modifier
-                var asyncModifier = SyntaxFactory.Token(SyntaxKind.AsyncKeyword);
-                var newModifiers = methodDeclaration.Modifiers.Add(asyncModifier
-                    .WithTrailingTrivia(SyntaxFactory.Space));
-
-                // Update the return type to Task or Task<T>
-                var returnType = methodDeclaration.ReturnType;
-                var newReturnType = returnType;
-
-                if (returnType is PredefinedTypeSyntax predefinedType &&
-                    predefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
-                {
-                    newReturnType = SyntaxFactory.IdentifierName("Task")
-                        .WithTrailingTrivia(SyntaxFactory.Space);
-                }
-                else if (returnType is not GenericNameSyntax genericName || genericName.Identifier.Text != "Task")
-                {
-                    newReturnType = SyntaxFactory.ParseTypeName($"Task<{returnType}>")
-                        .WithTrailingTrivia(SyntaxFactory.Space);
-                }
-
-                var newMethodDeclaration = methodDeclaration
-                    .ReplaceNode(expressionSyntax, awaitExpression)
-                    .WithModifiers(newModifiers)
-                    .WithReturnType(newReturnType)
-                    .WithAdditionalAnnotations(Formatter.Annotation);
-
-                editor.ReplaceNode(methodDeclaration, newMethodDeclaration);
+                newReturnType = SyntaxFactory.IdentifierName("Task")
+                    .WithTrailingTrivia(SyntaxFactory.Space);
+            }
+            else if (returnType is not GenericNameSyntax genericName || genericName.Identifier.Text != "Task")
+            {
+                newReturnType = SyntaxFactory.ParseTypeName($"Task<{returnType}>")
+                    .WithTrailingTrivia(SyntaxFactory.Space);
             }
         }
+
+        var newMethodDeclaration = methodDeclaration
+            .ReplaceNode(expressionSyntax, awaitExpression)
+            .WithModifiers(modifiers)
+            .WithReturnType(newReturnType)
+            .WithAdditionalAnnotations(Formatter.Annotation);
+
+        editor.ReplaceNode(methodDeclaration, newMethodDeclaration);
 
         return editor.GetChangedDocument();
     }
