@@ -127,7 +127,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Arguments.WithoutGlobalPrefix)))
             {
-                CheckArguments(context, attribute, parameters);
+                CheckArguments(context, attribute, parameters, propertySymbol);
             }
             
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
@@ -176,7 +176,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     }
     
     private void CheckArguments(SymbolAnalysisContext context, AttributeData argumentsAttribute,
-        ImmutableArray<IParameterSymbol> parameters)
+        ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? propertySymbol)
     {
         if (argumentsAttribute.ConstructorArguments.IsDefaultOrEmpty)
         {
@@ -197,7 +197,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var parameter = parameters.ElementAtOrDefault(i);
 
-            if (parameter is null)
+            if (parameter is null && propertySymbol is null)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.TooManyArguments, argumentsAttribute.GetLocation())
@@ -206,21 +206,23 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
             
             var argumentExists = i + 1 <= arguments.Length;
-            var methodParameterType = parameter.Type;
+            
+            var typeSymbol = parameter?.Type ?? propertySymbol!.Type;
+
             var argument = arguments.ElementAtOrDefault(i);
             
-            if (parameter.Type.IsCollectionType(context.Compilation, out var innerType)
+            if (typeSymbol.IsCollectionType(context.Compilation, out var innerType)
                 && arguments.Skip(i).Select(x => x.Type).All(x => SymbolEqualityComparer.Default.Equals(x, innerType)))
             {
                 break;
             }
             
-            if (SymbolEqualityComparer.Default.Equals(methodParameterType, cancellationTokenType))
+            if (SymbolEqualityComparer.Default.Equals(typeSymbol, cancellationTokenType))
             {
                 continue;
             }
 
-            if (!argumentExists && parameter.IsOptional)
+            if (!argumentExists && parameter?.IsOptional is true)
             {
                 continue;
             }
@@ -231,32 +233,32 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         argumentsAttribute.GetLocation(),
                         "null",
-                        methodParameterType.ToDisplayString())
+                        typeSymbol.ToDisplayString())
                 );
                 return;
             }
             
-            if (argument.IsNull && methodParameterType.NullableAnnotation == NullableAnnotation.NotAnnotated)
+            if (argument.IsNull && typeSymbol.NullableAnnotation == NullableAnnotation.NotAnnotated)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.MethodParameterBadNullability,
-                        parameters[i].Locations.FirstOrDefault(),
-                        parameters[i].Name)
+                        parameter?.Locations.FirstOrDefault() ?? propertySymbol!.Locations.FirstOrDefault(),
+                        parameter?.Name ?? propertySymbol!.Name)
                 );
             }
             
-            if (IsEnumAndInteger(methodParameterType, argument.Type))
+            if (IsEnumAndInteger(typeSymbol, argument.Type))
             {
                 continue;
             }
             
-            if (!argument.IsNull && !CanConvert(context, argument, methodParameterType))
+            if (!argument.IsNull && !CanConvert(context, argument, typeSymbol))
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         argumentsAttribute.GetLocation(),
                         argument.Type?.ToDisplayString(),
-                        methodParameterType.ToDisplayString())
+                        typeSymbol.ToDisplayString())
                 );
                 return;
             }
