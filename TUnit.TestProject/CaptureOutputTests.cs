@@ -31,7 +31,7 @@ public class CaptureOutputTests
             await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah2");
         }
     }
-            
+
     [Test]
     public async Task Test3()
     {
@@ -43,7 +43,7 @@ public class CaptureOutputTests
             await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah3");
         }
     }
-        
+
     [Test]
     public async Task Test4()
     {
@@ -55,7 +55,7 @@ public class CaptureOutputTests
             await Assert.That(TestContext.Current!.GetStandardOutput()).IsEqualTo("Blah4");
         }
     }
-        
+
     [Test]
     public async Task Test5()
     {
@@ -76,7 +76,7 @@ public class CaptureOutputTests
             Console.WriteLine(@$"Test {test.TestDetails.TestId} has output: {test.GetStandardOutput()}");
         }
     }
-    
+
     private class MyClass
     {
         public void DoSomething(int i)

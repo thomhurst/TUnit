@@ -2,7 +2,7 @@
 using TUnit.Assertions.Extensions;
 using Polyfills;
 
-namespace TUnit.TestProject.AfterTests; 
+namespace TUnit.TestProject.AfterTests;
 
 public class TestSessionAfterHooksTests
 {

@@ -9,7 +9,7 @@ public class MyTests : BaseTests<MyFixture>
     public MyTests(MyFixture myFixture)
         : base(myFixture)
     {
-        
+
     }
 
     [Test]

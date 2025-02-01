@@ -15,19 +15,19 @@ public class NotInParallelTests
 
         await AssertNoOverlaps();
     }
-    
+
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test1()
     {
         await Task.Delay(500);
     }
-    
+
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test2()
     {
         await Task.Delay(500);
     }
-    
+
     [Test, NotInParallel, Repeat(3)]
     public async Task NotInParallel_Test3()
     {

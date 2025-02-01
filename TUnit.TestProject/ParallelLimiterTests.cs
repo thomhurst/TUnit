@@ -10,13 +10,13 @@ public class ParallelLimiterTests
     {
         await Task.Delay(500);
     }
-    
+
     [Test, Repeat(3)]
     public async Task Parallel_Test2()
     {
         await Task.Delay(500);
     }
-    
+
     [Test, Repeat(3)]
     public async Task Parallel_Test3()
     {

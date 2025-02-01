@@ -25,7 +25,7 @@ public class TimeoutCancellationTokenTests
     {
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
-    
+
     [Test]
     [FiveSecondTimeout]
     public async Task InheritedTimeoutAttribute(CancellationToken cancellationToken)
@@ -50,13 +50,13 @@ public class TimeoutCancellationTokenTests
         await Assert.That(value).IsEqualTo(1);
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
-    
+
     [Test]
     [MatrixDataSource]
     [Timeout(5_000)]
     [Category("Blah")]
     public async Task MatrixTest(
-        [Matrix(1, 2, 3)] int value, 
+        [Matrix(1, 2, 3)] int value,
         CancellationToken cancellationToken)
     {
         await Assert.That(value).IsEqualTo(1).Or.IsEqualTo(2).Or.IsEqualTo(3);
@@ -67,6 +67,6 @@ public class TimeoutCancellationTokenTests
     {
         return 1;
     }
-    
+
     public class FiveSecondTimeout() : TimeoutAttribute(5_000);
 }

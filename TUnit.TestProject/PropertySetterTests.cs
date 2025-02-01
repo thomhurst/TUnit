@@ -12,28 +12,28 @@ public class PropertySetterTests
 {
     [Arguments("1")]
     public required string Property1 { get; init; }
-        
+
     [MethodDataSource(nameof(MethodData))]
     public required string Property2 { get; init; }
-        
+
     [ClassDataSource<InnerModel>]
     public required InnerModel Property3 { get; init; }
-    
+
     [ClassDataSource<InnerModel>(Shared = SharedType.PerTestSession)]
     public required InnerModel Property4 { get; init; }
-    
+
     [ClassDataSource<InnerModel>(Shared = SharedType.PerClass)]
     public required InnerModel Property5 { get; init; }
-    
+
     [ClassDataSource<InnerModel>(Shared = SharedType.Keyed, Key = "Key")]
     public required InnerModel Property6 { get; init; }
-        
+
     [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
     public required string Property7 { get; init; }
 
     [ClassDataSource<StaticInnerModel>(Shared = SharedType.PerTestSession)]
     public static StaticInnerModel StaticProperty { get; set; } = null!;
-    
+
     [Before(TestSession)]
     public static async Task BeforeTestSession()
     {
@@ -41,10 +41,10 @@ public class PropertySetterTests
         {
             await PrintMessage("Before Test Session");
 
-            await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
+            Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
         }
     }
-    
+
     [Before(Assembly)]
     public static async Task BeforeAssembly()
     {
@@ -93,14 +93,14 @@ public class PropertySetterTests
         public async ValueTask DisposeAsync()
         {
             await PrintMessage("Disposing Property");
-            
+
             if (IsMatchingTestFilter())
             {
                 await FilePolyfill.WriteAllTextAsync("Property_IAsyncDisposable.txt", "true");
             }
         }
     }
-    
+
     public record StaticInnerModel : IAsyncInitializer, IAsyncDisposable
     {
         public async Task InitializeAsync()
@@ -116,7 +116,7 @@ public class PropertySetterTests
         public async ValueTask DisposeAsync()
         {
             await PrintMessage("Disposing Static Property");
-            
+
             if (IsMatchingTestFilter())
             {
                 await FilePolyfill.WriteAllTextAsync("StaticProperty_IAsyncDisposable.txt", "true");
@@ -133,7 +133,7 @@ public class PropertySetterTests
             Console.WriteLine(message);
             await FilePolyfill.AppendAllLinesAsync("PropertySetterTests_CapturedOutput.txt", [message]);
         }
-        
+
         if (GlobalContext.Current.TestFilter is "/*/*/InheritedPropertySetterTests/*")
         {
             Console.WriteLine(message);

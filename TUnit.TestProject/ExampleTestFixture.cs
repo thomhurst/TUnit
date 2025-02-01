@@ -49,6 +49,6 @@ public class DependencyInjectionClassConstructor2 : IClassConstructor, ITestEndE
             //.AddScoped<Class1>() //Commenting this line out removes the test from the discovery
             .BuildServiceProvider();
     }
-    
+
     public int Order => 0;
 }

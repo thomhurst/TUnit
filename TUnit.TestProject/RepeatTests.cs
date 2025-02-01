@@ -9,14 +9,14 @@ public class RepeatTests
     {
         // Dummy method
     }
-    
+
     [Test]
     [Repeat(2)]
     public void Two()
     {
         // Dummy method
     }
-    
+
     [Test]
     public void Three()
     {

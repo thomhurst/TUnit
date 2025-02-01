@@ -16,7 +16,7 @@ public class AttributeTests
     public void MyTest()
     {
     }
-    
+
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class MixedAttribute(string? property = null, string? property2 = null) : Attribute
     {

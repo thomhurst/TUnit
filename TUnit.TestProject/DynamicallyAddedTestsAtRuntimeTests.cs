@@ -4,7 +4,7 @@ namespace TUnit.TestProject;
 public class DynamicallyAddedTestsAtRuntimeTests
 {
     private static int _testRepeatLimit = 0;
-    
+
     [Test]
     [Arguments(1)]
     public void Failure(int i)

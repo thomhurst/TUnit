@@ -13,11 +13,11 @@ public class CategoryTests
     public async Task Test()
     {
         await Assert.That(GetDictionary()).Contains("ClassCategory");
-        
+
         await Assert.That(GetDictionary()).Contains("ClassCategory2");
-        
+
         await Assert.That(GetDictionary()).Contains("MethodCategory");
-        
+
         await Assert.That(GetDictionary()).Contains("MethodCategory2");
     }
 
@@ -26,13 +26,13 @@ public class CategoryTests
     public void A()
     {
     }
-    
+
     [Test]
     [Category("B")]
     public void B()
     {
     }
-    
+
     [Test]
     [Category("A"), Category("B")]
     public void C()
@@ -45,6 +45,6 @@ public class CategoryTests
     }
 
     public class ClassCategoryAttribute() : CategoryAttribute("ClassCategory2");
-    
+
     public class MethodCategoryAttribute() : CategoryAttribute("MethodCategory2");
 }

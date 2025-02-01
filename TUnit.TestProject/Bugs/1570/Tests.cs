@@ -24,7 +24,7 @@ public class Tests(int number)
         var dependencyContext = TestContext.Current!
             .GetTests(nameof(Dependency))
             .First();
-        
+
         await Assert.That(dependencyContext.ObjectBag["number"]).IsEqualTo(number);
     }
 }

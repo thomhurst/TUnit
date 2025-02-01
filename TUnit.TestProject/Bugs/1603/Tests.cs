@@ -11,7 +11,7 @@ public class Tests
     {
         await Assert.That(value).IsEqualTo((short)-123);
     }
-    
+
     [Test]
     [Arguments(-123)]
     public async Task Integer_To_Short_Converts(short value)

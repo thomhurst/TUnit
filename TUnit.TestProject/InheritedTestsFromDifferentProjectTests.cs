@@ -13,7 +13,7 @@ public class InheritedTestsFromDifferentProjectTests : Library.BaseTests
     public void GenericMethodDataSource(string value)
     {
     }
-    
+
     [Test]
     [MethodDataSource(typeof(TestData), nameof(TestData.Foo))]
     public void NonGenericMethodDataSource(string value)

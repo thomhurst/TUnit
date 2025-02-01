@@ -26,6 +26,6 @@ public class EnumGeneratorAttribute : NonTypedDataSourceGeneratorAttribute
             yield return () => [enumValue];
         }
 #endif
-        
+
     }
 }

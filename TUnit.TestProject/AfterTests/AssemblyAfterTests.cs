@@ -7,7 +7,7 @@ public class AssemblyBase1
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task AfterEach1()
     {
@@ -22,7 +22,7 @@ public class AssemblyBase2 : AssemblyBase1
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task AfterEach2()
     {
@@ -37,7 +37,7 @@ public class AssemblyBase3 : AssemblyBase2
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task AfterEach3()
     {
@@ -52,43 +52,43 @@ public class AssemblyCleanupTests : AssemblyBase3
     {
         await Task.CompletedTask;
     }
-        
+
     [After(Assembly)]
     public static async Task AfterAllCleanUpWithContext(AssemblyHookContext context)
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Assembly)]
     public static async Task AfterAllCleanUp(CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Assembly)]
     public static async Task AfterAllCleanUpWithContext(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task Cleanup()
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test), Timeout(30_000)]
     public async Task Cleanup(CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test)]
     public async Task CleanupWithContext(TestContext testContext)
     {
         await Task.CompletedTask;
     }
-    
+
     [After(Test), Timeout(30_000)]
     public async Task CleanupWithContext(TestContext testContext, CancellationToken cancellationToken)
     {

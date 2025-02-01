@@ -16,7 +16,7 @@ public class Tests
 
         await Assert.That(TestContext.Current?.GetStandardOutput()).IsEqualTo("Blah!", StringComparison.Ordinal);
     }
-    
+
     [Test]
     [Category("Pass")]
     public async Task Test1()
@@ -24,7 +24,7 @@ public class Tests
         var value = "1";
         await Assert.That(value).IsEqualTo("1");
     }
-    
+
     [Test]
     [Category("Pass")]
     public async Task LessThan()
@@ -100,7 +100,7 @@ public class Tests
         var value = "1";
         await Assert.That(value).IsEqualTo("1");
     }
-    
+
     [Test, CustomSkip]
     [Category("Skip")]
     public async Task CustomSkip1()
@@ -160,7 +160,7 @@ public class Tests
         await Task.Yield();
         await Assert.That(value).IsEqualTo(1);
     }
-    
+
     [Test]
     [MethodDataSource(typeof(TestDataSources), "Two")]
     [Category("Pass")]
@@ -168,7 +168,7 @@ public class Tests
     {
         await Assert.That(value).IsEqualTo(1);
     }
-    
+
     [Test]
     [MethodDataSource(typeof(TestDataSources), nameof(Two))]
     [Category("Fail")]
@@ -263,7 +263,7 @@ public class Tests
         var list = new List<int> { 1, 2, 3 };
         await Assert.That(list).IsEquivalentTo([1, 2, 3]).And.HasCount().EqualTo(3);
     }
-    
+
     [Test]
     [Category("Pass")]
     public async Task Single()
@@ -271,7 +271,7 @@ public class Tests
         var list = new List<int> { 1 };
         await Assert.That(list).HasSingleItem();
     }
-    
+
     [Test]
     [Category("Pass")]
     public async Task DistinctItems()
@@ -279,7 +279,7 @@ public class Tests
         var list = new List<int> { 1, 2, 3, 4, 5 };
         await Assert.That(list).HasDistinctItems();
     }
-    
+
     [Test]
     [Category("Pass")]
     public async Task Enumerable_NotEmpty()
@@ -295,19 +295,19 @@ public class Tests
         var list = new List<int> { 1, 2, 3 };
         await Assert.That(list).IsEquivalentTo([1, 2, 3, 4, 5]).And.HasCount().EqualTo(5);
     }
-    
+
     [Test]
     public async Task AssertMultiple()
     {
         var list = new List<int> { 1, 2, 3 };
-        
+
         using (Assert.Multiple())
         {
             await Assert.That(list).IsEquivalentTo([1, 2, 3, 4, 5]);
             await Assert.That(list).HasCount().EqualTo(5);
         }
     }
-    
+
     [Test]
     public async Task NotNull()
     {
@@ -317,7 +317,7 @@ public class Tests
             .IsNotNull()
             .And.IsNotEmpty();
     }
-    
+
     [Test]
     public async Task NotNull2()
     {
@@ -331,7 +331,7 @@ public class Tests
     {
         var one = "";
         var two = "Foo bar!";
-        
+
         using (Assert.Multiple())
         {
             await Assert.That(one).IsNull().Or.IsEmpty();
@@ -348,7 +348,7 @@ public class Tests
         Console.WriteLine(_retryCount);
         throw new Exception();
     }
-    
+
     [Test]
     public async Task Throws6()
     {
@@ -356,27 +356,27 @@ public class Tests
         Console.WriteLine(_retryCount);
         throw new Exception();
     }
-    
+
     [Test]
     public void Throws7()
     {
         Console.WriteLine(_retryCount);
         throw new Exception();
     }
-    
+
     [Test]
     public async Task OneSecond()
     {
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
-    
+
     [Test]
     public async Task Long_String_Not_Equals()
     {
         await Assert.That("ABCDEFGHIJKLMNOOPQRSTUVWXYZ")
             .IsEqualTo("ABCDEFGHIJKLMNOPQRSTUVWXYZ", StringComparison.Ordinal);
     }
-    
+
     [Test]
     public async Task Short_String_Not_Equals()
     {
@@ -389,7 +389,7 @@ public class Tests
     // {
     //     await Assert.That(value).IsEqualTo(1);
     // }
-    
+
     // [MethodDataSource(typeof(TestDataSources), nameof(TestDataSources.OneFailingEnumerable))]
     // [Category("Fail")]
     // public async Task TestDataSourceFailingEnumerable(int value)
@@ -401,17 +401,17 @@ public class Tests
     // public void No_Arg()
     // {
     // }
-    
+
     // [Arguments()]
     // public void No_Arg2()
     // {
     // }
-    
+
     // [Arguments("")]
     // public void WrongType(int i)
     // {
     // }
-    
+
     public static int One() => 1;
     public static int Two() => 2;
 }

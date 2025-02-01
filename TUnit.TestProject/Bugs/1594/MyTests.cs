@@ -6,7 +6,7 @@ public class MyTests : ParentTests<MyFixture>
     public MyTests(MyFixture myFixture)
         : base(myFixture)
     {
-        
+
     }
 
     [Test]
