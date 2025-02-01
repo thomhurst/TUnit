@@ -36,9 +36,9 @@ internal class TUnitTestDiscoverer(
 
         var executionRequest = context.Request as TestExecutionRequest;
         
-        var filteredTests = testFilterService.FilterTests(executionRequest?.Filter, allDiscoveredTests).ToArray();
+        var filteredTests = testFilterService.FilterTests(executionRequest, allDiscoveredTests);
         
-        await logger.LogTraceAsync($"Found {filteredTests.Length} tests after filtering.");
+        await logger.LogTraceAsync($"Found {filteredTests.Count} tests after filtering.");
         
         var organisedTests = testGrouper.OrganiseTests(filteredTests);
         

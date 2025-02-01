@@ -22,7 +22,6 @@ internal class SingleTestExecutor(
     IExtension extension,
     InstanceTracker instanceTracker,
     TestInvoker testInvoker,
-    ExplicitFilterService explicitFilterService,
     ParallelLimitLockProvider parallelLimitLockProvider,
     AssemblyHookOrchestrator assemblyHookOrchestrator,
     ClassHookOrchestrator classHookOrchestrator,
@@ -78,11 +77,6 @@ internal class SingleTestExecutor(
                 start = DateTimeOffset.Now;
 
                 await RegisterIfNotAlready(testContext);
-
-                if (!explicitFilterService.CanRun(test.TestDetails, filter))
-                {
-                    throw new SkipTestException("Test with ExplicitAttribute was not explicitly run.");
-                }
 
                 if (testContext.SkipReason != null)
                 {

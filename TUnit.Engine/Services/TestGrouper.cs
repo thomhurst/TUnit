@@ -6,7 +6,7 @@ namespace TUnit.Engine.Services;
 
 internal class TestGrouper
 {
-    public GroupedTests OrganiseTests(DiscoveredTest[] testCases)
+    public GroupedTests OrganiseTests(IReadOnlyCollection<DiscoveredTest> testCases)
     {
         var notInParallel = new PriorityQueue<DiscoveredTest, int>();
         var keyedNotInParallel = new ConcurrentDictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>>();
