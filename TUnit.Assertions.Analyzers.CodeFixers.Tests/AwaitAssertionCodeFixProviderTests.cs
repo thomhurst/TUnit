@@ -9,8 +9,6 @@ public class AwaitAssertionCodeFixProviderTests
     [Test]
     public async Task Void_Changes_To_Async_Task()
     {
-        return;
-        // TODO - It's complaining even though it matches:
         await Verifier
             .VerifyCodeFixAsync(
                 """

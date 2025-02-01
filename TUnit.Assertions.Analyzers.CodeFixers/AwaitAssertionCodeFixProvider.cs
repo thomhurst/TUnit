@@ -37,10 +37,12 @@ public class AwaitAssertionCodeFixProvider : CodeFixProvider
                 return;
             }
 
+            var upperMostExpression = expressionSyntax.AncestorsAndSelf().OfType<ExpressionSyntax>().Last();
+
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Resources.TUnitAssertions0002CodeFixTitle,
-                    createChangedDocument: c => AwaitAssertionAsync(context.Document, expressionSyntax, c),
+                    createChangedDocument: c => AwaitAssertionAsync(context.Document, upperMostExpression, c),
                     equivalenceKey: nameof(Resources.TUnitAssertions0002CodeFixTitle)),
                 diagnostic);
         }
