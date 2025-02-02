@@ -49,8 +49,8 @@
     <PackageVersion Include="Polly" Version="8.5.1" />
     <PackageVersion Include="Polyfill" Version="7.16.0" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
-    <PackageVersion Include="Sourcy.DotNet" Version="0.7.4" />
-    <PackageVersion Include="Sourcy.Git" Version="0.7.4" />
+    <PackageVersion Include="Sourcy.DotNet" Version="0.7.5" />
+    <PackageVersion Include="Sourcy.Git" Version="0.7.5" />
     <PackageVersion Include="StreamJsonRpc" Version="2.20.20" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.1" />
