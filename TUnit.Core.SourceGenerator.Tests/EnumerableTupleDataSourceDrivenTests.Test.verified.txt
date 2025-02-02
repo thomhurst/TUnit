@@ -32,8 +32,71 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
+{
+     Name = "DataSource_TupleMethod",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+    {
+        Name = "value3",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "EnumerableTupleDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "EnumerableTupleDataSourceDrivenTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -60,24 +123,11 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
 					TestFilePath = @"",
 					TestLineNumber = 5,
-					TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
-{
-    
-} ],
-					ClassAttributes = [  ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [  ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -91,7 +141,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS0:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",
@@ -108,8 +158,71 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
+{
+     Name = "DataSource_TupleMethod",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value2",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
+    {
+        Name = "value3",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "EnumerableTupleDataSourceDrivenTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "EnumerableTupleDataSourceDrivenTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -136,24 +249,11 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.DataSource_TupleMethod(methodArg, methodArg1, methodArg2)),
 					TestFilePath = @"",
 					TestLineNumber = 5,
-					TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
-{
-    
-} ],
-					ClassAttributes = [  ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [  ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -167,7 +267,7 @@ file partial class EnumerableTupleDataSourceDrivenTests : global::TUnit.Core.Int
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS1:{testMethodDataIndex}:TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod(int,string,bool):0",
 				TestClass = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests), "DataSource_TupleMethod", 0, [typeof(int), typeof(string), typeof(bool)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(int), typeof(string), typeof(bool)],
 				TestName = "DataSource_TupleMethod",
 				TestFilePath = @"",

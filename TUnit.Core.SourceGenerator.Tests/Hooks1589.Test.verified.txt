@@ -38,7 +38,66 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 		[
 			new global::TUnit.Core.Hooks.InstanceHookMethod<global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>>
 			{
-				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>), "Setup", 0, []),
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1589.BaseTests<TFixture>>
+{
+     Name = "Setup",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.BeforeAttribute(global::TUnit.Core.HookType.Test)
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<TFixture>),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "Hooks1589",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "BaseTests",
+     Namespace = "TUnit.TestProject.Bugs._1589",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<object>
+    {
+        Name = "fixture",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(TFixture),
+        Name = "Fixture",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(int),
+        Name = "MyProp",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+},
 				Body = (classInstance, context, cancellationToken) => classInstance.Setup(),
 				HookExecutor = DefaultExecutor.Instance,
 				Order = 0,

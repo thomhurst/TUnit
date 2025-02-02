@@ -28,8 +28,59 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.ClassConstructorTest);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassConstructorTest), "Test", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.ClassConstructorTest>
+{
+     Name = "Test",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ClassConstructorTest",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ClassConstructorTest",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         new global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>()
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestProject.DummyReferenceTypeClass>
+    {
+        Name = "dummyReferenceTypeClass",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Properties = [new global::TUnit.Core.SourceGeneratedPropertyInformation
+    {
+        Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
+        Name = "DummyReferenceTypeClass",
+        IsStatic = false,
+        Attributes = 
+        [
+            
+        ]
+    }],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -46,21 +97,11 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 				TestFilePath = @"",
 				TestLineNumber = 8,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-} ],
-				ClassAttributes = [ new global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>()
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -73,7 +114,7 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 			{
 				TestId = $"global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>:{classDataIndex}:CL-CCA0:TUnit.TestProject.ClassConstructorTest(TUnit.TestProject.DummyReferenceTypeClass).Test:0",
 				TestClass = typeof(global::TUnit.TestProject.ClassConstructorTest),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.ClassConstructorTest), "Test", 0, []).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [],
 				TestName = "Test",
 				TestFilePath = @"",

@@ -36,8 +36,82 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+{
+     Name = "MyTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("T")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+    {
+        Name = "cancellationToken",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -57,39 +131,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodArg, cancellationToken)),
 				TestFilePath = @"",
 				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("T")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-{
-    
-} ],
-				ClassAttributes = [ new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -102,7 +148,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS0:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -119,8 +165,82 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+{
+     Name = "MyTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("T")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+    {
+        Name = "cancellationToken",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -140,39 +260,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodArg, cancellationToken)),
 				TestFilePath = @"",
 				TestLineNumber = 10,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("T")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-{
-    
-} ],
-				ClassAttributes = [ new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-{
-    
-} ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -185,7 +277,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-MDS1:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -202,8 +294,82 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+{
+     Name = "MyTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("T")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+    {
+        Name = "cancellationToken",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -226,39 +392,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
 					TestFilePath = @"",
 					TestLineNumber = 10,
-					TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("T")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-{
-    
-} ],
-					ClassAttributes = [ new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-{
-    
-} ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [  ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -272,7 +410,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS2:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -289,8 +427,82 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+{
+     Name = "MyTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("T")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+    {
+        Name = "cancellationToken",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -313,39 +525,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
 					TestFilePath = @"",
 					TestLineNumber = 10,
-					TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("T")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-{
-    
-} ],
-					ClassAttributes = [ new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-{
-    
-} ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [  ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -359,7 +543,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS3:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -376,8 +560,82 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+{
+     Name = "MyTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("T")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+    {
+        Name = "cancellationToken",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -400,39 +658,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
 					TestFilePath = @"",
 					TestLineNumber = 10,
-					TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("T")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-{
-    
-} ],
-					ClassAttributes = [ new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-{
-    
-} ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [  ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -446,7 +676,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS4:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",
@@ -463,8 +693,82 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
+{
+     Name = "MyTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("T")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
+{
+    
+}, 
+new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<int>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }, 
+new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Threading.CancellationToken>
+    {
+        Name = "cancellationToken",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "MethodDataSourceDrivenWithCancellationTokenTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+{
+    
+}
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -487,39 +791,11 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 					TestClassProperties = [],
 					CurrentRepeatAttempt = 0,
 					RepeatLimit = 0,
-					MethodInfo = methodInfo,
 					ResettableClassFactory = resettableClassFactory,
 					TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.MyTest(methodData, cancellationToken)),
 					TestFilePath = @"",
 					TestLineNumber = 10,
-					TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("T")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
-{
-    
-}, new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
-{
-    
-} ],
-					ClassAttributes = [ new global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
-{
-    
-} ],
-					AssemblyAttributes = [  ],
-					DataAttributes = [  ],
+					TestMethod = testInformation,
 					TestBuilderContext = testBuilderContext,
 				});
 				resettableClassFactory = resettableClassFactoryDelegate();
@@ -533,7 +809,7 @@ file partial class MethodDataSourceDrivenWithCancellationTokenTests : global::TU
 			{
 				TestId = $"global::TUnit.Core.MethodDataSourceAttribute:{testMethodDataIndex}:TL-EMDS5:{testMethodDataIndex}:TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest(int,System.Threading.CancellationToken):0",
 				TestClass = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests), "MyTest", 0, [typeof(int), typeof(global::System.Threading.CancellationToken)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(int), typeof(global::System.Threading.CancellationToken)],
 				TestName = "MyTest",
 				TestFilePath = @"",

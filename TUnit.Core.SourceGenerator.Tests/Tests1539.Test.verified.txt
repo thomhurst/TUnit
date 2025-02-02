@@ -28,8 +28,56 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.Bugs._1539.Tests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1539.Tests), "Test", 0, []);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1539.Tests>
+{
+     Name = "Test",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs()
+{
+    
+}, 
+new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(11)
+{
+    
+}, 
+new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(two: "two")
+{
+    
+}, 
+new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three: false)
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "Tests1539",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "Tests",
+     Namespace = "TUnit.TestProject.Bugs._1539",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -48,30 +96,11 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Test()),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs()
-{
-    
-}, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(11)
-{
-    
-}, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(two: "two")
-{
-    
-}, new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(three: false)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -84,7 +113,7 @@ file partial class Tests : global::TUnit.Core.Interfaces.SourceGenerator.ITestSo
 			{
 				TestId = $"TUnit.TestProject.Bugs._1539.Tests.Test:0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1539.Tests), "Test", 0, []).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [],
 				TestName = "Test",
 				TestFilePath = @"",

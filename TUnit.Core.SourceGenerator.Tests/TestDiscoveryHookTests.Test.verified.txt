@@ -26,7 +26,40 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 		[
 			new global::TUnit.Core.Hooks.BeforeTestDiscoveryHookMethod
 			{
-				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TestDiscoveryHookTests), "BeforeDiscovery", 0, []),
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TestDiscoveryHookTests>
+{
+     Name = "BeforeDiscovery",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.BeforeEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
+{
+    Order = 5
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "TestDiscoveryHookTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "TestDiscoveryHookTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+},
 				Body = (context, cancellationToken) => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery(),
 				HookExecutor = DefaultExecutor.Instance,
 				Order = 5,
@@ -83,7 +116,40 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 		[
 			new global::TUnit.Core.Hooks.AfterTestDiscoveryHookMethod
 			{
-				MethodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.TestDiscoveryHookTests), "AfterDiscovery", 0, []),
+				MethodInfo = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.TestDiscoveryHookTests>
+{
+     Name = "AfterDiscovery",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.AfterEveryAttribute(global::TUnit.Core.HookType.TestDiscovery)
+{
+    
+}
+     ],  
+     Parameters = [],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "TestDiscoveryHookTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "TestDiscoveryHookTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+},
 				Body = (context, cancellationToken) => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery(),
 				HookExecutor = DefaultExecutor.Instance,
 				Order = 0,

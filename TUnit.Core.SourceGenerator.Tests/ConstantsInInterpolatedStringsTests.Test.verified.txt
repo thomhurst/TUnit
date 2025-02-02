@@ -28,8 +28,51 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests), "SomeTest", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests>
+{
+     Name = "SomeTest",
+     GenericTypeCount = 0,
+     ReturnType = typeof(global::System.Threading.Tasks.Task),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute($"{"Value"}1")
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "value",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "ConstantsInInterpolatedStringsTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "ConstantsInInterpolatedStringsTests",
+     Namespace = "TUnit.TestProject.Bugs._1432",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -50,21 +93,11 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.SomeTest(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 13,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute($"{"Value"}1")
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -77,7 +110,7 @@ file partial class ConstantsInInterpolatedStringsTests : global::TUnit.Core.Inte
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests.SomeTest(string):0",
 				TestClass = typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests), "SomeTest", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(global::System.Threading.Tasks.Task),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "SomeTest",
 				TestFilePath = @"",

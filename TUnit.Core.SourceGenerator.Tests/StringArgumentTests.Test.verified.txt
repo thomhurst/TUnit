@@ -38,8 +38,83 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Normal",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(        """
+        Hello
+        World
+        """
+)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -60,46 +135,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Normal(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(        """
-        Hello
-        World
-        """
-)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -112,7 +152,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Normal",
 				TestFilePath = @"",
@@ -129,8 +169,83 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Normal",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(        """
+        Hello
+        World
+        """
+)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -151,46 +266,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Normal(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(        """
-        Hello
-        World
-        """
-)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -203,7 +283,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Normal",
 				TestFilePath = @"",
@@ -220,8 +300,83 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Normal",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(        """
+        Hello
+        World
+        """
+)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -242,46 +397,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Normal(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(        """
-        Hello
-        World
-        """
-)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -294,7 +414,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Normal",
 				TestFilePath = @"",
@@ -311,8 +431,83 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Normal",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(        """
+        Hello
+        World
+        """
+)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -333,46 +528,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Normal(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(        """
-        Hello
-        World
-        """
-)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -385,7 +545,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS3:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Normal",
 				TestFilePath = @"",
@@ -402,8 +562,83 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Normal",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(        """
+        Hello
+        World
+        """
+)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -424,46 +659,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Normal(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(        """
-        Hello
-        World
-        """
-)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -476,7 +676,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS4:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Normal",
 				TestFilePath = @"",
@@ -493,8 +693,83 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Normal",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(        """
+        Hello
+        World
+        """
+)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -515,46 +790,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Normal(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(        """
-        Hello
-        World
-        """
-)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -567,7 +807,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS5:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Normal",
 				TestFilePath = @"",
@@ -584,8 +824,83 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Normal",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(        """
+        Hello
+        World
+        """
+)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -606,46 +921,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Normal(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(        """
-        Hello
-        World
-        """
-)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -658,7 +938,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS6:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Normal",
 				TestFilePath = @"",
@@ -675,8 +955,83 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Normal",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(        """
+        Hello
+        World
+        """
+)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -700,46 +1055,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Normal(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 5,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(        """
-        Hello
-        World
-        """
-)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -752,7 +1072,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS7:TUnit.TestProject.StringArgumentTests.Normal(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Normal", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Normal",
 				TestFilePath = @"",
@@ -804,8 +1124,79 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Nullable",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(null)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -826,42 +1217,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Nullable(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 24,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(null)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -874,7 +1234,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS0:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Nullable",
 				TestFilePath = @"",
@@ -891,8 +1251,79 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Nullable",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(null)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -913,42 +1344,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Nullable(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 24,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(null)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -961,7 +1361,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS1:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Nullable",
 				TestFilePath = @"",
@@ -978,8 +1378,79 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Nullable",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(null)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -1000,42 +1471,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Nullable(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 24,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(null)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -1048,7 +1488,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS2:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Nullable",
 				TestFilePath = @"",
@@ -1065,8 +1505,79 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Nullable",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(null)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -1087,42 +1598,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Nullable(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 24,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(null)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -1135,7 +1615,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS3:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Nullable",
 				TestFilePath = @"",
@@ -1152,8 +1632,79 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Nullable",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(null)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -1174,42 +1725,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Nullable(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 24,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(null)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -1222,7 +1742,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS4:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Nullable",
 				TestFilePath = @"",
@@ -1239,8 +1759,79 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Nullable",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(null)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -1261,42 +1852,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Nullable(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 24,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(null)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -1309,7 +1869,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS5:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Nullable",
 				TestFilePath = @"",
@@ -1326,8 +1886,79 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Nullable",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(null)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -1348,42 +1979,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Nullable(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 24,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(null)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -1396,7 +1996,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS6:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Nullable",
 				TestFilePath = @"",
@@ -1413,8 +2013,79 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 		var testMethodDataIndex = 0;
 		try
 		{
-			var testClassType = typeof(global::TUnit.TestProject.StringArgumentTests);
-			var methodInfo = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]);
+			var testInformation = new global::TUnit.Core.SourceGeneratedMethodInformation<global::TUnit.TestProject.StringArgumentTests>
+{
+     Name = "Nullable",
+     GenericTypeCount = 0,
+     ReturnType = typeof(void),
+     Attributes = 
+     [
+         new global::TUnit.Core.TestAttribute()
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(@"\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute("\\\\t")
+{
+    
+}, 
+new global::TUnit.Core.ArgumentsAttribute(null)
+{
+    
+}
+     ],  
+     Parameters = [new global::TUnit.Core.SourceGeneratedParameterInformation<string>
+    {
+        Name = "s",
+        Attributes = 
+        [
+            
+        ]
+    }],
+     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+{    
+     Type = typeof(global::TUnit.TestProject.StringArgumentTests),
+     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+{
+     Name = "StringArgumentTests",
+     Attributes = 
+     [
+         
+     ],  
+},
+     Name = "StringArgumentTests",
+     Namespace = "TUnit.TestProject",
+     Attributes = 
+     [
+         
+     ],  
+     Parameters = [],
+     Properties = [],
+},
+};
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
 			var testBuilderContextAccessor = new global::TUnit.Core.TestBuilderContextAccessor(testBuilderContext);
@@ -1435,42 +2106,11 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 				TestClassProperties = [],
 				CurrentRepeatAttempt = 0,
 				RepeatLimit = 0,
-				MethodInfo = methodInfo,
 				ResettableClassFactory = resettableClassFactory,
 				TestMethodFactory = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.Nullable(methodArg)),
 				TestFilePath = @"",
 				TestLineNumber = 24,
-				TestAttributes = [ new global::TUnit.Core.TestAttribute()
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(@"\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute("\\\\t")
-{
-    
-}, new global::TUnit.Core.ArgumentsAttribute(null)
-{
-    
-} ],
-				ClassAttributes = [  ],
-				AssemblyAttributes = [  ],
-				DataAttributes = [  ],
+				TestMethod = testInformation,
 				TestBuilderContext = testBuilderContext,
 			});
 			resettableClassFactory = resettableClassFactoryDelegate();
@@ -1483,7 +2123,7 @@ file partial class StringArgumentTests : global::TUnit.Core.Interfaces.SourceGen
 			{
 				TestId = $"global::TUnit.Core.ArgumentsAttribute:{testMethodDataIndex}:TL-ARGS7:TUnit.TestProject.StringArgumentTests.Nullable(string):0",
 				TestClass = typeof(global::TUnit.TestProject.StringArgumentTests),
-				ReturnType = global::TUnit.Core.Helpers.MethodInfoRetriever.GetMethodInfo(typeof(global::TUnit.TestProject.StringArgumentTests), "Nullable", 0, [typeof(string)]).ReturnType,
+				ReturnType = typeof(void),
 				ParameterTypeFullNames = [typeof(string)],
 				TestName = "Nullable",
 				TestFilePath = @"",
