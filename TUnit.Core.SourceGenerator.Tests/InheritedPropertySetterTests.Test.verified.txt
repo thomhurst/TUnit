@@ -42,17 +42,17 @@ file partial class PropertySetterTests : global::TUnit.Core.Interfaces.SourceGen
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PropertySetterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.PropertySetterTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "InheritedPropertySetterTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "PropertySetterTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -168,7 +168,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
 }
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -400,17 +400,17 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.InheritedPropertySetterTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("InheritedPropertySetterTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "InheritedPropertySetterTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "InheritedPropertySetterTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -422,7 +422,7 @@ file partial class Inherited_InheritedPropertySetterTests : global::TUnit.Core.I
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

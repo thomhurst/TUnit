@@ -78,17 +78,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -97,7 +97,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -292,17 +292,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -311,7 +311,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -496,17 +496,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestPro
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -515,7 +515,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::TUnit.TestPro
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -673,17 +673,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -692,7 +692,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -850,17 +850,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -869,7 +869,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1030,17 +1030,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1049,7 +1049,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1210,17 +1210,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1229,7 +1229,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1379,17 +1379,17 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1398,7 +1398,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1536,17 +1536,17 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1555,7 +1555,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1693,17 +1693,17 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1712,7 +1712,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1850,17 +1850,17 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
 }
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.MatrixTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.MatrixTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("MatrixTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "MatrixTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "MatrixTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1869,7 +1869,7 @@ new global::TUnit.Core.MatrixDataSourceAttribute()
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

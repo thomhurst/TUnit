@@ -42,17 +42,17 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassConstructorTest),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassConstructorTest", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassConstructorTest",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassConstructorTest",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -80,7 +80,7 @@ file partial class ClassConstructorTest : global::TUnit.Core.Interfaces.SourceGe
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

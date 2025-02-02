@@ -10,7 +10,7 @@ public static class SourceInformationWriter
     public static string GenerateClassInformation(GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol)
     {
         return $$"""
-                 new global::TUnit.Core.SourceGeneratedClassInformation
+                 global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("{{namedTypeSymbol.GloballyQualified()}}", () => new global::TUnit.Core.SourceGeneratedClassInformation
                  {    
                       Type = typeof({{namedTypeSymbol.GloballyQualified()}}),
                       Assembly = {{GenerateAssemblyInformation(context, namedTypeSymbol.ContainingAssembly)}},
@@ -22,21 +22,21 @@ public static class SourceInformationWriter
                       ],  
                       Parameters = [{{string.Join(", \r\n", namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters.Select(p => GenerateParameterInformation(context, p, ArgumentsType.ClassConstructor, null)) ?? [])}}],
                       Properties = [{{string.Join(", \r\n", namedTypeSymbol.GetMembers().OfType<IPropertySymbol>().Select(p => GeneratePropertyInformation(context, p)))}}],
-                 }
+                 })
                  """;
     }
 
     private static string GenerateAssemblyInformation(GeneratorAttributeSyntaxContext context, IAssemblySymbol assembly)
     {
         return $$"""
-                 new global::TUnit.Core.SourceGeneratedAssemblyInformation
+                 global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("{{assembly.Name}}", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
                  {
                       Name = "{{assembly.Name}}",
                       Attributes = 
                       [
                           {{string.Join(", \r\n", AttributeWriter.WriteAttributes(context, assembly.GetAttributes()))}}
                       ],  
-                 }
+                 })
                  """;
     }
 

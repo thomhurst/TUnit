@@ -52,17 +52,17 @@ file partial class Hooks_BaseTests : global::TUnit.Core.Interfaces.SourceGenerat
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.Bugs._1589.BaseTests<global::TUnit.TestProject.Bugs._1589.MyFixture>),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("Hooks1589", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "Hooks1589",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "BaseTests",
      Namespace = "TUnit.TestProject.Bugs._1589",
      Attributes = 
@@ -97,7 +97,7 @@ new global::TUnit.Core.SourceGeneratedPropertyInformation
             
         ]
     }],
-},
+}),
 },
 				Body = (classInstance, context, cancellationToken) => classInstance.Setup(),
 				HookExecutor = DefaultExecutor.Instance,

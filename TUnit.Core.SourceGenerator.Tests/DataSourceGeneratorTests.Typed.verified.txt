@@ -57,17 +57,17 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "DataSourceGeneratorTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "DataSourceGeneratorTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -106,7 +106,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -259,17 +259,17 @@ new global::TUnit.TestProject.DataSourceGeneratorTests.AutoFixtureGeneratorAttri
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "DataSourceGeneratorTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "DataSourceGeneratorTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -308,7 +308,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -506,17 +506,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "DataSourceGeneratorTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "DataSourceGeneratorTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -555,7 +555,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -744,17 +744,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "DataSourceGeneratorTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "DataSourceGeneratorTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -793,7 +793,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1011,17 +1011,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "DataSourceGeneratorTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "DataSourceGeneratorTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1060,7 +1060,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1249,17 +1249,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("DataSourceGeneratorTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "DataSourceGeneratorTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "DataSourceGeneratorTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1298,7 +1298,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

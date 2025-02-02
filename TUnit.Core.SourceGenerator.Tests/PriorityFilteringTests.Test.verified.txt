@@ -46,17 +46,17 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "PriorityFilteringTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "PriorityFilteringTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -65,7 +65,7 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -162,17 +162,17 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "PriorityFilteringTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "PriorityFilteringTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -181,7 +181,7 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -278,17 +278,17 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "PriorityFilteringTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "PriorityFilteringTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -297,7 +297,7 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -394,17 +394,17 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "PriorityFilteringTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "PriorityFilteringTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -413,7 +413,7 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -510,17 +510,17 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "PriorityFilteringTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "PriorityFilteringTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -529,7 +529,7 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -626,17 +626,17 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("PriorityFilteringTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "PriorityFilteringTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "PriorityFilteringTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -645,7 +645,7 @@ new global::TUnit.TestProject.PriorityAttribute(global::TUnit.TestProject.Enums.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

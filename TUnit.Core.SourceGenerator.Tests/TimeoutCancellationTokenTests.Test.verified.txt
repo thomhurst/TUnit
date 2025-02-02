@@ -49,17 +49,17 @@ file partial class TimeoutCancellationTokenTests : global::TUnit.Core.Interfaces
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "TimeoutCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "TimeoutCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -82,7 +82,7 @@ new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -191,17 +191,17 @@ new global::TUnit.Core.CategoryAttribute("Blah")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "TimeoutCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "TimeoutCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -224,7 +224,7 @@ new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -329,17 +329,17 @@ new global::TUnit.TestProject.TimeoutCancellationTokenTests.FiveSecondTimeout()
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "TimeoutCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "TimeoutCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -362,7 +362,7 @@ new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -479,17 +479,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "TimeoutCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "TimeoutCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -512,7 +512,7 @@ new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -631,17 +631,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "TimeoutCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "TimeoutCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -664,7 +664,7 @@ new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -789,17 +789,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<global::System.Thread
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TimeoutCancellationTokenTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "TimeoutCancellationTokenTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "TimeoutCancellationTokenTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -822,7 +822,7 @@ new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

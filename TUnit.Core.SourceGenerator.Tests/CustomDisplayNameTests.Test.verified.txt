@@ -46,17 +46,17 @@ new global::TUnit.Core.DisplayNameAttribute("A super important test!")
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -74,7 +74,7 @@ new global::TUnit.Core.DisplayNameAttribute("A super important test!")
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -171,17 +171,17 @@ new global::TUnit.Core.DisplayNameAttribute("Another super important test!")
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -199,7 +199,7 @@ new global::TUnit.Core.DisplayNameAttribute("Another super important test!")
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -331,17 +331,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -359,7 +359,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -466,17 +466,17 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -494,7 +494,7 @@ new global::TUnit.Core.SourceGeneratedParameterInformation<bool>
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -606,17 +606,17 @@ new global::TUnit.Core.DisplayNameAttribute("Test using MethodDataSource")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -634,7 +634,7 @@ new global::TUnit.Core.DisplayNameAttribute("Test using MethodDataSource")
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -739,17 +739,17 @@ new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -767,7 +767,7 @@ new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator()
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -891,17 +891,17 @@ new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -919,7 +919,7 @@ new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1016,17 +1016,17 @@ new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1044,7 +1044,7 @@ new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1141,17 +1141,17 @@ new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("CustomDisplayNameTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "CustomDisplayNameTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "CustomDisplayNameTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1169,7 +1169,7 @@ new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}")
             
         ]
     }],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

@@ -46,17 +46,17 @@ file partial class ClassAndMethodArgumentsTests : global::TUnit.Core.Interfaces.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -79,7 +79,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -149,17 +149,17 @@ new global::TUnit.Core.ArgumentsAttribute("2")
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -182,7 +182,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -298,17 +298,17 @@ new global::TUnit.Core.ArgumentsAttribute("4")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -331,7 +331,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -418,17 +418,17 @@ new global::TUnit.Core.ArgumentsAttribute("4")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -451,7 +451,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -538,17 +538,17 @@ new global::TUnit.Core.ArgumentsAttribute("4")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -571,7 +571,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -658,17 +658,17 @@ new global::TUnit.Core.ArgumentsAttribute("4")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -691,7 +691,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -809,17 +809,17 @@ new global::TUnit.Core.ArgumentsAttribute("4")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -842,7 +842,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -929,17 +929,17 @@ new global::TUnit.Core.ArgumentsAttribute("4")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -962,7 +962,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1049,17 +1049,17 @@ new global::TUnit.Core.ArgumentsAttribute("4")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1082,7 +1082,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();
@@ -1169,17 +1169,17 @@ new global::TUnit.Core.ArgumentsAttribute("4")
             
         ]
     }],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("ClassAndMethodArgumentsTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "ClassAndMethodArgumentsTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "ClassAndMethodArgumentsTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -1202,7 +1202,7 @@ new global::TUnit.Core.ArgumentsAttribute("2")
         ]
     }],
      Properties = [],
-},
+}),
 };
 
 			var testBuilderContext = new global::TUnit.Core.TestBuilderContext();

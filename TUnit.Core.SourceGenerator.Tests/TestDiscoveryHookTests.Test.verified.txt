@@ -40,17 +40,17 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "TestDiscoveryHookTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "TestDiscoveryHookTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -59,7 +59,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 },
 				Body = (context, cancellationToken) => global::TUnit.TestProject.TestDiscoveryHookTests.BeforeDiscovery(),
 				HookExecutor = DefaultExecutor.Instance,
@@ -131,17 +131,17 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
 }
      ],  
      Parameters = [],
-     Class = new global::TUnit.Core.SourceGeneratedClassInformation
+     Class = global::TUnit.Core.SourceGeneratedClassInformation.GetOrAdd("global::TUnit.TestProject.TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedClassInformation
 {    
      Type = typeof(global::TUnit.TestProject.TestDiscoveryHookTests),
-     Assembly = new global::TUnit.Core.SourceGeneratedAssemblyInformation
+     Assembly = global::TUnit.Core.SourceGeneratedAssemblyInformation.GetOrAdd("TestDiscoveryHookTests", () => new global::TUnit.Core.SourceGeneratedAssemblyInformation
 {
      Name = "TestDiscoveryHookTests",
      Attributes = 
      [
          
      ],  
-},
+}),
      Name = "TestDiscoveryHookTests",
      Namespace = "TUnit.TestProject",
      Attributes = 
@@ -150,7 +150,7 @@ file partial class Hooks_TestDiscoveryHookTests : global::TUnit.Core.Interfaces.
      ],  
      Parameters = [],
      Properties = [],
-},
+}),
 },
 				Body = (context, cancellationToken) => global::TUnit.TestProject.TestDiscoveryHookTests.AfterDiscovery(),
 				HookExecutor = DefaultExecutor.Instance,
